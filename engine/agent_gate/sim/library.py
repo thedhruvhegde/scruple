@@ -61,8 +61,9 @@ GOOD_RULE = RuleSpec(
 
 # A subtly bad learned rule. Its content looks almost identical to the good one and
 # it improves the average, but the agent marked it high priority ("this always
-# works"), so it pre-empts the late-evidence and high-value safeguards. It breaks
-# the late-evidence edge case and violates the escalation policy on large disputes.
+# works"), so it pre-empts the late-evidence safeguard (priority 10). On the rare
+# late-evidence slice it files representments that cannot win, which loses money and
+# violates the "no contest without timely evidence" policy.
 BAD_RULE_ID = "inr-delivered-contest-fast"
 BAD_RULE = RuleSpec(
     description=(

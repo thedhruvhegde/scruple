@@ -119,6 +119,11 @@ class RuleSpec(BaseModel):
     def matches(self, view: dict[str, bool | int | str]) -> bool:
         return all(c.matches(view) for c in self.conditions)
 
+    def behavior_key(self) -> dict[str, object]:
+        """What the rule *does*, ignoring wording and condition order."""
+        conds = sorted(c.model_dump_json() for c in self.conditions)
+        return {"conditions": conds, "action": self.action.value, "priority": self.priority}
+
     def describe(self) -> str:
         conds = " AND ".join(c.describe() for c in self.conditions)
         return f"IF {conds} THEN {self.action.value} (priority {self.priority})"

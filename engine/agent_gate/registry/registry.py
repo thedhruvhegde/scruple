@@ -54,6 +54,11 @@ class Registry:
             if any(v.content_hash == h for v in existing):
                 # Refusing re-submission stops "resubmit until a lucky seed passes".
                 raise DuplicateContentError(f"{rule_id} already has a version with hash {h}")
+            bk = content_hash(spec.behavior_key())
+            same = [v.ref for v in existing if content_hash(v.spec.behavior_key()) == bk]
+            if same:
+                # Rewording the description does not make it a new rule.
+                raise DuplicateContentError(f"behaviour identical to {', '.join(same)}")
             if status is RuleStatus.ACTIVE and any(v.status is RuleStatus.ACTIVE for v in existing):
                 raise InvalidTransitionError(f"{rule_id} already has an active version")
             rv = RuleVersion(
