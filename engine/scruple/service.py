@@ -6,6 +6,7 @@ Both the API and the CLI call this class; neither touches storage directly.
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Sequence
 from typing import Any
 
 from pydantic import BaseModel
@@ -14,10 +15,23 @@ from scruple.audit.log import AuditLog, VerifyResult
 from scruple.audit.report import render_report
 from scruple.clock import Clock, SystemClock
 from scruple.domain import RuleSpec
+from scruple.gate.canary import (
+    EVENT_BREACHED,
+    EVENT_COMPLETED,
+    EVENT_STAGE_HELD,
+    EVENT_STAGE_PASSED,
+    EVENT_STARTED,
+    Arm,
+    CanaryState,
+    RampSchedule,
+    assign,
+    evaluate_stage,
+    project_state,
+)
 from scruple.gate.config import GateConfig
 from scruple.gate.engine import Verdict, evaluate_canary, evaluate_shadow, policy_from
 from scruple.gate.models import CheckResult, Decision, DecisionRecord, Outcome, Stage
-from scruple.gate.provider import StatsProvider
+from scruple.gate.provider import BootstrapProvider, StatsProvider
 from scruple.gate.regression import golden_cases
 from scruple.gate.shadow import ShadowRecorder
 from scruple.hashing import content_hash
@@ -26,6 +40,7 @@ from scruple.registry.state import InvalidTransitionError
 from scruple.sim.engine import Simulator
 from scruple.sim.generator import generate_cases
 from scruple.sim.library import BASELINE_RULES
+from scruple.sim.models import DisputeCase
 from scruple.storage import SQLiteStorage, Storage
 from scruple.verifiers.ledger import verify_ledger
 from scruple.verifiers.policy_constraints import verify_policy
@@ -233,6 +248,118 @@ class AgentGate:
                 f"assurance failure, decision {rec.decision.decision_id}",
             )
         return rec
+
+    # --- staged canary ramp -----------------------------------------------------
+
+    def start_canary_ramp(
+        self, rule_id: str, version: int, schedule: RampSchedule, actor: str = SYSTEM_ACTOR
+    ) -> CanaryState:
+        """Begin a staged ramp for a version that passed the one-shot canary."""
+        rv = self.registry.get(rule_id, version)
+        last = self._latest(rule_id, version, Stage.CANARY)
+        if (
+            rv.status is not RuleStatus.CANARY
+            or last is None
+            or last.decision.outcome is not Outcome.CANARY_PASSED
+        ):
+            raise InvalidTransitionError(f"{rv.ref} has not passed canary")
+        if self.canary_state(rule_id, version) is not None:
+            raise InvalidTransitionError(f"{rv.ref} already has a canary ramp")
+        self.audit.append(
+            EVENT_STARTED,
+            actor,
+            {
+                "rule_id": rule_id,
+                "version": version,
+                "content_hash": rv.content_hash,
+                "schedule": schedule.model_dump(mode="json"),
+                "percent": schedule.stages[0],
+            },
+        )
+        state = self.canary_state(rule_id, version)
+        assert state is not None
+        return state
+
+    def advance_canary(
+        self,
+        rule_id: str,
+        version: int,
+        cases: Sequence[DisputeCase] | None = None,
+        actor: str = SYSTEM_ACTOR,
+        provider: StatsProvider | None = None,
+    ) -> tuple[DecisionRecord, CanaryState]:
+        """Evaluate the current stage on a batch of live traffic and apply the result.
+        Without `cases`, a seeded synthetic batch per stage is generated."""
+        state = self.canary_state(rule_id, version)
+        if state is None or state.status != "ramping":
+            raise InvalidTransitionError(f"{rule_id}@v{version} has no ramp in progress")
+        rv = self.registry.get(rule_id, version)
+        if rv.status is not RuleStatus.CANARY:
+            raise InvalidTransitionError(f"{rv.ref} is {rv.status.value}, not canary")
+        if cases is None:
+            cases = generate_cases(
+                self.config.canary_seed + 1_000 + state.stage_index,
+                self.config.canary_n_cases,
+                self.config.canary_profile,
+                prefix=f"r{state.stage_index}-",
+            )
+        active = [r for r in self.registry.active_rules() if r.rule_id != rule_id]
+        res = evaluate_stage(
+            rv,
+            active,
+            cases,
+            state.schedule,
+            state.stage_index,
+            provider or BootstrapProvider(self.config.bootstrap_resamples, self.config.stats_seed),
+        )
+        verdict = Verdict(
+            res.gate_outcome,
+            res.summary,
+            res.reasons,
+            res.checks,
+            canary=res.metrics(self.config.canary_profile.name),
+        )
+        base = {
+            "rule_id": rule_id,
+            "version": version,
+            "content_hash": rv.content_hash,
+            "stage_index": res.stage_index,
+            "percent": res.percent,
+        }
+        with self.storage.transaction():
+            rec = self._record(Stage.CANARY, rv, verdict, actor)
+            base["decision_id"] = rec.decision.decision_id
+            if res.outcome == "advance":
+                nxt = res.stage_index + 1
+                self.audit.append(
+                    EVENT_STAGE_PASSED,
+                    actor,
+                    {**base, "next_stage_index": nxt, "next_percent": state.schedule.stages[nxt]},
+                )
+            elif res.outcome == "complete":
+                self.audit.append(EVENT_COMPLETED, actor, base)
+            elif res.outcome == "hold":
+                self.audit.append(EVENT_STAGE_HELD, actor, base)
+            else:
+                self._canary_breach(rv, rec, base, actor)
+        new_state = self.canary_state(rule_id, version)
+        assert new_state is not None
+        return rec, new_state
+
+    def canary_state(self, rule_id: str, version: int) -> CanaryState | None:
+        return project_state(self.audit.entries(), rule_id, version)
+
+    def canary_arm(self, rule_id: str, version: int, case_id: str) -> Arm:
+        """Which policy a live case should get right now. Baseline unless ramping."""
+        state = self.canary_state(rule_id, version)
+        if state is None or state.status == "breached":
+            return Arm.BASELINE
+        return assign(case_id, state.content_hash, state.percent)
+
+    def _canary_breach(
+        self, rv: RuleVersion, rec: DecisionRecord, base: dict[str, Any], actor: str
+    ) -> None:
+        self.audit.append(EVENT_BREACHED, actor, base)
 
     # --- shadow mode (read-only) -------------------------------------------------
 
