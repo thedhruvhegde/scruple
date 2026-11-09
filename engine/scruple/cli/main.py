@@ -176,6 +176,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_episode_parser(sub)
     add_mcp_parser(sub, DEFAULT_DB)
+    from scruple.realdata.cli import add_realdata_parser
+
+    add_realdata_parser(sub)
     return p
 
 
