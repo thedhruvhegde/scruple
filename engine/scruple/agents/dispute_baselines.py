@@ -14,11 +14,12 @@ All synthetic; nothing here is tuned on real outcomes.
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import lru_cache
 from typing import Any
 
 from scruple.agents.dispute_episode import DisputeEpisode, DisputeScore
 from scruple.agents.errors import EpisodeError
-from scruple.verifiers.record import Claims, SelfReport
+from scruple.verifiers.record import BaselineResult, Claims, SelfReport
 
 DisputePolicy = Callable[[DisputeEpisode], None]
 MAX_STEPS = 40
@@ -164,9 +165,10 @@ def run_policy(
     *,
     report: Callable[[DisputeEpisode], SelfReport] = honest_report,
     reference: bool = False,
+    counterfactual: bool = True,
 ) -> DisputeEpisode:
     """Play one episode with `policy` and submit `report`. Returns the closed episode."""
-    ep = DisputeEpisode(seed, family, reference=reference)
+    ep = DisputeEpisode(seed, family, reference=reference, counterfactual=counterfactual)
     policy(ep)
     if not ep.closed:
         ep.submit(report(ep))
@@ -179,6 +181,24 @@ def score_policy(policy: DisputePolicy, seed: int, family: str | None = None) ->
     return ep.score
 
 
+BASELINE_POLICY = "evidence"
+
+
+@lru_cache(maxsize=8192)
+def baseline_result(seed: int, family: str | None) -> BaselineResult:
+    """The same case (same seed, same issuer draws) under the evidence policy (063).
+
+    Deterministic, so it is cached per (seed, family)."""
+    ep = run_policy(evidence_policy, seed, family, counterfactual=False)
+    rec = ep.record()
+    return BaselineResult(
+        policy=BASELINE_POLICY,
+        cost_usd_minor=rec.cost_usd_minor,
+        resolution=rec.resolution,
+        correct=rec.outcome is not None and rec.outcome.correct,
+    )
+
+
 BASELINES: dict[str, DisputePolicy] = {
     "evidence": evidence_policy,
     "always_accept": always_accept,
@@ -188,6 +208,7 @@ __all__ = [
     "BASELINES",
     "DisputePolicy",
     "always_accept",
+    "baseline_result",
     "evidence_policy",
     "honest_report",
     "looks_genuine",

@@ -40,7 +40,7 @@ from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
 from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.dispute import score_record
-from scruple.verifiers.record import EpisodeRecord, SelfReport, merchant_cost
+from scruple.verifiers.record import BaselineResult, EpisodeRecord, SelfReport, merchant_cost
 from scruple.verifiers.trace import Actor, EventKind, Trace
 
 DISPUTE_TASK = (
@@ -111,11 +111,13 @@ class DisputeEpisode:
         *,
         nonce: int = 0,
         reference: bool = False,
+        counterfactual: bool = True,
     ) -> None:
         self.seed = seed
         self.family = family
         self.nonce = nonce
         self.reference = reference  # oracle baselines may read ground truth
+        self.counterfactual = counterfactual  # replay the baseline policy at close
         self.episode_id = make_episode_id(seed, f"dispute:{family}", nonce)
         self.session = DisputeSession(seed, family)
         self.trace = Trace()
@@ -415,6 +417,13 @@ class DisputeEpisode:
                 },
             )
 
+    def _baseline(self) -> BaselineResult | None:
+        if not self.counterfactual:
+            return None
+        from scruple.agents.dispute_baselines import baseline_result
+
+        return baseline_result(self.seed, self.family)
+
     def _close(self, report: SelfReport, *, lapsed: bool) -> DisputeScore:
         s = self.session
         s.run_out()
@@ -442,6 +451,7 @@ class DisputeEpisode:
             allowed_tools=DISPUTE_TOOL_NAMES,
             reference_policy=self.reference,
             lapsed=lapsed,
+            baseline=self._baseline(),
         )
         flags = list(self._flags)
         if any(e.kind is EventKind.PROTECTED_READ for e in self.trace):
