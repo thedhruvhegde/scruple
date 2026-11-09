@@ -17,6 +17,13 @@ from scruple.api.strict import reject_unknown_inputs
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
+from scruple.gate.shadow_imported import (
+    ImportedBatchResult,
+    ImportedDecisionBatch,
+    ImportedObserveResult,
+    ImportedOutcomeBatch,
+    ImportedShadowSummary,
+)
 from scruple.ingest.api import ingest_router
 from scruple.logging import RequestIDMiddleware
 from scruple.registry import (
@@ -185,6 +192,31 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
     @app.get("/shadow/rules/{rule_id}/versions/{version}")
     def shadow_summary(rule_id: str, version: int) -> ShadowSummary:
         return _recorder(rule_id, version).summary()
+
+    # Imported (real) cases: no ground truth; metrics are labelled observed or estimated.
+    @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/decisions")
+    def shadow_record_imported(
+        rule_id: str, version: int, body: ImportedDecisionBatch, actor: Actor
+    ) -> ImportedBatchResult:
+        if any(d.agent_id != actor for d in body.decisions):
+            raise HTTPException(403, "X-Actor must match every decision's agent_id")
+        try:
+            return _recorder(rule_id, version).record_imported(body.decisions)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+    @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/outcomes")
+    def shadow_observe_imported(
+        rule_id: str, version: int, body: ImportedOutcomeBatch, actor: Actor
+    ) -> ImportedObserveResult:
+        try:
+            return _recorder(rule_id, version).observe_imported(body.outcomes)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+    @app.get("/shadow/rules/{rule_id}/versions/{version}/imported")
+    def shadow_summary_imported(rule_id: str, version: int) -> ImportedShadowSummary:
+        return _recorder(rule_id, version).summary_imported()
 
     @app.get("/audit/verify")
     def verify(expected_head: str | None = None) -> IntegrityReport:

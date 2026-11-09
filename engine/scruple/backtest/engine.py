@@ -231,30 +231,45 @@ def _fees(hc: HistoricalCase, until: datetime | None = None) -> int:
     )
 
 
-def _line(
-    hc: HistoricalCase,
-    history: History,
-    candidate: Candidate,
-    profile: CalibrationProfile,
-    index: PaymentIndex,
-    cfg: BacktestConfig,
-) -> CaseLine:
-    c = hc.case
-    at = c.opened_at + timedelta(hours=cfg.decision_delay_hours)
-    view = build_view(hc, index, at, history.merchant_account)
-    decision = candidate.decide(view)
-    hist = Action.CONTEST if contested(c) else Action.ACCEPT
-    action = decision.action or hist
+class Priced(BaseModel):
+    """The cost of one action on one case, and how it was obtained."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    basis: Basis
+    method: Method
+    cost_source: Literal["ledger", "state"]
+    baseline: float  # realised cost of what was actually done
+    cost: float
+    low: float  # optimistic end
+    high: float  # pessimistic end
+
+
+def realised_cost(hc: HistoricalCase, merchant_account: str) -> tuple[float, str]:
+    """What the case actually cost the merchant: ledger postings when there are any,
+    else the amount if it ended lost or accepted (and the source used)."""
     if hc.ledger:
-        source: Literal["ledger", "state"] = "ledger"
-        baseline = float(-_merchant_net(hc, history.merchant_account))
-    else:
-        source = "state"
-        baseline = float(c.amount_minor if c.state in (CaseState.LOST, CaseState.ACCEPTED) else 0)
+        return float(-_merchant_net(hc, merchant_account)), "ledger"
+    c = hc.case
+    return float(c.amount_minor if c.state in (CaseState.LOST, CaseState.ACCEPTED) else 0), "state"
+
+
+def price_action(
+    hc: HistoricalCase,
+    historical: Action,
+    action: Action,
+    at: datetime,
+    profile: CalibrationProfile,
+    cfg: BacktestConfig,
+    merchant_account: str = "merchant",
+) -> Priced:
+    """Observed cost if `action` is what was done, else the estimate described above."""
+    c = hc.case
+    baseline, source = realised_cost(hc, merchant_account)
     fee_now = _fees(hc, at)
     amount = c.amount_minor
     method: Method
-    if action is hist:
+    if action is historical:
         basis: Basis = "observed"
         method = "observed"
         cost = lo = hi = baseline
@@ -272,8 +287,35 @@ def _line(
         base = fee_now + cfg.contest_fee_minor
         cost = base + (1 - p) * amount
         lo, hi = base + (1 - p_hi) * amount, base + (1 - p_lo) * amount
-    cap = float(amount + _fees(hc) + cfg.contest_fee_minor + cfg.escalation_cost_minor)
-    cap = max(cap, 1.0, *(abs(x - baseline) for x in (cost, lo, hi)))
+    return Priced(
+        basis=basis,
+        method=method,
+        cost_source="ledger" if source == "ledger" else "state",
+        baseline=baseline,
+        cost=cost,
+        low=lo,
+        high=hi,
+    )
+
+
+def _line(
+    hc: HistoricalCase,
+    history: History,
+    candidate: Candidate,
+    profile: CalibrationProfile,
+    index: PaymentIndex,
+    cfg: BacktestConfig,
+) -> CaseLine:
+    c = hc.case
+    at = c.opened_at + timedelta(hours=cfg.decision_delay_hours)
+    view = build_view(hc, index, at, history.merchant_account)
+    decision = candidate.decide(view)
+    hist = Action.CONTEST if contested(c) else Action.ACCEPT
+    action = decision.action or hist
+    pr = price_action(hc, hist, action, at, profile, cfg, history.merchant_account)
+    baseline = pr.baseline
+    cap = float(c.amount_minor + _fees(hc) + cfg.contest_fee_minor + cfg.escalation_cost_minor)
+    cap = max(cap, 1.0, *(abs(x - baseline) for x in (pr.cost, pr.low, pr.high)))
     return CaseLine(
         case_id=c.case_id,
         reason=c.source_reason,
@@ -281,13 +323,13 @@ def _line(
         historical_action=hist,
         candidate_action=action,
         decided_by=decision.ref,
-        basis=basis,
-        method=method,
-        cost_source=source,
+        basis=pr.basis,
+        method=pr.method,
+        cost_source=pr.cost_source,
         baseline_cost=baseline,
-        candidate_cost=cost,
-        candidate_cost_low=lo,
-        candidate_cost_high=hi,
+        candidate_cost=pr.cost,
+        candidate_cost_low=pr.low,
+        candidate_cost_high=pr.high,
         cap=cap,
         defaulted=view.defaulted_rule_fields(),
     )

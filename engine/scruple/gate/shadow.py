@@ -13,8 +13,14 @@ Zero side effects, by construction:
 - `record` returns statistics only. It never returns an action to execute.
 
 Case type is the observable `reason_code`. Ground truth (needed for regret) exists
-only because the cases are synthetic; real shadow traffic would only have realized
-cost, after outcomes resolve. All results are synthetic.
+only because the cases are synthetic, so `record` and `summary` are synthetic.
+
+Real cases: `record_imported` takes decisions production made on imported cases
+(`ExternalCase`, no ground truth) and `observe_imported` their outcomes when they
+arrive; `summary_imported` scores what is observable and labels every metric observed
+or estimated (`scruple.gate.shadow_imported`). The candidate there is this rule alone,
+judged where it fires: elsewhere it keeps production's action, so a difference is
+always the candidate's doing (the active rules are not replayed against production).
 """
 
 from __future__ import annotations
@@ -25,8 +31,17 @@ from dataclasses import dataclass, field
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from scruple.backtest.candidate import RuleCandidate, RuleEntry
 from scruple.domain import Action
 from scruple.gate.provider import Interval, StatsProvider, default_provider
+from scruple.gate.shadow_imported import (
+    ImportedBatchResult,
+    ImportedDecision,
+    ImportedObserveResult,
+    ImportedOutcome,
+    ImportedShadowRecorder,
+    ImportedShadowSummary,
+)
 from scruple.registry.models import RuleVersion
 from scruple.sim.engine import RunResult, Simulator
 from scruple.sim.models import DisputeCase
@@ -137,6 +152,29 @@ class ShadowRecorder:
         self._provider = provider or default_provider()
         self._confidence = confidence
         self._state = _State()
+        self._imported: ImportedShadowRecorder | None = None
+
+    # --- imported (real) cases ---------------------------------------------------
+
+    def imported(self) -> ImportedShadowRecorder:
+        """The recorder for imported cases (created on first use; in memory only)."""
+        if self._imported is None:
+            rule = RuleCandidate(
+                (RuleEntry(rule_id=self.candidate.rule_id, spec=self.candidate.spec),),
+                default=None,
+                name=self.candidate.ref,
+            )
+            self._imported = ImportedShadowRecorder(rule)
+        return self._imported
+
+    def record_imported(self, decisions: Sequence[ImportedDecision]) -> ImportedBatchResult:
+        return self.imported().record(decisions)
+
+    def observe_imported(self, outcomes: Sequence[ImportedOutcome]) -> ImportedObserveResult:
+        return self.imported().observe(outcomes)
+
+    def summary_imported(self) -> ImportedShadowSummary:
+        return self.imported().summary()
 
     def record(self, decisions: Sequence[LiveDecision]) -> BatchResult:
         """Replay a batch. Rejects the whole batch if any case was already recorded

@@ -103,7 +103,16 @@ def test_recorder_holds_no_handle_to_storage_registry_or_audit() -> None:
     bad = (SQLiteStorage, AuditLog, Registry, AgentGate)
     assert not [o for o in _reachable(rec) if isinstance(o, bad)]
     public = sorted(m for m in dir(rec) if not m.startswith("_"))
-    assert public == ["active", "candidate", "record", "summary"]
+    assert public == [
+        "active",
+        "candidate",
+        "imported",
+        "observe_imported",
+        "record",
+        "record_imported",
+        "summary",
+        "summary_imported",
+    ]
 
 
 def test_recording_writes_nothing_and_changes_no_state() -> None:
