@@ -39,12 +39,10 @@ dev = [
     "types-pyyaml>=6.0.12.20261103",
     "hypothesis>=6.170.15",
     "pypdf>=7.0.0",
-    "hypothesis>=6.170.15",
     "jsonschema>=4.26.0",
     "types-jsonschema>=4.26.0.20261006",
     "claude-agent-sdk>=0.2",
     "langgraph>=1.0",
-    "hypothesis>=6.170.15",
 ]
 
 [build-system]
@@ -79,9 +77,6 @@ warn_required_dynamic_aliases = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q -m 'not slow'"
-markers = [
-    "slow: long Monte Carlo or large suites; run with make test-slow",
-]
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
 markers = [
     "postgres: needs a PostgreSQL server (throwaway local cluster or SCRUPLE_TEST_POSTGRES_URL)",
