@@ -98,3 +98,25 @@ def test_errors_map_to_http_codes(client: TestClient) -> None:
         ).status_code
         == 403
     )
+
+
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [
+        ("post", "/rules/x/versions/9223372036854775808/evaluate"),
+        ("post", "/rules/x/versions/9223372036854775808/approve"),
+        ("get", "/shadow/rules/x/versions/9223372036854775808"),
+        ("post", "/shadow/rules/x/versions/9223372036854775808/decisions"),
+        ("post", "/rules/x/versions/0/evaluate"),
+        ("get", "/shadow/rules/x/versions/-1"),
+    ],
+)
+def test_out_of_range_versions_are_422_not_500(client: TestClient, method: str, path: str) -> None:
+    """Regression (found by schemathesis, tests/test_api_fuzz.py): a version above
+    2**63 - 1 reached SQLite and raised OverflowError, a 500."""
+    kwargs: dict[str, object] = {"headers": RISK}
+    if path.endswith("/decisions"):
+        kwargs["json"] = {"decisions": []}
+    r = getattr(client, method)(path, **kwargs)
+    assert r.status_code == 422, r.text
+    assert any(e["loc"][-1] == "version" for e in r.json()["detail"])

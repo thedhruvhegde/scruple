@@ -159,3 +159,13 @@ def _activate(registry: Registry, rule_id: str, s: RuleSpec) -> RuleVersion:
     registry.transition(rule_id, rv.version, RuleStatus.SHADOW, actor="gate", reason="t")
     registry.transition(rule_id, rv.version, RuleStatus.CANARY, actor="gate", reason="t")
     return registry.activate(rule_id, rv.version, actor="risk", reason="t")
+
+
+@pytest.mark.parametrize("version", [0, -1, 2**63, 10**20])
+def test_out_of_range_versions_are_not_found(registry: Registry, version: int) -> None:
+    """Regression: an unbounded version reached SQLite and raised OverflowError (a
+    500 over HTTP, a traceback in the CLI)."""
+    from scruple.registry import RuleNotFoundError
+
+    with pytest.raises(RuleNotFoundError):
+        registry.get("x", version)

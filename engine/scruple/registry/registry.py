@@ -12,6 +12,8 @@ from scruple.registry.models import Provenance, RuleStatus, RuleVersion
 from scruple.registry.state import PRIVILEGED, InvalidTransitionError, check_transition
 from scruple.storage import Storage
 
+MAX_VERSION = 2**63 - 1  # the largest version a SQL BIGINT / SQLite INTEGER can hold
+
 
 class RuleNotFoundError(KeyError):
     pass
@@ -89,6 +91,8 @@ class Registry:
     # --- reads ---------------------------------------------------------------
 
     def get(self, rule_id: str, version: int) -> RuleVersion:
+        if not 1 <= version <= MAX_VERSION:  # out of SQL integer range: cannot exist
+            raise RuleNotFoundError(f"{rule_id}@v{version}")
         rv = self._s.get_rule_version(rule_id, version)
         if rv is None:
             raise RuleNotFoundError(f"{rule_id}@v{version}")

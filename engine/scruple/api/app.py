@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -85,6 +85,10 @@ def actor_header(
 
 Actor = Annotated[str, Depends(actor_header)]
 
+# Versions are 1-based and must fit a 64-bit SQL integer (an unbounded int reached
+# the driver and came back as a 500).
+VersionPath = Annotated[int, Path(ge=1, le=2**63 - 1)]
+
 
 def create_app(gate: AgentGate | None = None) -> FastAPI:
     app = FastAPI(
@@ -140,11 +144,11 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         return versions
 
     @app.post("/rules/{rule_id}/versions/{version}/evaluate")
-    def evaluate(rule_id: str, version: int, actor: Actor) -> list[DecisionOut]:
+    def evaluate(rule_id: str, version: VersionPath, actor: Actor) -> list[DecisionOut]:
         return [DecisionOut.of(r.decision) for r in g.evaluate(rule_id, version, actor)]
 
     @app.post("/rules/{rule_id}/versions/{version}/approve")
-    def approve(rule_id: str, version: int, actor: Actor) -> DecisionOut:
+    def approve(rule_id: str, version: VersionPath, actor: Actor) -> DecisionOut:
         return DecisionOut.of(g.approve(rule_id, version, actor).decision)
 
     @app.post("/rules/{rule_id}/rollback")
@@ -180,7 +184,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
 
     @app.post("/shadow/rules/{rule_id}/versions/{version}/decisions")
     def shadow_record(
-        rule_id: str, version: int, body: LiveDecisionBatch, actor: Actor
+        rule_id: str, version: VersionPath, body: LiveDecisionBatch, actor: Actor
     ) -> BatchResult:
         if any(d.agent_id != actor for d in body.decisions):
             raise HTTPException(403, "X-Actor must match every decision's agent_id")
@@ -190,7 +194,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
             raise HTTPException(409, str(exc)) from exc
 
     @app.get("/shadow/rules/{rule_id}/versions/{version}")
-    def shadow_summary(rule_id: str, version: int) -> ShadowSummary:
+    def shadow_summary(rule_id: str, version: VersionPath) -> ShadowSummary:
         return _recorder(rule_id, version).summary()
 
     # Imported (real) cases: no ground truth; metrics are labelled observed or estimated.
