@@ -11,6 +11,7 @@ Run it with `scruple mcp sim` (or `uv run scruple mcp sim`).
 
 from __future__ import annotations
 
+import threading
 from typing import Annotated, Any
 
 from mcp.server.mcpserver import MCPServer
@@ -29,13 +30,22 @@ Reason = Annotated[str, Field(description="Why, in a sentence.", max_length=1_00
 
 
 class EpisodeTable:
-    """In-memory episodes for one server process."""
+    """In-memory episodes for one server process.
+
+    The MCP SDK runs synchronous tools in worker threads, so every call takes a lock:
+    episodes see their calls one at a time, in arrival order.
+    """
 
     def __init__(self) -> None:
         self.episodes: dict[str, Episode] = {}
         self._starts: dict[tuple[int, str | None], int] = {}
+        self._lock = threading.Lock()
 
     def start(self, seed: int, case_type: str | None) -> Episode:
+        with self._lock:
+            return self._start(seed, case_type)
+
+    def _start(self, seed: int, case_type: str | None) -> Episode:
         if len(self.episodes) >= MAX_EPISODES:
             raise ToolError(f"episode limit reached ({MAX_EPISODES}); restart the server")
         key = (seed, case_type)
@@ -49,6 +59,10 @@ class EpisodeTable:
         return ep
 
     def call(self, episode_id: str, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+        with self._lock:
+            return self._call(episode_id, tool, args)
+
+    def _call(self, episode_id: str, tool: str, args: dict[str, Any]) -> dict[str, Any]:
         ep = self.episodes.get(episode_id)
         if ep is None:
             raise ToolError(f"unknown episode {episode_id!r}; call start_episode first")

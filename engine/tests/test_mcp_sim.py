@@ -179,3 +179,23 @@ def test_episode_table_is_shared_with_caller() -> None:
 
     eid = session(fn, build_sim_server(table))
     assert eid in table.episodes
+
+
+def test_concurrent_calls_are_serialised() -> None:
+    """Parallel action calls on one episode: exactly one wins."""
+
+    async def fn(c: Client) -> list[Any]:
+        eid = data(await c.call_tool("start_episode", {"seed": 6}))["episode_id"]
+        results: list[Any] = []
+
+        async def act(tool: str) -> None:
+            results.append(await c.call_tool(tool, {"episode_id": eid}))
+
+        async with anyio.create_task_group() as tg:
+            for tool in ["accept_liability", "refund", "escalate"] * 3:
+                tg.start_soon(act, tool)
+        return results
+
+    results = session(fn)
+    assert sum(1 for r in results if not r.is_error) == 1
+    assert all("already taken" in r.content[0].text for r in results if r.is_error)
