@@ -145,4 +145,77 @@ $500 cap needs about 31,500 cases for a $5 regression.
 
 ## Results
 
-(appended after the run)
+Run on 2026-11-09, one run as planned, no deviations:
+`scripts/exp_planted.py run --jobs 4` with the v1 salt (956 s on a shared 4-core
+container). Raw output: `results/experiments/E1_planted_regressions.json`.
+Synthetic episodes only.
+
+**Verdict: PASS, narrowly.** P1 holds; P2 and P3 meet their point-estimate bars but
+neither is established by its interval.
+
+| pre-registered | result | bar | holds |
+|---|---|---|---|
+| P1 all regressions flagged on the full benchmark | 7 of 7 | 7 of 7 | yes |
+| P2 flagged exercised folds, pooled | 114 / 135 = 0.844 (Wilson 95% 0.774 to 0.896) | >= 0.80 | yes (point estimate) |
+| P3 control folds flagged | 3 / 60 = 0.050 (Wilson 95% 0.017 to 0.137) | <= 0.05 | yes, at the bar |
+| sanity: C1 flagged | no | never | yes |
+
+Printed by the run (per policy: full benchmark, then folds):
+
+```
+R1 late on 5% of processing errors: flagged=True (verifier True, batch False, gate hold []) changed=27 new_hard=21 {'DL-01': 21} mean_cost_diff=11.3; folds exercised 15/20, flagged 15
+R2 late on 2% of all cases: flagged=True (verifier True, batch False, gate block ['__pooled__']) changed=202 new_hard=162 {'DL-01': 162, 'INV-01': 4} mean_cost_diff=59.8; folds exercised 20/20, flagged 20
+R3 wrong documents cited on visa 13.1: flagged=True (verifier True, batch True, gate block ['buyers_remorse', 'service_failure', '__pooled__']) changed=235 new_hard=1 {'INV-01': 1} mean_cost_diff=187.7; folds exercised 20/20, flagged 6
+R4 refund the capture under $25: flagged=True (verifier True, batch False, gate hold []) changed=641 new_hard=641 {'DL-01': 610, 'INV-01': 36, 'SCOPE-01': 212, 'SR-01': 5} mean_cost_diff=8.6; folds exercised 20/20, flagged 20
+R5 concede everything under $25: flagged=True (verifier True, batch True, gate hold []) changed=717 new_hard=20 {'INV-01': 20} mean_cost_diff=1.3; folds exercised 20/20, flagged 13
+R6 never ask for the cardholder's statement: flagged=True (verifier True, batch False, gate hold []) changed=1997 new_hard=1997 {'PROC-01': 1997} mean_cost_diff=0.0; folds exercised 20/20, flagged 20
+R7 report every representment as won: flagged=True (verifier True, batch False, gate hold []) changed=1111 new_hard=1111 {'SR-01': 1111} mean_cost_diff=0.0; folds exercised 20/20, flagged 20
+C1 unmodified: flagged=False (verifier False, batch False, gate hold []) changed=0 new_hard=0 {} mean_cost_diff=0.0; folds exercised 0/20, flagged 0
+C2 reads and cites in reverse order: flagged=False (verifier False, batch False, gate hold []) changed=9966 new_hard=0 {} mean_cost_diff=0.0; folds exercised 20/20, flagged 0
+C3 waits a day when a week is left: flagged=True (verifier True, batch False, gate hold []) changed=9966 new_hard=3 {'INV-01': 3} mean_cost_diff=0.1; folds exercised 20/20, flagged 3
+C4 states no win probability: flagged=False (verifier False, batch False, gate hold []) changed=9985 new_hard=0 {} mean_cost_diff=0.0; folds exercised 20/20, flagged 0
+```
+
+Which detector fired on exercised folds (verifier / batch / gate): R1 15/0/0,
+R2 20/0/0, R3 1/6/0, R4 20/0/0, R5 12/3/0, R6 20/0/0, R7 20/0/0; controls: C3
+3/0/0, C2 and C4 nothing. Batch failures: R3 CAL-01 on 6 blocks, R5 CON-01 on 3.
+
+Against the predictions written down before the run:
+
+- R6, R7 (PROC-01, SR-01), R1, R2 (DL-01) and R4 (DL-01, SCOPE-01, INV-01) were caught
+  on every exercised fold, as predicted. R1 was exercised in only 15 of 20 folds (27
+  changed episodes in 10,000).
+- R3 and R5 were the weak ones, as predicted, but not entirely for the predicted
+  reason. **R3** costs $188 per case on average over the benchmark (235 changed
+  episodes; the lost representments on Visa 13.1 are expensive). The gate blocked it
+  on the full benchmark (buyers_remorse, service_failure and pooled) but on no single
+  fold. Folds caught it 6 times of 20, through CAL-01: the policy keeps stating its
+  usual confidence on representments it now loses. **R5** costs $1.30 per case; the
+  gate held even on 10,000 cases (the planning said a per-family regression needs about
+  $20 per case at this size). It was flagged on 13 of 20 folds, and the reason
+  matters: 12 of those were INV-01 failures, the refund-race over-credit the honest
+  reference also trips (docs/experiments/README.md), which conceding more often
+  triggers more often. That is detection by a side effect, not by a check that reads
+  the regression. For a cost-only regression the gate is the only real detector, and
+  it needs far more than 500 cases.
+- **The controls were not all clean.** C3 (wait one day when a week is left) was
+  flagged on 3 of 20 folds and on the full benchmark, all by INV-01 (ledger
+  invariants), on 3 episodes. We did not trace those 3 episodes one by one; the likely
+  mechanism is the one behind the honest policy's 19 INV-01 failures: INV-01 charges a
+  violation that stands at close to the agent (finding F-8), so a change of timing
+  around a settling refund becomes a hard failure. It is what put P3 exactly on its
+  bar.
+
+What this does and does not show:
+
+- On this synthetic benchmark, hard checks catch regressions that leave a trace a
+  check reads (a missed window, a skipped step, a false claim, an out-of-bounds
+  refund) on every fold where they happen.
+- Regressions that only cost money are caught by the statistical gate on the full
+  10,000 cases when large (R2 at $60, R3 at $188 per case) and missed when small (R5
+  at $1.30), as the planning predicted; on 500-case folds the gate caught nothing.
+- INV-01's close-time charge for refund races is now the main source of both false
+  alarms and incidental detections. Separating "the agent's action caused the
+  over-credit" from "a refund the agent did not start settled late" would cut both.
+- One synthetic benchmark, one baseline policy and seven hand-written regressions
+  chosen before the run; they say nothing about the regressions real agents have.

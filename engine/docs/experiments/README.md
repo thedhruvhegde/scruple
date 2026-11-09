@@ -54,9 +54,10 @@ Reading the reference rows:
   than the evidence policy: knowing a claim is invalid does not win it when the
   merchant lacks the documents, and fighting costs fees.
 - Even the honest reference fails a hard check on 19 of 10,000 cases (INV-01, ledger
-  invariants), and conceding policies on 155. These are refund races where the
-  cardholder ends above the capture at close; the check charges a violation that
-  stands at close to the agent (F-8 in docs/VERIFIER_FINDINGS.md). A gate that
+  invariants), and the oracle and always-accept policies on 155. On 3,000 cases from
+  a throwaway salt (not v1), all 7 honest INV-01 failures had a refund in flight and
+  ended with the cardholder over-credited at close: the check charges a violation
+  that stands at close to the agent (F-8 in docs/VERIFIER_FINDINGS.md). A gate that
   demands zero hard failures over 10,000 cases would block the reference policy.
 
 Difficulty tiers (`scruple/bench/spec.py`, our definition): `aligned`, the documents
@@ -96,3 +97,6 @@ cases); a CLI agent is isolated, a Python agent in the same process is not (G-10
 Each experiment is pre-registered (hypothesis, design, metric, pass bar, sample size,
 analysis plan) and the pre-registration is committed before anything runs. Results
 are added below it in a separate commit, with the raw JSON in `results/experiments/`.
+
+- [E1 planted regressions](E1_planted_regressions.md): PASS, narrowly (7 of 7 flagged on
+  the full benchmark; 0.84 of exercised folds; 3 of 60 control folds flagged).

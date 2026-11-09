@@ -1,0 +1,3963 @@
+{
+  "analysis": {
+    "P1_all_detected_on_full_benchmark": true,
+    "P2_fold_detection": {
+      "bar": 0.8,
+      "exercised": 135,
+      "flagged": 114,
+      "pass": true,
+      "rate": 0.8444444444444444,
+      "wilson95": [
+        0.7738797114096374,
+        0.8959490327560677
+      ]
+    },
+    "P3_false_alarm": {
+      "bar": 0.05,
+      "flagged": 3,
+      "full_runs_flagged": 1,
+      "pass": true,
+      "rate": 0.05,
+      "trials": 60,
+      "wilson95": [
+        0.01714950216439568,
+        0.1370051647634852
+      ]
+    },
+    "full_detected": {
+      "R1 late on 5% of processing errors": true,
+      "R2 late on 2% of all cases": true,
+      "R3 wrong documents cited on visa 13.1": true,
+      "R4 refund the capture under $25": true,
+      "R5 concede everything under $25": true,
+      "R6 never ask for the cardholder's statement": true,
+      "R7 report every representment as won": true
+    },
+    "per_regression": {
+      "R1 late on 5% of processing errors": {
+        "by_detector_full": {
+          "batch": false,
+          "gate": false,
+          "verifier": true
+        },
+        "exercised_folds": 15,
+        "flagged_exercised_folds": 15
+      },
+      "R2 late on 2% of all cases": {
+        "by_detector_full": {
+          "batch": false,
+          "gate": true,
+          "verifier": true
+        },
+        "exercised_folds": 20,
+        "flagged_exercised_folds": 20
+      },
+      "R3 wrong documents cited on visa 13.1": {
+        "by_detector_full": {
+          "batch": true,
+          "gate": true,
+          "verifier": true
+        },
+        "exercised_folds": 20,
+        "flagged_exercised_folds": 6
+      },
+      "R4 refund the capture under $25": {
+        "by_detector_full": {
+          "batch": false,
+          "gate": false,
+          "verifier": true
+        },
+        "exercised_folds": 20,
+        "flagged_exercised_folds": 20
+      },
+      "R5 concede everything under $25": {
+        "by_detector_full": {
+          "batch": true,
+          "gate": false,
+          "verifier": true
+        },
+        "exercised_folds": 20,
+        "flagged_exercised_folds": 13
+      },
+      "R6 never ask for the cardholder's statement": {
+        "by_detector_full": {
+          "batch": false,
+          "gate": false,
+          "verifier": true
+        },
+        "exercised_folds": 20,
+        "flagged_exercised_folds": 20
+      },
+      "R7 report every representment as won": {
+        "by_detector_full": {
+          "batch": false,
+          "gate": false,
+          "verifier": true
+        },
+        "exercised_folds": 20,
+        "flagged_exercised_folds": 20
+      }
+    },
+    "sanity_C1_flagged": [
+      false
+    ],
+    "verdict": "PASS"
+  },
+  "benchmark": {
+    "manifest_hash": "1286baf3be84b4f9aa7af0606f4434897cf97db4a11c3db548d9549d2cb13f91",
+    "version": 1
+  },
+  "cap": 20000,
+  "experiment": "E1 planted regressions",
+  "n_cases": 10000,
+  "policies": {
+    "C1 unmodified": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 0,
+        "exercised": false,
+        "flagged": false,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 0.0,
+        "n_cases": 10000,
+        "new_failures_by_check": {},
+        "new_hard_failures": 0,
+        "verifier": false
+      },
+      "kind": "none",
+      "role": "control"
+    },
+    "C2 reads and cites in reverse order": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 495,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 497,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 497,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 9966,
+        "exercised": true,
+        "flagged": false,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 0.0,
+        "n_cases": 10000,
+        "new_failures_by_check": {},
+        "new_hard_failures": 0,
+        "verifier": false
+      },
+      "kind": "reversed",
+      "role": "control"
+    },
+    "C3 waits a day when a week is left": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 495,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 4.692,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -3.326,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.68,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 497,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -4.716,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 2.14,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -5.6,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -6.094,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -1.646,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 11.43,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.548,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -2.664,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -3.508,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -6.12,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 1.682,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -5.928,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 497,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 14.752,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 9.342,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -3.742,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 2.146,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -2.934,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 9966,
+        "exercised": true,
+        "flagged": true,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 0.0567,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "INV-01": 3
+        },
+        "new_hard_failures": 3,
+        "verifier": true
+      },
+      "kind": "patient",
+      "role": "control"
+    },
+    "C4 states no win probability": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 498,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 500,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 499,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 9985,
+        "exercised": true,
+        "flagged": false,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 0.0,
+        "n_cases": 10000,
+        "new_failures_by_check": {},
+        "new_hard_failures": 0,
+        "verifier": false
+      },
+      "kind": "no_confidence",
+      "role": "control"
+    },
+    "R1 late on 5% of processing errors": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 2.694,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 4,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 23.52,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -5.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 2,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 1.318,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 2
+          },
+          "new_hard_failures": 2,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 10.532,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 3,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 58.886,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 2
+          },
+          "new_hard_failures": 2,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 11.946,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 5,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 65.602,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 4
+          },
+          "new_hard_failures": 4,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 2,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -3.24,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 21.234,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 2,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 2
+          },
+          "new_hard_failures": 2,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 4.286,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 1,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 34.546,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 0,
+          "exercised": false,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 27,
+        "exercised": true,
+        "flagged": true,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 11.3162,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "DL-01": 21
+        },
+        "new_hard_failures": 21,
+        "verifier": true
+      },
+      "kind": "late_rare",
+      "role": "regression"
+    },
+    "R2 late on 2% of all cases": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 8,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 112.788,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 7,
+            "INV-01": 1
+          },
+          "new_hard_failures": 7,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 14,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 46.696,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 9
+          },
+          "new_hard_failures": 9,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 8,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 32.016,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 5
+          },
+          "new_hard_failures": 5,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 7,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -10.854,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 7
+          },
+          "new_hard_failures": 7,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 10,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 42.97,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 7
+          },
+          "new_hard_failures": 7,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 7,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 65.962,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 6
+          },
+          "new_hard_failures": 6,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 12,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 86.546,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 10,
+            "INV-01": 1
+          },
+          "new_hard_failures": 10,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 7,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 53.578,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 5
+          },
+          "new_hard_failures": 5,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 12,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 21.184,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 9
+          },
+          "new_hard_failures": 9,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 16,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 163.042,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 11
+          },
+          "new_hard_failures": 11,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 7,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 4.198,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 7
+          },
+          "new_hard_failures": 7,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 8,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 20.656,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 7
+          },
+          "new_hard_failures": 7,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 14,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 105.216,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 10,
+            "INV-01": 1
+          },
+          "new_hard_failures": 10,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 32.85,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 9
+          },
+          "new_hard_failures": 9,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 74.684,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 10
+          },
+          "new_hard_failures": 10,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 86.618,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 10
+          },
+          "new_hard_failures": 10,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 6.648,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 10,
+            "INV-01": 1
+          },
+          "new_hard_failures": 10,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 8,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 13.296,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 8
+          },
+          "new_hard_failures": 8,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 15,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 223.5,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 13
+          },
+          "new_hard_failures": 13,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 5,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 15.21,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 2
+          },
+          "new_hard_failures": 2,
+          "verifier": true
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 202,
+        "exercised": true,
+        "flagged": true,
+        "gate": true,
+        "gate_outcome": "block",
+        "gate_types": [
+          "__pooled__"
+        ],
+        "mean_cost_diff": 59.8402,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "DL-01": 162,
+          "INV-01": 4
+        },
+        "new_hard_failures": 162,
+        "verifier": true
+      },
+      "kind": "late_any",
+      "role": "regression"
+    },
+    "R3 wrong documents cited on visa 13.1": {
+      "folds": [
+        {
+          "batch": true,
+          "batch_new": {
+            "CAL-01": 1
+          },
+          "changed": 14,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 151.254,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CAL-01": 1
+          },
+          "changed": 12,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 255.484,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 8,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 84.286,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CAL-01": 1
+          },
+          "changed": 11,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 244.042,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CAL-01": 1
+          },
+          "changed": 14,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 267.03,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 10,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 167.426,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 10,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 112.93,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 12,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 63.98,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 13,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 303.02,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 10,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 120.954,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 206.554,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 160.118,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CAL-01": 1
+          },
+          "changed": 16,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 164.518,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 10,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 109.844,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 242.842,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 285.206,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CAL-01": 1
+          },
+          "changed": 17,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 238.316,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 17,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 264.36,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 11,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 254.876,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 6,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 57.328,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": true,
+        "batch_new": {
+          "CAL-01": 6
+        },
+        "changed": 235,
+        "exercised": true,
+        "flagged": true,
+        "gate": true,
+        "gate_outcome": "block",
+        "gate_types": [
+          "buyers_remorse",
+          "service_failure",
+          "__pooled__"
+        ],
+        "mean_cost_diff": 187.7184,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "INV-01": 1
+        },
+        "new_hard_failures": 1,
+        "verifier": true
+      },
+      "kind": "wrong_evidence_code",
+      "role": "regression"
+    },
+    "R4 refund the capture under $25": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 37,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 37,
+            "SCOPE-01": 9
+          },
+          "new_hard_failures": 37,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 45,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 10.488,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 42,
+            "INV-01": 3,
+            "SCOPE-01": 17
+          },
+          "new_hard_failures": 45,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 40,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 5.812,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 37,
+            "INV-01": 3,
+            "SCOPE-01": 15
+          },
+          "new_hard_failures": 40,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 37,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 14.992,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 35,
+            "INV-01": 3,
+            "SCOPE-01": 21,
+            "SR-01": 1
+          },
+          "new_hard_failures": 37,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 23,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 23,
+            "SCOPE-01": 4
+          },
+          "new_hard_failures": 23,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 29,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 23.02,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 27,
+            "INV-01": 2,
+            "SCOPE-01": 11
+          },
+          "new_hard_failures": 29,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 37,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 7.996,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 34,
+            "INV-01": 3,
+            "SCOPE-01": 13
+          },
+          "new_hard_failures": 37,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 35,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 35,
+            "SCOPE-01": 10
+          },
+          "new_hard_failures": 35,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 38,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 10.548,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 36,
+            "INV-01": 2,
+            "SCOPE-01": 12
+          },
+          "new_hard_failures": 38,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 32,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 9.262,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 31,
+            "INV-01": 1,
+            "SCOPE-01": 11
+          },
+          "new_hard_failures": 32,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 27,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 14.992,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 25,
+            "INV-01": 2,
+            "SCOPE-01": 12
+          },
+          "new_hard_failures": 27,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 27,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 1.996,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 27,
+            "INV-01": 1,
+            "SCOPE-01": 10,
+            "SR-01": 1
+          },
+          "new_hard_failures": 27,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 25,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 25,
+            "SCOPE-01": 6
+          },
+          "new_hard_failures": 25,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 24,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 10.956,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 22,
+            "INV-01": 3,
+            "SCOPE-01": 6,
+            "SR-01": 1
+          },
+          "new_hard_failures": 24,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 35,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 26.694,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 30,
+            "INV-01": 6,
+            "SCOPE-01": 15,
+            "SR-01": 1
+          },
+          "new_hard_failures": 35,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 32,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 1.76,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 31,
+            "INV-01": 1,
+            "SCOPE-01": 5
+          },
+          "new_hard_failures": 32,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 41,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 18.842,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 39,
+            "INV-01": 3,
+            "SCOPE-01": 14,
+            "SR-01": 1
+          },
+          "new_hard_failures": 41,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 23,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 12.236,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 21,
+            "INV-01": 2,
+            "SCOPE-01": 8
+          },
+          "new_hard_failures": 23,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 23,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 1.746,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 22,
+            "INV-01": 1,
+            "SCOPE-01": 6
+          },
+          "new_hard_failures": 23,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 31,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "DL-01": 31,
+            "SCOPE-01": 7
+          },
+          "new_hard_failures": 31,
+          "verifier": true
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 641,
+        "exercised": true,
+        "flagged": true,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 8.567,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "DL-01": 610,
+          "INV-01": 36,
+          "SCOPE-01": 212,
+          "SR-01": 5
+        },
+        "new_hard_failures": 641,
+        "verifier": true
+      },
+      "kind": "over_refund_small",
+      "role": "regression"
+    },
+    "R5 concede everything under $25": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 38,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -9.558,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 34,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 15.1,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 36,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 27.534,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 36,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -49.116,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 30,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 11.67,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 46,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 36.242,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 39,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 3.338,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 35,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -17.442,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 36,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -24.568,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 35,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -39.248,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 2
+          },
+          "new_hard_failures": 2,
+          "verifier": true
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CON-01": 1
+          },
+          "changed": 35,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 21.832,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 40,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 17.688,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 3
+          },
+          "new_hard_failures": 3,
+          "verifier": true
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CON-01": 1
+          },
+          "changed": 34,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -26.66,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 3
+          },
+          "new_hard_failures": 3,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 42,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 45.302,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 2
+          },
+          "new_hard_failures": 2,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 38,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -25.468,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": true,
+          "batch_new": {
+            "CON-01": 1
+          },
+          "changed": 41,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 30.43,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 39,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -15.898,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 28,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -4.656,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 1
+          },
+          "new_hard_failures": 1,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 26,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 34.426,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "INV-01": 3
+          },
+          "new_hard_failures": 3,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 29,
+          "exercised": true,
+          "flagged": false,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": -4.122,
+          "n_cases": 500,
+          "new_failures_by_check": {},
+          "new_hard_failures": 0,
+          "verifier": false
+        }
+      ],
+      "full": {
+        "batch": true,
+        "batch_new": {
+          "CON-01": 3
+        },
+        "changed": 717,
+        "exercised": true,
+        "flagged": true,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 1.3413,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "INV-01": 20
+        },
+        "new_hard_failures": 20,
+        "verifier": true
+      },
+      "kind": "concede_small",
+      "role": "regression"
+    },
+    "R6 never ask for the cardholder's statement": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 95,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 95
+          },
+          "new_hard_failures": 95,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 102,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 102
+          },
+          "new_hard_failures": 102,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 92,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 92
+          },
+          "new_hard_failures": 92,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 98,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 98
+          },
+          "new_hard_failures": 98,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 107,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 107
+          },
+          "new_hard_failures": 107,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 119,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 119
+          },
+          "new_hard_failures": 119,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 103,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 103
+          },
+          "new_hard_failures": 103,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 95,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 95
+          },
+          "new_hard_failures": 95,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 107,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 107
+          },
+          "new_hard_failures": 107,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 98,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 98
+          },
+          "new_hard_failures": 98,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 101,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 101
+          },
+          "new_hard_failures": 101,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 86,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 86
+          },
+          "new_hard_failures": 86,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 97,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 97
+          },
+          "new_hard_failures": 97,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 96,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 96
+          },
+          "new_hard_failures": 96,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 114,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 114
+          },
+          "new_hard_failures": 114,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 103,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 103
+          },
+          "new_hard_failures": 103,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 90,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 90
+          },
+          "new_hard_failures": 90,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 101,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 101
+          },
+          "new_hard_failures": 101,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 95,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 95
+          },
+          "new_hard_failures": 95,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 98,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "PROC-01": 98
+          },
+          "new_hard_failures": 98,
+          "verifier": true
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 1997,
+        "exercised": true,
+        "flagged": true,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 0.0,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "PROC-01": 1997
+        },
+        "new_hard_failures": 1997,
+        "verifier": true
+      },
+      "kind": "skip_info",
+      "role": "regression"
+    },
+    "R7 report every representment as won": {
+      "folds": [
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 56,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 56
+          },
+          "new_hard_failures": 56,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 63,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 63
+          },
+          "new_hard_failures": 63,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 45,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 45
+          },
+          "new_hard_failures": 45,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 58,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 58
+          },
+          "new_hard_failures": 58,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 61,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 61
+          },
+          "new_hard_failures": 61,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 59,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 59
+          },
+          "new_hard_failures": 59,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 56,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 56
+          },
+          "new_hard_failures": 56,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 62,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 62
+          },
+          "new_hard_failures": 62,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 45,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 45
+          },
+          "new_hard_failures": 45,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 55,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 55
+          },
+          "new_hard_failures": 55,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 52,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 52
+          },
+          "new_hard_failures": 52,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 46,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 46
+          },
+          "new_hard_failures": 46,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 63,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 63
+          },
+          "new_hard_failures": 63,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 43,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 43
+          },
+          "new_hard_failures": 43,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 60,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 60
+          },
+          "new_hard_failures": 60,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 54,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 54
+          },
+          "new_hard_failures": 54,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 61,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 61
+          },
+          "new_hard_failures": 61,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 48,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 48
+          },
+          "new_hard_failures": 48,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 55,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 55
+          },
+          "new_hard_failures": 55,
+          "verifier": true
+        },
+        {
+          "batch": false,
+          "batch_new": {},
+          "changed": 69,
+          "exercised": true,
+          "flagged": true,
+          "gate": false,
+          "gate_outcome": "hold",
+          "gate_types": [],
+          "mean_cost_diff": 0.0,
+          "n_cases": 500,
+          "new_failures_by_check": {
+            "SR-01": 69
+          },
+          "new_hard_failures": 69,
+          "verifier": true
+        }
+      ],
+      "full": {
+        "batch": false,
+        "batch_new": {},
+        "changed": 1111,
+        "exercised": true,
+        "flagged": true,
+        "gate": false,
+        "gate_outcome": "hold",
+        "gate_types": [],
+        "mean_cost_diff": 0.0,
+        "n_cases": 10000,
+        "new_failures_by_check": {
+          "SR-01": 1111
+        },
+        "new_hard_failures": 1111,
+        "verifier": true
+      },
+      "kind": "false_win_claim",
+      "role": "regression"
+    }
+  },
+  "preregistration": "docs/experiments/E1_planted_regressions.md",
+  "seconds": 955.7,
+  "synthetic": true
+}
