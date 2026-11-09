@@ -30,3 +30,15 @@ def audit(storage: SQLiteStorage, clock: SteppingClock) -> AuditLog:
 @pytest.fixture
 def registry(storage: SQLiteStorage, audit: AuditLog, clock: SteppingClock) -> Registry:
     return Registry(storage, audit, clock)
+
+
+@pytest.fixture(scope="session")
+def postgres_url() -> Iterator[str]:
+    """Superuser URL of a throwaway PostgreSQL cluster (skips if none is available)."""
+    from tests import pgcluster
+
+    cluster = pgcluster.start()
+    if cluster is None:
+        pytest.skip("PostgreSQL binaries not found and SCRUPLE_TEST_POSTGRES_URL not set")
+    yield cluster.url
+    cluster.stop()

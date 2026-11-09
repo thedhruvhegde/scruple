@@ -57,7 +57,7 @@ from scruple.sim.engine import Simulator
 from scruple.sim.generator import generate_cases
 from scruple.sim.library import BASELINE_RULES
 from scruple.sim.models import DisputeCase
-from scruple.storage import SQLiteStorage, Storage
+from scruple.storage import Storage, open_storage
 from scruple.verifiers.ledger import verify_ledger
 from scruple.verifiers.policy_constraints import verify_policy
 
@@ -88,7 +88,7 @@ class AgentGate:
     def open(
         cls, path: str, clock: Clock | None = None, config: GateConfig | None = None
     ) -> AgentGate:
-        return cls(SQLiteStorage(path), clock, config)
+        return cls(open_storage(path), clock, config)
 
     # --- setup ---------------------------------------------------------------
 

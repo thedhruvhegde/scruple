@@ -22,6 +22,7 @@ from scruple.storage.base import (
 from scruple.storage.sqlite import SCHEMA, SQLiteStorage
 
 SQLITE_PREFIX = "sqlite:///"
+POSTGRES_PREFIXES = ("postgresql://", "postgres://")
 
 
 def open_storage(location: str) -> Storage:
@@ -29,7 +30,12 @@ def open_storage(location: str) -> Storage:
 
     - `":memory:"`: SQLite in memory (tests)
     - `"sqlite:///path/to.db"` or a bare path: SQLite file
+    - `"postgresql://..."` or `"postgres://..."`: PostgreSQL (schema created if missing)
     """
+    if location.startswith(POSTGRES_PREFIXES):
+        from scruple.storage.postgres import PostgresStorage  # psycopg loads only if used
+
+        return PostgresStorage(location)
     if location.startswith(SQLITE_PREFIX):
         location = location[len(SQLITE_PREFIX) :] or ":memory:"
     if "://" in location:
