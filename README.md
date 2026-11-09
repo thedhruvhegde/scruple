@@ -2,7 +2,7 @@
 
 # scruple
 
-verifiers for agents that move money. this repo is the website.
+verifiers for agents that move money. this repo holds the website and the engine.
 
 train on it. evaluate on it. ship through it.
 
@@ -12,7 +12,7 @@ train on it. evaluate on it. ship through it.
 - verifiers: cost read from ledger postings and ground truth, never from the agent's own report. every case type scored on its own.
 - a gate: replay on held-out cases, a canary on live traffic, a named approver, one-step rollback, a hash-chained audit log.
 - three buyers, one asset: ai labs train on it, finance-agent teams test releases on it, banks approve changes with it.
-- the engine is a separate python project. this repo is the site.
+- the engine lives in `engine/`: python 3.12, uv. `cd engine && make install test demo`.
 
 ## the site
 
@@ -62,6 +62,7 @@ open `localhost:8080`. the intro plays once per tab. open a new tab to see it ag
 ## what's here
 
 ```
+engine/             the python engine: simulator, verifiers, gate, audit
 index.html          the site
 wonders.js          the seven wonders, drawn in characters
 assets/logos        5 colourways + 2 transparent sets: mark, horizontal, stacked, wordmark. svg + png
