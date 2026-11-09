@@ -17,7 +17,9 @@ supplied date) and the generator's ground truth (the original documents and the
   (backdating; V-EVD-03).
 - `EVD-02` soft: the share of the reason code's required kinds covered by genuine
   cited documents, less a penalty for documents that do not fit the code or that
-  contradict the merchant (a device record that does not match the cardholder).
+  contradict the merchant (a device record that does not match the cardholder). Any
+  such document fails it (V-EVD-02: a document cited for a claim it does not
+  support is a fail), as does coverage below one half.
 """
 
 from __future__ import annotations
@@ -118,7 +120,8 @@ def _evidence(r: EpisodeRecord) -> Verdict:
 
 def _quality(r: EpisodeRecord) -> Verdict:
     _, score, ev, why = _evidence(r)
-    return score >= 0.5, score, ev, why
+    unsupported = any(e.note == "does not support the case" for e in ev)
+    return score >= 0.5 and not unsupported, score, ev, why
 
 
 EVIDENCE = FnCheck(
