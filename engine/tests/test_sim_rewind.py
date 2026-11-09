@@ -11,6 +11,7 @@ from scruple.sim.disputes import (
     FULL_MIX,
     Accept,
     ActionApplied,
+    AgentAction,
     CardDispute,
     DisputeEngine,
     EngineEvent,
@@ -61,8 +62,7 @@ def test_rewind_restores_the_case_state_at_that_event(
     e, _, cases = _play(seed, n, plan)
     c = data.draw(st.sampled_from(cases))
     trace = list(e.trace[c.case_id])
-    lo = e.opening_events(c.case_id)
-    k = data.draw(st.integers(lo, len(trace)))
+    k = data.draw(st.sampled_from(e.step_boundaries(c.case_id)))
     others = {x.case_id: e.case_digest(x.case_id) for x in cases if x.case_id != c.case_id}
     removed = e.rewind(c.case_id, k)
     assert len(removed) == len(trace) - k
@@ -82,7 +82,7 @@ def test_rewind_then_redo_gets_back_to_the_same_case_state(
     e, _, cases = _play(seed, n, plan)
     c = data.draw(st.sampled_from(cases))
     before = e.case_digest(c.case_id)
-    k = data.draw(st.integers(e.opening_events(c.case_id), len(e.case_events(c.case_id))))
+    k = data.draw(st.sampled_from(e.step_boundaries(c.case_id)))
     for ev in e.rewind(c.case_id, k):
         e._emit(ev)
     assert e.case_digest(c.case_id) == before
@@ -171,3 +171,46 @@ def test_rewind_keeps_the_clock_unless_given_one() -> None:
     e.sync()  # 100 days later the chargeback window has passed: the case is lost
     out = e.outcome(case.case_id)
     assert out is not None and out.resolution is Resolution.LOST
+
+
+def test_rewind_inside_a_step_is_refused_and_changes_nothing() -> None:
+    """Regression (found by tests/test_props_ledger.py): rewinding between an issuer
+    reply's first event (due cleared) and its resolution left a case awaiting the
+    issuer with no due date, and the next sync crashed on `assert st.due is not None`."""
+    cases = generate_cases(0, 1)
+    clock = ManualClock()
+    clock.set_date(cases[0].opened_on)
+    e = DisputeEngine(cases, clock)
+    for days in (1, 1, 1, 1, 31):
+        clock.advance(days=days)
+        e.sync()
+    cid = cases[0].case_id
+    bounds = set(e.step_boundaries(cid))
+    inside = [k for k in range(e.opening_events(cid), len(e.case_events(cid))) if k not in bounds]
+    assert inside, "this case's steps should span several events"
+    digest = e.state_digest()
+    for k in inside:
+        with pytest.raises(ValueError, match="inside a step"):
+            e.rewind(cid, k)
+        assert e.state_digest() == digest
+
+
+@settings(max_examples=25)
+@given(st.integers(0, 2**32), st.integers(1, 4), plans, st.data())
+def test_every_step_boundary_is_a_state_the_engine_can_continue_from(
+    seed: int, n: int, plan: Plan, data: st.DataObject
+) -> None:
+    e, clock, cases = _play(seed, n, plan)
+    c = data.draw(st.sampled_from(cases))
+    k = data.draw(st.sampled_from(e.step_boundaries(c.case_id)))
+    e.rewind(c.case_id, k)
+    acts: dict[str, AgentAction] = {
+        "accept": Accept(),
+        "represent": Represent(),
+        "request_info": RequestInfo(),
+    }
+    for kind in e.allowed_actions(c.case_id):  # acting from here never raises
+        if kind in acts:
+            e.at(len(e.events)).act(c.case_id, acts[kind])
+    drain(e, clock)  # and time always runs the case to resolution
+    assert e.is_resolved(c.case_id)

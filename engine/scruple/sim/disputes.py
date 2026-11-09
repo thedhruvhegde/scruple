@@ -1115,7 +1115,7 @@ class DisputeEngine:
         """Restore one case to its state after its first `to` events. Other cases keep
         their state. Returns the events removed. `to` runs from `opening_events(case_id)`
         (the case as it opened: captured and, for a chargeback, debited) to the number of
-        the case's events (no change).
+        the case's events (no change), and must be one of `step_boundaries(case_id)`.
 
         The log is refolded without the case's later events, so ledger entry ids after
         the cut are renumbered. Time is the clock's: pass `clock` (e.g. a `ManualClock`
@@ -1127,6 +1127,10 @@ class DisputeEngine:
         lo = self.opening_events(case_id)
         if not lo <= to <= len(mine):
             raise ValueError(f"{case_id}: can rewind to {lo}..{len(mine)} events, not {to}")
+        if to not in self.step_boundaries(case_id):
+            # A cut inside one step (e.g. between a ruling and its reversal) leaves a
+            # state the engine never rests in, and continuing from it can crash.
+            raise ValueError(f"{case_id}: event {to} is inside a step; rewind to a boundary")
         cut = set(mine[to:])
         kept = [e for i, e in enumerate(self._events) if i not in cut]
         removed = tuple(self._events[i] for i in mine[to:])
@@ -1136,6 +1140,14 @@ class DisputeEngine:
         for ev in kept:
             self._emit(ev)
         return removed
+
+    def step_boundaries(self, case_id: str) -> tuple[int, ...]:
+        """The event counts `rewind` accepts for this case: the end of the opening and
+        the end of every later step (an agent action, a refund settling, a missed
+        deadline, an issuer reply or a ruling), each of which emits several events."""
+        mine = [e for e in self._events if e.case_id == case_id]
+        lo = self.opening_events(case_id)
+        return tuple(k for k in range(lo, len(mine) + 1) if k == len(mine) or _starts_step(mine[k]))
 
     def opening_events(self, case_id: str) -> int:
         """How many events open this case (a case cannot be rewound past its opening)."""
@@ -1602,6 +1614,18 @@ class DisputeEngine:
         self._emit(CaseResolved(case_id=cid, resolution=res))
         if reversal > 0:
             self._emit(ReversalPosted(case_id=cid, amount_minor=reversal, on=day))
+
+
+def _starts_step(ev: EngineEvent) -> bool:
+    """True for the first event of a step after a case has opened (see `rewind`)."""
+    match ev:
+        case ActionApplied() | PendingRefundCleared():
+            return True
+        case StageFired(event=Event.DEADLINE_MISSED):
+            return True
+        case AwaitingSet(awaiting="issuer" | "network", due=None):
+            return True
+    return False
 
 
 def drain(engine: DisputeEngine, clock: ManualClock, max_days: int = 800) -> None:
