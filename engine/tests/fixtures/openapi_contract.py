@@ -64,9 +64,10 @@ def _type_matches(ann: Any, prop: dict[str, Any], names: dict[type, str]) -> str
     if origin is Literal:
         if prop.get("type") != "string":
             return "Literal needs a string schema"
-        enum = set(prop.get("enum", []))
-        missing = set(get_args(ann)) - enum
-        return None if enum and not missing else f"Literal values {missing} not in enum"
+        if "enum" not in prop:
+            return None  # narrowing a free-form string (documented values) is allowed
+        missing = set(get_args(ann)) - set(prop["enum"])
+        return None if not missing else f"Literal values {missing} not in enum"
     if origin is tuple:
         if prop.get("type") != "array":
             return "tuple needs an array schema"

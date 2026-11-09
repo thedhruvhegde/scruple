@@ -58,3 +58,26 @@ Rules every adapter follows:
   400 bad signature, 413 body over 2 MiB, 422 signed but unmappable.
 - Stubbed: accepted batches stay in memory on the receiver; persisting them (through
   the service layer) is not written yet.
+
+## Adyen dispute notifications (`scruple.ingest.adyen`)
+
+- HMAC ported from Adyen's library (Adyen/adyen-python-api-library `Adyen/util.py` at
+  `2b708a4`, MIT) and checked against its own vectors: the item vector in
+  `test/UtilTest.py`, the four `test/mocks/util` notifications (colons, slashes,
+  backslashes, unescaped) and the header-signed payload vector.
+- Signing string: `pspReference:originalReference:merchantAccountCode:merchantReference:
+  value:currency:eventCode:success`, key hex-decoded, base64 HMAC-SHA256, constant time.
+  Several keys may be configured (rotation). One bad item rejects the whole delivery.
+- Shape and event list from Adyen/adyen-openapi `json/Webhooks-v1.json` at `d449f09`
+  (MIT). `EVENT_MAP` equals the 19 webhooks tagged `Dispute` (contract test).
+  Note: that spec's `eventCode` enum omits five of those webhooks (`PREARBITRATION_ACCEPTED`,
+  `_DECLINED`, `_ISSUER_WITHDRAWN`, `SCHEME_ARBITRATION`, `_WON`/`_LOST`), so the wire model
+  keeps `eventCode` as a string and `EVENT_MAP` decides.
+- ASSUMPTION: (stage, state) per event is our reading of each webhook's one-line summary;
+  `disputeStatus`, when present, overrides the state (`Expired`/`Undefended` read as LOST).
+  `PREARBITRATION_ACCEPTED` is read as merchant-accepted; the summary does not say who.
+- Items that are not dispute events, or carry `success: "false"`, are returned in
+  `skipped` with a reason. The free-text `reason` field is never stored.
+- `live: "true"` notifications are refused unless `allow_live=True`.
+- Not done: an HTTP route for Adyen (the adapter is a function), Basic auth on the
+  endpoint, the `[accepted]` acknowledgement, the Disputes API client.

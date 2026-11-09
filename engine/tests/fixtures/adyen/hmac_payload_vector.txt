@@ -1,0 +1,18 @@
+
+        {
+            "type": "merchant.created",
+            "environment": "test",
+            "createdAt": "01-01-2024",
+            "data": {
+                "capabilities": {
+                    "sendToTransferInstrument": {
+                        "requested": true,
+                        "requestedLevel": "notApplicable"
+                    }
+                },
+                "companyId": "YOUR_COMPANY_ID",
+                "merchantId": "YOUR_MERCHANT_ACCOUNT",
+                "status": "PreActive"
+            }
+        }
+        
