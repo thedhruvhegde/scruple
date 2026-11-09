@@ -1,40 +1,42 @@
 name: pages
 
+# pages is served from the gh-pages branch (legacy source). this job copies the
+# site files from main into gh-pages, and the pages build publishes them.
 on:
   push:
     branches: [main]
+    paths: [index.html, wonders.js, 404.html, robots.txt, sitemap.xml, "assets/**", .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: collect site files
         run: |
-          mkdir _site
-          cp index.html wonders.js _site/
-          for f in 404.html robots.txt sitemap.xml; do [ -f "$f" ] && cp "$f" _site/ || true; done
-          cp -r assets _site/
-          rm -rf _site/assets/readme
-          touch _site/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          mkdir "$RUNNER_TEMP/site"
+          cp index.html wonders.js 404.html robots.txt sitemap.xml "$RUNNER_TEMP/site/"
+          cp -r assets "$RUNNER_TEMP/site/"
+          rm -rf "$RUNNER_TEMP/site/assets/readme"
+          touch "$RUNNER_TEMP/site/.nojekyll"
+      - name: push to gh-pages
+        run: |
+          git config user.name thedhruvhegde
+          git config user.email dhegde@umich.edu
+          git fetch origin gh-pages --depth 1 || true
+          if git rev-parse -q --verify origin/gh-pages >/dev/null; then git checkout -B gh-pages origin/gh-pages; else git checkout --orphan gh-pages; fi
+          git rm -rq --ignore-unmatch .
+          git clean -fdxq
+          cp -r "$RUNNER_TEMP/site/." .
+          git add -A
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -qm "[~] publish site from main ${GITHUB_SHA::7}"
+          git push origin gh-pages
