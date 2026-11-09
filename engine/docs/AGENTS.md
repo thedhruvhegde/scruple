@@ -103,6 +103,43 @@ simulator provides a `CaseEnvironment` whose cases offer `observable`, `evidence
 `ground_truth`. Places marked `ADAPTER:` are where the current sim is thinner than the
 tool suite.
 
+## Dispute episodes (the rich engine)
+
+`scruple.agents.DisputeEpisode(seed, family)` (kind `dispute`) plays one case of
+`scruple.sim.disputes.DisputeEngine` (FULL_MIX: reason codes, evidence documents,
+refund races, split shipments, FX, CE 3.0) across its lifecycle. The old
+single-action `Episode` (kind `simple`) is unchanged.
+
+| tool | scope | notes |
+|---|---|---|
+| `get_case` | read | whitelisted case fields (`env.DISPUTE_CASE_FIELDS` plus the reason code's required and supporting evidence kinds, CE 3.0 eligibility, merchant risk tier), stage, who is due, deadline, allowed actions, refunded so far |
+| `list_evidence`, `get_evidence` | read | the case's sealed documents (content hash included) |
+| `get_ledger_view` | read | anonymised copy of this transaction's journal |
+| `accept`, `represent`, `escalate`, `refund(amount_minor)`, `request_info` | action | engine actions, legal per stage; refused actions change nothing |
+| `upload_evidence` | write | merchant-authored document; the environment records the ingestion day |
+| `wait(days)` | clock | the issuer replies and networks rule as days pass |
+| `submit_decision` | submit | `SelfReport`: explanation, optional stated win probability, structured claims; time then runs until the case resolves with the agent idle |
+
+What changed against the caveats of the simple kind: `refund` is its own engine path
+(refunding an inquiry resolves it without a chargeback; at chargeback it posts money
+and the case stays open; a refund that would refund twice is refused).
+`request_info` returns the cardholder's statement and the ids of evidence that
+appeared since the agent last looked (for example a refund record the engine filed).
+Cited evidence changes the outcome: the `SeededIssuer` scores the share of the reason
+code's required evidence kinds that were submitted and not caught as flawed.
+
+Every call (refused ones and tools that do not exist included) and every state
+change (transitions, postings, evidence, incidents, clock) is appended to a
+hash-chained trace (`scruple.verifiers.trace`). At close the episode builds an
+`EpisodeRecord` (`scruple.verifiers.record`), the input of the dispute verifiers.
+`ground_truth_for_reference()` is recorded in the trace as a protected read.
+
+Terminal: `scruple episode start --kind dispute --seed 3 [--case-type true_fraud]`,
+then `scruple episode call <id> wait '{"days": 5}'` and so on; `scruple episode tools
+--kind dispute` prints the schemas. MCP: `start_dispute_episode`, `list_case_families`,
+`accept`, `wait`, `upload_evidence`, `submit_dispute`, and `refund(amount_minor=...)`;
+the read tools are shared. Reference policies: `scruple/agents/dispute_baselines.py`.
+
 ## Assumptions and gaps
 
 - ASSUMPTION: `refund` maps to accepting liability; the current sim has no separate

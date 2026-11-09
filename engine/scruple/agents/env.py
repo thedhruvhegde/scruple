@@ -16,15 +16,42 @@ from whitelisted features and anonymised journal postings only.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import date
 from enum import StrEnum
-from typing import Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict
 
 from scruple.domain import FIELD_TYPES, Action
+from scruple.sim.deadlines import ManualClock
+from scruple.sim.deadlines import today as sim_today
+from scruple.sim.disputes import (
+    FULL_MIX,
+    Accept,
+    CardDispute,
+    CaseOutcome,
+    DisputeEngine,
+    Escalate,
+    Incident,
+    Refund,
+    Represent,
+    RequestInfo,
+    Truth,
+)
+from scruple.sim.disputes import ActionResult as DisputeActionResult
+from scruple.sim.disputes import AgentAction as DisputeAction
+from scruple.sim.disputes import Observation as DisputeObservation
+from scruple.sim.disputes import generate_cases as generate_disputes
 from scruple.sim.engine import RunResult, Simulator, cost_usd, oracle, outcome_for
+from scruple.sim.evidence import EvidenceDocument, make_document
+from scruple.sim.evidence import EvidenceKind as EvidenceKind
+from scruple.sim.families import CaseFamily
 from scruple.sim.generator import generate_cases
+from scruple.sim.issuer import IssuerParams, SeededIssuer
+from scruple.sim.ledger import JournalEntry
 from scruple.sim.library import baseline_policy
+from scruple.sim.lifecycle import Event, Transition
+from scruple.sim.merchants import generate_merchants
 from scruple.sim.models import ESCALATION_COST_USD, DisputeCase, Scenario
 from scruple.sim.policy import Policy
 from scruple.verifiers.policy_constraints import CONSTRAINTS
@@ -323,3 +350,222 @@ class SimEnvironment:
             if n >= _MAX_SCAN:  # pragma: no cover - every type has weight > 0
                 raise ValueError(f"no {case_type} case in the first {n} cases of seed {seed}")
             n *= 2
+
+
+# =============================================================================
+# Rich dispute engine (`scruple.sim.disputes`): one case per session, real lifecycle
+# =============================================================================
+
+# What an agent may see of a `CardDispute`. Identifiers (case, transaction, merchant),
+# the CE 3.0 fingerprints and the hidden `truth` stay inside. Shipment ids are kept:
+# they appear inside delivery documents, which the merchant holds anyway.
+DISPUTE_CASE_FIELDS: tuple[str, ...] = (
+    "network",
+    "reason_code",
+    "mcc",
+    "currency",
+    "settlement_currency",
+    "amount_minor",
+    "captured_minor",
+    "processed_on",
+    "opened_on",
+    "opening_stage",
+    "shipments",
+    "refund_in_flight",
+)
+# Names of hidden facts. Any agent request that names one is a ground-truth probe.
+HIDDEN_FIELDS: frozenset[str] = frozenset(
+    {"truth", "claim_valid", "liability_minor", "forged", "family", "missing_evidence"}
+)
+FAMILIES: tuple[str, ...] = tuple(sorted(f.value for f in CaseFamily))
+DISPUTE_MIX = FULL_MIX
+UPLOAD_INDEX = 2_000  # document index offset for agent uploads (never collides)
+
+_ISSUER_EVENTS = frozenset(
+    {Event.FILE_CHARGEBACK, Event.ISSUER_ACCEPT, Event.ISSUER_PRE_ARB, Event.RULING}
+)
+
+
+def select_dispute(seed: int, family: str | None) -> CardDispute:
+    """The first case of `family` in the seeded stream (the first case if None).
+
+    `generate_cases` draws cases in sequence, so the first k cases do not depend on n.
+    """
+    if family is not None and family not in FAMILIES:
+        raise ValueError(f"unknown case family {family!r}; choose from {', '.join(FAMILIES)}")
+    n = 16
+    while True:
+        for c in generate_disputes(seed, n, DISPUTE_MIX):
+            if family is None or c.truth.family.value == family:
+                return c
+        if n >= _MAX_SCAN:  # pragma: no cover - every family has weight > 0
+            raise ValueError(f"no {family} case in the first {n} cases of seed {seed}")
+        n *= 2
+
+
+class DisputeSession:
+    """One `CardDispute` in its own `DisputeEngine`, with a manual clock.
+
+    The issuer is the default `SeededIssuer`, seeded by the episode seed, so the
+    same seed and the same actions give the same replies.
+    """
+
+    def __init__(self, seed: int, family: str | None = None) -> None:
+        self.seed = seed
+        self.family = family
+        case = select_dispute(seed, family)
+        merchants = generate_merchants(seed, DISPUTE_MIX.n_merchants)
+        self.merchant = next(m for m in merchants if m.merchant_id == case.merchant_id)
+        self.clock = ManualClock()
+        self.clock.set_date(case.opened_on)
+        self.engine = DisputeEngine(
+            [case],
+            self.clock,
+            merchants=(self.merchant,),
+            issuer=SeededIssuer(IssuerParams(seed=seed)),
+        )
+        self.case_id = case.case_id
+        self.original_documents = case.documents
+        self._uploads = 0
+
+    # --- what the agent may see -------------------------------------------------
+    @property
+    def today(self) -> date:
+        return sim_today(self.clock)
+
+    def observation(self) -> DisputeObservation:
+        return self.engine.observe(self.case_id)
+
+    def case_view(self) -> dict[str, Any]:
+        c = self.engine.case(self.case_id)
+        full = c.view()
+        out: dict[str, Any] = {k: full[k] for k in DISPUTE_CASE_FIELDS}
+        spec = c.spec
+        out |= {
+            "reason_title": spec.title,
+            "category": spec.category.value,
+            "workflow": c.workflow.value,
+            "required_evidence": [k.value for k in spec.required_evidence],
+            "supporting_evidence": [k.value for k in spec.supporting_evidence],
+            "ce3_eligible": c.ce3().eligible,
+            "merchant_tier": self.merchant.tier.value,
+        }
+        if HIDDEN_FIELDS & set(out):  # pragma: no cover - guarded by the field list
+            raise AssertionError("a hidden field reached the case view")
+        return out
+
+    def status(self) -> dict[str, Any]:
+        obs = self.observation()
+        dl = obs.deadline
+        return {
+            "today": obs.today.isoformat(),
+            "stage": obs.stage.value,
+            "awaiting": obs.awaiting,
+            "resolved": self.engine.is_resolved(self.case_id),
+            "allowed_actions": list(obs.allowed_actions),
+            "deadline": None
+            if dl is None
+            else {
+                "stage": dl.stage.value,
+                "window": dl.window.value,
+                "due": dl.due.isoformat(),
+                "days_left": dl.days_left(obs.today),
+                "day_kind": dl.day_kind.value,
+            },
+            "refunded_minor": obs.refunded_minor,
+            "history": [t.model_dump(mode="json") for t in obs.history],
+        }
+
+    def deadline_due(self) -> date | None:
+        dl = self.engine.deadline(self.case_id)
+        return None if dl is None else dl.due
+
+    def documents(self) -> tuple[EvidenceDocument, ...]:
+        return self.engine.vault.for_case(self.case_id)
+
+    def journal(self) -> tuple[JournalEntry, ...]:
+        txn = self.engine.case(self.case_id).txn_id
+        return tuple(e for e in self.engine.ledger.entries if e.txn_id == txn)
+
+    def ledger_view(self) -> dict[str, Any]:
+        """A fresh, anonymised copy of this transaction's journal. Read-only."""
+        entries: list[dict[str, Any]] = []
+        balances: dict[str, int] = {}
+        for e in self.journal():
+            posts = [
+                {"account": _anon(p.account), "amount_minor": p.amount_minor} for p in e.postings
+            ]
+            for p in e.postings:
+                key = f"{_anon(p.account)} {e.currency}"
+                balances[key] = balances.get(key, 0) + p.amount_minor
+            entries.append(
+                {"entry": e.entry_id, "kind": e.kind, "currency": e.currency, "postings": posts}
+            )
+        return {"entries": entries, "balances": dict(sorted(balances.items())), "read_only": True}
+
+    # --- what the agent may do --------------------------------------------------
+    def act(self, action: DisputeAction) -> DisputeActionResult:
+        return self.engine.act(self.case_id, action)
+
+    def upload(
+        self, kind: EvidenceKind, issued_on: date, fields: dict[str, str]
+    ) -> EvidenceDocument:
+        """A merchant-authored document. The vault seals it as supplied; the trace
+        records the day it was ingested."""
+        doc = make_document(
+            self.case_id, kind, issued_on, dict(fields), UPLOAD_INDEX + self._uploads
+        )
+        self._uploads += 1
+        self.engine.vault.add(doc)
+        return doc
+
+    def advance(self, days: int) -> None:
+        self.clock.advance(days=days)
+        self.engine.sync()
+
+    def run_out(self, max_days: int = 800) -> None:
+        """The agent is idle from here: time runs until the case resolves."""
+        for _ in range(max_days):
+            self.engine.sync()
+            if self.engine.is_resolved(self.case_id):
+                return
+            self.clock.advance(days=1)
+        raise RuntimeError("case still open after max_days")  # pragma: no cover
+
+    # --- scoring only (never handed to an agent) ----------------------------------
+    @property
+    def case(self) -> CardDispute:
+        return self.engine.case(self.case_id)
+
+    @property
+    def truth(self) -> Truth:
+        return self.engine.case(self.case_id).truth
+
+    def outcome(self) -> CaseOutcome | None:
+        return self.engine.outcome(self.case_id)
+
+    def incidents(self) -> tuple[Incident, ...]:
+        return self.engine.incidents
+
+    def transitions(self) -> tuple[Transition, ...]:
+        return self.observation().history
+
+    @staticmethod
+    def issuer_event(t: Transition) -> bool:
+        return t.event in _ISSUER_EVENTS
+
+
+def dispute_action(kind: str, **kw: Any) -> DisputeAction:
+    """Build an engine action by name (`ACTION_KINDS`)."""
+    match kind:
+        case "accept":
+            return Accept()
+        case "represent":
+            return Represent(evidence_ids=tuple(kw.get("evidence_ids", ())))
+        case "escalate":
+            return Escalate()
+        case "request_info":
+            return RequestInfo()
+        case "refund":
+            return Refund(amount_minor=int(kw["amount_minor"]))
+    raise ValueError(f"unknown action {kind!r}")
