@@ -268,8 +268,25 @@ def _text(data: bytes | str, cfg: ImportConfig) -> str:
     return text.removeprefix("﻿")
 
 
+Rows = Iterable[tuple[int, dict[str, str] | RowError]]
+
+
+def import_rows(cfg: ImportConfig, header: list[str], rows: Rows) -> ImportReport:
+    """Map already split rows (row number, column -> value, or a `RowError`)."""
+    return _collect(cfg, header, rows)
+
+
 def import_csv(data: bytes | str, cfg: ImportConfig, *, strict: bool = False) -> ImportReport:
     """Import cases from CSV. With `strict=True`, any row error raises `ImportFailedError`."""
+    header, rows = csv_rows(data, cfg)
+    report = _collect(cfg, header, rows)
+    return report.raise_if_errors() if strict else report
+
+
+def csv_rows(
+    data: bytes | str, cfg: ImportConfig
+) -> tuple[list[str], Iterator[tuple[int, dict[str, str] | RowError]]]:
+    """The header and the data rows of a CSV file, before any mapping."""
     text = _text(data, cfg)
     reader = csv.reader(io.StringIO(text, newline=""), delimiter=cfg.delimiter, strict=True)
     try:
@@ -309,8 +326,7 @@ def import_csv(data: bytes | str, cfg: ImportConfig, *, strict: bool = False) ->
                 continue
             yield n, dict(zip(header, fields, strict=True))
 
-    report = _collect(cfg, header, rows())
-    return report.raise_if_errors() if strict else report
+    return header, rows()
 
 
 def import_jsonl(data: bytes | str, cfg: ImportConfig, *, strict: bool = False) -> ImportReport:
@@ -319,6 +335,15 @@ def import_jsonl(data: bytes | str, cfg: ImportConfig, *, strict: bool = False) 
     Values must be strings (an integer is accepted for a minor-unit amount); null
     means empty. The header is the union of keys on the first line.
     """
+    header, parsed = jsonl_rows(data, cfg)
+    report = _collect(cfg, header, parsed)
+    return report.raise_if_errors() if strict else report
+
+
+def jsonl_rows(
+    data: bytes | str, cfg: ImportConfig
+) -> tuple[list[str], list[tuple[int, dict[str, str] | RowError]]]:
+    """The header (keys of the first object) and the rows of a JSON Lines file."""
     text = _text(data, cfg)
     lines = text.splitlines()
     if not lines:
@@ -357,5 +382,4 @@ def import_jsonl(data: bytes | str, cfg: ImportConfig, *, strict: bool = False) 
         parsed.append((n, bad if bad is not None else rec))
     if first is None:
         raise SchemaMismatchError("no line is a JSON object")
-    report = _collect(cfg, list(first), parsed)
-    return report.raise_if_errors() if strict else report
+    return list(first), parsed

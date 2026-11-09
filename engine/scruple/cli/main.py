@@ -229,6 +229,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.backtest.cli import add_backtest_parser
 
     add_backtest_parser(sub)
+    from scruple.ingest.cli import add_ingest_parser
+
+    add_ingest_parser(sub)
     return p
 
 

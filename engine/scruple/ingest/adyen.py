@@ -317,11 +317,48 @@ def ingest_notification(
     return AdyenResult(cases=tuple(cases), skipped=tuple(skipped))
 
 
+# Stages that mean the merchant defended (same set as scruple.calibration.facts).
+_CONTEST_STAGES = frozenset({Stage.REPRESENTMENT, Stage.PRE_ARBITRATION, Stage.ARBITRATION})
+
+
+def fold_adyen_events(events: Sequence[ExternalCase]) -> list[ExternalCase]:
+    """One case per payment (`originalReference`) from its dispute events.
+
+    The first event opens the case (id, open time, amount); the last event gives its
+    state; the latest defence deadline seen is kept; a case that ever reached
+    representment or later counts as defended (ASSUMPTION, docs/BACKTEST.md).
+    """
+    by_payment: dict[str, list[ExternalCase]] = {}
+    for e in events:
+        by_payment.setdefault(e.payment_ref, []).append(e)
+    cases: list[ExternalCase] = []
+    for evs in by_payment.values():
+        evs = sorted(evs, key=lambda e: e.opened_at)  # stable: input order breaks ties
+        first, last = evs[0], evs[-1]
+        due = next((e.evidence_due_at for e in reversed(evs) if e.evidence_due_at), None)
+        cases.append(
+            last.model_copy(
+                update={
+                    "external_id": first.external_id,
+                    "opened_at": first.opened_at,
+                    "evidence_due_at": due,
+                    "evidence_submitted": any(e.stage in _CONTEST_STAGES for e in evs),
+                    "amount_minor": first.amount_minor,
+                    "currency": first.currency,
+                }
+            )
+        )
+    if len({c.external_id for c in cases}) != len(cases):
+        raise SchemaMismatchError("two Adyen disputes share a first pspReference")
+    return cases
+
+
 __all__ = [
     "EVENT_MAP",
     "AdyenResult",
     "IngestError",
     "MalformedInputError",
+    "fold_adyen_events",
     "ingest_notification",
     "item_signature",
     "signing_string",

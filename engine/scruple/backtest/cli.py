@@ -10,7 +10,7 @@ from typing import Any
 
 from scruple.backtest.candidate import load_candidate
 from scruple.backtest.engine import BacktestConfig, run_backtest
-from scruple.backtest.history import History, load_adyen, load_stripe, load_tabular
+from scruple.backtest.history import History, load_adyen, load_store, load_stripe, load_tabular
 from scruple.backtest.report import write_report
 from scruple.calibration import (
     DEFAULT_PROFILE,
@@ -25,6 +25,8 @@ from scruple.ingest.tabular import ImportConfig
 
 def _history(args: argparse.Namespace) -> History:
     path = Path(args.history)
+    if args.format == "store":
+        return load_store(str(path), label=args.label)
     data = path.read_bytes()
     label = args.label or f"{path.name} ({args.format} export)"
     if args.format == "stripe":
@@ -98,8 +100,8 @@ def cmd_synth(args: argparse.Namespace) -> int:
 
 
 def _input_args(sp: argparse.ArgumentParser) -> None:
-    sp.add_argument("--history", required=True, help="the exported history file")
-    sp.add_argument("--format", required=True, choices=["stripe", "adyen", "csv"])
+    sp.add_argument("--history", required=True, help="the exported file, or a case store")
+    sp.add_argument("--format", required=True, choices=["stripe", "adyen", "csv", "store"])
     sp.add_argument("--csv-config", default=None, help="ImportConfig JSON for --format csv")
     sp.add_argument("--adyen-hmac-key", action="append", help="hex HMAC key (repeatable)")
     sp.add_argument("--no-verify", action="store_true", help="skip Adyen HMAC checks")

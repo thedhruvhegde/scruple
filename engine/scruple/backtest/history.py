@@ -16,6 +16,8 @@ Accepted file shapes:
   (`originalReference`): first event opens it, the last event gives its state; a case
   that ever reached representment or later counts as contested (ASSUMPTION).
 - CSV or JSON Lines with an `ImportConfig` (`scruple.ingest.tabular`).
+- A case store written by `scruple ingest` (`load_store`): the latest version of every
+  stored case plus its movements. Redaction, tokenisation and encryption already ran.
 """
 
 from __future__ import annotations
@@ -26,9 +28,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from scruple.calibration.facts import CONTEST_STAGES
 from scruple.calibration.synthetic import SYNTHETIC_LABEL, SYNTHETIC_METADATA
-from scruple.ingest.adyen import ingest_notification
+from scruple.ingest.adyen import fold_adyen_events, ingest_notification
 from scruple.ingest.errors import IngestError, MalformedInputError, SchemaMismatchError
 from scruple.ingest.ledger import InMemoryLedger, LedgerTransaction, from_movement
 from scruple.ingest.limits import MAX_FILE_BYTES, check_size, decode_utf8, load_json
@@ -36,7 +37,7 @@ from scruple.ingest.models import ExternalCase, LedgerMovement
 from scruple.ingest.stripe.mapping import ingest_dispute
 from scruple.ingest.tabular import ImportConfig, import_csv, import_jsonl
 
-Format = Literal["stripe", "adyen", "csv", "jsonl", "records"]
+Format = Literal["stripe", "adyen", "csv", "jsonl", "records", "store"]
 MERCHANT_ACCOUNT = "merchant"
 FEE_ACCOUNT = "processor:fees"
 
@@ -192,28 +193,7 @@ def load_adyen(
         events.extend(res.cases)
         for s in res.skipped:
             skipped[f"adyen: {s.reason}"] += 1
-    by_payment: dict[str, list[ExternalCase]] = defaultdict(list)
-    for e in events:
-        by_payment[e.payment_ref].append(e)
-    cases: list[ExternalCase] = []
-    for evs in by_payment.values():
-        evs.sort(key=lambda e: e.opened_at)  # stable: file order breaks ties
-        first, last = evs[0], evs[-1]
-        due = next((e.evidence_due_at for e in reversed(evs) if e.evidence_due_at), None)
-        cases.append(
-            last.model_copy(
-                update={
-                    "external_id": first.external_id,
-                    "opened_at": first.opened_at,
-                    "evidence_due_at": due,
-                    "evidence_submitted": any(e.stage in CONTEST_STAGES for e in evs),
-                    "amount_minor": first.amount_minor,
-                    "currency": first.currency,
-                }
-            )
-        )
-    if len({c.external_id for c in cases}) != len(cases):
-        raise SchemaMismatchError("two Adyen disputes share a first pspReference")
+    cases = fold_adyen_events(events)
     return from_records(cases, format="adyen", label=label, skipped=skipped)
 
 
@@ -227,6 +207,29 @@ def load_tabular(
     )
 
 
+def load_store(path: str, *, label: str | None = None) -> History:
+    """A history from a `scruple ingest` case store (latest version of each case)."""
+    from scruple.ingest.store import CaseStore  # sqlite only when a store is read
+
+    with CaseStore(path, create=False) as store:
+        stored = store.cases()
+        moves = store.movements()
+        runs = store.runs()
+        kind = store.kind()
+    synthetic = kind == "synthetic"
+    names = sorted({str(r.get("label") or r.get("source", "")) for r in runs})
+    text = label or f"case store {path} ({', '.join(names) or 'empty'})"
+    failed = sum(int(r.get("rows_failed", 0)) for r in runs)
+    return from_records(
+        [sc.case for sc in stored],
+        moves,
+        format="store",
+        label=f"{SYNTHETIC_LABEL}; {text}" if synthetic else text,
+        synthetic=synthetic,
+        skipped={"ingest row errors": failed} if failed else None,
+    )
+
+
 __all__ = [
     "FEE_ACCOUNT",
     "MERCHANT_ACCOUNT",
@@ -235,6 +238,7 @@ __all__ = [
     "IngestError",
     "from_records",
     "load_adyen",
+    "load_store",
     "load_stripe",
     "load_tabular",
 ]
