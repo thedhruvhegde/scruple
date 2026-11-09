@@ -156,10 +156,12 @@ def test_nacha_every_transaction_code_has_a_direction(code: int) -> None:
     assert b.entries[0].is_debit is (code in ACH_DEBIT)
 
 
-@pytest.mark.parametrize("code", sorted(set(range(100)) - ACH_CREDIT - ACH_DEBIT))
-def test_nacha_any_other_transaction_code_is_refused(code: int) -> None:
-    with pytest.raises(UnmappedValueError, match="unknown transaction code"):
-        parse_nacha(build([(code, "09100001", 500, None)]))
+def test_nacha_every_other_transaction_code_is_refused() -> None:
+    others = sorted(set(range(100)) - ACH_CREDIT - ACH_DEBIT)
+    assert len(others) == 70
+    for code in others:  # one test, all 70 codes (not 70 tests)
+        with pytest.raises(UnmappedValueError, match="unknown transaction code"):
+            parse_nacha(build([(code, "09100001", 500, None)]))
 
 
 # ------------------------------------------------------------------------- BAI2
@@ -190,10 +192,12 @@ def test_bai2_status_codes_are_refused_as_transactions(code: str) -> None:
 ALL_BAI2 = CREDIT_CODES | DEBIT_CODES | MISC_CODES | STATUS_CODES
 
 
-@pytest.mark.parametrize("code", sorted({f"{n:03d}" for n in range(1000)} - ALL_BAI2))
-def test_bai2_codes_outside_the_table_are_refused(code: str) -> None:
-    with pytest.raises(UnmappedValueError, match="unknown type code"):
-        parse_bai2(_svb_with_code(code))
+def test_bai2_every_code_outside_the_table_is_refused() -> None:
+    others = sorted({f"{n:03d}" for n in range(1000)} - ALL_BAI2)
+    assert len(others) > 300
+    for code in others:  # one test, every unlisted three-digit code
+        with pytest.raises(UnmappedValueError, match="unknown type code"):
+            parse_bai2(_svb_with_code(code))
 
 
 # --------------------------------------------------------------------- currency
