@@ -104,6 +104,20 @@ def ternary_with_mean(mean: float, p_changed: float, magnitude: float) -> Ternar
     return Ternary(max(p_w, 0.0), magnitude, max(p_b, 0.0), magnitude)
 
 
+def ternary_with_moments(mean: float, sd: float, magnitude: float | None = None) -> Ternary:
+    """A ternary law with the given mean and standard deviation (``|X| = magnitude``).
+
+    By default the magnitude is the largest in [0, 1] for which the law exists.
+    """
+    m2 = sd * sd + mean * mean
+    if magnitude is None:
+        magnitude = 1.0 if mean == 0 else min(1.0, m2 / abs(mean))
+    p_changed = m2 / (magnitude * magnitude)
+    if p_changed > 1 + 1e-12:
+        raise ValueError("variance too large for this magnitude")
+    return ternary_with_mean(mean, min(p_changed, 1.0), magnitude)
+
+
 def draw(dist: Sampler, n: int, rng: random.Random) -> list[float]:
     return [dist.sample(rng) for _ in range(n)]
 
