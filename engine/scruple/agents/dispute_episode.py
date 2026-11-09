@@ -38,6 +38,8 @@ from scruple.agents.dispute_tools import (
 from scruple.agents.env import DisputeSession, dispute_action
 from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
+from scruple.verifiers.checks import Scorecard
+from scruple.verifiers.dispute import score_record
 from scruple.verifiers.record import EpisodeRecord, SelfReport, merchant_cost
 from scruple.verifiers.trace import Actor, EventKind, Trace
 
@@ -87,7 +89,16 @@ class DisputeScore(BaseModel):
     trace_head: str
     flags: tuple[str, ...]
     explanation: str
+    scorecard: Scorecard | None = None  # the scruple checks (gate, quality, reward)
     synthetic: bool = True
+
+    @property
+    def gate(self) -> bool:
+        return self.scorecard is not None and self.scorecard.gate
+
+    @property
+    def reward(self) -> float:
+        return 0.0 if self.scorecard is None else self.scorecard.reward
 
 
 class DisputeEpisode:
@@ -456,6 +467,7 @@ class DisputeEpisode:
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
+            scorecard=score_record(self._record),
         )
         return self._score
 

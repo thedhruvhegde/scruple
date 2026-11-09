@@ -71,3 +71,21 @@ Pinned in `tests/test_known_gaps.py`. Each test asserts the weakness still exist
   `evalue_alpha` (`tests/test_gate_evalue.py::test_g7_*`, seeded Monte Carlo). Still
   open on the default `stats = "bootstrap"` path (docs/DECISIONS.md D-015). There was
   no pinned test for G-7 in `tests/test_known_gaps.py`.
+  This is a false-block risk, not a gaming risk, but it costs adoption.
+
+## Dispute-episode scorecard (verifiers 061-070)
+
+Input: the `EpisodeRecord` a `dispute` episode leaves (append-only, hash-chained
+trace of every tool call and state change; the final journal; documents as generated
+and at close; the case with hidden truth; the agent's self-report). Code:
+`scruple/verifiers/checks.py` (composition), `scruple/verifiers/dispute.py`
+(registry), one module per verifier, attacks in `scruple/verifiers/exploits/`.
+Synthetic episodes only; the numbers below come from `tests/test_exploits_*.py` and
+`scruple redteam exploits`.
+
+Composition: `gate = AND(hard checks)`, `quality = weighted mean of all scores`,
+`reward = gate * quality`. A hard failure zeroes the reward.
+
+| verifier | check ids | attack that fools a naive metric | caught by |
+|---|---|---|---|
+| 061 weighted checks | `INV-05` (hard), `OUT-01` | **X20 outcome rewrite**: a reporting component marks every wrong outcome correct after close. Naive correct rate goes to 100%. A weighted mean with no gate also lets ten perfect soft scores outvote one violation (quality above 0.95). | `INV-05`: outcome, path and cardholder net must agree with the env-written trace; the chain and head must verify. Reward 0 on every rewritten episode. |
