@@ -63,6 +63,17 @@ class GateConfig(BaseModel):
     # regressed), and for certifying improved case types.
     evalue_alpha: float = Field(default=0.05, gt=0.0, lt=1.0)
     evalue_alpha_certify: float = Field(default=0.05, gt=0.0, lt=1.0)
+    # Sample-size planning (scruple.stats.plan), done before outcomes are seen: each
+    # case type the candidate touches must hold enough held-out cases to flag a
+    # regression of `min detectable regression` beyond its tolerance with power
+    # 1 - beta, else the verdict is "insufficient evidence" (HOLD) with the
+    # required n. MDR and the per-case sd are fractions of each type's declared
+    # cap; the sd is an ASSUMPTION about the change's spread (checked after the
+    # run and reported, never used to decide). Overrides: scenario or full type.
+    evalue_min_detectable_regression_fraction: float = Field(default=0.025, gt=0.0, lt=1.0)
+    evalue_type_min_detectable_regression_usd_minor: dict[str, float] = Field(default_factory=dict)
+    evalue_planning_sd_fraction: float = Field(default=0.05, gt=0.0, le=1.0)
+    evalue_beta: float = Field(default=0.2, gt=0.0, lt=1.0)
 
     # Regression guards (hard)
     slice_tolerance_usd_minor: float = 0.0  # any slice-mean worsening blocks
@@ -91,4 +102,11 @@ class GateConfig(BaseModel):
     def _tolerances(cls, v: dict[str, float]) -> dict[str, float]:
         if any(t < 0 for t in v.values()):
             raise ValueError("type tolerances must be non-negative")
+        return v
+
+    @field_validator("evalue_type_min_detectable_regression_usd_minor")
+    @classmethod
+    def _mdr(cls, v: dict[str, float]) -> dict[str, float]:
+        if any(t <= 0 for t in v.values()):
+            raise ValueError("minimum detectable regressions must be positive")
         return v

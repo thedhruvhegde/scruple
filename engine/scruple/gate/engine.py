@@ -212,6 +212,23 @@ def _evalue_checks(ev: EValueEvidence) -> tuple[CheckResult, ...]:
     else:
         imp_detail = "no case type has a changed decision"
     k = len(ev.family)
+    short = [t for t in ev.types if t.case_type in ev.insufficient]
+    if short:
+        size_detail = (
+            f"insufficient evidence: held-out set has {ev.n_cases} cases, the plan needs "
+            f"{ev.required_total_cases}; "
+            + "; ".join(
+                f"'{t.case_type}' has {t.n} cases, needs {t.required_n} to detect "
+                f"{_usd(t.tolerance + (t.min_detectable_regression or 0.0))} per case"
+                for t in short
+            )
+        )
+    else:
+        size_detail = (
+            f"every tested case type has enough held-out cases ({ev.plan_method}; "
+            f"plan needs {ev.required_total_cases or 0} held-out cases, have {ev.n_cases})"
+        )
+    off = [t.case_type for t in ev.types if t.sd_within_assumption is False]
     return (
         _check(
             "evalue_declared_caps",
@@ -228,10 +245,25 @@ def _evalue_checks(ev: EValueEvidence) -> tuple[CheckResult, ...]:
             f"e-BH over {k} case type(s) at FDR {ev.alpha:g}: {reg_detail}",
         ),
         _check(
+            "evalue_sample_size",
+            "evidence",
+            ev.sufficient,
+            size_detail,
+        ),
+        _check(
             "evalue_improvement_certified",
             "evidence",
             bool(ev.improved),
             f"e-BH over {k} case type(s) at {ev.alpha_certify:g}: {imp_detail}",
+        ),
+        _check(
+            "evalue_planning_assumption",
+            "info",
+            not off,
+            "observed per-case sd within the planning assumption for every tested type"
+            if not off
+            else "observed sd above the planning assumption (power not guaranteed) for: "
+            + ", ".join(off),
         ),
     )
 
@@ -244,6 +276,14 @@ def _verdict(checks: tuple[CheckResult, ...], metrics: ShadowMetrics) -> Verdict
             Outcome.BLOCK,
             f"Blocked: {len(hard)} hard check(s) failed.",
             tuple(f"{c.name}: {c.detail}" for c in hard),
+            checks,
+            shadow=metrics,
+        )
+    if soft and any(c.name == "evalue_sample_size" for c in soft):
+        return Verdict(
+            Outcome.HOLD,
+            "Insufficient evidence: the held-out set is too small for the e-value gate.",
+            tuple(f"{c.name}: {c.detail}" for c in soft),
             checks,
             shadow=metrics,
         )

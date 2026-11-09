@@ -57,4 +57,4 @@ Logic: `IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN con
 
 </details>
 
-Synthetic simulator data only. Thresholds are illustrative defaults. Config `da23d1db96ae3347`, audit head `d5b38bc934cc9325`.
+Synthetic simulator data only. Thresholds are illustrative defaults. Config `b761d070feba74cf`, audit head `d5b38bc934cc9325`.

@@ -29,6 +29,14 @@ Improvement (certificate). For each type, a betting e-process for
 ``H0_k: mean_k >= 0``; e-BH at ``evalue_alpha_certify`` flags the improved types.
 If no type improves, P(any certified) <= alpha_certify.
 
+Sample size (before outcomes). For each type in the family, ``scruple.stats.plan``
+(docs/math/03, Bernstein bound) gives the number of type-``k`` cases ``n_k*`` that
+flags a regression of ``t_k + MDR_k`` with power ``1 - beta`` at level
+``alpha / K``, assuming the per-case sd is at most the configured fraction of the
+cap. It uses only counts, caps and configuration. If any ``n_k < n_k*`` the verdict
+is "insufficient evidence" (HOLD) with the required numbers: a small held-out set
+never passes silently. The sd assumption is checked after the run and reported.
+
 Reported for information: the adapter's pooled certificate and confidence
 sequence, and its time-uniform e-Bonferroni flags (scruple.stats.evaluate_pairs).
 """
@@ -46,8 +54,10 @@ from scruple.stats import (
     BettingEProcess,
     LossPair,
     StatsGateConfig,
+    StratumSpec,
     e_bh,
     evaluate_pairs,
+    plan,
 )
 from scruple.verifiers.outcome import OutcomeScores
 
@@ -101,6 +111,11 @@ class TypeEvidence(BaseModel):
     e_threshold: float  # K / alpha: the e-value that flags this type on its own
     regressed: bool  # e-BH at evalue_alpha
     improved: bool  # e-BH at evalue_alpha_certify
+    # sample-size plan (None when not planned)
+    min_detectable_regression: float | None = None
+    planning_sd: float | None = None  # ASSUMPTION used by the plan
+    required_n: int | None = None  # n_k*: type cases needed for power 1 - beta
+    sd_within_assumption: bool | None = None  # observed sd <= planning sd
 
 
 class EValueEvidence(BaseModel):
@@ -124,6 +139,12 @@ class EValueEvidence(BaseModel):
     pooled_certify_e_value: float  # H0: pooled mean >= 0 (pooled cap, information)
     pooled_regression_e_value: float
     violations: tuple[str, ...]  # declared-cap or unchanged-decision violations
+    # sample-size plan
+    beta: float | None = None
+    plan_method: str | None = None
+    required_total_cases: int | None = None  # held-out size the plan asks for
+    sufficient: bool = True  # every family type has n_k >= n_k*
+    insufficient: tuple[str, ...] = ()
 
 
 def stratified_test(
@@ -212,6 +233,119 @@ def stratified_test(
     )
 
 
+def mdr_for(t: str, cap: float, cfg: GateConfig) -> float:
+    o = cfg.evalue_type_min_detectable_regression_usd_minor
+    if t in o:
+        return o[t]
+    return o.get(t.split("/", 1)[0], cfg.evalue_min_detectable_regression_fraction * cap)
+
+
+class TypePlan(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    case_type: str
+    n: int
+    required_n: int
+    min_detectable_regression: float
+    planning_sd: float
+
+
+class SamplePlan(BaseModel):
+    """Held-out size needed by the e-value gate (computed before outcomes)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    method: str
+    alpha: float
+    beta: float
+    types: tuple[TypePlan, ...]
+    required_total_cases: int
+    n_cases: int
+
+    @property
+    def insufficient(self) -> tuple[str, ...]:
+        return tuple(t.case_type for t in self.types if t.n < t.required_n)
+
+
+def plan_sample(
+    counts: Mapping[str, int],
+    caps: Mapping[str, float],
+    tolerances: Mapping[str, float],
+    family: Sequence[str],
+    cfg: GateConfig,
+) -> SamplePlan:
+    """Per-type required cases from counts, caps and configuration only."""
+    total = sum(counts.values())
+    method = f"bernstein (scruple.stats.plan), alpha/K per type, power {1 - cfg.evalue_beta:g}"
+    specs = []
+    for t in sorted(family):
+        cap, tol = caps[t], tolerances[t]
+        specs.append(
+            StratumSpec(
+                name=t,
+                frequency=counts[t] / total,
+                cost_cap=cap,
+                min_detectable_regression=min(mdr_for(t, cap, cfg), 0.999 * cap - tol),
+                tolerance=tol,
+                sd=cfg.evalue_planning_sd_fraction * cap,
+            )
+        )
+    if not specs:
+        return SamplePlan(
+            method=method,
+            alpha=cfg.evalue_alpha,
+            beta=cfg.evalue_beta,
+            types=(),
+            required_total_cases=0,
+            n_cases=total,
+        )
+    p = plan(specs, alpha=cfg.evalue_alpha, beta=cfg.evalue_beta, method="bernstein")
+    return SamplePlan(
+        method=method,
+        alpha=cfg.evalue_alpha,
+        beta=cfg.evalue_beta,
+        types=tuple(
+            TypePlan(
+                case_type=s.name,
+                n=counts[s.name],
+                required_n=sp.stratum_cases,
+                min_detectable_regression=s.min_detectable_regression,
+                planning_sd=s.sd or 0.0,
+            )
+            for s, sp in zip(specs, p.strata, strict=True)
+        ),
+        required_total_cases=p.total_cases,
+        n_cases=total,
+    )
+
+
+def with_plan(ev: EValueEvidence, sp: SamplePlan) -> EValueEvidence:
+    by = {t.case_type: t for t in sp.types}
+    types = tuple(
+        t.model_copy(
+            update={
+                "min_detectable_regression": by[t.case_type].min_detectable_regression,
+                "planning_sd": by[t.case_type].planning_sd,
+                "required_n": by[t.case_type].required_n,
+                "sd_within_assumption": t.sd <= by[t.case_type].planning_sd,
+            }
+        )
+        if t.case_type in by
+        else t
+        for t in ev.types
+    )
+    return ev.model_copy(
+        update={
+            "types": types,
+            "beta": sp.beta,
+            "plan_method": sp.method,
+            "required_total_cases": sp.required_total_cases,
+            "sufficient": not sp.insufficient,
+            "insufficient": sp.insufficient,
+        }
+    )
+
+
 def _empty(n: int, cfg: GateConfig, violations: list[str]) -> EValueEvidence:
     return EValueEvidence(
         method=METHOD,
@@ -239,12 +373,14 @@ def evaluate_evalue(
     """Shadow replay scores (baseline ``b``, candidate ``c``) in, evidence out."""
     pairs: list[LossPair] = []
     caps: dict[str, float] = {}
+    counts: dict[str, int] = defaultdict(int)
     changed: dict[str, int] = defaultdict(int)
     violations: list[str] = []
     for case in cases:
         i = case.case_id
         t, cap = case_type(case, cfg)
         caps[t] = cap
+        counts[t] += 1
         d = c.regret[i] - b.regret[i]
         if abs(d) > cap:
             violations.append(f"{i}: |loss change| {abs(d)} exceeds declared cap {cap:g} ({t})")
@@ -261,7 +397,8 @@ def evaluate_evalue(
     for t, tol in tolerances.items():
         if tol >= caps[t]:
             raise ValueError(f"tolerance for {t!r} must be below its cap {caps[t]:g}")
-    return stratified_test(
+    sample = plan_sample(counts, caps, tolerances, sorted(changed), cfg)  # no outcomes
+    ev = stratified_test(
         pairs,
         caps,
         tolerances,
@@ -272,3 +409,4 @@ def evaluate_evalue(
         cost_cap=cfg.evalue_cost_cap_usd_minor,
         changed=changed,
     )
+    return with_plan(ev, sample)
