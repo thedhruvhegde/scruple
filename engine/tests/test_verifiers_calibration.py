@@ -35,7 +35,7 @@ def _with(recs: tuple[EpisodeRecord, ...], fn: object) -> list[EpisodeRecord]:
     ]
 
 
-@pytest.mark.parametrize("window", [(0, 100), (100, 200)])
+@pytest.mark.parametrize("window", [(0, 100), pytest.param((100, 200), marks=pytest.mark.slow)])
 def test_the_honest_estimates_are_calibrated(window: tuple[int, int]) -> None:
     res = CALIBRATION.run_batch(honest(*window))
     assert res.passed, res.explanation

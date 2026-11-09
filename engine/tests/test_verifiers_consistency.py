@@ -16,7 +16,7 @@ def honest(lo: int, hi: int) -> tuple[EpisodeRecord, ...]:
     return tuple(run_policy(evidence_policy, s).record() for s in range(lo, hi))
 
 
-@pytest.mark.parametrize("window", [(0, 200), (200, 400)])
+@pytest.mark.parametrize("window", [(0, 200), pytest.param((200, 400), marks=pytest.mark.slow)])
 def test_the_honest_policy_is_consistent(window: tuple[int, int]) -> None:
     res = CONSISTENCY.run_batch(honest(*window))
     assert res.passed, res.explanation
