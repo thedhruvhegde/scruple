@@ -1,0 +1,6 @@
+engine/
+tools/
+.github/
+node_modules/
+*.md
+!README.md
