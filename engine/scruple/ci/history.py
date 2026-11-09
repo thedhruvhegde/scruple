@@ -155,7 +155,8 @@ def load_history(section: HistorySection, root: Path | None = None) -> History:
     fmt = _infer(path, section.format)
     label = section.label or f"{path.name} ({fmt})"
     if fmt == "store":
-        return load_store(str(path), label=section.label)
+        # The file name, not the path: the scorecard must not depend on where it ran.
+        return load_store(str(path), label=section.label or f"case store {path.name}")
     data = path.read_bytes()
     if fmt == "stripe":
         return load_stripe(data, label=label, allow_live=section.allow_live)

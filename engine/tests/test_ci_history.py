@@ -167,6 +167,7 @@ def test_history_path_is_deterministic(tmp_path: Path) -> None:
         main(["ci", "run", "--config", str(cfg), "--out", str(out), "--history", str(db)])
         outs.append(out.read_bytes())
     assert outs[0] == outs[1]
+    assert str(tmp_path) not in outs[0].decode()  # no machine-specific path in the card
 
 
 def test_store_and_export_give_the_same_history_result(tmp_path: Path) -> None:
