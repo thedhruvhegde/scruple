@@ -1,0 +1,107 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement on the goods or services disputed, and which items were received or returned."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-17029774c77667a7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-036244fe7117fccd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0e61a15de1e92a83"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b2efa667d63620b7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-24d88cfb1e4968b9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-17029774c77667a7",
+     "ev-036244fe7117fccd",
+     "ev-0e61a15de1e92a83",
+     "ev-b2efa667d63620b7",
+     "ev-24d88cfb1e4968b9"
+    ],
+    "narrative": "The order of 2335 USD was captured once. The product description, the terms the cardholder accepted, the delivery proof (USPS, delivered 2026-01-20), the communication log and the receipt are attached. The disputed amount is 1377 USD. The cardholder states the item was not as described; the product description supplied is the one shown at purchase. The merchant does not hold a separate return or refund record for the disputed item."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-17029774c77667a7",
+      "ev-036244fe7117fccd",
+      "ev-0e61a15de1e92a83",
+      "ev-b2efa667d63620b7",
+      "ev-24d88cfb1e4968b9"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.5
+    },
+    "confidence": 0.5,
+    "explanation": "Seed 5008. Reason 4853 (not as described), partial dispute of 1377 on a 2335 capture. Read product description, terms acceptance, delivery proof, communication log and receipt. Represented on 2026-03-26 with those five documents, stating that no separate return record exists. The issuer accepted the representment on 2026-04-05 and the chargeback was reversed. Ledger: capture 2335, chargeback 1377 debited and reversed 1377, chargeback fee 1500 charged and not reversed. Merchant balance 835. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 5008
+}

@@ -1,0 +1,99 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement on the item they received and why they consider it counterfeit."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-610932bb7fc465e8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1434435dbe5e512c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-465428009030b75f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6a886f211594cf2f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-610932bb7fc465e8",
+     "ev-1434435dbe5e512c",
+     "ev-465428009030b75f",
+     "ev-6a886f211594cf2f"
+    ],
+    "narrative": "The item sold for 47642 USD (one capture, authorization code 973696 approved) is supported by an authenticity proof and a product description, both attached, along with the receipt for the same amount. These address the counterfeit claim under reason 13.4. The cardholder statement says they cancelled and were still charged; the merchant file holds no cancellation record, so this response does not address cancellation."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-610932bb7fc465e8",
+      "ev-1434435dbe5e512c",
+      "ev-465428009030b75f",
+      "ev-6a886f211594cf2f"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.6
+    },
+    "confidence": 0.6,
+    "explanation": "Seed 5010. Reason 13.4 (counterfeit), 47642 USD. Read authenticity proof, product description, receipt and authorization record, all of which I cited. Represented on 2026-03-13 with those four documents. The cardholder said they cancelled and were still charged; no cancellation record is in the file and the narrative says so. The issuer accepted the representment on 2026-03-23 and the chargeback was reversed. Ledger: chargeback 47642 debited and reversed 47642; chargeback fee 1500 charged and not reversed. Merchant balance 46142. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 5010
+}

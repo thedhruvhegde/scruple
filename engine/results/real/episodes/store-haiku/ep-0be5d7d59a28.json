@@ -1,0 +1,73 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement, including the dispute details and any communication about the goods or services."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-9572a9d0bf8b67da"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b069d80252f7ff9b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-7cbfdfce2242c9ad"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "reason": "Cardholder says the order never arrived and the merchant holds no product description or delivery proof to rebut it; terms and receipt alone do not answer a non-receipt claim, and arbitration fees would add loss at low odds."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "accept"
+     ],
+     "cost_usd_minor": 10732,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 9232,
+     "win_rate": 0.1
+    },
+    "confidence": 0.1,
+    "explanation": "Seed 5003. Reason 4853 (goods not as described / defective); cardholder statement says the order never arrived. Read terms acceptance, receipt and authorization record. The required product description and delivery proof were not held, so I did not represent. Accepted liability on the chargeback. Ledger: chargeback 9232 and chargeback fee 1500. No refund issued (no double refund)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 2,
+ "seed": 5003
+}

@@ -1,0 +1,117 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-609d1d00585b60da"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-3c9fe17128fc3096"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement for this dispute?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-609d1d00585b60da",
+     "ev-3c9fe17128fc3096"
+    ],
+    "narrative": "The transaction was approved by the issuer (auth code 922519) on 2026-01-14 for the full amount; authorization record and receipt attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Why was the representment rejected? Any new evidence?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "reason": "Authorization approved for the full amount; ledger shows a single capture, so no duplicate charge."
+   },
+   "tool": "escalate"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent",
+      "escalate",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-609d1d00585b60da",
+      "ev-3c9fe17128fc3096"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.6
+    },
+    "confidence": 0.6,
+    "explanation": "Read the case, both evidence documents and the ledger. Represented with the issuer-approved authorization record (required kind) and receipt. Issuer sent it to pre-arbitration; cardholder says charged twice but the ledger shows a single capture, so I escalated to arbitration. Waited in steps (10, 5, 30 days). Chargeback was reversed in my favour. Fees paid: 1500 chargeback and 2500 pre-arbitration. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 5002
+}

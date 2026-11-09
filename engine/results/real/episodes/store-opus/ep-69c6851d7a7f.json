@@ -1,0 +1,108 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-24d88cfb1e4968b9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-85b8ca6158861668"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-17029774c77667a7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-036244fe7117fccd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0e61a15de1e92a83"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b2efa667d63620b7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about how the goods were not as described?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-17029774c77667a7",
+     "ev-036244fe7117fccd",
+     "ev-0e61a15de1e92a83",
+     "ev-b2efa667d63620b7",
+     "ev-24d88cfb1e4968b9"
+    ],
+    "narrative": "The item matched its product description, the cardholder accepted the terms at purchase on 2026-01-16, USPS delivered it on 2026-01-20, and the communication log records our exchange with the cardholder."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 20
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-17029774c77667a7",
+      "ev-036244fe7117fccd",
+      "ev-0e61a15de1e92a83",
+      "ev-b2efa667d63620b7",
+      "ev-24d88cfb1e4968b9"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.85,
+    "explanation": "Mastercard 4853 not-as-described chargeback for 13.77 USD of a 23.35 USD capture. The case file had both required kinds (product description, terms acceptance) plus USPS delivery proof and a communication log. Represented with those and the receipt. The issuer accepted the representment and the case resolved for the merchant; the remaining cost is the 15.00 USD chargeback fee. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 5008
+}

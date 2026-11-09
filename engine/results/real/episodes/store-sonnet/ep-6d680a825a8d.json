@@ -1,0 +1,90 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement for this dispute?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-465428009030b75f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6a886f211594cf2f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-610932bb7fc465e8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1434435dbe5e512c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-610932bb7fc465e8",
+     "ev-1434435dbe5e512c",
+     "ev-6a886f211594cf2f",
+     "ev-465428009030b75f"
+    ],
+    "narrative": "Authenticity proof and product description for the item are attached, with the approved authorization (code 973696) and receipt. The cardholder statement (cancelled and still charged) does not concern counterfeit goods; I hold no cancellation record."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-610932bb7fc465e8",
+      "ev-1434435dbe5e512c",
+      "ev-6a886f211594cf2f",
+      "ev-465428009030b75f"
+     ],
+     "outcome": "won",
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Read the case, statement and all four evidence documents. Represented with authenticity_proof and product_description (the required kinds), plus authorization record and receipt. The issuer accepted and the chargeback was reversed. I paid the 1500 chargeback fee. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 5010
+}

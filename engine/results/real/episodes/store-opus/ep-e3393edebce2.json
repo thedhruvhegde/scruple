@@ -1,0 +1,106 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement, and which shipments do they say were not received?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-47c1cb9acc40bf72"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b6e7d4cd79a1eb7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ec3fe8d87a8d4685"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-091194a91bb69fb9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-80a453c8cc155b0c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-47c1cb9acc40bf72",
+     "ev-ec3fe8d87a8d4685",
+     "ev-091194a91bb69fb9",
+     "ev-80a453c8cc155b0c",
+     "ev-b6e7d4cd79a1eb7c"
+    ],
+    "narrative": "All three shipments in this order were delivered: s1 (5652 JPY) by USPS on 2026-01-14, s2 (4503 JPY) and s3 (1298 JPY) by UPS on 2026-01-18. Together they equal the 11453 JPY receipt."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 20
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-47c1cb9acc40bf72",
+      "ev-ec3fe8d87a8d4685",
+      "ev-091194a91bb69fb9",
+      "ev-80a453c8cc155b0c",
+      "ev-b6e7d4cd79a1eb7c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.85,
+    "explanation": "Mastercard 4855 goods-not-provided chargeback for 11453 JPY across three shipments. The case file had the receipt and a carrier delivery proof for each shipment (s1 USPS 2026-01-14, s2 and s3 UPS 2026-01-18), covering the full amount. Represented with the receipt, the three delivery proofs and the authorization record. The issuer accepted the representment and the case resolved in the merchant favour; the chargeback amount was returned and only the 15.00 USD chargeback fee remains as cost. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 5005
+}

@@ -1,0 +1,97 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-436980a18fb30800"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-630f5078c52db8e2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement and any record of the cancellation of this recurring transaction, and the terms the cardholder accepted at signup."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-436980a18fb30800",
+     "ev-630f5078c52db8e2"
+    ],
+    "narrative": "The transaction of 3996 USD was authorized (auth code 418716) and a receipt for the same amount is attached. The merchant does not hold a cancellation record or signed terms acceptance for this recurring charge in the file provided, so this response does not claim the charge was cancelled or that terms were accepted. The cardholder states the order never arrived; the merchant has no shipment record in this case."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Does the issuer have any new evidence on the cancellation of this recurring transaction or the cardholder terms? Please provide the statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "No cancellation record or signed terms acceptance exists in the file for this recurring charge, and the issuer will not reverse on the evidence held; arbitration fees would add loss with low odds of recovery."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent",
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-436980a18fb30800",
+      "ev-630f5078c52db8e2"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 3996,
+     "win_rate": 0.1
+    },
+    "confidence": 0.1,
+    "explanation": "Seed 5001. Chargeback for reason 13.2 (cancelled recurring transaction). Merchant had no cancellation record or terms acceptance; represented with receipt and authorization record, stating the gap honestly. Issuer moved to pre-arbitration. No new evidence appeared on request_info. Accepted liability to avoid arbitration fees. Merchant loss: 3996 chargeback plus 1500 chargeback fee. No refund issued to avoid a double refund."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5001
+}

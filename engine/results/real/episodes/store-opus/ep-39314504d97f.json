@@ -1,0 +1,107 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-3c9fe17128fc3096"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-609d1d00585b60da"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement regarding this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-609d1d00585b60da",
+     "ev-3c9fe17128fc3096"
+    ],
+    "narrative": "The transaction was authorized and approved on 2026-01-14 (auth code 922519) for 38.46 USD, so the card was not on a recovery bulletin at authorization. The ledger shows a single capture, not a duplicate."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Why did the issuer reject the representment and file pre-arbitration?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Amount at stake (38.46 USD) is smaller than the arbitration fee risk."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent",
+      "wait",
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 7846,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-609d1d00585b60da",
+      "ev-3c9fe17128fc3096"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 3846,
+     "win_rate": 0.0
+    },
+    "confidence": 0.0,
+    "explanation": "Visa 11.1 chargeback for 38.46 USD. Read the case and both evidence documents; the approved authorization record (the required kind) was present. Represented with the authorization record and receipt. The issuer moved the case to pre-arbitration, which charged a 25.00 fee. With 38.46 at stake, arbitration fees on a loss would exceed the amount, so I accepted at pre-arbitration before its deadline. Merchant cost: 38.46 liability plus 15.00 chargeback fee plus 25.00 pre-arbitration fee, 78.46 total. No documents were uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 5002
+}

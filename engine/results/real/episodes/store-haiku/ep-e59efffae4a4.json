@@ -1,0 +1,83 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement on the charge: was it charged more than once, or at an incorrect amount, and was any refund issued?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b4f868d7ea100c1a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0bc6f6773eda5bc7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b4f868d7ea100c1a",
+     "ev-0bc6f6773eda5bc7"
+    ],
+    "narrative": "One charge of 8385 USD was authorized (auth code 119763, approved) and the receipt shows the same single amount of 8385 USD. The merchant holds no settlement record for this case in the file, so this response does not provide one. The cardholder states the amount is wrong; the receipt and authorization record show one charge at the authorized amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b4f868d7ea100c1a",
+      "ev-0bc6f6773eda5bc7"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.4
+    },
+    "confidence": 0.4,
+    "explanation": "Seed 5007. Reason 4834 (point-of-interaction error). Read receipt and authorization record; no settlement record was held, and I said so in the narrative. Represented on 2026-03-05 with the receipt and authorization record showing one charge at the authorized amount. The issuer accepted the representment on 2026-03-15 and the chargeback was reversed. Ledger: chargeback 8385 debited and reversed 8385; chargeback fee 1500 charged and not reversed. Merchant balance 6885. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 5007
+}

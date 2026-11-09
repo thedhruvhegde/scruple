@@ -1,0 +1,90 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement for this dispute?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0ccee71ece3d2de5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-03fdd4e7abb27a9a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f353a9345167df57"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d9982420eca82222"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-f353a9345167df57",
+     "ev-d9982420eca82222",
+     "ev-03fdd4e7abb27a9a",
+     "ev-0ccee71ece3d2de5"
+    ],
+    "narrative": "Terms were accepted on 2026-01-15, the charge was authorized (code 391564) and settled for 1718 GBP, matching the receipt. The cardholder statement (order never arrived) does not match the installment billing reason code."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-f353a9345167df57",
+      "ev-d9982420eca82222",
+      "ev-03fdd4e7abb27a9a",
+      "ev-0ccee71ece3d2de5"
+     ],
+     "outcome": "won",
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Read the case, statement and all four evidence documents. Represented with terms_acceptance and settlement_record (the required kinds), plus authorization record and receipt. The issuer accepted and the chargeback was reversed. I paid the 1500 chargeback fee. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 5006
+}

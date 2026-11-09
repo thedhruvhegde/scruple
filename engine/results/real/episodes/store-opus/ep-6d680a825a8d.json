@@ -1,0 +1,94 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-465428009030b75f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6a886f211594cf2f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-610932bb7fc465e8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1434435dbe5e512c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about the merchandise being counterfeit?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-610932bb7fc465e8",
+     "ev-1434435dbe5e512c",
+     "ev-465428009030b75f",
+     "ev-6a886f211594cf2f"
+    ],
+    "narrative": "The authenticity proof shows the goods sold for 476.42 USD on 2026-02-10 were genuine, and they match the product description. The cardholder statement concerns a cancellation, not counterfeit goods."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 20
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-610932bb7fc465e8",
+      "ev-1434435dbe5e512c",
+      "ev-465428009030b75f",
+      "ev-6a886f211594cf2f"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.85,
+    "explanation": "Visa 13.4 counterfeit chargeback for 476.42 USD; cardholder statement was about a cancellation. Both required kinds were in the case file (authenticity proof, product description). Represented with those plus receipt and authorization. The issuer accepted and the case resolved for the merchant; remaining cost is the 15.00 USD chargeback fee. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 5010
+}

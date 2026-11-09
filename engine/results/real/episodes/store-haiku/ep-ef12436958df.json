@@ -1,0 +1,117 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement on whether they recognise and authorised this transaction, and any prior account activity."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f264b06af184ca8b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-de9d9e9b40cb5e43"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-97e2db393a9e67c1"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e8833b342d3b0abf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-7e86ed9115eb2932"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-83471dd7905e9578"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-f264b06af184ca8b",
+     "ev-83471dd7905e9578",
+     "ev-de9d9e9b40cb5e43",
+     "ev-97e2db393a9e67c1",
+     "ev-e8833b342d3b0abf",
+     "ev-7e86ed9115eb2932",
+     "ev-dba54207fbd8e7de"
+    ],
+    "narrative": "The transaction of 18321 USD was authorized (auth code 389817) with AVS Y and CVV M. Account activity and prior undisputed transactions on the account are attached (prior transaction ids cd-5009-000000-p1, p2, p3). A delivery proof (USPS, delivered 2026-01-18) and the receipt for the same amount are attached. The merchant does not hold a device and IP match record for this transaction, so this response does not claim one. The cardholder states they do not recognise the charge."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-f264b06af184ca8b",
+      "ev-83471dd7905e9578",
+      "ev-de9d9e9b40cb5e43",
+      "ev-97e2db393a9e67c1",
+      "ev-e8833b342d3b0abf",
+      "ev-7e86ed9115eb2932",
+      "ev-dba54207fbd8e7de"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.3
+    },
+    "confidence": 0.3,
+    "explanation": "Seed 5009. Reason 10.4 (card-absent fraud), 18321 USD. Read AVS/CVV match, authorization record, account activity, prior undisputed history, delivery proof and receipt. No device/IP match record was held, and the narrative says so. Represented on 2026-03-06; the case went to pre-arbitration with a 2500 network fee at that step. The issuer accepted on 2026-03-16 and the chargeback was reversed. Ledger: chargeback 18321 debited and reversed 18321; chargeback fee 1500 and pre-arbitration fee 2500 charged and not reversed. Merchant balance 14321. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 8,
+ "seed": 5009
+}

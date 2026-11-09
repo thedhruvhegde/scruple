@@ -1,0 +1,1216 @@
+[
+ {
+  "cost_usd": 107.32,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999773,
+  "resolution": "accepted",
+  "reward": 0.9997727272727274,
+  "seed": 5003,
+  "soft_failures": [],
+  "system": "haiku",
+  "tool_calls": 9,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 79.96,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": false,
+  "hard_failures": [
+   "PROC-01",
+   "SR-01"
+  ],
+  "quality": 0.687187,
+  "resolution": "accepted",
+  "reward": 0.0,
+  "seed": 5001,
+  "soft_failures": [
+   "CF-01",
+   "EVD-02"
+  ],
+  "system": "haiku",
+  "tool_calls": 13,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 104.2,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999773,
+  "resolution": "accepted",
+  "reward": 0.9997727272727274,
+  "seed": 5011,
+  "soft_failures": [],
+  "system": "haiku",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 78.46,
+  "fair_outcome": false,
+  "family": "cardholder_mistake",
+  "gate": false,
+  "hard_failures": [
+   "DL-01",
+   "PROC-01",
+   "SR-01"
+  ],
+  "quality": 0.56767,
+  "resolution": "lost",
+  "reward": 0.0,
+  "seed": 5002,
+  "soft_failures": [
+   "DL-02",
+   "OUT-01"
+  ],
+  "system": "haiku",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 14.6,
+  "fair_outcome": false,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.848636,
+  "resolution": "won",
+  "reward": 0.8486363636363637,
+  "seed": 5006,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "haiku",
+  "tool_calls": 13,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 121.37,
+  "fair_outcome": false,
+  "family": "friendly_fraud",
+  "gate": false,
+  "hard_failures": [
+   "PROC-01",
+   "SR-01"
+  ],
+  "quality": 0.669545,
+  "resolution": "accepted",
+  "reward": 0.0,
+  "seed": 5004,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "haiku",
+  "tool_calls": 14,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.994318,
+  "resolution": "won",
+  "reward": 0.9943181818181818,
+  "seed": 5008,
+  "soft_failures": [],
+  "system": "haiku",
+  "tool_calls": 14,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.985,
+  "resolution": "won",
+  "reward": 0.9850000000000001,
+  "seed": 5010,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "haiku",
+  "tool_calls": 13,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 166.11,
+  "fair_outcome": true,
+  "family": "true_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999773,
+  "resolution": "accepted",
+  "reward": 0.9997727272727274,
+  "seed": 5012,
+  "soft_failures": [],
+  "system": "haiku",
+  "tool_calls": 9,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 13.53,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": false,
+  "hard_failures": [
+   "SR-01"
+  ],
+  "quality": 0.8975,
+  "resolution": "won",
+  "reward": 0.0,
+  "seed": 5005,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "haiku",
+  "tool_calls": 14,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": false,
+  "family": "merchant_error",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.821364,
+  "resolution": "won",
+  "reward": 0.8213636363636364,
+  "seed": 5007,
+  "soft_failures": [
+   "CAL-02",
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "haiku",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 40.0,
+  "fair_outcome": true,
+  "family": "friendly_fraud",
+  "gate": false,
+  "hard_failures": [
+   "PROC-01"
+  ],
+  "quality": 0.886591,
+  "resolution": "won",
+  "reward": 0.0,
+  "seed": 5009,
+  "soft_failures": [
+   "CAL-02",
+   "EVD-02"
+  ],
+  "system": "haiku",
+  "tool_calls": 15,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": false,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.8275,
+  "resolution": "won",
+  "reward": 0.8274999999999999,
+  "seed": 5003,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "sonnet",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 79.96,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": false,
+  "hard_failures": [
+   "DL-01",
+   "PROC-01",
+   "SR-01"
+  ],
+  "quality": 0.573551,
+  "resolution": "lost",
+  "reward": 0.0,
+  "seed": 5001,
+  "soft_failures": [
+   "CF-01",
+   "DL-02",
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 7,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 129.2,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.9161,
+  "resolution": "accepted",
+  "reward": 0.9160996738687323,
+  "seed": 5011,
+  "soft_failures": [
+   "CF-01",
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 21,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 40.0,
+  "fair_outcome": true,
+  "family": "cardholder_mistake",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.996364,
+  "resolution": "won",
+  "reward": 0.9963636363636365,
+  "seed": 5002,
+  "soft_failures": [],
+  "system": "sonnet",
+  "tool_calls": 17,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 14.6,
+  "fair_outcome": false,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.851364,
+  "resolution": "won",
+  "reward": 0.8513636363636364,
+  "seed": 5006,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "sonnet",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 43.83,
+  "fair_outcome": true,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.985,
+  "resolution": "won",
+  "reward": 0.9850000000000001,
+  "seed": 5004,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 22,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.987727,
+  "resolution": "won",
+  "reward": 0.9877272727272728,
+  "seed": 5008,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 13,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.987727,
+  "resolution": "won",
+  "reward": 0.9877272727272728,
+  "seed": 5010,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": false,
+  "family": "true_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.850227,
+  "resolution": "won",
+  "reward": 0.8502272727272726,
+  "seed": 5012,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "sonnet",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 13.53,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.988125,
+  "resolution": "won",
+  "reward": 0.988125,
+  "seed": 5005,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": false,
+  "family": "merchant_error",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.828125,
+  "resolution": "won",
+  "reward": 0.828125,
+  "seed": 5007,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "sonnet",
+  "tool_calls": 9,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 40.0,
+  "fair_outcome": true,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.987216,
+  "resolution": "won",
+  "reward": 0.9872159090909091,
+  "seed": 5009,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "sonnet",
+  "tool_calls": 15,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 107.32,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "resolution": "accepted",
+  "reward": 1.0,
+  "seed": 5003,
+  "soft_failures": [],
+  "system": "opus",
+  "tool_calls": 9,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 54.96,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": false,
+  "hard_failures": [
+   "SR-01"
+  ],
+  "quality": 0.88858,
+  "resolution": "accepted",
+  "reward": 0.0,
+  "seed": 5001,
+  "soft_failures": [
+   "CAL-02"
+  ],
+  "system": "opus",
+  "tool_calls": 9,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 129.2,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.916327,
+  "resolution": "accepted",
+  "reward": 0.9163269465960049,
+  "seed": 5011,
+  "soft_failures": [
+   "CF-01",
+   "EVD-02"
+  ],
+  "system": "opus",
+  "tool_calls": 22,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 78.46,
+  "fair_outcome": false,
+  "family": "cardholder_mistake",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.863636,
+  "resolution": "accepted",
+  "reward": 0.8636363636363636,
+  "seed": 5002,
+  "soft_failures": [
+   "OUT-01"
+  ],
+  "system": "opus",
+  "tool_calls": 15,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 14.6,
+  "fair_outcome": false,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.851761,
+  "resolution": "won",
+  "reward": 0.8517613636363636,
+  "seed": 5006,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "opus",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 121.37,
+  "fair_outcome": false,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.852273,
+  "resolution": "accepted",
+  "reward": 0.8522727272727273,
+  "seed": 5004,
+  "soft_failures": [
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "opus",
+  "tool_calls": 16,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999489,
+  "resolution": "won",
+  "reward": 0.9994886363636364,
+  "seed": 5008,
+  "soft_failures": [],
+  "system": "opus",
+  "tool_calls": 14,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.988125,
+  "resolution": "won",
+  "reward": 0.988125,
+  "seed": 5010,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "opus",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 166.11,
+  "fair_outcome": true,
+  "family": "true_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "resolution": "accepted",
+  "reward": 1.0,
+  "seed": 5012,
+  "soft_failures": [],
+  "system": "opus",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 13.53,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.988125,
+  "resolution": "won",
+  "reward": 0.988125,
+  "seed": 5005,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "opus",
+  "tool_calls": 14,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 98.85,
+  "fair_outcome": true,
+  "family": "merchant_error",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "resolution": "accepted",
+  "reward": 1.0,
+  "seed": 5007,
+  "soft_failures": [],
+  "system": "opus",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 40.0,
+  "fair_outcome": true,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.985,
+  "resolution": "won",
+  "reward": 0.9850000000000001,
+  "seed": 5009,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "opus",
+  "tool_calls": 18,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 54.96,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5001,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 78.46,
+  "fair_outcome": false,
+  "family": "cardholder_mistake",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.849091,
+  "resolution": "accepted",
+  "reward": 0.8490909090909091,
+  "seed": 5002,
+  "soft_failures": [
+   "CAL-02",
+   "OUT-01"
+  ],
+  "system": "ref:evidence",
+  "tool_calls": 23,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 107.32,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5003,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 121.37,
+  "fair_outcome": false,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.845227,
+  "resolution": "accepted",
+  "reward": 0.8452272727272727,
+  "seed": 5004,
+  "soft_failures": [
+   "CAL-02",
+   "OUT-01"
+  ],
+  "system": "ref:evidence",
+  "tool_calls": 29,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 13.53,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999091,
+  "resolution": "won",
+  "reward": 0.9990909090909091,
+  "seed": 5005,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 18,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 14.6,
+  "fair_outcome": false,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.862727,
+  "resolution": "won",
+  "reward": 0.8627272727272728,
+  "seed": 5006,
+  "soft_failures": [
+   "OUT-01"
+  ],
+  "system": "ref:evidence",
+  "tool_calls": 17,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 98.85,
+  "fair_outcome": true,
+  "family": "merchant_error",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5007,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999091,
+  "resolution": "won",
+  "reward": 0.9990909090909091,
+  "seed": 5008,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 19,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 40.0,
+  "fair_outcome": true,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999773,
+  "resolution": "won",
+  "reward": 0.9997727272727274,
+  "seed": 5009,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 20,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999091,
+  "resolution": "won",
+  "reward": 0.9990909090909091,
+  "seed": 5010,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 17,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 104.2,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5011,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 166.11,
+  "fair_outcome": true,
+  "family": "true_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5012,
+  "soft_failures": [],
+  "system": "ref:evidence",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 54.96,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5001,
+  "soft_failures": [],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 53.46,
+  "fair_outcome": false,
+  "family": "cardholder_mistake",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.863627,
+  "resolution": "accepted",
+  "reward": 0.8636272727272728,
+  "seed": 5002,
+  "soft_failures": [
+   "OUT-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 107.32,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5003,
+  "soft_failures": [],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 96.37,
+  "fair_outcome": false,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.863627,
+  "resolution": "accepted",
+  "reward": 0.8636272727272728,
+  "seed": 5004,
+  "soft_failures": [
+   "OUT-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 91.07,
+  "fair_outcome": false,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.771305,
+  "resolution": "accepted",
+  "reward": 0.771305292777597,
+  "seed": 5005,
+  "soft_failures": [
+   "CF-01",
+   "OUT-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 36.53,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.863627,
+  "resolution": "accepted",
+  "reward": 0.8636272727272728,
+  "seed": 5006,
+  "soft_failures": [
+   "CF-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 98.85,
+  "fair_outcome": true,
+  "family": "merchant_error",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5007,
+  "soft_failures": [],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 28.77,
+  "fair_outcome": false,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.727264,
+  "resolution": "accepted",
+  "reward": 0.7272636363636363,
+  "seed": 5008,
+  "soft_failures": [
+   "CF-01",
+   "OUT-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 198.21,
+  "fair_outcome": false,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.745871,
+  "resolution": "accepted",
+  "reward": 0.7458711954984594,
+  "seed": 5009,
+  "soft_failures": [
+   "CF-01",
+   "OUT-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 491.42,
+  "fair_outcome": false,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.727264,
+  "resolution": "accepted",
+  "reward": 0.7272636363636363,
+  "seed": 5010,
+  "soft_failures": [
+   "CF-01",
+   "OUT-01"
+  ],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 104.2,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5011,
+  "soft_failures": [],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 166.11,
+  "fair_outcome": true,
+  "family": "true_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5012,
+  "soft_failures": [],
+  "system": "ref:always_accept",
+  "tool_calls": 4,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 54.96,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5001,
+  "soft_failures": [],
+  "system": "ref:oracle",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 78.46,
+  "fair_outcome": false,
+  "family": "cardholder_mistake",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.849091,
+  "resolution": "accepted",
+  "reward": 0.8490909090909091,
+  "seed": 5002,
+  "soft_failures": [
+   "CAL-02",
+   "OUT-01"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 23,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 107.32,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5003,
+  "soft_failures": [],
+  "system": "ref:oracle",
+  "tool_calls": 11,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 121.37,
+  "fair_outcome": false,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.833864,
+  "resolution": "accepted",
+  "reward": 0.8338636363636364,
+  "seed": 5004,
+  "soft_failures": [
+   "CAL-02",
+   "EVD-02",
+   "OUT-01"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 29,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 13.53,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.987727,
+  "resolution": "won",
+  "reward": 0.9877272727272728,
+  "seed": 5005,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 18,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 36.53,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.863627,
+  "resolution": "accepted",
+  "reward": 0.8636272727272728,
+  "seed": 5006,
+  "soft_failures": [
+   "CF-01"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 98.85,
+  "fair_outcome": true,
+  "family": "merchant_error",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5007,
+  "soft_failures": [],
+  "system": "ref:oracle",
+  "tool_calls": 10,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.987727,
+  "resolution": "won",
+  "reward": 0.9877272727272728,
+  "seed": 5008,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 19,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 40.0,
+  "fair_outcome": true,
+  "family": "friendly_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.988409,
+  "resolution": "won",
+  "reward": 0.9884090909090909,
+  "seed": 5009,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 20,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 15.0,
+  "fair_outcome": true,
+  "family": "buyers_remorse",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.987727,
+  "resolution": "won",
+  "reward": 0.9877272727272728,
+  "seed": 5010,
+  "soft_failures": [
+   "EVD-02"
+  ],
+  "system": "ref:oracle",
+  "tool_calls": 17,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 104.2,
+  "fair_outcome": true,
+  "family": "service_failure",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5011,
+  "soft_failures": [],
+  "system": "ref:oracle",
+  "tool_calls": 12,
+  "tool_errors": 0
+ },
+ {
+  "cost_usd": 166.11,
+  "fair_outcome": true,
+  "family": "true_fraud",
+  "gate": true,
+  "hard_failures": [],
+  "quality": 0.999991,
+  "resolution": "accepted",
+  "reward": 0.9999909090909092,
+  "seed": 5012,
+  "soft_failures": [],
+  "system": "ref:oracle",
+  "tool_calls": 11,
+  "tool_errors": 0
+ }
+]

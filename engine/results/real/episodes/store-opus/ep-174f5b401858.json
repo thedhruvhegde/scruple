@@ -1,0 +1,71 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-436980a18fb30800"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-630f5078c52db8e2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement: when and how did they cancel the recurring subscription?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "No terms acceptance or cancellation record exists for this recurring charge; only receipt and auth, which do not answer 13.2."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "wait 7",
+      "accept"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 0,
+     "win_rate": 0.0
+    },
+    "confidence": 0.95,
+    "explanation": "Visa 13.2 cancelled recurring chargeback for 39.96 USD. Required evidence (terms acceptance, cancellation record) was not in the case file; only a receipt and authorization record. Cardholder statement said the order never arrived. Waited 7 days, no new evidence appeared. Accepted liability within the deadline rather than represent without the required evidence. Merchant loss is the 39.96 chargeback plus the 15.00 chargeback fee. Did not upload or create any documents."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5001
+}

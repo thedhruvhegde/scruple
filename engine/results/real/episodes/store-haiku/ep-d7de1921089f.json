@@ -1,0 +1,68 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement on whether they recognise this transaction and any prior activity on the account."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e8c6419ab9ab4704"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-9c8c8bae43d7d417"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-9c92494b7e1ae822"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "The required delivery proof is not on file and the cardholder says the card was lost or stolen; a representment on the receipt and history alone is unlikely to win and would add a pre-arbitration fee."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "accept"
+     ],
+     "cost_usd_minor": 16611,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 15111,
+     "win_rate": 0.1
+    },
+    "confidence": 0.1,
+    "explanation": "Seed 5012. Reason 4863 (cardholder does not recognise), 15111 USD. Read receipt, authorization record and prior undisputed history. The required delivery proof is not on file and the cardholder says the card was lost or stolen. I did not represent, because a win without the required proof is unlikely and a pre-arbitration fee would add loss. Accepted liability on 2026-02-15. No refund issued. Ledger: chargeback 15111 debited and chargeback fee 1500 charged."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 5012
+}

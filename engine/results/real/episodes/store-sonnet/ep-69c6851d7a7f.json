@@ -1,0 +1,106 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement for this dispute?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-24d88cfb1e4968b9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-85b8ca6158861668"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-17029774c77667a7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-036244fe7117fccd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0e61a15de1e92a83"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b2efa667d63620b7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-17029774c77667a7",
+     "ev-036244fe7117fccd",
+     "ev-0e61a15de1e92a83",
+     "ev-b2efa667d63620b7",
+     "ev-85b8ca6158861668",
+     "ev-24d88cfb1e4968b9"
+    ],
+    "narrative": "Product description and accepted terms (2026-01-16), delivery proof (delivered 2026-01-20), communication log, authorization and receipt attached. The item matches its description."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-17029774c77667a7",
+      "ev-036244fe7117fccd",
+      "ev-0e61a15de1e92a83",
+      "ev-b2efa667d63620b7",
+      "ev-85b8ca6158861668",
+      "ev-24d88cfb1e4968b9"
+     ],
+     "outcome": "won",
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Read the case, statement and all six evidence documents. Disputed amount was 1377 of 2335 captured. Represented with product description, terms acceptance, delivery proof, communication log, authorization and receipt. The issuer accepted and the chargeback was reversed. I paid the 1500 chargeback fee. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 5008
+}

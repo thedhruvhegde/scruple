@@ -1,0 +1,107 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement on the goods or services: which items were received, and when."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-47c1cb9acc40bf72"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ec3fe8d87a8d4685"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-091194a91bb69fb9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-80a453c8cc155b0c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b6e7d4cd79a1eb7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-47c1cb9acc40bf72",
+     "ev-b6e7d4cd79a1eb7c",
+     "ev-ec3fe8d87a8d4685",
+     "ev-091194a91bb69fb9",
+     "ev-80a453c8cc155b0c"
+    ],
+    "narrative": "The order of 11453 JPY was shipped in three parts and delivered: shipment cd-5005-000000-s1 (5652, delivered 2026-01-14, USPS), s2 (4503, delivered 2026-01-18, UPS) and s3 (1298, delivered 2026-01-18, UPS). The three delivery proofs sum to the full amount. The receipt and authorization record (auth code 284987, approved) for the same amount are attached. The cardholder statement says the order never arrived; the carrier records above show delivery on the dates listed."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-47c1cb9acc40bf72",
+      "ev-b6e7d4cd79a1eb7c",
+      "ev-ec3fe8d87a8d4685",
+      "ev-091194a91bb69fb9",
+      "ev-80a453c8cc155b0c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.9
+    },
+    "confidence": 0.9,
+    "explanation": "Seed 5005. Reason 4855 (goods not provided), 3 shipments. Read receipt, authorization record and three delivery proofs that sum to the full amount. Represented on 2026-01-22 with the receipt, authorization record and the three delivery proofs. The issuer accepted the representment on 2026-02-01 and the chargeback was reversed. Ledger: chargeback 7607 debited, reversal 7754 credited, chargeback fee 1500 charged and not reversed. Merchant balance 6541. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 5005
+}

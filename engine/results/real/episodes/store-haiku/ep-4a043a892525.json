@@ -1,0 +1,112 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement regarding this transaction, including whether the cardholder recognises it and any prior activity on the account."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-181685d721f26170"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bda4b9cf5b09a4e3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-301a0db16a0e2170"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-fa395189ef9f69c9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d022252c89297ca0"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-181685d721f26170",
+     "ev-bda4b9cf5b09a4e3",
+     "ev-301a0db16a0e2170",
+     "ev-fa395189ef9f69c9",
+     "ev-d022252c89297ca0"
+    ],
+    "narrative": "The transaction of 7380 EUR was authorized (auth code 971529). AVS returned Y and CVV returned M. The device and IP record (device dev-372507c4e0a0) matches the cardholder device on file. The account has prior undisputed transaction history. A receipt for the same amount is attached. The cardholder statement says a member of the household used the card; the merchant has no evidence on that point beyond the matches above."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Does the cardholder dispute that the transaction was authorized by them or someone with their permission? Please provide the full statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "The cardholder states a household member used the card; that is authorised-use territory the merchant cannot defeat, and escalation fees would add loss at low odds."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent",
+      "accept"
+     ],
+     "cost_usd_minor": 9637,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-181685d721f26170",
+      "ev-bda4b9cf5b09a4e3",
+      "ev-301a0db16a0e2170",
+      "ev-fa395189ef9f69c9",
+      "ev-d022252c89297ca0"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 8137,
+     "win_rate": 0.2
+    },
+    "confidence": 0.2,
+    "explanation": "Seed 5004. Reason 4837 (no cardholder authorization), EUR 7380. Read AVS/CVV match, device/IP match, prior undisputed history, authorization record and receipt. Represented on 2026-03-01 with those documents; the issuer moved to pre-arbitration on 2026-03-11. The cardholder statement says a household member used the card, so I did not escalate and accepted liability on 2026-03-11 to avoid arbitration fees. Ledger: chargeback 8137 and chargeback fee 1500 (the chargeback debit exceeds the captured 7997 by 140 in the ledger). No refund issued (no double refund)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 3,
+ "seed": 5004
+}

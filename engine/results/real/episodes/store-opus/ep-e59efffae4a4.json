@@ -1,0 +1,76 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b4f868d7ea100c1a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0bc6f6773eda5bc7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this charge?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "No settlement record (required for 4834) exists in the case file."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 9885,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 8385
+    },
+    "confidence": 0.0,
+    "explanation": "Mastercard 4834 incorrect-amount chargeback for 83.85 USD; cardholder says the amount is wrong. The case file held only a receipt and authorization record, both for 83.85; the required settlement record was missing and none appeared after waiting 10 days. Accepted liability within the chargeback window rather than represent without required evidence. Cost: 83.85 plus the 15.00 chargeback fee. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 5007
+}

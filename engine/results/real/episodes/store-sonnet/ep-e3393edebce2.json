@@ -1,0 +1,98 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement for this dispute?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-47c1cb9acc40bf72"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b6e7d4cd79a1eb7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ec3fe8d87a8d4685"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-091194a91bb69fb9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-80a453c8cc155b0c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-ec3fe8d87a8d4685",
+     "ev-091194a91bb69fb9",
+     "ev-80a453c8cc155b0c",
+     "ev-47c1cb9acc40bf72",
+     "ev-b6e7d4cd79a1eb7c"
+    ],
+    "narrative": "All three shipments (5652, 4503, 1298; total 11453) were delivered on 2026-01-14 and 2026-01-18. Delivery proofs, receipt and approved authorization attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-ec3fe8d87a8d4685",
+      "ev-091194a91bb69fb9",
+      "ev-80a453c8cc155b0c",
+      "ev-47c1cb9acc40bf72",
+      "ev-b6e7d4cd79a1eb7c"
+     ],
+     "outcome": "won",
+     "win_rate": 0.85
+    },
+    "confidence": 0.85,
+    "explanation": "Read the case, statement and all five evidence documents. The three delivery proofs cover all three shipments (total 11453). Represented with those plus receipt and authorization record. The issuer accepted and the chargeback was reversed. I paid the 1500 chargeback fee. No refund issued."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 5005
+}

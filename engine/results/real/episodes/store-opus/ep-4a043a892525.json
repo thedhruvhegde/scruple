@@ -1,0 +1,122 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d022252c89297ca0"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-fa395189ef9f69c9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-181685d721f26170"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bda4b9cf5b09a4e3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-301a0db16a0e2170"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-181685d721f26170",
+     "ev-bda4b9cf5b09a4e3",
+     "ev-301a0db16a0e2170",
+     "ev-fa395189ef9f69c9",
+     "ev-d022252c89297ca0"
+    ],
+    "narrative": "AVS matched (Y) and CVV matched (M). The order came from a device and IP that match the cardholder, and the card has prior undisputed history with us. The cardholder states a household member used the card, which is not a third-party fraud claim."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 20
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "What new information did the issuer provide with the pre-arbitration?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "reason": "Evidence is strong but the arbitration fee on a loss would outweigh the roughly 74 EUR at stake."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent",
+      "wait",
+      "request_info",
+      "accept"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-181685d721f26170",
+      "ev-bda4b9cf5b09a4e3",
+      "ev-301a0db16a0e2170",
+      "ev-fa395189ef9f69c9",
+      "ev-d022252c89297ca0"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 7380,
+     "win_rate": 0.0
+    },
+    "confidence": 0.0,
+    "explanation": "Mastercard 4837 no-authorization chargeback for 73.80 EUR. Case file had both required kinds (AVS/CVV match, device/IP match) plus prior undisputed history; cardholder said a household member used the card. Represented with those documents. The issuer answered with pre-arbitration, which added a 25.00 USD fee. Given the small amount, I judged the arbitration fee on a loss to outweigh the expected recovery and accepted within the pre-arbitration window. Merchant lost the transaction plus 15.00 chargeback and 25.00 pre-arbitration fees. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 3,
+ "seed": 5004
+}

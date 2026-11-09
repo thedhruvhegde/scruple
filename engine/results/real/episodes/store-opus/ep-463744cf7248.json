@@ -1,0 +1,94 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this installment charge?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0ccee71ece3d2de5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-03fdd4e7abb27a9a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f353a9345167df57"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d9982420eca82222"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-f353a9345167df57",
+     "ev-d9982420eca82222",
+     "ev-0ccee71ece3d2de5",
+     "ev-03fdd4e7abb27a9a"
+    ],
+    "narrative": "The cardholder accepted the installment terms on 2026-01-15 and the settlement record shows the charge of 17.18 GBP was billed as agreed, matching the receipt and the approved authorization."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 20
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "represent"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-f353a9345167df57",
+      "ev-d9982420eca82222",
+      "ev-0ccee71ece3d2de5",
+      "ev-03fdd4e7abb27a9a"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.85,
+    "explanation": "Mastercard 4850 installment billing chargeback for 17.18 GBP. Both required kinds were in the case file (terms acceptance and settlement record), plus receipt and approved authorization. Represented with those four. The issuer accepted the representment and the case resolved for the merchant; the remaining cost is the 15.00 USD chargeback fee. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 5006
+}

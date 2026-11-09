@@ -1,0 +1,72 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e8c6419ab9ab4704"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-9c8c8bae43d7d417"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-9c92494b7e1ae822"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "reason": "No delivery proof (required for 4863) and the cardholder reports the card lost or stolen."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 16611,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 15111
+    },
+    "confidence": 0.0,
+    "explanation": "Mastercard 4863 not-recognised chargeback for 151.11 USD; cardholder says the card was lost or stolen. The case file had a receipt, authorization and prior undisputed history, but no delivery proof, which is required. Accepted liability at the chargeback stage within the deadline. Cost: 151.11 plus the 15.00 chargeback fee. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 5012
+}

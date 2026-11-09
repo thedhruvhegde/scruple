@@ -1,0 +1,69 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on how the goods differed from the description?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b069d80252f7ff9b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-7cbfdfce2242c9ad"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-9572a9d0bf8b67da"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "No product description (required) and no delivery proof for a cardholder who says the order never arrived."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 10732,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 9232,
+     "win_rate": 0.0
+    },
+    "confidence": 0.0,
+    "explanation": "Mastercard 4853 not-as-described chargeback for 92.32 USD. The case file had a receipt, authorization record and terms acceptance, but no product description (required) and no delivery proof; the cardholder statement says the order never arrived and no shipment is recorded. Accepted liability at the chargeback stage within the deadline instead of representing without the required evidence. Cost: 92.32 liability plus the 15.00 chargeback fee. No documents uploaded."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 2,
+ "seed": 5003
+}
