@@ -395,6 +395,43 @@ def _check_level(v: float, name: str) -> None:
         raise ValueError(f"{name} must lie in (0, 1)")
 
 
+# --- lower bound: the price of a worst-case cap ------------------------------------------
+
+
+def binary_kl(p: float, q: float) -> float:
+    """``kl(p || q)`` for Bernoulli laws, in nats."""
+    if not (0.0 <= p <= 1.0 and 0.0 < q < 1.0):
+        raise ValueError("need 0 <= p <= 1 and 0 < q < 1")
+    out = 0.0
+    if p > 0:
+        out += p * math.log(p / q)
+    if p < 1:
+        out += (1 - p) * math.log((1 - p) / (1 - q))
+    return out
+
+
+def cases_lower_bound(gap: float, null_mean: float, alpha: float, beta: float) -> float:
+    """No test valid for *every* law on [-1, 1] with mean <= ``m`` can do better.
+
+    Proposition (cap tax). Let ``P1`` be the point mass at ``m + d`` and ``P0`` the law
+    putting ``1 - p`` on ``m + d`` and ``p = d / (1 + m + d)`` on ``-1`` (mean ``m``, so
+    ``P0`` is in the null). ``KL(P1 || P0) = log((1 + m + d) / (1 + m))``. Any test with
+    ``P0(reject) <= alpha`` and ``P1(reject) >= 1 - beta`` after ``n`` observations has
+    ``n KL >= kl(1 - beta || alpha)`` by data processing; for sequential tests the same
+    bound holds for ``E_1[tau]`` (the change-of-measure lemma of Kaufmann, Cappe and
+    Garivier 2016, JMLR). So ``n >= kl(1 - beta || alpha) / log(1 + d / (1 + m))``,
+    which is of order ``log(1/alpha) / d``: linear, not quadratic, in the normalised gap,
+    and it grows with the cap because ``d = Delta / cap``.
+    """
+    _check_level(alpha, "alpha")
+    _check_level(beta, "beta")
+    if gap <= 0 or not -1 < null_mean < 1 or null_mean + gap > 1:
+        raise ValueError("need gap > 0 and -1 < m < m + gap <= 1")
+    if 1 - beta <= alpha:
+        return 0.0
+    return binary_kl(1 - beta, alpha) / math.log1p(gap / (1 + null_mean))
+
+
 def simulate_power(
     spec: StratumSpec,
     n: int,

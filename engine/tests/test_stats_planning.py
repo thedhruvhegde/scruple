@@ -11,7 +11,9 @@ from pydantic import ValidationError
 
 from scruple.stats.planning import (
     StratumSpec,
+    binary_kl,
     binomial_sf,
+    cases_lower_bound,
     growth_lower_bound,
     guaranteed_count,
     max_log_threshold,
@@ -213,3 +215,40 @@ def test_planned_n_achieves_power_slow(
     s = spec(mde=mde, sd=sd, tol=tol)
     n, bet = stratum_cases_needed(s, 0.005, 0.2, method)  # type: ignore[arg-type]
     assert simulate_power(s, n, 0.005, bet=bet, reps=600, seed=7) >= 0.8 - 3 * math.sqrt(0.16 / 600)
+
+
+# --- lower bound --------------------------------------------------------------------------
+
+
+@given(
+    mde=st.floats(50, 3000),
+    sd=st.floats(10, 4000),
+    alpha_k=st.floats(0.001, 0.2),
+    beta=st.floats(0.05, 0.5),
+)
+@settings(max_examples=30, deadline=None)
+def test_rigorous_plans_respect_the_lower_bound(
+    mde: float, sd: float, alpha_k: float, beta: float
+) -> None:
+    s = spec(mde=mde, sd=sd)
+    lb = cases_lower_bound(s.gap, s.null_mean, alpha_k, beta)
+    for method in ("bernstein", "hoeffding"):
+        n, _ = stratum_cases_needed(s, alpha_k, beta, method)
+        assert n >= lb - 1e-9
+
+
+def test_lower_bound_scales_with_cap_and_validates() -> None:
+    small = cases_lower_bound(0.01, 0.0, 0.05, 0.2)
+    assert cases_lower_bound(0.001, 0.0, 0.05, 0.2) == pytest.approx(10 * small, rel=0.01)
+    assert cases_lower_bound(0.5, 0.0, 0.5, 0.6) == 0.0
+    assert binary_kl(0.5, 0.5) == 0.0
+    with pytest.raises(ValueError):
+        cases_lower_bound(0.0, 0.0, 0.05, 0.2)
+    with pytest.raises(ValueError):
+        binary_kl(0.5, 0.0)
+
+
+def test_point_mass_alternative_is_in_the_null_family() -> None:
+    d, m = 0.05, 0.1
+    p = d / (1 + m + d)
+    assert (1 - p) * (m + d) + p * (-1.0) == pytest.approx(m)
