@@ -209,8 +209,8 @@ def test_assign_is_order_independent_and_partitions(
         n = len(members)
         got = Counter(a[i] for i in members)
         assert got["test"] == round(n * 0.2)
-        assert got["test"] + got["dev"] == round(n * 0.3)
-        assert got["test"] + got["dev"] + got["train"] == round(n * 0.8)
+        assert got["test"] + got["dev"] == round(n * (0.2 + 0.1))
+        assert got["test"] + got["dev"] + got["train"] == round(n * (0.2 + 0.1 + 0.5))
 
 
 def test_seed_changes_assignment() -> None:
