@@ -26,7 +26,7 @@ def _gate(args: argparse.Namespace) -> AgentGate:
 def cmd_demo(args: argparse.Namespace) -> int:
     from scruple.cli.demo import run_demo
 
-    return run_demo(Path(args.out), print_reports=not args.quiet)
+    return run_demo(Path(args.out), print_reports=not args.quiet, stats=args.stats)
 
 
 def cmd_serve(args: argparse.Namespace) -> int:
@@ -145,6 +145,12 @@ def build_parser() -> argparse.ArgumentParser:
     d = add("demo", cmd_demo, "run the end-to-end demo on synthetic data", db=False)
     d.add_argument("--out", default="demo-output", help="directory for reports and demo db")
     d.add_argument("--quiet", action="store_true", help="do not print full reports")
+    d.add_argument(
+        "--stats",
+        choices=("evalue", "bootstrap"),
+        default="evalue",
+        help="gate statistics: anytime-valid e-values (default) or the bootstrap path",
+    )
     s = add("serve", cmd_serve, "run the HTTP API")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8000)

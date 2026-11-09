@@ -251,23 +251,29 @@ def test_tolerance_at_or_above_cap_is_an_error() -> None:
 
 
 @pytest.fixture(scope="module")
+def small() -> dict[str, Verdict]:
+    return {r: _shadow(EV, r) for r in (GOOD_RULE_ID, BAD_RULE_ID)}
+
+
+@pytest.fixture(scope="module")
 def big() -> dict[str, Verdict]:
     """25,000 held-out cases: enough for the e-value gate on both demo rules."""
     cfg = GateConfig(stats="evalue", n_cases=25_000)
     return {r: _shadow(cfg, r) for r in (GOOD_RULE_ID, BAD_RULE_ID)}
 
 
-def test_evalue_checks_replace_slice_and_bootstrap_checks(big: dict[str, Verdict]) -> None:
-    names = [c.name for c in big[GOOD_RULE_ID].checks]
+def test_evalue_checks_replace_slice_and_bootstrap_checks(small: dict[str, Verdict]) -> None:
+    names = [c.name for c in small[GOOD_RULE_ID].checks]
     for gone in ("no_slice_regression", "not_significantly_worse", "significant_improvement"):
         assert gone not in names
     for new in ("evalue_declared_caps", "evalue_no_type_regression"):
         assert new in names
-        assert next(c for c in big[GOOD_RULE_ID].checks if c.name == new).kind == "hard"
-    cert = next(c for c in big[GOOD_RULE_ID].checks if c.name == "evalue_improvement_certified")
+        assert next(c for c in small[GOOD_RULE_ID].checks if c.name == new).kind == "hard"
+    cert = next(c for c in small[GOOD_RULE_ID].checks if c.name == "evalue_improvement_certified")
     assert cert.kind == "evidence"
 
 
+@pytest.mark.slow  # the demo test runs the same story at 30,000 cases by default
 def test_good_rule_certified_and_promoted(big: dict[str, Verdict]) -> None:
     v = big[GOOD_RULE_ID]
     assert v.outcome is Outcome.PROMOTE
@@ -279,6 +285,7 @@ def test_good_rule_certified_and_promoted(big: dict[str, Verdict]) -> None:
     assert any("certified better" in r for r in v.reasons)
 
 
+@pytest.mark.slow
 def test_bad_rule_blocked_by_the_stratified_check(big: dict[str, Verdict]) -> None:
     v = big[BAD_RULE_ID]
     assert v.outcome is Outcome.BLOCK
@@ -306,8 +313,8 @@ def test_bootstrap_path_is_unchanged_and_has_no_evalue_key() -> None:
     assert "no_slice_regression" in [c.name for c in v.checks]
 
 
-def test_evalue_evidence_survives_a_round_trip(big: dict[str, Verdict]) -> None:
-    s = big[BAD_RULE_ID].shadow
+def test_evalue_evidence_survives_a_round_trip(small: dict[str, Verdict]) -> None:
+    s = small[BAD_RULE_ID].shadow
     assert s is not None
     again = type(s).model_validate_json(s.model_dump_json())
     assert again == s

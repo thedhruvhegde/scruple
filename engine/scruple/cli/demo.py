@@ -1,14 +1,23 @@
-"""`agent-gate demo`: the end-to-end story, on synthetic data, deterministically."""
+"""`agent-gate demo`: the end-to-end story, on synthetic data, deterministically.
+
+The default demo gates with the anytime-valid e-value statistics on a held-out set
+of `DEMO_HELD_OUT` cases, sized by the gate's own sample-size plan (the bad rule's
+rarest tested case type needs about 27,000 held-out cases). `--stats bootstrap`
+runs the original story on 3,000 cases with the bootstrap and slice checks.
+"""
 
 from __future__ import annotations
 
 import shutil
 import sqlite3
 from pathlib import Path
+from typing import Literal
 
 from scruple.audit.report import usd
 from scruple.clock import SteppingClock
-from scruple.gate.models import DecisionRecord
+from scruple.gate.config import GateConfig
+from scruple.gate.evalue import EValueEvidence
+from scruple.gate.models import DecisionRecord, ShadowMetrics
 from scruple.registry import Provenance
 from scruple.service import AgentGate
 from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
@@ -16,6 +25,34 @@ from scruple.storage import SQLiteStorage
 
 APPROVER = "model-risk@demo.bank"
 AGENT = "dispute-agent-01"
+# Held-out size for the e-value demo: at least the plan's requirement for both
+# rules (26,912 for the bad rule at the default MDR and sd assumptions).
+DEMO_HELD_OUT = 30_000
+
+
+def demo_config(stats: Literal["evalue", "bootstrap"]) -> GateConfig:
+    if stats == "evalue":
+        return GateConfig(stats="evalue", n_cases=DEMO_HELD_OUT)
+    return GateConfig()
+
+
+def _evalue_lines(ev: EValueEvidence) -> None:
+    print(
+        f"  e-value gate: {len(ev.family)} case type(s) changed, e-BH at {ev.alpha:g}; "
+        f"plan needs {ev.required_total_cases} held-out cases, have {ev.n_cases}."
+    )
+    for t in ev.types:
+        flag = "REGRESSED" if t.regressed else ("improved" if t.improved else "no call")
+        print(
+            f"    {t.case_type:<24} n={t.n:>5} (needs {t.required_n}) "
+            f"change {usd(t.mean_diff):>8}/case  e(worse)={t.regression_e_value:<9.3g} "
+            f"e(better)={t.improvement_e_value:<9.3g} {flag}"
+        )
+
+
+def _shadow_story(s: ShadowMetrics) -> None:
+    if s.evalue is not None:
+        _evalue_lines(s.evalue)
 
 
 def _h(title: str) -> None:
@@ -44,7 +81,9 @@ def print_redteam() -> bool:
     return ok
 
 
-def run_demo(out: Path, print_reports: bool = True) -> int:
+def run_demo(
+    out: Path, print_reports: bool = True, stats: Literal["evalue", "bootstrap"] = "evalue"
+) -> int:
     out.mkdir(parents=True, exist_ok=True)
     reports = out / "reports"
     shutil.rmtree(reports, ignore_errors=True)
@@ -53,8 +92,16 @@ def run_demo(out: Path, print_reports: bool = True) -> int:
     for p in (db, out / "tampered.db"):
         p.unlink(missing_ok=True)
 
-    gate = AgentGate(SQLiteStorage(str(db)), SteppingClock())
+    cfg = demo_config(stats)
+    gate = AgentGate(SQLiteStorage(str(db)), SteppingClock(), cfg)
     print("agent-gate demo: change control for agent learning (synthetic data only)")
+    if cfg.stats == "evalue":
+        print(
+            f"Statistics: anytime-valid e-values on {cfg.n_cases:,} held-out cases "
+            "(sized by the gate's sample-size plan)."
+        )
+    else:
+        print(f"Statistics: seeded bootstrap on {cfg.n_cases:,} held-out cases.")
     print("A dispute-handling agent has learned two new rules from experience.")
     print("Neither may go live until it has been verified, staged and approved.")
 
@@ -80,6 +127,14 @@ def run_demo(out: Path, print_reports: bool = True) -> int:
         f"  Held-out replay: mean loss per case {usd(s.baseline.mean_regret_usd_minor)} -> "
         f"{usd(s.candidate.mean_regret_usd_minor)}, no slice worse, no violations."
     )
+    _shadow_story(s)
+    c = good[-1].decision.canary
+    if c is not None and c.sequential is not None:
+        q = c.sequential
+        print(
+            f"  Canary: sequential two-sample test on {q.n_matched} matched live cases "
+            f"(p = {q.assignment_probability:g}): {q.decision.replace('_', ' ')}."
+        )
     print("  Status: canary passed. It is NOT live yet: a human approver must sign off.")
 
     _h("3. The agent proposes a SUBTLY BAD rule (judged against the same current policy)")
@@ -107,8 +162,12 @@ def run_demo(out: Path, print_reports: bool = True) -> int:
             f"  But edge case '{sl.scenario}' got worse: {usd(sl.baseline_mean_regret)} -> "
             f"{usd(sl.candidate_mean_regret)} per case ({sl.changed_cases} cases)."
         )
-    for c in bs.conflicts:
-        print(f"  It silently overrides safeguard {c.overridden_rule} on {c.cases} cases.")
+    for conflict in bs.conflicts:
+        print(
+            f"  It silently overrides safeguard {conflict.overridden_rule} "
+            f"on {conflict.cases} cases."
+        )
+    _shadow_story(bs)
     print(
         f"  New policy violations: {bs.candidate.policy_findings - bs.baseline.policy_findings}."
         " Status: rejected. Nothing went live."

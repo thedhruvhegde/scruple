@@ -66,3 +66,19 @@ is deterministic and open, so publishing the seed would let an agent regenerate 
 held-out set. An auditor with config access can reproduce any decision exactly.
 
 **D-014 argparse, not Typer/Click.** One fewer dependency; the CLI is small.
+
+**D-015 Anytime-valid e-value gate is opt-in (`stats = "evalue"`); the default
+stays `"bootstrap"` for now.** The e-value path (DESIGN "Statistics in the gate")
+replaces the zero-tolerance slice check with per-case-type e-BH, plans the
+held-out size before evaluating, and runs a sequential inverse-propensity canary.
+Evidence (synthetic, seeded): it closes G-7 (false blocks at most alpha instead of
+73% to 100%); on 30,000 held-out cases it certifies the good rule and flags A-1 on
+`late_evidence/<$80` with error control; all 7 red-team attacks are still stopped.
+Why not the default yet: at the default 3,000 held-out cases it returns
+"insufficient evidence" for every candidate that touches a rare case type (A-1
+needs about 27,000), so switching would turn today's promotions into holds for
+every existing caller, CI config and test that sizes the held-out set at 3,000;
+the caps, MDR (2.5% of cap) and sd (5% of cap) are assumptions a policy owner has
+not agreed; and the demo held-out replay takes about 15 s instead of 4 s. The
+demo uses `"evalue"`. Make it the default once a design partner agrees caps and
+materiality thresholds and held-out sets are sized by the plan.
