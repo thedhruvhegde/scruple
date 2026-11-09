@@ -34,8 +34,10 @@ from scruple.sim.disputes import (
     AgentAction,
     CardDispute,
     DisputeEngine,
+    Issuer,
     Represent,
     RequestInfo,
+    TruthIssuer,
     drain,
 )
 from scruple.sim.disputes import generate_cases as generate_disputes
@@ -201,11 +203,11 @@ def test_relabelling_ids_changes_only_the_labels(seed: int, n: int, p: Policy) -
 
 
 def _engine_outcomes(
-    cases: list[CardDispute], plan: list[tuple[int, AgentAction]]
+    cases: list[CardDispute], plan: list[tuple[int, AgentAction]], issuer: Issuer | None = None
 ) -> list[tuple[object, ...]]:
     clock = ManualClock()
     clock.set_date(min(c.opened_on for c in cases))
-    e = DisputeEngine(cases, clock)
+    e = DisputeEngine(cases, clock, issuer=issuer)
     for i, action in plan:
         e.act(cases[i % len(cases)].case_id, action)
     drain(e, clock)
@@ -226,13 +228,16 @@ def _engine_outcomes(
 def test_relabelling_dispute_case_ids_keeps_engine_outcomes(
     seed: int, n: int, plan: list[tuple[int, AgentAction]]
 ) -> None:
-    """Case ids are not observable features: the issuer and the engine must not
-    depend on them (the issuer is seeded from case content, not the label)."""
-    cases = generate_disputes(seed, n, DEFAULT_MIX)
+    """Apart from the issuer's seeded draw (keyed by case id on purpose, see
+    scruple.sim.issuer), the engine must not depend on the label: with the
+    label-free `TruthIssuer` and no evidence documents (whose ids embed the case
+    id), renaming every case changes no outcome."""
+    cases = [
+        c.model_copy(update={"documents": ()}) for c in generate_disputes(seed, n, DEFAULT_MIX)
+    ]
     renamed = [c.model_copy(update={"case_id": f"renamed-{i}"}) for i, c in enumerate(cases)]
-    if any(c.documents for c in cases):
-        return  # documents carry the case id in their own ids; covered by evidence tests
-    assert _engine_outcomes(cases, plan) == _engine_outcomes(renamed, plan)
+    truth = TruthIssuer()
+    assert _engine_outcomes(cases, plan, truth) == _engine_outcomes(renamed, plan, truth)
 
 
 # --------------------------------------------------------------- dominated actions
