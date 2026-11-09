@@ -15,6 +15,22 @@ from scruple.audit.log import AuditLog, VerifyResult
 from scruple.audit.report import render_report
 from scruple.clock import Clock, SystemClock
 from scruple.domain import RuleSpec
+from scruple.gate.approval import (
+    EVENT_GRANTED,
+    EVENT_POLICY_SET,
+    EVENT_REQUESTED,
+    EVENT_SATISFIED,
+    ApprovalPolicy,
+    ApprovalStatus,
+    NoOpenRequestError,
+    check_grant,
+    evaluate_approvals,
+    new_grant,
+    new_request,
+    project_approvals,
+    project_policy,
+)
+from scruple.gate.approval import ApprovalError as ApprovalError
 from scruple.gate.canary import (
     EVENT_BREACHED,
     EVENT_COMPLETED,
@@ -48,8 +64,8 @@ from scruple.verifiers.policy_constraints import verify_policy
 SYSTEM_ACTOR = "agent-gate"
 
 
-class ApprovalError(PermissionError):
-    pass
+# ApprovalError now lives with the approval policy (scruple.gate.approval) and is
+# re-exported here unchanged, so `from scruple.service import ApprovalError` works.
 
 
 class IntegrityReport(BaseModel):
@@ -136,6 +152,8 @@ class AgentGate:
         return records
 
     def approve(self, rule_id: str, version: int, approver: str) -> DecisionRecord:
+        if self.approval_policy() is not None:
+            raise ApprovalError("an approval policy is in force: use request/grant approval")
         rv = self.registry.get(rule_id, version)
         self._require_approver(approver)
         if approver in (rv.owner, rv.provenance.agent_id):
@@ -248,6 +266,126 @@ class AgentGate:
                 f"assurance failure, decision {rec.decision.decision_id}",
             )
         return rec
+
+    # --- approval workflow (N of M named approvers) --------------------------------
+
+    def set_approval_policy(self, policy: ApprovalPolicy, actor: str) -> ApprovalPolicy:
+        """Put an approval policy in force. Audited; the chain holds its history.
+        Only operators in `GateConfig.approvers` may set it, so a named approver
+        cannot lower the quorum they are part of."""
+        if actor not in self.config.approvers:
+            raise ApprovalError(f"{actor} may not change the approval policy")
+        self.audit.append(EVENT_POLICY_SET, actor, {"policy": policy.model_dump(mode="json")})
+        return policy
+
+    def approval_policy(self) -> ApprovalPolicy | None:
+        return project_policy(self.audit.entries())
+
+    def request_approval(self, rule_id: str, version: int, proposer: str) -> ApprovalStatus:
+        policy = self._policy_or_raise()
+        rv = self.registry.get(rule_id, version)
+        self._require_ready_for_activation(rv)
+        now = self.clock.now()
+        request, _ = project_approvals(self.audit.entries(), rule_id, version)
+        if request is not None and now < request.expires_at:
+            raise ApprovalError(f"{rv.ref} already has an open approval request")
+        req = new_request(policy, rv, proposer, now)
+        self.audit.append(
+            EVENT_REQUESTED,
+            proposer,
+            {
+                "rule_id": rule_id,
+                "version": version,
+                "content_hash": rv.content_hash,
+                "proposer": proposer,
+                "requested_at": req.requested_at.isoformat(),
+                "expires_at": req.expires_at.isoformat(),
+            },
+        )
+        return self.approval_status(rule_id, version)
+
+    def grant_approval(
+        self, rule_id: str, version: int, approver: str
+    ) -> tuple[ApprovalStatus, DecisionRecord | None]:
+        """Record one approval. When the policy is satisfied, activate in the same
+        transaction and return the activation decision."""
+        policy = self._policy_or_raise()
+        rv = self.registry.get(rule_id, version)
+        self._require_ready_for_activation(rv)
+        with self.storage.transaction():
+            now = self.clock.now()
+            request, grants = project_approvals(self.audit.entries(), rule_id, version)
+            named = check_grant(policy, request, rv, grants, approver, now)
+            assert request is not None
+            grant = new_grant(policy, named, now)
+            self.audit.append(
+                EVENT_GRANTED,
+                approver,
+                {
+                    "rule_id": rule_id,
+                    "version": version,
+                    "content_hash": rv.content_hash,
+                    "approver": approver,
+                    "roles": list(named.roles),
+                    "granted_at": grant.granted_at.isoformat(),
+                    "expires_at": grant.expires_at.isoformat(),
+                    "request_seq": request.seq,
+                },
+            )
+            request, grants = project_approvals(self.audit.entries(), rule_id, version)
+            status = evaluate_approvals(policy, request, grants, now)
+            if not status.satisfied:
+                return status, None
+            last = self._latest(rule_id, version, Stage.CANARY)
+            assert last is not None
+            verdict = Verdict(
+                Outcome.ACTIVATED,
+                f"Activated by {len(status.counted)} of {len(policy.approvers)} named approvers.",
+                (
+                    f"approved by {', '.join(status.counted)}",
+                    f"policy: {policy.required} of {len(policy.approvers)}"
+                    + (f", role {policy.required_role} required" if policy.required_role else ""),
+                    f"approved after canary decision {last.decision.decision_id}",
+                ),
+                (),
+            )
+            rec = self._record(Stage.ACTIVATION, rv, verdict, approver)
+            self.audit.append(
+                EVENT_SATISFIED,
+                approver,
+                {
+                    "rule_id": rule_id,
+                    "version": version,
+                    "content_hash": rv.content_hash,
+                    "approvers": list(status.counted),
+                    "request_seq": request.seq if request else None,
+                    "decision_id": rec.decision.decision_id,
+                },
+            )
+            self.registry.activate(
+                rule_id, version, approver, f"approved; decision {rec.decision.decision_id}"
+            )
+        return status, rec
+
+    def approval_status(self, rule_id: str, version: int) -> ApprovalStatus:
+        policy = self._policy_or_raise()
+        request, grants = project_approvals(self.audit.entries(), rule_id, version)
+        return evaluate_approvals(policy, request, grants, self.clock.now())
+
+    def _policy_or_raise(self) -> ApprovalPolicy:
+        policy = self.approval_policy()
+        if policy is None:
+            raise NoOpenRequestError("no approval policy is in force")
+        return policy
+
+    def _require_ready_for_activation(self, rv: RuleVersion) -> None:
+        last = self._latest(rv.rule_id, rv.version, Stage.CANARY)
+        if (
+            rv.status is not RuleStatus.CANARY
+            or last is None
+            or last.decision.outcome is not Outcome.CANARY_PASSED
+        ):
+            raise ApprovalError(f"{rv.ref} has not passed canary")
 
     # --- staged canary ramp -----------------------------------------------------
 
