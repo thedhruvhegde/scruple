@@ -1,0 +1,33 @@
+{
+  "rule_id": "inr-delivered-contest-fast",
+  "spec": {
+    "description": "Always contest 'item not received' disputes with confirmed delivery; learned as a high-confidence override.",
+    "conditions": [
+      {
+        "field": "reason_code",
+        "op": "eq",
+        "value": "not_received"
+      },
+      {
+        "field": "delivery_confirmed",
+        "op": "eq",
+        "value": true
+      }
+    ],
+    "action": "contest",
+    "priority": 5
+  },
+  "owner": "payments-ops",
+  "provenance": {
+    "agent_id": "dispute-agent-01",
+    "episode_ids": [
+      "ep-0001",
+      "ep-0002",
+      "ep-0003"
+    ],
+    "notes": "synthetic demo candidate",
+    "claimed_metrics": {
+      "win_rate": 0.97
+    }
+  }
+}

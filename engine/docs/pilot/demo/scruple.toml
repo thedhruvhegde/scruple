@@ -1,0 +1,10 @@
+# Demo gate config (synthetic data). Paths are relative to this file.
+[candidate]
+file = "bad.json"
+
+[gate]
+n_cases = 3000
+
+[ci]
+fail_on_hold = true
+scorecard = "out/scorecard.json"

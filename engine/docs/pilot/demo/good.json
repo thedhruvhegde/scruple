@@ -1,0 +1,31 @@
+{
+  "rule_id": "inr-delivered-contest",
+  "spec": {
+    "description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "conditions": [
+      {
+        "field": "reason_code",
+        "op": "eq",
+        "value": "not_received"
+      },
+      {
+        "field": "delivery_confirmed",
+        "op": "eq",
+        "value": true
+      }
+    ],
+    "action": "contest",
+    "priority": 50
+  },
+  "owner": "payments-ops",
+  "provenance": {
+    "agent_id": "dispute-agent-01",
+    "episode_ids": [
+      "ep-0001",
+      "ep-0002",
+      "ep-0003"
+    ],
+    "notes": "synthetic demo candidate",
+    "claimed_metrics": {}
+  }
+}
