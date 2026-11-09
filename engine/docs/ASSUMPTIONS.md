@@ -71,6 +71,11 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   chargeback rates of 0.1-0.6%, 0.6-1.4% and 1.4-4.0% of settled transactions per tier,
   log-normal monthly volume, and fraud reports at 20-60% of chargebacks. None of this is
   calibrated to any real portfolio or MCC.
+- **A-19** Evidence availability: every case has a receipt and an authorization record.
+  A merchant facing an invalid claim holds every required kind for the reason code and
+  each supporting kind with probability 0.6; facing a valid claim, 0.25 and 0.2.
+  Document contents (refs, carriers, IPs from 203.0.113.0/24, a documentation range)
+  are synthetic.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own

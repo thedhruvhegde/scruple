@@ -57,6 +57,13 @@ from scruple.sim.deadlines import (
     stage_deadline,
     today,
 )
+from scruple.sim.evidence import (
+    EvidenceDocument,
+    EvidenceError,
+    EvidenceKind,
+    EvidenceVault,
+    make_document,
+)
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
 from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
 from scruple.sim.merchants import MerchantProfile, generate_merchants
@@ -99,6 +106,7 @@ class CardDispute(BaseModel):
     processed_on: date  # transaction processing date
     opened_on: date
     opening_stage: Stage
+    documents: tuple[EvidenceDocument, ...] = ()  # what the merchant holds
     truth: Truth
 
     @model_validator(mode="after")
@@ -116,7 +124,15 @@ class CardDispute(BaseModel):
             self.processed_on <= self.opened_on <= filing_deadline(self.rules, self.processed_on)
         ):
             raise ValueError("dispute opened outside the issuer filing window")
+        if any(d.case_id != self.case_id for d in self.documents):
+            raise ValueError("a document belongs to another case")
+        if len({d.doc_id for d in self.documents}) != len(self.documents):
+            raise ValueError("duplicate document id")
         return self
+
+    @property
+    def evidence_ids(self) -> tuple[str, ...]:
+        return tuple(d.doc_id for d in self.documents)
 
     @property
     def rules(self) -> NetworkRules:
@@ -180,9 +196,11 @@ def generate_cases(
         stage = Stage.INQUIRY if rng.random() < mix.p_inquiry else Stage.CHARGEBACK
         key = f"{seed}-{i:06d}"
         merchant = rng.choice(merchants)
+        case_id = f"cd-{key}"
+        docs = _documents(rng, case_id, spec, valid, processed, amount, CURRENCY)
         out.append(
             CardDispute(
-                case_id=f"cd-{key}",
+                case_id=case_id,
                 txn_id=f"tx-{key}",
                 merchant_id=merchant.merchant_id,
                 mcc=merchant.mcc,
@@ -194,10 +212,66 @@ def generate_cases(
                 processed_on=processed,
                 opened_on=opened,
                 opening_stage=stage,
+                documents=docs,
                 truth=Truth(claim_valid=valid, liability_minor=amount if valid else 0),
             )
         )
     return out
+
+
+# Chance that the merchant holds each evidence kind (ASSUMPTION A-19). A merchant in
+# the right usually holds what the reason code needs; one facing a valid claim rarely
+# does. Every case has a receipt and an authorization record.
+P_REQUIRED_HELD = {False: 1.0, True: 0.25}  # keyed by claim_valid
+P_SUPPORTING_HELD = {False: 0.6, True: 0.2}
+ALWAYS_HELD = (EvidenceKind.RECEIPT, EvidenceKind.AUTHORIZATION_RECORD)
+
+
+def _fields(
+    rng: random.Random, kind: EvidenceKind, processed: date, amount: int, currency: str
+) -> tuple[date, dict[str, str]]:
+    ref = f"{rng.getrandbits(48):012x}"
+    f = {"ref": ref, "amount_minor": str(amount), "currency": currency}
+    issued = processed
+    match kind:
+        case EvidenceKind.DELIVERY_PROOF:
+            issued = processed + timedelta(days=rng.randint(1, 10))
+            f |= {"carrier": rng.choice(("ups", "usps", "dhl")), "delivered_on": issued.isoformat()}
+        case EvidenceKind.AUTHORIZATION_RECORD:
+            f |= {"auth_code": f"{rng.randint(0, 999_999):06d}", "approved": "Y"}
+        case EvidenceKind.AVS_CVV_MATCH:
+            f |= {"avs": "Y", "cvv": "M"}
+        case EvidenceKind.DEVICE_IP_MATCH:
+            f |= {"ip": f"203.0.113.{rng.randint(1, 254)}", "device_id": f"dev-{ref}"}
+        case EvidenceKind.REFUND_RECORD:
+            issued = processed + timedelta(days=rng.randint(1, 20))
+            f |= {"refund_id": f"rf-{ref}", "settled_on": issued.isoformat()}
+        case _:
+            pass
+    return issued, f
+
+
+def _documents(
+    rng: random.Random,
+    case_id: str,
+    spec: ReasonCodeSpec,
+    valid: bool,
+    processed: date,
+    amount: int,
+    currency: str,
+) -> tuple[EvidenceDocument, ...]:
+    kinds: list[EvidenceKind] = list(ALWAYS_HELD)
+    for k in spec.required_evidence:
+        if k not in kinds and rng.random() < P_REQUIRED_HELD[valid]:
+            kinds.append(k)
+    for k in spec.supporting_evidence:
+        if k not in kinds and rng.random() < P_SUPPORTING_HELD[valid]:
+            kinds.append(k)
+    docs = []
+    for idx, k in enumerate(kinds):
+        issued, fields = _fields(rng, k, processed, amount, currency)
+        docs.append(make_document(case_id, k, issued, fields, idx))
+    return tuple(docs)
 
 
 # ------------------------------------------------------------------------- actions
@@ -233,6 +307,7 @@ class ActionError(StrEnum):
     RESOLVED = "resolved"
     NOT_ALLOWED = "not_allowed"
     AWAITING_OTHER_PARTY = "awaiting_other_party"
+    BAD_EVIDENCE = "bad_evidence"  # unknown, repeated, or another case's evidence id
 
 
 Awaiting = Literal["merchant", "issuer", "network", "nobody"]
@@ -283,7 +358,9 @@ class CaseOutcome(BaseModel):
 class Issuer(Protocol):
     """Decides the other side of the dispute. Must be deterministic."""
 
-    def merchant_prevails(self, case: CardDispute, stage: Stage, evidence: tuple[str, ...]) -> bool:
+    def merchant_prevails(
+        self, case: CardDispute, stage: Stage, evidence: tuple[EvidenceDocument, ...]
+    ) -> bool:
         """At INQUIRY, REPRESENTMENT, PRE_ARBITRATION (allocation) and ARBITRATION."""
         ...
 
@@ -291,7 +368,9 @@ class Issuer(Protocol):
 class TruthIssuer:
     """Placeholder issuer: the merchant prevails exactly when the claim is invalid."""
 
-    def merchant_prevails(self, case: CardDispute, stage: Stage, evidence: tuple[str, ...]) -> bool:
+    def merchant_prevails(
+        self, case: CardDispute, stage: Stage, evidence: tuple[EvidenceDocument, ...]
+    ) -> bool:
         return not case.truth.claim_valid
 
 
@@ -311,7 +390,7 @@ class _CaseState:
     awaiting: Awaiting
     due: date | None = None  # when the issuer or network acts
     declined_on: date | None = None  # allocation: issuer declined the pre-arbitration
-    evidence: tuple[str, ...] = ()
+    evidence: tuple[EvidenceDocument, ...] = ()
     resolution: Resolution | None = None
     entry_ids: list[int] = field(default_factory=list)
 
@@ -334,6 +413,7 @@ class DisputeEngine:
         self.params = params or EngineParams()
         self.calendar = calendar
         self.merchants = {m.merchant_id: m for m in merchants}
+        self.vault = EvidenceVault(d for c in cases for d in c.documents)
         self.ledger = CardLedger()
         self._cases: dict[str, _CaseState] = {}
         for c in cases:
@@ -463,6 +543,11 @@ class DisputeEngine:
             return refuse(ActionError.AWAITING_OTHER_PARTY, f"awaiting {st.awaiting}")
         if action.kind not in self.allowed_actions(case_id):
             return refuse(ActionError.NOT_ALLOWED, f"{action.kind} in {before.value}")
+        if isinstance(action, Represent):
+            try:
+                self.vault.resolve(case_id, action.evidence_ids)
+            except EvidenceError as exc:
+                return refuse(ActionError.BAD_EVIDENCE, str(exc))
         mark = len(self.ledger.entries)
         self._apply(st, action, now)
         posted = tuple(e.entry_id for e in self.ledger.entries[mark:])
@@ -480,9 +565,9 @@ class DisputeEngine:
             case Accept():
                 self._resolve(st, Event.ACCEPT, now, Resolution.ACCEPTED)
             case Represent(evidence_ids=ids):
-                st.evidence = ids
+                st.evidence = self.vault.resolve(st.case.case_id, ids)
                 if st.life.stage is Stage.INQUIRY:
-                    if self.issuer.merchant_prevails(st.case, Stage.INQUIRY, ids):
+                    if self.issuer.merchant_prevails(st.case, Stage.INQUIRY, st.evidence):
                         self._resolve(st, Event.RESOLVE_INQUIRY, now, Resolution.WON)
                     else:
                         st.life.fire(Event.FILE_CHARGEBACK, now)
