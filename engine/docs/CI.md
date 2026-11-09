@@ -114,6 +114,39 @@ check that pipelines must succeed (Settings, Merge requests). The setting's exac
 name and location vary by GitLab version; check GitLab's documentation for yours.
 The template's script is run locally in the tests against the real CLI.
 
+## After merge: shadow, canary, approval, evidence
+
+All of these go through `AgentGate`; every state change is an audit event in the
+one hash chain, so `scruple audit verify` covers them.
+
+- **Shadow mode** (`AgentGate.shadow_recorder`, `POST /shadow/rules/{id}/versions/{v}/decisions`):
+  the production agent posts decisions it already made; the recorder replays them
+  in a private simulator under the candidate and accumulates per-reason-code
+  statistics. It writes nothing: the module imports no storage, registry, audit or
+  service code, and the tests count every storage write (zero).
+- **Canary ramp** (`start_canary_ramp`, `advance_canary`, `canary_arm`): case ids
+  hash into 10,000 buckets salted by the candidate's content hash; a stage at p%
+  sends buckets below p x 100 to the candidate. Stable, monotone across stages,
+  and independent between candidates (property-tested). Stages must stay below
+  100%, since the last stage still needs a control group. Progress lives only in
+  `canary.*` audit events and is rebuilt from them after a restart.
+- **Breach**: hard violations on canary cases, or treatment cost above control by
+  more than the tolerance, rejects the version in one transaction (decision,
+  `canary.breached`, status change). `breach_canary` is the manual kill switch.
+- **Approvals** (`set_approval_policy`, `request_approval`, `grant_approval`): N of
+  M named approvers, optionally one with a required role; the proposer, owner and
+  learning agent can never approve; grants and requests expire. When the policy is
+  in force, the single-approver `approve` is refused.
+- **Evidence pack** (`scruple ci evidence --db gate.db RULE VERSION`, or
+  `scruple ci run --evidence DIR`): sorted JSON with scorecard, statistics,
+  decisions, ramp, approvals, config hash, seed commitments and an audit segment
+  whose hashes recompute to the chain head; plus a PDF rendered from it. Seeds are
+  never exported.
+
+Statistics are injected through `scruple.gate.provider.StatsProvider`; the default
+is the existing seeded bootstrap. A sequential test can replace it without changing
+the canary or the scorecard.
+
 ## What is not done
 
 - No GitLab merge request note: the markdown is an artifact only.
