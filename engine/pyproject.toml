@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",
+    "fpdf2>=2.9.0",
     "pydantic>=2.9",
     "uvicorn>=0.30",
 ]
@@ -24,6 +25,7 @@ dev = [
     "pyyaml>=6.0.3",
     "types-pyyaml>=6.0.12.20261103",
     "hypothesis>=6.170.15",
+    "pypdf>=7.0.0",
 ]
 
 [build-system]

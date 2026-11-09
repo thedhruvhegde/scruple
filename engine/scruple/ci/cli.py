@@ -14,6 +14,7 @@ from scruple.ci.github import DEFAULT_API, GitHubClient, Transport, UrllibTransp
 from scruple.ci.runner import run_candidate
 from scruple.ci.scorecard import Scorecard, load_scorecard
 from scruple.ci.status import payload_for
+from scruple.service import AgentGate
 
 
 def make_transport() -> Transport:
@@ -48,7 +49,29 @@ def cmd_ci_run(args: argparse.Namespace) -> int:
     for r in card.regressions:
         print(f"  REGRESSION {r.kind}: {r.name}: {r.detail}")
     print(f"scorecard written to {out}")
+    if args.evidence:
+        write_evidence(run.gate, card.rule_id, card.version, Path(args.evidence))
     return card.exit_code
+
+
+def write_evidence(gate: AgentGate, rule_id: str, version: int, out_dir: Path) -> Path:
+    from scruple.ci.evidence import build_evidence_pack
+    from scruple.ci.evidence_pdf import render_pdf
+
+    pack = build_evidence_pack(gate, rule_id, version)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    stem = out_dir / f"evidence-{rule_id}-v{version}"
+    stem.with_suffix(".json").write_text(pack.to_json())
+    stem.with_suffix(".pdf").write_bytes(render_pdf(pack))
+    print(f"evidence pack {pack.pack_sha256[:16]} written to {stem}.json and .pdf")
+    return stem
+
+
+def cmd_ci_evidence(args: argparse.Namespace) -> int:
+    gate_cfg = load_config(args.config).gate if args.config else None
+    gate = AgentGate.open(args.db, config=gate_cfg)
+    write_evidence(gate, args.rule_id, args.version, Path(args.out))
+    return 0
 
 
 def cmd_ci_render(args: argparse.Namespace) -> int:
@@ -95,6 +118,7 @@ def add_ci_parser(sub: Any) -> None:
     r.add_argument("--candidate", default=None, help="candidate rule JSON (overrides config)")
     r.add_argument("--out", default=None, help="scorecard path (overrides config)")
     r.add_argument("--db", default=None, help="SQLite path (default: in-memory)")
+    r.add_argument("--evidence", default=None, help="also write an evidence pack to this dir")
 
     m = ci_sub.add_parser("render", help="render a scorecard as markdown")
     m.set_defaults(fn=cmd_ci_render)
@@ -107,6 +131,16 @@ def add_ci_parser(sub: Any) -> None:
     c.add_argument("--repo", required=True, help="owner/name")
     c.add_argument("--pr", type=int, required=True)
     c.add_argument("--api-url", default=None, help="GitHub API base (default: env or public)")
+
+    ev = ci_sub.add_parser("evidence", help="export the evidence pack (JSON and PDF)")
+    ev.set_defaults(fn=cmd_ci_evidence)
+    ev.add_argument("--db", required=True, help="SQLite database path")
+    ev.add_argument("rule_id")
+    ev.add_argument("version", type=int)
+    ev.add_argument("--out", default=".", help="output directory")
+    ev.add_argument(
+        "--config", default=None, help="scruple.toml whose [gate] produced the decisions"
+    )
 
     st = ci_sub.add_parser("status", help="emit a commit status or check-run payload")
     st.set_defaults(fn=cmd_ci_status)
