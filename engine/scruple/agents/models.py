@@ -70,7 +70,8 @@ class EpisodeScore(BaseModel):
     stages: tuple[str, ...]
     cost_usd_minor: int
     oracle_cost_usd_minor: int
-    regret_usd_minor: int
+    regret_usd_minor: int  # versus the unconstrained hindsight optimum (outcome verifier)
+    compliant_regret_usd_minor: int  # versus the best action that breaks no constraint
     verifiers: tuple[VerifierResult, ...]
     flags: tuple[str, ...]
     tool_calls: int

@@ -162,6 +162,9 @@ def test_high_value_must_escalate() -> None:
     ep2.act(ActionKind.ESCALATE)
     s2 = ep2.submit(EXPLAIN)
     assert s2.outcome == "escalated"
+    assert s2.compliant_regret_usd_minor == 0
+    assert s2.regret_usd_minor > 0  # the unconstrained optimum would not pay an analyst
+    assert s2.passed
     assert next(v for v in s2.verifiers if v.name == "policy_constraints").passed
 
 
@@ -274,6 +277,9 @@ def test_score_invariants(seed: int, case_type: str, kind: ActionKind) -> None:
     assert s.regret_usd_minor >= 0
     assert s.cost_usd_minor - s.regret_usd_minor == s.oracle_cost_usd_minor
     assert s.case_type == case_type
+    policy = next(v for v in s.verifiers if v.name == "policy_constraints")
+    if policy.passed:
+        assert s.compliant_regret_usd_minor >= 0
     ledger = next(v for v in s.verifiers if v.name == "ledger_correctness")
     assert "conservation" not in ledger.findings
     json.loads(s.model_dump_json())
