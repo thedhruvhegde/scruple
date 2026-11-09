@@ -11,3 +11,4 @@ htmlcov/
 demo-output/
 dist/
 site/local/
+.hypothesis/

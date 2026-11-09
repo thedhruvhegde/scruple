@@ -1,13 +1,33 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 
 import pytest
+from hypothesis import HealthCheck, settings
 
 from scruple.audit.log import AuditLog
 from scruple.clock import SteppingClock
 from scruple.registry import Registry
 from scruple.storage import SQLiteStorage
+
+# Hypothesis profiles. "ci" is derandomized: the same examples on every run, so a
+# CI failure always reproduces. "dev" explores fresh examples each run. "thorough"
+# backs `make test-slow`. Pick one with HYPOTHESIS_PROFILE (default: dev).
+_SLOW_OK = [HealthCheck.too_slow]
+settings.register_profile(
+    "ci",
+    derandomize=True,
+    max_examples=100,
+    print_blob=True,
+    deadline=None,
+    suppress_health_check=_SLOW_OK,
+)
+settings.register_profile("dev", max_examples=50, deadline=None, suppress_health_check=_SLOW_OK)
+settings.register_profile(
+    "thorough", max_examples=1_000, deadline=None, suppress_health_check=_SLOW_OK
+)
+settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "dev"))
 
 
 @pytest.fixture
