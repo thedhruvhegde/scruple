@@ -32,7 +32,14 @@ def declared_query(route: APIRoute) -> set[str]:
     return {p.alias for d in _walk(route.dependant) for p in d.query_params}
 
 
+RAW_BODY = "x-scruple-raw-body"
+"""Mark a route with ``openapi_extra={RAW_BODY: True}`` when it reads the raw body
+itself (e.g. signed webhooks, which must verify the exact bytes before parsing)."""
+
+
 def takes_body(route: APIRoute) -> bool:
+    if (route.openapi_extra or {}).get(RAW_BODY):
+        return True
     return any(d.body_params for d in _walk(route.dependant))
 
 

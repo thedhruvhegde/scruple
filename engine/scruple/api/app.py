@@ -17,8 +17,8 @@ from scruple.api.strict import reject_unknown_inputs
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
-from scruple.logging import RequestIDMiddleware
 from scruple.ingest.api import ingest_router
+from scruple.logging import RequestIDMiddleware
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
