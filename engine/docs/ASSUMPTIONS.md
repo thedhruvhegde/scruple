@@ -88,6 +88,11 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   flawed document is caught with probability 0.3, 0.5, 0.7, 0.95 by stage, and a
   caught forgery loses the stage. The issuer never sees ground truth. All numbers are
   invented to give evidence a clear but noisy effect; none comes from network data.
+- **A-22** Case families (scruple/sim/families.py): the suggested mix (22% true fraud,
+  28% friendly fraud, 18% service failure, 20% buyer's remorse, 6% merchant error, 6%
+  cardholder mistake) and the cardholder statements with their odds are invented.
+  Friendly fraud always comes with device and IP evidence linking the cardholder; true
+  fraud never does. Real friendly-fraud rates are disputed and not modelled.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own

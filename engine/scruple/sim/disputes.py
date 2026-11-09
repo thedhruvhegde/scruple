@@ -66,6 +66,14 @@ from scruple.sim.evidence import (
     forge,
     make_document,
 )
+from scruple.sim.families import (
+    CLAIM_VALID,
+    FAMILY_CATEGORIES,
+    CaseFamily,
+    codes_for,
+    family_of,
+    statement,
+)
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
 from scruple.sim.issuer import SeededIssuer
 from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
@@ -93,6 +101,8 @@ class Truth(BaseModel):
     claim_valid: bool
     liability_minor: int = Field(ge=0)  # what the merchant truly owes, txn currency
     forged: dict[str, Forgery] = Field(default_factory=dict)  # doc_id -> how it was forged
+    family: CaseFamily
+    statement: str  # what the cardholder says; revealed by RequestInfo
     missing_evidence: tuple[EvidenceKind, ...] = ()  # required kinds lost by the merchant
 
 
@@ -135,6 +145,11 @@ class CardDispute(BaseModel):
             raise ValueError("duplicate document id")
         if not set(self.truth.forged) <= set(self.evidence_ids):
             raise ValueError("forged ids must name documents of this case")
+        fam = self.truth.family
+        if self.category not in FAMILY_CATEGORIES[fam]:
+            raise ValueError(f"{fam.value} cannot file under a {self.category.value} code")
+        if CLAIM_VALID[fam] is not self.truth.claim_valid:
+            raise ValueError(f"{fam.value} implies claim_valid={CLAIM_VALID[fam]}")
         return self
 
     @property
@@ -163,7 +178,7 @@ class CardDispute(BaseModel):
 
 
 class CaseMix(BaseModel):
-    """Generator knobs. New features add fields with defaults that change nothing."""
+    """Generator knobs. New features add fields whose defaults leave them off."""
 
     model_config = _FROZEN
 
@@ -177,6 +192,9 @@ class CaseMix(BaseModel):
     p_missing_evidence: float = Field(0.0, ge=0, le=1)
     # 024: a merchant facing a valid claim forges each missing required document
     p_forged_evidence: float = Field(0.0, ge=0, le=1)
+    # 026: sample a case family first (see scruple.sim.families.FAMILY_WEIGHTS); when
+    # None, pick any card-absent code and draw validity from p_claim_valid
+    family_weights: dict[CaseFamily, float] | None = None
 
 
 DEFAULT_MIX = CaseMix()
@@ -199,11 +217,21 @@ def generate_cases(
     out: list[CardDispute] = []
     for i in range(n):
         net = rng.choices(networks, weights=weights, k=1)[0]
-        spec = rng.choice(_cnp_codes(net))
+        family: CaseFamily | None = None
+        if mix.family_weights is None:
+            spec = rng.choice(_cnp_codes(net))
+        else:
+            fams = sorted(mix.family_weights, key=lambda f: f.value)
+            family = rng.choices(fams, weights=[mix.family_weights[f] for f in fams], k=1)[0]
+            spec = rng.choice(codes_for(net, family))
         amount = max(500, int(rng.lognormvariate(4.4, 0.9) * 100))
         processed = start + timedelta(days=rng.randint(0, 60))
         opened = processed + timedelta(days=rng.randint(3, 90))
-        valid = rng.random() < mix.p_claim_valid
+        if family is None:
+            valid = rng.random() < mix.p_claim_valid
+            family = family_of(spec.category, valid)
+        else:
+            valid = CLAIM_VALID[family]
         stage = Stage.INQUIRY if rng.random() < mix.p_inquiry else Stage.CHARGEBACK
         key = f"{seed}-{i:06d}"
         merchant = rng.choice(merchants)
@@ -231,6 +259,8 @@ def generate_cases(
                     liability_minor=amount if valid else 0,
                     forged=forged,
                     missing_evidence=missing,
+                    family=family,
+                    statement=statement(case_id, family),
                 ),
             )
         )
@@ -246,7 +276,12 @@ ALWAYS_HELD = (EvidenceKind.RECEIPT, EvidenceKind.AUTHORIZATION_RECORD)
 
 
 def _fields(
-    rng: random.Random, kind: EvidenceKind, processed: date, amount: int, currency: str
+    rng: random.Random,
+    kind: EvidenceKind,
+    processed: date,
+    amount: int,
+    currency: str,
+    valid: bool = False,
 ) -> tuple[date, dict[str, str]]:
     ref = f"{rng.getrandbits(48):012x}"
     f = {"ref": ref, "amount_minor": str(amount), "currency": currency}
@@ -260,7 +295,12 @@ def _fields(
         case EvidenceKind.AVS_CVV_MATCH:
             f |= {"avs": "Y", "cvv": "M"}
         case EvidenceKind.DEVICE_IP_MATCH:
-            f |= {"ip": f"203.0.113.{rng.randint(1, 254)}", "device_id": f"dev-{ref}"}
+            f |= {
+                "ip": f"203.0.113.{rng.randint(1, 254)}",
+                "device_id": f"dev-{ref}",
+                # true fraud: the order came from a device the cardholder never used
+                "matches_cardholder": "N" if valid else "Y",
+            }
         case EvidenceKind.REFUND_RECORD:
             issued = processed + timedelta(days=rng.randint(1, 20))
             f |= {"refund_id": f"rf-{ref}", "settled_on": issued.isoformat()}
@@ -303,7 +343,7 @@ def _documents(
     docs: list[EvidenceDocument] = []
     forged: dict[str, Forgery] = {}
     for idx, k in enumerate(kinds):
-        issued, fields = _fields(rng, k, processed, amount, currency)
+        issued, fields = _fields(rng, k, processed, amount, currency, valid)
         d = make_document(case_id, k, issued, fields, idx)
         if k in to_forge:
             how = rng.choice(tuple(Forgery))
@@ -336,8 +376,15 @@ class Escalate(BaseModel):
     kind: Literal["escalate"] = "escalate"
 
 
-AgentAction = Annotated[Accept | Represent | Escalate, Field(discriminator="kind")]
-ACTION_KINDS: tuple[str, ...] = ("accept", "represent", "escalate")
+class RequestInfo(BaseModel):
+    """Ask the issuer for the cardholder's statement. Changes no state."""
+
+    model_config = _FROZEN
+    kind: Literal["request_info"] = "request_info"
+
+
+AgentAction = Annotated[Accept | Represent | Escalate | RequestInfo, Field(discriminator="kind")]
+ACTION_KINDS: tuple[str, ...] = ("accept", "represent", "escalate", "request_info")
 
 
 class ActionError(StrEnum):
@@ -363,6 +410,7 @@ class ActionResult(BaseModel):
     stage_before: Stage | None = None
     stage_after: Stage | None = None
     entries: tuple[int, ...] = ()  # journal entry ids posted by this action
+    info: dict[str, str] = Field(default_factory=dict)  # e.g. RequestInfo's statement
 
 
 class Observation(BaseModel):
@@ -513,6 +561,7 @@ class DisputeEngine:
             out.append("represent")
         if stage is Stage.PRE_ARBITRATION:
             out.append("escalate")
+        out.append("request_info")
         return tuple(out)
 
     def observe(self, case_id: str) -> Observation:
@@ -590,7 +639,7 @@ class DisputeEngine:
             except EvidenceError as exc:
                 return refuse(ActionError.BAD_EVIDENCE, str(exc))
         mark = len(self.ledger.entries)
-        self._apply(st, action, now)
+        info = self._apply(st, action, now)
         posted = tuple(e.entry_id for e in self.ledger.entries[mark:])
         return ActionResult(
             case_id=case_id,
@@ -599,10 +648,13 @@ class DisputeEngine:
             stage_before=before,
             stage_after=st.life.stage,
             entries=posted,
+            info=info,
         )
 
-    def _apply(self, st: _CaseState, action: AgentAction, now: date) -> None:
+    def _apply(self, st: _CaseState, action: AgentAction, now: date) -> dict[str, str]:
         match action:
+            case RequestInfo():
+                return {"statement": st.case.truth.statement}
             case Accept():
                 self._resolve(st, Event.ACCEPT, now, Resolution.ACCEPTED)
             case Represent(evidence_ids=ids):
@@ -613,7 +665,7 @@ class DisputeEngine:
                     else:
                         st.life.fire(Event.FILE_CHARGEBACK, now)
                         self._on_chargeback(st)
-                    return
+                    return {}
                 to = st.life.fire(Event.REPRESENT, now)
                 self._enter(st, to, now)
                 st.awaiting = "issuer"
@@ -623,6 +675,7 @@ class DisputeEngine:
                 self._enter(st, Stage.ARBITRATION, now)
                 st.awaiting = "network"
                 st.due = now + timedelta(days=self.params.arbitration_ruling_days)
+        return {}
 
     # --- time ---------------------------------------------------------------
     def sync(self) -> None:

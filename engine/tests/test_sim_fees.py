@@ -16,9 +16,11 @@ from scruple.sim.disputes import (
     TruthIssuer,
     drain,
 )
+from scruple.sim.families import family_of
 from scruple.sim.fees import DEFAULT_FEES, NO_FEES, FeeSchedule
 from scruple.sim.models import Resolution, Stage
 from scruple.sim.networks import Network
+from scruple.sim.reason_codes import reason_code
 
 
 def case(
@@ -41,7 +43,12 @@ def case(
         processed_on=date(2026, 1, 5),
         opened_on=date(2026, 2, 2),
         opening_stage=stage,
-        truth=Truth(claim_valid=valid, liability_minor=amount if valid else 0),
+        truth=Truth(
+            claim_valid=valid,
+            liability_minor=amount if valid else 0,
+            family=family_of(reason_code(network, code).category, valid),
+            statement="synthetic",
+        ),
     )
 
 

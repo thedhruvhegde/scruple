@@ -18,7 +18,7 @@ from scruple.sim.disputes import (
     DisputeEngine,
     Escalate,
     Represent,
-    Truth,
+    RequestInfo,
     TruthIssuer,
     drain,
     generate_cases,
@@ -73,7 +73,12 @@ def test_case_validation() -> None:
     with pytest.raises(ValidationError, match="cannot open"):
         CardDispute.model_validate({**data, "opening_stage": Stage.ARBITRATION})
     with pytest.raises(ValidationError, match="no liability"):
-        CardDispute.model_validate({**data, "truth": Truth(claim_valid=False, liability_minor=1)})
+        CardDispute.model_validate(
+            {
+                **data,
+                "truth": c.truth.model_copy(update={"claim_valid": False, "liability_minor": 1}),
+            }
+        )
     with pytest.raises(KeyError):
         CardDispute.model_validate({**data, "reason_code": "99.9"})
 
@@ -175,6 +180,7 @@ BY_KIND: dict[str, AgentAction] = {
     "accept": Accept(),
     "represent": Represent(),
     "escalate": Escalate(),
+    "request_info": RequestInfo(),
 }
 action_st = st.sampled_from([Accept(), Represent(), Represent(evidence_ids=("x",)), Escalate()])
 
@@ -223,7 +229,7 @@ def test_history_dates_never_go_backwards(seed: int, waits: list[int]) -> None:
         cid = cases[i % len(cases)].case_id
         acts = e.observe(cid).allowed_actions
         if acts:
-            e.act(cid, BY_KIND[acts[-1]])
+            e.act(cid, BY_KIND[acts[i % len(acts)]])
         clock.advance(days=w)
     drain(e, clock)
     for c in cases:
