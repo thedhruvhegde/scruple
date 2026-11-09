@@ -9,7 +9,8 @@ same starting state with call k failing: an ordinary error on even k, a crash
 exactly the state before or exactly the state after: never a status change without
 its audit entry, a decision without its transition, or half a ramp step. The
 integrity check must pass, and a retry must then succeed. The same runs on
-PostgreSQL, and on a SQLite file whose process is killed (`os._exit`) mid-step.
+PostgreSQL, and on a SQLite file whose process is killed (`os._exit`) mid-step
+(one step by default; the others under `make test-slow`).
 
 Gate verdicts are pure functions of (rule, active rules, config), so they are
 memoised here to keep the hundreds of re-runs fast. Synthetic data only.
@@ -252,7 +253,14 @@ def kill_child(db: str, name: str, k: int) -> None:
     raise SystemExit(0)  # the fault was past the end: the step completed
 
 
-@pytest.mark.parametrize("name", ["evaluate_to_canary", "approve", "rollback"])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "approve",
+        pytest.param("evaluate_to_canary", marks=pytest.mark.slow),
+        pytest.param("rollback", marks=pytest.mark.slow),
+    ],
+)
 def test_killing_the_process_mid_step_leaves_all_or_nothing(name: str, tmp_path: Path) -> None:
     before, after, n = _reference(lambda: SQLiteStorage(":memory:"), name)
     for k in sorted({0, 1, n // 3, n // 2, (2 * n) // 3, n - 2, n - 1}):

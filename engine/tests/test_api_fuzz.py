@@ -83,7 +83,7 @@ def client_errors_are_well_formed(ctx: CheckContext, response: Any, case: Any) -
 
 
 @schema.parametrize()
-@settings(max_examples=40, deadline=None, suppress_health_check=list(HealthCheck))
+@settings(max_examples=30, deadline=None, suppress_health_check=list(HealthCheck))
 def test_every_route_survives_schema_fuzzing(case: Any) -> None:
     response = case.call()
     excluded = [

@@ -30,47 +30,52 @@ from tests.golden.episodes import TRACES, approvals, dumps, promotion
 from tests.golden.regen import path_for
 
 ROOT = Path(__file__).resolve().parents[1]
-HASH_SEEDS = ("0", "1", "4242", "random")
+QUICK_SEEDS = ("0", "random")
+ALL_SEEDS = ("0", "1", "2", "4242", "123456789", "random")
 
 
-def _probe(hash_seed: str) -> dict[str, str]:
-    env = {**os.environ, "PYTHONHASHSEED": hash_seed}
-    out = subprocess.run(
-        [sys.executable, "-m", "tests.determinism_probe"],
-        cwd=ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=True,
-        timeout=300,
-    )
-    result: dict[str, str] = json.loads(out.stdout)
-    return result
+def _probes(hash_seeds: tuple[str, ...]) -> dict[str, dict[str, str]]:
+    """Run the probe once per hash seed, all at the same time."""
+    procs = {
+        s: subprocess.Popen(
+            [sys.executable, "-m", "tests.determinism_probe"],
+            cwd=ROOT,
+            env={**os.environ, "PYTHONHASHSEED": s},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        for s in hash_seeds
+    }
+    out: dict[str, dict[str, str]] = {}
+    for s, p in procs.items():
+        stdout, stderr = p.communicate(timeout=600)
+        assert p.returncode == 0, stderr[-2000:]
+        out[s] = json.loads(stdout)
+    return out
 
 
-@pytest.fixture(scope="module")
-def probes() -> dict[str, dict[str, str]]:
-    return {s: _probe(s) for s in HASH_SEEDS}
+def _check(probes: dict[str, dict[str, str]]) -> None:
+    from scruple.hashing import sha256_hex
 
-
-def test_outputs_do_not_depend_on_the_hash_seed(probes: dict[str, dict[str, str]]) -> None:
-    first = probes[HASH_SEEDS[0]]
+    first = next(iter(probes.values()))
     assert set(first) >= set(TRACES)
     for seed, got in probes.items():
         diff = sorted(k for k in first if got.get(k) != first[k])
         assert not diff, f"PYTHONHASHSEED={seed} changed {diff}"
+    for name in TRACES:  # and every subprocess agrees with the golden files
+        assert first[name] == sha256_hex(path_for(name).read_text(encoding="utf-8")), name
 
 
-def test_subprocess_outputs_match_this_process(probes: dict[str, dict[str, str]]) -> None:
-    assert digests() == probes[HASH_SEEDS[0]]
+def test_outputs_do_not_depend_on_the_hash_seed() -> None:
+    probes = _probes(QUICK_SEEDS)
+    _check(probes)
+    assert digests() == probes["0"]  # nor on whether it runs in this process
 
 
-def test_subprocess_outputs_match_the_golden_files(probes: dict[str, dict[str, str]]) -> None:
-    from scruple.hashing import sha256_hex
-
-    for name in TRACES:
-        want = sha256_hex(path_for(name).read_text(encoding="utf-8"))
-        assert probes["random"][name] == want, name
+@pytest.mark.slow
+def test_outputs_do_not_depend_on_any_of_many_hash_seeds() -> None:
+    _check(_probes(ALL_SEEDS))
 
 
 # --------------------------------------------------------------------- backends
