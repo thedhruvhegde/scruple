@@ -72,6 +72,7 @@ def test_bootstrap_demo_keeps_the_old_story(
     assert "e-value gate" not in out
 
 
+@pytest.mark.slow  # the default suite checks the e-value demo (tests/test_cli.py)
 def test_bootstrap_demo_is_deterministic(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
