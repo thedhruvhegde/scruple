@@ -16,6 +16,7 @@ dependencies = [
     "pydantic>=2.9",
     "sqlalchemy>=2.0",
     "uvicorn>=0.30",
+    "pyyaml>=6.0.3",
 ]
 
 [project.scripts]
