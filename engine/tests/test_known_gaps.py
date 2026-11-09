@@ -6,6 +6,8 @@ update docs/VERIFIER_FINDINGS.md and move the test to test_adversarial.py.
 
 from __future__ import annotations
 
+import pytest
+
 from scruple.domain import Action, RuleSpec
 from scruple.gate import GateConfig, Outcome, evaluate_shadow
 from scruple.registry import Provenance, Registry
@@ -64,3 +66,18 @@ def test_gap_memorised_outcomes_pass_the_episode_scorecard() -> None:
     assert run.fired_on == 0
     assert run.gate_rate == 1.0
     assert run.status == "not caught"
+
+
+NOT_MODELLED = ["X7", "X8", "X14", "X30", "X31", "X36", "X37"]
+
+
+@pytest.mark.parametrize("xid", NOT_MODELLED)
+def test_gap_issuer_side_exploits_are_not_modelled(xid: str) -> None:
+    """G-9: the research exploits about Reg E / Reg Z provisional credit, customer
+    notices, statement dates, collections, case creation and talking the cardholder
+    out of a dispute cannot be expressed against the merchant-side dispute engine, so
+    nothing tests the scorecard against them. Modelling an issuer-side environment
+    with a user simulator makes these testable (and this test fail)."""
+    run = run_exploit(EXPLOIT_BY_ID[xid], range(5))
+    assert not EXPLOIT_BY_ID[xid].expressible
+    assert run.status == "n/a" and run.exercised == 0
