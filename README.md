@@ -14,6 +14,14 @@ train on it. evaluate on it. ship through it.
 - three buyers, one asset: ai labs train on it, finance-agent teams test releases on it, banks approve changes with it.
 - the engine lives in `engine/`: python 3.12, uv. `cd engine && make install test demo`.
 
+## the engine
+
+- `engine/`: simulator, verifiers, statistics, gate, integrations, pilot kit. 5,193 tests. [engine/README.md](engine/README.md).
+- real models on real cfpb complaints: [engine/docs/results/REAL_MODELS.md](engine/docs/results/REAL_MODELS.md).
+- claude haiku, sonnet and opus working simulated disputes: [engine/docs/results/MODEL_EPISODES.md](engine/docs/results/MODEL_EPISODES.md).
+- pre-registered experiments, one pass and one fail: [engine/docs/experiments](engine/docs/experiments).
+- the maths: [engine/docs/math](engine/docs/math).
+
 ## the site
 
 - one html file and one script. no build step, no framework, no tracking, no cookies.
