@@ -9,6 +9,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, SerializerFunctionWrapHandler, model_serializer
 
 from scruple.gate.evalue import EValueEvidence
+from scruple.gate.sequential import SequentialCanaryResult
 from scruple.verifiers.base import Finding
 
 
@@ -124,6 +125,11 @@ class CanaryMetrics(BaseModel):
     treatment_mean_cost_usd_minor: float
     control_mean_cost_usd_minor: float
     new_hard_findings: tuple[Finding, ...]
+    sequential: SequentialCanaryResult | None = None  # set when GateConfig.stats = "evalue"
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        return _drop_none(handler(self), "sequential")
 
 
 class Decision(BaseModel):

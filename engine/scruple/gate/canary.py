@@ -19,6 +19,12 @@ the candidate decided, or treatment mean realized cost above control by more tha
 the tolerance. The interval from the injected `StatsProvider` is reported with
 every stage, so a sequential test can replace the point rule later without
 changing callers.
+
+With a `GateConfig` whose `stats` is "evalue", the point rule is replaced by the
+anytime-valid two-sample test in `scruple.gate.sequential` (inverse-propensity
+betting on the known assignment probability). Each stage is its own sequential
+test on fresh live cases at level `evalue_alpha / len(stages)`, so the chance of a
+false rollback anywhere in the ramp is at most `evalue_alpha` (union bound).
 """
 
 from __future__ import annotations
@@ -31,8 +37,15 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from scruple.audit.models import AuditEntry
+from scruple.gate.config import GateConfig
 from scruple.gate.models import CanaryMetrics, CheckResult, Outcome
 from scruple.gate.provider import Interval, StatsProvider, default_provider
+from scruple.gate.sequential import (
+    SequentialCanaryResult,
+    describe,
+    observations,
+    sequential_checks,
+)
 from scruple.hashing import sha256_hex
 from scruple.registry.models import RuleVersion
 from scruple.sim.engine import Simulator
@@ -120,6 +133,7 @@ class StageResult(BaseModel):
     checks: tuple[CheckResult, ...]
     summary: str
     reasons: tuple[str, ...]
+    sequential: SequentialCanaryResult | None = None
 
     @property
     def gate_outcome(self) -> Outcome:
@@ -141,6 +155,7 @@ class StageResult(BaseModel):
             treatment_mean_cost_usd_minor=self.treatment_mean_cost_usd_minor,
             control_mean_cost_usd_minor=self.control_mean_cost_usd_minor,
             new_hard_findings=self.hard_findings[:10],
+            sequential=self.sequential,
         )
 
 
@@ -162,6 +177,7 @@ def evaluate_stage(
     schedule: RampSchedule,
     stage_index: int,
     provider: StatsProvider | None = None,
+    config: GateConfig | None = None,
 ) -> StageResult:
     if not 0 <= stage_index < len(schedule.stages):
         raise ValueError(f"stage {stage_index} is outside the schedule")
@@ -194,6 +210,27 @@ def evaluate_stage(
     )
     enough = len(decided) >= schedule.min_matched and len(control) >= schedule.min_matched
     within = t_mean <= c_mean + schedule.tolerance_usd_minor
+    seq: SequentialCanaryResult | None = None
+    cost_checks: tuple[CheckResult, ...]
+    if config is not None and config.stats == "evalue":
+        cost_checks, seq = sequential_checks(
+            observations(cases, matches, treat, costs, config),
+            basis_points(percent) / BUCKETS,
+            config.evalue_alpha / len(schedule.stages),
+            schedule.tolerance_usd_minor,
+        )
+    else:
+        cost_checks = (
+            _check(
+                "canary_cost_within_tolerance",
+                "hard",
+                within or not enough,
+                f"treatment mean cost {_usd(t_mean)} vs control {_usd(c_mean)}, difference "
+                f"{_usd(diff.mean)} ({diff.confidence:.0%} interval {_usd(diff.low)} to "
+                f"{_usd(diff.high)}, {diff.method}; "
+                f"tolerance {_usd(schedule.tolerance_usd_minor)})",
+            ),
+        )
     checks = (
         _check(
             "canary_no_hard_violations",
@@ -201,14 +238,7 @@ def evaluate_stage(
             not hard,
             f"{len(hard)} ledger/policy violations on canary cases",
         ),
-        _check(
-            "canary_cost_within_tolerance",
-            "hard",
-            within or not enough,
-            f"treatment mean cost {_usd(t_mean)} vs control {_usd(c_mean)}, difference "
-            f"{_usd(diff.mean)} ({diff.confidence:.0%} interval {_usd(diff.low)} to "
-            f"{_usd(diff.high)}, {diff.method}; tolerance {_usd(schedule.tolerance_usd_minor)})",
-        ),
+        *cost_checks,
         _check(
             "canary_enough_traffic",
             "evidence",
@@ -237,6 +267,8 @@ def evaluate_stage(
         outcome = "advance"
         summary = f"Canary stage {percent:g}% passed: ramping to {nxt:g}%."
         reasons = ("live outcomes within tolerance of control", "no hard violations")
+    if seq is not None and outcome in ("complete", "advance"):
+        reasons = (describe(seq), "no hard violations")
     return StageResult(
         stage_index=stage_index,
         percent=percent,
@@ -252,6 +284,7 @@ def evaluate_stage(
         checks=checks,
         summary=summary,
         reasons=reasons,
+        sequential=seq,
     )
 
 

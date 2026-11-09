@@ -35,6 +35,7 @@ from .models import (
     SliceStat,
 )
 from .regression import golden_cases
+from .sequential import SequentialCanaryResult, describe, observations, sequential_checks
 from .stats import paired_bootstrap_ci
 
 
@@ -378,6 +379,26 @@ def evaluate_canary(
     ]
     enough = len(t_ids) >= cfg.canary_min_matched and len(ctrl_ids) >= cfg.canary_min_matched
     within = t_mean <= c_mean + cfg.canary_tolerance_usd_minor
+    seq: SequentialCanaryResult | None = None
+    cost_checks: tuple[CheckResult, ...]
+    if cfg.stats == "evalue":
+        p = int(cfg.canary_fraction * 10_000) / 10_000  # exactly what in_canary uses
+        cost_checks, seq = sequential_checks(
+            observations(cases, matches, treat, costs, cfg),
+            p,
+            cfg.evalue_alpha,
+            cfg.canary_tolerance_usd_minor,
+        )
+    else:
+        cost_checks = (
+            _check(
+                "canary_cost_within_tolerance",
+                "hard",
+                within or not enough,
+                f"treatment mean cost {_usd(t_mean)} vs control {_usd(c_mean)} "
+                f"(tolerance {_usd(cfg.canary_tolerance_usd_minor)})",
+            ),
+        )
     checks = (
         _check(
             "canary_no_hard_violations",
@@ -385,13 +406,7 @@ def evaluate_canary(
             not hard,
             f"{len(hard)} ledger/policy violations on canary cases",
         ),
-        _check(
-            "canary_cost_within_tolerance",
-            "hard",
-            within or not enough,
-            f"treatment mean cost {_usd(t_mean)} vs control {_usd(c_mean)} "
-            f"(tolerance {_usd(cfg.canary_tolerance_usd_minor)})",
-        ),
+        *cost_checks,
         _check(
             "canary_enough_traffic",
             "evidence",
@@ -410,6 +425,7 @@ def evaluate_canary(
         treatment_mean_cost_usd_minor=t_mean,
         control_mean_cost_usd_minor=c_mean,
         new_hard_findings=tuple(hard[:10]),
+        sequential=seq,
     )
     failed_hard = [c for c in checks if c.kind == "hard" and not c.passed]
     if failed_hard:
@@ -425,6 +441,17 @@ def evaluate_canary(
             Outcome.HOLD,
             "Canary inconclusive: not enough live traffic yet.",
             tuple(f"{c.name}: {c.detail}" for c in checks if not c.passed),
+            checks,
+            canary=metrics,
+        )
+    if seq is not None:
+        early = seq.decision == "benefit"
+        return Verdict(
+            Outcome.CANARY_PASSED,
+            "Canary passed early: candidate certified cheaper than control."
+            if early
+            else "Canary passed: ready for human approval.",
+            (describe(seq), "no hard violations"),
             checks,
             canary=metrics,
         )

@@ -449,6 +449,7 @@ class AgentGate:
             state.schedule,
             state.stage_index,
             provider or provider_for(self.config),
+            self.config,
         )
         verdict = Verdict(
             res.gate_outcome,
