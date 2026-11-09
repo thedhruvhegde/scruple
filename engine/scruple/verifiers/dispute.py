@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from scruple.verifiers.calibration import CALIBRATION, CALIBRATION_EPISODE
 from scruple.verifiers.checks import (
     OUTCOME_CORRECT,
     RECORD_INTEGRITY,
@@ -35,8 +36,9 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     EVIDENCE_FIT,
     DEADLINES,
     DEADLINE_CREDIT,
+    CALIBRATION_EPISODE,
 )
-BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY,)
+BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION)
 
 
 def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS) -> Scorecard:

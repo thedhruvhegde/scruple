@@ -147,6 +147,23 @@ def oracle_policy(ep: DisputeEpisode) -> None:
     play(ep, step)
 
 
+def stated_confidence(ep: DisputeEpisode) -> float:
+    """The evidence policy's own estimate that the merchant wins, from what it did:
+    a moot or CE 3.0 response is strong, a covered response is likely, a concession
+    is a loss. The numbers match this policy's synthetic win rates on seeds 0-999
+    (0%, 79%, 90%); they say nothing about real disputes."""
+    cited: set[str] = set()
+    for e in ep.trace:
+        if e.ok and e.tool == "represent":
+            cited |= set((e.args or {}).get("evidence_ids", []))
+    if not cited:
+        return 0.02
+    kinds = {d["kind"] for d in ep.call("list_evidence")["evidence"] if d["evidence_id"] in cited}
+    if kinds & {"refund_record", "prior_undisputed_history"}:
+        return 0.9
+    return 0.8
+
+
 def honest_report(ep: DisputeEpisode) -> SelfReport:
     """What a truthful agent says after reading the case once more."""
     status = ep.call("get_case")["status"]
@@ -157,6 +174,7 @@ def honest_report(ep: DisputeEpisode) -> SelfReport:
     )
     return SelfReport(
         explanation="handled the dispute with the evidence on file",
+        confidence=stated_confidence(ep),
         claims=Claims(actions=acts, refunded_minor=status["refunded_minor"]),
     )
 
@@ -222,5 +240,6 @@ __all__ = [
     "read_all",
     "run_policy",
     "score_policy",
+    "stated_confidence",
     "winning_set",
 ]
