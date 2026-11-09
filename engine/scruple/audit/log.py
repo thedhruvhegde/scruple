@@ -71,14 +71,17 @@ class AuditLog:
 
 
 def verify_entries(entries: Sequence[AuditEntry], expected_head: str | None = None) -> VerifyResult:
+    """`first_bad_seq` is the first position (1-based) that cannot be trusted. It is the
+    position, not the seq the entry claims: after a deletion or a swap at position i,
+    the entry found there claims seq i+1, but entry i is the one that is missing."""
     prev = GENESIS_HASH
     for i, e in enumerate(entries, start=1):
         if e.seq != i:
-            return _bad(entries, e.seq, f"sequence gap: expected seq {i}, found {e.seq}")
+            return _bad(entries, i, f"sequence gap: expected seq {i}, found {e.seq}")
         if e.prev_hash != prev:
-            return _bad(entries, e.seq, "prev_hash does not match the previous entry")
+            return _bad(entries, i, "prev_hash does not match the previous entry")
         if compute_hash(e) != e.entry_hash:
-            return _bad(entries, e.seq, "entry contents do not match its hash (edited)")
+            return _bad(entries, i, "entry contents do not match its hash (edited)")
         prev = e.entry_hash
     if expected_head is not None and prev != expected_head:
         return _bad(entries, None, "head hash differs from anchored head (truncated or rewritten)")

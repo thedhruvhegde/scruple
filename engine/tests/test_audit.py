@@ -58,6 +58,19 @@ def test_tampering_is_detected(audit: AuditLog, attack: str) -> None:
     assert not verify_entries(es).ok
 
 
+def test_failure_points_at_the_position_not_the_claimed_seq(audit: AuditLog) -> None:
+    """Regression (found by tests/test_audit_tamper.py): after deleting entry 3, or
+    swapping entries 3 and 4, verification reported seq 4 as the first bad entry,
+    which implied entry 3 was fine when it was the one missing or moved."""
+    for i in range(6):
+        audit.append("x", "tester", {"i": i})
+    es = audit.entries()
+    deleted = es[:2] + es[3:]
+    assert verify_entries(deleted).first_bad_seq == 3
+    swapped = [*es[:2], es[3], es[2], *es[4:]]
+    assert verify_entries(swapped).first_bad_seq == 3
+
+
 def test_truncation_needs_anchored_head(audit: AuditLog) -> None:
     for i in range(4):
         audit.append("x", "tester", {"i": i})
