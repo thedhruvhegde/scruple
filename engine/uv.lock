@@ -1220,6 +1220,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
     { name = "fpdf2", specifier = ">=2.9.0" },
     { name = "httpx", specifier = ">=0.27" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "langgraph", marker = "extra == 'langgraph'", specifier = ">=1.0" },
     { name = "mcp", specifier = ">=2.3" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
