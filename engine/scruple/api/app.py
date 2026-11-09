@@ -18,6 +18,7 @@ from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
 from scruple.logging import RequestIDMiddleware
+from scruple.ingest.api import ingest_router
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
@@ -104,6 +105,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
     app.add_exception_handler(DuplicateContentError, _err(409))
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
+    app.include_router(ingest_router())
 
     @app.get("/health")
     def health() -> dict[str, str]:

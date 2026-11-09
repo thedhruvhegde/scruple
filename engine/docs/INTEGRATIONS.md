@@ -39,3 +39,22 @@ Rules every adapter follows:
   against `^[A-Za-z0-9_]+$` before they reach a URL; responses are size-limited.
 - Not done: writes (submitting evidence, closing disputes), retries and rate-limit
   backoff, Connect (`Stripe-Account` header), `expand[]`.
+
+## Stripe webhooks (`scruple.ingest.stripe.webhook`, route in `scruple.ingest.api`)
+
+- Scheme ported from Stripe's own library (stripe/stripe-python `stripe/_webhook.py`
+  at `ee9db33`, MIT): `Stripe-Signature: t=...,v1=...`, hex HMAC-SHA256 of
+  `"{t}.{raw body}"` keyed with the `whsec_...` secret, any `v1` may match (rotation),
+  `v0` ignored, constant-time compare, 300 s default tolerance.
+- Stricter than the library (our choice): future timestamps beyond the tolerance are
+  rejected; exactly one numeric `t`; `v1` must be 64 lowercase hex; header length and
+  signature count are bounded; every (secret, signature) pair is compared.
+- Replay: event ids are remembered (bounded LRU); a repeat is acknowledged (200,
+  `duplicate: true`) and not processed again. A delivery that failed to map is not
+  remembered, so Stripe's retry can succeed later.
+- Vectors in the tests were computed independently with `openssl dgst -sha256 -hmac`.
+- Route: `POST /ingest/stripe/webhook`, mounted in `api/app.py` with one line.
+  Secrets from `SCRUPLE_STRIPE_WEBHOOK_SECRETS` (comma separated); unset means 503.
+  400 bad signature, 413 body over 2 MiB, 422 signed but unmappable.
+- Stubbed: accepted batches stay in memory on the receiver; persisting them (through
+  the service layer) is not written yet.
