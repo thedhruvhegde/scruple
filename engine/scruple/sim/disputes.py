@@ -62,6 +62,8 @@ from scruple.sim.evidence import (
     EvidenceError,
     EvidenceKind,
     EvidenceVault,
+    Forgery,
+    forge,
     make_document,
 )
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
@@ -89,6 +91,8 @@ class Truth(BaseModel):
 
     claim_valid: bool
     liability_minor: int = Field(ge=0)  # what the merchant truly owes, txn currency
+    forged: dict[str, Forgery] = Field(default_factory=dict)  # doc_id -> how it was forged
+    missing_evidence: tuple[EvidenceKind, ...] = ()  # required kinds lost by the merchant
 
 
 class CardDispute(BaseModel):
@@ -128,6 +132,8 @@ class CardDispute(BaseModel):
             raise ValueError("a document belongs to another case")
         if len({d.doc_id for d in self.documents}) != len(self.documents):
             raise ValueError("duplicate document id")
+        if not set(self.truth.forged) <= set(self.evidence_ids):
+            raise ValueError("forged ids must name documents of this case")
         return self
 
     @property
@@ -166,6 +172,10 @@ class CaseMix(BaseModel):
     p_inquiry: float = Field(0.2, ge=0, le=1)  # share opening as an inquiry
     p_claim_valid: float = Field(0.5, ge=0, le=1)
     n_merchants: int = Field(40, ge=1)
+    # 024: a merchant in the right loses each required document with this probability
+    p_missing_evidence: float = Field(0.0, ge=0, le=1)
+    # 024: a merchant facing a valid claim forges each missing required document
+    p_forged_evidence: float = Field(0.0, ge=0, le=1)
 
 
 DEFAULT_MIX = CaseMix()
@@ -197,7 +207,9 @@ def generate_cases(
         key = f"{seed}-{i:06d}"
         merchant = rng.choice(merchants)
         case_id = f"cd-{key}"
-        docs = _documents(rng, case_id, spec, valid, processed, amount, CURRENCY)
+        docs, forged, missing = _documents(
+            rng, case_id, spec, valid, processed, amount, CURRENCY, mix
+        )
         out.append(
             CardDispute(
                 case_id=case_id,
@@ -213,7 +225,12 @@ def generate_cases(
                 opened_on=opened,
                 opening_stage=stage,
                 documents=docs,
-                truth=Truth(claim_valid=valid, liability_minor=amount if valid else 0),
+                truth=Truth(
+                    claim_valid=valid,
+                    liability_minor=amount if valid else 0,
+                    forged=forged,
+                    missing_evidence=missing,
+                ),
             )
         )
     return out
@@ -259,7 +276,10 @@ def _documents(
     processed: date,
     amount: int,
     currency: str,
-) -> tuple[EvidenceDocument, ...]:
+    mix: CaseMix = DEFAULT_MIX,
+) -> tuple[tuple[EvidenceDocument, ...], dict[str, Forgery], tuple[EvidenceKind, ...]]:
+    """(documents held, forged doc ids, required kinds lost). Draws extra randomness
+    only when the 024 options are non-zero, so default seeds are unchanged."""
     kinds: list[EvidenceKind] = list(ALWAYS_HELD)
     for k in spec.required_evidence:
         if k not in kinds and rng.random() < P_REQUIRED_HELD[valid]:
@@ -267,11 +287,29 @@ def _documents(
     for k in spec.supporting_evidence:
         if k not in kinds and rng.random() < P_SUPPORTING_HELD[valid]:
             kinds.append(k)
-    docs = []
+    missing: list[EvidenceKind] = []
+    if mix.p_missing_evidence > 0 and not valid:
+        for k in spec.required_evidence:
+            if k in kinds and k not in ALWAYS_HELD and rng.random() < mix.p_missing_evidence:
+                kinds.remove(k)
+                missing.append(k)
+    to_forge: list[EvidenceKind] = []
+    if mix.p_forged_evidence > 0 and valid:
+        for k in spec.required_evidence:
+            if k not in kinds and rng.random() < mix.p_forged_evidence:
+                kinds.append(k)
+                to_forge.append(k)
+    docs: list[EvidenceDocument] = []
+    forged: dict[str, Forgery] = {}
     for idx, k in enumerate(kinds):
         issued, fields = _fields(rng, k, processed, amount, currency)
-        docs.append(make_document(case_id, k, issued, fields, idx))
-    return tuple(docs)
+        d = make_document(case_id, k, issued, fields, idx)
+        if k in to_forge:
+            how = rng.choice(tuple(Forgery))
+            d = forge(d, how, processed)
+            forged[d.doc_id] = how
+        docs.append(d)
+    return tuple(docs), forged, tuple(missing)
 
 
 # ------------------------------------------------------------------------- actions

@@ -76,6 +76,11 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   each supporting kind with probability 0.6; facing a valid claim, 0.25 and 0.2.
   Document contents (refs, carriers, IPs from 203.0.113.0/24, a documentation range)
   are synthetic.
+- **A-20** Forged and missing evidence (generator options, off by default): only a
+  merchant facing a valid claim forges, and only to fill a missing required document;
+  only a merchant in the right loses documents. Forgeries come in three synthetic
+  styles (edited after sealing, a resealed copy of another order, backdated), each
+  detectable by `document_problems`. Real forgeries can be subtler.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own

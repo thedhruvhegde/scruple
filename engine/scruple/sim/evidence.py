@@ -13,7 +13,7 @@ to another case.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from datetime import date
+from datetime import date, timedelta
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict
@@ -125,3 +125,51 @@ class EvidenceVault:
             seen.add(i)
             out.append(doc)
         return tuple(out)
+
+
+class Forgery(StrEnum):
+    """How a forged document was made (hidden ground truth)."""
+
+    TAMPERED = "tampered"  # fields edited after sealing: the hash no longer matches
+    WRONG_ORDER = "wrong_order"  # resealed copy of another order: amount does not match
+    BACKDATED = "backdated"  # resealed with a date before the transaction
+
+
+def _reseal(doc: EvidenceDocument, issued_on: date, fields: dict[str, str]) -> EvidenceDocument:
+    return doc.model_copy(
+        update={
+            "issued_on": issued_on,
+            "fields": fields,
+            "content_hash": seal(doc.case_id, doc.kind, issued_on, fields),
+        }
+    )
+
+
+def forge(doc: EvidenceDocument, how: Forgery, processed_on: date) -> EvidenceDocument:
+    """A forged variant of `doc` (same id, same case)."""
+    match how:
+        case Forgery.TAMPERED:
+            return doc.model_copy(update={"fields": {**doc.fields, "edited": "1"}})
+        case Forgery.WRONG_ORDER:
+            amt = str(int(doc.fields.get("amount_minor", "0")) + 1_000)
+            return _reseal(doc, doc.issued_on, {**doc.fields, "amount_minor": amt})
+        case Forgery.BACKDATED:
+            return _reseal(doc, processed_on - timedelta(days=3), doc.fields)
+
+
+def document_problems(
+    doc: EvidenceDocument, amount_minor: int, currency: str, processed_on: date
+) -> tuple[str, ...]:
+    """Checks anyone can run on a document. An empty tuple means it looks genuine."""
+    out: list[str] = []
+    if not doc.hash_ok:
+        out.append("hash_mismatch")
+    amt = doc.fields.get("amount_minor")
+    if amt is not None and amt != str(amount_minor):
+        out.append("amount_mismatch")
+    ccy = doc.fields.get("currency")
+    if ccy is not None and ccy != currency:
+        out.append("currency_mismatch")
+    if doc.issued_on < processed_on:
+        out.append("dated_before_transaction")
+    return tuple(out)

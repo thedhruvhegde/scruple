@@ -96,7 +96,7 @@ def test_no_evidence_id_resolves_to_another_cases_document(seed: int, data: st.D
 
 @pytest.mark.parametrize("spec", CODES, ids=[c.key for c in CODES])
 def test_merchant_in_the_right_holds_every_required_document(spec: ReasonCodeSpec) -> None:
-    docs = _documents(random.Random(1), "cd-x", spec, False, D, 1_000, "USD")
+    docs, _, _ = _documents(random.Random(1), "cd-x", spec, False, D, 1_000, "USD")
     kinds = {d.kind for d in docs}
     assert set(spec.required_evidence) <= kinds
     assert set(ALWAYS_HELD) <= kinds
@@ -108,7 +108,7 @@ def test_merchant_in_the_right_holds_every_required_document(spec: ReasonCodeSpe
 def test_merchant_facing_a_valid_claim_often_lacks_evidence(spec: ReasonCodeSpec) -> None:
     missing = 0
     for s in range(200):
-        docs = _documents(random.Random(s), "cd-x", spec, True, D, 1_000, "USD")
+        docs, _, _ = _documents(random.Random(s), "cd-x", spec, True, D, 1_000, "USD")
         if not set(spec.required_evidence) <= {d.kind for d in docs}:
             missing += 1
     if set(spec.required_evidence) <= set(ALWAYS_HELD):
