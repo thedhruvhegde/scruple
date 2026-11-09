@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
 
 from scruple.ci.cli import add_ci_parser
 from scruple.registry import InvalidTransitionError, Provenance
+from scruple.registry import InvalidTransitionError
 from scruple.service import AgentGate
 
 DEFAULT_DB = "agent-gate.db"
@@ -63,15 +63,11 @@ def cmd_rules(args: argparse.Namespace) -> int:
 
 
 def cmd_propose(args: argparse.Namespace) -> int:
-    from scruple.domain import RuleSpec
+    from scruple.api.app import RegisterIn
 
-    body = json.loads(Path(args.file).read_text())
-    rv = _gate(args).propose(
-        body["rule_id"],
-        RuleSpec.model_validate(body["spec"]),
-        body["owner"],
-        Provenance.model_validate(body["provenance"]),
-    )
+    # Same model as POST /rules: unknown fields anywhere in the file are refused.
+    body = RegisterIn.model_validate_json(Path(args.file).read_text())
+    rv = _gate(args).propose(body.rule_id, body.spec, body.owner, body.provenance)
     print(f"registered {rv.ref} ({rv.status.value}) hash {rv.content_hash[:16]}")
     return 0
 

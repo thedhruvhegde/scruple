@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from scruple.api.strict import reject_unknown_inputs
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
@@ -82,6 +83,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         title="agent-gate",
         version=package_version(),
         description="Change control for agent learning (synthetic demo).",
+        dependencies=[Depends(reject_unknown_inputs)],
     )
     if gate is None:
         from scruple.settings import load_settings
