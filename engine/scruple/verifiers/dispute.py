@@ -17,6 +17,7 @@ from scruple.verifiers.checks import (
     Scorecard,
     run_checks,
 )
+from scruple.verifiers.consistency import CONSISTENCY
 from scruple.verifiers.counterfactual import COUNTERFACTUAL
 from scruple.verifiers.deadlines_check import DEADLINE_CREDIT, DEADLINES
 from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT
@@ -35,7 +36,7 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     DEADLINES,
     DEADLINE_CREDIT,
 )
-BATCH_CHECKS: tuple[BatchCheck, ...] = ()
+BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY,)
 
 
 def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS) -> Scorecard:

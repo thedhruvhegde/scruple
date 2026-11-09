@@ -97,7 +97,7 @@ def play(ep: DisputeEpisode, step: Callable[[DisputeEpisode, dict[str, Any]], bo
             return
 
 
-def _evidence_step(ep: DisputeEpisode, got: dict[str, Any]) -> bool:
+def evidence_step(ep: DisputeEpisode, got: dict[str, Any]) -> bool:
     case, status = got["case"], got["status"]
     _, docs = read_all(ep)
     ids = winning_set(case, docs)
@@ -113,7 +113,7 @@ def _evidence_step(ep: DisputeEpisode, got: dict[str, Any]) -> bool:
 
 
 def evidence_policy(ep: DisputeEpisode) -> None:
-    play(ep, _evidence_step)
+    play(ep, evidence_step)
 
 
 def always_accept(ep: DisputeEpisode) -> None:
@@ -214,6 +214,7 @@ __all__ = [
     "baseline_result",
     "concede",
     "evidence_policy",
+    "evidence_step",
     "honest_report",
     "looks_genuine",
     "oracle_policy",
