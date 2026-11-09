@@ -185,3 +185,22 @@ Rules every adapter follows:
 - Limits (tested and pinned): a bare name with no cue and not in `known_names` is not
   found; addresses outside the listed patterns are not found; long non-card numbers
   are redacted as `[NUMBER]` (over-redaction is preferred to leaks).
+
+## Card numbers (`scruple.security.pan`)
+
+- `luhn_valid` (ISO/IEC 7812-1 Annex B), `normalise_pan` (NFKC, separators and format
+  characters removed, 13 to 19 digits, Luhn required). Errors never echo the input.
+- `PanTokenizer`: keyed HMAC-SHA256 with key ids (keys of 32 bytes or more). The same
+  card and key give the same `ctok_...` token, so cases on one card can be linked; an
+  unkeyed hash of a 16-digit PAN could be brute-forced, a keyed one cannot without the
+  key. `CardToken` keeps token, key id, first six (`bin6`), last four and length only.
+  ASSUMPTION: first six plus last four is the common truncation format; whether it is
+  acceptable is a compliance decision for each deployment.
+- Rotation: `matches` accepts tokens from any configured key; `rotate` re-issues under the
+  active key and needs the PAN, so it only happens at ingest. Dropping a key retires its
+  tokens.
+- Logs: `PanScrubbingFilter` rewrites log messages and arguments with Luhn-valid card
+  numbers replaced; the module's own logger has it installed.
+- Property test over generated PANs (several brands, 13 to 19 digits, separators):
+  tokenise, log, write to a SQLite file, then search the bytes and the log text for the
+  PAN. It never appears.
