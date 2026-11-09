@@ -19,6 +19,11 @@ dependencies = [
 agent-gate = "scruple.cli.main:main"
 scruple = "scruple.cli.main:main"
 
+[project.optional-dependencies]
+claude = [
+    "claude-agent-sdk>=0.2",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=8.3",
@@ -33,6 +38,7 @@ dev = [
     "hypothesis>=6.170.15",
     "jsonschema>=4.26.0",
     "types-jsonschema>=4.26.0.20261006",
+    "claude-agent-sdk>=0.2",
 ]
 
 [build-system]
