@@ -37,8 +37,26 @@ Rules every adapter follows:
   `starting_after`/`has_more`, bounded by `max_pages`) and `GET /v1/disputes/{id}`.
   Only `sk_test_`/`rk_test_` keys by default; key never in `repr`; ids are checked
   against `^[A-Za-z0-9_]+$` before they reach a URL; responses are size-limited.
+- Payment facts (`mapping.payment_facts`, `ExternalCase.facts`): read from the dispute
+  and, when `charge` is expanded (`expand[]=data.charge` on the list), from the charge:
+  `payment_method_details.card.three_d_secure` (`result` verbatim, `authenticated` only
+  for `result == "authenticated"`, every other value in the spec enum is "not
+  authenticated", `three_d_secure: null` means not used, a `result` the spec does not
+  list is None), `.checks` (AVS line 1, AVS postal code, CVC, verbatim), `.brand`,
+  `.funding`, `.country`, `shipping` (only whether an address and a tracking number are
+  present, and the carrier name after redaction; never the address, name or phone),
+  and `refunds` (refunded before the dispute opened: from refund timestamps, False when
+  `amount_refunded == 0`, None when the list is not expanded or incomplete; refund state
+  at export). Dispute-level: `is_charge_refundable`, evidence counters,
+  `enhanced_eligibility_types`. MCC is not in the charge or dispute schema: always None.
+  Every field the export does not carry is None, never guessed. The vendored spec subset
+  now includes `payment_method_details`, `payment_method_details_card`,
+  `payment_method_details_card_checks`, `three_d_secure_details_charge`, `shipping`,
+  `address` and `refund` (same commit; contract tests cover them, including the inline
+  `charge.refunds` list).
 - Not done: writes (submitting evidence, closing disputes), retries and rate-limit
-  backoff, Connect (`Stripe-Account` header), `expand[]`.
+  backoff, Connect (`Stripe-Account` header); the client does not send `expand[]`
+  itself (export with it, or fetch charges separately).
 
 ## Stripe webhooks (`scruple.ingest.stripe.webhook`, route in `scruple.ingest.api`)
 
@@ -56,8 +74,8 @@ Rules every adapter follows:
 - Route: `POST /ingest/stripe/webhook`, mounted in `api/app.py` with one line.
   Secrets from `SCRUPLE_STRIPE_WEBHOOK_SECRETS` (comma separated); unset means 503.
   400 bad signature, 413 body over 2 MiB, 422 signed but unmappable.
-- Stubbed: accepted batches stay in memory on the receiver; persisting them (through
-  the service layer) is not written yet.
+- Stubbed: accepted batches stay in memory on the receiver; persisting them into the
+  case store is not wired (exports go through `scruple ingest`).
 
 ## Adyen dispute notifications (`scruple.ingest.adyen`)
 
@@ -79,6 +97,10 @@ Rules every adapter follows:
 - Items that are not dispute events, or carry `success: "false"`, are returned in
   `skipped` with a reason. The free-text `reason` field is never stored.
 - `live: "true"` notifications are refused unless `allow_live=True`.
+- Payment facts (`item_facts`): `paymentMethod` as the card brand, `paymentMethodVariant`
+  verbatim (funding is not inferred from it), `defendable` and `autoDefended` (the
+  strings "true"/"false"; anything else is None). The Webhooks-v1 dispute schema has no
+  3-D Secure, AVS/CVC, MCC, shipping or refund fields, so those are None.
 - Not done: an HTTP route for Adyen (the adapter is a function), Basic auth on the
   endpoint, the `[accepted]` acknowledgement, the Disputes API client.
 
@@ -97,6 +119,9 @@ Rules every adapter follows:
   Duplicate ids are errors that name the first row. A CSV quoting error stops reading
   at that row (Python's csv module cannot resynchronise) and is reported there.
 - Timestamps need a UTC offset; a plain `YYYY-MM-DD` date means midnight UTC.
+- Optional fact columns: `mcc` (verbatim), and `three_ds`, `delivery_confirmed`,
+  `prior_refund` as true/false/yes/no/1/0; an empty cell is None (unknown), anything
+  else is a row error.
 - Values are only ever strings: nothing is evaluated (`=1+1` stays text).
 - Parquet is deferred: pyarrow is a large native dependency for one format. Convert to
   CSV or JSONL first.
@@ -220,8 +245,51 @@ Rules every adapter follows:
 - Tests: an independent `AESGCM` decrypt of a pinned vector, a flip of every ciphertext
   byte and of the nonce, context swaps, key relabelling, truncation, malformed envelopes,
   rotation and shredding, hypothesis round trips and parser fuzzing.
+- Wired into `scruple ingest` (below) for chosen columns or paths, keys from
+  `SCRUPLE_FIELD_KEYS`.
 - Not done: key storage (KMS, envelope keys wrapped by a KEK), per-tenant keys, and
-  wiring encryption into a storage layer (scruple's storage only holds rules and audit).
+  counting encryptions per key.
+
+## The ingest command and the case store (`scruple.ingest.cli`, `.pipeline`, `.store`)
+
+```bash
+uv run scruple ingest stripe --in disputes.json --store cases.db --report ingest.json
+uv run scruple ingest adyen  --in notifications.json --store cases.db   # SCRUPLE_ADYEN_HMAC_KEYS
+uv run scruple ingest csv    --in cases.csv --store cases.db --config import.json \
+    --pan-column card_number --encrypt-column customer_email           # SCRUPLE_TOKEN_KEYS, _FIELD_KEYS
+uv run scruple ingest jsonl  --in cases.jsonl --store cases.db --config import.json
+uv run scruple ingest verify --store cases.db [--k 10] [--json]
+```
+
+- Per record: limits, then sensitive columns out first (card numbers tokenised with the
+  keyed `PanTokenizer`, chosen columns or dotted paths sealed with `FieldCipher` bound to
+  `case:<case id>:<field>`, card numbers scrubbed from a value before it is sealed), the
+  adapter's mapping, redaction of the text kept (`merchant_ref`, `network`,
+  `network_reason_code`, `source_reason`, shipping carrier), and a final check that the
+  clear-text part of the record holds no Luhn-valid 13 to 19 digit run. An id holding a
+  card number or email address rejects the row (an id cannot be redacted). Card numbers
+  in input fields that are not kept are counted by field name in the report.
+- Keys only from the environment (`scruple.ingest.keys`): `SCRUPLE_TOKEN_KEYS` and
+  `SCRUPLE_FIELD_KEYS` as `kid:base64url,...` (first is active), `SCRUPLE_ADYEN_HMAC_KEYS`
+  as hex. A card-number column without a tokenisation key, or an encrypted column without
+  a field key, fails those rows; nothing is stored another way.
+- Row-level report: every record is stored or listed as an error with row, column and
+  message (`rows_read == rows_ok + rows_failed`, hypothesis property). Exit 0 all stored,
+  1 some rows failed (the rest stored; `--strict` stores nothing), 2 the file or options
+  were rejected. `--dry-run` validates only.
+- The store is its own SQLite file, separate from the gate database. Append-only
+  (triggers refuse UPDATE and DELETE); a re-import with new content (a dispute since won)
+  is a new version, readers take the latest; an identical re-import is a no-op. A store
+  holds synthetic or real data, never both.
+- `ingest verify`: counts per source, state, stage, reason, currency, token key id and
+  encrypted field, all through the calibration suppression (k = 10 by default, primary
+  and complementary), envelope decryption checks when a field key is set, and a scan of
+  every text value in the file for card numbers (must be 0; exit 1 otherwise).
+- `load_store` turns a store into a backtest `History` (`--format store` for
+  `scruple backtest`, `--history` for `scruple ci run`).
+- Tests: `tests/test_ingest_pipeline.py` (the no-PAN property over generated CSVs with
+  card numbers in every column, raw file bytes searched; append-only; key parsing that
+  never echoes keys; fuzzing), `tests/test_ingest_payment_facts.py`.
 
 ## Backtest and calibration (`scruple.backtest`, `scruple.calibration`)
 

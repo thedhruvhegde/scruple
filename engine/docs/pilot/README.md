@@ -32,9 +32,9 @@ engine has parsers for some of those files, but no verifiers or gate for them.
    what the candidate would have done and acts on nothing.
 3. **A gate in your CI.** A GitHub Action (or GitLab template) that blocks a pull request
    when the candidate regresses, posts a scorecard comment and a `scruple/gate` status.
-   Today the gate replays candidates on synthetic held-out cases against a synthetic
-   baseline (docs/CI.md); pointing it at your history and your current rules depends on
-   the backtest work in SCOPE.md.
+   It replays candidates on synthetic held-out cases and, with `--history`, on your own
+   history, and shows the two results separately (SCOPE.md week 5). The history side
+   judges the candidate rule alone, not your full current rule set.
 4. **A self-report check.** What your agent or dashboard says it wins, against what the
    balance transactions say happened.
 5. **An evidence pack per decision** (JSON plus PDF, audit chain proof included) that a
@@ -43,10 +43,13 @@ engine has parsers for some of those files, but no verifiers or gate for them.
    to before seeing any data. We report the result whether it passes or fails.
 
 What exists today and what we build during the pilot is listed in SCOPE.md. In short:
-the gate, CI integration, evidence packs, audit chain, Stripe/Adyen/CSV parsers, PII
-redaction, card tokenisation and field encryption exist and are tested. The backtest on
-imported cases, the shadow adapter for imported cases and an ingest command line are
-**planned**; they are the first build work of the pilot.
+the gate, CI integration, evidence packs, audit chain, Stripe/Adyen/CSV ingest
+(`scruple ingest`, with redaction, card tokenisation and field encryption applied before
+storage), the backtest on imported cases, shadow mode on imported cases and the CI gate
+on your history exist and are tested, on Stripe's published fixtures and on synthetic
+histories; none has yet run on a partner's data. Still to build or agree in the pilot:
+your own policy constraints as checks, your `ImportConfig` if you export CSV, and
+anything SCOPE.md lists as not built.
 
 ## What you give
 

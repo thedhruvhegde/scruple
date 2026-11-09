@@ -23,7 +23,8 @@ Fields read (API version of the vendored spec: `2026-09-30.endive`):
 | object | fields |
 |---|---|
 | `dispute` | `id`, `object`, `amount`, `currency`, `created`, `charge`, `reason`, `status`, `livemode`, `is_charge_refundable`, `balance_transactions`, `evidence`, `evidence_details`, `payment_method_details`, `metadata` |
-| `charge` (only if expanded instead of an id) | `id`, `amount`, `amount_captured`, `amount_refunded`, `currency`, `created`, `livemode` |
+| `charge` (only if expanded instead of an id: `expand[]=data.charge`) | `id`, `amount`, `amount_captured`, `amount_refunded`, `currency`, `created`, `livemode`, `refunded`, `payment_method_details.type`, `.card.brand`, `.card.funding`, `.card.country`, `.card.checks` (`address_line1_check`, `address_postal_code_check`, `cvc_check`), `.card.three_d_secure` (`result`, `result_reason`, `version`, `authentication_flow`), `shipping` (whether `address.line1`/`postal_code` and `tracking_number` are present, and `carrier`), `refunds.data[]` (`id`, `amount`, `created`, `status`), `refunds.has_more` |
+| `dispute` (also) | `enhanced_eligibility_types` |
 | `dispute.evidence_details` | `due_by`, `has_evidence`, `past_due`, `submission_count` |
 | `dispute.payment_method_details` | `type`, `card.brand`, `card.case_type`, `card.network`, `card.network_reason_code` |
 | `dispute.balance_transactions[]` | `id`, `object`, `amount`, `currency`, `created`, `fee`, `fee_details[].amount`, `fee_details[].currency`, `fee_details[].type`, `net`, `reporting_category`, `status`, `type` |
@@ -85,24 +86,28 @@ Rules the importer enforces: unmapped extra columns are an error unless
 message; nothing is evaluated (a cell `=1+1` stays text); limits of 64 MiB and 100,000
 rows per file by default. Parquet is not supported: convert to CSV first.
 
-### Fields the rule replay also needs (planned)
+### Fields the rule replay reads
 
 The rule language (`scruple.domain.FIELD_TYPES`) decides on these observable fields.
-No adapter reads them yet; mapping them is part of the week 1 build (SCOPE.md). Each
-source column is agreed with your engineer and written down in the `ImportConfig` or
-the mapping code, with the choice marked as ours.
+They are read into `ExternalCase.facts` (`scruple.ingest.models.PaymentFacts`) when the
+export carries them; a field the export lacks is None (unknown), the backtest uses a
+fixed default for the rule, and the report counts every case where it did.
 
-| rule field | type | where it usually comes from (to confirm with your engineer) |
-|---|---|---|
-| `reason_code` | category | already mapped (above) |
-| `amount_usd_minor` | integer | `amount` plus `currency`; non-USD needs an FX rate source you specify |
-| `currency_mismatch` | bool | dispute currency differs from settlement currency |
-| `mcc` | string | merchant category code from your merchant records |
-| `three_ds` | bool | whether the original payment was 3-D Secure authenticated |
-| `delivery_confirmed` | bool | carrier delivery confirmation on file |
-| `evidence_on_time` | bool | evidence was (or could be) submitted before the due date |
-| `prior_dispute_on_txn` | bool | another dispute exists on the same payment |
-| `has_prior_refund` | bool | the payment was partly or fully refunded before the dispute |
+| rule field | type | Stripe | Adyen | CSV/JSONL column |
+|---|---|---|---|---|
+| `reason_code` | category | mapped from `reason` | none (codes kept verbatim) | `reason` via `reason_map` |
+| `amount_usd_minor` | integer | `amount` + `currency` (synthetic FX table: USD, EUR, GBP only) | same | same |
+| `three_ds` | bool | expanded charge: `three_d_secure.result == "authenticated"`; `three_d_secure: null` is false; a null or unknown result is unknown | not in the dispute notification schema | `three_ds` |
+| `has_prior_refund` | bool | expanded charge: a refund created before the dispute (false if `amount_refunded == 0`, unknown if the refund list is missing or paged) | not in the schema | `prior_refund` |
+| `mcc` | string | not in the charge or dispute schema | not in the schema | `mcc` |
+| `delivery_confirmed` | bool | not in the schema (shipping presence and tracking presence are kept as facts, not as confirmation) | not in the schema | `delivery_confirmed` |
+| `evidence_on_time` | bool | `evidence_details.due_by` after the decision time | `defensePeriodEndsAt` | `evidence_due_at` |
+| `prior_dispute_on_txn` | bool | another dispute on the same `charge`, opened earlier | same `originalReference` | same `payment_ref` |
+| `currency_mismatch` | bool | not read (default false) | not read | not read |
+
+Also kept as facts (not rule fields): card funding and country, 3-D Secure version,
+AVS and CVC check results, refund state at export, Adyen `paymentMethodVariant`,
+`defendable`, `autoDefended`.
 
 ## Date range and volume
 
@@ -138,9 +143,40 @@ after each module in `tests/`):
 - **Field encryption** (`scruple.security.crypto`): AES-256-GCM per field, bound to the
   record and field it belongs to, with key ids and rotation. Removing a key makes its
   ciphertexts unreadable.
-- **Not yet wired:** redaction, tokenisation and encryption are library functions. The
-  ingest command that calls them on every row is part of the week 1 build. scruple's
-  storage today holds rules, decisions and the audit log, not imported cases.
+- **Wired into ingest:** `scruple ingest` applies all three to every record before it is
+  stored: `--pan-column` tokenises card numbers (key `SCRUPLE_TOKEN_KEYS`),
+  `--encrypt-column` / `--encrypt-path` seals chosen fields (key `SCRUPLE_FIELD_KEYS`),
+  and the text that is kept is redacted. The case store refuses any record whose clear
+  text still holds a card number, and `scruple ingest verify` scans the whole file for
+  one. Card numbers in fields that are not kept are counted by field name in the ingest
+  report, never stored. Tested: a hypothesis property generates CSVs with card numbers
+  in every column and searches the store file's bytes (tests/test_ingest_pipeline.py).
+
+What it looks like on a file with a card-number column, run here on a hand-made
+SYNTHETIC CSV (`4242...` is the public test card number), first without the key:
+
+```
+$ uv run scruple ingest csv --in cards.csv --store cases.db --config import.json --pan-column card
+csv: 2 records read, 0 ok, 2 failed; 0 cases (0 new, 0 updated, 0 unchanged), 0 movements; 0 card numbers tokenised, 0 fields encrypted, 0 redactions; run 1
+  row 1: a card-number column needs a tokenisation key (SCRUPLE_TOKEN_KEYS); nothing was stored
+  row 2: a card-number column needs a tokenisation key (SCRUPLE_TOKEN_KEYS); nothing was stored
+$ SCRUPLE_TOKEN_KEYS="k1:$(python -c 'import os,base64;print(base64.urlsafe_b64encode(os.urandom(32)).decode())')" \
+    uv run scruple ingest csv --in cards.csv --store cases.db --config import.json --pan-column card
+csv: 2 records read, 2 ok, 0 failed; 2 cases (2 new, 0 updated, 0 unchanged), 0 movements; 2 card numbers tokenised, 0 fields encrypted, 1 redactions; run 2
+$ grep -c -a 4242424242424242 cases.db; grep -c -a 5555555555554444 cases.db
+0
+0
+$ uv run scruple ingest verify --store cases.db --k 2
+...
+card tokens: 2
+  token key ids: k1 2
+...
+raw card numbers in the file: 0
+STORE OK
+```
+
+(The one redaction is the email address in the `merchant` column, stored as `[EMAIL]`.
+`--k 2` only because the file has two rows; the default is 10.)
 
 ## What never leaves your environment
 

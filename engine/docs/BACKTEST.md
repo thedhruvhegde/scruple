@@ -10,7 +10,12 @@ uv run scruple backtest run --history disputes.json --format stripe \
 uv run scruple backtest calibrate --history disputes.json --format stripe \
     --out calibration.json --profile-out profile.json
 uv run scruple backtest synth --n 5000 --seed 7 --out SYNTHETIC.json   # labelled test data
+uv run scruple backtest run --history cases.db --format store \
+    --candidate rule.json --out report/          # a `scruple ingest` case store
 ```
+
+The same backtest gates CI (`scruple ci run --history`, below) and prices the
+estimated metrics of shadow mode on imported cases (`scruple.gate.shadow_imported`).
 
 Code: `scruple/calibration/` (153), `scruple/backtest/` (154). Tests:
 `tests/test_calibration_*.py`, `tests/test_backtest_*.py`.
@@ -70,12 +75,15 @@ which fails the run.
 | amount, currency, open time, evidence due date, response allowed | evidence submitted, which fields, late or not |
 | earlier disputes on the same payment (opened strictly before) | the historical action |
 | ledger postings up to the decision time | later postings (reinstatement credits) |
+| payment facts: card brand, funding, country; 3-D Secure result; AVS and CVC checks; MCC; shipping address and tracking present; delivery confirmed (ASSUMPTION: before the dispute); refunded before the dispute | refund state and amount at export, refundability, evidence counters, enhanced eligibility, Adyen `defendable` |
 
 Exports do not timestamp submissions or outcomes, so those are treated as unknown until
 the outcome. Rule candidates read the observable-field dictionary of
-`scruple.domain.FIELD_TYPES`; fields an export does not carry use fixed defaults
-(`mcc=unknown`, `delivery_confirmed`, `three_ds`, `has_prior_refund`,
-`currency_mismatch` all false) and the report lists them. Tests: every outcome fact
+`scruple.domain.FIELD_TYPES`. `mcc`, `delivery_confirmed`, `three_ds` and
+`has_prior_refund` come from the payment facts when the export has them (an expanded
+Stripe charge, CSV fact columns; docs/INTEGRATIONS.md); otherwise, and always for
+`currency_mismatch`, fixed defaults are used (`mcc=unknown`, the rest false), and the
+report counts per field how many cases used a default (`rule_fields_defaulted`). Tests: every outcome fact
 raises; a policy that peeks fails the backtest; a hypothesis property checks that no
 fact in any view is later than its decision time; two histories that differ only in
 outcomes get identical rule decisions.
@@ -144,7 +152,8 @@ divergence; the Stripe rendering of a synthetic history maps back to the same re
 ## What a partner exports
 
 **Stripe** (`--format stripe`): the `GET /v1/disputes` list (every page; a list with
-`has_more: true` is refused), as a JSON array, a list object, or JSON Lines. Fields read:
+`has_more: true` is refused), as a JSON array, a list object, or JSON Lines; with
+`expand[]=data.charge` the payment facts are read too. Fields read:
 `id`, `object`, `amount`, `currency`, `created`, `charge`, `reason`, `status`,
 `livemode`, `is_charge_refundable`, `metadata`, `evidence` (only which fields are
 present, never their content), `evidence_details.due_by`, `.has_evidence`, `.past_due`,
@@ -170,6 +179,17 @@ are read from the state.
 `network`, `network_reason_code`, `evidence_due_at` (optional), the amount format, and
 `status_map` / `reason_map`. Row errors are counted on the report.
 
+## Gating CI on the history
+
+`scruple ci run --history <case store or export>` (docs/pilot/SCOPE.md week 5) runs the synthetic gate
+and this backtest on the same candidate rule and shows both on the scorecard as
+separate sources (`synthetic_verdict`, `history`). History verdict: `worse` is BLOCK;
+`better` is PASS only if robust at both ends of the estimates, else HOLD; `insufficient
+evidence` is HOLD; `no change` is PASS (nothing to regress). A history below `k` cases
+cannot be calibrated: HOLD, estimates from the synthetic default profile, said so. The
+overall verdict is the worse of the two sources. Same inputs, same scorecard bytes (the
+history is identified by a content hash, not a path; tested, also with shuffled input).
+
 ## Privacy
 
 - Free text is never kept: Stripe evidence is reduced to the names of the fields
@@ -192,8 +212,10 @@ are read from the state.
   assumptions above. Results on estimated cases are model-based, not observed.
 - Suppression is per table, not a formal privacy guarantee (no cross-table audit, no
   differential privacy).
-- Exports lack several rule fields (MCC, delivery confirmation, 3-D Secure, prior
-  refunds); rules that need them see the defaults.
+- Stripe exports carry 3-D Secure, AVS/CVC and refund timing only with the charge
+  expanded; no Stripe or Adyen dispute export carries MCC or delivery confirmation (CSV
+  columns can). Rules that need a missing field see the default, and the report says
+  how often.
 - One currency per run; amounts for rules are converted with the simulator's synthetic
   FX table (USD, EUR, GBP only).
 - The decision is placed at the open time (plus a fixed delay); the real decision
