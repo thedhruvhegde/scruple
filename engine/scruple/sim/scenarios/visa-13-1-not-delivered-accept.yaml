@@ -1,0 +1,15 @@
+id: visa-13-1-not-delivered-accept
+title: Item never arrived and the merchant has no delivery proof
+sources: [S1]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: service_failure
+  amount_minor: 6200
+  opened_after_days: 35
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    Without carrier tracking (the key 13.1 evidence, S1) there is nothing to show
+    delivery, and the claim is genuine: accept rather than pay later-stage fees.

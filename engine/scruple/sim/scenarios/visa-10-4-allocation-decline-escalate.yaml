@@ -1,0 +1,20 @@
+id: visa-10-4-allocation-decline-escalate
+title: Allocation pre-arbitration declined by the issuer on a friendly fraud claim
+sources: [S8, S9, A-25]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 17500
+  opened_after_days: 27
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+issuer: {pre_arbitration: false}
+history:
+  - {day: 0, action: represent, evidence: [avs_cvv_match, device_ip_match]}
+expected:
+  day: 13
+  action: escalate
+  resolution: won
+  why: >-
+    In allocation the merchant's response is a pre-arbitration (S8, S9); after the
+    decline it files arbitration inside Visa's 10-day window, and the evidence holds.

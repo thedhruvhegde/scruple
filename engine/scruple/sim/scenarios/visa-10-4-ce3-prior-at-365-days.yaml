@@ -1,0 +1,21 @@
+id: visa-10-4-ce3-prior-at-365-days
+title: A prior order 365 days old falls outside the CE 3.0 window
+sources: [S4, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 15900
+  opened_after_days: 30
+  fingerprint: {account_id: acct-7, ip: 198.51.100.7, shipping_address: addr-7,
+                device_id: device-0123456789abc}
+  prior_transactions: [{age_days: 365}, {age_days: 300}]
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    Fewer than 365 days is required, so the 365-day order does not qualify; with one
+    qualifying prior the merchant represents on AVS/CVV and device evidence instead.
+checks: {ce3_eligible: false}

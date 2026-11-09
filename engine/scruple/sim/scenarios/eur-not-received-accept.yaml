@@ -1,0 +1,17 @@
+id: eur-not-received-accept
+title: A euro purchase never arrived; the merchant settles in US dollars
+sources: [S1, S17, A-27]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: service_failure
+  amount_minor: 9250
+  currency: EUR
+  settlement_currency: USD
+  opened_after_days: 25
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    Liability is in the transaction currency (EUR 92.50) whatever the USD settlement
+    rate; with no delivery proof and a genuine claim the merchant accepts.

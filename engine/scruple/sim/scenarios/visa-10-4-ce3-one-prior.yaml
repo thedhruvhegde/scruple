@@ -1,0 +1,21 @@
+id: visa-10-4-ce3-one-prior
+title: Only one qualifying prior order, so CE 3.0 is not met
+sources: [S3, S4, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 8000
+  opened_after_days: 15
+  fingerprint: {account_id: acct-7, ip: 198.51.100.7, shipping_address: addr-7,
+                device_id: device-0123456789abc}
+  prior_transactions: [{age_days: 200}, {age_days: 400}]
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    The 400-day order is outside the 120 to 365 day window, leaving one qualifying
+    prior; CE 3.0 needs two, so the merchant relies on AVS/CVV and device evidence.
+checks: {ce3_eligible: false}

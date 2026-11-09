@@ -1,0 +1,18 @@
+id: mastercard-4855-represent-on-day-40
+title: Day-40 second presentment, too late for Visa but inside Mastercard's window
+sources: [S1, S11]
+case:
+  network: mastercard
+  reason_code: "4855"
+  family: buyers_remorse
+  amount_minor: 6600
+  opened_after_days: 10
+  documents: [{kind: delivery_proof}]
+expected:
+  day: 40
+  action: represent
+  evidence: [delivery_proof, receipt]
+  resolution: won
+  why: >-
+    Mastercard allows 45 calendar days for second presentment (S1, S11), so day 40 is
+    on time; the same delay would miss Visa's 30-day window.

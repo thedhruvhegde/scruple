@@ -1,0 +1,16 @@
+id: visa-10-4-true-fraud-accept
+title: True card-absent fraud; the order came from a stranger's device
+sources: [S1, A-22]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: true_fraud
+  amount_minor: 31000
+  opened_after_days: 9
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    The device record shows the order did not come from the cardholder; contesting a
+    valid fraud claim only adds pre-arbitration and arbitration fees.

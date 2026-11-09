@@ -1,0 +1,19 @@
+id: visa-13-6-refund-settled-before-dispute
+title: The merchant refunded before the dispute; the chargeback pays the cardholder twice
+sources: [S1, A-23]
+case:
+  network: visa
+  reason_code: "13.6"
+  family: service_failure
+  amount_minor: 7600
+  opened_after_days: 12
+  refund_in_flight: {settles_day: -3}
+issuer: {representment: true}
+expected:
+  action: represent
+  evidence: [refund_record]
+  resolution: won
+  why: >-
+    13.6 is answered with the processor refund confirmation (S1). The refund settled
+    before the dispute, so the chargeback double-credits; the refund record undoes it.
+checks: {incidents: 1, cardholder_net_minor: 7600}

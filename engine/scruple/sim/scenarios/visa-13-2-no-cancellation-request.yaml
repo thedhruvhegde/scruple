@@ -1,0 +1,17 @@
+id: visa-13-2-no-cancellation-request
+title: Recurring charge disputed as cancelled, with no cancellation on file
+sources: [S1]
+case:
+  network: visa
+  reason_code: "13.2"
+  family: buyers_remorse
+  amount_minor: 1999
+  opened_after_days: 31
+  documents: [{kind: terms_acceptance}, {kind: cancellation_record}]
+expected:
+  action: represent
+  evidence: [terms_acceptance, cancellation_record]
+  resolution: won
+  why: >-
+    The accepted renewal terms and records showing no cancellation before the billing
+    date are the 13.2 evidence (S1); both are held, so the merchant represents.

@@ -1,0 +1,25 @@
+id: visa-10-4-ce3-no-ip-or-device
+title: Account and address match, but neither IP nor device, so no CE 3.0
+sources: [S2, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 22000
+  opened_after_days: 40
+  fingerprint: {account_id: acct-3, ip: 198.51.100.3, shipping_address: addr-3,
+                device_id: device-3333333333333}
+  prior_transactions:
+    - {age_days: 130, fingerprint: {account_id: acct-3, ip: 192.0.2.50,
+                                    shipping_address: addr-3, device_id: device-old-0000000001}}
+    - {age_days: 300, fingerprint: {account_id: acct-3, ip: 192.0.2.51,
+                                    shipping_address: addr-3, device_id: device-old-0000000002}}
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    Two elements match but one of them must be the IP address or the device id (S2);
+    CE 3.0 fails, so the merchant answers with AVS/CVV and device records.
+checks: {ce3_eligible: false}

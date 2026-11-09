@@ -1,0 +1,21 @@
+id: visa-10-4-ce3-prior-at-120-days
+title: A prior order exactly 120 days old does not count for CE 3.0
+sources: [S4, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 6400
+  opened_after_days: 12
+  fingerprint: {account_id: acct-7, ip: 198.51.100.7, shipping_address: addr-7,
+                device_id: device-0123456789abc}
+  prior_transactions: [{age_days: 120}, {age_days: 210}]
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    The window is read as more than 120 days (S4), so the 120-day order fails and only
+    one prior qualifies; the claim is still friendly fraud and the device evidence wins.
+checks: {ce3_eligible: false}

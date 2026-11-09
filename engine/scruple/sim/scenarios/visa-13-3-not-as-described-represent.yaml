@@ -1,0 +1,17 @@
+id: visa-13-3-not-as-described-represent
+title: Buyer's remorse filed as not as described
+sources: [S1]
+case:
+  network: visa
+  reason_code: "13.3"
+  family: buyers_remorse
+  amount_minor: 9900
+  opened_after_days: 26
+  documents: [{kind: product_description}, {kind: terms_acceptance}]
+expected:
+  action: represent
+  evidence: [product_description, terms_acceptance]
+  resolution: won
+  why: >-
+    The listing as shown at checkout and the accepted return policy are the 13.3
+    evidence (S1); the item matched its description, so the merchant represents.

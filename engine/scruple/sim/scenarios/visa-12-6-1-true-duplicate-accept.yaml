@@ -1,0 +1,15 @@
+id: visa-12-6-1-true-duplicate-accept
+title: The same order was processed twice
+sources: [S1]
+case:
+  network: visa
+  reason_code: "12.6.1"
+  family: merchant_error
+  amount_minor: 6700
+  opened_after_days: 10
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    It is a true duplicate with no separate order behind it; 12.6.1 evidence would
+    have to show distinct purchases (S1), which do not exist, so the merchant accepts.

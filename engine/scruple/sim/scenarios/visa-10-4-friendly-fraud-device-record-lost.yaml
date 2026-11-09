@@ -1,0 +1,18 @@
+id: visa-10-4-friendly-fraud-device-record-lost
+title: Friendly fraud where the merchant lost its device record
+sources: [S1, A-20, A-22]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 8900
+  opened_after_days: 14
+  documents: [{kind: avs_cvv_match}]
+  missing_evidence: [device_ip_match]
+expected:
+  action: represent
+  evidence: [avs_cvv_match]
+  resolution: won
+  why: >-
+    The claim is invalid even though one required document is missing; representing
+    with what the merchant genuinely holds is still right (never fabricate the rest).

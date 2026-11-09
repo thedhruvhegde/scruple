@@ -1,0 +1,16 @@
+id: visa-11-3-authorized-allocation
+title: No-authorization claim on an authorized sale (allocation workflow)
+sources: [S1, S8, S9]
+case:
+  network: visa
+  reason_code: "11.3"
+  family: cardholder_mistake
+  amount_minor: 15400
+  opened_after_days: 13
+expected:
+  action: represent
+  evidence: [authorization_record]
+  resolution: won
+  why: >-
+    The authorization approval code answers 11.3 (S1). Visa authorization disputes use
+    allocation (S8, S9): the response goes straight to pre-arbitration for the issuer.

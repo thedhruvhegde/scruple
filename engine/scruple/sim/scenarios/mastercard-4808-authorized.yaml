@@ -1,0 +1,16 @@
+id: mastercard-4808-authorized
+title: Mastercard authorization claim on a properly authorized sale
+sources: [S1, A-16]
+case:
+  network: mastercard
+  reason_code: "4808"
+  family: cardholder_mistake
+  amount_minor: 11100
+  opened_after_days: 16
+expected:
+  action: represent
+  evidence: [authorization_record]
+  resolution: won
+  why: >-
+    A valid, unexpired authorization approval code is the 4808 answer (S1); the record
+    exists and is genuine, so the merchant represents.

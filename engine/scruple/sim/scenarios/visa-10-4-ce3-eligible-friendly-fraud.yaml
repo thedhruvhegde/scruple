@@ -1,0 +1,21 @@
+id: visa-10-4-ce3-eligible-friendly-fraud
+title: CE 3.0 met; the merchant answers with the order history
+sources: [S2, S3, S4, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 12500
+  opened_after_days: 25
+  fingerprint: {account_id: acct-7, ip: 198.51.100.7, shipping_address: addr-7,
+                device_id: device-0123456789abc}
+  prior_transactions: [{age_days: 150}, {age_days: 240}]
+  documents: [{kind: prior_undisputed_history, label: history}]
+expected:
+  action: represent
+  evidence: [history]
+  resolution: won
+  why: >-
+    Two undisputed orders on the same card, 150 and 240 days old, match on account,
+    IP, address and device, so CE 3.0 is met for 10.4 and liability moves to the issuer.
+checks: {ce3_eligible: true}

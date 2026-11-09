@@ -1,0 +1,18 @@
+id: mastercard-4855-delivered
+title: Mastercard goods-not-provided claim on a delivered order
+sources: [S1, S11, A-16]
+case:
+  network: mastercard
+  reason_code: "4855"
+  family: buyers_remorse
+  amount_minor: 13300
+  opened_after_days: 28
+  documents: [{kind: delivery_proof}]
+expected:
+  day: 5
+  action: represent
+  evidence: [delivery_proof, receipt]
+  resolution: won
+  why: >-
+    4855 is answered with carrier tracking and the order confirmation (S1); the second
+    presentment goes in well inside Mastercard's 45-day window (S11).

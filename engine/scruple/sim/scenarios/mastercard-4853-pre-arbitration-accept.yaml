@@ -1,0 +1,18 @@
+id: mastercard-4853-pre-arbitration-accept
+title: After a weak second presentment the issuer files pre-arbitration on a valid claim
+sources: [S11, A-14, A-25]
+case:
+  network: mastercard
+  reason_code: "4853"
+  family: service_failure
+  amount_minor: 9400
+  opened_after_days: 18
+history:
+  - {day: 0, action: represent, evidence: [receipt]}
+expected:
+  day: 15
+  action: accept
+  resolution: accepted
+  why: >-
+    The claim is valid and the second presentment was weak; escalating would add the
+    arbitration fee to a sure loss, so the merchant accepts the pre-arbitration.

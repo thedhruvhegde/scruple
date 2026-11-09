@@ -1,0 +1,15 @@
+id: visa-11-2-declined-force-posted-accept
+title: A declined authorization was force-posted
+sources: [S1]
+case:
+  network: visa
+  reason_code: "11.2"
+  family: merchant_error
+  amount_minor: 3900
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    11.2 needs proof the charge was approved and not force-posted after a decline (S1);
+    here it was force-posted, so the claim is valid and the merchant accepts.

@@ -1,0 +1,17 @@
+id: visa-13-4-counterfeit-claim-authentic-goods
+title: Counterfeit claim against goods with supplier proof of authenticity
+sources: [S1]
+case:
+  network: visa
+  reason_code: "13.4"
+  family: buyers_remorse
+  amount_minor: 45000
+  opened_after_days: 44
+  documents: [{kind: authenticity_proof}, {kind: product_description}]
+expected:
+  action: represent
+  evidence: [authenticity_proof, product_description]
+  resolution: won
+  why: >-
+    13.4 is answered with proof of authenticity (supplier invoices, brand authorization)
+    and the accepted listing (S1); both are held, so the merchant represents.

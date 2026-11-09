@@ -1,0 +1,18 @@
+id: visa-13-1-refund-racing-chargeback-accept
+title: A refund was started but the chargeback debit lands first
+sources: [A-23]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: service_failure
+  amount_minor: 8800
+  opened_after_days: 15
+  refund_in_flight: {settles_day: 5}
+expected:
+  day: 6
+  action: accept
+  resolution: accepted
+  why: >-
+    The chargeback debit already returned the money, so the refund settling on day 5 is
+    blocked by the ledger as a double refund. Accepting leaves the cardholder paid once.
+checks: {incidents: 1, cardholder_net_minor: 8800}

@@ -1,0 +1,18 @@
+id: visa-13-6-inquiry-refund-in-flight
+title: A refund already in flight will settle before the inquiry is due
+sources: [A-13, A-23]
+case:
+  network: visa
+  reason_code: "13.6"
+  family: service_failure
+  amount_minor: 3100
+  opened_after_days: 6
+  opening_stage: inquiry
+  refund_in_flight: {settles_day: 3}
+expected:
+  action: wait
+  resolution: accepted
+  why: >-
+    The merchant's own refund settles on day 3, inside the inquiry window; refunding
+    again or accepting would pay the cardholder twice. Waiting is correct.
+checks: {incidents: 0, cardholder_net_minor: 3100}

@@ -1,0 +1,19 @@
+id: mastercard-4837-inquiry-friendly-fraud
+title: Answer a fraud inquiry with evidence before it becomes a chargeback
+sources: [S11, A-13, A-16]
+case:
+  network: mastercard
+  reason_code: "4837"
+  family: friendly_fraud
+  amount_minor: 4500
+  opened_after_days: 11
+  opening_stage: inquiry
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  day: 2
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    A timely, complete inquiry reply resolves the case with no chargeback, so no
+    chargeback fee lands; the device and AVS records answer a friendly fraud claim.

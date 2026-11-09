@@ -1,0 +1,19 @@
+id: visa-13-1-split-order-all-delivered
+title: Every parcel of a split order arrived; the cardholder disputes the whole order
+sources: [S1, A-26]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: buyers_remorse
+  amount_minor: 12000
+  shipments:
+    - {amount_minor: 3000, delivered_day: 2, disputed: true}
+    - {amount_minor: 4000, delivered_day: 4, disputed: true}
+    - {amount_minor: 5000, delivered_day: 6, disputed: true}
+expected:
+  action: represent
+  evidence: [parcel-1, parcel-2, parcel-3, receipt]
+  resolution: won
+  why: >-
+    Only parcels proven delivered are won back (A-26); all three have tracking, so all
+    three proofs must be submitted to recover the full amount.

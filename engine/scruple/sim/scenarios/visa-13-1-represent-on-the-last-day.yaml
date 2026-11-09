@@ -1,0 +1,18 @@
+id: visa-13-1-represent-on-the-last-day
+title: Representment filed on the last day of Visa's 30-day window
+sources: [S1, A-24]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: buyers_remorse
+  amount_minor: 5100
+  opened_after_days: 10
+  documents: [{kind: delivery_proof}]
+expected:
+  day: 30
+  action: represent
+  evidence: [delivery_proof, receipt]
+  resolution: won
+  why: >-
+    The response window is 30 calendar days (S1) and an action on the due date is on
+    time (A-24); one more day would lose the case by default.

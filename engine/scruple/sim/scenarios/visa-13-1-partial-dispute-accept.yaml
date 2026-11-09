@@ -1,0 +1,17 @@
+id: visa-13-1-partial-dispute-accept
+title: The cardholder disputes only part of an order that partly failed
+sources: [S1, A-26]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: service_failure
+  amount_minor: 6000
+  captured_minor: 15000
+  opened_after_days: 21
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    Only 6000 of the 15000 capture is disputed and that part was never delivered;
+    accepting returns exactly the disputed 6000, not the whole order.
+checks: {cardholder_net_minor: 6000}

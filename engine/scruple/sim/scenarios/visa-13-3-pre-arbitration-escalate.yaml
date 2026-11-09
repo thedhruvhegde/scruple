@@ -1,0 +1,20 @@
+id: visa-13-3-pre-arbitration-escalate
+title: The issuer files pre-arbitration despite complete evidence
+sources: [S1, S8, A-25]
+case:
+  network: visa
+  reason_code: "13.3"
+  family: buyers_remorse
+  amount_minor: 26000
+  opened_after_days: 20
+  documents: [{kind: product_description}, {kind: terms_acceptance}]
+issuer: {representment: false}
+history:
+  - {day: 0, action: represent, evidence: [product_description, terms_acceptance]}
+expected:
+  day: 12
+  action: escalate
+  resolution: won
+  why: >-
+    Under collaboration (S8) the issuer may answer a representment with pre-arbitration;
+    the claim is invalid and fully documented, so the merchant escalates to arbitration.

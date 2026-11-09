@@ -1,0 +1,20 @@
+id: visa-13-1-split-order-one-parcel-lost
+title: Split order where one of two parcels was lost, and both are disputed
+sources: [S1, A-26]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: service_failure
+  amount_minor: 9000
+  shipments:
+    - {amount_minor: 5000, delivered_day: 3, disputed: true}
+    - {amount_minor: 4000, disputed: true}
+issuer: {representment: true}
+expected:
+  action: represent
+  evidence: [parcel-1, receipt]
+  resolution: partial
+  why: >-
+    The cardholder overclaims: parcel 1 was delivered and can be proven, parcel 2 was
+    lost and is owed. Representing with parcel 1's proof recovers exactly 5000.
+checks: {cardholder_net_minor: 4000}

@@ -1,0 +1,21 @@
+id: visa-10-4-ce3-prior-disputed
+title: A prior order that was itself disputed cannot support CE 3.0
+sources: [S3, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 4999
+  opened_after_days: 20
+  fingerprint: {account_id: acct-7, ip: 198.51.100.7, shipping_address: addr-7,
+                device_id: device-0123456789abc}
+  prior_transactions: [{age_days: 180, disputed: true}, {age_days: 250}]
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    CE 3.0 counts only prior transactions with no dispute against them, so one prior is
+    left; the AVS/CVV and device records still show the cardholder placed the order.
+checks: {ce3_eligible: false}

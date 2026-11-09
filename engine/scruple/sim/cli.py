@@ -43,3 +43,19 @@ def add_sim_parser(sub: Any) -> None:
     h.add_argument("--allocation", choices=["uniform", "optimised"], default="uniform")
     h.add_argument("--check", type=int, default=None, help="generate N cases and check them")
     h.add_argument("--seed", type=int, default=1, help="seed for --check")
+    sc = ss.add_parser("scenarios", help="run the hand-written scenarios through the engine")
+    sc.set_defaults(fn=cmd_scenarios)
+    sc.add_argument("--dir", default=None, help="scenario directory (default: built-in)")
+
+
+def cmd_scenarios(args: argparse.Namespace) -> int:
+    from scruple.sim.scenario import SCENARIO_DIR, load_scenarios, run_scenario
+
+    runs = [run_scenario(s) for s in load_scenarios(args.dir or SCENARIO_DIR)]
+    for r in runs:
+        print(f"{'ok  ' if r.passed else 'FAIL'} {r.scenario_id}")
+        for p in r.problems:
+            print(f"     {p}")
+    failed = sum(1 for r in runs if not r.passed)
+    print(f"{len(runs) - failed}/{len(runs)} scenarios passed (synthetic)")
+    return 1 if failed else 0

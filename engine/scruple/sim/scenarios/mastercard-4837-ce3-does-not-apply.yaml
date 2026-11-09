@@ -1,0 +1,21 @@
+id: mastercard-4837-ce3-does-not-apply
+title: CE 3.0 is a Visa 10.4 rule; a Mastercard 4837 history does not shift liability
+sources: [S3, S11, A-16, A-28]
+case:
+  network: mastercard
+  reason_code: "4837"
+  family: friendly_fraud
+  amount_minor: 10400
+  opened_after_days: 22
+  fingerprint: {account_id: acct-7, ip: 198.51.100.7, shipping_address: addr-7,
+                device_id: device-0123456789abc}
+  prior_transactions: [{age_days: 150}, {age_days: 200}]
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    The same history would meet CE 3.0 on Visa, but CE 3.0 covers Visa 10.4 only; on
+    Mastercard 4837 the merchant represents with AVS/CVC2 and device evidence (S1).
+checks: {ce3_eligible: false}

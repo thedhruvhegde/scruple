@@ -1,0 +1,16 @@
+id: visa-10-4-filed-on-day-120
+title: A fraud dispute filed on the last day of the issuer's filing window
+sources: [S7, A-22]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: true_fraud
+  amount_minor: 27500
+  opened_after_days: 120
+  documents: [{kind: device_ip_match}]
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    Visa issuers generally have 120 days from processing to file (S7), so the dispute
+    is timely; the device record shows true fraud, and the merchant accepts.

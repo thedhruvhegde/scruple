@@ -1,0 +1,17 @@
+id: visa-12-6-1-two-separate-purchases
+title: Two charges that look like a duplicate are two separate orders
+sources: [S1]
+case:
+  network: visa
+  reason_code: "12.6.1"
+  family: cardholder_mistake
+  amount_minor: 6700
+  opened_after_days: 10
+  documents: [{kind: settlement_record}]
+expected:
+  action: represent
+  evidence: [settlement_record, receipt]
+  resolution: won
+  why: >-
+    Distinct order ids, auth codes and line items show two purchases (S1); the
+    settlement record and receipt prove it, so the merchant represents.

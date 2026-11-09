@@ -1,0 +1,20 @@
+id: visa-12-5-inquiry-refund-the-difference
+title: Incorrect amount found at inquiry; refund instead of waiting for a chargeback
+sources: [S1, A-13]
+case:
+  network: visa
+  reason_code: "12.5"
+  family: merchant_error
+  amount_minor: 2500
+  captured_minor: 12500
+  opened_after_days: 8
+  opening_stage: inquiry
+expected:
+  day: 1
+  action: refund
+  amount_minor: 2500
+  resolution: accepted
+  why: >-
+    The merchant overcharged by 2500; refunding exactly the disputed difference resolves
+    the inquiry with no chargeback fee and no refund of the undisputed 10000.
+checks: {cardholder_net_minor: 2500}

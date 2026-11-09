@@ -1,0 +1,15 @@
+id: mastercard-4853-service-failure-accept
+title: Not-as-described claim the merchant cannot contest
+sources: [S1, A-16]
+case:
+  network: mastercard
+  reason_code: "4853"
+  family: service_failure
+  amount_minor: 18800
+  opened_after_days: 17
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    4853 needs the product description and accepted terms (S1); the merchant holds
+    neither and the goods were defective, so it accepts the chargeback.

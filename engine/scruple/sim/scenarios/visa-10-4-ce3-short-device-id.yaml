@@ -1,0 +1,25 @@
+id: visa-10-4-ce3-short-device-id
+title: A device id under 15 characters is not a CE 3.0 match
+sources: [S2, S5, A-28]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 7300
+  opened_after_days: 18
+  fingerprint: {account_id: acct-9, ip: 198.51.100.9, shipping_address: addr-9,
+                device_id: dev-123}
+  prior_transactions:
+    - {age_days: 160, fingerprint: {account_id: acct-9, ip: 198.51.100.200,
+                                    shipping_address: addr-old, device_id: dev-123}}
+    - {age_days: 220, fingerprint: {account_id: acct-9, ip: 198.51.100.201,
+                                    shipping_address: addr-old, device_id: dev-123}}
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    The priors share the account id and a 7-character device id; a device id must be at
+    least 15 characters to count (S5), leaving one element, short of the two required.
+checks: {ce3_eligible: false}

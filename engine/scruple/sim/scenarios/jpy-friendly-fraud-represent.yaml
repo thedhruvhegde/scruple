@@ -1,0 +1,18 @@
+id: jpy-friendly-fraud-represent
+title: Friendly fraud on a yen purchase (zero-decimal currency)
+sources: [S1, S17, A-27]
+case:
+  network: visa
+  reason_code: "10.4"
+  family: friendly_fraud
+  amount_minor: 15000
+  currency: JPY
+  opened_after_days: 14
+  documents: [{kind: avs_cvv_match}, {kind: device_ip_match}]
+expected:
+  action: represent
+  evidence: [avs_cvv_match, device_ip_match]
+  resolution: won
+  why: >-
+    JPY has no minor unit (S17), so 15000 means 15,000 yen; the documents carry that
+    amount and currency, and the device evidence ties the cardholder to the order.

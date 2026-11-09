@@ -1,0 +1,17 @@
+id: visa-13-1-forged-delivery-proof-accept
+title: The only delivery proof is backdated; the claim is genuine
+sources: [S1, A-20]
+case:
+  network: visa
+  reason_code: "13.1"
+  family: service_failure
+  amount_minor: 5400
+  opened_after_days: 19
+  documents: [{kind: delivery_proof, forged: backdated}]
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    The delivery record is dated before the sale, a detectable forgery; submitting it
+    risks a caught forgery and the claim is valid, so the merchant accepts.
+checks: {flawed_documents: 1}

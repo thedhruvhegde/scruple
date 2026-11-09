@@ -1,0 +1,15 @@
+id: visa-12-1-late-presentment-accept
+title: The merchant presented the transaction late
+sources: [S1]
+case:
+  network: visa
+  reason_code: "12.1"
+  family: merchant_error
+  amount_minor: 4100
+  opened_after_days: 24
+expected:
+  action: accept
+  resolution: accepted
+  why: >-
+    12.1 is answered with timestamps proving timely presentment (S1); the merchant has
+    no presentment record because it really was late, so it accepts.
