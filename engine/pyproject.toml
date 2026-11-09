@@ -23,6 +23,9 @@ scruple = "scruple.cli.main:main"
 claude = [
     "claude-agent-sdk>=0.2",
 ]
+langgraph = [
+    "langgraph>=1.0",
+]
 
 [dependency-groups]
 dev = [
@@ -39,6 +42,7 @@ dev = [
     "jsonschema>=4.26.0",
     "types-jsonschema>=4.26.0.20261006",
     "claude-agent-sdk>=0.2",
+    "langgraph>=1.0",
 ]
 
 [build-system]
