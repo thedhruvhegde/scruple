@@ -7,17 +7,21 @@ DB_URL ?= postgresql://scruple@127.0.0.1:$${POSTGRES_PORT:-5432}/scruple
 install:
 	uv sync --python 3.12
 
+# Parallel across every core (pytest-xdist); tests use tmp dirs, in-memory dbs and
+# a postgres cluster per worker on a free port, so they are safe to run together.
+PYTEST_PAR ?= -n auto --dist worksteal
+
 test:
-	uv run pytest
+	uv run pytest $(PYTEST_PAR)
 
 # Suites marked @pytest.mark.slow, with the larger hypothesis profile.
 test-slow:
-	HYPOTHESIS_PROFILE=thorough uv run pytest -m slow
+	HYPOTHESIS_PROFILE=thorough uv run pytest $(PYTEST_PAR) -m slow
 
 # Storage contract and migrations on postgres (a throwaway local cluster, or
 # SCRUPLE_TEST_POSTGRES_URL).
 test-postgres:
-	uv run pytest -m postgres
+	uv run pytest $(PYTEST_PAR) -m postgres
 
 cov:
 	uv run pytest --cov --cov-report=term-missing
