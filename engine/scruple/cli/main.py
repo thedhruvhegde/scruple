@@ -8,7 +8,6 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from scruple.ci.cli import add_ci_parser
-from scruple.registry import InvalidTransitionError, Provenance
 from scruple.registry import InvalidTransitionError
 from scruple.service import AgentGate
 
