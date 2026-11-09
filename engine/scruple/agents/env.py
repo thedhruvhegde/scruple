@@ -22,11 +22,12 @@ from typing import Protocol
 from pydantic import BaseModel, ConfigDict
 
 from scruple.domain import FIELD_TYPES, Action
-from scruple.sim.engine import RunResult, Simulator
+from scruple.sim.engine import RunResult, Simulator, cost_usd, oracle, outcome_for
 from scruple.sim.generator import generate_cases
 from scruple.sim.library import baseline_policy
-from scruple.sim.models import DisputeCase, Scenario
+from scruple.sim.models import ESCALATION_COST_USD, DisputeCase, Scenario
 from scruple.sim.policy import Policy
+from scruple.verifiers.policy_constraints import CONSTRAINTS
 
 FieldValue = bool | int | str
 
@@ -62,6 +63,34 @@ class GroundTruth(BaseModel):
 
     case_type: str
     claim_valid: bool
+    best_action: ActionKind  # cheapest action in hindsight that breaks no constraint
+
+
+AGENT_ACTION: dict[Action, ActionKind] = {
+    Action.ACCEPT: ActionKind.ACCEPT_LIABILITY,
+    Action.CONTEST: ActionKind.REPRESENT,
+    Action.ESCALATE: ActionKind.ESCALATE,
+}
+
+
+def best_compliant(case: DisputeCase) -> tuple[Action, int]:
+    """The cheapest action, with hindsight, that breaks no policy constraint.
+
+    Escalation never breaks a constraint, so there is always one. Ties prefer the
+    order accept, contest, escalate (automation first).
+    """
+    best: tuple[Action, int] | None = None
+    for a in (Action.ACCEPT, Action.CONTEST, Action.ESCALATE):
+        if any(violated(case, a) for _, violated in CONSTRAINTS.values()):
+            continue
+        if a is Action.ESCALATE:
+            cost = oracle(case)[2] + ESCALATION_COST_USD
+        else:
+            cost = cost_usd(case, outcome_for(case, a))
+        if best is None or cost < best[1]:
+            best = (a, cost)
+    assert best is not None
+    return best
 
 
 class EvidenceDoc(BaseModel):
@@ -255,7 +284,9 @@ class SimCase:
 
     def ground_truth(self) -> GroundTruth:
         return GroundTruth(
-            case_type=self._target.scenario.value, claim_valid=self._target.claim_valid
+            case_type=self._target.scenario.value,
+            claim_valid=self._target.claim_valid,
+            best_action=AGENT_ACTION[best_compliant(self._target)[0]],
         )
 
 

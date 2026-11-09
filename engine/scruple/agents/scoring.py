@@ -6,16 +6,16 @@ the ledger only to raise flags. They never change cost, regret or verifier resul
 
 from __future__ import annotations
 
-from scruple.agents.env import ActionKind, SimCase
+from scruple.agents.env import ActionKind, SimCase, best_compliant
 from scruple.agents.models import Decision, EpisodeScore, Outcome, VerifierResult
 from scruple.domain import Action
-from scruple.sim.engine import cost_usd, oracle, outcome_for
-from scruple.sim.models import ESCALATION_COST_USD, DisputeCase, Resolution
+from scruple.sim.engine import oracle
+from scruple.sim.models import Resolution
 from scruple.verifiers.costs import realized_costs
 from scruple.verifiers.ledger import verify_ledger
 from scruple.verifiers.outcome import NAME as OUTCOME_NAME
 from scruple.verifiers.outcome import score_outcomes
-from scruple.verifiers.policy_constraints import CONSTRAINTS, verify_policy
+from scruple.verifiers.policy_constraints import verify_policy
 
 _OUTCOME: dict[Resolution, Outcome] = {
     Resolution.WON: "win",
@@ -23,26 +23,6 @@ _OUTCOME: dict[Resolution, Outcome] = {
     Resolution.LOST: "loss",
     Resolution.ACCEPTED: "accepted",
 }
-
-
-def best_compliant(case: DisputeCase) -> tuple[Action, int]:
-    """The cheapest action, with hindsight, that breaks no policy constraint.
-
-    Escalation never breaks a constraint, so there is always one. Ties prefer the
-    order accept, contest, escalate (automation first).
-    """
-    best: tuple[Action, int] | None = None
-    for a in (Action.ACCEPT, Action.CONTEST, Action.ESCALATE):
-        if any(violated(case, a) for _, violated in CONSTRAINTS.values()):
-            continue
-        if a is Action.ESCALATE:
-            cost = oracle(case)[2] + ESCALATION_COST_USD
-        else:
-            cost = cost_usd(case, outcome_for(case, a))
-        if best is None or cost < best[1]:
-            best = (a, cost)
-    assert best is not None
-    return best
 
 
 def score_episode(
