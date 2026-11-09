@@ -1,0 +1,24 @@
+{
+  "rule_id": "fraud-contest-all",
+  "spec": {
+    "description": "Contest every fraud dispute.",
+    "conditions": [
+      {
+        "field": "reason_code",
+        "op": "eq",
+        "value": "fraud"
+      }
+    ],
+    "action": "contest",
+    "priority": 10
+  },
+  "owner": "payments-ops",
+  "provenance": {
+    "agent_id": "dispute-agent-01",
+    "episode_ids": [
+      "ep-0004"
+    ],
+    "notes": "synthetic demo candidate",
+    "claimed_metrics": {}
+  }
+}
