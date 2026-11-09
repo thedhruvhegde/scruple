@@ -14,12 +14,13 @@ from scruple.service import AgentGate
 DEFAULT_DB = "agent-gate.db"
 
 
-def _gate(args: argparse.Namespace) -> AgentGate:
+def _gate(args: argparse.Namespace, bootstrap: bool = True) -> AgentGate:
     from scruple.settings import load_settings
 
     # --db wins; else SCRUPLE_DATABASE_URL (+ password) from settings; else DEFAULT_DB.
     g = AgentGate.open(args.db or load_settings().database_dsn())
-    g.bootstrap_baseline()
+    if bootstrap:
+        g.bootstrap_baseline()
     return g
 
 
@@ -47,7 +48,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
-    rep = _gate(args).verify_integrity(args.expected_head)
+    # Read-only: verifying must never write (no baseline import into the evidence).
+    rep = _gate(args, bootstrap=False).verify_integrity(args.expected_head)
     print(
         f"audit chain: {'OK' if rep.chain.ok else 'BROKEN'} "
         f"({rep.chain.entries} entries, head {rep.chain.head_hash[:16]})"

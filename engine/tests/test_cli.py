@@ -82,3 +82,25 @@ def test_audit_verify_fails_on_bad_anchor(tmp_path: Path) -> None:
     db = str(tmp_path / "g.db")
     assert main(["audit", "verify", "--db", db]) == 0
     assert main(["audit", "verify", "--db", db, "--expected-head", "f" * 64]) == 1
+
+
+def test_audit_verify_never_writes(tmp_path: Path) -> None:
+    """Regression (found while writing tests/test_e2e_processes.py): `audit verify`
+    imported the baseline rules first, so verifying a database appended six audit
+    entries to the very evidence it was checking."""
+    from scruple.storage import SQLiteStorage
+
+    db = str(tmp_path / "g.db")
+    assert main(["audit", "verify", "--db", db]) == 0
+    s = SQLiteStorage(db)
+    assert s.list_audit() == [] and s.list_rule_versions() == []
+    s.close()
+    assert main(["rules", "--db", db]) == 0  # ordinary commands still bootstrap
+    s = SQLiteStorage(db)
+    head = s.list_audit()[-1].entry_hash
+    n = len(s.list_audit())
+    s.close()
+    assert main(["audit", "verify", "--db", db, "--expected-head", head]) == 0
+    s = SQLiteStorage(db)
+    assert len(s.list_audit()) == n
+    s.close()
