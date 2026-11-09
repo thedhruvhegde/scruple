@@ -42,3 +42,16 @@ as fact to a customer.
   not calibrated to any institution's risk appetite.
 - **A-12** Scenario slices are the right unit for "edge case regression". Real
   edge cases may cut across our slice labels (see gap G-3).
+
+## Card network model (scruple/sim, roadmap 017 onwards)
+
+Sources are listed in docs/SOURCES.md. Everything below is NOT sourced, or is a
+simplification of a sourced rule. Data files flag these values with `assumption: true`.
+
+- **A-13** Inquiry (retrieval request) reply window: 10 business days on both networks.
+  Not sourced; chosen so the business-day calendar is exercised.
+- **A-14** Mastercard: the 120-day issuer filing window is commonly cited but was not
+  confirmed here; the 30-day pre-arbitration response and 45-day arbitration filing
+  windows are not sourced (public sources conflict: 15, 30, 45, 75 days). Mastercard
+  disputes are modelled with the same collaboration-shaped flow as Visa consumer
+  disputes (chargeback, second presentment, pre-arbitration, arbitration).

@@ -1,0 +1,44 @@
+{
+  "version": "2026-11-09",
+  "note": "Synthetic simulator rule sets. Every window cites a docs/SOURCES.md id or is an ASSUMPTION (docs/ASSUMPTIONS.md). Not legal or network advice.",
+  "networks": [
+    {
+      "network": "visa",
+      "display_name": "Visa",
+      "workflows": {
+        "fraud": "allocation",
+        "authorization": "allocation",
+        "processing_error": "collaboration",
+        "consumer_dispute": "collaboration"
+      },
+      "workflow_source": "S8,S9",
+      "windows": [
+        {"window": "inquiry_response", "days": 10, "day_kind": "business", "actor": "merchant", "source": null, "assumption": true, "note": "A-13: retrieval/inquiry reply window is not sourced."},
+        {"window": "chargeback_filing", "days": 120, "day_kind": "calendar", "actor": "issuer", "source": "S7", "assumption": false, "note": "From the transaction processing date; 540-day outer cap not modelled."},
+        {"window": "chargeback_response", "days": 30, "day_kind": "calendar", "actor": "merchant", "source": "S1", "assumption": false, "note": "Standard window; processors often impose shorter ones (S10)."},
+        {"window": "pre_arbitration_filing", "days": 30, "day_kind": "calendar", "actor": "issuer", "source": "S8", "assumption": false, "note": "2016 Visa document; may be out of date."},
+        {"window": "pre_arbitration_response", "days": 30, "day_kind": "calendar", "actor": "merchant", "source": "S8", "assumption": false, "note": "2016 Visa document; may be out of date."},
+        {"window": "arbitration_filing", "days": 10, "day_kind": "calendar", "actor": "network", "source": "S8", "assumption": false, "note": "2016 Visa document; may be out of date."}
+      ]
+    },
+    {
+      "network": "mastercard",
+      "display_name": "Mastercard",
+      "workflows": {
+        "fraud": "collaboration",
+        "authorization": "collaboration",
+        "processing_error": "collaboration",
+        "consumer_dispute": "collaboration"
+      },
+      "workflow_source": null,
+      "windows": [
+        {"window": "inquiry_response", "days": 10, "day_kind": "business", "actor": "merchant", "source": null, "assumption": true, "note": "A-13: retrieval/inquiry reply window is not sourced."},
+        {"window": "chargeback_filing", "days": 120, "day_kind": "calendar", "actor": "issuer", "source": null, "assumption": true, "note": "A-14: commonly cited, not confirmed in this research."},
+        {"window": "chargeback_response", "days": 45, "day_kind": "calendar", "actor": "merchant", "source": "S1,S11", "assumption": false, "note": "Second presentment window."},
+        {"window": "pre_arbitration_filing", "days": 45, "day_kind": "calendar", "actor": "issuer", "source": "S11", "assumption": false, "note": "Most commonly reported figure; some sources say 30."},
+        {"window": "pre_arbitration_response", "days": 30, "day_kind": "calendar", "actor": "merchant", "source": null, "assumption": true, "note": "A-14: not sourced."},
+        {"window": "arbitration_filing", "days": 45, "day_kind": "calendar", "actor": "network", "source": null, "assumption": true, "note": "A-14: sources conflict (15, 30, 45, 75 days)."}
+      ]
+    }
+  ]
+}
