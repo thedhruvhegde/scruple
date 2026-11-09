@@ -16,9 +16,22 @@ and stage, whether and when evidence was submitted, which evidence fields, wheth
 was late, and anything derived from the outcome. A later posting (a reinstatement
 credit) is likewise out of the view.
 
+Payment facts (`ExternalCase.facts`, from an expanded Stripe charge, an Adyen
+notification or mapped CSV columns) split the same way. Known at open, because they
+describe the payment, which precedes the dispute: card brand, funding and country,
+3-D Secure result and version, AVS and CVC check results, MCC, whether a shipping
+address and a tracking number were on the payment, delivery confirmation (ASSUMPTION:
+a carrier confirms delivery before the cardholder disputes it), and whether a refund
+was made before the dispute opened. Known only after the outcome, because exports
+report them as of the export: the refund state and amount refunded, refundability,
+the evidence counters, enhanced eligibility, Adyen's defendable flags. A fact the
+export does not carry is visible as None (known to be unknown), never guessed.
+
 `rule_view()` gives the observable-field dictionary that `scruple.domain.RuleSpec`
-conditions read. Exports do not carry some of those fields; they are filled with fixed
-defaults and listed in `DEFAULTED_RULE_FIELDS` (and on every report).
+conditions read. `mcc`, `delivery_confirmed`, `three_ds` and `has_prior_refund` come
+from the payment facts when the export carries them; otherwise, and always for
+`currency_mismatch`, a fixed default from `DEFAULTED_RULE_FIELDS` is used.
+`defaulted_rule_fields()` says which, and every backtest report counts them.
 """
 
 from __future__ import annotations
@@ -42,7 +55,43 @@ OUTCOME_FACTS = (
     "historical_action",
     "ledger_after_decision",
 )
-# RuleSpec fields an export does not carry, and the value used instead.
+# Payment facts known when the dispute opens, and those known only after the outcome.
+DECISION_TIME_FACTS = (
+    "card_brand",
+    "card_funding",
+    "card_country",
+    "payment_method_variant",
+    "three_ds_result",
+    "three_ds_version",
+    "three_ds_authenticated",
+    "avs_line1_check",
+    "avs_postal_code_check",
+    "cvc_check",
+    "mcc",
+    "shipping_address_present",
+    "shipping_carrier",
+    "shipping_tracking_present",
+    "delivery_confirmed",
+    "refunded_before_dispute",
+)
+OUTCOME_TIME_FACTS = (
+    "amount_refunded_minor",
+    "refund_state",
+    "is_charge_refundable",
+    "evidence_has_evidence",
+    "evidence_submission_count",
+    "enhanced_eligibility_types",
+    "defendable",
+    "auto_defended",
+)
+# RuleSpec field -> the payment fact it is read from, when the export carries it.
+RULE_FIELD_FACTS: Mapping[str, str] = {
+    "mcc": "mcc",
+    "delivery_confirmed": "delivery_confirmed",
+    "three_ds": "three_ds_authenticated",
+    "has_prior_refund": "refunded_before_dispute",
+}
+# RuleSpec fields an export may not carry, and the value used instead.
 DEFAULTED_RULE_FIELDS: Mapping[str, bool | str] = {
     "mcc": "unknown",
     "delivery_confirmed": False,
@@ -139,6 +188,19 @@ class DecisionView:
     def __repr__(self) -> str:
         return f"DecisionView(at={self.decided_at.isoformat()}, known={list(self.known())})"
 
+    def defaulted_rule_fields(self) -> tuple[str, ...]:
+        """Rule fields that `rule_view` fills with a default (the export lacks them)."""
+        return tuple(
+            f
+            for f in DEFAULTED_RULE_FIELDS
+            if f not in RULE_FIELD_FACTS or self._values.get(RULE_FIELD_FACTS[f]) is None
+        )
+
+    def _rule_fact(self, field: str) -> bool | str:
+        fact = RULE_FIELD_FACTS.get(field)
+        v = self._values.get(fact) if fact else None
+        return DEFAULTED_RULE_FIELDS[field] if v is None else v
+
     def rule_view(self) -> dict[str, bool | int | str]:
         """The `scruple.domain.FIELD_TYPES` dictionary, from known facts and defaults."""
         currency = self._values["currency"]
@@ -148,14 +210,14 @@ class DecisionView:
                 f"(synthetic table covers {sorted(FX_TO_USD_PER_100)})"
             )
         return {
-            "mcc": DEFAULTED_RULE_FIELDS["mcc"],
+            "mcc": self._rule_fact("mcc"),
             "reason_code": self._values["reason_code"] or "unmapped",
             "amount_usd_minor": to_usd(self._values["amount_minor"], currency),
-            "delivery_confirmed": DEFAULTED_RULE_FIELDS["delivery_confirmed"],
-            "three_ds": DEFAULTED_RULE_FIELDS["three_ds"],
+            "delivery_confirmed": self._rule_fact("delivery_confirmed"),
+            "three_ds": self._rule_fact("three_ds"),
             "evidence_on_time": bool(self._values["response_allowed"]),
             "prior_dispute_on_txn": self._values["prior_disputes_on_payment"] > 0,
-            "has_prior_refund": DEFAULTED_RULE_FIELDS["has_prior_refund"],
+            "has_prior_refund": self._rule_fact("has_prior_refund"),
             "currency_mismatch": DEFAULTED_RULE_FIELDS["currency_mismatch"],
         }
 
@@ -210,6 +272,9 @@ def facts_of(
         Fact("ledger_after_decision", tuple(later), None),
     ]
     out += [Fact(name, None, None) for name in OUTCOME_FACTS if name != "ledger_after_decision"]
+    pf = c.facts.model_dump() if c.facts is not None else {}
+    out += [Fact(name, pf.get(name), opened) for name in DECISION_TIME_FACTS]
+    out += [Fact(name, pf.get(name), None) for name in OUTCOME_TIME_FACTS]
     return out
 
 

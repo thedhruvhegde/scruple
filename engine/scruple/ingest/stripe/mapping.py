@@ -26,8 +26,15 @@ from scruple.ingest.errors import (
     UnmappedValueError,
 )
 from scruple.ingest.limits import load_json_object
-from scruple.ingest.models import CaseState, ExternalCase, IngestBatch, LedgerMovement, MovementKind
-from scruple.ingest.stripe.wire import BalanceTransaction, Dispute
+from scruple.ingest.models import (
+    CaseState,
+    ExternalCase,
+    IngestBatch,
+    LedgerMovement,
+    MovementKind,
+    PaymentFacts,
+)
+from scruple.ingest.stripe.wire import BalanceTransaction, Charge, Dispute
 from scruple.sim.models import Stage
 
 SOURCE = "stripe"
@@ -94,6 +101,112 @@ EVIDENCE_FIELDS: tuple[str, ...] = (
 )
 
 
+# `three_d_secure_details_charge.result` enum (vendored spec) -> authenticated?
+# Only "authenticated" counts; every other documented outcome is "not authenticated".
+# A value the spec does not list maps to None (unknown), never to a guess.
+THREE_DS_AUTHENTICATED: Mapping[str, bool] = {
+    "authenticated": True,
+    "attempt_acknowledged": False,
+    "data_share_only": False,
+    "exempted": False,
+    "failed": False,
+    "not_supported": False,
+    "processing_error": False,
+}
+# Refund statuses that mean no money went back (Stripe documents pending, requires_action,
+# succeeded, failed and canceled for `refund.status`).
+_NOT_REFUNDED = frozenset({"failed", "canceled"})
+
+
+def _three_ds(card: Any) -> tuple[str | None, str | None, bool | None]:
+    """(result, version, authenticated) from `payment_method_details.card`.
+
+    The spec documents `three_d_secure` as "Populated if this transaction used 3D Secure
+    authentication", so a card with `three_d_secure: null` was not authenticated (False).
+    An object whose `result` is null says 3-D Secure was involved but not how: None.
+    """
+    tds = card.three_d_secure
+    if tds is None:
+        return None, None, False
+    if tds.result is None:
+        return None, tds.version, None
+    return tds.result, tds.version, THREE_DS_AUTHENTICATED.get(tds.result)
+
+
+def _refunds(ch: Charge, opened: int) -> tuple[bool | None, str]:
+    """(refunded before the dispute opened, refund state at export)."""
+    if ch.amount_refunded == 0:
+        before: bool | None = False  # nothing was ever refunded
+    elif ch.refunds is not None and not ch.refunds.has_more:
+        before = any(
+            r.created < opened and (r.status or "") not in _NOT_REFUNDED for r in ch.refunds.data
+        )
+    else:
+        before = None  # refunded at some point, but the export does not say when
+    if ch.amount_refunded == 0:
+        state = "none"
+    elif ch.amount_refunded >= ch.amount:
+        state = "full"
+    else:
+        state = "partial"
+    return before, state
+
+
+def payment_facts(d: Dispute) -> PaymentFacts:
+    """Rule-relevant facts from a dispute and, when it is expanded, its charge.
+
+    With `charge` as an id only (the default), only what the dispute itself carries is
+    known (card brand, refundability, evidence counters); everything else is None.
+    Expand it (`expand[]=charge` or `data.charge` on a list) to get 3-D Secure, AVS/CVC,
+    funding, shipping and refunds. MCC is not in the Stripe charge or dispute schema,
+    so it is always None here.
+    """
+    dcard = d.payment_method_details.card if d.payment_method_details else None
+    ev = d.evidence_details
+    base: dict[str, Any] = {
+        "card_brand": dcard.brand if dcard else None,
+        "is_charge_refundable": d.is_charge_refundable,
+        "evidence_has_evidence": ev.has_evidence,
+        "evidence_submission_count": ev.submission_count,
+        "enhanced_eligibility_types": tuple(d.enhanced_eligibility_types),
+    }
+    ch = d.charge if isinstance(d.charge, Charge) else None
+    if ch is None:
+        return PaymentFacts(**base)
+    pmd = ch.payment_method_details
+    card = pmd.card if pmd is not None else None
+    if card is not None:
+        result, version, authed = _three_ds(card)
+        checks = card.checks
+        base.update(
+            card_brand=card.brand or base["card_brand"],
+            card_funding=card.funding,
+            card_country=card.country,
+            three_ds_result=result,
+            three_ds_version=version,
+            three_ds_authenticated=authed,
+            avs_line1_check=checks.address_line1_check if checks else None,
+            avs_postal_code_check=checks.address_postal_code_check if checks else None,
+            cvc_check=checks.cvc_check if checks else None,
+        )
+    ship = ch.shipping
+    addr = ship.address if ship is not None else None
+    base.update(
+        shipping_address_present=bool(addr and (addr.line1 or addr.postal_code)),
+        shipping_carrier=(ship.carrier or None) if ship is not None else None,
+        shipping_tracking_present=bool(ship and ship.tracking_number),
+    )
+    before, state = _refunds(ch, d.created)
+    base.update(
+        refunded_before_dispute=before,
+        amount_refunded_minor=ch.amount_refunded,
+        refund_state=state,
+    )
+    if ch.amount_refunded < 0:
+        raise SchemaMismatchError(f"charge {ch.id} has a negative amount_refunded")
+    return PaymentFacts(**base)
+
+
 def _ts(seconds: int, what: str) -> datetime:
     # Year 1970..9999 keeps datetime happy and rejects absurd values.
     if not 0 <= seconds <= 253_402_300_799:
@@ -148,6 +261,7 @@ def map_dispute(d: Dispute, *, allow_live: bool = False) -> ExternalCase:
             evidence_submitted=d.evidence_details.submission_count > 0,
             evidence_past_due=d.evidence_details.past_due,
             livemode=d.livemode,
+            facts=payment_facts(d),
         )
     except ValidationError as e:
         raise SchemaMismatchError(
@@ -207,4 +321,5 @@ __all__ = [
     "map_balance_transaction",
     "map_dispute",
     "parse_dispute",
+    "payment_facts",
 ]

@@ -12,7 +12,8 @@ JSON Lines row):
    `[PAN]` first, so not even ciphertext holds one.
 3. The adapter maps the record (unknown statuses and reasons are errors, not guesses).
 4. Redaction (`scruple.security.redact.redact_text`) of the free-text fields that are
-   kept (`merchant_ref`, `network`, `network_reason_code`, `source_reason`). Identifiers
+   kept (`merchant_ref`, `network`, `network_reason_code`, `source_reason`, and the
+   shipping carrier in `facts`). Identifiers
    (`external_id`, `payment_ref`) cannot be redacted without breaking joins, so an id
    that holds a card number or an email address rejects the row.
 5. The store refuses any record whose clear-text part still holds a card number
@@ -201,9 +202,14 @@ def _redact_case(case: ExternalCase, acc: _Acc) -> ExternalCase:
         if r.text != v:
             update[f] = r.text
             acc.redactions.update(r.counts())
+    if case.facts is not None and case.facts.shipping_carrier:
+        r = redact_text(case.facts.shipping_carrier)
+        if r.text != case.facts.shipping_carrier:
+            acc.redactions.update(r.counts())
+            update["facts"] = case.facts.model_copy(update={"shipping_carrier": r.text})
     if not update:
         return case
-    return ExternalCase.model_validate({**case.model_dump(), **update})
+    return case.model_copy(update=update)
 
 
 def _seal(

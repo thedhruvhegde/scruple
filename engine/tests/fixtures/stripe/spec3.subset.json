@@ -1,6 +1,50 @@
 {
  "components": {
   "schemas": {
+   "address": {
+    "description": "",
+    "properties": {
+     "city": {
+      "description": "City, district, suburb, town, or village.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "country": {
+      "description": "Two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "line1": {
+      "description": "Address line 1, such as the street, PO Box, or company name.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "line2": {
+      "description": "Address line 2, such as the apartment, suite, unit, or building.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "postal_code": {
+      "description": "ZIP or postal code.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "state": {
+      "description": "State, county, province, or region ([ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2)).",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     }
+    },
+    "title": "Address",
+    "type": "object",
+    "x-expandableFields": []
+   },
    "balance_transaction": {
     "description": "Balance transactions represent funds moving through your Stripe account.\nStripe creates them for every type of transaction that enters or leaves your Stripe account balance.\n\nRelated guide: [Balance transaction types](https://docs.stripe.com/reports/balance-transaction-types)",
     "properties": {
@@ -1488,6 +1532,901 @@
      "object"
     ],
     "title": "NotificationEventData",
+    "type": "object",
+    "x-expandableFields": []
+   },
+   "payment_method_details": {
+    "description": "",
+    "properties": {
+     "ach_credit_transfer": {
+      "$ref": "#/components/schemas/payment_method_details_ach_credit_transfer"
+     },
+     "ach_debit": {
+      "$ref": "#/components/schemas/payment_method_details_ach_debit"
+     },
+     "acss_debit": {
+      "$ref": "#/components/schemas/payment_method_details_acss_debit"
+     },
+     "affirm": {
+      "$ref": "#/components/schemas/payment_method_details_affirm"
+     },
+     "afterpay_clearpay": {
+      "$ref": "#/components/schemas/payment_method_details_afterpay_clearpay"
+     },
+     "alipay": {
+      "$ref": "#/components/schemas/payment_method_details_alipay"
+     },
+     "alma": {
+      "$ref": "#/components/schemas/payment_method_details_alma"
+     },
+     "amazon_pay": {
+      "$ref": "#/components/schemas/payment_method_details_amazon_pay"
+     },
+     "au_becs_debit": {
+      "$ref": "#/components/schemas/payment_method_details_au_becs_debit"
+     },
+     "bacs_debit": {
+      "$ref": "#/components/schemas/payment_method_details_bacs_debit"
+     },
+     "bancontact": {
+      "$ref": "#/components/schemas/payment_method_details_bancontact"
+     },
+     "billie": {
+      "$ref": "#/components/schemas/payment_method_details_billie"
+     },
+     "bizum": {
+      "$ref": "#/components/schemas/payment_method_details_bizum"
+     },
+     "blik": {
+      "$ref": "#/components/schemas/payment_method_details_blik"
+     },
+     "boleto": {
+      "$ref": "#/components/schemas/payment_method_details_boleto"
+     },
+     "card": {
+      "$ref": "#/components/schemas/payment_method_details_card"
+     },
+     "card_present": {
+      "$ref": "#/components/schemas/payment_method_details_card_present"
+     },
+     "cashapp": {
+      "$ref": "#/components/schemas/payment_method_details_cashapp"
+     },
+     "crypto": {
+      "$ref": "#/components/schemas/payment_method_details_crypto"
+     },
+     "customer_balance": {
+      "$ref": "#/components/schemas/payment_method_details_customer_balance"
+     },
+     "eps": {
+      "$ref": "#/components/schemas/payment_method_details_eps"
+     },
+     "fpx": {
+      "$ref": "#/components/schemas/payment_method_details_fpx"
+     },
+     "giropay": {
+      "$ref": "#/components/schemas/payment_method_details_giropay"
+     },
+     "grabpay": {
+      "$ref": "#/components/schemas/payment_method_details_grabpay"
+     },
+     "ideal": {
+      "$ref": "#/components/schemas/payment_method_details_ideal"
+     },
+     "interac_present": {
+      "$ref": "#/components/schemas/payment_method_details_interac_present"
+     },
+     "kakao_pay": {
+      "$ref": "#/components/schemas/payment_method_details_kakao_pay"
+     },
+     "klarna": {
+      "$ref": "#/components/schemas/payment_method_details_klarna"
+     },
+     "konbini": {
+      "$ref": "#/components/schemas/payment_method_details_konbini"
+     },
+     "kr_card": {
+      "$ref": "#/components/schemas/payment_method_details_kr_card"
+     },
+     "link": {
+      "$ref": "#/components/schemas/payment_method_details_link"
+     },
+     "mb_way": {
+      "$ref": "#/components/schemas/payment_method_details_mb_way"
+     },
+     "mobilepay": {
+      "$ref": "#/components/schemas/payment_method_details_mobilepay"
+     },
+     "multibanco": {
+      "$ref": "#/components/schemas/payment_method_details_multibanco"
+     },
+     "naver_pay": {
+      "$ref": "#/components/schemas/payment_method_details_naver_pay"
+     },
+     "nz_bank_account": {
+      "$ref": "#/components/schemas/payment_method_details_nz_bank_account"
+     },
+     "oxxo": {
+      "$ref": "#/components/schemas/payment_method_details_oxxo"
+     },
+     "p24": {
+      "$ref": "#/components/schemas/payment_method_details_p24"
+     },
+     "pay_by_bank": {
+      "$ref": "#/components/schemas/payment_method_details_pay_by_bank"
+     },
+     "payco": {
+      "$ref": "#/components/schemas/payment_method_details_payco"
+     },
+     "paynow": {
+      "$ref": "#/components/schemas/payment_method_details_paynow"
+     },
+     "paypal": {
+      "$ref": "#/components/schemas/payment_method_details_paypal"
+     },
+     "paypay": {
+      "$ref": "#/components/schemas/payment_method_details_paypay"
+     },
+     "payto": {
+      "$ref": "#/components/schemas/payment_method_details_payto"
+     },
+     "pix": {
+      "$ref": "#/components/schemas/payment_method_details_pix"
+     },
+     "promptpay": {
+      "$ref": "#/components/schemas/payment_method_details_promptpay"
+     },
+     "revolut_pay": {
+      "$ref": "#/components/schemas/payment_method_details_revolut_pay"
+     },
+     "samsung_pay": {
+      "$ref": "#/components/schemas/payment_method_details_samsung_pay"
+     },
+     "satispay": {
+      "$ref": "#/components/schemas/payment_method_details_satispay"
+     },
+     "scalapay": {
+      "$ref": "#/components/schemas/payment_method_details_scalapay"
+     },
+     "sepa_debit": {
+      "$ref": "#/components/schemas/payment_method_details_sepa_debit"
+     },
+     "sequra": {
+      "$ref": "#/components/schemas/payment_method_details_sequra"
+     },
+     "sofort": {
+      "$ref": "#/components/schemas/payment_method_details_sofort"
+     },
+     "stripe_account": {
+      "$ref": "#/components/schemas/payment_method_details_stripe_account"
+     },
+     "sunbit": {
+      "$ref": "#/components/schemas/payment_method_details_sunbit"
+     },
+     "swish": {
+      "$ref": "#/components/schemas/payment_method_details_swish"
+     },
+     "twint": {
+      "$ref": "#/components/schemas/payment_method_details_twint"
+     },
+     "type": {
+      "description": "The type of transaction-specific details of the payment method used in the payment. See [PaymentMethod.type](https://docs.stripe.com/api/payment_methods/object#payment_method_object-type) for the full list of possible types.\nAn additional hash is included on `payment_method_details` with a name matching this value.\nIt contains information specific to the payment method.",
+      "maxLength": 5000,
+      "type": "string"
+     },
+     "upi": {
+      "$ref": "#/components/schemas/payment_method_details_upi"
+     },
+     "us_bank_account": {
+      "$ref": "#/components/schemas/payment_method_details_us_bank_account"
+     },
+     "wechat": {
+      "$ref": "#/components/schemas/payment_method_details_wechat"
+     },
+     "wechat_pay": {
+      "$ref": "#/components/schemas/payment_method_details_wechat_pay"
+     },
+     "zip": {
+      "$ref": "#/components/schemas/payment_method_details_zip"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "title": "payment_method_details",
+    "type": "object",
+    "x-expandableFields": [
+     "ach_credit_transfer",
+     "ach_debit",
+     "acss_debit",
+     "affirm",
+     "afterpay_clearpay",
+     "alipay",
+     "alma",
+     "amazon_pay",
+     "au_becs_debit",
+     "bacs_debit",
+     "bancontact",
+     "billie",
+     "bizum",
+     "blik",
+     "boleto",
+     "card",
+     "card_present",
+     "cashapp",
+     "crypto",
+     "customer_balance",
+     "eps",
+     "fpx",
+     "giropay",
+     "grabpay",
+     "ideal",
+     "interac_present",
+     "kakao_pay",
+     "klarna",
+     "konbini",
+     "kr_card",
+     "link",
+     "mb_way",
+     "mobilepay",
+     "multibanco",
+     "naver_pay",
+     "nz_bank_account",
+     "oxxo",
+     "p24",
+     "pay_by_bank",
+     "payco",
+     "paynow",
+     "paypal",
+     "paypay",
+     "payto",
+     "pix",
+     "promptpay",
+     "revolut_pay",
+     "samsung_pay",
+     "satispay",
+     "scalapay",
+     "sepa_debit",
+     "sequra",
+     "sofort",
+     "stripe_account",
+     "sunbit",
+     "swish",
+     "twint",
+     "upi",
+     "us_bank_account",
+     "wechat",
+     "wechat_pay",
+     "zip"
+    ]
+   },
+   "payment_method_details_card": {
+    "description": "",
+    "properties": {
+     "amount_authorized": {
+      "description": "The authorized amount.",
+      "nullable": true,
+      "type": "integer"
+     },
+     "authorization_code": {
+      "description": "Authorization code on the charge.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "brand": {
+      "description": "Card brand. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa` or `unknown`.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "capture_before": {
+      "description": "When using manual capture, a future timestamp at which the charge will be automatically refunded if uncaptured.",
+      "format": "unix-time",
+      "type": "integer"
+     },
+     "checks": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/payment_method_details_card_checks"
+       }
+      ],
+      "description": "Check results by Card networks on Card address and CVC at time of payment.",
+      "nullable": true
+     },
+     "country": {
+      "description": "Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you've collected.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "electronic_commerce_indicator": {
+      "description": "The Electronic Commerce Indicator (ECI) returned by the card network in the authorization response. Indicates the level of authentication used. Only populated for Visa and Mastercard transactions. This is the network's final ECI and can differ from the request value. An authenticated ECI alone doesn't determine liability shift.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "exp_month": {
+      "description": "Two-digit number representing the card's expiration month.",
+      "type": "integer"
+     },
+     "exp_year": {
+      "description": "Four-digit number representing the card's expiration year.",
+      "type": "integer"
+     },
+     "extended_authorization": {
+      "$ref": "#/components/schemas/payment_flows_private_payment_methods_card_details_api_resource_enterprise_features_extended_authorization_extended_authorization"
+     },
+     "fingerprint": {
+      "description": "Uniquely identifies this particular card number. You can use this attribute to check whether two customers who\u2019ve signed up with you are using the same card number, for example. For payment methods that tokenize card information (Apple Pay, Google Pay), the tokenized number might be provided instead of the underlying card number.\n\n*As of May 1, 2021, card fingerprint in India for Connect changed to allow two fingerprints for the same card---one for India and one for the rest of the world.*",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "funding": {
+      "description": "Card funding type. Can be `credit`, `debit`, `prepaid`, or `unknown`.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "incremental_authorization": {
+      "$ref": "#/components/schemas/payment_flows_private_payment_methods_card_details_api_resource_enterprise_features_incremental_authorization_incremental_authorization"
+     },
+     "installments": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/payment_method_details_card_installments"
+       }
+      ],
+      "description": "Installment details for this payment.\n\nFor more information, see the [installments integration guide](https://docs.stripe.com/payments/installments).",
+      "nullable": true
+     },
+     "last4": {
+      "description": "The last four digits of the card.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "mandate": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/mandate"
+       }
+      ],
+      "description": "ID of the mandate used to make this payment or created by it.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/mandate"
+        }
+       ]
+      }
+     },
+     "multicapture": {
+      "$ref": "#/components/schemas/payment_flows_private_payment_methods_card_details_api_resource_multicapture"
+     },
+     "network": {
+      "description": "Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "network_token": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/payment_method_details_card_network_token"
+       }
+      ],
+      "description": "If this card has network token credentials, this contains the details of the network token credentials.",
+      "nullable": true
+     },
+     "network_transaction_id": {
+      "description": "This is used by the financial networks to identify a transaction. Visa calls this the Transaction ID, Mastercard calls this the Trace ID, and American Express calls this the Acquirer Reference Data. This value will be present if it is returned by the financial network in the authorization response, and null otherwise.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "overcapture": {
+      "$ref": "#/components/schemas/payment_flows_private_payment_methods_card_details_api_resource_enterprise_features_overcapture_overcapture"
+     },
+     "regulated_status": {
+      "description": "Status of a card based on the card issuer.",
+      "enum": [
+       "regulated",
+       "unregulated"
+      ],
+      "nullable": true,
+      "type": "string"
+     },
+     "three_d_secure": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/three_d_secure_details_charge"
+       }
+      ],
+      "description": "Populated if this transaction used 3D Secure authentication.",
+      "nullable": true
+     },
+     "transaction_link_id": {
+      "description": "Transaction Link ID (TLID) is a unique identifier for a transaction. This is used by some card networks, such as Mastercard, for transaction linking, in addition to Network Transaction IDs. This value will be present if it is returned by the financial network in the authorization response, and null otherwise.",
+      "maxLength": 22,
+      "nullable": true,
+      "type": "string"
+     },
+     "wallet": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/payment_method_details_card_wallet"
+       }
+      ],
+      "description": "If this Card is part of a card wallet, this contains the details of the card wallet.",
+      "nullable": true
+     }
+    },
+    "required": [
+     "exp_month",
+     "exp_year"
+    ],
+    "title": "payment_method_details_card",
+    "type": "object",
+    "x-expandableFields": [
+     "checks",
+     "extended_authorization",
+     "incremental_authorization",
+     "installments",
+     "mandate",
+     "multicapture",
+     "network_token",
+     "overcapture",
+     "three_d_secure",
+     "wallet"
+    ]
+   },
+   "payment_method_details_card_checks": {
+    "description": "",
+    "properties": {
+     "address_line1_check": {
+      "description": "If a address line1 was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "address_postal_code_check": {
+      "description": "If a address postal code was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "cvc_check": {
+      "description": "If a CVC was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     }
+    },
+    "title": "payment_method_details_card_checks",
+    "type": "object",
+    "x-expandableFields": []
+   },
+   "refund": {
+    "description": "Refund objects allow you to refund a previously created charge that isn't\nrefunded yet. Funds are refunded to the credit or debit card that's\ninitially charged.\n\nRelated guide: [Refunds](https://docs.stripe.com/refunds)",
+    "properties": {
+     "amount": {
+      "description": "Amount, in cents (or local equivalent).",
+      "type": "integer"
+     },
+     "balance_transaction": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/balance_transaction"
+       }
+      ],
+      "description": "Balance transaction that describes the impact on your account balance.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/balance_transaction"
+        }
+       ]
+      }
+     },
+     "charge": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/charge"
+       }
+      ],
+      "description": "ID of the charge that's refunded.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/charge"
+        }
+       ]
+      }
+     },
+     "created": {
+      "description": "Time at which the object was created. Measured in seconds since the Unix epoch.",
+      "format": "unix-time",
+      "type": "integer"
+     },
+     "currency": {
+      "description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).",
+      "format": "currency",
+      "type": "string"
+     },
+     "customer": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/customer"
+       },
+       {
+        "$ref": "#/components/schemas/deleted_customer"
+       }
+      ],
+      "description": "ID of the customer of this refund.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/customer"
+        },
+        {
+         "$ref": "#/components/schemas/deleted_customer"
+        }
+       ]
+      }
+     },
+     "customer_account": {
+      "description": "ID of the account of this refund.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "description": {
+      "description": "An arbitrary string attached to the object. You can use this for displaying to users (available on non-card refunds only).",
+      "maxLength": 5000,
+      "type": "string"
+     },
+     "destination_details": {
+      "$ref": "#/components/schemas/refund_destination_details"
+     },
+     "failure_balance_transaction": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/balance_transaction"
+       }
+      ],
+      "description": "After the refund fails, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.",
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/balance_transaction"
+        }
+       ]
+      }
+     },
+     "failure_reason": {
+      "description": "Provides the reason for the refund failure. Possible values are: `lost_or_stolen_card`, `expired_or_canceled_card`, `charge_for_pending_refund_disputed`, `insufficient_funds`, `declined`, `merchant_request`, or `unknown`.",
+      "maxLength": 5000,
+      "type": "string"
+     },
+     "id": {
+      "description": "Unique identifier for the object.",
+      "maxLength": 5000,
+      "type": "string"
+     },
+     "instructions_email": {
+      "description": "For payment methods without native refund support (for example, Konbini, PromptPay), provide an email address for the customer to receive refund instructions.",
+      "maxLength": 5000,
+      "type": "string"
+     },
+     "metadata": {
+      "additionalProperties": {
+       "maxLength": 500,
+       "type": "string"
+      },
+      "description": "Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
+      "nullable": true,
+      "type": "object"
+     },
+     "next_action": {
+      "$ref": "#/components/schemas/refund_next_action"
+     },
+     "object": {
+      "description": "String representing the object's type. Objects of the same type share the same value.",
+      "enum": [
+       "refund"
+      ],
+      "type": "string"
+     },
+     "payment_intent": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/payment_intent"
+       }
+      ],
+      "description": "ID of the PaymentIntent that's refunded.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/payment_intent"
+        }
+       ]
+      }
+     },
+     "payment_method": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/payment_method"
+       }
+      ],
+      "description": "ID of the payment method associated with this refund.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/payment_method"
+        }
+       ]
+      }
+     },
+     "pending_reason": {
+      "description": "Provides the reason for why the refund is pending. Possible values are: `processing`, `insufficient_funds`, or `charge_pending`.",
+      "enum": [
+       "charge_pending",
+       "insufficient_funds",
+       "processing"
+      ],
+      "type": "string"
+     },
+     "presentment_details": {
+      "$ref": "#/components/schemas/payment_flows_payment_intent_presentment_details"
+     },
+     "reason": {
+      "description": "Reason for the refund, which is either user-provided (`duplicate`, `fraudulent`, or `requested_by_customer`) or generated by Stripe internally (`expired_uncaptured_charge`).",
+      "enum": [
+       "duplicate",
+       "expired_uncaptured_charge",
+       "fraudulent",
+       "requested_by_customer"
+      ],
+      "nullable": true,
+      "type": "string",
+      "x-stripeBypassValidation": true
+     },
+     "receipt_number": {
+      "description": "This is the transaction number that appears on email receipts sent for this refund.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "source_transfer_reversal": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/transfer_reversal"
+       }
+      ],
+      "description": "The transfer reversal that's associated with the refund. Only present if the charge came from another Stripe account.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/transfer_reversal"
+        }
+       ]
+      }
+     },
+     "status": {
+      "description": "Status of the refund. This can be `pending`, `requires_action`, `succeeded`, `failed`, or `canceled`. Learn more about [failed refunds](https://docs.stripe.com/refunds#failed-refunds).",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "transfer_reversal": {
+      "anyOf": [
+       {
+        "maxLength": 5000,
+        "type": "string"
+       },
+       {
+        "$ref": "#/components/schemas/transfer_reversal"
+       }
+      ],
+      "description": "This refers to the transfer reversal object if the accompanying transfer reverses. This is only applicable if the charge was created using the destination parameter.",
+      "nullable": true,
+      "x-expansionResources": {
+       "oneOf": [
+        {
+         "$ref": "#/components/schemas/transfer_reversal"
+        }
+       ]
+      }
+     }
+    },
+    "required": [
+     "amount",
+     "created",
+     "currency",
+     "id",
+     "object"
+    ],
+    "title": "Refund",
+    "type": "object",
+    "x-expandableFields": [
+     "balance_transaction",
+     "charge",
+     "customer",
+     "destination_details",
+     "failure_balance_transaction",
+     "next_action",
+     "payment_intent",
+     "payment_method",
+     "presentment_details",
+     "source_transfer_reversal",
+     "transfer_reversal"
+    ],
+    "x-resourceId": "refund"
+   },
+   "shipping": {
+    "description": "",
+    "properties": {
+     "address": {
+      "$ref": "#/components/schemas/address"
+     },
+     "carrier": {
+      "description": "The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "name": {
+      "description": "Recipient name.",
+      "maxLength": 5000,
+      "type": "string"
+     },
+     "phone": {
+      "description": "Recipient phone (including extension).",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "tracking_number": {
+      "description": "The tracking number for a physical product, obtained from the delivery service. If multiple tracking numbers were generated for this purchase, please separate them with commas.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     }
+    },
+    "title": "Shipping",
+    "type": "object",
+    "x-expandableFields": [
+     "address"
+    ]
+   },
+   "three_d_secure_details_charge": {
+    "description": "",
+    "properties": {
+     "authentication_flow": {
+      "description": "For authenticated transactions: how the customer was authenticated by\nthe issuing bank.",
+      "enum": [
+       "challenge",
+       "frictionless"
+      ],
+      "nullable": true,
+      "type": "string"
+     },
+     "electronic_commerce_indicator": {
+      "description": "The Electronic Commerce Indicator (ECI). A protocol-level field\nindicating what degree of authentication was performed.",
+      "enum": [
+       "01",
+       "02",
+       "05",
+       "06",
+       "07"
+      ],
+      "nullable": true,
+      "type": "string",
+      "x-stripeBypassValidation": true
+     },
+     "exemption_indicator": {
+      "description": "The exemption requested via 3DS and accepted by the issuer at authentication time.",
+      "enum": [
+       "low_risk",
+       "none"
+      ],
+      "nullable": true,
+      "type": "string"
+     },
+     "exemption_indicator_applied": {
+      "description": "Whether Stripe requested the value of `exemption_indicator` in the transaction. This will depend on\nthe outcome of Stripe's internal risk assessment.",
+      "type": "boolean"
+     },
+     "result": {
+      "description": "Indicates the outcome of 3D Secure authentication.",
+      "enum": [
+       "attempt_acknowledged",
+       "authenticated",
+       "data_share_only",
+       "exempted",
+       "failed",
+       "not_supported",
+       "processing_error"
+      ],
+      "nullable": true,
+      "type": "string"
+     },
+     "result_reason": {
+      "description": "Additional information about why 3D Secure succeeded or failed based\non the `result`.",
+      "enum": [
+       "abandoned",
+       "bypassed",
+       "canceled",
+       "card_not_enrolled",
+       "network_not_supported",
+       "protocol_error",
+       "rejected"
+      ],
+      "nullable": true,
+      "type": "string"
+     },
+     "transaction_id": {
+      "description": "The 3D Secure 1 XID or 3D Secure 2 Directory Server Transaction ID\n(dsTransId) for this payment.",
+      "maxLength": 5000,
+      "nullable": true,
+      "type": "string"
+     },
+     "version": {
+      "description": "The version of 3D Secure that was used.",
+      "enum": [
+       "1.0.2",
+       "2.1.0",
+       "2.2.0",
+       "2.3.0",
+       "2.3.1"
+      ],
+      "nullable": true,
+      "type": "string",
+      "x-stripeBypassValidation": true
+     }
+    },
+    "title": "three_d_secure_details_charge",
     "type": "object",
     "x-expandableFields": []
    }

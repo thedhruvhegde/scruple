@@ -2,8 +2,9 @@
 
 For every field a model declares we check that the property exists in the schema,
 that the Python type matches the schema type (integer/string/boolean/array/object/
-$ref/anyOf/enum), and that fields the schema marks optional or nullable are optional
-or nullable in the model too (otherwise real data would fail to parse).
+$ref/anyOf/enum, or an inline object named "schema#property"), and that fields the
+schema marks optional or nullable are optional or nullable in the model too
+(otherwise real data would fail to parse).
 """
 
 from __future__ import annotations
@@ -59,6 +60,8 @@ def _type_matches(ann: Any, prop: dict[str, Any], names: dict[type, str]) -> str
         return None
     if isinstance(ann, type) and issubclass(ann, BaseModel):
         want = names.get(ann)
+        if want is not None and "#" in want and "properties" in prop:
+            return None  # an inline object schema, checked on its own under `want`
         got = _ref_name(prop)
         return None if want is not None and got == want else f"expected $ref {want}, got {got}"
     if origin is Literal:
@@ -85,7 +88,11 @@ def check_model(
 ) -> list[str]:
     """All contract violations of `model` against `schemas[schema]` (empty list = ok)."""
     problems: list[str] = []
-    sch = schemas[schema]
+    if "#" in schema:  # "parent#prop": the inline object schema of a property
+        parent, _, inline = schema.partition("#")
+        sch = schemas[parent]["properties"][inline]
+    else:
+        sch = schemas[schema]
     props: dict[str, Any] = sch.get("properties", {})
     required = set(sch.get("required", []))
     for fname, finfo in model.model_fields.items():

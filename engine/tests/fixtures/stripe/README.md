@@ -15,11 +15,16 @@
 
 - `spec3.subset.json`: the schemas scruple reads, verbatim (`dispute`, `dispute_evidence`,
   `dispute_evidence_details`, `dispute_payment_method_details`(`_card`), `balance_transaction`,
-  `fee`, `charge`, `event`, `notification_event_data`), the `GET /v1/disputes` and
+  `fee`, `charge`, `event`, `notification_event_data`, and, for the rule-relevant charge
+  fields, `payment_method_details`, `payment_method_details_card`,
+  `payment_method_details_card_checks`, `three_d_secure_details_charge`, `shipping`,
+  `address`, `refund`), the `GET /v1/disputes` and
   `GET /v1/disputes/{dispute}` operations, and `x-scruple-dispute-event-types`
   (the `charge.dispute.*` values of the webhook endpoint `enabled_events` enum).
-- `fixtures3.subset.json`: the `dispute`, `charge`, `balance_transaction` and `event`
-  fixture objects, verbatim.
+- `fixtures3.subset.json`: the `dispute`, `charge`, `balance_transaction`, `event` and
+  `refund` fixture objects, verbatim.
+- The charge-detail schemas and the `refund` fixture were added on 2026-11-09 from the
+  same commit: a fresh download that day had the same sha256 for both files as above.
 - `extract.py`: rebuilds both files from a fresh download.
 
 Tests derive extra cases (for example a dispute with balance transactions) by editing

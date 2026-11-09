@@ -21,8 +21,17 @@ SCHEMAS = (
     "charge",
     "event",
     "notification_event_data",
+    # charge fields the rules and the backtest read (3-D Secure, AVS/CVC, card,
+    # shipping, refunds)
+    "payment_method_details",
+    "payment_method_details_card",
+    "payment_method_details_card_checks",
+    "three_d_secure_details_charge",
+    "shipping",
+    "address",
+    "refund",
 )
-RESOURCES = ("dispute", "charge", "balance_transaction", "event")
+RESOURCES = ("dispute", "charge", "balance_transaction", "event", "refund")
 
 
 def _load(path: str) -> Any:

@@ -85,7 +85,9 @@ ASSUMPTIONS = (
     "escalation_cost_minor (synthetic default from scruple.sim.models).",
     "Rule fields an export does not carry use fixed defaults: "
     + ", ".join(f"{k}={v}" for k, v in DEFAULTED_RULE_FIELDS.items())
-    + ".",
+    + " (mcc, delivery_confirmed, three_ds and has_prior_refund are read from the "
+    "payment facts when the export has them; rule_fields_defaulted counts the cases "
+    "where a default was used).",
 )
 
 
@@ -125,6 +127,7 @@ class CaseLine(BaseModel):
     candidate_cost_low: float  # optimistic end of the estimate
     candidate_cost_high: float  # pessimistic end
     cap: float
+    defaulted: tuple[str, ...] = ()  # rule fields filled with a default for this case
 
 
 class StatsRun(BaseModel):
@@ -188,6 +191,8 @@ class BacktestReport(BaseModel):
     n_observed: int
     n_estimated: int
     cost_source: dict[str, int]
+    # rule field -> included cases where the export lacked it and a default was used
+    rule_fields_defaulted: dict[str, int] = {}
     ledger_merchant_net: int  # merchant balance over all postings in the currency
     ledger_reconciled: bool  # observed costs of every case == -ledger_merchant_net
     baseline_cost: float
@@ -284,6 +289,7 @@ def _line(
         candidate_cost_low=lo,
         candidate_cost_high=hi,
         cap=cap,
+        defaulted=view.defaulted_rule_fields(),
     )
 
 
@@ -520,6 +526,7 @@ def run_backtest(
         n_observed=len(observed),
         n_estimated=len(estimated),
         cost_source=dict(sorted(Counter(x.cost_source for x in lines).items())),
+        rule_fields_defaulted=dict(sorted(Counter(f for x in lines for f in x.defaulted).items())),
         ledger_merchant_net=ledger_net,
         ledger_reconciled=observed_total == -ledger_net,
         baseline_cost=total("baseline_cost"),

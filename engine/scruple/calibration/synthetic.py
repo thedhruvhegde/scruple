@@ -35,7 +35,7 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.calibration.aggregates import OTHER, UNKNOWN
 from scruple.calibration.profile import CalibrationProfile
-from scruple.ingest.models import ExternalCase, LedgerMovement, MovementKind
+from scruple.ingest.models import ExternalCase, LedgerMovement, MovementKind, PaymentFacts
 from scruple.ingest.stripe.mapping import EVIDENCE_FIELDS, REASON_MAP, STATUS_MAP
 
 SYNTHETIC_LABEL = (
@@ -176,6 +176,15 @@ def _case(d: _Draw, currency: str, source: str) -> ExternalCase:
         evidence_fields=d.fields,
         evidence_submitted=d.submitted,
         evidence_past_due=d.late,
+        # What the Stripe rendering below carries (the charge is not expanded), so
+        # both renderings map to the same records.
+        facts=PaymentFacts(
+            card_brand=d.network,
+            is_charge_refundable=False,
+            evidence_has_evidence=bool(d.fields),
+            evidence_submission_count=1 if d.submitted else 0,
+            enhanced_eligibility_types=(),
+        ),
     )
 
 

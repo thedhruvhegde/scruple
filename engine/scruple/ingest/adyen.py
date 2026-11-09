@@ -44,7 +44,7 @@ from scruple.ingest.errors import (
     UnmappedValueError,
 )
 from scruple.ingest.limits import load_json_object
-from scruple.ingest.models import CaseState, ExternalCase
+from scruple.ingest.models import CaseState, ExternalCase, PaymentFacts
 from scruple.sim.models import Stage
 
 SOURCE = "adyen"
@@ -124,6 +124,11 @@ class DisputeAdditionalData(_Wire):
         default=None, alias="defensePeriodEndsAt", max_length=64
     )
     dispute_status: DisputeStatus | None = Field(default=None, alias="disputeStatus")
+    payment_method_variant: str | None = Field(
+        default=None, alias="paymentMethodVariant", max_length=64
+    )
+    defendable: str | None = Field(default=None, max_length=8)
+    auto_defended: str | None = Field(default=None, alias="autoDefended", max_length=8)
 
 
 class NotificationItem(_Wire):
@@ -134,6 +139,7 @@ class NotificationItem(_Wire):
     merchant_account_code: str = Field(alias="merchantAccountCode", max_length=255)
     merchant_reference: str = Field(alias="merchantReference", max_length=255)
     original_reference: str | None = Field(default=None, alias="originalReference", max_length=255)
+    payment_method: str | None = Field(default=None, alias="paymentMethod", max_length=64)
     psp_reference: str = Field(alias="pspReference", min_length=1, max_length=64)
     success: Literal["true", "false"]
 
@@ -234,6 +240,28 @@ class AdyenResult(BaseModel):
     skipped: tuple[Skipped, ...]
 
 
+def _flag(text: str | None) -> bool | None:
+    """Adyen sends booleans in additionalData as the strings "true" and "false"."""
+    return {"true": True, "false": False}.get((text or "").strip().lower())
+
+
+def item_facts(item: NotificationItem) -> PaymentFacts:
+    """What a dispute notification says about the payment (Webhooks-v1 schema).
+
+    The schema has the payment method (`paymentMethod`, e.g. "visa"), its variant and
+    `defendable` / `autoDefended`; it has no 3-D Secure, AVS/CVC, MCC, shipping or refund
+    fields, so those are None. The variant is kept verbatim: funding is not inferred
+    from it.
+    """
+    ad = item.additional_data or DisputeAdditionalData()
+    return PaymentFacts(
+        card_brand=item.payment_method,
+        payment_method_variant=ad.payment_method_variant,
+        defendable=_flag(ad.defendable),
+        auto_defended=_flag(ad.auto_defended),
+    )
+
+
 def map_item(item: NotificationItem) -> ExternalCase:
     try:
         stage, state = EVENT_MAP[item.event_code]
@@ -263,6 +291,7 @@ def map_item(item: NotificationItem) -> ExternalCase:
             currency=normalise_currency(item.amount.currency),
             opened_at=_when(item.event_date, "eventDate"),
             evidence_due_at=_when(due, "defensePeriodEndsAt") if due else None,
+            facts=item_facts(item),
         )
     except ValidationError as e:
         raise SchemaMismatchError(f"item does not map: {e.error_count()} errors") from None

@@ -83,6 +83,10 @@ def to_markdown(r: BacktestReport) -> str:
     out += [f"- input records skipped, {k}: {v}" for k, v in r.skipped_input.items()]
     out += [f"- cost source {k}: {v} cases" for k, v in r.cost_source.items()]
     out += [
+        f"- rule field {k} not in the export, default used: {v} cases"
+        for k, v in r.rule_fields_defaulted.items()
+    ]
+    out += [
         f"- ledger: merchant net {r.ledger_merchant_net:,} over all postings in {cur}; "
         f"observed costs {'reconcile' if r.ledger_reconciled else 'DO NOT reconcile'} with it",
         "",

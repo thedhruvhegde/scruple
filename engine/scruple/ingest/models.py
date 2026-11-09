@@ -9,14 +9,16 @@ here; evidence is recorded as the *names* of the evidence fields present.
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Any, Literal
 
 from pydantic import (
     AwareDatetime,
     BaseModel,
     ConfigDict,
     Field,
+    SerializerFunctionWrapHandler,
     StringConstraints,
+    model_serializer,
     model_validator,
 )
 
@@ -38,6 +40,57 @@ class CaseState(StrEnum):
     ACCEPTED = "accepted"  # merchant accepted liability without contesting
     PREVENTED = "prevented"  # resolved before becoming a dispute
     CLOSED = "closed"  # an inquiry closed with no chargeback
+
+
+class PaymentFacts(BaseModel):
+    """Facts about the disputed payment that rules and the backtest read.
+
+    Every field is None when the export does not carry it: unknown is never guessed
+    and never defaulted here (defaults for rules live in `scruple.backtest.view`, and
+    every report counts how often one was used). Values from the source are kept
+    verbatim where they are short enumerations (3-D Secure result, AVS/CVC check
+    results, card brand and funding). Personal data is never kept: of a shipping
+    address only whether one was present, of a tracking number only whether one was
+    present; the carrier name is kept after redaction.
+
+    Which of these were known when the dispute opened (and so may be shown to a
+    candidate deciding it) is decided in `scruple.backtest.view`, not here.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    # the card and its authentication (known when the payment was made)
+    card_brand: ShortText | None = None
+    card_funding: ShortText | None = None  # credit, debit, prepaid, unknown (Stripe)
+    card_country: ShortText | None = None  # issuing country, two letters
+    payment_method_variant: ShortText | None = None  # Adyen, verbatim
+    three_ds_result: ShortText | None = None  # Stripe enum, verbatim
+    three_ds_version: ShortText | None = None
+    three_ds_authenticated: bool | None = None
+    avs_line1_check: ShortText | None = None  # pass, fail, unavailable, unchecked
+    avs_postal_code_check: ShortText | None = None
+    cvc_check: ShortText | None = None
+    mcc: ShortText | None = None  # merchant category code
+    # fulfilment
+    shipping_address_present: bool | None = None
+    shipping_carrier: ShortText | None = None
+    shipping_tracking_present: bool | None = None
+    delivery_confirmed: bool | None = None
+    # refunds: before the dispute (decision-time) and at export (outcome-time)
+    refunded_before_dispute: bool | None = None
+    amount_refunded_minor: int | None = Field(default=None, ge=0)
+    refund_state: Literal["none", "partial", "full"] | None = None
+    # dispute handling state as exported (outcome-time)
+    is_charge_refundable: bool | None = None
+    evidence_has_evidence: bool | None = None
+    evidence_submission_count: int | None = Field(default=None, ge=0)
+    enhanced_eligibility_types: tuple[ShortText, ...] | None = None
+    defendable: bool | None = None  # Adyen
+    auto_defended: bool | None = None  # Adyen
+
+    def known(self) -> dict[str, Any]:
+        """The fields that are not None."""
+        return {k: v for k, v in self.model_dump().items() if v is not None}
 
 
 class ExternalCase(BaseModel):
@@ -63,6 +116,15 @@ class ExternalCase(BaseModel):
     evidence_submitted: bool = False
     evidence_past_due: bool = False
     livemode: bool = False
+    facts: PaymentFacts | None = None  # rule-relevant payment facts, when exported
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # Omitted when absent, so records without facts serialise as they did before.
+        data: dict[str, Any] = handler(self)
+        if data.get("facts") is None:
+            data.pop("facts", None)
+        return data
 
     @property
     def case_id(self) -> str:

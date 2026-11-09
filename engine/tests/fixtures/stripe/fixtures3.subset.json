@@ -296,6 +296,31 @@
     "idempotency_key": null
    },
    "type": "plan.created"
+  },
+  "refund": {
+   "amount": 100,
+   "balance_transaction": null,
+   "charge": "ch_1PgafuB7WZ01zgkWXYmPNZs8",
+   "created": 1234567890,
+   "currency": "usd",
+   "customer": null,
+   "customer_account": null,
+   "destination_details": {
+    "card": {
+     "type": "reversal"
+    },
+    "type": "card"
+   },
+   "id": "re_1Pgc72B7WZ01zgkWqPvrRrPE",
+   "metadata": {},
+   "object": "refund",
+   "payment_intent": null,
+   "payment_method": null,
+   "reason": null,
+   "receipt_number": null,
+   "source_transfer_reversal": null,
+   "status": "succeeded",
+   "transfer_reversal": null
   }
  }
 }

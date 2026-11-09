@@ -29,7 +29,7 @@ from scruple.ingest.errors import (
     SchemaMismatchError,
 )
 from scruple.ingest.limits import MAX_FILE_BYTES, check_size, decode_utf8, load_json_object
-from scruple.ingest.models import CaseState, ExternalCase, SourceName
+from scruple.ingest.models import CaseState, ExternalCase, PaymentFacts, SourceName
 from scruple.sim.models import Stage
 
 
@@ -56,6 +56,11 @@ class ColumnMapping(BaseModel):
     network: str | None = Field(default=None, min_length=1, max_length=128)
     network_reason_code: str | None = Field(default=None, min_length=1, max_length=128)
     evidence_due_at: str | None = Field(default=None, min_length=1, max_length=128)
+    # Rule-relevant payment facts (`PaymentFacts`); an empty cell means unknown (None).
+    mcc: str | None = Field(default=None, min_length=1, max_length=128)
+    three_ds: str | None = Field(default=None, min_length=1, max_length=128)
+    delivery_confirmed: str | None = Field(default=None, min_length=1, max_length=128)
+    prior_refund: str | None = Field(default=None, min_length=1, max_length=128)
 
     def used(self) -> dict[str, str]:
         """field -> column, for the columns that are mapped."""
@@ -116,6 +121,23 @@ class ImportReport(BaseModel):
         if self.errors:
             raise ImportFailedError(self)
         return self
+
+
+# Mapped boolean columns -> `PaymentFacts` field; an empty cell is None (unknown).
+FACT_FLAGS = {
+    "three_ds": "three_ds_authenticated",
+    "delivery_confirmed": "delivery_confirmed",
+    "prior_refund": "refunded_before_dispute",
+}
+BOOLS: dict[str, bool | None] = {
+    "": None,
+    "true": True,
+    "false": False,
+    "yes": True,
+    "no": False,
+    "1": True,
+    "0": False,
+}
 
 
 def _parse_when(text: str) -> datetime:
@@ -216,6 +238,20 @@ class _RowMapper:
                 values[field] = _parse_when(v)
             except ValueError as e:
                 err(field, f"{v[:40]!r}: {e}")
+
+        facts: dict[str, Any] = {}
+        if self.cols.get("mcc"):
+            facts["mcc"] = get("mcc") or None
+        for field, fact_name in FACT_FLAGS.items():
+            if not self.cols.get(field):
+                continue
+            raw = get(field)
+            flag = BOOLS.get(raw.lower())
+            if raw and flag is None:
+                err(field, f"{raw[:32]!r} is not one of {sorted(k for k in BOOLS if k)} or empty")
+            facts[fact_name] = flag
+        if facts:
+            values["facts"] = PaymentFacts(**facts)
 
         ext = values["external_id"]
         if ext and ext in self.seen:
