@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "scruple-sim": {
+      "command": "uv",
+      "args": ["run", "--project", "${CLAUDE_PLUGIN_ROOT}/../..", "scruple", "mcp", "sim"]
+    },
+    "scruple-gate": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}/../..",
+        "scruple",
+        "mcp",
+        "gate",
+        "--db",
+        "agent-gate.db"
+      ]
+    }
+  }
+}

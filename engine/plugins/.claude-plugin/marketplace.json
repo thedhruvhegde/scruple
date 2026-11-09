@@ -1,0 +1,14 @@
+{
+  "name": "scruple",
+  "owner": {
+    "name": "thedhruvhegde",
+    "email": "dhegde@umich.edu"
+  },
+  "plugins": [
+    {
+      "name": "scruple",
+      "source": "./claude-code",
+      "description": "Run the scruple gate and play synthetic dispute episodes from Claude Code."
+    }
+  ]
+}

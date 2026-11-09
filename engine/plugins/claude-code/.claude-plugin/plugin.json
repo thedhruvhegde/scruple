@@ -1,0 +1,10 @@
+{
+  "name": "scruple",
+  "version": "0.1.0",
+  "description": "Run the scruple gate and play synthetic card-dispute episodes from Claude Code. All data is synthetic.",
+  "author": {
+    "name": "thedhruvhegde",
+    "email": "dhegde@umich.edu"
+  },
+  "keywords": ["verifiers", "disputes", "change-control", "mcp"]
+}

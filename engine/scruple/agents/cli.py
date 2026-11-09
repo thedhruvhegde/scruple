@@ -1,4 +1,6 @@
-"""`scruple episode ...` subcommands.
+"""`scruple episode ...` and `scruple mcp ...` subcommands.
+
+`scruple mcp sim` and `scruple mcp gate --db PATH` run the MCP servers on stdio.
 
 `scruple episode` lets any external agent (a human, or a model in a terminal) play
 an episode one command at a time; state lives in a local file store
@@ -108,4 +110,23 @@ def add_episode_parser(sub: Any) -> None:
     sh.add_argument("episode_id")
 
 
-__all__ = ["add_episode_parser", "cmd_episode"]
+def cmd_mcp(args: argparse.Namespace) -> int:  # pragma: no cover - blocks on stdio
+    if args.server == "sim":
+        from scruple.mcp.sim_server import run_stdio
+
+        run_stdio()
+    else:
+        from scruple.mcp.gate_server import run_stdio as run_gate
+
+        run_gate(args.db)
+    return 0
+
+
+def add_mcp_parser(sub: Any, default_db: str) -> None:
+    p = sub.add_parser("mcp", help="run an MCP server on stdio")
+    p.set_defaults(fn=cmd_mcp)
+    p.add_argument("server", choices=["sim", "gate"])
+    p.add_argument("--db", default=default_db, help="SQLite database path (gate only)")
+
+
+__all__ = ["add_episode_parser", "add_mcp_parser", "cmd_episode", "cmd_mcp"]
