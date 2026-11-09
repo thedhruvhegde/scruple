@@ -117,3 +117,8 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   a genuine delivery document, and only if the issuer's evidence decision goes its way.
   Partial disputes cover 20-80% of the capture. Real networks have specific partial
   representment rules that are not modelled.
+- **A-27** FX (scruple/sim/fx.py): synthetic base rates (USD per unit: EUR 1.08,
+  GBP 1.27, JPY 0.0067) moved by a deterministic daily drift of at most 3%. Not market
+  rates. Every posting converts at the rate of its own day, so the merchant bears the
+  FX difference between a chargeback debit and its reversal; real schemes convert at
+  specific settlement dates and can apply markups, which are not modelled.

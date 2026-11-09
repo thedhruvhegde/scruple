@@ -30,6 +30,7 @@ or marks the value as an assumption.
 | S14 | High Dispute, Chargeback, and Fraud Monitoring Programs | Square | https://squareup.com/help/us/en/article/7580 | 2026-11-09 (search summary) | Mastercard ECM: 100 chargebacks and 1.5% in the same month; HECM: 300 and 3%; fine schedule (month 1 none, month 2 $1,000, month 3 $1,000 ECM / $2,000 HECM). Other sources disagree on fines. |
 | S15 | Mastercard Excessive Chargebacks FAQ (9 Feb 2022) | Chase Merchant Services | https://merchantservices.chase.com/content/dam/jpm/merchant-services/documents/payment-network-updates/MC_ExcessiveChargebacks_FAQ_02092022.pdf | 2026-11-09 (search summary) | Exit ECM after three consecutive months below threshold; HECM issuer recovery assessment reported (not modelled). |
 | S16 | Chargeback arbitration costs; chargeback fee guides | chargeback.io; Chargebacks911 | https://www.chargeback.io/blog/chargeback-arbitration | 2026-11-09 (search summary) | Context only for fee assumptions: processor chargeback fees reported around $15 to $100; Visa arbitration ruling fee reported at $500, then $600 from 1 Apr 2025; Mastercard arbitration total reported near $575. Not used as fact; all simulator fees are assumptions (A-17). |
+| S17 | ISO 4217 Currency codes | ISO | https://www.iso.org/iso-4217-currency-codes.html | not accessed in this session | Minor-unit exponents (USD, EUR, GBP: 2; JPY: 0). Widely reproduced; the page itself was not opened here. |
 
 ## Licence note for S1
 

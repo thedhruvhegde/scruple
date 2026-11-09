@@ -78,6 +78,7 @@ from scruple.sim.families import (
     statement,
 )
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
+from scruple.sim.fx import EXPONENT, FxTable
 from scruple.sim.issuer import SeededIssuer
 from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
 from scruple.sim.merchants import MerchantProfile, generate_merchants
@@ -138,7 +139,7 @@ class CardDispute(BaseModel):
     mcc: str
     network: Network
     reason_code: str
-    currency: str
+    currency: str  # transaction (presentment) currency
     amount_minor: int = Field(gt=0)  # disputed amount, txn currency
     captured_minor: int = Field(gt=0)
     processed_on: date  # transaction processing date
@@ -147,11 +148,14 @@ class CardDispute(BaseModel):
     documents: tuple[EvidenceDocument, ...] = ()  # what the merchant holds
     refund_in_flight: PendingRefund | None = None  # 027: a refund racing the dispute
     shipments: tuple[Shipment, ...] = ()  # 028: a split order; empty for one parcel
+    settlement_currency: str = "USD"  # 029: the merchant's currency
     truth: Truth
 
     @model_validator(mode="after")
     def _consistent(self) -> CardDispute:
         reason_code(self.network, self.reason_code)  # raises KeyError if unknown
+        if self.currency not in EXPONENT or self.settlement_currency not in EXPONENT:
+            raise ValueError("unsupported currency")
         if self.amount_minor > self.captured_minor:
             raise ValueError("cannot dispute more than was captured")
         if self.truth.liability_minor > self.amount_minor:
@@ -237,9 +241,12 @@ class CaseMix(BaseModel):
     p_split_shipment: float = Field(0.0, ge=0, le=1)
     # 028: the cardholder disputes only 20-80% of the captured amount
     p_partial_dispute: float = Field(0.0, ge=0, le=1)
+    # 029: the cardholder pays in EUR, GBP or JPY; the merchant settles in USD
+    p_foreign_currency: float = Field(0.0, ge=0, le=1)
 
 
 DEFAULT_MIX = CaseMix()
+FX = FxTable()  # synthetic rates (A-27); pass your own to DisputeEngine
 START_DATE = date(2026, 1, 5)
 CURRENCY = "USD"
 
@@ -268,6 +275,10 @@ def generate_cases(
             spec = rng.choice(codes_for(net, family))
         amount = max(500, int(rng.lognormvariate(4.4, 0.9) * 100))
         processed = start + timedelta(days=rng.randint(0, 60))
+        ccy = CURRENCY
+        if mix.p_foreign_currency > 0 and rng.random() < mix.p_foreign_currency:
+            ccy = rng.choice(("EUR", "GBP", "JPY"))
+            amount = max(1, FX.convert(amount, CURRENCY, ccy, processed))
         opened = processed + timedelta(days=rng.randint(3, 90))
         if family is None:
             valid = rng.random() < mix.p_claim_valid
@@ -278,9 +289,7 @@ def generate_cases(
         key = f"{seed}-{i:06d}"
         merchant = rng.choice(merchants)
         case_id = f"cd-{key}"
-        docs, forged, missing = _documents(
-            rng, case_id, spec, valid, processed, amount, CURRENCY, mix
-        )
+        docs, forged, missing = _documents(rng, case_id, spec, valid, processed, amount, ccy, mix)
         captured, liability = amount, (amount if valid else 0)
         shipments: tuple[Shipment, ...] = ()
         if (
@@ -288,7 +297,7 @@ def generate_cases(
             and spec.legacy_family is ReasonCode.NOT_RECEIVED
             and rng.random() < mix.p_split_shipment
         ):
-            shipments, ship_docs = _split(rng, case_id, captured, processed, valid, len(docs))
+            shipments, ship_docs = _split(rng, case_id, captured, processed, valid, len(docs), ccy)
             keep = tuple(d for d in docs if d.kind is not EvidenceKind.DELIVERY_PROOF)
             forged = {k: v for k, v in forged.items() if k in {d.doc_id for d in keep}}
             docs = keep + ship_docs
@@ -311,7 +320,8 @@ def generate_cases(
                 mcc=merchant.mcc,
                 network=net,
                 reason_code=spec.code,
-                currency=CURRENCY,
+                currency=ccy,
+                settlement_currency=CURRENCY,
                 amount_minor=amount,
                 captured_minor=captured,
                 processed_on=processed,
@@ -426,6 +436,7 @@ def _split(
     processed: date,
     valid: bool,
     first_index: int,
+    currency: str = CURRENCY,
 ) -> tuple[tuple[Shipment, ...], tuple[EvidenceDocument, ...]]:
     """Split an order into parcels (A-26). A valid claim has at least one lost parcel;
     half the time the cardholder disputes the whole order anyway (an overclaim)."""
@@ -458,7 +469,7 @@ def _split(
             fields = {
                 "shipment_id": sid,
                 "shipment_amount_minor": str(amt),
-                "currency": CURRENCY,
+                "currency": currency,
                 "carrier": rng.choice(("ups", "usps", "dhl")),
                 "delivered_on": day.isoformat(),
             }
@@ -578,6 +589,8 @@ class CaseOutcome(BaseModel):
     fees_usd_minor: int
     liability_minor: int  # ground truth, for scoring only
     correct: bool  # cardholder_net == liability
+    settlement_currency: str = "USD"
+    merchant_settled_minor: int = 0  # net merchant movement for this txn after capture
 
 
 # -------------------------------------------------------------------------- issuer
@@ -636,6 +649,7 @@ class DisputeEngine:
         merchants: tuple[MerchantProfile, ...] = (),
         params: EngineParams | None = None,
         calendar: BusinessCalendar = DEFAULT_CALENDAR,
+        fx: FxTable | None = None,
     ) -> None:
         self.clock = clock
         self.fees = fees if fees is not None else DEFAULT_FEES
@@ -644,7 +658,7 @@ class DisputeEngine:
         self.calendar = calendar
         self.merchants = {m.merchant_id: m for m in merchants}
         self.vault = EvidenceVault(d for c in cases for d in c.documents)
-        self.ledger = CardLedger()
+        self.ledger = CardLedger(fx or FX)
         self._incidents: list[Incident] = []
         self._cases: dict[str, _CaseState] = {}
         for c in cases:
@@ -657,7 +671,14 @@ class DisputeEngine:
                 pending_refund=c.refund_in_flight,
             )
             self._cases[c.case_id] = st
-            self.ledger.capture(c.txn_id, c.merchant_id, c.captured_minor, c.currency)
+            self.ledger.capture(
+                c.txn_id,
+                c.merchant_id,
+                c.captured_minor,
+                c.currency,
+                c.settlement_currency,
+                c.processed_on,
+            )
             rf = c.refund_in_flight
             if rf is not None and rf.settles_on <= c.opened_on:
                 # the refund settled before the dispute was filed
@@ -755,6 +776,14 @@ class DisputeEngine:
             fees_usd_minor=fees,
             liability_minor=c.truth.liability_minor,
             correct=net == c.truth.liability_minor,
+            settlement_currency=c.settlement_currency,
+            merchant_settled_minor=sum(
+                p.amount_minor
+                for e in self.ledger.entries
+                if e.txn_id == c.txn_id and e.kind != "capture" and not e.kind.startswith("fee:")
+                for p in e.postings
+                if p.account.startswith("merchant:")
+            ),
         )
 
     # --- actions ------------------------------------------------------------
@@ -921,7 +950,7 @@ class DisputeEngine:
     def _on_chargeback(self, st: _CaseState) -> None:
         c = st.case
         before = len(self.ledger.violations)
-        self.ledger.chargeback_debit(c.txn_id, c.case_id, c.amount_minor)
+        self.ledger.chargeback_debit(c.txn_id, c.case_id, c.amount_minor, st.life.entered_on)
         if len(self.ledger.violations) > before:
             v = self.ledger.violations[-1]
             self._incidents.append(
@@ -939,7 +968,7 @@ class DisputeEngine:
         """Post a merchant refund; the ledger refuses a double refund (an incident)."""
         c = st.case
         try:
-            self.ledger.refund(c.txn_id, c.case_id, amount)
+            self.ledger.refund(c.txn_id, c.case_id, amount, day)
         except DoubleRefundError as exc:
             self._incidents.append(
                 Incident(case_id=c.case_id, on=day, kind="refund_blocked", detail=str(exc))
@@ -993,7 +1022,7 @@ class DisputeEngine:
         st.resolution = res
         if reversal > 0:
             c = st.case
-            self.ledger.to_merchant("chargeback_reversal", c.txn_id, c.case_id, reversal)
+            self.ledger.to_merchant("chargeback_reversal", c.txn_id, c.case_id, reversal, day)
 
 
 def drain(engine: DisputeEngine, clock: ManualClock, max_days: int = 800) -> None:
