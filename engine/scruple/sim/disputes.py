@@ -2,38 +2,58 @@
 
 Everything here is synthetic. Network rules come from `scruple.sim.networks` and
 `scruple.sim.reason_codes` (sourced in docs/SOURCES.md); every parameter that is not
-sourced is an ASSUMPTION in docs/ASSUMPTIONS.md.
+sourced is an ASSUMPTION in docs/ASSUMPTIONS.md (A-13 onwards).
 
 Quick start::
 
     from scruple.sim.deadlines import ManualClock
-    from scruple.sim.disputes import Accept, DisputeEngine, Represent, generate_cases
+    from scruple.sim.disputes import FULL_MIX, Accept, DisputeEngine, generate_cases
 
+    cases = generate_cases(seed=7, n=100, mix=FULL_MIX)
     clock = ManualClock()
-    cases = generate_cases(seed=7, n=100)
+    clock.set_date(min(c.opened_on for c in cases))
     engine = DisputeEngine(cases, clock)
-    obs = engine.observe(cases[0].case_id)          # what an agent may see
-    res = engine.act(cases[0].case_id, Accept())    # ActionResult, never raises
-    clock.advance(days=5); engine.sync()            # time moves only via the clock
-    engine.outcome(cases[0].case_id)                # CaseOutcome once resolved
+    cid = cases[0].case_id
+    obs = engine.observe(cid)        # Observation: what an agent may see
+    res = engine.act(cid, Accept())  # ActionResult; never raises for a bad action
+    clock.advance(days=5)            # time moves only through the injected clock
+    engine.sync()                    # issuer replies, rulings, deadlines, refunds
+    engine.outcome(cid)              # CaseOutcome once resolved (scored vs truth)
 
-Pieces:
+Generation: `generate_cases(seed, n, mix)` returns `CardDispute`s, deterministic in
+(seed, n, mix, start). Ground truth lives in `CardDispute.truth` and never appears in
+`view()` or `Observation`. `CaseMix` options, all off by default except the base mix:
 
-- `generate_cases(seed, n, mix)`: seeded, deterministic list of `CardDispute`.
-  Ground truth sits in `CardDispute.truth` and is never part of `view()` or
-  `Observation`.
-- `DisputeEngine`: owns one `Lifecycle` per case (explicit transition table,
-  `scruple.sim.lifecycle`), stage deadlines (`scruple.sim.deadlines`) and a
-  `CardLedger`. Issuer responses, arbitration rulings and missed deadlines happen in
-  `sync()`, driven by the injected clock.
-- Actions an agent can take on a case (`AgentAction`): `Accept`, `Represent`
-  (with evidence ids), `Escalate` (to arbitration) and the others listed in
-  `ACTION_KINDS`. Each returns an `ActionResult`; a refused action changes nothing
-  and carries an `ActionError`.
+- `family_weights` (026): true fraud, friendly fraud, service failure, ...
+- `p_missing_evidence`, `p_forged_evidence` (024)
+- `p_refund_race` (027), `p_split_shipment`, `p_partial_dispute` (028)
+- `p_foreign_currency` (029), `p_ce3_history` (030)
+`FULL_MIX` turns every feature on at moderate rates.
 
-Extending: new generator features add optional fields to `CaseMix` (defaults keep
-old seeds byte-identical) and new fields to `CardDispute`; new agent actions add a
-model to `AgentAction` and a branch in `DisputeEngine._apply`.
+Actions (`AgentAction`, a pydantic union discriminated on `kind`; `ACTION_KINDS`):
+
+- `Accept()`: accept liability (chargeback or pre-arbitration).
+- `Represent(evidence_ids=...)`: answer an inquiry or a chargeback with evidence ids
+  from `Observation.evidence`. Ids of another case are refused (`BAD_EVIDENCE`).
+- `Escalate()`: take a pre-arbitration to network arbitration.
+- `RequestInfo()`: the cardholder's statement, in `ActionResult.info`. No state change.
+- `Refund(amount_minor=...)`: refund directly; refused if it would refund twice.
+
+`Observation.allowed_actions` lists what is legal now. A refused action returns
+`ok=False` with an `ActionError` and changes nothing. Underneath, every stage change
+goes through `scruple.sim.lifecycle.Lifecycle`, whose explicit transition table raises
+on anything illegal.
+
+Money: `DisputeEngine.ledger` is a `CardLedger` (double entry, settlement currency,
+fees in USD). `engine.incidents` lists double refunds the ledger caught (027).
+`engine.post_monitoring_fines()` applies VAMP / ECM fines from merchant histories
+(031). `CardDispute.ce3()` reports Visa CE 3.0 eligibility (030).
+
+Extending (032 onwards): add an optional `CaseMix` field whose default draws no extra
+randomness (so existing seeds stay byte-identical), any new observable field on
+`CardDispute` with a default, and hidden facts on `Truth`. New agent actions add a
+model to `AgentAction`, a name to `ACTION_KINDS`, a check in `allowed_actions` and a
+branch in `DisputeEngine._apply`. The `Issuer` protocol can be swapped per engine.
 """
 
 from __future__ import annotations
@@ -73,6 +93,7 @@ from scruple.sim.evidence import (
 from scruple.sim.families import (
     CLAIM_VALID,
     FAMILY_CATEGORIES,
+    FAMILY_WEIGHTS,
     CaseFamily,
     codes_for,
     family_of,
@@ -263,6 +284,17 @@ class CaseMix(BaseModel):
 
 
 DEFAULT_MIX = CaseMix()
+# Every generator feature on at moderate rates (synthetic; A-19 to A-28).
+FULL_MIX = CaseMix(
+    family_weights=FAMILY_WEIGHTS,
+    p_missing_evidence=0.1,
+    p_forged_evidence=0.2,
+    p_refund_race=0.1,
+    p_split_shipment=0.5,
+    p_partial_dispute=0.1,
+    p_foreign_currency=0.2,
+    p_ce3_history=0.6,
+)
 FX = FxTable()  # synthetic rates (A-27); pass your own to DisputeEngine
 START_DATE = date(2026, 1, 5)
 CURRENCY = "USD"
@@ -820,8 +852,8 @@ class DisputeEngine:
         return tuple(out)
 
     def observe(self, case_id: str) -> Observation:
-        self.sync()
         st = self._cases[case_id]
+        self._sync_case(st, today(self.clock))
         return Observation(
             case=st.case.view(),
             today=today(self.clock),
@@ -874,9 +906,9 @@ class DisputeEngine:
             return ActionResult(
                 case_id=case_id, action=action.kind, ok=False, error=ActionError.UNKNOWN_CASE
             )
-        self.sync()
         st = self._cases[case_id]
         now = today(self.clock)
+        self._sync_case(st, now)
         before = st.life.stage
 
         def refuse(err: ActionError, detail: str = "") -> ActionResult:
@@ -958,17 +990,21 @@ class DisputeEngine:
         by today, in date order per case."""
         now = today(self.clock)
         for st in self._cases.values():
-            while True:
-                rf = st.pending_refund
-                if rf is not None and rf.settles_on <= now:
-                    nxt = self._next_due(st)
-                    if nxt is None or rf.settles_on <= nxt:
-                        st.pending_refund = None
-                        self._post_refund(st, rf.amount_minor, rf.settles_on)
-                        continue
-                if st.resolution is None and self._step_due(st, now):
+            self._sync_case(st, now)
+
+    def _sync_case(self, st: _CaseState, now: date) -> None:
+        """Cases are independent, so one case can be brought up to date on its own."""
+        while True:
+            rf = st.pending_refund
+            if rf is not None and rf.settles_on <= now:
+                nxt = self._next_due(st)
+                if nxt is None or rf.settles_on <= nxt:
+                    st.pending_refund = None
+                    self._post_refund(st, rf.amount_minor, rf.settles_on)
                     continue
-                break
+            if st.resolution is None and self._step_due(st, now):
+                continue
+            break
 
     def _next_due(self, st: _CaseState) -> date | None:
         if st.resolution is not None:
