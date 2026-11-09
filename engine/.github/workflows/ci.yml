@@ -2,14 +2,117 @@ name: ci
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "17 4 * * 1" # weekly: slow suites with the thorough hypothesis profile
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_PYTHON: "3.12"
+  HYPOTHESIS_PROFILE: ci # derandomized: CI failures always reproduce
+
 jobs:
-  check:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
-      - run: uv sync --python 3.12 --locked
-      - run: make lint
-      - run: make typecheck
-      - run: make test
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check --output-format=github .
+      - run: uv run ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run mypy
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      # Postgres runs in its own job against a service container.
+      - run: >-
+          uv run pytest -m "not slow and not postgres"
+          --cov --cov-report=term-missing --cov-report=xml --cov-fail-under=90
       - run: make demo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-sqlite
+          path: coverage.xml
+
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          # Ephemeral CI container on a private network: no password needed.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      SCRUPLE_TEST_POSTGRES_URL: postgresql://postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run pytest -m postgres --cov --cov-report=term-missing --cov-report=xml
+      - name: alembic upgrade head on a fresh database
+        run: |
+          psql "$SCRUPLE_TEST_POSTGRES_URL" -c "CREATE DATABASE ci_migrate"
+          SCRUPLE_DATABASE_URL=postgresql://postgres@localhost:5432/ci_migrate \
+            uv run alembic upgrade head
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-postgres
+          path: coverage.xml
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: compose config
+        env:
+          POSTGRES_PASSWORD: ci-placeholder-not-a-secret
+        run: docker compose config --quiet
+      - name: build image
+        run: >-
+          docker build --build-arg BUILD_COMMIT=${{ github.sha }} -t scruple:ci .
+      - name: image runs as non-root and reports its commit
+        run: |
+          test "$(docker run --rm --entrypoint id scruple:ci -u)" != "0"
+          docker run --rm scruple:ci version | grep "${GITHUB_SHA:0:12}"
+
+  slow:
+    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      HYPOTHESIS_PROFILE: thorough
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run pytest -m slow
