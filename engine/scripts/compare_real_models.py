@@ -20,7 +20,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
-from scruple.realdata import metrics as M
+from scruple.realdata import metrics as m_
 from scruple.realdata.baselines import BASELINES
 from scruple.realdata.tasks import OutcomeTask, Task, get_task
 
@@ -65,7 +65,7 @@ def _primary(card: dict[str, Any]) -> float:
 
 def _metric(task: Task) -> tuple[str, Callable[[list[Any]], float | None]]:
     if isinstance(task, OutcomeTask):
-        return "auroc", lambda rows: M.auroc([g for g, _ in rows], [p for _, p in rows])
+        return "auroc", lambda rows: m_.auroc([g for g, _ in rows], [p for _, p in rows])
     return "accuracy", lambda rows: sum(rows) / len(rows) if rows else None
 
 
