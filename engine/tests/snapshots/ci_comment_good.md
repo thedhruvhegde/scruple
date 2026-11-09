@@ -58,4 +58,4 @@ None found.
 
 </details>
 
-Synthetic simulator data only. Thresholds are illustrative defaults. Config `3c8c70a8a65fbe84`, audit head `f33b999d755961fe`.
+Synthetic simulator data only. Thresholds are illustrative defaults. Config `da23d1db96ae3347`, audit head `f33b999d755961fe`.

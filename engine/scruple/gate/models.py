@@ -4,11 +4,21 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, SerializerFunctionWrapHandler, model_serializer
 
+from scruple.gate.evalue import EValueEvidence
 from scruple.verifiers.base import Finding
+
+
+def _drop_none(data: dict[str, Any], *keys: str) -> dict[str, Any]:
+    """Optional evidence added after records were first stored is omitted when
+    absent, so the hash of an older decision is unchanged when it is re-read."""
+    for k in keys:
+        if data.get(k) is None:
+            data.pop(k, None)
+    return data
 
 
 class Stage(StrEnum):
@@ -95,6 +105,11 @@ class ShadowMetrics(BaseModel):
     new_ledger_findings: tuple[Finding, ...]
     new_policy_findings: tuple[Finding, ...]
     baseline_rules: tuple[str, ...]
+    evalue: EValueEvidence | None = None  # set when GateConfig.stats = "evalue"
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        return _drop_none(handler(self), "evalue")
 
 
 class CanaryMetrics(BaseModel):

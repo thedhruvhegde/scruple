@@ -24,6 +24,7 @@ from scruple.verifiers.outcome import OutcomeScores, score_outcomes
 from scruple.verifiers.policy_constraints import verify_policy
 
 from .config import GateConfig
+from .evalue import EValueEvidence, evaluate_evalue
 from .models import (
     ArmStats,
     CanaryMetrics,
@@ -33,7 +34,6 @@ from .models import (
     ShadowMetrics,
     SliceStat,
 )
-from .provider import provider_for
 from .regression import golden_cases
 from .stats import paired_bootstrap_ci
 
@@ -81,9 +81,13 @@ def evaluate_shadow(
     diffs = [b_out.regret[i] - c_out.regret[i] for i in ids]  # positive = better
     affected = sum(1 for i in ids if b_out.action[i] is not c_out.action[i])
     matched = sum(1 for r in c_run.results if r.decided_by == candidate.ref)
+    ev: EValueEvidence | None = None
     if cfg.stats == "evalue":
-        iv = provider_for(cfg).paired_interval(diffs, cfg.confidence)
-        mean, lo, hi = iv.mean, iv.low, iv.high
+        ev = evaluate_evalue(cases, b_out, c_out, cfg)
+        # pooled time-uniform CS, flipped to "improvement" (positive = better)
+        mean, lo, hi = -ev.pooled_mean_diff, -ev.pooled_ci_high, -ev.pooled_ci_low
+        if ev.violations:
+            mean = sum(diffs) / len(diffs) if diffs else 0.0
     else:
         mean, lo, hi = paired_bootstrap_ci(
             diffs, cfg.bootstrap_resamples, cfg.confidence, cfg.stats_seed
@@ -94,7 +98,7 @@ def evaluate_shadow(
 
     worst = max(slices, key=lambda s: s.delta)
     esc_increase = c_out.escalation_rate - b_out.escalation_rate
-    checks = (
+    checks: tuple[CheckResult, ...] = (
         _check(
             "no_new_ledger_violations",
             "hard",
@@ -148,6 +152,9 @@ def evaluate_shadow(
             f"{_usd(cfg.min_mean_improvement_usd_minor)} per case",
         ),
     )
+    if ev is not None:
+        replaced = {"no_slice_regression", "not_significantly_worse", "significant_improvement"}
+        checks = tuple(c for c in checks if c.name not in replaced) + _evalue_checks(ev)
     metrics = ShadowMetrics(
         n_cases=len(cases),
         eval_seed_commitment=seed_commitment(cfg.eval_seed),
@@ -167,8 +174,65 @@ def evaluate_shadow(
         new_ledger_findings=tuple(new_led[:10]),
         new_policy_findings=tuple(new_pol[:10]),
         baseline_rules=tuple(baseline.refs()),
+        evalue=ev,
     )
     return _verdict(checks, metrics)
+
+
+def _evalue_checks(ev: EValueEvidence) -> tuple[CheckResult, ...]:
+    """The stratified checks that replace the slice and bootstrap checks."""
+    flagged = [t for t in ev.types if t.regressed]
+    worst = max(ev.types, key=lambda t: t.regression_e_value, default=None)
+    if flagged:
+        reg_detail = "; ".join(
+            f"'{t.case_type}' mean loss change {_usd(t.mean_diff)} per case "
+            f"(tolerance {_usd(t.tolerance)}, e-value {t.regression_e_value:.3g})"
+            for t in flagged
+        )
+    elif worst is not None:
+        reg_detail = (
+            f"no case type flagged; largest regression e-value {worst.regression_e_value:.3g} "
+            f"('{worst.case_type}', flags at {worst.e_threshold:.3g} alone)"
+        )
+    else:
+        reg_detail = "no case type has a changed decision"
+    best = max(ev.types, key=lambda t: t.improvement_e_value, default=None)
+    if ev.improved:
+        imp_detail = "certified better: " + ", ".join(
+            f"'{t.case_type}' {_usd(t.mean_diff)} per case (e-value {t.improvement_e_value:.3g})"
+            for t in ev.types
+            if t.improved
+        )
+    elif best is not None:
+        imp_detail = (
+            f"no case type certified better; largest improvement e-value "
+            f"{best.improvement_e_value:.3g} ('{best.case_type}')"
+        )
+    else:
+        imp_detail = "no case type has a changed decision"
+    k = len(ev.family)
+    return (
+        _check(
+            "evalue_declared_caps",
+            "hard",
+            not ev.violations,
+            "every loss change within its declared cap"
+            if not ev.violations
+            else f"{len(ev.violations)} violation(s): {ev.violations[0]}",
+        ),
+        _check(
+            "evalue_no_type_regression",
+            "hard",
+            not ev.regressed,
+            f"e-BH over {k} case type(s) at FDR {ev.alpha:g}: {reg_detail}",
+        ),
+        _check(
+            "evalue_improvement_certified",
+            "evidence",
+            bool(ev.improved),
+            f"e-BH over {k} case type(s) at {ev.alpha_certify:g}: {imp_detail}",
+        ),
+    )
 
 
 def _verdict(checks: tuple[CheckResult, ...], metrics: ShadowMetrics) -> Verdict:
@@ -190,14 +254,23 @@ def _verdict(checks: tuple[CheckResult, ...], metrics: ShadowMetrics) -> Verdict
             checks,
             shadow=metrics,
         )
-    return Verdict(
-        Outcome.PROMOTE,
-        "Promoted to canary: improves outcomes with no regressions.",
-        (
+    if metrics.evalue is not None:
+        ev = metrics.evalue
+        reasons: tuple[str, ...] = (
+            f"certified better (e-BH at {ev.alpha_certify:g}): {', '.join(ev.improved)}",
+            f"no case type regressed (e-BH over {len(ev.family)} types at FDR {ev.alpha:g})",
+            "all hard checks passed",
+        )
+    else:
+        reasons = (
             f"mean regret improves by {_usd(metrics.mean_improvement_usd_minor)} per case "
             f"(CI [{_usd(metrics.ci_low)}, {_usd(metrics.ci_high)}])",
             "all hard checks passed",
-        ),
+        )
+    return Verdict(
+        Outcome.PROMOTE,
+        "Promoted to canary: improves outcomes with no regressions.",
+        reasons,
         checks,
         shadow=metrics,
     )

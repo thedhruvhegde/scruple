@@ -64,4 +64,10 @@ Pinned in `tests/test_known_gaps.py`. Each test asserts the weakness still exist
 - **G-6 Full-chain rewrite.** Someone who rewrites the whole audit chain
   consistently is caught only with an externally anchored head hash.
 - **G-7 Conservative blocking.** Zero slice tolerance can block net-good rules.
-  This is a false-block risk, not a gaming risk, but it costs adoption.
+  This is a false-block risk, not a gaming risk, but it costs adoption. At the null
+  boundary the zero-tolerance check false-blocks 73% to 100% of the time
+  (docs/math/02). **Closed when `stats = "evalue"`:** per-case-type tolerances and
+  e-BH over the case types the candidate touches keep the false-block rate at most
+  `evalue_alpha` (`tests/test_gate_evalue.py::test_g7_*`, seeded Monte Carlo). Still
+  open on the default `stats = "bootstrap"` path (docs/DECISIONS.md D-015). There was
+  no pinned test for G-7 in `tests/test_known_gaps.py`.

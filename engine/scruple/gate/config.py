@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from scruple.sim.generator import DEFAULT_PROFILE, Profile
+from scruple.sim.models import (
+    ARBITRATION_FEE_USD,
+    ESCALATION_COST_USD,
+    HIGH_VALUE_THRESHOLD_USD,
+    REPRESENTMENT_LOSS_FEE_USD,
+)
+
+# ASSUMPTION: a policy change can move a case's cost by at most its amount plus
+# every fee and the escalation cost (synthetic fee schedule in scruple.sim.models).
+EVALUE_FEES_USD_MINOR = ARBITRATION_FEE_USD + REPRESENTMENT_LOSS_FEE_USD + ESCALATION_COST_USD
 
 
 class GateConfig(BaseModel):
@@ -35,6 +46,23 @@ class GateConfig(BaseModel):
     # amount ($50,000) plus every fee and the escalation cost. Must be set before
     # outcomes are seen; a case that breaks it fails the gate closed.
     evalue_cost_cap_usd_minor: float = Field(default=5_030_000.0, gt=0.0)
+    # Case types for the stratified test are scenario x amount band. A band
+    # "<$X" has the declared cap X + fees; amounts at or above the last edge use
+    # `evalue_cost_cap_usd_minor`. Caps come from observable amounts only. The
+    # default edge $80 is the synthetic generator's median amount (it splits
+    # ordinary amounts in two), and $10,000 is the high-value threshold.
+    evalue_band_edges_usd_minor: tuple[int, ...] = (8_000, HIGH_VALUE_THRESHOLD_USD)
+    evalue_fees_usd_minor: int = Field(default=EVALUE_FEES_USD_MINOR, ge=0)
+    # Per-case-type regression thresholds: a type is flagged only if its mean loss
+    # worsens by more than its tolerance (USD minor per case). Keys are a scenario
+    # ("late_evidence") or a full case type ("late_evidence/<$80"); the full type
+    # wins. Replaces the zero-tolerance slice check when stats = "evalue".
+    evalue_tolerance_usd_minor: float = Field(default=0.0, ge=0.0)
+    evalue_type_tolerances_usd_minor: dict[str, float] = Field(default_factory=dict)
+    # e-BH level for flagging regressed case types (false-block rate when no type
+    # regressed), and for certifying improved case types.
+    evalue_alpha: float = Field(default=0.05, gt=0.0, lt=1.0)
+    evalue_alpha_certify: float = Field(default=0.05, gt=0.0, lt=1.0)
 
     # Regression guards (hard)
     slice_tolerance_usd_minor: float = 0.0  # any slice-mean worsening blocks
@@ -50,3 +78,17 @@ class GateConfig(BaseModel):
 
     # Who may approve activation or roll back (segregation of duties enforced too).
     approvers: tuple[str, ...] = ("model-risk@demo.bank",)
+
+    @field_validator("evalue_band_edges_usd_minor")
+    @classmethod
+    def _edges(cls, v: tuple[int, ...]) -> tuple[int, ...]:
+        if not v or v[0] <= 0 or any(b <= a for a, b in pairwise(v)):
+            raise ValueError("band edges must be positive and strictly increasing")
+        return v
+
+    @field_validator("evalue_type_tolerances_usd_minor")
+    @classmethod
+    def _tolerances(cls, v: dict[str, float]) -> dict[str, float]:
+        if any(t < 0 for t in v.values()):
+            raise ValueError("type tolerances must be non-negative")
+        return v
