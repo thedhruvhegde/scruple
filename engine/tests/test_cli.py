@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from agent_gate.cli.main import main
-from agent_gate.sim.library import GOOD_RULE, GOOD_RULE_ID
+from scruple.cli.main import main
+from scruple.sim.library import GOOD_RULE, GOOD_RULE_ID
 
 
 def test_demo_runs_and_tells_the_story(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

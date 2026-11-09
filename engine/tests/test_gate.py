@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from agent_gate.domain import Action, RuleSpec
-from agent_gate.gate import GateConfig, Outcome, evaluate_canary, evaluate_shadow
-from agent_gate.gate.stats import paired_bootstrap_ci
-from agent_gate.sim.generator import Profile
-from agent_gate.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID, C
+from scruple.domain import Action, RuleSpec
+from scruple.gate import GateConfig, Outcome, evaluate_canary, evaluate_shadow
+from scruple.gate.stats import paired_bootstrap_ci
+from scruple.sim.generator import Profile
+from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID, C
 from tests.helpers import baseline_versions, rv
 
 CFG = GateConfig(n_cases=2_000, bootstrap_resamples=500)

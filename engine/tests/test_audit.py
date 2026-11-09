@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from agent_gate.audit.log import AuditLog, verify_entries
-from agent_gate.clock import SteppingClock
-from agent_gate.gate import GateConfig
-from agent_gate.registry import Provenance
-from agent_gate.service import AgentGate
-from agent_gate.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
-from agent_gate.storage import SQLiteStorage
+from scruple.audit.log import AuditLog, verify_entries
+from scruple.clock import SteppingClock
+from scruple.gate import GateConfig
+from scruple.registry import Provenance
+from scruple.service import AgentGate
+from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
+from scruple.storage import SQLiteStorage
 
 CFG = GateConfig(n_cases=1_000, bootstrap_resamples=300, min_affected_cases=10)
 
@@ -51,7 +51,7 @@ def test_tampering_is_detected(audit: AuditLog, attack: str) -> None:
     elif attack == "reorder":
         es[1], es[2] = es[2], es[1]
     elif attack == "rehash_one":  # attacker recomputes the edited entry's own hash
-        from agent_gate.audit.log import compute_hash
+        from scruple.audit.log import compute_hash
 
         e = es[2].model_copy(update={"payload": {"i": 999}})
         es[2] = e.model_copy(update={"entry_hash": compute_hash(e)})

@@ -3,10 +3,10 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from agent_gate.audit.log import AuditLog
-from agent_gate.domain import Action, Condition, RuleSpec
-from agent_gate.hashing import content_hash
-from agent_gate.registry import (
+from scruple.audit.log import AuditLog
+from scruple.domain import Action, Condition, RuleSpec
+from scruple.hashing import content_hash
+from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
     Provenance,
@@ -14,7 +14,7 @@ from agent_gate.registry import (
     RuleStatus,
     RuleVersion,
 )
-from agent_gate.storage import SQLiteStorage
+from scruple.storage import SQLiteStorage
 
 
 def spec(priority: int = 50, action: Action = Action.CONTEST) -> RuleSpec:

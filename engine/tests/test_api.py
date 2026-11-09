@@ -3,12 +3,12 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from agent_gate.api.app import create_app
-from agent_gate.clock import SteppingClock
-from agent_gate.gate import GateConfig
-from agent_gate.service import AgentGate
-from agent_gate.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
-from agent_gate.storage import SQLiteStorage
+from scruple.api.app import create_app
+from scruple.clock import SteppingClock
+from scruple.gate import GateConfig
+from scruple.service import AgentGate
+from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
+from scruple.storage import SQLiteStorage
 
 AGENT = {"X-Actor": "dispute-agent-01"}
 RISK = {"X-Actor": "model-risk@demo.bank"}

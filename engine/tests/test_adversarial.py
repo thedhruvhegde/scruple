@@ -6,12 +6,12 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from agent_gate.domain import Action, Condition, RuleSpec
-from agent_gate.gate import GateConfig, Outcome, evaluate_shadow
-from agent_gate.gate.redteam import run_rule_attack, run_tamper_attacks
-from agent_gate.registry import DuplicateContentError, Provenance, Registry
-from agent_gate.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, C
-from agent_gate.verifiers.adversarial import rule_attacks
+from scruple.domain import Action, Condition, RuleSpec
+from scruple.gate import GateConfig, Outcome, evaluate_shadow
+from scruple.gate.redteam import run_rule_attack, run_tamper_attacks
+from scruple.registry import DuplicateContentError, Provenance, Registry
+from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, C
+from scruple.verifiers.adversarial import rule_attacks
 from tests.helpers import baseline_versions, rv
 
 CFG = GateConfig(n_cases=2_000, bootstrap_resamples=500)
@@ -19,7 +19,7 @@ CFG = GateConfig(n_cases=2_000, bootstrap_resamples=500)
 
 @pytest.mark.parametrize("attack", rule_attacks(), ids=lambda a: a.name)
 def test_rule_attack_fools_naive_verifier_but_not_gate(attack: object) -> None:
-    from agent_gate.verifiers.adversarial import RuleAttack
+    from scruple.verifiers.adversarial import RuleAttack
 
     assert isinstance(attack, RuleAttack)
     result = run_rule_attack(attack, CFG)

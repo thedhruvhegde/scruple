@@ -4,13 +4,13 @@ from collections import Counter
 
 import pytest
 
-from agent_gate.domain import FIELD_TYPES, Action
-from agent_gate.hashing import canonical_json
-from agent_gate.sim import Policy, Scenario, Simulator, generate_cases, oracle, outcome_for
-from agent_gate.sim.engine import Outcome
-from agent_gate.sim.ledger import Ledger, UnbalancedEntryError
-from agent_gate.sim.library import baseline_policy
-from agent_gate.sim.models import ARBITRATION_FEE_USD, REPRESENTMENT_LOSS_FEE_USD, Resolution
+from scruple.domain import FIELD_TYPES, Action
+from scruple.hashing import canonical_json
+from scruple.sim import Policy, Scenario, Simulator, generate_cases, oracle, outcome_for
+from scruple.sim.engine import Outcome
+from scruple.sim.ledger import Ledger, UnbalancedEntryError
+from scruple.sim.library import baseline_policy
+from scruple.sim.models import ARBITRATION_FEE_USD, REPRESENTMENT_LOSS_FEE_USD, Resolution
 
 
 def _bytes(seed: int, n: int = 500) -> str:

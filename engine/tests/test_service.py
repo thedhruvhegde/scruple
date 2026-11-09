@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from agent_gate.clock import SteppingClock
-from agent_gate.gate import GateConfig, Outcome
-from agent_gate.gate.models import Stage
-from agent_gate.registry import InvalidTransitionError, Provenance, RuleStatus
-from agent_gate.service import AgentGate, ApprovalError
-from agent_gate.sim.generator import Profile
-from agent_gate.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
-from agent_gate.storage import SQLiteStorage
+from scruple.clock import SteppingClock
+from scruple.gate import GateConfig, Outcome
+from scruple.gate.models import Stage
+from scruple.registry import InvalidTransitionError, Provenance, RuleStatus
+from scruple.service import AgentGate, ApprovalError
+from scruple.sim.generator import Profile
+from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
+from scruple.storage import SQLiteStorage
 
 CFG = GateConfig(n_cases=2_000, bootstrap_resamples=500)
 APPROVER = "model-risk@demo.bank"

@@ -4,10 +4,10 @@ from collections.abc import Iterator
 
 import pytest
 
-from agent_gate.audit.log import AuditLog
-from agent_gate.clock import SteppingClock
-from agent_gate.registry import Registry
-from agent_gate.storage import SQLiteStorage
+from scruple.audit.log import AuditLog
+from scruple.clock import SteppingClock
+from scruple.registry import Registry
+from scruple.storage import SQLiteStorage
 
 
 @pytest.fixture

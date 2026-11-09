@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import pytest
 
-from agent_gate.clock import SteppingClock
-from agent_gate.domain import Action, RuleSpec
-from agent_gate.gate import GateConfig, Outcome
-from agent_gate.registry import Provenance, RuleStatus
-from agent_gate.service import AgentGate
-from agent_gate.sim import Simulator, generate_cases
-from agent_gate.sim.ledger import JournalEntry, Posting
-from agent_gate.sim.library import GOOD_RULE, GOOD_RULE_ID, C, baseline_policy
-from agent_gate.storage import SQLiteStorage
-from agent_gate.verifiers import verify_ledger
+from scruple.clock import SteppingClock
+from scruple.domain import Action, RuleSpec
+from scruple.gate import GateConfig, Outcome
+from scruple.registry import Provenance, RuleStatus
+from scruple.service import AgentGate
+from scruple.sim import Simulator, generate_cases
+from scruple.sim.ledger import JournalEntry, Posting
+from scruple.sim.library import GOOD_RULE, GOOD_RULE_ID, C, baseline_policy
+from scruple.storage import SQLiteStorage
+from scruple.verifiers import verify_ledger
 
 CFG = GateConfig(n_cases=1_000, bootstrap_resamples=200)
 PROV = Provenance(agent_id="agent-1")
@@ -105,7 +105,7 @@ def test_integrity_detects_missing_records() -> None:
 
 
 def test_evaluate_refuses_non_candidates_and_unknown_rules() -> None:
-    from agent_gate.registry import InvalidTransitionError, RuleNotFoundError
+    from scruple.registry import InvalidTransitionError, RuleNotFoundError
 
     g = _gate()
     with pytest.raises(InvalidTransitionError):

@@ -6,11 +6,11 @@ update docs/VERIFIER_FINDINGS.md and move the test to test_adversarial.py.
 
 from __future__ import annotations
 
-from agent_gate.domain import Action, RuleSpec
-from agent_gate.gate import GateConfig, Outcome, evaluate_shadow
-from agent_gate.registry import Provenance, Registry
-from agent_gate.sim.generator import Profile
-from agent_gate.sim.library import GOOD_RULE, GOOD_RULE_ID, C
+from scruple.domain import Action, RuleSpec
+from scruple.gate import GateConfig, Outcome, evaluate_shadow
+from scruple.registry import Provenance, Registry
+from scruple.sim.generator import Profile
+from scruple.sim.library import GOOD_RULE, GOOD_RULE_ID, C
 from tests.helpers import baseline_versions, rv
 
 CFG = GateConfig(n_cases=2_000, bootstrap_resamples=500)

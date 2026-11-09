@@ -21,9 +21,9 @@ typecheck:
 	uv run mypy
 
 demo:
-	uv run agent-gate demo
+	uv run scruple demo
 
 serve:
-	uv run agent-gate serve
+	uv run scruple serve
 
 check: lint typecheck test

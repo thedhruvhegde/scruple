@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from agent_gate.domain import RuleSpec
-from agent_gate.hashing import content_hash
-from agent_gate.registry import Provenance, RuleStatus, RuleVersion
-from agent_gate.sim.library import BASELINE_RULES
+from scruple.domain import RuleSpec
+from scruple.hashing import content_hash
+from scruple.registry import Provenance, RuleStatus, RuleVersion
+from scruple.sim.library import BASELINE_RULES
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 
