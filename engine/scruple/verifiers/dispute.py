@@ -18,6 +18,7 @@ from scruple.verifiers.checks import (
     run_checks,
 )
 from scruple.verifiers.counterfactual import COUNTERFACTUAL
+from scruple.verifiers.deadlines_check import DEADLINE_CREDIT, DEADLINES
 from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT
 from scruple.verifiers.ledger_invariants import LEDGER_INVARIANTS
 from scruple.verifiers.process import PROCESS
@@ -31,6 +32,8 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     PROCESS,
     EVIDENCE,
     EVIDENCE_FIT,
+    DEADLINES,
+    DEADLINE_CREDIT,
 )
 BATCH_CHECKS: tuple[BatchCheck, ...] = ()
 
