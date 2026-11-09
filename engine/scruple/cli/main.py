@@ -188,6 +188,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.sim.cli import add_sim_parser
 
     add_sim_parser(sub)
+    from scruple.backtest.cli import add_backtest_parser
+
+    add_backtest_parser(sub)
     return p
 
 

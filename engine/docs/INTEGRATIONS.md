@@ -222,3 +222,7 @@ Rules every adapter follows:
   rotation and shredding, hypothesis round trips and parser fuzzing.
 - Not done: key storage (KMS, envelope keys wrapped by a KEK), per-tenant keys, and
   wiring encryption into a storage layer (scruple's storage only holds rules and audit).
+
+## Backtest and calibration (`scruple.backtest`, `scruple.calibration`)
+
+- Imported histories feed the backtest and the aggregates-only calibration: docs/BACKTEST.md.
