@@ -13,3 +13,4 @@ dist/
 site/local/
 .hypothesis/
 .env
+.scruple/

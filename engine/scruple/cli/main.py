@@ -172,6 +172,9 @@ def build_parser() -> argparse.ArgumentParser:
     add_ci_parser(sub)
     v = add("version", cmd_version, "print version and build metadata", db=False)
     v.add_argument("--json", action="store_true", help="print as JSON")
+    from scruple.agents.cli import add_episode_parser
+
+    add_episode_parser(sub)
     return p
 
 
