@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Not found · Scruple</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/scruple/assets/logos/bone-on-night/mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<style>
+:root {
+  --bg: #EDEAE1; --fg: #121513; --muted: #565B57; --rule: #D3D0C5; --brass: #7A5C20; --accent: #1D4A3A; --on-accent: #EDEAE1;
+  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0B100E; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --brass: #D8B25E; --accent: #5AAE88; --on-accent: #0B100E; color-scheme: dark; }
+}
+*, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; padding: 0 16px; }
+::selection { background: var(--accent); color: var(--on-accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar { max-width: 1240px; margin: 0 auto; height: 60px; display: flex; align-items: center; border-bottom: 1px solid var(--rule); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); }
+.brand svg { width: 24px; height: 24px; display: block; }
+.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+main { max-width: 1240px; margin: 0 auto; padding: 96px 0; display: grid; gap: 20px; }
+.code { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); margin: 0; }
+h1 { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: clamp(32px, 6vw, 56px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
+p { margin: 0; max-width: 46ch; color: var(--muted); }
+.btn { display: inline-flex; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; padding: 12px 18px; border: 1px solid var(--fg); color: var(--fg); background: transparent; text-decoration: none; width: fit-content; margin-top: 12px; }
+.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 24 24">
+    <g transform="rotate(-6 12 11)">
+      <rect x="1.5" y="10" width="21" height="2.4" fill="currentColor"/>
+      <rect x="3" y="5.4" width="4.6" height="4.6" fill="var(--brass)"/>
+    </g>
+    <path d="M12 12.6L17.5 21.5H6.5Z" fill="currentColor"/>
+  </symbol>
+</svg>
+<header class="bar">
+  <a class="brand" href="/scruple/" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+</header>
+<main>
+  <p class="code">404 · not found</p>
+  <h1>Nothing at this address.</h1>
+  <p>The page you asked for does not exist. The site is one page.</p>
+  <a class="btn" href="/scruple/">Back to scruple</a>
+</main>
+</body>
+</html>

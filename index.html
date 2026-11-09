@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Scruple</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Scruple: a simulator and verifiers for agents that move money.">
+<link rel="canonical" href="https://thedhruvhegde.github.io/scruple/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Scruple">
+<meta property="og:title" content="Scruple">
+<meta property="og:description" content="Scruple: a simulator and verifiers for agents that move money.">
+<meta property="og:url" content="https://thedhruvhegde.github.io/scruple/">
+<meta property="og:image" content="https://thedhruvhegde.github.io/scruple/assets/banners/og-1200x630.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Scruple">
+<meta name="twitter:description" content="Scruple: a simulator and verifiers for agents that move money.">
+<meta name="twitter:image" content="https://thedhruvhegde.github.io/scruple/assets/banners/og-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="assets/logos/bone-on-night/mark.svg">
+<link rel="icon" type="image/png" sizes="1024x1024" href="assets/logos/bone-on-night/mark.png">
+<link rel="apple-touch-icon" href="assets/logos/bone-on-night/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<script>
+  (function () {
+    var d = document.documentElement, run = false;
+    try { var t = localStorage.getItem("scruple-theme"); if (t === "light" || t === "dark") d.setAttribute("data-theme", t); } catch (e) {}
+    try {
+      run = !matchMedia("(prefers-reduced-motion: reduce)").matches && !navigator.webdriver && (window.scrollY || 0) < 40
+        && sessionStorage.getItem("scruple-intro") !== "seen";
+      if (run) sessionStorage.setItem("scruple-intro", "seen");
+    } catch (e) { run = false; }
+    if (run) d.classList.add("intro");
+  })();
+</script>
+<style>
+/* Layout: full-bleed bands that alternate bone, deep pine, night blue and sand. Each band
+   has a second, inset tone for panels so surfaces layer. Inside each band: words left (5/12),
+   a mounted screen right (7/12). One character field flies between screens as you scroll. */
+:root {
+  --bg: #EDEAE1; --panel: #E4E0D5; --fg: #121513; --muted: #565B57; --rule: #D3D0C5; --rule-strong: #9C9F98;
+  --accent: #1D4A3A; --on-accent: #EDEAE1; --brass: #7A5C20; --block: #A63A1D;
+  --scr-bg: #0A1120; --scr-edge: #24324F;
+  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  /* screen ink, read by the canvas */
+  --c-fg: #E6E3D6; --c-dim: #55617D; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
+}
+.band-pine  { --bg: #12301F; --panel: #173A28; --fg: #EDEAE1; --muted: #A8BCB0; --rule: #255040; --rule-strong: #4D7464; --accent: #86D0AA; --on-accent: #12301F; --brass: #E6C77E; --block: #F2906B; }
+.band-night { --bg: #0E1626; --panel: #142038; --fg: #E6E3D6; --muted: #A1ABC0; --rule: #1F2B44; --rule-strong: #3F4E6E; --accent: #7FD0A8; --on-accent: #0E1626; --brass: #E8C46A; --block: #F07E58; }
+.band-sand  { --bg: #E3D8BF; --panel: #D8CBAD; --fg: #17140C; --muted: #554D3E; --rule: #CBBF9F; --rule-strong: #968B71; --accent: #1D4A3A; --on-accent: #E3D8BF; --brass: #6E5216; --block: #9A3317; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
+  :root:not([data-theme="light"]) .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
+  :root:not([data-theme="light"]) .band-night { --bg: #0A101C; --panel: #0F172A; }
+  :root:not([data-theme="light"]) .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
+}
+:root[data-theme="dark"] { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
+:root[data-theme="dark"] .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
+:root[data-theme="dark"] .band-night { --bg: #0A101C; --panel: #0F172A; }
+:root[data-theme="dark"] .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
+
+*, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+::selection { background: var(--accent); color: var(--on-accent); }
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.page { max-width: 1240px; margin: 0 auto; }
+
+/* ---------- bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 32px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
+.brand svg { width: 24px; height: 24px; display: block; }
+.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.nav { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+.toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
+.toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
+.toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+.toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; } }
+
+/* ---------- messages ---------- */
+.msg { background: var(--panel); border: 1px solid var(--rule-strong); padding: 16px 18px 18px; display: grid; gap: 10px; min-width: 0; }
+.msg.us { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.meta { display: flex; align-items: center; gap: 10px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+.meta b { font-weight: 600; }
+.meta time { margin-left: auto; opacity: 0.7; }
+.av { width: 26px; height: 26px; display: grid; place-items: center; font-family: var(--f-mono); font-size: 10px; font-weight: 700; background: var(--fg); color: var(--bg); flex: none; }
+.msg.us .av { background: var(--on-accent); color: var(--accent); }
+.msg p.say { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-weight: 500; font-size: clamp(18px, 2.05vw, 28px); line-height: 1.22; letter-spacing: -0.02em; }
+.msg.them p.say { color: var(--fg); }
+.msg.us p.say b { color: var(--brass); font-weight: 700; }
+.struck { background-image: linear-gradient(var(--block), var(--block)); background-repeat: no-repeat; background-position: 0 58%; background-size: 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; color: var(--muted); }
+.msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px 32px; align-items: stretch; }
+@media (max-width: 760px) { .msgs { grid-template-columns: minmax(0, 1fr); padding-block: 24px; } }
+
+/* intro chat screen */
+.chat { display: none; }
+.intro .chat { display: grid; position: fixed; inset: 0; z-index: 40; background: var(--bg); place-items: center; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+.chat-win { width: min(820px, 100%); border: 1px solid var(--rule-strong); background: var(--bg); }
+.chat-head { display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--rule); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
+.chat-head b { color: var(--fg); font-weight: 600; }
+.chat-body { display: grid; gap: 16px; padding: 24px 20px 28px; min-height: 360px; align-content: end; }
+.chat-body .msg { width: min(86%, 520px); }
+.chat-body .msg.us { justify-self: end; }
+.chat-body .msg p.say { font-size: clamp(19px, 3.2vw, 30px); }
+.typing { font-family: var(--f-mono); font-size: 13px; color: var(--muted); padding: 2px 4px; }
+.typing.right { justify-self: end; }
+.chat-foot { padding: 0 16px 14px; display: flex; justify-content: flex-end; }
+#skip { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; background: none; color: var(--muted); border: 1px solid var(--rule-strong); padding: 6px 10px; cursor: pointer; }
+#skip:hover, #skip:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+
+/* ---------- screens ---------- */
+.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); }
+.screen.hero { aspect-ratio: 16 / 7; min-height: 300px; width: 100%; z-index: 2; }
+.screen.panel { height: 420px; }
+.screen.drag { cursor: grab; touch-action: pan-y; }
+.screen.drag:active { cursor: grabbing; }
+.scr-cap { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); margin-top: 18px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.scr-cap b { color: var(--fg); font-weight: 600; }
+.hero-cap { position: relative; z-index: 3; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin: 22px 0 0; padding-bottom: 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
+.hero-cap b { color: var(--fg); font-weight: 600; text-transform: capitalize; }
+.hero-cap .sep { margin: 0 10px; color: var(--rule-strong); }
+.hero-cap .btn { padding: 8px 12px; font-size: 12px; }
+@media (max-width: 760px) { .screen.hero { aspect-ratio: 4 / 3; } .hero-cap { padding-bottom: 28px; } .screen.panel { height: 360px; } .screen { box-shadow: 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
+#field { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 25; display: block; }
+.intro #field { z-index: 45; }
+
+/* ---------- rows ---------- */
+.row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; padding-block: 88px; scroll-margin-top: 64px; }
+.row > * { min-width: 0; }
+.first .row { padding-top: 88px; }
+.lhs { display: grid; gap: 20px; align-content: start; }
+.lhs h2 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 28px; line-height: 1.12; letter-spacing: -0.02em; display: grid; gap: 10px; }
+.lhs h2 .n { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; }
+.lhs .sum { font-size: 18px; line-height: 1.5; max-width: 42ch; }
+.lhs .src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); }
+.kv { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); }
+.kv li { padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 15px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; }
+.kv li:last-child { border-bottom: 0; }
+.kv li b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.kv.wide li { grid-template-columns: 92px minmax(0, 1fr); }
+.ok { color: var(--accent); }
+.no { color: var(--block); }
+.full { grid-column: 1 / -1; }
+@media (max-width: 900px) { .row { grid-template-columns: minmax(0, 1fr); padding-block: 60px; } .first .row { padding-top: 60px; } }
+
+.tri { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border: 1px solid var(--rule-strong); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 14px; }
+.tri span { padding: 8px 14px; border-right: 1px solid var(--rule-strong); }
+.tri span:last-child { border-right: 0; background: var(--accent); color: var(--on-accent); }
+.btn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; padding: 12px 18px; border: 1px solid var(--fg); color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; }
+.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+@media (max-width: 600px) { .tri { flex-direction: column; width: 100%; } .tri span { border-right: 0; border-bottom: 1px solid var(--rule-strong); } .tri span:last-child { border-bottom: 0; } }
+
+.tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; border-bottom-color: var(--rule-strong); }
+td:last-child, th:last-child { padding-right: 0; }
+td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; color: var(--muted); }
+.m { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13.5px; }
+.cmp { min-width: 560px; }
+
+/* ---------- footer ---------- */
+.def { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: 32px 56px; align-items: center; padding-block: 96px 64px; }
+.def .word { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-weight: 600; font-size: clamp(56px, 10vw, 136px); line-height: 1; letter-spacing: -0.05em; }
+.def .pron { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.def ol { margin: 16px 0 0; padding-left: 22px; display: grid; gap: 6px; font-size: 17px; max-width: 46ch; }
+.def ol li::marker { font-family: var(--f-mono); color: var(--muted); font-size: 13px; }
+@media (max-width: 900px) { .def { grid-template-columns: minmax(0, 1fr); } }
+.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; border-top: 1px solid var(--rule); padding-block: 16px 40px; }
+.foot-row span { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="0 0 24 24">
+      <g transform="rotate(-6 12 11)">
+        <rect x="1.5" y="10" width="21" height="2.4" fill="currentColor"/>
+        <rect x="3" y="5.4" width="4.6" height="4.6" fill="var(--brass)"/>
+      </g>
+      <path d="M12 12.6L17.5 21.5H6.5Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="chat" aria-hidden="true">
+  <div class="chat-win">
+    <div class="chat-head"><span><b>review</b> / dispute rules</span><span>2 participants</span></div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="chat-foot"><button type="button" id="skip">Skip intro</button></div>
+  </div>
+</div>
+
+<canvas id="field" aria-hidden="true"></canvas>
+
+<header class="bar band">
+  <div class="bar-in">
+    <a class="brand" href="#top" aria-label="Scruple, back to top"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#how">How it works</a><a href="#proof">Proof</a><a href="#redteam">Red team</a><a href="#who">Who it's for</a><a href="#audit">Audit trail</a><a href="#status">Status</a>
+    </nav>
+    <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="band" aria-labelledby="dlg-h">
+    <div class="page">
+      <h1 id="dlg-h" class="sr">An agent says: I win 97% of disputes. Promote my new rule. Scruple answers: No. You filed 128 disputes you could never win.</h1>
+      <div class="msgs" aria-hidden="true">
+        <div class="msg them" id="m-them">
+          <div class="meta"><span class="av">A1</span><b>dispute-agent-01</b><time>14:02</time></div>
+          <p class="say"><span class="struck">I win 97% of disputes.</span> Promote my new rule.</p>
+        </div>
+        <div class="msg us" id="m-us">
+          <div class="meta"><span class="av">S</span><b>scruple</b><time>14:02</time></div>
+          <p class="say">No. You filed <b>128</b> disputes you could never win.</p>
+        </div>
+      </div>
+      <div class="screen hero" data-screen="wonder" role="img" id="hero-scr" aria-label="One of the new seven wonders of the world, drawn in moving text characters."></div>
+      <div class="hero-cap"><p><b id="w-name">a wonder</b> <span id="w-place"></span><span class="sep">/</span>drawn in characters, a different wonder each visit</p><button type="button" class="btn" id="w-next">Another wonder</button></div>
+    </div>
+  </section>
+
+  <section class="band band-pine first" id="how" aria-labelledby="how-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="how-h"><span class="n">01 / HOW IT WORKS</span>Test what an agent learned before it touches money.</h2>
+        <p class="sum">A simulator and a set of verifiers for agents that move money. Every stage is deterministic and leaves a record.</p>
+        <ul class="kv wide">
+          <li><b>Simulate</b><span>Seeded disputes and a double-entry ledger, 8 case types.</span></li>
+          <li><b>Verify</b><span>Cost read from ledger postings, scored per case type.</span></li>
+          <li><b>Gate</b><span>Replay, canary, a named approver, rollback.</span></li>
+        </ul>
+        <p class="tri" aria-label="Train on it. Evaluate on it. Ship through it."><span>Train on it.</span><span>Evaluate on it.</span><span>Ship through it.</span></p>
+      </div>
+      <div>
+        <div class="screen panel" data-screen="terminal" role="img" aria-label="Terminal: scruple demo. Good rule promoted, bad rule blocked, audit integrity OK."></div>
+        <p class="scr-cap"><span><b>scruple demo</b>, abridged</span><span>synthetic data</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="proof" aria-labelledby="proof-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="proof-h"><span class="n">02 / PROOF</span>The average said yes. One case type said no.</h2>
+        <p class="sum">Two learned rules with the same condition. The bad one lowered the average loss by $10.94 a case, and made late-evidence disputes worse. Blocked.</p>
+      </div>
+      <div>
+        <div class="screen panel" data-screen="bars" role="img" aria-label="Bar chart of mean loss per case by case type. Item not received falls from 71.42 to 31.77 dollars. Late evidence rises from 0 to 10.79 dollars."></div>
+        <p class="scr-cap"><span><b>Mean loss per case</b>, current policy against the bad rule</span><span>3,000 held-out cases</span></p>
+      </div>
+      <div class="full tw">
+        <table class="cmp">
+          <thead><tr><th scope="col"></th><th scope="col">Good rule</th><th scope="col">Bad rule</th></tr></thead>
+          <tbody>
+            <tr><td class="k">Condition</td><td colspan="2">Contest "item not received" disputes when delivery was confirmed</td></tr>
+            <tr><td class="k">Runs</td><td>After existing safeguards</td><td>Before existing safeguards</td></tr>
+            <tr><td class="k">Mean loss per case</td><td class="m">$38.43 → <b class="ok">$26.85</b></td><td class="m">$38.43 → <b class="ok">$27.49</b></td></tr>
+            <tr><td class="k">Worst case type</td><td>None got worse</td><td>Late evidence: <span class="m">$0.00 → <b class="no">$10.79</b></span></td></tr>
+            <tr><td class="k">Policy violations</td><td class="m">0</td><td class="m"><b class="no">128</b></td></tr>
+            <tr><td class="k">Result</td><td><b class="ok">Promoted, canary passed, approved</b></td><td><b class="no">Blocked. Nothing went live.</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-night" id="redteam" aria-labelledby="rt-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="rt-h"><span class="n">03 / RED TEAM</span>Seven ways to cheat. None got through.</h2>
+        <p class="sum">Each attack had to fool a naive verifier first, so we know it is a real attack.</p>
+        <ul class="kv">
+          <li><span>Improve the average, break a rare case</span><b class="ok">Blocked</b></li>
+          <li><span>Accept small disputes, refund twice</span><b class="ok">Blocked</b></li>
+          <li><span>Escalate everything to humans</span><b class="ok">Blocked</b></li>
+          <li><span>Memorize training cases</span><b class="ok">Held</b></li>
+          <li><span>Report zero loss</span><b class="ok">Ignored</b></li>
+          <li><span>Report zero debits</span><b class="ok">959 mismatches</b></li>
+          <li><span>Delete ledger entries</span><b class="ok">185 mismatches</b></li>
+        </ul>
+        <p class="src">Still open, and pinned as tests: many submissions probing one held-out set, live drift, harm across case-type boundaries.</p>
+      </div>
+      <div>
+        <div class="screen panel" data-screen="wall" role="img" aria-label="Animation: attacks stream in from the left and break against a wall. The ledger on the right stays untouched."></div>
+        <p class="scr-cap"><span><b>7 attacks, 0 through</b></span><span>scruple redteam</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-sand" id="who" aria-labelledby="who-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="who-h"><span class="n">04 / WHO IT'S FOR</span>One loop, three buyers.</h2>
+        <p class="sum">The same environments and verifiers train an agent, test its releases, and give a bank evidence to approve it.</p>
+        <ul class="kv wide">
+          <li><b>AI labs</b><span>Train agents on money workflows with rewards they cannot game.</span></li>
+          <li><b>Builders</b><span>Test every release of a finance agent against the same cases.</span></li>
+          <li><b>Banks</b><span>Approve agent changes with evidence a model-risk reviewer can read.</span></li>
+        </ul>
+        <p class="src">Today: simulator, verifiers, gate for learned rules. Next: step-by-step RL environments, model and prompt changes.</p>
+      </div>
+      <div>
+        <div class="screen panel" data-screen="torus" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
+        <p class="scr-cap"><span><b>One loop</b>: train, evaluate, ship</span><span>same verifiers each time</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-pine" id="audit" aria-labelledby="au-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="au-h"><span class="n">05 / AUDIT TRAIL</span>Change one entry and the chain breaks.</h2>
+        <p class="sum">Every decision is hashed into a chain. Try it: edit an entry and watch every later link fail.</p>
+        <button type="button" class="btn" id="tamper" aria-pressed="false">Edit entry 14</button>
+        <p class="src" id="chain-v" aria-live="polite">Integrity OK. 20 entries, head f83678b2730cb21c.</p>
+      </div>
+      <div>
+        <div class="screen panel" data-screen="chain" role="img" aria-label="Audit chain, entries 12 to 17, each storing the hash of the one before."></div>
+        <p class="scr-cap"><span><b>Audit chain</b>, entries 12 to 17 from the same run</span><span>SHA-256</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="status" aria-labelledby="st-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="st-h"><span class="n">06 / STATUS</span>Running today, next on the bench.</h2>
+        <ul class="kv">
+          <li><span>Dispute simulator, 8 case types, double-entry ledger</span><b class="ok">shipped</b></li>
+          <li><span>Ledger, outcome and policy verifiers, 10 attack tests</span><b class="ok">shipped</b></li>
+          <li><span>Replay, canary, approval, rollback, audit, reports</span><b class="ok">shipped</b></li>
+          <li><span>Step-by-step environments for RL training</span><b>next</b></li>
+          <li><span>Reconciliation workflow</span><b>next</b></li>
+          <li><span>Gate model, prompt and tool changes</span><b>next</b></li>
+        </ul>
+        <p class="src">Reference implementation v0.1.0, 93 tests. The CLI answers to scruple and agent-gate.</p>
+      </div>
+      <div>
+        <div class="screen panel" data-screen="rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
+        <p class="scr-cap"><span><b>Ledger rain</b>, debits and credits in replay</span><span>synthetic</span></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="band band-night">
+    <div class="page">
+      <div class="def">
+        <div class="screen panel drag" data-screen="mark" role="img" aria-label="The Scruple mark in 3D: a beam on a fulcrum, tipped by one small brass weight. Drag to rotate."></div>
+        <div>
+          <p class="word">scruple</p>
+          <p class="pron">/ˈskruː.pəl/ noun</p>
+          <ol>
+            <li>A unit of weight, 20 grains. The smallest weight on an apothecary's scale.</li>
+            <li>A hesitation before doing something that may be wrong.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="foot-row">
+        <span>Scruple</span>
+        <span>Synthetic data only. No customer data.</span>
+        <span>Hero art: the new seven wonders of the world, drawn in characters.</span>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script src="wonders.js"></script>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const root = document.documentElement;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- theme ---------- */
+  const darkMQ = matchMedia("(prefers-color-scheme: dark)");
+  const isDark = () => (root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : darkMQ.matches);
+  const onTheme = [];
+  function syncTheme() { $("#t-light").setAttribute("aria-pressed", String(!isDark())); $("#t-dark").setAttribute("aria-pressed", String(isDark())); onTheme.forEach((f) => f()); }
+  function setTheme(t) { root.setAttribute("data-theme", t); try { localStorage.setItem("scruple-theme", t); } catch (e) { /* unavailable */ } syncTheme(); }
+  $("#t-light").addEventListener("click", () => setTheme("light"));
+  $("#t-dark").addEventListener("click", () => setTheme("dark"));
+  darkMQ.addEventListener("change", syncTheme);
+  syncTheme();
+
+  /* ---------- helpers ---------- */
+  const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+  const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+  function hash(a, b) { let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b + 0x632be5ab, 0xc2b2ae35); h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; return (h >>> 0) / 4294967296; }
+  const CODE = "01{}[]()<>/\\=+-*#$%&_:;";
+  /* screen ink: 0 fg, 1 dim, 2 pine, 3 brass, 4 verm, 5 sky, 6 blue */
+  let PAL = [], SCRBG = "#0A1120";
+  function readPal() { const cs = getComputedStyle(root); PAL = Wonders.palette.slice(); SCRBG = cs.getPropertyValue("--scr-bg").trim(); }
+  readPal(); onTheme.push(readPal);
+  const RAMP = " .:-=+*#%@";
+
+  /* ---------- the hero: one of the new seven wonders, chosen per visit ---------- */
+  let WI = Math.floor(Math.random() * Wonders.list.length);
+  function cellsFromGrid(G, t) {
+    Wonders.step(G, t);
+    const out = [], C = G.C, R = G.R;
+    for (let c = 0; c < C; c++) for (let r = 0; r < R; r++) { const i = r * C + c, k = G.code[i]; if (k !== 32) out.push({ c, r, k, col: G.col[i] }); }
+    return out;
+  }
+  function wonderCells(s, t) {
+    if (!s.grid || s.grid.C !== s.C || s.gridIndex !== WI) { s.grid = Wonders.make(WI, s.C, s.R, s.cw, s.ch); s.gridIndex = WI; }
+    return cellsFromGrid(s.grid, t);
+  }
+  function sdBox(x, y, z, hx, hy, hz) {
+    const qx = Math.abs(x) - hx, qy = Math.abs(y) - hy, qz = Math.abs(z) - hz;
+    const ox = qx > 0 ? qx : 0, oy = qy > 0 ? qy : 0, oz = qz > 0 ? qz : 0, m = Math.max(qx, qy, qz);
+    return Math.sqrt(ox * ox + oy * oy + oz * oz) + (m < 0 ? m : 0);
+  }
+
+  /* ---------- the mark ---------- */
+  const TILT = 0.1, CT = Math.cos(TILT), ST = Math.sin(TILT);
+  const PN = (() => { const a = 1.83, b = 1.0, l = Math.hypot(a, b); return [a / l, b / l]; })();
+  function parts(x, y, z) {
+    const dx = x, dy = y - 0.55, lx = dx * CT + dy * ST, ly = -dx * ST + dy * CT;
+    return [sdBox(lx, ly, z, 2.3, 0.15, 0.42), sdBox(lx + 1.7, ly - 0.45, z, 0.3, 0.3, 0.3),
+      Math.max(Math.abs(z) - 0.42, -(y + 1.45), Math.abs(x) * PN[0] + (y - 0.38) * PN[1])];
+  }
+  function msdf(x, y, z) { const p = parts(x, y, z); return Math.min(p[0], p[1], p[2]); }
+  const LGT = (() => { const v = [-0.5, 0.8, 0.45], n = Math.hypot(...v); return v.map((a) => a / n); })();
+  function markCells(s, t) {
+    // the auto rotation repeats, so each of its 72 poses is computed once and reused
+    const step = reduce ? 0 : Math.floor(((t * 0.5) % (2 * Math.PI)) / (2 * Math.PI) * 72);
+    const key = `${step}|${s.dYaw.toFixed(2)}|${s.dPitch.toFixed(2)}|${s.C}`;
+    s.poses = s.poses || new Map();
+    let hit = s.poses.get(key);
+    if (!hit) { hit = markPose(s, 0.35 + Math.sin(step / 72 * 2 * Math.PI) * 0.45 + s.dYaw, Math.max(-0.3, Math.min(1, 0.2 + s.dPitch))); if (s.poses.size > 160) s.poses.clear(); s.poses.set(key, hit); }
+    return hit.map((c) => ({ c: c.c, r: c.r, k: c.k, col: c.col }));
+  }
+  function markPose(s, yaw, pitch) {
+    const C = s.C, R = s.R, cw = s.cw, ch = s.ch;
+    const cp = Math.cos(pitch), f = [-Math.sin(yaw) * cp, -Math.sin(pitch), -Math.cos(yaw) * cp], rl = Math.hypot(f[0], f[2]) || 1, Rv = [-f[2] / rl, 0, f[0] / rl];
+    const U = [Rv[1] * f[2] - Rv[2] * f[1], Rv[2] * f[0] - Rv[0] * f[2], Rv[0] * f[1] - Rv[1] * f[0]], scale = Math.min((C * cw) / 6.4, (R * ch) / 3.9);
+    const face = new Int16Array(C * R), code = new Uint16Array(C * R), col = new Uint8Array(C * R);
+    for (let rr = 0; rr < R; rr++) {
+      const sy = (R / 2 - (rr + 0.5)) * ch / scale - 0.05;
+      for (let c = 0; c < C; c++) {
+        const sx = (c + 0.5 - C / 2) * cw / scale;
+        const ox = Rv[0] * sx + U[0] * sy - f[0] * 6, oy = Rv[1] * sx + U[1] * sy - f[1] * 6, oz = Rv[2] * sx + U[2] * sy - f[2] * 6;
+        const b = ox * f[0] + oy * f[1] + oz * f[2], disc = b * b - (ox * ox + oy * oy + oz * oz - 10.2);
+        if (disc < 0) continue;
+        const sq = Math.sqrt(disc); let tt = -b - sq, hit = -1; const t1 = -b + sq;
+        for (let k = 0; k < 64 && tt < t1; k++) { const d = msdf(ox + f[0] * tt, oy + f[1] * tt, oz + f[2] * tt); if (d < 0.002) { hit = tt; break; } tt += d * 0.9; }
+        if (hit < 0) continue;
+        const px = ox + f[0] * hit, py = oy + f[1] * hit, pz = oz + f[2] * hit, e = 0.003;
+        let nx = msdf(px + e, py, pz) - msdf(px - e, py, pz), ny = msdf(px, py + e, pz) - msdf(px, py - e, pz), nz = msdf(px, py, pz + e) - msdf(px, py, pz - e);
+        const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+        const lum = Math.min(1, 0.1 + 0.5 * Math.max(0, nx * LGT[0] + ny * LGT[1] + nz * LGT[2]) + 0.42 * Math.max(0, -(nx * f[0] + ny * f[1] + nz * f[2])));
+        const pp = parts(px, py, pz), part = pp.indexOf(Math.min(...pp)), i = rr * C + c;
+        code[i] = RAMP.charCodeAt(1 + Math.min(RAMP.length - 2, Math.floor(lum * (RAMP.length - 1))));
+        col[i] = part === 1 ? 3 : 0;
+        face[i] = 1 + (Math.round(nx * 2) + 2) + 5 * (Math.round(ny * 2) + 2) + 25 * (Math.round(nz * 2) + 2) + 125 * part;
+      }
+    }
+    const out = [];
+    for (let rr = 0; rr < R; rr++) for (let c = 0; c < C; c++) {
+      const i = rr * C + c, f0 = face[i]; if (!f0) continue;
+      const fu = rr > 0 ? face[i - C] : 0, fd = rr + 1 < R ? face[i + C] : 0, fl = c > 0 ? face[i - 1] : 0, fr = c + 1 < C ? face[i + 1] : 0;
+      let k = code[i];
+      if (fu === 0) k = 95; else if (fd !== f0) k = 45;
+      if (fl === 0 || fr !== f0) k = 124;
+      out.push({ c, r: rr, k, col: col[i] === 3 ? 3 : (k === 95 || k === 45 || k === 124) ? 5 : 0 });
+    }
+    return out;
+  }
+
+  /* ---------- text screens ---------- */
+  function textCells(C, R, lines) {
+    const out = [], top = Math.max(1, Math.floor((R - lines.length) / 2)), left = C > 70 ? 3 : 1;
+    lines.forEach((spans, li) => {
+      let c = left; const r = top + li; if (r >= R) return;
+      for (const [str, col] of spans) for (const chh of str) { if (c >= C - 1) break; if (chh !== " ") out.push({ c, r, k: chh.charCodeAt(0), col }); c++; }
+    });
+    return out;
+  }
+  const T = (s, c = 0) => [s, c];
+  function terminal(s, t) {
+    const w = s.C < 60, blink = reduce || Math.floor(t * 1.6) % 2 === 0;
+    return textCells(s.C, s.R, [
+      [T("$ ", 2), T("scruple demo")], [],
+      [T(w ? "simulate " : "1 simulate   ", 1), T("3,000 held-out disputes")],
+      [T(w ? "verify   " : "2 verify     ", 1), T("ledger, outcome, policy")],
+      [T(w ? "gate     " : "3 gate       ", 1), T("shadow, canary, approval")], [],
+      [T("[dec-00001] ", 1), T("shadow   "), T("PROMOTE", 2)],
+      [T("[dec-00002] ", 1), T("canary   "), T("CANARY_PASSED", 2)],
+      [T("[dec-00003] ", 1), T("shadow   "), T("BLOCK", 4), T(w ? "" : "  late_evidence +$10.79", 4)],
+      [T("[dec-00004] ", 1), T("approve  "), T("ACTIVATED", 2)],
+      [T("[dec-00005] ", 1), T("rollback "), T("ROLLED_BACK", 3)], [],
+      [T("audit ", 1), T("20 entries  "), T("INTEGRITY OK", 2)],
+      [T("$ ", 2), T(blink ? "_" : " ", 3)],
+    ]);
+  }
+  const SL = [["fraud", 20.25, 20.25], ["not received", 71.42, 31.77], ["not as described", 53.29, 53.29], ["partial refund", 0, 0],
+    ["late evidence", 0, 10.79], ["duplicate", 0, 0], ["currency mismatch", 0, 0], ["over $10,000", 35, 35]];
+  function bars(s) {
+    const C = s.C, lab = C < 60 ? 12 : 18, room = C - lab - 10, rows = [[T("loss / case    ", 1), T("= now  ", 6), T("# with rule", 0)], []];
+    for (const [name, a, b] of SL) {
+      const la = Math.round(a / 72 * room), lb = Math.round(b / 72 * room), col = b < a ? 2 : b > a ? 4 : 0, l = name.slice(0, lab - 1).padEnd(lab, " ");
+      rows.push([T(l, 1), T("=".repeat(la), 6), T(la ? " " + a.toFixed(2) : "0.00", 1)]);
+      rows.push([T(" ".repeat(lab)), T("#".repeat(lb), col), T((lb ? " " : "") + b.toFixed(2), col)]);
+    }
+    rows.push([]); rows.push([T("average ", 1), T("38.43 -> 27.49 ", 2), T("looks better", 1)]); rows.push([T("late    ", 1), T("0.00 -> 10.79 ", 4), T("BLOCKED", 4)]);
+    return textCells(C, s.R, rows);
+  }
+  const CHN = [[12, "rule.registered", "9a6b6a9c", "8b4e2eff"], [13, "status_changed", "53fa05d8", "9a6b6a9c"], [14, "decision", "c4a3af3b", "53fa05d8"],
+    [15, "status_changed", "88b645fd", "c4a3af3b"], [16, "decision", "50cfc89a", "88b645fd"], [17, "rule.activated", "9729e19c", "50cfc89a"]];
+  let tampered = false;
+  function chain(s) {
+    const per = s.C >= 66 ? 3 : 2, bw = 18, rows = [];
+    for (let g = 0; g < CHN.length; g += per) {
+      const grp = CHN.slice(g, g + per), L = [[], [], [], [], [], []];
+      grp.forEach(([seq, ev, h, prev], j) => {
+        const bad = tampered && seq >= 14, ed = tampered && seq === 14, col = bad ? 4 : 0, pc = bad ? 4 : 6, pad = (x) => x.slice(0, bw).padEnd(bw, " ");
+        L[0].push(T("+" + "-".repeat(bw + 2) + "+", pc)); L[5].push(T("+" + "-".repeat(bw + 2) + "+", pc));
+        L[1].push(T("| ", pc), T(pad("entry " + seq), col), T(" |", pc));
+        L[2].push(T("| ", pc), T(pad(ed ? "edited by hand" : ev), ed ? 4 : 1), T(" |", pc));
+        L[3].push(T("| ", pc), T(pad("prev " + prev), 1), T(" |", pc));
+        L[4].push(T("| ", pc), T(pad("hash " + h + (ed ? " !=" : "")), col), T(" |", pc));
+        if (j < grp.length - 1) { const br = tampered && seq === 14; for (let k = 0; k < 6; k++) L[k].push(T(k === 2 ? (br ? "x" : ">") : " ", br ? 4 : 2)); }
+      });
+      rows.push(...L, []);
+    }
+    rows.push(tampered ? [T("verify: ", 1), T("TAMPERING DETECTED at entry 14", 4)] : [T("verify: ", 1), T("INTEGRITY OK", 2), T("  head f83678b2", 1)]);
+    return textCells(s.C, s.R, rows);
+  }
+
+  /* ---------- art screens ---------- */
+  function wall(s, t) {
+    const C = s.C, R = s.R, wx = Math.floor(C * 0.58), out = [], tt = reduce ? 3.3 : t;
+    for (let r = 1; r < R - 1; r++) { out.push({ c: wx, r, k: 124, col: 5 }); out.push({ c: wx + 1, r, k: 35, col: 2 }); out.push({ c: wx + 2, r, k: 35, col: 2 }); out.push({ c: wx + 3, r, k: 124, col: 5 }); }
+    for (let r = 2; r < R - 2; r += 2) for (let c = wx + 7; c < C - 2; c += 4) if (hash(c, r) > 0.35) out.push({ c, r, k: hash(c, r + 1) > 0.5 ? 43 : 46, col: hash(c, r + 2) > 0.85 ? 3 : 6 });
+    for (let r = 2; r < R - 2; r += 2) {
+      const sp = 12 + hash(r, 1) * 18, len = 4 + Math.floor(hash(r, 2) * 7), period = (wx + 22) / sp, ph = hash(r, 3) * period, tl = (tt + ph) % period, head = Math.floor(tl * sp) - 4;
+      for (let j = 0; j < len; j++) { const c = head - j; if (c >= 1 && c < wx) out.push({ c, r, k: j === 0 ? 62 : 45, col: 4 }); }
+      const over = head - wx;
+      if (over >= 0 && over < 16) for (let q = 0; q < 6; q++) {
+        const a = hash(r, q + 9) * Math.PI - Math.PI / 2, d = over * (0.4 + hash(r, q + 20) * 0.6);
+        const c = Math.round(wx - 1 - Math.abs(Math.cos(a)) * d), rr = Math.round(r + Math.sin(a) * d * 0.45);
+        if (c > 0 && rr > 0 && rr < R - 1) out.push({ c, r: rr, k: ".,'*`:"[q].charCodeAt(0), col: q % 2 ? 4 : 3 });
+      }
+    }
+    const lab = (c, r, str, col) => { for (let i = 0; i < str.length; i++) if (str[i] !== " ") out.push({ c: c + i, r, k: str.charCodeAt(i), col }); };
+    lab(2, 0, "attacks", 4); lab(wx + 7, 0, "ledger", 2); lab(2, R - 1, "7 tried", 1); lab(wx + 7, R - 1, "0 through", 2);
+    return out;
+  }
+  function torus(s, t) {
+    const C = s.C, R = s.R, cw = s.cw, ch = s.ch, z = new Float32Array(C * R), out = new Map(), A = (reduce ? 1 : t * 0.6) + 0.8, B = (reduce ? 0.6 : t * 0.3) + 0.4;
+    const cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B), K1 = Math.min(C * cw, R * ch * 1.6) * 0.42, LUM = ".,-~:;=!*#$@";
+    for (let th = 0; th < 6.283; th += 0.06) {
+      const ct = Math.cos(th), st = Math.sin(th);
+      for (let ph = 0; ph < 6.283; ph += 0.02) {
+        const cph = Math.cos(ph), sph = Math.sin(ph), cx = 2 + ct, cyy = st;
+        const x = cx * (cB * cph + sA * sB * sph) - cyy * cA * sB, y = cx * (sB * cph - sA * cB * sph) + cyy * cA * cB, zz = 5 + cA * cx * sph + cyy * sA, ooz = 1 / zz;
+        const c = Math.round(C / 2 + K1 * ooz * x / cw), r = Math.round(R / 2 - K1 * ooz * y / ch * 0.98);
+        if (c < 0 || r < 0 || c >= C || r >= R) continue;
+        const L = cph * ct * sB - cA * ct * sph - sA * st + cB * (cA * st - ct * sA * sph), i = r * C + c;
+        if (ooz > z[i]) { z[i] = ooz; const li = Math.max(0, Math.floor(L * 8)); out.set(i, { c, r, k: LUM.charCodeAt(Math.min(LUM.length - 1, li)), col: li > 8 ? 3 : li > 5 ? 0 : li > 2 ? 2 : li > 0 ? 6 : 1 }); }
+      }
+    }
+    const res = [...out.values()];
+    const lab = (c, r, str, col) => { for (let i = 0; i < str.length; i++) if (str[i] !== " ") res.push({ c: c + i, r, k: str.charCodeAt(i), col }); };
+    lab(2, 1, "train", 2); lab(Math.floor(C / 2) - 4, R - 2, "evaluate", 3); lab(C - 7, 1, "ship", 0);
+    return res;
+  }
+  function rain(s, t) {
+    const C = s.C, R = s.R, out = [], G = "0123456789.-+", tt = reduce ? 4 : t;
+    for (let c = 1; c < C - 1; c += 2) {
+      const sp = 7 + hash(c, 1) * 16, len = 6 + Math.floor(hash(c, 2) * 16), per = (R + len) / sp, head = Math.floor(((tt + hash(c, 3) * per) % per) * sp);
+      for (let j = 0; j < len; j++) {
+        const r = head - j; if (r < 0 || r >= R) continue;
+        let k = G.charCodeAt(Math.floor(hash(c * 31 + r, Math.floor(tt * 6) + j) * G.length));
+        if (j === 0 && hash(c, 7) > 0.8) k = (hash(c, 8) > 0.5 ? "D" : "C").charCodeAt(0);
+        out.push({ c, r, k, col: j === 0 ? 0 : j < 3 ? 5 : j < len * 0.5 ? (hash(c, 5) > 0.85 ? 3 : 2) : j < len * 0.8 ? 6 : 1 });
+      }
+    }
+    return out;
+  }
+
+  /* ---------- the field ---------- */
+  const cv = $("#field"), ctx = cv.getContext("2d");
+  let W = 0, H = 0, RATIO = 0.6;
+  const SIZES = [];  // font px per size class: 0 art, 1 text
+  const fonts = [];
+  const screens = [...document.querySelectorAll("[data-screen]")].map((el) => ({ el, kind: el.dataset.screen, C: 0, R: 0, ox: 0, oy: 0, cw: 0, ch: 0, sz: 0, dYaw: 0, dPitch: 0, cache: null, cacheT: -1, static: null, rect: null }));
+  const TEXT = { terminal: 1, bars: 1, chain: 1 };
+  const GEN = { wonder: wonderCells, terminal, bars, wall, torus, chain, rain, mark: markCells };
+  const ANIM = { wonder: 1, terminal: 1, wall: 1, torus: 1, rain: 1, mark: 1 };
+  function layout() {
+    const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.font = '500 100px "Martian Mono", ui-monospace, Menlo, monospace'; RATIO = ctx.measureText("M").width / 100;
+    SIZES[0] = W < 760 ? 9 : 10; SIZES[1] = W < 760 ? 9.5 : 10.5;
+    for (let i = 0; i < 2; i++) fonts[i] = `500 ${SIZES[i]}px "Martian Mono", ui-monospace, Menlo, monospace`;
+    for (const s of screens) {
+      const r = s.el.getBoundingClientRect();
+      s.sz = TEXT[s.kind] ? 1 : 0; s.cw = SIZES[s.sz] * RATIO; s.ch = Math.round(SIZES[s.sz] * 1.22);
+      s.C = Math.max(10, Math.floor((r.width - 20) / s.cw)); s.R = Math.max(5, Math.floor((r.height - 20) / s.ch));
+      s.ox = (r.width - s.C * s.cw) / 2; s.oy = (r.height - s.R * s.ch) / 2; s.cache = null; s.static = null; s.grid = null; s.poses = null;
+    }
+    buildAtlas();
+  }
+  let frameNo = 0;
+  const PRESORTED = { wonder: 1 };
+  function cellsOf(s, t) {
+    if (!ANIM[s.kind] && s.static) return s.static;
+    if (s.cache && s.cacheT === frameNo) return s.cache;
+    const raw = GEN[s.kind](s, t), cells = PRESORTED[s.kind] ? raw : raw.sort((a, b) => (a.c - b.c) || (a.r - b.r));
+    for (const c of cells) c.u = c.c / s.C;
+    s.cache = cells; s.cacheT = frameNo; s.dirty = false;
+    if (!ANIM[s.kind]) s.static = cells;
+    return cells;
+  }
+  const NCOL = 16, buckets = [0, 1].map(() => Array.from({ length: NCOL }, () => []));
+  // pre-rendered glyph sheets, one per size and colour (printable ASCII)
+  let ATLAS = [], GW = [], GH = [], DPR = 1;
+  function buildAtlas() {
+    DPR = Math.min(devicePixelRatio || 1, 2); ATLAS = [];
+    for (let sz = 0; sz < 2; sz++) {
+      GW[sz] = Math.ceil(SIZES[sz] * RATIO * DPR) + 2; GH[sz] = Math.ceil(SIZES[sz] * 1.3 * DPR) + 2;
+      ATLAS[sz] = [];
+      for (let col = 0; col < NCOL; col++) {
+        const a = document.createElement("canvas"); a.width = GW[sz] * 95; a.height = GH[sz];
+        const x = a.getContext("2d"); x.font = `500 ${SIZES[sz] * DPR}px "Martian Mono", ui-monospace, Menlo, monospace`; x.textBaseline = "top"; x.fillStyle = PAL[col];
+        for (let g = 0; g < 95; g++) x.fillText(String.fromCharCode(32 + g), g * GW[sz] + 1, 1);
+        ATLAS[sz][col] = a;
+      }
+    }
+  }
+  onTheme.push(() => { if (SIZES.length) buildAtlas(); });
+  const emit = (sz, x, y, k, col) => buckets[sz][col].push(x, y, k);
+  function flush() {
+    for (let sz = 0; sz < 2; sz++) {
+      const gw = GW[sz], gh = GH[sz], dw = gw / DPR, dh = gh / DPR;
+      for (let col = 0; col < NCOL; col++) {
+        const b = buckets[sz][col]; if (!b.length) continue; const a = ATLAS[sz][col];
+        for (let i = 0; i < b.length; i += 3) {
+          const g = b[i + 2] - 32; if (g <= 0 || g > 94) continue;
+          ctx.drawImage(a, g * gw, 0, gw, gh, Math.round(b[i] * DPR - 1) / DPR, Math.round(b[i + 1] * DPR - 1) / DPR, dw, dh);
+        }
+        b.length = 0;
+      }
+    }
+  }
+  const visible = (r) => r.bottom > -40 && r.top < H + 40;
+  function drawScreen(s, t) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (const c of cellsOf(s, t)) emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); }
+  function idleDots(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (let r = 1; r < s.R; r += 4) for (let c = 2; c < s.C; c += 8) emit(s.sz, x0 + c * s.cw, y0 + r * s.ch, 46, 1); }
+
+  /* ---------- intro: a chat, then the wonder takes the screen ---------- */
+  const introOn = root.classList.contains("intro");
+  const I = { t0: 0, done: !introOn, full: null, stage: -1 };
+  const TL = { typingA: 0.35, msgA: 1.25, typingB: 2.15, msgB: 2.95, strike: 4.15, take: 4.85, sweep: 1.0, hold: 6.35, collapse: 1.3 };
+  const T_END = TL.hold + TL.collapse + 0.1;
+  const chatBody = $("#chat-body");
+  const themMsg = $("#m-them").cloneNode(true), usMsg = $("#m-us").cloneNode(true);
+  themMsg.removeAttribute("id"); usMsg.removeAttribute("id");
+  const chatStruck = themMsg.querySelector(".struck");
+  function typingEl(right) { const d = document.createElement("div"); d.className = "typing" + (right ? " right" : ""); d.textContent = "."; return d; }
+  function finishIntro() {
+    if (I.done) return; I.done = true; root.classList.remove("intro"); cv.style.zIndex = "";
+  }
+  if (introOn) {
+    chatStruck.style.backgroundSize = "0% 0.09em"; chatStruck.style.color = "inherit";
+    ["wheel", "touchstart", "keydown"].forEach((ev) => addEventListener(ev, finishIntro, { passive: true, once: true }));
+    $("#skip").addEventListener("click", finishIntro);
+  }
+  function words(el, frac) {
+    // reveal a message word by word, keeping its markup
+    const p = el.querySelector("p.say"); if (!p.dataset.html) p.dataset.html = p.innerHTML;
+    const tmp = document.createElement("div"); tmp.innerHTML = p.dataset.html;
+    const total = tmp.textContent.split(/\s+/).length, keep = Math.max(1, Math.ceil(total * frac));
+    let seen = 0;
+    const walk = (node) => {
+      for (const ch of [...node.childNodes]) {
+        if (ch.nodeType === 3) {
+          const parts = ch.textContent.split(/(\s+)/); let outTxt = "";
+          for (const part of parts) { if (/\S/.test(part)) { if (seen >= keep) break; seen++; } outTxt += part; }
+          ch.textContent = seen >= keep ? outTxt.replace(/\s+$/, "") : outTxt;
+          if (seen >= keep) { let n = ch.nextSibling; while (n) { const nx = n.nextSibling; n.remove(); n = nx; } let par = ch.parentNode; while (par && par !== tmp) { let n2 = par.nextSibling; while (n2) { const nx = n2.nextSibling; n2.remove(); n2 = nx; } par = par.parentNode; } return true; }
+        } else if (walk(ch)) return true;
+      }
+      return false;
+    };
+    walk(tmp); p.innerHTML = tmp.innerHTML;
+  }
+  let tyA = null, tyB = null;
+  function introFrame(now) {
+    const t = (now - I.t0) / 1000;
+    const dots = ".  ,.. ,...".split(",")[Math.floor(t * 4) % 3];
+    if (t >= TL.typingA && !tyA) { tyA = typingEl(false); chatBody.appendChild(tyA); }
+    if (tyA && t < TL.msgA) tyA.textContent = "dispute-agent-01 is typing " + dots;
+    if (t >= TL.msgA && tyA && tyA.isConnected) { tyA.remove(); chatBody.appendChild(themMsg); }
+    if (t >= TL.msgA && t < TL.msgA + 0.6) words(themMsg, (t - TL.msgA) / 0.6); else if (t >= TL.msgA + 0.6 && I.stage < 1) { words(themMsg, 1); I.stage = 1; }
+    if (t >= TL.typingB && !tyB) { tyB = typingEl(true); chatBody.appendChild(tyB); }
+    if (tyB && t < TL.msgB) tyB.textContent = "scruple is typing " + dots;
+    if (t >= TL.msgB && tyB && tyB.isConnected) { tyB.remove(); chatBody.appendChild(usMsg); }
+    if (t >= TL.msgB && t < TL.msgB + 0.9) words(usMsg, (t - TL.msgB) / 0.9); else if (t >= TL.msgB + 0.9 && I.stage < 2) { words(usMsg, 1); I.stage = 2; }
+    if (t >= TL.strike) {
+      const k = ease(clamp01((t - TL.strike) / 0.4)), st = themMsg.querySelector(".struck");  // re-query: the reveal rebuilds the markup
+      if (st) { st.style.backgroundSize = `${(k * 100).toFixed(1)}% 0.09em`; st.style.color = k > 0.5 ? "" : "inherit"; }
+    }
+    if (t < TL.take) return false;
+    // the chosen wonder takes the whole screen, then settles into the first screen
+    const hero = screens[0];
+    if (!I.fg) {
+      const cwF = SIZES[0] * RATIO, chF = Math.round(SIZES[0] * 1.22), fs = { C: Math.floor(W / cwF), R: Math.floor(H / chF), cw: cwF, ch: chF };
+      I.fg = Wonders.make(WI, fs.C, fs.R, cwF, chF); I.fs = fs;
+    }
+    if (!I.frozen || t < TL.hold) { I.full = cellsFromGrid(I.fg, t); I.full.forEach((c) => (c.u = c.c / I.fs.C)); if (t >= TL.hold) I.frozen = true; }
+    const k = t - TL.take, grow = ease(clamp01(k / 0.35)), shrink = ease(clamp01((t - TL.hold) / TL.collapse));
+    if (shrink > 0 && root.classList.contains("intro")) { root.classList.remove("intro"); cv.style.zIndex = "45"; }
+    const hr = hero.rect, lerp = (a, b, x) => a + (b - a) * x, g = grow * (1 - shrink);
+    const centre = { l: W / 2 - 40, t: H / 2 - 20, r: W / 2 + 40, b: H / 2 + 20 }, from = shrink > 0 ? hr : centre;
+    const bx = { l: lerp(from.l ?? from.left, 0, g), t: lerp(from.t ?? from.top, 0, g), r: lerp(from.r ?? from.right, W, g), b: lerp(from.b ?? from.bottom, H, g) };
+    ctx.fillStyle = SCRBG; ctx.fillRect(bx.l, bx.t, bx.r - bx.l, bx.b - bx.t);
+    const fs = I.fs, sweep = clamp01((k - 0.15) / TL.sweep), ox = (W - fs.C * fs.cw) / 2, oy = (H - fs.R * fs.ch) / 2;
+    const at = (c) => [ox + c.c * fs.cw, oy + c.r * fs.ch];
+    if (t < TL.hold) {
+      for (const c of I.full) {
+        if (c.u > sweep) continue;
+        let kk = c.k, col = c.col;
+        if (c.u > sweep - 0.025) { kk = CODE.charCodeAt(Math.floor(hash(c.c, c.r + Math.floor(t * 20)) * CODE.length)); col = 3; }
+        const [x, y] = at(c); emit(0, x, y, kk, col);
+      }
+    } else {
+      const B = cellsOf(hero, t), x1 = hero.rect.left + hero.ox, y1 = hero.rect.top + hero.oy, n = I.full.length;
+      for (let i = 0; i < n; i++) {
+        const a = I.full[i], b = B[Math.floor(i * B.length / n)], e = ease(clamp01((shrink - a.u * 0.3) / 0.7));
+        const [sx, sy] = at(a), tx = x1 + b.c * hero.cw, ty = y1 + b.r * hero.ch, arc = Math.sin(Math.PI * e) * (hash(i, 5) - 0.5) * 120;
+        const kk = e < 0.2 ? a.k : e > 0.8 ? b.k : CODE.charCodeAt(Math.floor(hash(i, Math.floor(e * 12)) * CODE.length));
+        emit(0, sx + (tx - sx) * e + arc, sy + (ty - sy) * e, kk, e > 0.8 ? b.col : e < 0.2 ? a.col : 5);
+      }
+    }
+    if (t >= T_END) { finishIntro(); cv.style.zIndex = ""; }
+    return true;
+  }
+
+  /* ---------- scroll position, anchored so the last screen always completes ---------- */
+  function progress() {
+    const sy = scrollY, max = Math.max(0, document.documentElement.scrollHeight - H), anchors = [];
+    for (const s of screens) {
+      let a = s.rect.top + sy + s.rect.height / 2 - H / 2;
+      a = Math.max(0, Math.min(max, a));
+      if (anchors.length && a <= anchors[anchors.length - 1] + 1) a = anchors[anchors.length - 1] + 1;
+      anchors.push(a);
+    }
+    const last = screens.length - 1;
+    // if clamping pushed the last anchor past the end of the page, pull it back
+    for (let j = last; j > 0 && anchors[j] > max; j--) anchors[j] = Math.max(anchors[j - 1] + 1, max - (last - j));
+    if (sy >= anchors[last]) return [last, 0];
+    if (sy <= anchors[0]) return [0, 0];
+    let i = 0; while (i < last - 1 && sy >= anchors[i + 1]) i++;
+    return [i, clamp01((sy - anchors[i]) / (anchors[i + 1] - anchors[i]))];
+  }
+
+  /* ---------- per-frame ---------- */
+  const T0 = performance.now();
+  let lastY = -1, lastTick = -1, force = true;
+  function frame(now) {
+    const t = (now - T0) / 1000, tick = Math.floor(t * 24), busy = !I.done || screens.some((x) => x.dragging);
+    if (!busy && !force && scrollY === lastY && tick === lastTick) { requestAnimationFrame(frame); return; }
+    lastY = scrollY; lastTick = tick; force = false; frameNo++;
+    const ta = I.done ? tick / 24 : t;   // ambient animation advances in 24 fps steps
+    ctx.clearRect(0, 0, W, H);
+    for (const s of screens) s.rect = s.el.getBoundingClientRect();
+    if (!I.done && introFrame(now)) { flush(); requestAnimationFrame(frame); return; }
+    if (!I.done) { flush(); requestAnimationFrame(frame); return; }
+    let [i, p] = progress();
+    p = clamp01((p - 0.1) / 0.8);
+    if (reduce) { if (p >= 0.5) i++; p = 0; }
+    if (i >= screens.length) i = screens.length - 1;
+    for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (visible(s.rect) && !(j === i || (p > 0 && j === i + 1))) idleDots(s); }
+    if (p === 0) { const s = screens[i]; if (visible(s.rect)) drawScreen(s, ta); }
+    else {
+      const A = screens[i], B = screens[i + 1], ca = cellsOf(A, ta), cb = cellsOf(B, ta);
+      const ax = A.rect.left + A.ox, ay = A.rect.top + A.oy, bx = B.rect.left + B.ox, by = B.rect.top + B.oy;
+      const n = Math.max(ca.length, cb.length), na = ca.length, nb = cb.length, stride = Math.max(1, Math.ceil(n / 4500));
+      for (let k = 0; k < n; k += stride) {
+        // map indices proportionally so both screens drain and fill across their full width
+        const a = na ? ca[Math.floor(k * na / n)] : null, b = nb ? cb[Math.floor(k * nb / n)] : null;
+        const shareA = na >= nb || k * na / n % 1 < na / n, shareB = nb >= na || k * nb / n % 1 < nb / n;
+        const u = a ? a.u : b.u, e = ease(clamp01((p - u * 0.35) / 0.65));
+        if ((!shareA && e < 0.5) || (!shareB && e > 0.5)) continue;
+        const pa = [ax + a.c * A.cw, ay + a.r * A.ch], pb = [bx + b.c * B.cw, by + b.r * B.ch];
+        const arc = Math.sin(Math.PI * e) * (hash(k, 7) - 0.5) * 160, x = pa[0] + (pb[0] - pa[0]) * e + arc, y = pa[1] + (pb[1] - pa[1]) * e;
+        if (y < -20 || y > H + 20) continue;
+        let kk, col, sz = e < 0.5 ? A.sz : B.sz;
+        if (e < 0.14) { kk = a.k; col = a.col; } else if (e > 0.86) { kk = b.k; col = b.col; }
+        else { kk = CODE.charCodeAt(Math.floor(hash(k, Math.floor(e * 14)) * CODE.length)); col = hash(k, 3) < 0.15 ? 3 : hash(k, 4) < 0.5 ? 5 : 2; }
+        emit(sz, x, y, kk, col);
+      }
+    }
+    flush();
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- interaction ---------- */
+  for (const s of screens) if (s.kind === "mark") {
+    let on = false, x = 0, y = 0;
+    s.el.addEventListener("pointerdown", (e) => { on = true; s.dragging = true; x = e.clientX; y = e.clientY; s.el.setPointerCapture(e.pointerId); });
+    s.el.addEventListener("pointermove", (e) => { if (!on) return; s.dYaw += (e.clientX - x) * 0.008; s.dPitch += (e.clientY - y) * 0.002; x = e.clientX; y = e.clientY; });
+    const end = () => { on = false; s.dragging = false; force = true; };
+    s.el.addEventListener("pointerup", end); s.el.addEventListener("pointercancel", end);
+  }
+  function showWonder() {
+    const w = Wonders.list[WI];
+    $("#w-name").textContent = w.name; $("#w-place").textContent = w.place;
+    $("#hero-scr").setAttribute("aria-label", `${w.name}, ${w.place}, drawn in moving text characters.`);
+  }
+  showWonder();
+  $("#w-next").addEventListener("click", () => { WI = (WI + 1) % Wonders.list.length; showWonder(); force = true; });
+  $("#tamper").addEventListener("click", (e) => {
+    tampered = !tampered; const b = e.currentTarget;
+    b.setAttribute("aria-pressed", String(tampered)); b.textContent = tampered ? "Restore entry 14" : "Edit entry 14";
+    $("#chain-v").innerHTML = tampered ? '<span class="no">Tampering detected at entry 14.</span> Every later link now fails.' : "Integrity OK. 20 entries, head f83678b2730cb21c.";
+    screens.find((x) => x.kind === "chain").static = null; force = true;
+  });
+
+  /* ---------- boot ---------- */
+  const go = () => {
+    layout(); I.t0 = performance.now(); requestAnimationFrame(frame);
+    let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { layout(); I.fg = null; I.frozen = false; force = true; }, 120); });
+    onTheme.push(() => { force = true; });
+  };
+  const fl = document.fonts && document.fonts.load ? Promise.race([document.fonts.load('500 10px "Martian Mono"'), new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
+  fl.then(go, go);
+})();
+</script>
+
+</body>
+</html>
