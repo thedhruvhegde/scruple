@@ -76,3 +76,30 @@ this shared machine.
 The `DisputeEngine` (event-sourced since 036) was not benchmarked here; `outcome()` and
 `ActionResult.entries` scan the whole ledger and would be the first thing to index if
 engines with many thousands of cases become a hot path.
+
+## Load: episodes and HTTP (roadmap 169)
+
+Measured on 2026-11-09 with `uv run python -m tests.load` on the development container:
+4 vCPU Intel Xeon @ 2.30GHz, Python 3.12, SQLite file, one uvicorn worker. The box was
+shared with other test runs (load average about 7 on 4 cores), so these are lower
+bounds on a quiet machine, not benchmarks. Synthetic data only.
+
+| path | what one unit is | measured |
+|---|---|---|
+| episode SDK (`scruple.agents.sdk.evaluate`, rule-based baseline) | one rollout: load a case, tool calls, act, submit, verifier score | 2,000 rollouts in 1.6 s: about 74,000 per minute |
+| episode CLI in process (`scruple episode start`, `call` x3, `submit`, on-disk store) | one episode, five commands, each replaying the stored call log | 300 episodes in 9.3 s: about 1,900 per minute |
+| HTTP `GET /health`, 4 clients, 4 s | one request | about 1,230 requests/s, 0 errors |
+| HTTP `GET /rules` (7 rule versions), 4 clients | one request | about 1,180 requests/s, 0 errors |
+| HTTP `GET /audit/verify` (full chain re-hash plus projections), 4 clients | one request | about 700 requests/s, 0 errors |
+| HTTP `POST /rules` (register, one transaction, audited), 1 client | one committed write | about 49 requests/s, 0 errors |
+
+The CLI path is about 40 times slower than the SDK because every command is a fresh
+replay of the episode's call log from the JSON store; that is the design (stateless
+commands), not a hot spot. `POST /rules` is bound by one SQLite commit per request on a
+file (journal sync); `GET /audit/verify` re-hashes the whole chain, so it slows linearly
+with the chain length (here seven entries).
+
+`tests/test_load.py` checks the roadmap targets with wide margins (1,000 episodes per
+minute on both episode paths; 200 requests/s on `/health`, 100 on `/rules`, 20 on
+`POST /rules`; no 5xx). Those runs are `@pytest.mark.slow` (`make test-slow`); a smoke
+run of the same harness is in the default suite.
