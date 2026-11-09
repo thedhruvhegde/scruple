@@ -608,29 +608,11 @@ class AgentGate:
         expected: dict[tuple[str, int], tuple[str, str]] = {}
         decision_hashes: dict[str, str] = {}
         for e in entries:
-            p: dict[str, Any] = e.payload
-            if e.event_type == "decision.recorded":
-                decision_hashes[p["decision_id"]] = p["decision_sha256"]
-                continue
-            if not e.event_type.startswith("rule."):
-                continue
-            key = (p["rule_id"], int(p["version"]))
-            h = p["content_hash"]
-            if e.event_type in (
-                "rule.registered",
-                "rule.baseline_imported",
-                "rule.status_changed",
-                "rule.activated",
-            ):
-                expected[key] = (p.get("to_status", p.get("status", "")), h)
-            if e.event_type == "rule.activated" and p.get("retired_version"):
-                old = (p["rule_id"], int(p["retired_version"]))
-                expected[old] = ("retired", expected.get(old, ("", ""))[1])
-            if e.event_type == "rule.rolled_back":
-                expected[key] = ("retired", h)
-                if p.get("restored_version"):
-                    old = (p["rule_id"], int(p["restored_version"]))
-                    expected[old] = ("active", expected.get(old, ("", ""))[1])
+            try:
+                self._project_entry(e.event_type, e.payload, expected, decision_hashes)
+            except (KeyError, TypeError, ValueError):
+                # A tampered payload must be reported, never crash the check.
+                problems.append(f"audit entry seq {e.seq}: payload does not fit {e.event_type}")
         actual = {(r.rule_id, r.version): r for r in self.registry.all_versions()}
         for key in sorted(set(expected) | set(actual)):
             if key not in actual:
@@ -656,6 +638,37 @@ class AgentGate:
             elif content_hash(stored[did].decision) != decision_hashes[did]:
                 problems.append(f"decision {did} was modified after it was recorded")
         return IntegrityReport(ok=not problems, chain=chain, problems=problems)
+
+    @staticmethod
+    def _project_entry(
+        event_type: str,
+        p: dict[str, Any],
+        expected: dict[tuple[str, int], tuple[str, str]],
+        decision_hashes: dict[str, str],
+    ) -> None:
+        """Fold one audit entry into the expected registry and decision hashes."""
+        if event_type == "decision.recorded":
+            decision_hashes[p["decision_id"]] = p["decision_sha256"]
+            return
+        if not event_type.startswith("rule."):
+            return
+        key = (p["rule_id"], int(p["version"]))
+        h = p["content_hash"]
+        if event_type in (
+            "rule.registered",
+            "rule.baseline_imported",
+            "rule.status_changed",
+            "rule.activated",
+        ):
+            expected[key] = (p.get("to_status", p.get("status", "")), h)
+        if event_type == "rule.activated" and p.get("retired_version"):
+            old = (p["rule_id"], int(p["retired_version"]))
+            expected[old] = ("retired", expected.get(old, ("", ""))[1])
+        if event_type == "rule.rolled_back":
+            expected[key] = ("retired", h)
+            if p.get("restored_version"):
+                old = (p["rule_id"], int(p["restored_version"]))
+                expected[old] = ("active", expected.get(old, ("", ""))[1])
 
     # --- internals -------------------------------------------------------------
 

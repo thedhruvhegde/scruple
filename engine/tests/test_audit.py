@@ -94,6 +94,22 @@ def test_raw_file_edit_of_audit_log_is_detected(tmp_path: object) -> None:
     assert not rep.ok and "edited" in (rep.chain.problem or "")
 
 
+@pytest.mark.parametrize("event_type", ["rule.registered", "decision.recorded"])
+def test_a_gutted_payload_is_reported_not_raised(tmp_path: object, event_type: str) -> None:
+    """Regression (found by tests/test_audit_tamper.py): replacing an entry's payload
+    with `{}` made verify_integrity raise KeyError (a 500 on /audit/verify) instead of
+    reporting the tampering."""
+    g = _populated(f"{tmp_path}/gate.db")
+    g.storage.unsafe_execute("DROP TRIGGER audit_no_update")  # type: ignore[attr-defined]
+    g.storage.unsafe_execute(  # type: ignore[attr-defined]
+        f"UPDATE audit_events SET payload_json = '{{}}' WHERE seq = "
+        f"(SELECT MIN(seq) FROM audit_events WHERE event_type = '{event_type}')"
+    )
+    rep = g.verify_integrity()
+    assert not rep.ok
+    assert any(f"payload does not fit {event_type}" in p for p in rep.problems)
+
+
 def test_raw_edit_of_rule_status_is_detected(tmp_path: object) -> None:
     g = _populated(f"{tmp_path}/gate.db")
     # Someone flips the blocked rule to active directly in the database.
