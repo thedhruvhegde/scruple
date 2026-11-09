@@ -102,7 +102,7 @@ def test_well_formed_incoming_id_is_kept(logs: io.StringIO) -> None:
 )
 def test_malformed_incoming_id_is_replaced(bad: bytes) -> None:
     client = TestClient(_probe_app())
-    r = client.get("/async", headers={"X-Request-ID": bad})
+    r = client.get("/async", headers=[(b"X-Request-ID", bad)])
     got = r.headers["X-Request-ID"]
     assert got.encode() != bad and len(got) == 32
 
