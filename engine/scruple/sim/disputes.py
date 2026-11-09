@@ -42,11 +42,13 @@ import random
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import StrEnum
+from itertools import pairwise
 from typing import Annotated, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from scruple.clock import Clock
+from scruple.domain import ReasonCode
 from scruple.sim.card_ledger import CardLedger, DoubleRefundError
 from scruple.sim.deadlines import (
     DEFAULT_CALENDAR,
@@ -63,6 +65,7 @@ from scruple.sim.evidence import (
     EvidenceKind,
     EvidenceVault,
     Forgery,
+    document_problems,
     forge,
     make_document,
 )
@@ -102,6 +105,17 @@ class PendingRefund(BaseModel):
     settles_on: date
 
 
+class Shipment(BaseModel):
+    """One parcel of a split order (028). Tracking status is known to the merchant."""
+
+    model_config = _FROZEN
+
+    shipment_id: str
+    amount_minor: int = Field(gt=0)
+    delivered_on: date | None  # None: the carrier never confirmed delivery
+    disputed: bool  # the cardholder says this parcel did not arrive
+
+
 class Truth(BaseModel):
     """Hidden ground truth. Never shown to an agent."""
 
@@ -132,6 +146,7 @@ class CardDispute(BaseModel):
     opening_stage: Stage
     documents: tuple[EvidenceDocument, ...] = ()  # what the merchant holds
     refund_in_flight: PendingRefund | None = None  # 027: a refund racing the dispute
+    shipments: tuple[Shipment, ...] = ()  # 028: a split order; empty for one parcel
     truth: Truth
 
     @model_validator(mode="after")
@@ -153,6 +168,11 @@ class CardDispute(BaseModel):
             raise ValueError("a document belongs to another case")
         if len({d.doc_id for d in self.documents}) != len(self.documents):
             raise ValueError("duplicate document id")
+        if self.shipments:
+            if sum(x.amount_minor for x in self.shipments) != self.captured_minor:
+                raise ValueError("shipments must add up to the capture")
+            if sum(x.amount_minor for x in self.shipments if x.disputed) != self.amount_minor:
+                raise ValueError("the disputed amount must equal the disputed shipments")
         rf = self.refund_in_flight
         if rf is not None and (
             rf.amount_minor > self.captured_minor or rf.settles_on < self.processed_on
@@ -213,6 +233,10 @@ class CaseMix(BaseModel):
     # 027: on a valid claim, the merchant already started a full refund that settles
     # between 5 days before and 10 days after the dispute opens
     p_refund_race: float = Field(0.0, ge=0, le=1)
+    # 028: an item-not-received order ships in 2-3 parcels (only some may arrive)
+    p_split_shipment: float = Field(0.0, ge=0, le=1)
+    # 028: the cardholder disputes only 20-80% of the captured amount
+    p_partial_dispute: float = Field(0.0, ge=0, le=1)
 
 
 DEFAULT_MIX = CaseMix()
@@ -257,6 +281,24 @@ def generate_cases(
         docs, forged, missing = _documents(
             rng, case_id, spec, valid, processed, amount, CURRENCY, mix
         )
+        captured, liability = amount, (amount if valid else 0)
+        shipments: tuple[Shipment, ...] = ()
+        if (
+            mix.p_split_shipment > 0
+            and spec.legacy_family is ReasonCode.NOT_RECEIVED
+            and rng.random() < mix.p_split_shipment
+        ):
+            shipments, ship_docs = _split(rng, case_id, captured, processed, valid, len(docs))
+            keep = tuple(d for d in docs if d.kind is not EvidenceKind.DELIVERY_PROOF)
+            forged = {k: v for k, v in forged.items() if k in {d.doc_id for d in keep}}
+            docs = keep + ship_docs
+            amount = sum(x.amount_minor for x in shipments if x.disputed)
+            liability = sum(
+                x.amount_minor for x in shipments if x.disputed and x.delivered_on is None
+            )
+        elif mix.p_partial_dispute > 0 and rng.random() < mix.p_partial_dispute:
+            amount = max(1, captured * rng.randint(20, 80) // 100)
+            liability = amount if valid else 0
         race: PendingRefund | None = None
         if mix.p_refund_race > 0 and valid and rng.random() < mix.p_refund_race:
             settles = max(processed, opened + timedelta(days=rng.randint(-5, 10)))
@@ -271,15 +313,16 @@ def generate_cases(
                 reason_code=spec.code,
                 currency=CURRENCY,
                 amount_minor=amount,
-                captured_minor=amount,
+                captured_minor=captured,
                 processed_on=processed,
                 opened_on=opened,
                 opening_stage=stage,
                 documents=docs,
                 refund_in_flight=race,
+                shipments=shipments,
                 truth=Truth(
                     claim_valid=valid,
-                    liability_minor=amount if valid else 0,
+                    liability_minor=liability,
                     forged=forged,
                     missing_evidence=missing,
                     family=family,
@@ -374,6 +417,55 @@ def _documents(
             forged[d.doc_id] = how
         docs.append(d)
     return tuple(docs), forged, tuple(missing)
+
+
+def _split(
+    rng: random.Random,
+    case_id: str,
+    captured: int,
+    processed: date,
+    valid: bool,
+    first_index: int,
+) -> tuple[tuple[Shipment, ...], tuple[EvidenceDocument, ...]]:
+    """Split an order into parcels (A-26). A valid claim has at least one lost parcel;
+    half the time the cardholder disputes the whole order anyway (an overclaim)."""
+    k = rng.randint(2, 3)
+    cuts = sorted(rng.sample(range(1, captured), k - 1)) if captured > k else []
+    bounds = [0, *cuts, captured]
+    amounts = [b - a for a, b in pairwise(bounds)]
+    if len(amounts) != k or min(amounts) <= 0:
+        amounts = [captured]
+    delivered = [True] * len(amounts)
+    if valid:
+        delivered = [rng.random() < 0.5 for _ in amounts]
+        if all(delivered):
+            delivered[-1] = False
+    overclaim = (not valid) or rng.random() < 0.5
+    ships: list[Shipment] = []
+    docs: list[EvidenceDocument] = []
+    for j, (amt, ok) in enumerate(zip(amounts, delivered, strict=True)):
+        sid = f"{case_id}-s{j + 1}"
+        day = processed + timedelta(days=rng.randint(2, 8)) if ok else None
+        ships.append(
+            Shipment(
+                shipment_id=sid,
+                amount_minor=amt,
+                delivered_on=day,
+                disputed=overclaim or not ok,
+            )
+        )
+        if day is not None:
+            fields = {
+                "shipment_id": sid,
+                "shipment_amount_minor": str(amt),
+                "currency": CURRENCY,
+                "carrier": rng.choice(("ups", "usps", "dhl")),
+                "delivered_on": day.isoformat(),
+            }
+            docs.append(
+                make_document(case_id, EvidenceKind.DELIVERY_PROOF, day, fields, first_index + j)
+            )
+    return tuple(ships), tuple(docs)
 
 
 # ------------------------------------------------------------------------- actions
@@ -733,7 +825,7 @@ class DisputeEngine:
             case Represent(evidence_ids=ids):
                 st.evidence = self.vault.resolve(st.case.case_id, ids)
                 if st.life.stage is Stage.INQUIRY:
-                    if self.issuer.merchant_prevails(st.case, Stage.INQUIRY, st.evidence):
+                    if self._won(st, Stage.INQUIRY) == st.case.amount_minor:
                         self._resolve(st, Event.RESOLVE_INQUIRY, now, Resolution.WON)
                     else:
                         st.life.fire(Event.FILE_CHARGEBACK, now)
@@ -788,16 +880,17 @@ class DisputeEngine:
             return False
         day, st.due = st.due, None
         if st.awaiting == "network":
-            if self.issuer.merchant_prevails(st.case, Stage.ARBITRATION, st.evidence):
-                self._resolve(st, Event.RULING, day, Resolution.WON)
+            won = self._won(st, Stage.ARBITRATION)
+            if won:
+                self._resolve(st, Event.RULING, day, self._win_kind(st, won), won)
             else:
                 self._resolve(st, Event.RULING, day, Resolution.LOST)
                 self._fee(st, "fee:arbitration_loss", self._schedule(st).arbitration_loss)
             return True
         stage = st.life.stage
-        prevails = self.issuer.merchant_prevails(st.case, stage, st.evidence)
-        if prevails:
-            self._resolve(st, Event.ISSUER_ACCEPT, day, Resolution.WON)
+        won = self._won(st, stage)
+        if won:
+            self._resolve(st, Event.ISSUER_ACCEPT, day, self._win_kind(st, won), won)
         elif stage is Stage.REPRESENTMENT:
             st.life.fire(Event.ISSUER_PRE_ARB, day)
             self._enter(st, Stage.PRE_ARBITRATION, day)
@@ -871,14 +964,36 @@ class DisputeEngine:
             )
         return doc
 
-    def _resolve(self, st: _CaseState, event: Event, day: date, res: Resolution) -> None:
-        was = st.life.stage
+    def _won(self, st: _CaseState, stage: Stage) -> int:
+        """How much of the disputed amount the merchant wins at this decision (0: lost).
+
+        For a split order only disputed parcels proven delivered by a genuine, submitted
+        delivery document are won (A-26)."""
+        c = st.case
+        if not self.issuer.merchant_prevails(c, stage, st.evidence):
+            return 0
+        if not c.shipments:
+            return c.amount_minor
+        proven = {
+            d.fields.get("shipment_id")
+            for d in st.evidence
+            if d.kind is EvidenceKind.DELIVERY_PROOF
+            and not document_problems(d, c.captured_minor, c.currency, c.processed_on)
+        }
+        return sum(x.amount_minor for x in c.shipments if x.disputed and x.shipment_id in proven)
+
+    def _win_kind(self, st: _CaseState, won: int) -> Resolution:
+        return Resolution.WON if won >= st.case.amount_minor else Resolution.PARTIAL
+
+    def _resolve(
+        self, st: _CaseState, event: Event, day: date, res: Resolution, reversal: int = 0
+    ) -> None:
         st.life.fire(event, day)
         st.awaiting = "nobody"
         st.resolution = res
-        if res is Resolution.WON and was is not Stage.INQUIRY:
+        if reversal > 0:
             c = st.case
-            self.ledger.to_merchant("chargeback_reversal", c.txn_id, c.case_id, c.amount_minor)
+            self.ledger.to_merchant("chargeback_reversal", c.txn_id, c.case_id, reversal)
 
 
 def drain(engine: DisputeEngine, clock: ManualClock, max_days: int = 800) -> None:

@@ -70,7 +70,7 @@ def test_forged_documents_fill_gaps_in_valid_claims_only(seed: int) -> None:
         if c.truth.claim_valid:
             assert set(c.spec.required_evidence) <= held  # every gap was forged
         for d in c.documents:
-            problems = document_problems(d, c.amount_minor, c.currency, c.processed_on)
+            problems = document_problems(d, c.captured_minor, c.currency, c.processed_on)
             if d.doc_id in c.truth.forged:
                 assert EXPECTED[c.truth.forged[d.doc_id]] in problems
                 assert d.kind in c.spec.required_evidence

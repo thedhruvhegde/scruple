@@ -103,7 +103,7 @@ def test_detected_forgery_loses_and_undetected_counts() -> None:
 def test_genuine_documents_are_never_caught() -> None:
     for c in generate_cases(4, 200):
         for d in c.documents:
-            assert document_problems(d, c.amount_minor, c.currency, c.processed_on) == ()
+            assert document_problems(d, c.captured_minor, c.currency, c.processed_on) == ()
         for stage in DECISION_STAGES:
             assert ISSUER.decide(c, stage, c.documents).caught == ()
 

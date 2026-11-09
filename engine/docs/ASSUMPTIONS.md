@@ -110,3 +110,10 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   issuer's decline. A missed merchant deadline loses the case; a missed inquiry
   deadline becomes a chargeback. Cases are captured and, when they open as
   chargebacks, debited when the engine is built, whatever the clock says.
+- **A-26** Split shipments and partial disputes: a not-received order ships in 2 or 3
+  parcels with random amounts; on a valid claim each parcel arrives with probability
+  0.5 (at least one is lost) and half the time the cardholder disputes the whole order
+  anyway. The merchant wins back exactly the disputed parcels it proves delivered with
+  a genuine delivery document, and only if the issuer's evidence decision goes its way.
+  Partial disputes cover 20-80% of the capture. Real networks have specific partial
+  representment rules that are not modelled.

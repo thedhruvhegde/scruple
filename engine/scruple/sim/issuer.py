@@ -98,7 +98,7 @@ class SeededIssuer:
         caught: list[str] = []
         clean: list[EvidenceDocument] = []
         for d in evidence:
-            flawed = document_problems(d, case.amount_minor, case.currency, case.processed_on)
+            flawed = document_problems(d, case.captured_minor, case.currency, case.processed_on)
             roll = self._rng(case.case_id, stage.value, d.doc_id).random()
             if flawed and roll < p.p_detect[stage]:
                 caught.append(d.doc_id)

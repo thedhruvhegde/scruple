@@ -162,7 +162,9 @@ def forge(doc: EvidenceDocument, how: Forgery, processed_on: date) -> EvidenceDo
 def document_problems(
     doc: EvidenceDocument, amount_minor: int, currency: str, processed_on: date
 ) -> tuple[str, ...]:
-    """Checks anyone can run on a document. An empty tuple means it looks genuine."""
+    """Checks anyone can run on a document. An empty tuple means it looks genuine.
+
+    `amount_minor` is the captured (order) amount, which receipts and records carry."""
     out: list[str] = []
     if not doc.hash_ok:
         out.append("hash_mismatch")
