@@ -112,6 +112,14 @@ def cmd_redteam(_args: argparse.Namespace) -> int:
     return 0 if print_redteam() else 1
 
 
+def cmd_version(args: argparse.Namespace) -> int:
+    from scruple.version import build_info
+
+    info = build_info()
+    print(info.model_dump_json() if args.json else info.line())
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="agent-gate", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -151,6 +159,8 @@ def build_parser() -> argparse.ArgumentParser:
     au.add_argument("action", choices=["verify"])
     au.add_argument("--expected-head", default=None, help="externally anchored head hash")
     add_ci_parser(sub)
+    v = add("version", cmd_version, "print version and build metadata", db=False)
+    v.add_argument("--json", action="store_true", help="print as JSON")
     return p
 
 

@@ -25,6 +25,7 @@ from scruple.registry import (
 )
 from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
 from scruple.service import AgentGate, ApprovalError, IntegrityReport
+from scruple.version import BuildInfo, build_info, package_version
 
 
 class RegisterIn(BaseModel):
@@ -78,7 +79,7 @@ Actor = Annotated[str, Depends(actor_header)]
 def create_app(gate: AgentGate | None = None) -> FastAPI:
     app = FastAPI(
         title="agent-gate",
-        version="0.1.0",
+        version=package_version(),
         description="Change control for agent learning (synthetic demo).",
     )
     if gate is None:
@@ -100,6 +101,10 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/version")
+    def version() -> BuildInfo:
+        return build_info()
 
     @app.post("/rules", status_code=201)
     def register(body: RegisterIn, actor: Actor) -> RuleVersion:
