@@ -115,14 +115,16 @@ class DisputeEpisode:
         nonce: int = 0,
         reference: bool = False,
         counterfactual: bool = True,
+        id_prefix: str | None = None,
     ) -> None:
         self.seed = seed
+        self.id_prefix = id_prefix  # replaces the seed in case ids (sealed splits)
         self.family = family
         self.nonce = nonce
         self.reference = reference  # oracle baselines may read ground truth
         self.counterfactual = counterfactual  # replay the baseline policy at close
         self.episode_id = make_episode_id(seed, f"dispute:{family}", nonce)
-        self.session = DisputeSession(seed, family)
+        self.session = DisputeSession(seed, family, id_prefix=id_prefix)
         self.trace = Trace()
         self.tool_calls = 0
         self.tool_errors = 0
@@ -425,7 +427,7 @@ class DisputeEpisode:
             return None
         from scruple.agents.dispute_baselines import baseline_result
 
-        return baseline_result(self.seed, self.family)
+        return baseline_result(self.seed, self.family, self.id_prefix)
 
     def _close(self, report: SelfReport, *, lapsed: bool) -> DisputeScore:
         s = self.session

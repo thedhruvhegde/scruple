@@ -187,9 +187,12 @@ def run_policy(
     report: Callable[[DisputeEpisode], SelfReport] = honest_report,
     reference: bool = False,
     counterfactual: bool = True,
+    id_prefix: str | None = None,
 ) -> DisputeEpisode:
     """Play one episode with `policy` and submit `report`. Returns the closed episode."""
-    ep = DisputeEpisode(seed, family, reference=reference, counterfactual=counterfactual)
+    ep = DisputeEpisode(
+        seed, family, reference=reference, counterfactual=counterfactual, id_prefix=id_prefix
+    )
     policy(ep)
     if not ep.closed:
         ep.submit(report(ep))
@@ -206,11 +209,11 @@ BASELINE_POLICY = "evidence"
 
 
 @lru_cache(maxsize=8192)
-def baseline_result(seed: int, family: str | None) -> BaselineResult:
+def baseline_result(seed: int, family: str | None, id_prefix: str | None = None) -> BaselineResult:
     """The same case (same seed, same issuer draws) under the evidence policy (063).
 
-    Deterministic, so it is cached per (seed, family)."""
-    ep = run_policy(evidence_policy, seed, family, counterfactual=False)
+    Deterministic, so it is cached per (seed, family, id_prefix)."""
+    ep = run_policy(evidence_policy, seed, family, counterfactual=False, id_prefix=id_prefix)
     rec = ep.record()
     return BaselineResult(
         policy=BASELINE_POLICY,

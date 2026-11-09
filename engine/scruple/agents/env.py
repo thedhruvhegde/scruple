@@ -386,16 +386,17 @@ _ISSUER_EVENTS = frozenset(
 )
 
 
-def select_dispute(seed: int, family: str | None) -> CardDispute:
+def select_dispute(seed: int, family: str | None, id_prefix: str | None = None) -> CardDispute:
     """The first case of `family` in the seeded stream (the first case if None).
 
     `generate_cases` draws cases in sequence, so the first k cases do not depend on n.
+    `id_prefix` replaces the seed in case ids (a sealed split must not show its seed).
     """
     if family is not None and family not in FAMILIES:
         raise ValueError(f"unknown case family {family!r}; choose from {', '.join(FAMILIES)}")
     n = 16
     while True:
-        for c in generate_disputes(seed, n, DISPUTE_MIX):
+        for c in generate_disputes(seed, n, DISPUTE_MIX, id_prefix=id_prefix):
             if family is None or c.truth.family.value == family:
                 return c
         if n >= _MAX_SCAN:  # pragma: no cover - every family has weight > 0
@@ -410,10 +411,12 @@ class DisputeSession:
     same seed and the same actions give the same replies.
     """
 
-    def __init__(self, seed: int, family: str | None = None) -> None:
+    def __init__(
+        self, seed: int, family: str | None = None, *, id_prefix: str | None = None
+    ) -> None:
         self.seed = seed
         self.family = family
-        case = select_dispute(seed, family)
+        case = select_dispute(seed, family, id_prefix)
         merchants = generate_merchants(seed, DISPUTE_MIX.n_merchants)
         self.merchant = next(m for m in merchants if m.merchant_id == case.merchant_id)
         self.clock = ManualClock()

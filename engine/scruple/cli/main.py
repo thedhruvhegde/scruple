@@ -234,6 +234,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.ingest.cli import add_ingest_parser
 
     add_ingest_parser(sub)
+    from scruple.bench.cli import add_bench_parser
+
+    add_bench_parser(sub)
     return p
 
 
