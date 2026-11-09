@@ -1,0 +1,80 @@
+name: scruple gate
+description: >
+  Gate a candidate rule in a pull request. Replays it against held-out synthetic
+  cases with scruple's verifiers, writes a JSON scorecard and fails on block.
+inputs:
+  config:
+    description: Path to scruple.toml.
+    required: false
+    default: scruple.toml
+  candidate:
+    description: Candidate rule JSON. Empty means the file named in the config.
+    required: false
+    default: ""
+  scorecard:
+    description: Where to write the JSON scorecard.
+    required: false
+    default: scruple-scorecard.json
+  python-version:
+    description: Python version for scruple.
+    required: false
+    default: "3.12"
+  install:
+    description: >
+      pip requirement for scruple. Empty installs the copy of scruple this action
+      ships with (same ref as the action).
+    required: false
+    default: ""
+outputs:
+  verdict:
+    description: pass, hold or block.
+    value: ${{ steps.gate.outputs.verdict }}
+  exit-code:
+    description: Exit code of scruple ci run.
+    value: ${{ steps.gate.outputs.exit-code }}
+  scorecard:
+    description: Path to the JSON scorecard.
+    value: ${{ inputs.scorecard }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: install scruple
+      shell: bash
+      env:
+        SCRUPLE_INSTALL: ${{ inputs.install }}
+        SCRUPLE_SRC: ${{ github.action_path }}/../../..
+      run: |
+        if [ -n "$SCRUPLE_INSTALL" ]; then
+          python -m pip install "$SCRUPLE_INSTALL"
+        else
+          python -m pip install "$SCRUPLE_SRC"
+        fi
+    - name: run the gate
+      id: gate
+      shell: bash
+      env:
+        SCRUPLE_CONFIG: ${{ inputs.config }}
+        SCRUPLE_CANDIDATE: ${{ inputs.candidate }}
+        SCRUPLE_SCORECARD: ${{ inputs.scorecard }}
+      run: |
+        set +e
+        args=(ci run --config "$SCRUPLE_CONFIG" --out "$SCRUPLE_SCORECARD")
+        if [ -n "$SCRUPLE_CANDIDATE" ]; then args+=(--candidate "$SCRUPLE_CANDIDATE"); fi
+        scruple "${args[@]}"
+        code=$?
+        set -e
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        if [ -f "$SCRUPLE_SCORECARD" ]; then
+          verdict=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["verdict"])' "$SCRUPLE_SCORECARD")
+        else
+          verdict=error
+        fi
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+    - name: fail on block
+      shell: bash
+      env:
+        SCRUPLE_EXIT: ${{ steps.gate.outputs.exit-code }}
+      run: exit "$SCRUPLE_EXIT"

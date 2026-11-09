@@ -8,6 +8,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from scruple.ci.cli import add_ci_parser
 from scruple.registry import InvalidTransitionError, Provenance
 from scruple.service import AgentGate
 
@@ -149,6 +150,7 @@ def build_parser() -> argparse.ArgumentParser:
     au = add("audit", cmd_verify, "verify the audit trail (hash chain + projections)")
     au.add_argument("action", choices=["verify"])
     au.add_argument("--expected-head", default=None, help="externally anchored head hash")
+    add_ci_parser(sub)
     return p
 
 
@@ -156,7 +158,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         return int(args.fn(args))
-    except (PermissionError, ValueError, KeyError, InvalidTransitionError) as exc:
+    except (OSError, ValueError, KeyError, InvalidTransitionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
