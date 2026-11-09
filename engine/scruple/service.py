@@ -111,44 +111,63 @@ class AgentGate:
         self, rule_id: str, version: int, actor: str = SYSTEM_ACTOR
     ) -> list[DecisionRecord]:
         """Shadow replay, then (if promoted) canary. Applies every outcome via the
-        registry, so status always reflects the latest decision."""
+        registry, so status always reflects the latest decision.
+
+        The verdicts are pure, so both are computed first; every write (the status
+        changes, decisions and audit entries) then happens in one transaction, so a
+        failure part-way leaves the version a candidate with nothing recorded."""
         rv = self.registry.get(rule_id, version)
         if rv.status is not RuleStatus.CANDIDATE:
             raise InvalidTransitionError(f"{rv.ref} is {rv.status.value}, not candidate")
         active = self.registry.active_rules()  # candidate replaces its own rule_id, if any
-        self.registry.transition(
-            rule_id, version, RuleStatus.SHADOW, actor, "shadow evaluation started"
+        shadow = evaluate_shadow(rv, active, self.config)
+        canary = (
+            evaluate_canary(rv, active, self.config) if shadow.outcome is Outcome.PROMOTE else None
         )
         records = []
-        shadow = evaluate_shadow(rv, active, self.config)
-        rec = self._record(Stage.SHADOW, rv, shadow, actor)
-        records.append(rec)
-        link = {"decision_id": rec.decision.decision_id}
-        if shadow.outcome is Outcome.BLOCK:
+        with self.storage.transaction():
+            if self.registry.get(rule_id, version).status is not RuleStatus.CANDIDATE:
+                raise InvalidTransitionError(f"{rv.ref} changed while it was being evaluated")
             self.registry.transition(
-                rule_id, version, RuleStatus.REJECTED, actor, "blocked by shadow evaluation", link
+                rule_id, version, RuleStatus.SHADOW, actor, "shadow evaluation started"
             )
-            return records
-        if shadow.outcome is Outcome.HOLD:
+            rec = self._record(Stage.SHADOW, rv, shadow, actor)
+            records.append(rec)
+            link = {"decision_id": rec.decision.decision_id}
+            if shadow.outcome is Outcome.BLOCK:
+                self.registry.transition(
+                    rule_id,
+                    version,
+                    RuleStatus.REJECTED,
+                    actor,
+                    "blocked by shadow evaluation",
+                    link,
+                )
+                return records
+            if shadow.outcome is Outcome.HOLD or canary is None:
+                self.registry.transition(
+                    rule_id,
+                    version,
+                    RuleStatus.CANDIDATE,
+                    actor,
+                    "held: insufficient evidence",
+                    link,
+                )
+                return records
             self.registry.transition(
-                rule_id, version, RuleStatus.CANDIDATE, actor, "held: insufficient evidence", link
+                rule_id, version, RuleStatus.CANARY, actor, "shadow evaluation passed", link
             )
-            return records
-        self.registry.transition(
-            rule_id, version, RuleStatus.CANARY, actor, "shadow evaluation passed", link
-        )
-        canary = evaluate_canary(rv, active, self.config)
-        rec = self._record(Stage.CANARY, rv, canary, actor)
-        records.append(rec)
-        if canary.outcome is Outcome.ROLLBACK:
-            self.registry.transition(
-                rule_id,
-                version,
-                RuleStatus.REJECTED,
-                actor,
-                "automatic rollback: canary regression",
-                {"decision_id": rec.decision.decision_id, "auto_rollback": True},
-            )
+            rec = self._record(Stage.CANARY, rv, canary, actor)
+            records.append(rec)
+            if canary.outcome is Outcome.ROLLBACK:
+                self.registry.transition(
+                    rule_id,
+                    version,
+                    RuleStatus.REJECTED,
+                    actor,
+                    "automatic rollback: canary regression",
+                    {"decision_id": rec.decision.decision_id, "auto_rollback": True},
+                )
         return records
 
     def approve(self, rule_id: str, version: int, approver: str) -> DecisionRecord:
@@ -167,10 +186,11 @@ class AgentGate:
             (f"approved after canary decision {last.decision.decision_id}",),
             (),
         )
-        rec = self._record(Stage.ACTIVATION, rv, verdict, approver)
-        self.registry.activate(
-            rule_id, version, approver, f"approved; decision {rec.decision.decision_id}"
-        )
+        with self.storage.transaction():  # the decision and the activation, or neither
+            rec = self._record(Stage.ACTIVATION, rv, verdict, approver)
+            self.registry.activate(
+                rule_id, version, approver, f"approved; decision {rec.decision.decision_id}"
+            )
         return rec
 
     def rollback(self, rule_id: str, actor: str, reason: str) -> DecisionRecord:
@@ -191,8 +211,9 @@ class AgentGate:
             ),
             (),
         )
-        rec = self._record(Stage.ROLLBACK, current, verdict, actor)
-        self.registry.rollback(rule_id, actor, f"{reason}; decision {rec.decision.decision_id}")
+        with self.storage.transaction():  # the decision and the rollback, or neither
+            rec = self._record(Stage.ROLLBACK, current, verdict, actor)
+            self.registry.rollback(rule_id, actor, f"{reason}; decision {rec.decision.decision_id}")
         return rec
 
     def run_assurance(
@@ -244,23 +265,24 @@ class AgentGate:
                 ),
                 actor,
             )
-        rec = self._record(
-            Stage.ASSURANCE,
-            target,
-            Verdict(
-                Outcome.ROLLBACK,
-                "Live policy failed assurance checks.",
-                tuple(problems[:10]),
-                checks,
-            ),
-            actor,
-        )
-        if auto_rollback and latest is not None:
-            self.rollback(
-                latest.rule_id,
-                SYSTEM_ACTOR,
-                f"assurance failure, decision {rec.decision.decision_id}",
+        with self.storage.transaction():  # the failed check and its rollback, or neither
+            rec = self._record(
+                Stage.ASSURANCE,
+                target,
+                Verdict(
+                    Outcome.ROLLBACK,
+                    "Live policy failed assurance checks.",
+                    tuple(problems[:10]),
+                    checks,
+                ),
+                actor,
             )
+            if auto_rollback and latest is not None:
+                self.rollback(
+                    latest.rule_id,
+                    SYSTEM_ACTOR,
+                    f"assurance failure, decision {rec.decision.decision_id}",
+                )
         return rec
 
     # --- approval workflow (N of M named approvers) --------------------------------

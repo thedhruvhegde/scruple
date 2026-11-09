@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import pytest
 
 from scruple.clock import SteppingClock
@@ -117,3 +119,50 @@ def test_evaluate_refuses_non_candidates_and_unknown_rules() -> None:
 def test_assurance_with_empty_policy_is_noop() -> None:
     g = AgentGate(SQLiteStorage(":memory:"), SteppingClock(), CFG)
     assert g.run_assurance() is None
+
+
+@pytest.mark.parametrize(
+    ("op", "fail_on"),
+    [
+        ("evaluate", "insert_decision"),  # after the status moved to shadow
+        ("approve", "update_rule_status"),  # after the activation decision was stored
+        ("rollback", "update_rule_status"),  # after the rollback decision was stored
+    ],
+)
+def test_a_failed_promotion_step_records_nothing(
+    monkeypatch: pytest.MonkeyPatch, op: str, fail_on: str
+) -> None:
+    """Regression (found by tests/test_chaos.py): evaluate, approve and rollback each
+    wrote in several transactions, so a failure part-way left a version in shadow
+    with no decision, or an 'activated' / 'rolled back' decision whose transition
+    never happened."""
+    g = AgentGate(
+        SQLiteStorage(":memory:"),
+        SteppingClock(),
+        GateConfig(n_cases=2_000, bootstrap_resamples=300),
+    )
+    g.bootstrap_baseline()
+    g.propose(GOOD_RULE_ID, GOOD_RULE, "ops", PROV)
+    if op != "evaluate":
+        g.evaluate(GOOD_RULE_ID, 1)
+    if op == "rollback":
+        g.approve(GOOD_RULE_ID, 1, "model-risk@demo.bank")
+    head, n = g.audit.head(), g.storage.count_decisions()
+    statuses = [(r.ref, r.status) for r in g.registry.all_versions()]
+
+    def boom(*_a: object, **_k: object) -> None:
+        raise RuntimeError("disk full")
+
+    monkeypatch.setattr(g.storage, fail_on, boom)
+    steps: dict[str, Callable[[], object]] = {
+        "evaluate": lambda: g.evaluate(GOOD_RULE_ID, 1),
+        "approve": lambda: g.approve(GOOD_RULE_ID, 1, "model-risk@demo.bank"),
+        "rollback": lambda: g.rollback(GOOD_RULE_ID, "model-risk@demo.bank", "drill"),
+    }
+    with pytest.raises(RuntimeError, match="disk full"):
+        steps[op]()
+    monkeypatch.undo()
+    assert g.audit.head() == head
+    assert g.storage.count_decisions() == n
+    assert [(r.ref, r.status) for r in g.registry.all_versions()] == statuses
+    assert g.verify_integrity().ok
