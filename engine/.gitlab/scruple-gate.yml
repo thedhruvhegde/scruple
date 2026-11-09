@@ -1,0 +1,48 @@
+# scruple gate for GitLab CI. Same CLI as the GitHub action.
+#
+# Use it from a project's .gitlab-ci.yml:
+#
+#   include:
+#     - remote: "https://<host>/<path>/.gitlab/scruple-gate.yml"   # or `local:` if vendored
+#   variables:
+#     SCRUPLE_INSTALL: "git+https://<host>/<path>/scruple.git@<ref>"
+#
+# The job fails when the gate blocks (or holds, with fail_on_hold), which blocks the
+# merge request when "Pipelines must succeed" is enabled. The scorecard JSON and a
+# markdown rendering are kept as artifacts either way. Results are from synthetic
+# simulator data.
+
+variables:
+  SCRUPLE_CONFIG: "scruple.toml"
+  SCRUPLE_SCORECARD: "scruple-scorecard.json"
+  SCRUPLE_MARKDOWN: "scruple-scorecard.md"
+  SCRUPLE_INSTALL: ""
+
+.scruple-gate:
+  image: python:3.12-slim
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  before_script:
+    - |
+      if [ -z "$SCRUPLE_INSTALL" ]; then
+        echo "set SCRUPLE_INSTALL to a pip requirement for scruple"
+        exit 2
+      fi
+    - python -m pip install "$SCRUPLE_INSTALL"
+  script:
+    - set +e
+    - scruple ci run --config "$SCRUPLE_CONFIG" --out "$SCRUPLE_SCORECARD"; code=$?
+    - set -e
+    - test -f "$SCRUPLE_SCORECARD" && scruple ci render --scorecard "$SCRUPLE_SCORECARD" --out "$SCRUPLE_MARKDOWN"
+    - exit $code
+  artifacts:
+    when: always
+    paths:
+      - $SCRUPLE_SCORECARD
+      - $SCRUPLE_MARKDOWN
+    expire_in: 30 days
+
+scruple-gate:
+  extends: .scruple-gate
