@@ -110,5 +110,7 @@ def load_catalogue() -> ReasonCodeCatalogue:
     return parse_catalogue((DATA_DIR / "reason_codes.json").read_text(encoding="utf-8"))
 
 
+@cache
 def reason_code(network: Network, code: str) -> ReasonCodeSpec:
+    """Cached lookup (038): every case validates its code, several times per case."""
     return load_catalogue().get(network, code)

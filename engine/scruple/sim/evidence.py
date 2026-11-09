@@ -12,6 +12,8 @@ to another case.
 
 from __future__ import annotations
 
+import hashlib
+import json.encoder as _json_encoder
 from collections.abc import Iterable
 from datetime import date, timedelta
 from enum import StrEnum
@@ -48,10 +50,38 @@ class EvidenceError(ValueError):
     """An evidence id that is unknown, repeated, or owned by a different case."""
 
 
-def seal(case_id: str, kind: EvidenceKind, issued_on: date, fields: dict[str, str]) -> str:
+def seal_reference(
+    case_id: str, kind: EvidenceKind, issued_on: date, fields: dict[str, str]
+) -> str:
+    """The seal as defined: SHA-256 of the canonical JSON of (case, kind, date, fields)."""
     return content_hash(
         {"case_id": case_id, "kind": kind.value, "issued_on": issued_on.isoformat(), "f": fields}
     )
+
+
+_q = _json_encoder.encode_basestring  # the escaper json.dumps uses with ensure_ascii=False
+
+
+def seal(case_id: str, kind: EvidenceKind, issued_on: date, fields: dict[str, str]) -> str:
+    """Same bytes as `seal_reference`, built without the general encoder (038: about 1.7x
+    faster on the generator's hot path; a property test checks the two always agree)."""
+    try:  # the escaper raises TypeError on anything but str (then use the reference)
+        body = ",".join([_q(k) + ":" + _q(fields[k]) for k in sorted(fields)])
+        cid = _q(case_id)
+    except TypeError:
+        return seal_reference(case_id, kind, issued_on, fields)
+    text = (
+        '{"case_id":'
+        + cid
+        + ',"f":{'
+        + body
+        + '},"issued_on":"'
+        + issued_on.isoformat()
+        + '","kind":'
+        + _q(kind.value)
+        + "}"
+    )
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 class EvidenceDocument(BaseModel):

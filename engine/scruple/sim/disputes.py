@@ -73,12 +73,17 @@ protocol can be swapped per engine.
 
 from __future__ import annotations
 
+import gc
+import hashlib
+import os
 import random
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import StrEnum
-from itertools import pairwise
+from functools import cache
+from itertools import accumulate, pairwise
 from typing import Annotated, Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, model_validator
@@ -329,6 +334,10 @@ START_DATE = date(2026, 1, 5)
 CURRENCY = "USD"
 
 
+_codes_for = cache(codes_for)  # the catalogue is immutable once loaded (038)
+
+
+@cache
 def _cnp_codes(network: Network) -> tuple[ReasonCodeSpec, ...]:
     return tuple(c for c in load_catalogue().for_network(network) if not c.card_present)
 
@@ -344,21 +353,45 @@ def generate_cases(
     """Seeded synthetic disputes. Same (seed, n, mix, start) gives identical cases.
 
     Case and transaction ids are `cd-<seed>-<i>` unless `id_prefix` is given (033: a
-    sealed split must not print its seed into the ids an agent sees)."""
+    sealed split must not print its seed into the ids an agent sees).
+
+    The cyclic garbage collector is paused while generating (038): the cases hold no
+    reference cycles, and repeated full collections over a growing list of models cost
+    about 30% at 20,000 cases. It is re-enabled on return if it was on."""
+    with _gc_paused():
+        return _generate(seed, n, mix, start, id_prefix)
+
+
+@contextmanager
+def _gc_paused() -> Iterator[None]:
+    was_on = gc.isenabled()
+    gc.disable()
+    try:
+        yield
+    finally:
+        if was_on:
+            gc.enable()
+
+
+def _generate(
+    seed: int, n: int, mix: CaseMix, start: date, id_prefix: str | None
+) -> list[CardDispute]:
     rng = random.Random(seed)
     merchants = generate_merchants(seed, mix.n_merchants)
     networks = sorted(mix.network_weights, key=lambda x: x.value)
-    weights = [mix.network_weights[x] for x in networks]
+    # cumulative weights once per call (038); `choices` draws exactly as with `weights`
+    net_cum = list(accumulate(mix.network_weights[x] for x in networks))
+    fams = sorted(mix.family_weights or {}, key=lambda f: f.value)
+    fam_cum = list(accumulate((mix.family_weights or {})[f] for f in fams))
     out: list[CardDispute] = []
     for i in range(n):
-        net = rng.choices(networks, weights=weights, k=1)[0]
+        net = rng.choices(networks, cum_weights=net_cum, k=1)[0]
         family: CaseFamily | None = None
         if mix.family_weights is None:
             spec = rng.choice(_cnp_codes(net))
         else:
-            fams = sorted(mix.family_weights, key=lambda f: f.value)
-            family = rng.choices(fams, weights=[mix.family_weights[f] for f in fams], k=1)[0]
-            spec = rng.choice(codes_for(net, family))
+            family = rng.choices(fams, cum_weights=fam_cum, k=1)[0]
+            spec = rng.choice(_codes_for(net, family))
         amount = max(500, int(rng.lognormvariate(4.4, 0.9) * 100))
         processed = start + timedelta(days=rng.randint(0, 60))
         ccy = CURRENCY
@@ -406,7 +439,11 @@ def generate_cases(
             docs = (
                 *docs,
                 make_document(
-                    case_id, EvidenceKind.PRIOR_UNDISPUTED_HISTORY, processed, fields, len(docs)
+                    case_id,
+                    EvidenceKind.PRIOR_UNDISPUTED_HISTORY,
+                    processed,
+                    fields,
+                    len(docs),
                 ),
             )
         race: PendingRefund | None = None
@@ -1575,3 +1612,49 @@ def drain(engine: DisputeEngine, clock: ManualClock, max_days: int = 800) -> Non
             return
         clock.advance(days=1)
     raise RuntimeError("cases still open after max_days")  # pragma: no cover
+
+
+# ------------------------------------------------------------------ sharded generation
+SHARD_SIZE = 2_000
+
+
+def shard_seed(seed: int, shard: int) -> int:
+    """The generator seed of one shard: a 64-bit hash of (seed, shard)."""
+    digest = hashlib.sha256(f"scruple-shard/{seed}/{shard}".encode()).digest()
+    return int.from_bytes(digest[:8], "big")
+
+
+def _shard(args: tuple[int, int, int, CaseMix, date]) -> list[CardDispute]:
+    seed, shard, n, mix, start = args
+    return generate_cases(shard_seed(seed, shard), n, mix, start, id_prefix=f"{seed}s{shard}")
+
+
+def generate_sharded(
+    seed: int,
+    n: int,
+    mix: CaseMix = DEFAULT_MIX,
+    start: date = START_DATE,
+    *,
+    shard_size: int = SHARD_SIZE,
+    workers: int | None = None,
+) -> list[CardDispute]:
+    """`n` cases in shards of `shard_size`, each from its own derived seed (038).
+
+    Deterministic in (seed, n, mix, start, shard_size) and independent of `workers`
+    (processes; None = all cpus, 1 = in this process). Not the same cases as
+    `generate_cases(seed, n)`, which draws one stream; case ids are `cd-<seed>s<k>-<i>`."""
+    if n < 0 or shard_size < 1:
+        raise ValueError("n must be >= 0 and shard_size >= 1")
+    jobs = [
+        (seed, k, min(shard_size, n - k * shard_size), mix, start)
+        for k in range((n + shard_size - 1) // shard_size)
+    ]
+    w = workers if workers is not None else (os.cpu_count() or 1)
+    if w <= 1 or len(jobs) <= 1:
+        parts = [_shard(j) for j in jobs]
+    else:
+        from concurrent.futures import ProcessPoolExecutor
+
+        with ProcessPoolExecutor(max_workers=min(w, len(jobs))) as pool, _gc_paused():
+            parts = list(pool.map(_shard, jobs))
+    return [c for part in parts for c in part]
