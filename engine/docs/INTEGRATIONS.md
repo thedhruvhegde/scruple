@@ -102,3 +102,27 @@ Rules every adapter follows:
   CSV or JSONL first.
 - Currency table: `scruple.ingest.currency`, from datasets/currency-codes at `31cfa13`
   (ODC-PDDL-1.0; list published by SIX Group as ISO 4217 maintenance agency).
+
+## Ledgers (`scruple.ingest.ledger`)
+
+- `LedgerPort` protocol: `post` (idempotent by `external_id`; same id with different
+  content raises `LedgerConflictError`), `get`, `transactions`, `balance`.
+- `LedgerTransaction`: signed lines in one currency that sum to zero (negative = money
+  leaving an account), at least two non-zero lines, aware timestamp, account addresses
+  `segment(:segment)*` of letters, digits, `_` and `-`.
+- Adapters: `InMemoryLedger`; `JsonFileLedger`, an append-only JSON Lines file of the
+  generic double-entry document (`entries` with `direction` debit/credit and positive
+  amounts), fsynced per post and re-validated line by line on open.
+- Conversions: `from_movement` (Stripe balance movements), `from_journal` (the
+  simulator's `JournalEntry`), `to_json_doc`/`from_json_doc`.
+- Formance: `to_formance`/`from_formance` for the v3 `CreateTransactionRequest`
+  (`postings` of `source`, `destination`, `amount`, `asset` such as `USD/2`; `reference`,
+  `timestamp`, `metadata`), verified against formancehq/ledger `openapi.yml` at `c0fe3f5`.
+  Signed lines are decomposed greedily into source to destination postings; round trips
+  preserve each account's net position (property test). Bigint amounts as decimal strings
+  are accepted. That repository has no licence file, so nothing from it is vendored.
+- Modern Treasury: `to_modern_treasury` builds `LedgerTransactionCreateParams`
+  (`ledger_entries` with `direction`, `ledger_account_id`, `amount`), verified against
+  Modern-Treasury/modern-treasury-python at `cf80342` (MIT). ASSUMPTION: every account is
+  treated as debit-normal (positive line = debit); real use needs each account's normal
+  balance. Mapping stubs only: no Formance or Modern Treasury HTTP client.
