@@ -94,3 +94,47 @@ Cannot: dollar exposure, chargeback win rates, network deadlines, compliance wit
 Reg E 10/45-day or Reg Z 30/90-day timelines (no amounts, transaction dates or
 provisional credit dates), false-positive cost, anything about merchants, or
 whether the company's response was correct.
+
+## Tasks and label mappings (`scruple/realdata/tasks.py`, `labels.py`)
+
+The grader is always a CFPB field, never a model. Test-split instance counts:
+
+| task | input | label | test n |
+|---|---|---|---|
+| `routing-2015` | narrative | issue (47 labels) | 3,024 |
+| `routing-2025` | narrative | issue and sub-issue (allowed pairs only) | 1,598 |
+| `outcome-2015` | narrative, product, sub-product, issue, sub-issue, company | relief vs explanation | 2,975 |
+| `outcome-2025` | same | relief vs explanation | 1,591 |
+| `regime-2015` | narrative | reg_e or reg_z, plus a citation | 764 |
+
+Outcome mapping (company response to consumer): "Closed with monetary relief",
+"Closed with non-monetary relief" and "Closed with relief" are relief; "Closed with
+explanation" is no relief; every other value ("Closed", "Closed without relief",
+"Untimely response", "In progress") is dropped.
+
+Regime mapping (cfpb2015 only, from product and issue):
+
+| product | issues | label |
+|---|---|---|
+| Credit card | Billing disputes; Identity theft / Fraud / Embezzlement; Transaction issue | reg_z (12 CFR 1026.13) |
+| Bank account or service | Using a debit or ATM card; Making/receiving payments, sending money | reg_e (12 CFR 1005.11) |
+| Prepaid card | Unauthorized transactions/trans. issues; Fraud or scam | reg_e (1005.11 as modified by 1005.18(e)) |
+
+Everything else is excluded. Money transfers are excluded on purpose: remittance
+transfers have their own error procedure (12 CFR 1005.33, not in `data/real/regs`)
+and many consumer money transfers are not electronic fund transfers under subpart A.
+cfpb2025 is excluded because every row is a deposit account (always reg_e). The
+label follows the product the consumer picked, so it is not a legal finding about
+the facts; ASSUMPTION: the selected issues are mostly transaction errors or
+unauthorized transactions (not hand-checked). "Neither regime" is not offered,
+because no field grades it.
+
+Citations must be written `12 CFR <section>(<paragraph>)...`. A citation "exists"
+when its paragraph id is defined in the shipped text of 1005.6, 1005.11, 1026.12 or
+1026.13 (142 ids, `scruple/realdata/regs.py`). It is "consistent" when it also
+belongs to the predicted regime's part (1005 for reg_e, 1026 for reg_z).
+`strict_accuracy` needs the right regime and a consistent citation.
+
+Answers are strict JSON objects with exactly the asked keys. A malformed or missing
+answer counts as wrong: an invalid class for classification, and probability
+`1 - y` (the worst possible) for outcome prediction.
