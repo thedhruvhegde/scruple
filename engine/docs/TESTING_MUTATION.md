@@ -42,6 +42,7 @@ pytest_add_cli_args_test_selection =
     tests/test_verifiers_scope.py
     tests/test_verifiers_self_report.py
     tests/test_adversarial.py
+    tests/test_verifiers_mutants.py
 also_copy =
     scruple
     tests
@@ -56,7 +57,7 @@ The first run took about 50 minutes (0.73 mutants per second, 3 workers on a sha
 
 ## Result
 
-First run:
+First run (without `tests/test_verifiers_mutants.py`):
 
 ```
 2173/2173  killed 1386  no tests 25  timeout 1  suspicious 0  survived 761  skipped 0
@@ -89,14 +90,43 @@ First run:
 The 25 "no tests" mutants are in code no selected test reaches (24 in `checks.py`:
 the `at()` helper's defaults, `from_report`, parts of `Scorecard.summary`).
 
-## What the 761 survivors are
+## Killing the important survivors
 
-A heuristic split of the diff of each survivor (regular expressions over the changed
-line; approximate):
+"Important" here means the mutant changes a hard verdict (a check that passes should
+fail or the reverse) in a way an agent could exploit or a reviewer would trust
+wrongly. `tests/test_verifiers_mutants.py` adds 15 tests aimed at 21 of them; the
+targeted mutants were then re-run (`mutmut run <names>`):
+
+| mutant (mutmut id) | change | after the new tests |
+|---|---|---|
+| `ledger_invariants._floors` 3 | network or processor below zero: `or` -> `and` | killed |
+| `ledger_invariants._floors` 10, 11 | fee payee floor `< 0` -> `<= 0`, `< 1` | killed |
+| `ledger_invariants._floors` 31 | cardholder over-credit `> 0` -> `> 1` (one minor unit slips) | killed |
+| `checks._integrity` 14 | empty trace: `not trace or ...` -> `and` | killed |
+| `checks.from_report` 4 | a finding for another case fails this one (`in` -> `not in`) | killed |
+| `process._process` 2 | a refused `get_evidence` counts as reading the document | killed |
+| `evidence_check._evidence` 80 | any upload of a kind the merchant never held is "fabricated" (`and` -> `or`) | killed |
+| `scope._names` 9, 10 | names nested in argument values are not searched | killed |
+| `scope._names` 8 | `out |= ...` -> `out = ...` | **survived** |
+| `self_report.contradictions` 3, 4 | the resolution is replaced by `open` | killed |
+| `self_report.contradictions` 18, 19, 24 | "refunded" claim checked against the wrong condition | killed |
+| `self_report.contradictions` 30, 31, 36 | "escalated" claim checked against the wrong condition | killed |
+| `self_report.contradictions` 42 | every non-decided case contradicts any claim (`and` -> `or`) | killed |
+| `self_report.contradictions` 6 | default resolution label `open` -> `OPEN` (message only) | survived |
+
+Rerun result: 19 of 21 killed. Score after the new tests: (1386 + 19 + 1) / 2173 =
+**64.7%**. `scope._names` 8 survives although a one-off emulation of the same change,
+run in process, makes the new SCOPE-01 test fail; the likely cause is mutmut's
+per-function test selection, not settled. `contradictions` 6 only changes text.
+
+## What the 742 remaining survivors are
+
+A heuristic split of the diff of each remaining survivor (regular expressions over the
+changed line; approximate):
 
 | kind | survivors | matters for a verdict? |
 |---|---|---|
-| logic, thresholds or soft scores | 378 | some do: see below |
+| logic, thresholds or soft scores | 359 | some do: see below |
 | message text (explanations, problem labels) | 237 | no |
 | evidence pointers (trace seq numbers, notes on `EvidenceRef`) | 110 | no verdict, but the evidence a reviewer reads would be wrong |
 | score of a hard check (`1.0 if ok` and the like) | 36 | no: `FnCheck` forces a hard check's score to 0 or 1 |
