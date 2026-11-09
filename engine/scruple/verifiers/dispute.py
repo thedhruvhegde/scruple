@@ -19,6 +19,7 @@ from scruple.verifiers.checks import (
 )
 from scruple.verifiers.counterfactual import COUNTERFACTUAL
 from scruple.verifiers.ledger_invariants import LEDGER_INVARIANTS
+from scruple.verifiers.process import PROCESS
 from scruple.verifiers.record import EpisodeRecord
 
 DISPUTE_CHECKS: tuple[Check, ...] = (
@@ -26,6 +27,7 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     OUTCOME_CORRECT,
     LEDGER_INVARIANTS,
     COUNTERFACTUAL,
+    PROCESS,
 )
 BATCH_CHECKS: tuple[BatchCheck, ...] = ()
 

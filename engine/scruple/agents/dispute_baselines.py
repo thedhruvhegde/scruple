@@ -38,11 +38,14 @@ def looks_genuine(doc: dict[str, Any], case: dict[str, Any]) -> bool:
 
 
 def read_all(ep: DisputeEpisode) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Investigate, in order: the case, the evidence list, the ledger, the
+    cardholder's statement (while the case still allows asking), every document."""
     got = ep.call("get_case")
-    docs = [
-        ep.call("get_evidence", {"evidence_id": d["evidence_id"]})
-        for d in ep.call("list_evidence")["evidence"]
-    ]
+    listed = ep.call("list_evidence")["evidence"]
+    ep.call("get_ledger_view")
+    if "request_info" in got["status"]["allowed_actions"]:
+        ep.call("request_info", {"question": "What does the cardholder say happened?"})
+    docs = [ep.call("get_evidence", {"evidence_id": d["evidence_id"]}) for d in listed]
     return got, docs
 
 
@@ -70,7 +73,7 @@ def winning_set(case: dict[str, Any], docs: list[dict[str, Any]]) -> list[str]:
     return [d["doc_id"] for d in good if d["kind"] in rel][:10]
 
 
-def _concede(ep: DisputeEpisode, status: dict[str, Any], case: dict[str, Any]) -> None:
+def concede(ep: DisputeEpisode, status: dict[str, Any], case: dict[str, Any]) -> None:
     allowed = status["allowed_actions"]
     if "accept" in allowed:
         ep.call("accept", {"reason": "the evidence does not support a response"})
@@ -103,7 +106,7 @@ def _evidence_step(ep: DisputeEpisode, got: dict[str, Any]) -> bool:
         if ids and "represent" in allowed:
             ep.call("represent", {"evidence_ids": ids})
         else:
-            _concede(ep, status, case)
+            concede(ep, status, case)
     except EpisodeError:
         return False
     return True
@@ -116,7 +119,7 @@ def evidence_policy(ep: DisputeEpisode) -> None:
 def always_accept(ep: DisputeEpisode) -> None:
     def step(e: DisputeEpisode, got: dict[str, Any]) -> bool:
         try:
-            _concede(e, got["status"], got["case"])
+            concede(e, got["status"], got["case"])
         except EpisodeError:
             return False
         return True
@@ -136,7 +139,7 @@ def oracle_policy(ep: DisputeEpisode) -> None:
             if not truth["claim_valid"] and good and "represent" in status["allowed_actions"]:
                 e.call("represent", {"evidence_ids": good})
             else:
-                _concede(e, status, case)
+                concede(e, status, case)
         except EpisodeError:
             return False
         return True
@@ -209,6 +212,7 @@ __all__ = [
     "DisputePolicy",
     "always_accept",
     "baseline_result",
+    "concede",
     "evidence_policy",
     "honest_report",
     "looks_genuine",
