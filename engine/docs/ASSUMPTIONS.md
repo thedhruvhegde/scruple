@@ -62,7 +62,19 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   4871 to fraud; 4808 and 4812 to authorization; 4834 to processing error; 4841, 4850,
   4853 and 4855 to consumer dispute. `legacy_family` (bridge to the original
   three-family simulator) and `card_present` are also our labels.
+- **A-17** Dispute fees (scruple/sim/fees.py): $15 when a chargeback lands, $25 on
+  entering pre-arbitration, and an arbitration case fee charged only when the merchant
+  loses ($600 Visa, $575 Mastercard). Public secondary sources (S16) report figures of
+  this order, but real amounts depend on the acquirer and change over time. The
+  "loser pays, merchant always pays its own fees" model is a simplification.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own
   calendars; processors often set shorter internal deadlines (S10).
+- **A-25** Dispute engine timing and roles: the issuer answers a representment or an
+  allocation pre-arbitration 10 days after it is filed; a network arbitration ruling
+  arrives 30 days after escalation. The merchant (not the issuer) escalates a
+  pre-arbitration to arbitration, and the arbitration filing window then runs from the
+  issuer's decline. A missed merchant deadline loses the case; a missed inquiry
+  deadline becomes a chargeback. Cases are captured and, when they open as
+  chargebacks, debited when the engine is built, whatever the clock says.
