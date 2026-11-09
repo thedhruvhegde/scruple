@@ -16,6 +16,8 @@ from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
 from scruple.storage import (
     AuditRepository,
     DecisionRepository,
+    DuplicateKeyError,
+    ImmutableHistoryError,
     RuleVersionRepository,
     Storage,
     Transactional,
@@ -101,7 +103,7 @@ def test_list_rule_versions_is_ordered(store: RawStorage) -> None:
 
 def test_duplicate_rule_version_is_refused(store: RawStorage) -> None:
     store.insert_rule_version(rv("r-dup", SPEC))
-    with pytest.raises(Exception):  # noqa: B017 - backend-specific integrity error
+    with pytest.raises(DuplicateKeyError):
         store.insert_rule_version(rv("r-dup", BAD_RULE))
     assert store.get_rule_version("r-dup", 1) == rv("r-dup", SPEC)
 
@@ -156,7 +158,7 @@ def test_audit_round_trips_and_orders(store: RawStorage) -> None:
 
 def test_duplicate_audit_seq_is_refused(store: RawStorage) -> None:
     store.append_audit(_audit(1))
-    with pytest.raises(Exception):  # noqa: B017
+    with pytest.raises(DuplicateKeyError):
         store.append_audit(_audit(1, {"forged": True}))
     assert store.list_audit() == [_audit(1)]
 
@@ -184,7 +186,7 @@ def test_decisions_round_trip_filter_and_count(store: RawStorage) -> None:
 
 def test_duplicate_decision_is_refused(store: RawStorage) -> None:
     store.insert_decision("dec-00001", "r-a", 1, "{}")
-    with pytest.raises(Exception):  # noqa: B017
+    with pytest.raises(DuplicateKeyError):
         store.insert_decision("dec-00001", "r-a", 1, '{"forged": 1}')
     assert store.get_decision("dec-00001") == "{}"
 
@@ -240,7 +242,7 @@ def test_store_is_usable_after_a_failed_transaction(store: RawStorage) -> None:
 
 def test_duplicate_inside_transaction_rolls_back_cleanly(store: RawStorage) -> None:
     store.insert_decision("dec-00001", "r-a", 1, "{}")
-    with pytest.raises(Exception), store.transaction():  # noqa: B017, PT012
+    with pytest.raises(DuplicateKeyError), store.transaction():  # noqa: PT012
         store.append_audit(_audit(1))
         store.insert_decision("dec-00001", "r-a", 1, "{}")
     assert store.list_audit() == []
@@ -274,7 +276,7 @@ def test_database_refuses_to_rewrite_history(store: RawStorage, sql: str, messag
     store.insert_rule_version(rv("r-hist", SPEC))
     store.append_audit(_audit(1))
     store.insert_decision("dec-00001", "r-hist", 1, '{"n": 1}')
-    with pytest.raises(Exception, match=message):
+    with pytest.raises(ImmutableHistoryError, match=message):
         store.unsafe_execute(sql)
     assert store.list_rule_versions() == [rv("r-hist", SPEC)]
     assert store.list_audit() == [_audit(1)]

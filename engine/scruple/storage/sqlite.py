@@ -1,20 +1,18 @@
-"""SQLite implementation of the storage interfaces in `scruple.storage.base`.
+"""SQLite backend: one implementation of the storage interfaces.
 
-Append-only history is enforced by triggers, so a stray SQL statement also fails.
+Use a file path for local runs, or ":memory:" for tests. Append-only history is
+enforced by triggers, so a stray SQL statement also fails.
 """
 
 from __future__ import annotations
 
-import json
 import sqlite3
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import datetime
 
-from scruple.audit.models import AuditEntry
-from scruple.domain import RuleSpec
-from scruple.registry.models import Provenance, RuleStatus, RuleVersion
+from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
+from scruple.storage.sql import Params, Row, SQLStorage
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS rule_versions (
@@ -70,11 +68,25 @@ BEFORE DELETE ON decisions
 BEGIN SELECT RAISE(ABORT, 'decisions are append-only'); END;
 """
 
+_HISTORY_MESSAGES = ("append-only", "immutable")
 
-class SQLiteStorage:
+
+def translate(exc: sqlite3.Error) -> StorageError:
+    msg = str(exc)
+    if any(m in msg for m in _HISTORY_MESSAGES):
+        return ImmutableHistoryError(msg)
+    if isinstance(exc, sqlite3.IntegrityError) and ("UNIQUE" in msg or "PRIMARY KEY" in msg):
+        return DuplicateKeyError(msg)
+    return StorageError(msg)
+
+
+class SQLiteConnection:
+    """One sqlite3 connection shared across threads behind a re-entrant lock."""
+
     def __init__(self, path: str) -> None:
         self._conn = sqlite3.connect(path, check_same_thread=False, isolation_level=None)
         self._conn.row_factory = sqlite3.Row
+        self._conn.execute("PRAGMA busy_timeout = 5000")
         self._lock = threading.RLock()
         self._depth = 0
         self._conn.executescript(SCHEMA)
@@ -84,7 +96,11 @@ class SQLiteStorage:
 
     @contextmanager
     def transaction(self) -> Iterator[None]:
-        """Re-entrant transaction. Only the outermost level commits or rolls back."""
+        """Re-entrant transaction. Only the outermost level commits or rolls back.
+
+        BEGIN IMMEDIATE takes the write lock up front, so two processes on one file
+        serialise instead of failing when a read lock is upgraded.
+        """
         with self._lock:
             outer = self._depth == 0
             if outer:
@@ -101,147 +117,24 @@ class SQLiteStorage:
             if outer:
                 self._conn.execute("COMMIT")
 
-    def unsafe_execute(self, sql: str) -> None:
-        """Raw SQL, for tests and the tamper demo only."""
+    def execute(self, sql: str, params: Params = ()) -> None:
         with self._lock:
-            self._conn.execute(sql)
+            try:
+                self._conn.execute(sql, tuple(params))
+            except sqlite3.Error as exc:
+                raise translate(exc) from exc
 
-    # --- rule versions -------------------------------------------------------
-
-    def insert_rule_version(self, rv: RuleVersion) -> None:
-        with self.transaction():
-            self._conn.execute(
-                "INSERT INTO rule_versions VALUES (?,?,?,?,?,?,?,?,?)",
-                (
-                    rv.rule_id,
-                    rv.version,
-                    rv.content_hash,
-                    rv.spec.model_dump_json(),
-                    rv.owner,
-                    rv.provenance.model_dump_json(),
-                    rv.created_at.isoformat(),
-                    rv.status.value,
-                    rv.rollback_to,
-                ),
-            )
-
-    def update_rule_status(self, rule_id: str, version: int, status: RuleStatus) -> None:
-        with self.transaction():
-            self._conn.execute(
-                "UPDATE rule_versions SET status=? WHERE rule_id=? AND version=?",
-                (status.value, rule_id, version),
-            )
-
-    def set_rollback_to(self, rule_id: str, version: int, rollback_to: int | None) -> None:
-        with self.transaction():
-            self._conn.execute(
-                "UPDATE rule_versions SET rollback_to=? WHERE rule_id=? AND version=?",
-                (rollback_to, rule_id, version),
-            )
-
-    def get_rule_version(self, rule_id: str, version: int) -> RuleVersion | None:
+    def query(self, sql: str, params: Params = ()) -> list[Row]:
         with self._lock:
-            row = self._conn.execute(
-                "SELECT * FROM rule_versions WHERE rule_id=? AND version=?", (rule_id, version)
-            ).fetchone()
-        return None if row is None else _row_to_rule(row)
-
-    def list_rule_versions(self, rule_id: str | None = None) -> list[RuleVersion]:
-        with self._lock:
-            if rule_id is None:
-                rows = self._conn.execute(
-                    "SELECT * FROM rule_versions ORDER BY rule_id, version"
-                ).fetchall()
-            else:
-                rows = self._conn.execute(
-                    "SELECT * FROM rule_versions WHERE rule_id=? ORDER BY version", (rule_id,)
-                ).fetchall()
-        return [_row_to_rule(r) for r in rows]
-
-    # --- audit ---------------------------------------------------------------
-
-    def append_audit(self, entry: AuditEntry) -> None:
-        with self.transaction():
-            self._conn.execute(
-                "INSERT INTO audit_events VALUES (?,?,?,?,?,?,?)",
-                (
-                    entry.seq,
-                    entry.at.isoformat(),
-                    entry.event_type,
-                    entry.actor,
-                    json.dumps(entry.payload, sort_keys=True),
-                    entry.prev_hash,
-                    entry.entry_hash,
-                ),
-            )
-
-    def last_audit(self) -> AuditEntry | None:
-        with self._lock:
-            row = self._conn.execute(
-                "SELECT * FROM audit_events ORDER BY seq DESC LIMIT 1"
-            ).fetchone()
-        return None if row is None else _row_to_audit(row)
-
-    def list_audit(self) -> list[AuditEntry]:
-        with self._lock:
-            rows = self._conn.execute("SELECT * FROM audit_events ORDER BY seq").fetchall()
-        return [_row_to_audit(r) for r in rows]
-
-    # --- decisions -----------------------------------------------------------
-
-    def insert_decision(self, decision_id: str, rule_id: str, version: int, body: str) -> None:
-        with self.transaction():
-            self._conn.execute(
-                "INSERT INTO decisions VALUES (?,?,?,?)", (decision_id, rule_id, version, body)
-            )
-
-    def get_decision(self, decision_id: str) -> str | None:
-        with self._lock:
-            row = self._conn.execute(
-                "SELECT body_json FROM decisions WHERE decision_id=?", (decision_id,)
-            ).fetchone()
-        return None if row is None else str(row["body_json"])
-
-    def list_decisions(self, rule_id: str | None = None) -> list[str]:
-        with self._lock:
-            if rule_id is None:
-                rows = self._conn.execute(
-                    "SELECT body_json FROM decisions ORDER BY decision_id"
-                ).fetchall()
-            else:
-                rows = self._conn.execute(
-                    "SELECT body_json FROM decisions WHERE rule_id=? ORDER BY decision_id",
-                    (rule_id,),
-                ).fetchall()
-        return [str(r["body_json"]) for r in rows]
-
-    def count_decisions(self) -> int:
-        with self._lock:
-            row = self._conn.execute("SELECT COUNT(*) AS n FROM decisions").fetchone()
-        return int(row["n"])
+            try:
+                return [dict(r) for r in self._conn.execute(sql, tuple(params)).fetchall()]
+            except sqlite3.Error as exc:  # pragma: no cover - our queries are static
+                raise translate(exc) from exc
 
 
-def _row_to_rule(row: sqlite3.Row) -> RuleVersion:
-    return RuleVersion(
-        rule_id=row["rule_id"],
-        version=row["version"],
-        content_hash=row["content_hash"],
-        spec=RuleSpec.model_validate_json(row["spec_json"]),
-        owner=row["owner"],
-        provenance=Provenance.model_validate_json(row["provenance_json"]),
-        status=RuleStatus(row["status"]),
-        created_at=datetime.fromisoformat(row["created_at"]),
-        rollback_to=row["rollback_to"],
-    )
+class SQLiteStorage(SQLStorage):
+    """`Storage` on SQLite. `path` is a file path or ":memory:"."""
 
-
-def _row_to_audit(row: sqlite3.Row) -> AuditEntry:
-    return AuditEntry(
-        seq=row["seq"],
-        at=datetime.fromisoformat(row["at"]),
-        event_type=row["event_type"],
-        actor=row["actor"],
-        payload=json.loads(row["payload_json"]),
-        prev_hash=row["prev_hash"],
-        entry_hash=row["entry_hash"],
-    )
+    def __init__(self, path: str) -> None:
+        self.path = path
+        super().__init__(SQLiteConnection(path))

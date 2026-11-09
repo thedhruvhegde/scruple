@@ -20,11 +20,13 @@ hash chain in `scruple.audit` and `AgentGate.verify_integrity` detect that case.
 
 from __future__ import annotations
 
-from contextlib import AbstractContextManager
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from scruple.audit.models import AuditEntry
-from scruple.registry.models import RuleStatus, RuleVersion
+if TYPE_CHECKING:  # runtime imports would cycle: registry -> storage -> registry
+    from contextlib import AbstractContextManager
+
+    from scruple.audit.models import AuditEntry
+    from scruple.registry.models import RuleStatus, RuleVersion
 
 
 @runtime_checkable
@@ -70,3 +72,15 @@ class Storage(Transactional, RuleVersionRepository, AuditRepository, DecisionRep
     """Everything the service needs from a backend, in one transactional object."""
 
     def close(self) -> None: ...
+
+
+class StorageError(Exception):
+    """A backend failure, translated from the driver's own exception type."""
+
+
+class DuplicateKeyError(StorageError):
+    """A record with this key already exists (rule version, audit seq, decision id)."""
+
+
+class ImmutableHistoryError(StorageError):
+    """The database refused to change or delete history (append-only trigger fired)."""
