@@ -3,6 +3,7 @@
 
 # Local postgres from docker-compose.yml (needs POSTGRES_PASSWORD in env or .env).
 DB_URL ?= postgresql://scruple@127.0.0.1:$${POSTGRES_PORT:-5432}/scruple
+.PHONY: install test test-slow lint format typecheck demo serve check cov
 
 install:
 	uv sync --python 3.12
@@ -18,6 +19,8 @@ test-slow:
 # SCRUPLE_TEST_POSTGRES_URL).
 test-postgres:
 	uv run pytest -m postgres
+test-slow:
+	uv run pytest -m slow
 
 cov:
 	uv run pytest --cov --cov-report=term-missing

@@ -79,6 +79,9 @@ warn_required_dynamic_aliases = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q -m 'not slow'"
+markers = [
+    "slow: long Monte Carlo or large suites; run with make test-slow",
+]
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
 markers = [
     "postgres: needs a PostgreSQL server (throwaway local cluster or SCRUPLE_TEST_POSTGRES_URL)",
