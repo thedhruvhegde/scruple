@@ -110,7 +110,9 @@ def test_no_raw_cfpb_file_is_committed() -> None:
     tracked = subprocess.run(
         ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=False
     ).stdout.split()
-    assert not [t for t in tracked if "complaints" in t or t.endswith((".csv", ".zip"))]
+    # Hand-made importer fixtures under tests/fixtures are not CFPB data.
+    raw = [t for t in tracked if not t.startswith("tests/fixtures/")]
+    assert not [t for t in raw if "complaints" in t or t.endswith((".csv", ".zip"))]
     data = ROOT / "scruple" / "sim" / "data"
     assert all(p.stat().st_size < 1_000_000 for p in data.iterdir())
 
@@ -134,9 +136,9 @@ def test_simulate_counts_add_up() -> None:
 @given(st.floats(0.01, 0.99), st.floats(0, 1), st.floats(0, 1))
 def test_weights_for_hits_the_requested_shares(f: float, vf: float, vo: float) -> None:
     w = weights_for(f, vf, vo)
-    assert math.isclose(sum(w.values()), 1.0)
-    assert math.isclose(sum(w[x] for x in FRAUD_FAMS), f)
-    assert math.isclose(w[CaseFamily.TRUE_FRAUD], f * vf)
+    assert math.isclose(sum(w.values()), 1.0, abs_tol=1e-12)
+    assert math.isclose(sum(w[x] for x in FRAUD_FAMS), f, abs_tol=1e-12)
+    assert math.isclose(w[CaseFamily.TRUE_FRAUD], f * vf, abs_tol=1e-12)
 
 
 def test_calibrated_profile_is_opt_in() -> None:

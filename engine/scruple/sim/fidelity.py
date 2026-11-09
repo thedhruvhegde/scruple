@@ -267,7 +267,8 @@ def jensen_shannon(p: Sequence[float], q: Sequence[float]) -> float:
     m = [(a + b) / 2 for a, b in zip(p, q, strict=True)]
 
     def kl(x: Sequence[float]) -> float:
-        return sum(a * math.log2(a / b) for a, b in zip(x, m, strict=True) if a > 0)
+        # b == 0 with a > 0 only happens when a is subnormal; its term is 0 in the limit.
+        return sum(a * math.log2(a / b) for a, b in zip(x, m, strict=True) if a > 0 and b > 0)
 
     return 0.5 * kl(p) + 0.5 * kl(q)
 
