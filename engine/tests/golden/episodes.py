@@ -33,7 +33,7 @@ from scruple.sim.generator import generate_cases as generate_batch
 from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID, baseline_policy
 from scruple.sim.merchants import generate_merchants
 from scruple.sim.networks import Workflow
-from scruple.storage import SQLiteStorage
+from scruple.storage import SQLiteStorage, Storage
 
 Trace = dict[str, Any]
 SEEDS = (1, 7, 2026)
@@ -106,8 +106,9 @@ def dispute_episode(seed: int, workflow: Workflow) -> Trace:
 
 
 # ----------------------------------------------------------------- the gate
-def _gate() -> AgentGate:
-    g = AgentGate(SQLiteStorage(":memory:"), SteppingClock(), CFG)
+def _gate(storage: Storage | None = None) -> AgentGate:
+    s = storage if storage is not None else SQLiteStorage(":memory:")
+    g = AgentGate(s, SteppingClock(), CFG)
     g.bootstrap_baseline()
     return g
 
@@ -116,9 +117,10 @@ def _audit(g: AgentGate) -> list[dict[str, Any]]:
     return [e.model_dump(mode="json") for e in g.audit.entries()]
 
 
-def promotion(seed: int) -> Trace:
-    """Good rule: shadow, canary, staged ramp, approval, rollback. Bad rule: blocked."""
-    g = _gate()
+def promotion(seed: int, storage: Storage | None = None) -> Trace:
+    """Good rule: shadow, canary, staged ramp, approval, rollback. Bad rule: blocked.
+    `storage` defaults to in-memory SQLite; tests/test_determinism.py passes others."""
+    g = _gate(storage)
     g.propose(GOOD_RULE_ID, GOOD_RULE, "ops-team", PROV)
     g.propose(BAD_RULE_ID, BAD_RULE, "ops-team", PROV)
     g.evaluate(GOOD_RULE_ID, 1)
@@ -142,9 +144,9 @@ def promotion(seed: int) -> Trace:
     }
 
 
-def approvals() -> Trace:
+def approvals(storage: Storage | None = None) -> Trace:
     """N-of-M approval: policy, request, a refused self-approval, quorum, activation."""
-    g = _gate()
+    g = _gate(storage)
     g.propose(GOOD_RULE_ID, GOOD_RULE, "ops-team", PROV)
     g.evaluate(GOOD_RULE_ID, 1)
     policy = ApprovalPolicy(
