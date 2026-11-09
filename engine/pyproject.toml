@@ -5,10 +5,12 @@ description = "Simulation and hack-resistant verifiers for agents that move mone
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "alembic>=1.13",
     "fastapi>=0.115",
     "fpdf2>=2.9.0",
     "psycopg[binary]>=3.2",
     "pydantic>=2.9",
+    "sqlalchemy>=2.0",
     "uvicorn>=0.30",
 ]
 
