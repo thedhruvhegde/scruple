@@ -25,6 +25,14 @@ inputs:
       ships with (same ref as the action).
     required: false
     default: ""
+  comment:
+    description: Post or update a scorecard comment on the pull request ("true" or "false").
+    required: false
+    default: "true"
+  github-token:
+    description: Token used to comment. Needs pull-requests write.
+    required: false
+    default: ${{ github.token }}
 outputs:
   verdict:
     description: pass, hold or block.
@@ -73,6 +81,26 @@ runs:
           verdict=error
         fi
         echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+    - name: job summary
+      if: always() && steps.gate.outputs.verdict != 'error'
+      shell: bash
+      env:
+        SCRUPLE_SCORECARD: ${{ inputs.scorecard }}
+      run: scruple ci render --scorecard "$SCRUPLE_SCORECARD" >> "$GITHUB_STEP_SUMMARY"
+    - name: comment on the pull request
+      if: >-
+        inputs.comment == 'true' && github.event_name == 'pull_request'
+        && steps.gate.outputs.verdict != 'error'
+      continue-on-error: true
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SCRUPLE_SCORECARD: ${{ inputs.scorecard }}
+        SCRUPLE_REPO: ${{ github.repository }}
+        SCRUPLE_PR: ${{ github.event.pull_request.number }}
+      run: >-
+        scruple ci comment --scorecard "$SCRUPLE_SCORECARD"
+        --repo "$SCRUPLE_REPO" --pr "$SCRUPLE_PR"
     - name: fail on block
       shell: bash
       env:

@@ -13,6 +13,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict
 
+from scruple.audit.report import usd
 from scruple.gate.config import GateConfig
 from scruple.gate.models import CheckResult, DecisionRecord, Outcome, Stage
 from scruple.hashing import content_hash
@@ -161,7 +162,7 @@ def build_scorecard(
                     Regression(
                         kind="slice",
                         name=s.scenario,
-                        detail=f"mean regret +{s.delta:.1f} minor units per case over {s.n}",
+                        detail=f"mean regret worse by {usd(s.delta)} per case over {s.n} cases",
                     )
                 )
         regressions += [
