@@ -94,7 +94,8 @@ def render_pdf(pack: EvidencePack) -> bytes:
             )
         else:
             line(
-                f"{ev.at.isoformat()}  {ev.event}  {ev.from_status} -> {ev.to_status}  "
+                f"{ev.at.isoformat()}  {ev.event}  {ev.from_status or '-'} -> "
+                f"{ev.to_status or '-'}  "
                 f"by {ev.actor}: {ev.detail}"
             )
 

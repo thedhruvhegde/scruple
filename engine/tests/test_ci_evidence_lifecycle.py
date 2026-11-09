@@ -83,6 +83,7 @@ def test_pdf_after_rollback_states_the_history(rolled_back: AgentGate) -> None:
     assert "Current status: retired" in text
     assert "Rolled back: by model-risk@demo.bank" in text and "pilot rollback drill" in text
     assert "Verdict: BLOCK" not in text and "BLOCK" not in text.split("History")[0]
+    assert "None ->" not in text and "-> candidate" in text
 
 
 def test_pack_before_and_after_rollback(tmp_path: Path) -> None:
