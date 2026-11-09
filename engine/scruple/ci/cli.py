@@ -4,6 +4,7 @@ failed (block, or hold with fail_on_hold), 2 usage or input error."""
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,7 @@ from scruple.ci.config import load_candidate, load_config
 from scruple.ci.github import DEFAULT_API, GitHubClient, Transport, UrllibTransport, token_from_env
 from scruple.ci.runner import run_candidate
 from scruple.ci.scorecard import Scorecard, load_scorecard
+from scruple.ci.status import payload_for
 
 
 def make_transport() -> Transport:
@@ -64,6 +66,24 @@ def cmd_ci_comment(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_ci_status(args: argparse.Namespace) -> int:
+    """Print the status/check-run payload; with --post, send it to GitHub too.
+    Exit code mirrors the gate, so the step can itself be the required check."""
+    card = _card(args.scorecard)
+    payload = payload_for(args.kind, card, args.sha, args.context, args.target_url)
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    if args.post:
+        if not args.repo:
+            raise ValueError("--post needs --repo owner/name")
+        gh = _client(args)
+        if args.kind == "status":
+            gh.create_status(args.sha, payload)
+        else:
+            gh.create_check_run(payload)
+        print(f"posted {args.kind} {payload.get('state', payload.get('conclusion'))}")
+    return card.exit_code if args.mirror_exit else 0
+
+
 def add_ci_parser(sub: Any) -> None:
     """Attach `ci` and its subcommands to the top-level subparsers (additive)."""
     ci = sub.add_parser("ci", help="gate a candidate in CI and report the result")
@@ -87,3 +107,15 @@ def add_ci_parser(sub: Any) -> None:
     c.add_argument("--repo", required=True, help="owner/name")
     c.add_argument("--pr", type=int, required=True)
     c.add_argument("--api-url", default=None, help="GitHub API base (default: env or public)")
+
+    st = ci_sub.add_parser("status", help="emit a commit status or check-run payload")
+    st.set_defaults(fn=cmd_ci_status)
+    st.add_argument("--scorecard", required=True)
+    st.add_argument("--sha", required=True, help="full commit sha being gated")
+    st.add_argument("--kind", choices=["status", "check-run"], default="status")
+    st.add_argument("--context", default="scruple/gate", help="status context / check name")
+    st.add_argument("--target-url", default=None, help="link shown next to the check")
+    st.add_argument("--post", action="store_true", help="send it to GitHub")
+    st.add_argument("--repo", default=None, help="owner/name (needed with --post)")
+    st.add_argument("--api-url", default=None)
+    st.add_argument("--mirror-exit", action="store_true", help="exit 1 when the gate failed")

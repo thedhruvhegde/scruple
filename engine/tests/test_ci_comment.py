@@ -101,6 +101,8 @@ class FakeTransport:
                     assert isinstance(payload, dict)
                     c["body"] = payload["body"]
             return Response(200, "{}")
+        if method == "POST":
+            return Response(201, json.dumps({"id": 1}))
         return Response(404, "")
 
 

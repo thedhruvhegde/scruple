@@ -30,9 +30,17 @@ inputs:
     required: false
     default: "true"
   github-token:
-    description: Token used to comment. Needs pull-requests write.
+    description: Token used to comment and post status. Needs pull-requests and statuses write.
     required: false
     default: ${{ github.token }}
+  status:
+    description: Post a commit status named by status-context ("true" or "false").
+    required: false
+    default: "true"
+  status-context:
+    description: Context of the commit status; require this name in branch protection.
+    required: false
+    default: scruple/gate
 outputs:
   verdict:
     description: pass, hold or block.
@@ -101,6 +109,21 @@ runs:
       run: >-
         scruple ci comment --scorecard "$SCRUPLE_SCORECARD"
         --repo "$SCRUPLE_REPO" --pr "$SCRUPLE_PR"
+    - name: commit status
+      if: inputs.status == 'true' && steps.gate.outputs.verdict != 'error'
+      continue-on-error: true
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SCRUPLE_SCORECARD: ${{ inputs.scorecard }}
+        SCRUPLE_REPO: ${{ github.repository }}
+        SCRUPLE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        SCRUPLE_CONTEXT: ${{ inputs.status-context }}
+        SCRUPLE_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: >-
+        scruple ci status --scorecard "$SCRUPLE_SCORECARD" --sha "$SCRUPLE_SHA"
+        --context "$SCRUPLE_CONTEXT" --target-url "$SCRUPLE_RUN_URL"
+        --repo "$SCRUPLE_REPO" --post
     - name: fail on block
       shell: bash
       env:

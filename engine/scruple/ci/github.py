@@ -4,6 +4,10 @@ Endpoints used (public GitHub REST API documentation, API version 2022-11-28):
 - issue comments: https://docs.github.com/en/rest/issues/comments
   GET/POST /repos/{owner}/{repo}/issues/{number}/comments,
   PATCH /repos/{owner}/{repo}/issues/comments/{comment_id}
+- commit statuses: https://docs.github.com/en/rest/commits/statuses
+  POST /repos/{owner}/{repo}/statuses/{sha}
+- check runs: https://docs.github.com/en/rest/checks/runs
+  POST /repos/{owner}/{repo}/check-runs
 
 HTTP goes through an injectable `Transport`, so tests never touch the network.
 The token is read from the environment by the caller and is never logged.
@@ -123,3 +127,9 @@ class GitHubClient:
             page += 1
         made = self._call("POST", f"/repos/{self.repo}/issues/{pr}/comments", {"body": body})
         return "created", int(made["id"])
+
+    def create_status(self, sha: str, payload: dict[str, Any]) -> Any:
+        return self._call("POST", f"/repos/{self.repo}/statuses/{sha}", payload)
+
+    def create_check_run(self, payload: dict[str, Any]) -> Any:
+        return self._call("POST", f"/repos/{self.repo}/check-runs", payload)
