@@ -27,22 +27,23 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 from scruple.ingest.errors import InputTooLargeError
-from scruple.security.pan import looks_like_pan
+from scruple.security.pan import DIGIT_RUN, FORMAT_CHARS, looks_like_pan
 
 MAX_TEXT_CHARS = 200_000
 MAX_DEPTH = 32
 
-_SEP = r"[ \t\-./\n]"
 _AT = r"(?:@|\s{0,3}[\[(]\s{0,3}at\s{0,3}[\])]\s{0,3}|\s{1,3}at\s{1,3})"
 _DOT = r"(?:\.|\s{0,3}[\[(]\s{0,3}dot\s{0,3}[\])]\s{0,3}|\s{1,3}dot\s{1,3})"
 # Every quantifier is bounded so no pattern can backtrack quadratically (ReDoS tests).
 _LOCAL = r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]{1,64}(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]{1,64}){0,8}"
 _LABEL = r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
 EMAIL = re.compile(
-    rf"{_LOCAL}{_AT}{_LABEL}(?:{_DOT}{_LABEL}){{0,8}}{_DOT}[A-Za-z]{{2,24}}\b", re.IGNORECASE
+    rf"{_LOCAL}{_AT}{_LABEL}(?:{_DOT}{_LABEL}){{0,126}}{_DOT}[A-Za-z]{{2,24}}\b", re.IGNORECASE
 )
+# Anything with an "@" between non-space characters: catches what the strict pattern's
+# bounds miss (over-redaction is preferred to a leak).
+EMAIL_LOOSE = re.compile(r"[^\s@\[\]()]{1,64}@[^\s@\[\]()]{1,255}")
 IBAN = re.compile(r"\b[A-Z]{2}[0-9]{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,4})?\b")
-DIGIT_RUN = re.compile(rf"(?<![0-9])[0-9](?:{_SEP}?[0-9]){{11,22}}(?![0-9])")
 PHONE = re.compile(
     r"(?<![\w+])(?:\+[0-9][0-9 ().\-]{6,20}[0-9]"
     r"|\(?[0-9]{3}\)?[ .\-]?[0-9]{3}[ .\-][0-9]{4}"
@@ -69,10 +70,6 @@ NAME_CUE = re.compile(
     r"|attn\s{0,3}:?\s{0,3}|signed by\s{1,3}"
     r"|(?:mr|mrs|ms|miss|mx|dr|prof|sir)\.?\s{1,3}|cardholder\s{1,3}|customer\s{1,3}))"
     rf"({_CAP}(?:\s{{1,3}}{_CAP}){{0,3}})"
-)
-FORMAT_CHARS = re.compile(
-    "[\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180e\u200b-\u200f"
-    "\u202a-\u202e\u2060-\u2064\u206a-\u206f\ufeff]"
 )
 
 # Known PII field names (normalised: lower case, separators removed).
@@ -187,8 +184,9 @@ def _ip_ok(raw: str) -> bool:
 
 def _spans(text: str, known_names: Sequence[str]) -> list[tuple[int, int, str]]:
     found: list[tuple[int, int, str]] = []
-    for m in EMAIL.finditer(text):
-        found.append((m.start(), m.end(), "EMAIL"))
+    for rx in (EMAIL, EMAIL_LOOSE):
+        for m in rx.finditer(text):
+            found.append((m.start(), m.end(), "EMAIL"))
     for m in IBAN.finditer(text):
         if _iban_ok(m.group()):
             found.append((m.start(), m.end(), "IBAN"))
@@ -233,8 +231,10 @@ def redact_text(text: str, *, known_names: Iterable[str] = ()) -> Redaction:
     order = {k: i for i, k in enumerate(kinds)}
     spans.sort(key=lambda s: (-(s[1] - s[0]), s[0], order[s[2]]))
     taken: list[tuple[int, int, str]] = []
+    covered = bytearray(len(norm))  # linear overlap check (no pairwise comparison)
     for s in spans:
-        if all(s[1] <= t[0] or s[0] >= t[1] for t in taken):
+        if not any(covered[s[0] : s[1]]):
+            covered[s[0] : s[1]] = b"\x01" * (s[1] - s[0])
             taken.append(s)
     taken.sort()
     out: list[str] = []

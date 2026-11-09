@@ -6,8 +6,19 @@ range ISO/IEC 7812 allows for an issuer identification number plus account numbe
 
 from __future__ import annotations
 
+import re
+
 PAN_MIN_LEN = 13
 PAN_MAX_LEN = 19
+
+# Invisible format characters (zero-width, bidi controls, soft hyphen) that attackers
+# insert to split a number; removed before matching.
+FORMAT_CHARS = re.compile(
+    "[\u00ad\u034f\u061c\u115f\u1160\u17b4\u17b5\u180e\u200b-\u200f"
+    "\u202a-\u202e\u2060-\u2064\u206a-\u206f\ufeff]"
+)
+_SEP = r"[ \t\-./\n]"
+DIGIT_RUN = re.compile(rf"(?<![0-9])[0-9](?:{_SEP}?[0-9]){{11,22}}(?![0-9])")
 
 
 def luhn_valid(digits: str) -> bool:
