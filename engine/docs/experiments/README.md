@@ -100,3 +100,7 @@ are added below it in a separate commit, with the raw JSON in `results/experimen
 
 - [E1 planted regressions](E1_planted_regressions.md): PASS, narrowly (7 of 7 flagged on
   the full benchmark; 0.84 of exercised folds; 3 of 60 control folds flagged).
+- [E2 reward-hacked vs honest policy](E2_reward_hacking.md): FAIL on H2 (the
+  proxy-optimised policy fabricates and overclaims, and is $33.87 per case *cheaper*
+  on the simulated ledger; the scorecard catches it, the cost gate would promote it);
+  the hacking-gap bounds hold and are tight.
