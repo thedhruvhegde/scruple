@@ -81,6 +81,13 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   only a merchant in the right loses documents. Forgeries come in three synthetic
   styles (edited after sealing, a resealed copy of another order, backdated), each
   detectable by `document_problems`. Real forgeries can be subtler.
+- **A-21** Issuer behaviour (scruple/sim/issuer.py): the chance the merchant prevails
+  is a base rate per stage (inquiry 0.30, representment 0.15, pre-arbitration 0.10,
+  arbitration 0.05) raised by the share of required evidence submitted (weights 0.5,
+  0.7, 0.75, 0.9), plus 0.03 per supporting kind (at most two), capped at 0.97. A
+  flawed document is caught with probability 0.3, 0.5, 0.7, 0.95 by stage, and a
+  caught forgery loses the stage. The issuer never sees ground truth. All numbers are
+  invented to give evidence a clear but noisy effect; none comes from network data.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own

@@ -13,6 +13,7 @@ from scruple.sim.disputes import (
     Escalate,
     Represent,
     Truth,
+    TruthIssuer,
     drain,
 )
 from scruple.sim.fees import DEFAULT_FEES, NO_FEES, FeeSchedule
@@ -49,7 +50,7 @@ def engine(
 ) -> tuple[DisputeEngine, ManualClock]:
     clock = ManualClock()
     clock.set_date(c.opened_on)
-    return DisputeEngine([c], clock, fees=fees), clock
+    return DisputeEngine([c], clock, fees=fees, issuer=TruthIssuer()), clock
 
 
 def fee_kinds(e: DisputeEngine) -> list[str]:

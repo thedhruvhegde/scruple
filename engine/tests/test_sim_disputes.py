@@ -19,6 +19,7 @@ from scruple.sim.disputes import (
     Escalate,
     Represent,
     Truth,
+    TruthIssuer,
     drain,
     generate_cases,
 )
@@ -145,7 +146,10 @@ def test_deadline_miss_happens_the_day_after_the_due_date() -> None:
 
 
 def test_truth_issuer_makes_representing_invalid_claims_correct() -> None:
-    e, clock, cases = start_engine(8, 120)
+    cases = sorted(generate_cases(8, 120), key=lambda c: c.opened_on)
+    clock = ManualClock()
+    clock.set_date(cases[0].opened_on)
+    e = DisputeEngine(cases, clock, issuer=TruthIssuer())
     for c in cases:
         clock.set_date(c.opened_on)
         e.act(c.case_id, Represent() if not c.truth.claim_valid else Accept())

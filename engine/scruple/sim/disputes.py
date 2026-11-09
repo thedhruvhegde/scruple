@@ -67,6 +67,7 @@ from scruple.sim.evidence import (
     make_document,
 )
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
+from scruple.sim.issuer import SeededIssuer
 from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
 from scruple.sim.merchants import MerchantProfile, generate_merchants
 from scruple.sim.models import Resolution, Stage
@@ -404,7 +405,9 @@ class Issuer(Protocol):
 
 
 class TruthIssuer:
-    """Placeholder issuer: the merchant prevails exactly when the claim is invalid."""
+    """Oracle issuer for tests: the merchant prevails exactly when the claim is invalid.
+
+    The default is `scruple.sim.issuer.SeededIssuer`, which judges evidence only."""
 
     def merchant_prevails(
         self, case: CardDispute, stage: Stage, evidence: tuple[EvidenceDocument, ...]
@@ -447,7 +450,7 @@ class DisputeEngine:
     ) -> None:
         self.clock = clock
         self.fees = fees if fees is not None else DEFAULT_FEES
-        self.issuer: Issuer = issuer if issuer is not None else TruthIssuer()
+        self.issuer: Issuer = issuer if issuer is not None else SeededIssuer()
         self.params = params or EngineParams()
         self.calendar = calendar
         self.merchants = {m.merchant_id: m for m in merchants}
