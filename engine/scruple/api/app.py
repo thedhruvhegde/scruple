@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
+from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
@@ -146,6 +147,30 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         if md is None:
             raise HTTPException(404, "unknown decision")
         return PlainTextResponse(md, media_type="text/markdown")
+
+    # Shadow mode: live decisions are scored, never acted on and never stored.
+    shadow: dict[tuple[str, int], ShadowRecorder] = {}
+
+    def _recorder(rule_id: str, version: int) -> ShadowRecorder:
+        key = (rule_id, version)
+        if key not in shadow:
+            shadow[key] = g.shadow_recorder(rule_id, version)
+        return shadow[key]
+
+    @app.post("/shadow/rules/{rule_id}/versions/{version}/decisions")
+    def shadow_record(
+        rule_id: str, version: int, body: LiveDecisionBatch, actor: Actor
+    ) -> BatchResult:
+        if any(d.agent_id != actor for d in body.decisions):
+            raise HTTPException(403, "X-Actor must match every decision's agent_id")
+        try:
+            return _recorder(rule_id, version).record(body.decisions)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+    @app.get("/shadow/rules/{rule_id}/versions/{version}")
+    def shadow_summary(rule_id: str, version: int) -> ShadowSummary:
+        return _recorder(rule_id, version).summary()
 
     @app.get("/audit/verify")
     def verify(expected_head: str | None = None) -> IntegrityReport:

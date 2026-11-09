@@ -17,7 +17,9 @@ from scruple.domain import RuleSpec
 from scruple.gate.config import GateConfig
 from scruple.gate.engine import Verdict, evaluate_canary, evaluate_shadow, policy_from
 from scruple.gate.models import CheckResult, Decision, DecisionRecord, Outcome, Stage
+from scruple.gate.provider import StatsProvider
 from scruple.gate.regression import golden_cases
+from scruple.gate.shadow import ShadowRecorder
 from scruple.hashing import content_hash
 from scruple.registry import Provenance, Registry, RuleStatus, RuleVersion
 from scruple.registry.state import InvalidTransitionError
@@ -231,6 +233,17 @@ class AgentGate:
                 f"assurance failure, decision {rec.decision.decision_id}",
             )
         return rec
+
+    # --- shadow mode (read-only) -------------------------------------------------
+
+    def shadow_recorder(
+        self, rule_id: str, version: int, provider: StatsProvider | None = None
+    ) -> ShadowRecorder:
+        """A recorder that scores live decisions for this candidate without acting.
+        Reads the registry once; the recorder holds no handle to storage."""
+        rv = self.registry.get(rule_id, version)
+        active = [r for r in self.registry.active_rules() if r.rule_id != rule_id]
+        return ShadowRecorder(rv, active, provider, self.config.confidence)
 
     # --- reads -----------------------------------------------------------------
 
