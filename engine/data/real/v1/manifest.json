@@ -1,0 +1,87 @@
+{
+  "datasets": {
+    "cfpb2015": {
+      "fractions": {
+        "dev": 0.1,
+        "test": 0.2,
+        "train": 0.45
+      },
+      "near_duplicates_dropped": 56,
+      "pool_not_committed": 3774,
+      "rows_with_narrative": 15167,
+      "source": {
+        "path": "cfpb_2012_2015/payments_subset.csv",
+        "sha256": "0ae2fefa23550ef941f9fcbf198d2e1e82ef51dd7bedca4478d4d4c7f40c3393"
+      },
+      "splits": {
+        "dev": {
+          "n": 1511,
+          "path": "cfpb2015/dev.jsonl.gz",
+          "sealed": false,
+          "sha256_gz": "01afc4146cdf4ede345b245484a51c70e1eb5347a0f88d4509e1d8bbba1a3571",
+          "sha256_jsonl": "8601a43f2161aa33a32966f88bbe88eff513bca16b5e6894ba260e65542f65e1"
+        },
+        "test": {
+          "n": 3024,
+          "path": "cfpb2015/test.jsonl.gz",
+          "sealed": true,
+          "sha256_gz": "629db154a3c6470da2327ac5784692da47945d204e891cebf8a24bba3a40a378",
+          "sha256_jsonl": "39f3df84449421209d187460df683d49588830ceb8e18d714d320464105cb98e"
+        },
+        "train": {
+          "n": 6802,
+          "path": "cfpb2015/train.jsonl.gz",
+          "sealed": false,
+          "sha256_gz": "57ef08a0024f7d163f71c2def79fc23320428b0868809e07d7366885713c3917",
+          "sha256_jsonl": "aa0c21f9c305a3033541355433e831a4d0411c5ee0381d9a7138a66aa42fd24b"
+        }
+      }
+    },
+    "cfpb2025": {
+      "fractions": {
+        "dev": 0.1,
+        "test": 0.2,
+        "train": 0.4
+      },
+      "near_duplicates_dropped": 11,
+      "pool_not_committed": 2395,
+      "rows_with_narrative": 8000,
+      "source": {
+        "path": "cfpb_checking_2025_2026/checking_complaints_sample.csv",
+        "sha256": "483854821b404dc6ef9454c06b8aab1be464a1b0cdb0c941c2610f942a81c318"
+      },
+      "splits": {
+        "dev": {
+          "n": 798,
+          "path": "cfpb2025/dev.jsonl.gz",
+          "sealed": false,
+          "sha256_gz": "91d26a006f34cbdb4591ccc7a64b4532e46bb69aaed75878a2a1685a9a355feb",
+          "sha256_jsonl": "4bd1f7d725520a603ae4580bac0c56c9d0e31f47bb51ec4b318da218a9ecac0b"
+        },
+        "test": {
+          "n": 1598,
+          "path": "cfpb2025/test.jsonl.gz",
+          "sealed": true,
+          "sha256_gz": "5018560e7adcf305151de986a91a6958b9b5c47e47ebf1050194ee5eadbba530",
+          "sha256_jsonl": "a10e286dc33fa3fe66229c9250fdfc5f49589a1b64c08271d1719499604d0498"
+        },
+        "train": {
+          "n": 3198,
+          "path": "cfpb2025/train.jsonl.gz",
+          "sealed": false,
+          "sha256_gz": "5c2136ffbf5b5d4e1e481d547bbb328838b84471f187237029b1749b29321768",
+          "sha256_jsonl": "91b0998c30a454beed1fcfae9db08852555020f760af43568388149f53ee9d19"
+        }
+      }
+    }
+  },
+  "procedure": "scruple.realdata.splits (see module docstring)",
+  "regs": {
+    "regs/sec-1005.11.txt": "c15391f755d0b79b30548798db305563b07e8a8b8a361ea2d4b9460c30935752",
+    "regs/sec-1005.6.txt": "498413014e3bebf7ffb3b4ca03d01865e0e0c2761048abc3be1a02f683d59c68",
+    "regs/sec-1026.12.txt": "19274b9eaae7826f439c41029f1f45127f4df2e2cf8ddb77048f973434808152",
+    "regs/sec-1026.13.txt": "93b01d12266e36048f105a2a297bc1c63130da157f9575b5e46a5f048875bed8"
+  },
+  "seed": 2026,
+  "version": "v1"
+}
