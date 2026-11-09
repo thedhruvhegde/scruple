@@ -112,10 +112,38 @@ def cmd_assurance(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_redteam(_args: argparse.Namespace) -> int:
+def cmd_redteam(args: argparse.Namespace) -> int:
+    if getattr(args, "suite", "rules") == "exploits":
+        return cmd_redteam_exploits(args)
     from scruple.cli.demo import print_redteam
 
     return 0 if print_redteam() else 1
+
+
+def cmd_redteam_exploits(args: argparse.Namespace) -> int:
+    """Run the dispute-episode exploit library and print the coverage table."""
+    import json
+
+    from scruple.verifiers.exploits.coverage import coverage, render, research_summary
+
+    seeds = range(args.start, args.start + args.seeds)
+    rows = coverage(seeds)
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "seeds": [seeds.start, seeds.stop],
+                    "synthetic": True,
+                    "rows": [r.model_dump(mode="json") for r in rows],
+                    "research": research_summary(rows),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        print(render(rows, seeds))
+    return 0
 
 
 def cmd_version(args: argparse.Namespace) -> int:
@@ -171,7 +199,17 @@ def build_parser() -> argparse.ArgumentParser:
     rp = add("report", cmd_report, "print the evidence report for a decision")
     rp.add_argument("decision_id")
     add("assurance", cmd_assurance, "re-check the live policy (auto rollback on failure)")
-    add("redteam", cmd_redteam, "run the adversarial verifier suite", db=False)
+    rt = add("redteam", cmd_redteam, "run the adversarial verifier suite", db=False)
+    rt.add_argument(
+        "suite",
+        nargs="?",
+        default="rules",
+        choices=["rules", "exploits"],
+        help="rules: attacks on learned rules (default); exploits: dispute-episode exploits",
+    )
+    rt.add_argument("--seeds", type=int, default=300, help="exploits: number of seeds")
+    rt.add_argument("--start", type=int, default=0, help="exploits: first seed")
+    rt.add_argument("--json", action="store_true", help="exploits: print JSON")
     au = add("audit", cmd_verify, "verify the audit trail (hash chain + projections)")
     au.add_argument("action", choices=["verify"])
     au.add_argument("--expected-head", default=None, help="externally anchored head hash")
