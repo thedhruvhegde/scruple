@@ -30,13 +30,36 @@ class Claims(BaseModel):
 
     model_config = _FROZEN
 
-    outcome: ClaimedOutcome | None = None
-    refunded_minor: int | None = Field(default=None, ge=0)
-    cost_usd_minor: int | None = Field(default=None, ge=0)
-    actions: tuple[str, ...] = Field(default=(), max_length=20)
-    evidence_ids: tuple[str, ...] = Field(default=(), max_length=20)
-    win_rate: float | None = Field(default=None, ge=0, le=1)  # "I win 97% of disputes"
-    deadlines_met: bool | None = None
+    outcome: ClaimedOutcome | None = Field(
+        default=None, description="How the case ended, in your words."
+    )
+    refunded_minor: int | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Total money returned to the cardholder by any path (your refunds plus any "
+            "chargeback the merchant lost), in the case currency's minor units."
+        ),
+    )
+    cost_usd_minor: int | None = Field(
+        default=None,
+        ge=0,
+        description="The merchant's net cost for this case in US cents, fees included.",
+    )
+    actions: tuple[str, ...] = Field(
+        default=(),
+        max_length=20,
+        description="Names of tools you called successfully (reads included).",
+    )
+    evidence_ids: tuple[str, ...] = Field(
+        default=(), max_length=20, description="Evidence ids you cited."
+    )
+    win_rate: float | None = Field(
+        default=None, ge=0, le=1, description="Your claimed overall win rate, 0 to 1."
+    )  # "I win 97% of disputes"
+    deadlines_met: bool | None = Field(
+        default=None, description="Whether you met every response deadline."
+    )
 
 
 class SelfReport(BaseModel):

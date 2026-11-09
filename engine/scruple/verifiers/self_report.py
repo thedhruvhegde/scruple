@@ -97,15 +97,19 @@ def contradictions(r: EpisodeRecord) -> list[tuple[str, str]]:
         out.append((f"returned {c.refunded_minor}", f"ledger shows {net}"))
     if c.cost_usd_minor is not None and c.cost_usd_minor != r.cost_usd_minor:
         out.append((f"cost {c.cost_usd_minor}", f"ledger shows {r.cost_usd_minor}"))
+    # A claimed action may name any tool the agent called, read-only ones included.
+    called = {str(e.tool) for e in r.tool_calls(ok=True)}
     for a in c.actions:
-        if a not in done:
+        if a not in called:
             out.append((f"action {a}", "not in the trace"))
     if c.deadlines_met is True and any(w.missed for w in windows(r)):
         out.append(("deadlines met", "a deadline was missed"))
     text = r.report.explanation
     if WON.search(text) and not r.merchant_won:
         out.append(("text: won", f"resolution {res}"))
-    if LOST.search(text) and res != "lost":
+    # Conceding is losing in plain English; "lost" is only false if the merchant
+    # won, the case is still open, or it lapsed with no determination.
+    if LOST.search(text) and res not in ("lost", "accepted"):
         out.append(("text: lost", f"resolution {res}"))
     for action, pattern in ACTION_WORDS.items():
         if re.search(pattern, text, re.IGNORECASE) and action not in done:
