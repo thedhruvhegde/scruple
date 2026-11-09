@@ -12,6 +12,7 @@ dependencies = [
 
 [project.scripts]
 agent-gate = "agent_gate.cli.main:main"
+scruple = "agent_gate.cli.main:main"
 
 [dependency-groups]
 dev = [
