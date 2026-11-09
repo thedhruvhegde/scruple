@@ -57,7 +57,10 @@ reversal, incident, fine, and `ActionApplied` for each accepted agent action). S
 is the fold of the log over the cases' opening state: `DisputeEngine.replay(cases,
 events, clock)` rebuilds it exactly without consulting the issuer, and
 `state_digest()` / `case_digest(id)` hash it. `events_json()` / `events_from_json()`
-serialise the log.
+serialise the log. Rewind (037): `engine.at(i)` is a new engine after the first `i`
+events; `engine.rewind(case_id, k)` restores one case to its state after its first `k`
+events (other cases untouched); `rewind_before_action(case_id, k)` goes back to just
+before that case's k-th action, e.g. to try a different one.
 
 Extending (032 onwards): add an optional `CaseMix` field whose default draws no extra
 randomness (so existing seeds stay byte-identical), any new observable field on
@@ -1050,6 +1053,69 @@ class DisputeEngine:
     @property
     def events(self) -> tuple[EngineEvent, ...]:
         return tuple(self._events)
+
+    # --- rewind (037) ---------------------------------------------------------
+    def _settings(self) -> dict[str, Any]:
+        return {
+            "fees": self.fees,
+            "issuer": self.issuer,
+            "merchants": tuple(self.merchants.values()),
+            "params": self.params,
+            "calendar": self.calendar,
+            "fx": self._fx,
+        }
+
+    def at(self, index: int, clock: Clock | None = None) -> DisputeEngine:
+        """A new engine holding the state after the first `index` events (all cases).
+        This engine is unchanged."""
+        if not 0 <= index <= len(self._events):
+            raise ValueError(f"event index must be in [0, {len(self._events)}]")
+        return DisputeEngine.replay(
+            self._cases_in, self._events[:index], clock or self.clock, **self._settings()
+        )
+
+    def rewind(self, case_id: str, to: int, clock: Clock | None = None) -> tuple[EngineEvent, ...]:
+        """Restore one case to its state after its first `to` events. Other cases keep
+        their state. Returns the events removed. `to` runs from `opening_events(case_id)`
+        (the case as it opened: captured and, for a chargeback, debited) to the number of
+        the case's events (no change).
+
+        The log is refolded without the case's later events, so ledger entry ids after
+        the cut are renumbered. Time is the clock's: pass `clock` (e.g. a `ManualClock`
+        set to the event's date) to act from that day; otherwise the next `sync` applies
+        whatever has fallen due since, deciding again with the issuer."""
+        if case_id not in self._cases:
+            raise KeyError(case_id)
+        mine = [i for i, e in enumerate(self._events) if e.case_id == case_id]
+        lo = self.opening_events(case_id)
+        if not lo <= to <= len(mine):
+            raise ValueError(f"{case_id}: can rewind to {lo}..{len(mine)} events, not {to}")
+        cut = set(mine[to:])
+        kept = [e for i, e in enumerate(self._events) if i not in cut]
+        removed = tuple(self._events[i] for i in mine[to:])
+        if clock is not None:
+            self.clock = clock
+        self._genesis()
+        for ev in kept:
+            self._emit(ev)
+        return removed
+
+    def opening_events(self, case_id: str) -> int:
+        """How many events open this case (a case cannot be rewound past its opening)."""
+        probe = DisputeEngine([self._cases[case_id].case], self.clock, **self._settings())
+        return len(probe._events)
+
+    def rewind_before_action(self, case_id: str, k: int, clock: Clock | None = None) -> date:
+        """Rewind a case to just before its k-th accepted agent action (0-based) and
+        return the day that action was taken."""
+        mine = [e for e in self._events if e.case_id == case_id]
+        acts = [j for j, e in enumerate(mine) if isinstance(e, ActionApplied)]
+        if not 0 <= k < len(acts):
+            raise ValueError(f"{case_id} has {len(acts)} actions; no action {k}")
+        ev = mine[acts[k]]
+        assert isinstance(ev, ActionApplied)
+        self.rewind(case_id, acts[k], clock)
+        return ev.on
 
     def case_events(self, case_id: str) -> tuple[tuple[int, EngineEvent], ...]:
         """(global index, event) for every event of one case, in order."""
