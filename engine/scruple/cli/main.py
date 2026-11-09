@@ -185,6 +185,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.realdata.cli import add_realdata_parser
 
     add_realdata_parser(sub)
+    from scruple.sim.cli import add_sim_parser
+
+    add_sim_parser(sub)
     return p
 
 

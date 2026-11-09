@@ -143,3 +143,7 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   tempered family weights (`w ** (2 d)`) is ours. "Ambiguity" means the evidence a
   merchant holds says less about who is right; "rarity" means rare case families get
   rarer. Neither is calibrated to real dispute data. `d = 0.5` equals `FULL_MIX`.
+- **A-31** Held-out planning (scruple/sim/heldout.py): the defaults ($100 per-case cost
+  cap, $5 regression to detect, $20 per-case sd, alpha 0.05, power 0.8) are the
+  illustrative values from docs/math, and "case type" defaults to case family. A real
+  plan needs the deployment's own caps, tolerances and type definitions.
