@@ -233,6 +233,31 @@ def stratified_test(
     )
 
 
+def _money(minor: float) -> str:
+    sign = "-" if minor < 0 else ""
+    return f"{sign}${abs(minor) / 100:,.2f}"
+
+
+def summary_lines(ev: EValueEvidence) -> list[str]:
+    """Plain-text lines for reports, PDFs and comments (one per tested case type)."""
+    head = (
+        f"{ev.method}; false-block FDR {ev.alpha:g}, certificate {ev.alpha_certify:g}; "
+        f"{len(ev.family)} tested case type(s), {ev.untouched_types} untouched; "
+        f"plan needs {ev.required_total_cases or 0} held-out cases, have {ev.n_cases}"
+        + ("" if ev.sufficient else " (INSUFFICIENT EVIDENCE)")
+    )
+    out = [head]
+    for t in ev.types:
+        flag = "REGRESSED" if t.regressed else ("improved" if t.improved else "no call")
+        out.append(
+            f"{t.case_type}: n={t.n} (needs {t.required_n}), change {_money(t.mean_diff)}/case, "
+            f"CS [{_money(t.ci_low)}, {_money(t.ci_high)}], e(worse)={t.regression_e_value:.3g}, "
+            f"e(better)={t.improvement_e_value:.3g}, alpha share {t.alpha_share:.4g} "
+            f"(e >= {t.e_threshold:.3g} alone), {flag}"
+        )
+    return out
+
+
 def mdr_for(t: str, cap: float, cfg: GateConfig) -> float:
     o = cfg.evalue_type_min_detectable_regression_usd_minor
     if t in o:

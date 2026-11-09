@@ -183,11 +183,18 @@ def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> Evidence
                 "matched_control": r.decision.canary.matched_control,
                 "treatment_mean_cost_usd_minor": r.decision.canary.treatment_mean_cost_usd_minor,
                 "control_mean_cost_usd_minor": r.decision.canary.control_mean_cost_usd_minor,
+                **(
+                    {"sequential": r.decision.canary.sequential.model_dump(mode="json")}
+                    if r.decision.canary.sequential is not None
+                    else {}
+                ),
             }
             for r in records
             if r.decision.canary is not None
         ],
     }
+    if card.evalue is not None:  # e-values, confidence sequences, required n, alpha shares
+        stats["evalue"] = card.evalue.model_dump(mode="json")
     return EvidencePack(
         rule_id=rule_id,
         version=version,

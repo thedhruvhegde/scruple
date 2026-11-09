@@ -71,6 +71,32 @@ def render_comment(card: Scorecard) -> str:
             f"method `{s.method}`"
         )
         w("")
+    if card.evalue is not None:
+        ev = card.evalue
+        sample = "sufficient" if ev.sufficient else "**insufficient evidence**"
+        w("### E-value statistics")
+        w("")
+        w(
+            f"- e-BH over {len(ev.family)} tested case type(s): false-block FDR "
+            f"{ev.alpha:g}, certificate {ev.alpha_certify:g}; sample size {sample} "
+            f"(plan needs {ev.required_total_cases or 0:,} held-out cases, have "
+            f"{ev.n_cases:,})"
+        )
+        w("")
+        w(
+            "| Case type | Cases | Needs | Change | Confidence sequence | e(worse) | "
+            "e(better) | Alpha share | Result |"
+        )
+        w("|---|---:|---:|---:|---|---:|---:|---:|---|")
+        for t in ev.types:
+            flag = "**regressed**" if t.regressed else ("improved" if t.improved else "-")
+            w(
+                f"| `{_cell(t.case_type)}` | {t.n:,} | {t.required_n or 0:,} | "
+                f"{usd(t.mean_diff)} | [{usd(t.ci_low)}, {usd(t.ci_high)}] | "
+                f"{t.regression_e_value:.3g} | {t.improvement_e_value:.3g} | "
+                f"{t.alpha_share:.4g} | {flag} |"
+            )
+        w("")
     if card.slices:
         w("<details><summary>Per-scenario regret (minor units per case)</summary>")
         w("")
@@ -96,6 +122,13 @@ def render_comment(card: Scorecard) -> str:
             f"{usd(c.control_mean_cost_usd_minor)} "
             f"({c.matched_treatment:,} / {c.matched_control:,} matched cases)"
         )
+        if card.canary_sequential is not None:
+            q = card.canary_sequential
+            w(
+                f"- Sequential two-sample test (p = {q.assignment_probability:g}, alpha "
+                f"{q.alpha:g}): **{q.decision.replace('_', ' ')}** after {q.stopped_at:,} "
+                f"of {q.n_matched:,} matched cases"
+            )
         w("")
     failed = [c for c in card.checks if not c.passed]
     passed = len(card.checks) - len(failed)

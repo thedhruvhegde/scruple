@@ -10,12 +10,16 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from enum import StrEnum
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, SerializerFunctionWrapHandler, model_serializer
 
 from scruple.audit.report import usd
 from scruple.gate.config import GateConfig
+from scruple.gate.evalue import METHOD as EVALUE_METHOD
+from scruple.gate.evalue import EValueEvidence
 from scruple.gate.models import CheckResult, DecisionRecord, Outcome, Stage
+from scruple.gate.sequential import SequentialCanaryResult
 from scruple.hashing import content_hash
 
 SCHEMA_VERSION = 1
@@ -101,6 +105,18 @@ class Scorecard(BaseModel):
     canary: CanaryLine | None
     config_sha256: str
     audit_head: str
+    # e-value statistics (GateConfig.stats = "evalue"); omitted when absent so
+    # bootstrap scorecards are byte-identical to before.
+    evalue: EValueEvidence | None = None
+    canary_sequential: SequentialCanaryResult | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        for k in ("evalue", "canary_sequential"):
+            if data.get(k) is None:
+                data.pop(k, None)
+        return data
 
     def to_json(self) -> str:
         return json.dumps(self.model_dump(mode="json"), indent=2, sort_keys=True) + "\n"
@@ -157,7 +173,7 @@ def build_scorecard(
                     changed_cases=s.changed_cases,
                 )
             )
-            if s.delta > config.slice_tolerance_usd_minor:
+            if shadow.evalue is None and s.delta > config.slice_tolerance_usd_minor:
                 regressions.append(
                     Regression(
                         kind="slice",
@@ -165,12 +181,23 @@ def build_scorecard(
                         detail=f"mean regret worse by {usd(s.delta)} per case over {s.n} cases",
                     )
                 )
+        if shadow.evalue is not None:
+            regressions += [
+                Regression(
+                    kind="case_type",
+                    name=t.case_type,
+                    detail=f"mean loss worse by {usd(t.mean_diff)} per case over {t.n} cases "
+                    f"(e-value {t.regression_e_value:.3g}, e-BH at FDR {shadow.evalue.alpha:g})",
+                )
+                for t in shadow.evalue.types
+                if t.regressed
+            ]
         regressions += [
             Regression(kind="golden", name=g, detail="golden case regressed")
             for g in shadow.golden_regressions
         ]
         stats = Statistics(
-            method=method,
+            method=EVALUE_METHOD if shadow.evalue is not None else method,
             confidence=shadow.confidence,
             mean_improvement_usd_minor=shadow.mean_improvement_usd_minor,
             ci_low=shadow.ci_low,
@@ -215,6 +242,8 @@ def build_scorecard(
         canary=canary_line,
         config_sha256=content_hash(config),
         audit_head=audit_head,
+        evalue=None if shadow is None else shadow.evalue,
+        canary_sequential=None if canary is None else canary.sequential,
     )
 
 

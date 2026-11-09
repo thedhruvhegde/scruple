@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from scruple.gate.evalue import EValueEvidence
 from scruple.gate.models import Decision, DecisionRecord, Outcome, Stage
 
 _VERDICT = {
@@ -154,12 +155,15 @@ def _shadow(d: Decision, write: Callable[[str], None]) -> None:
     write(f"| Ledger violations | {b.ledger_findings} | {c.ledger_findings} |")
     write(f"| Policy violations | {b.policy_findings} | {c.policy_findings} |")
     write("")
+    interval = "bootstrap confidence interval" if s.evalue is None else "confidence sequence"
     write(
         f"Paired improvement: **{usd(s.mean_improvement_usd_minor)} per case**, "
-        f"{s.confidence:.0%} bootstrap confidence interval "
+        f"{s.confidence:.0%} {interval} "
         f"[{usd(s.ci_low)}, {usd(s.ci_high)}]."
     )
     write("")
+    if s.evalue is not None:
+        _evalue(s.evalue, write)
     write("### Results by case type")
     write("")
     write("An average can hide a broken edge case, so every case type is checked separately.")
@@ -202,6 +206,70 @@ def _canary(d: Decision, write: Callable[[str], None]) -> None:
         f"current policy {usd(c.control_mean_cost_usd_minor)}."
     )
     write(f"- Hard violations on canary cases: {len(c.new_hard_findings)}.")
+    if c.sequential is not None:
+        q = c.sequential
+        write(
+            f"- **Sequential two-sample test** ({q.method}; arms are matched groups, so "
+            f"each case is weighted by its known assignment probability p = "
+            f"{q.assignment_probability:g}): decision **{q.decision.replace('_', ' ')}** "
+            f"after {q.stopped_at} of {q.n_matched} matched cases, alpha {q.alpha:g}, "
+            f"tolerance {usd(q.tolerance_usd_minor)} per case."
+        )
+        write("")
+        write(
+            "| Case type | Cases | Treated | Effect per case | Confidence sequence "
+            "| e(harm) | e(benefit) |"
+        )
+        write("|---|---|---|---|---|---|---|")
+        for t in q.types:
+            write(
+                f"| {t.case_type} | {t.n} | {t.treated} | {usd(t.effect_estimate)} | "
+                f"[{usd(t.ci_low)}, {usd(t.ci_high)}] | {t.harm_e_value:.3g} | "
+                f"{t.benefit_e_value:.3g} |"
+            )
+    write("")
+
+
+def _evalue(ev: EValueEvidence, write: Callable[[str], None]) -> None:
+    write("### Anytime-valid statistics (e-values)")
+    write("")
+    write(
+        f"Method: {ev.method}. Case types are scenario by amount band, each with a "
+        f"declared cost cap. A type is flagged as worse when e-BH over the "
+        f"{len(ev.family)} tested type(s) rejects at FDR {ev.alpha:g}, and certified "
+        f"better at {ev.alpha_certify:g}. Each type gets an equal share of the error "
+        "budget (alpha share); the plan says how many cases each type needs to detect "
+        "the minimum detectable regression with power "
+        f"{1 - (ev.beta or 0.0):.0%}. Confidence sequences are two-sided, time-uniform "
+        f"at {ev.alpha:g} and use their own, more conservative bets, so one can include "
+        "zero while the one-sided e-value test already decides."
+    )
+    write("")
+    sample = "sufficient" if ev.sufficient else "**INSUFFICIENT EVIDENCE**"
+    write(
+        f"- Sample size: plan needs {ev.required_total_cases or 0:,} held-out cases, "
+        f"have {ev.n_cases:,}: {sample}."
+    )
+    write(
+        f"- Pooled (information only): confidence sequence for the mean loss change "
+        f"[{usd(ev.pooled_ci_low)}, {usd(ev.pooled_ci_high)}], certificate e-value "
+        f"{ev.pooled_certify_e_value:.3g}."
+    )
+    if ev.violations:
+        write(f"- Declared-cap violations: {len(ev.violations)} (e.g. {ev.violations[0]}).")
+    write("")
+    write(
+        "| Case type | Cases | Needs | Cap | Change per case | Confidence sequence | "
+        "e(worse) | e(better) | Alpha share | Result |"
+    )
+    write("|---|---|---|---|---|---|---|---|---|---|")
+    for t in ev.types:
+        flag = "**REGRESSED**" if t.regressed else ("improved" if t.improved else "no call")
+        write(
+            f"| {t.case_type} | {t.n} | {t.required_n} | {usd(t.cap)} | {usd(t.mean_diff)} | "
+            f"[{usd(t.ci_low)}, {usd(t.ci_high)}] | {t.regression_e_value:.3g} | "
+            f"{t.improvement_e_value:.3g} | {t.alpha_share:.4g} | {flag} |"
+        )
     write("")
 
 

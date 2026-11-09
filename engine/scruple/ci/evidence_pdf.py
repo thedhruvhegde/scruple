@@ -12,6 +12,7 @@ from fpdf import FPDF
 
 from scruple.audit.report import usd
 from scruple.ci.evidence import EvidencePack, last_timestamp
+from scruple.gate.evalue import summary_lines
 
 
 def _t(text: object) -> str:
@@ -86,7 +87,17 @@ def render_pdf(pack: EvidencePack) -> bytes:
             f"{s.confidence:.0%} interval [{usd(s.ci_low)}, {usd(s.ci_high)}], "
             f"{s.n_cases} held-out cases, method {s.method}."
         )
+    if card.evalue is not None:
+        for text in summary_lines(card.evalue):
+            line(text)
     for st in pack.statistics.get("canary_stages", []):
+        seq = st.get("sequential")
+        if seq is not None:
+            line(
+                f"Canary {st['decision_id']} sequential test (p = "
+                f"{seq['assignment_probability']:g}, alpha {seq['alpha']:g}): "
+                f"{seq['decision']} after {seq['stopped_at']} of {seq['n_matched']} matched"
+            )
         line(
             f"Canary {st['decision_id']} at {st['fraction']:.0%}: {st['outcome']}, treatment "
             f"{usd(st['treatment_mean_cost_usd_minor'])} vs control "
