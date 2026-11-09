@@ -51,26 +51,38 @@ fees in USD). `engine.incidents` lists double refunds the ledger caught (027).
 `engine.post_monitoring_fines()` applies VAMP / ECM fines from merchant histories
 (031). `CardDispute.ce3()` reports Visa CE 3.0 eligibility (030).
 
+Events (036): every state change is an `EngineEvent` appended to `engine.events`
+(capture, chargeback debit, refund, fee, stage change, awaiting, evidence, resolution,
+reversal, incident, fine, and `ActionApplied` for each accepted agent action). State
+is the fold of the log over the cases' opening state: `DisputeEngine.replay(cases,
+events, clock)` rebuilds it exactly without consulting the issuer, and
+`state_digest()` / `case_digest(id)` hash it. `events_json()` / `events_from_json()`
+serialise the log.
+
 Extending (032 onwards): add an optional `CaseMix` field whose default draws no extra
 randomness (so existing seeds stay byte-identical), any new observable field on
 `CardDispute` with a default, and hidden facts on `Truth`. New agent actions add a
 model to `AgentAction`, a name to `ACTION_KINDS`, a check in `allowed_actions` and a
-branch in `DisputeEngine._apply`. The `Issuer` protocol can be swapped per engine.
+branch in `DisputeEngine._apply` that changes state only through `_emit(event)` (a new
+event type adds a model to `EngineEvent` and a case in `_apply_event`). The `Issuer`
+protocol can be swapped per engine.
 """
 
 from __future__ import annotations
 
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import StrEnum
 from itertools import pairwise
-from typing import Annotated, Literal, Protocol
+from typing import Annotated, Any, Literal, Protocol
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, model_validator
 
 from scruple.clock import Clock
 from scruple.domain import ReasonCode
+from scruple.hashing import content_hash
 from scruple.sim.card_ledger import CardLedger, DoubleRefundError
 from scruple.sim.ce3 import CE3Result, Fingerprint, PriorTransaction, ce3_eligibility
 from scruple.sim.deadlines import (
@@ -104,10 +116,16 @@ from scruple.sim.families import (
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
 from scruple.sim.fx import EXPONENT, FxTable
 from scruple.sim.issuer import SeededIssuer
-from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
+from scruple.sim.lifecycle import (
+    OPENING_STAGES,
+    Event,
+    IllegalTransitionError,
+    Lifecycle,
+    Transition,
+)
 from scruple.sim.merchants import MerchantProfile, generate_merchants
 from scruple.sim.models import Resolution, Stage
-from scruple.sim.monitoring import MonthStatus, post_fines
+from scruple.sim.monitoring import MonthStatus
 from scruple.sim.monitoring import evaluate as evaluate_programs
 from scruple.sim.networks import (
     Category,
@@ -745,6 +763,140 @@ class EngineParams:
     arbitration_ruling_days: int = 30
 
 
+# -------------------------------------------------------------------------- events
+# 036: every state change of a `DisputeEngine` is one of these events. The engine
+# state is `fold(genesis(cases), events)`: `DisputeEngine.replay(cases, events, clock)`
+# rebuilds it exactly. Decisions (issuer draws, deadline checks) happen when an event
+# is produced, never when it is applied, so a replay needs no issuer.
+class _Ev(BaseModel):
+    model_config = _FROZEN
+
+
+class CaseCaptured(_Ev):
+    type: Literal["captured"] = "captured"
+    case_id: str
+
+
+class ChargebackDebited(_Ev):
+    type: Literal["chargeback_debited"] = "chargeback_debited"
+    case_id: str
+    on: date
+
+
+class RefundPosted(_Ev):
+    type: Literal["refund_posted"] = "refund_posted"
+    case_id: str
+    amount_minor: int = Field(gt=0)
+    on: date
+
+
+class PendingRefundCleared(_Ev):
+    type: Literal["pending_refund_cleared"] = "pending_refund_cleared"
+    case_id: str
+
+
+class FeeCharged(_Ev):
+    type: Literal["fee_charged"] = "fee_charged"
+    case_id: str
+    kind: str
+    amount_usd_minor: int = Field(gt=0)
+    payee: str
+
+
+class StageFired(_Ev):
+    type: Literal["stage_fired"] = "stage_fired"
+    case_id: str
+    event: Event
+    on: date
+
+
+class AwaitingSet(_Ev):
+    type: Literal["awaiting_set"] = "awaiting_set"
+    case_id: str
+    awaiting: Awaiting
+    due: date | None
+
+
+class PreArbDeclined(_Ev):
+    type: Literal["pre_arb_declined"] = "pre_arb_declined"
+    case_id: str
+    on: date
+
+
+class EvidenceSubmitted(_Ev):
+    type: Literal["evidence_submitted"] = "evidence_submitted"
+    case_id: str
+    doc_ids: tuple[str, ...]
+
+
+class CaseResolved(_Ev):
+    type: Literal["case_resolved"] = "case_resolved"
+    case_id: str
+    resolution: Resolution
+
+
+class ReversalPosted(_Ev):
+    type: Literal["reversal_posted"] = "reversal_posted"
+    case_id: str
+    amount_minor: int = Field(gt=0)
+    on: date
+
+
+class IncidentRecorded(_Ev):
+    type: Literal["incident_recorded"] = "incident_recorded"
+    case_id: str
+    incident: Incident
+
+
+class ActionApplied(_Ev):
+    """An accepted agent action (the input that caused the events after it)."""
+
+    type: Literal["action_applied"] = "action_applied"
+    case_id: str
+    action: AgentAction
+    on: date
+
+
+class FinePosted(_Ev):
+    type: Literal["fine_posted"] = "fine_posted"
+    case_id: None = None
+    kind: str
+    merchant_id: str
+    amount_usd_minor: int = Field(gt=0)
+    payee: str
+    ref: str
+
+
+class FinesClosed(_Ev):
+    type: Literal["fines_closed"] = "fines_closed"
+    case_id: None = None
+
+
+EngineEvent = Annotated[
+    CaseCaptured
+    | ChargebackDebited
+    | RefundPosted
+    | PendingRefundCleared
+    | FeeCharged
+    | StageFired
+    | AwaitingSet
+    | PreArbDeclined
+    | EvidenceSubmitted
+    | CaseResolved
+    | ReversalPosted
+    | IncidentRecorded
+    | ActionApplied
+    | FinePosted
+    | FinesClosed,
+    Field(discriminator="type"),
+]
+EVENT_LOG = TypeAdapter(tuple[EngineEvent, ...])
+
+
+class ReplayError(ValueError):
+    """An event log that does not fit the cases it is replayed on."""
+
+
 # -------------------------------------------------------------------------- engine
 @dataclass
 class _CaseState:
@@ -761,6 +913,11 @@ class _CaseState:
 
 
 class DisputeEngine:
+    """Cases, ledger and evidence vault, changed only by appending events (036).
+
+    `events` is the full log; `replay` folds a log back into an identical engine;
+    `state_digest` / `case_digest` hash the state so replays can be compared."""
+
     def __init__(
         self,
         cases: list[CardDispute],
@@ -772,6 +929,7 @@ class DisputeEngine:
         params: EngineParams | None = None,
         calendar: BusinessCalendar = DEFAULT_CALENDAR,
         fx: FxTable | None = None,
+        events: Sequence[EngineEvent] | None = None,
     ) -> None:
         self.clock = clock
         self.fees = fees if fees is not None else DEFAULT_FEES
@@ -779,36 +937,183 @@ class DisputeEngine:
         self.params = params or EngineParams()
         self.calendar = calendar
         self.merchants = {m.merchant_id: m for m in merchants}
+        self._cases_in = list(cases)
+        self._fx = fx
+        self._genesis()
+        if events is None:
+            for st in self._cases.values():
+                self._open(st)
+        else:
+            for ev in events:
+                self._emit(ev)
+
+    def _genesis(self) -> None:
+        """The state before any event: cases at their opening stage, nothing posted."""
+        cases = self._cases_in
         self.vault = EvidenceVault(d for c in cases for d in c.documents)
-        self.ledger = CardLedger(fx or FX)
+        self.ledger = CardLedger(self._fx or FX)
         self._incidents: list[Incident] = []
         self._fined = False
+        self._events: list[EngineEvent] = []
         self._cases: dict[str, _CaseState] = {}
         for c in cases:
             if c.case_id in self._cases:
                 raise ValueError(f"duplicate case id {c.case_id}")
-            st = _CaseState(
+            self._cases[c.case_id] = _CaseState(
                 case=c,
                 life=Lifecycle(c.workflow, c.opened_on, c.opening_stage),
                 awaiting="merchant",
                 pending_refund=c.refund_in_flight,
             )
-            self._cases[c.case_id] = st
-            self.ledger.capture(
-                c.txn_id,
-                c.merchant_id,
-                c.captured_minor,
-                c.currency,
-                c.settlement_currency,
-                c.processed_on,
-            )
-            rf = c.refund_in_flight
-            if rf is not None and rf.settles_on <= c.opened_on:
-                # the refund settled before the dispute was filed
+
+    @classmethod
+    def replay(
+        cls, cases: list[CardDispute], events: Sequence[EngineEvent], clock: Clock, **kwargs: Any
+    ) -> DisputeEngine:
+        """An engine whose state is the fold of `events` over `cases` (no decisions run).
+        Pass the same fees and fx as the original; `issuer` only matters afterwards."""
+        return cls(cases, clock, events=events, **kwargs)
+
+    # --- event log ----------------------------------------------------------
+    def _emit(self, ev: EngineEvent) -> None:
+        """Apply then record. An event that cannot apply is not recorded."""
+        try:
+            self._apply_event(ev)
+        except KeyError as exc:
+            raise ReplayError(f"event {ev.type} names an unknown case: {exc}") from exc
+        except IllegalTransitionError as exc:
+            raise ReplayError(f"event {ev.type} does not fit the state: {exc}") from exc
+        self._events.append(ev)
+
+    def _apply_event(self, ev: EngineEvent) -> None:
+        """The only place engine state changes."""
+        match ev:
+            case FinePosted():
+                self.ledger.merchant_charge(
+                    ev.kind, ev.merchant_id, ev.amount_usd_minor, ev.payee, ev.ref
+                )
+                return
+            case FinesClosed():
+                self._fined = True
+                return
+            case _:
+                pass
+        st = self._cases[ev.case_id]
+        c = st.case
+        match ev:
+            case CaseCaptured():
+                self.ledger.capture(
+                    c.txn_id,
+                    c.merchant_id,
+                    c.captured_minor,
+                    c.currency,
+                    c.settlement_currency,
+                    c.processed_on,
+                )
+            case ChargebackDebited(on=on):
+                self.ledger.chargeback_debit(c.txn_id, c.case_id, c.amount_minor, on)
+            case RefundPosted(amount_minor=amount, on=day):
+                self.ledger.refund(c.txn_id, c.case_id, amount, day)
+                fields = {
+                    "amount_minor": str(amount),
+                    "currency": c.currency,
+                    "settled_on": day.isoformat(),
+                    "refund_settled": "Y",
+                }
+                self.vault.add(
+                    make_document(
+                        c.case_id, EvidenceKind.REFUND_RECORD, day, fields, 1_000 + st.refunds
+                    )
+                )
+                st.refunds += 1
+            case PendingRefundCleared():
                 st.pending_refund = None
-                self._post_refund(st, rf.amount_minor, rf.settles_on)
-            if c.opening_stage is Stage.CHARGEBACK:
-                self._on_chargeback(st)
+            case FeeCharged(kind=kind, amount_usd_minor=amount, payee=payee):
+                self.ledger.fee(kind, c.txn_id, c.case_id, amount, payee)
+            case StageFired(event=event, on=on):
+                st.life.fire(event, on)
+            case AwaitingSet(awaiting=awaiting, due=due):
+                st.awaiting, st.due = awaiting, due
+            case PreArbDeclined(on=on):
+                st.declined_on = on
+            case EvidenceSubmitted(doc_ids=ids):
+                st.evidence = self.vault.resolve(c.case_id, ids)
+            case CaseResolved(resolution=res):
+                st.resolution = res
+            case ReversalPosted(amount_minor=amount, on=day):
+                self.ledger.to_merchant("chargeback_reversal", c.txn_id, c.case_id, amount, day)
+            case IncidentRecorded(incident=inc):
+                self._incidents.append(inc)
+            case ActionApplied():
+                pass  # the input; its effects are the events that follow
+
+    @property
+    def events(self) -> tuple[EngineEvent, ...]:
+        return tuple(self._events)
+
+    def case_events(self, case_id: str) -> tuple[tuple[int, EngineEvent], ...]:
+        """(global index, event) for every event of one case, in order."""
+        return tuple((i, e) for i, e in enumerate(self._events) if e.case_id == case_id)
+
+    def events_json(self) -> str:
+        return EVENT_LOG.dump_json(tuple(self._events)).decode("utf-8")
+
+    @staticmethod
+    def events_from_json(raw: str | bytes) -> tuple[EngineEvent, ...]:
+        return EVENT_LOG.validate_json(raw)
+
+    # --- state hashes ---------------------------------------------------------
+    def case_state(self, case_id: str) -> dict[str, object]:
+        """Everything the engine holds about one case, as plain data. Ledger entry ids
+        are left out (they are global positions), so one case's state does not depend
+        on other cases."""
+        st = self._cases[case_id]
+        c = st.case
+        return {
+            "stage": st.life.stage.value,
+            "entered_on": st.life.entered_on.isoformat(),
+            "history": [t.model_dump(mode="json") for t in st.life.history],
+            "awaiting": st.awaiting,
+            "due": None if st.due is None else st.due.isoformat(),
+            "declined_on": None if st.declined_on is None else st.declined_on.isoformat(),
+            "evidence": [d.doc_id for d in st.evidence],
+            "resolution": None if st.resolution is None else st.resolution.value,
+            "pending_refund": None
+            if st.pending_refund is None
+            else st.pending_refund.model_dump(mode="json"),
+            "refunds": st.refunds,
+            "returned": self.ledger.returned(c.txn_id),
+            "entries": [
+                e.model_dump(mode="json", exclude={"entry_id"})
+                for e in self.ledger.entries
+                if e.txn_id == c.txn_id
+            ],
+            "violations": [
+                v.model_dump(mode="json", exclude={"entry_id"})
+                for v in self.ledger.violations
+                if v.txn_id == c.txn_id
+            ],
+            "incidents": [
+                i.model_dump(mode="json") for i in self._incidents if i.case_id == case_id
+            ],
+            "vault": [d.doc_id for d in self.vault.for_case(case_id)],
+        }
+
+    def case_digest(self, case_id: str) -> str:
+        return content_hash(self.case_state(case_id))
+
+    def state_digest(self) -> str:
+        """Hash of the whole engine state: every case, the full ledger (with entry ids),
+        violations, incidents and whether fines were posted."""
+        return content_hash(
+            {
+                "cases": {k: self.case_state(k) for k in self._cases},
+                "entries": [e.model_dump(mode="json") for e in self.ledger.entries],
+                "violations": [v.model_dump(mode="json") for v in self.ledger.violations],
+                "incidents": [i.model_dump(mode="json") for i in self._incidents],
+                "fined": self._fined,
+            }
+        )
 
     # --- queries ------------------------------------------------------------
     @property
@@ -824,11 +1129,21 @@ class DisputeEngine:
 
     def post_monitoring_fines(self) -> tuple[MonthStatus, ...]:
         """Evaluate VAMP and ECM over every known merchant's history and post the fines
-        (scruple.sim.monitoring). Posts at most once per engine."""
+        (scruple.sim.monitoring, same entries as `post_fines`). Posts at most once."""
         statuses = tuple(s for m in self.merchants.values() for s in evaluate_programs(m))
         if not self._fined:
-            post_fines(self.ledger, statuses)
-            self._fined = True
+            for s in statuses:
+                if s.fine_usd_minor > 0:
+                    self._emit(
+                        FinePosted(
+                            kind=f"fine:{s.program.value}",
+                            merchant_id=s.merchant_id,
+                            amount_usd_minor=s.fine_usd_minor,
+                            payee="network:fines",
+                            ref=f"{s.program.value}:{s.merchant_id}:{s.month.isoformat()}",
+                        )
+                    )
+            self._emit(FinesClosed())
         return statuses
 
     def is_resolved(self, case_id: str) -> bool:
@@ -962,6 +1277,7 @@ class DisputeEngine:
             except EvidenceError as exc:
                 return refuse(ActionError.BAD_EVIDENCE, str(exc))
         mark = len(self.ledger.entries)
+        self._emit(ActionApplied(case_id=case_id, action=action, on=now))
         info = self._apply(st, action, now)
         posted = tuple(e.entry_id for e in self.ledger.entries[mark:])
         return ActionResult(
@@ -975,6 +1291,7 @@ class DisputeEngine:
         )
 
     def _apply(self, st: _CaseState, action: AgentAction, now: date) -> dict[str, str]:
+        cid = st.case.case_id
         match action:
             case RequestInfo():
                 return {"statement": st.case.truth.statement}
@@ -984,24 +1301,39 @@ class DisputeEngine:
             case Accept():
                 self._resolve(st, Event.ACCEPT, now, Resolution.ACCEPTED)
             case Represent(evidence_ids=ids):
-                st.evidence = self.vault.resolve(st.case.case_id, ids)
+                self._emit(EvidenceSubmitted(case_id=cid, doc_ids=tuple(ids)))
                 if st.life.stage is Stage.INQUIRY:
                     if self._won(st, Stage.INQUIRY) == st.case.amount_minor:
                         self._resolve(st, Event.RESOLVE_INQUIRY, now, Resolution.WON)
                     else:
-                        st.life.fire(Event.FILE_CHARGEBACK, now)
+                        self._fire(st, Event.FILE_CHARGEBACK, now)
                         self._on_chargeback(st)
                     return {}
-                to = st.life.fire(Event.REPRESENT, now)
+                to = self._fire(st, Event.REPRESENT, now)
                 self._enter(st, to, now)
-                st.awaiting = "issuer"
-                st.due = now + timedelta(days=self.params.issuer_response_days)
+                due = now + timedelta(days=self.params.issuer_response_days)
+                self._emit(AwaitingSet(case_id=cid, awaiting="issuer", due=due))
             case Escalate():
-                st.life.fire(Event.ESCALATE, now)
+                self._fire(st, Event.ESCALATE, now)
                 self._enter(st, Stage.ARBITRATION, now)
-                st.awaiting = "network"
-                st.due = now + timedelta(days=self.params.arbitration_ruling_days)
+                due = now + timedelta(days=self.params.arbitration_ruling_days)
+                self._emit(AwaitingSet(case_id=cid, awaiting="network", due=due))
         return {}
+
+    def _fire(self, st: _CaseState, event: Event, on: date) -> Stage:
+        self._emit(StageFired(case_id=st.case.case_id, event=event, on=on))
+        return st.life.stage
+
+    def _open(self, st: _CaseState) -> None:
+        c = st.case
+        self._emit(CaseCaptured(case_id=c.case_id))
+        rf = c.refund_in_flight
+        if rf is not None and rf.settles_on <= c.opened_on:
+            # the refund settled before the dispute was filed
+            self._emit(PendingRefundCleared(case_id=c.case_id))
+            self._post_refund(st, rf.amount_minor, rf.settles_on)
+        if c.opening_stage is Stage.CHARGEBACK:
+            self._on_chargeback(st)
 
     # --- time ---------------------------------------------------------------
     def sync(self) -> None:
@@ -1018,7 +1350,7 @@ class DisputeEngine:
             if rf is not None and rf.settles_on <= now:
                 nxt = self._next_due(st)
                 if nxt is None or rf.settles_on <= nxt:
-                    st.pending_refund = None
+                    self._emit(PendingRefundCleared(case_id=st.case.case_id))
                     self._post_refund(st, rf.amount_minor, rf.settles_on)
                     continue
             if st.resolution is None and self._step_due(st, now):
@@ -1034,8 +1366,9 @@ class DisputeEngine:
         return st.due
 
     def _step_due(self, st: _CaseState, now: date) -> bool:
+        cid = st.case.case_id
         if st.awaiting == "merchant":
-            dl = self.deadline(st.case.case_id)
+            dl = self.deadline(cid)
             if dl is None or now <= dl.due:
                 return False
             self._missed(st, dl.due + timedelta(days=1))
@@ -1043,7 +1376,8 @@ class DisputeEngine:
         assert st.due is not None
         if now < st.due:
             return False
-        day, st.due = st.due, None
+        day = st.due
+        self._emit(AwaitingSet(case_id=cid, awaiting=st.awaiting, due=None))
         if st.awaiting == "network":
             won = self._won(st, Stage.ARBITRATION)
             if won:
@@ -1057,17 +1391,17 @@ class DisputeEngine:
         if won:
             self._resolve(st, Event.ISSUER_ACCEPT, day, self._win_kind(st, won), won)
         elif stage is Stage.REPRESENTMENT:
-            st.life.fire(Event.ISSUER_PRE_ARB, day)
+            self._fire(st, Event.ISSUER_PRE_ARB, day)
             self._enter(st, Stage.PRE_ARBITRATION, day)
-            st.awaiting = "merchant"
+            self._emit(AwaitingSet(case_id=cid, awaiting="merchant", due=None))
         else:  # allocation pre-arbitration declined by the issuer
-            st.declined_on = day
-            st.awaiting = "merchant"
+            self._emit(PreArbDeclined(case_id=cid, on=day))
+            self._emit(AwaitingSet(case_id=cid, awaiting="merchant", due=None))
         return True
 
     def _missed(self, st: _CaseState, day: date) -> None:
         if st.life.stage is Stage.INQUIRY:
-            st.life.fire(Event.DEADLINE_MISSED, day)
+            self._fire(st, Event.DEADLINE_MISSED, day)
             self._on_chargeback(st)
         else:
             self._resolve(st, Event.DEADLINE_MISSED, day, Resolution.LOST)
@@ -1077,8 +1411,14 @@ class DisputeEngine:
         return self.fees[st.case.network]
 
     def _fee(self, st: _CaseState, kind: str, amount: int) -> None:
+        if amount < 0:
+            raise ValueError("fees cannot be negative")
+        if amount == 0:
+            return
         payee = "processor:fees" if kind == "fee:chargeback" else "network:fees"
-        self.ledger.fee(kind, st.case.txn_id, st.case.case_id, amount, payee)
+        self._emit(
+            FeeCharged(case_id=st.case.case_id, kind=kind, amount_usd_minor=amount, payee=payee)
+        )
 
     def _enter(self, st: _CaseState, stage: Stage, day: date) -> None:
         self._fee(st, f"fee:{stage.value}", self._schedule(st).entry_fee(stage))
@@ -1086,39 +1426,39 @@ class DisputeEngine:
     def _on_chargeback(self, st: _CaseState) -> None:
         c = st.case
         before = len(self.ledger.violations)
-        self.ledger.chargeback_debit(c.txn_id, c.case_id, c.amount_minor, st.life.entered_on)
+        self._emit(ChargebackDebited(case_id=c.case_id, on=st.life.entered_on))
         if len(self.ledger.violations) > before:
             v = self.ledger.violations[-1]
-            self._incidents.append(
-                Incident(
+            self._emit(
+                IncidentRecorded(
                     case_id=c.case_id,
-                    on=st.life.entered_on,
-                    kind="double_refund",
-                    detail=f"chargeback debit over-credits the cardholder by {v.over_by}",
+                    incident=Incident(
+                        case_id=c.case_id,
+                        on=st.life.entered_on,
+                        kind="double_refund",
+                        detail=f"chargeback debit over-credits the cardholder by {v.over_by}",
+                    ),
                 )
             )
         self._enter(st, Stage.CHARGEBACK, st.life.entered_on)
-        st.awaiting = "merchant"
+        self._emit(AwaitingSet(case_id=c.case_id, awaiting="merchant", due=st.due))
 
     def _post_refund(self, st: _CaseState, amount: int, day: date) -> EvidenceDocument | None:
         """Post a merchant refund; the ledger refuses a double refund (an incident)."""
         c = st.case
         try:
-            self.ledger.refund(c.txn_id, c.case_id, amount, day)
+            self._emit(RefundPosted(case_id=c.case_id, amount_minor=amount, on=day))
         except DoubleRefundError as exc:
-            self._incidents.append(
-                Incident(case_id=c.case_id, on=day, kind="refund_blocked", detail=str(exc))
+            self._emit(
+                IncidentRecorded(
+                    case_id=c.case_id,
+                    incident=Incident(
+                        case_id=c.case_id, on=day, kind="refund_blocked", detail=str(exc)
+                    ),
+                )
             )
             return None
-        fields = {
-            "amount_minor": str(amount),
-            "currency": c.currency,
-            "settled_on": day.isoformat(),
-            "refund_settled": "Y",
-        }
-        doc = make_document(c.case_id, EvidenceKind.REFUND_RECORD, day, fields, 1_000 + st.refunds)
-        st.refunds += 1
-        self.vault.add(doc)
+        doc = self.vault.for_case(c.case_id)[-1]
         if (
             st.resolution is None
             and st.life.stage is Stage.INQUIRY
@@ -1153,12 +1493,12 @@ class DisputeEngine:
     def _resolve(
         self, st: _CaseState, event: Event, day: date, res: Resolution, reversal: int = 0
     ) -> None:
-        st.life.fire(event, day)
-        st.awaiting = "nobody"
-        st.resolution = res
+        cid = st.case.case_id
+        self._fire(st, event, day)
+        self._emit(AwaitingSet(case_id=cid, awaiting="nobody", due=st.due))
+        self._emit(CaseResolved(case_id=cid, resolution=res))
         if reversal > 0:
-            c = st.case
-            self.ledger.to_merchant("chargeback_reversal", c.txn_id, c.case_id, reversal, day)
+            self._emit(ReversalPosted(case_id=cid, amount_minor=reversal, on=day))
 
 
 def drain(engine: DisputeEngine, clock: ManualClock, max_days: int = 800) -> None:
