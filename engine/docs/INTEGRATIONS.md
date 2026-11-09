@@ -165,3 +165,23 @@ Rules every adapter follows:
 - Tests: tampering of each control field, a generator of valid files (hypothesis round
   trip, including entry hash overflow), single-byte mutation fuzzing.
 - Not done: IAT and ADV formats, notification of change (addenda 98) contents, writing files.
+
+## PII redaction (`scruple.security.redact`)
+
+- `redact_text`: deterministic, idempotent placeholders `[EMAIL]`, `[PAN]` (13 to 19
+  digits passing Luhn), `[IBAN]` (mod-97 checked), `[NUMBER]` (other runs of 12+
+  digits), `[PHONE]`, `[IP]` (validated by `ipaddress`), `[ADDRESS]` (street suffix,
+  PO box, UK postcode, US state plus ZIP), `[NAME]` (by cue such as "my name is", "Mr",
+  "cardholder", "Attn:", or any caller-supplied `known_names`, matched loosely).
+- Adversarial formats handled: NFKC normalisation (fullwidth digits and symbols),
+  zero-width and bidi format characters removed, separators inside card numbers
+  (space, dash, dot, newline), `[at]`/`(at)`/` at ` and `[dot]` email obfuscation.
+- `redact_record`: known PII keys (name, email, phone, address, card number, IP and
+  variants, matched case- and separator-insensitively) are replaced whole; other
+  strings are scanned; integers that are Luhn-valid PANs are replaced; depth-limited.
+- Bank statement entry descriptions are redacted when the model is constructed.
+- ReDoS: every regex quantifier is bounded and input is capped at 200,000 characters;
+  tests run hostile repetitions under a time bound.
+- Limits (tested and pinned): a bare name with no cue and not in `known_names` is not
+  found; addresses outside the listed patterns are not found; long non-card numbers
+  are redacted as `[NUMBER]` (over-redaction is preferred to leaks).

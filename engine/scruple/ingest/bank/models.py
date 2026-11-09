@@ -2,8 +2,9 @@
 
 Amounts are integer minor units. `StatementEntry.amount_minor` is unsigned and the
 direction says which way the money moved; `signed_minor` is positive for credits.
-`description` is the bank's free text, truncated; run it through
-`scruple.security.redact` before storing it anywhere.
+`description` is the bank's free text: it is passed through
+`scruple.security.redact.redact_text` on construction, so an entry never holds raw
+emails, card numbers, phone numbers or cued names, then truncated.
 """
 
 from __future__ import annotations
@@ -11,9 +12,10 @@ from __future__ import annotations
 from datetime import date
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from scruple.ingest.currency import Currency
+from scruple.security.redact import redact_text
 
 
 class Direction(StrEnum):
@@ -43,6 +45,13 @@ class StatementEntry(BaseModel):
     return_reason: str | None = Field(default=None, max_length=35)
     status: str | None = Field(default=None, max_length=16)
     description: str | None = Field(default=None, max_length=500)
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def _redact(cls, v: object) -> object:
+        if isinstance(v, str):
+            return truncate(redact_text(v[:20_000]).text, 500)
+        return v
 
     @property
     def signed_minor(self) -> int:
