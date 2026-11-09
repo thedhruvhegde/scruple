@@ -147,3 +147,9 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   cap, $5 regression to detect, $20 per-case sd, alpha 0.05, power 0.8) are the
   illustrative values from docs/math, and "case type" defaults to case family. A real
   plan needs the deployment's own caps, tolerances and type definitions.
+- **A-32** Generator base mix (scruple/sim/disputes.py `CaseMix` defaults): 60% Visa /
+  40% Mastercard, 20% of disputes open as an inquiry, 50% valid claims when no family
+  weights are given, amounts `max($5, lognormal(4.4, 0.9) dollars)`, transactions
+  processed within 60 days of the start date and disputed 3 to 90 days later. None of
+  this is calibrated; see docs/results/SIM_FIDELITY.md for how far one public dataset
+  is from it.
