@@ -1,0 +1,8 @@
+case_id,charge,amount,ccy,state,why,opened,due,scheme,scheme_code
+c-001,pay-001,12.50,usd,open,fraud,2026-01-05T10:00:00Z,2026-01-25,visa,10.4
+c-002,pay-002,99.00,EUR,won,item_missing,2026-01-06,,mastercard,
+c-003,pay-003,1000,JPY,lost,other,2026-01-07T09:30:00+09:00,,,
+c-004,pay-004,12.345,USD,open,fraud,2026-01-08,,,
+c-005,pay-005,5.00,USD,escalated,fraud,2026-01-09,,,
+c-001,pay-006,1.00,USD,open,fraud,2026-01-10,,,
+c-007,pay-007,7.00,USD,open,fraud,2026-01-11T10:00:00,,,

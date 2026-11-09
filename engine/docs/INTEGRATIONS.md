@@ -81,3 +81,24 @@ Rules every adapter follows:
 - `live: "true"` notifications are refused unless `allow_live=True`.
 - Not done: an HTTP route for Adyen (the adapter is a function), Basic auth on the
   endpoint, the `[accepted]` acknowledgement, the Disputes API client.
+
+## CSV and JSONL case import (`scruple.ingest.tabular`)
+
+- `ImportConfig` (Pydantic, frozen, extra forbidden) declares the column for each
+  `ExternalCase` field, the amount format (`decimal` parsed exactly with the ISO 4217
+  exponent, or `minor` integers), and the `status_map` / `reason_map` from the
+  source's values to scruple's. Two fields may not share a column.
+- File-level problems (missing or duplicate columns, unmapped extra columns unless
+  `allow_extra_columns`, empty file, bad UTF-8, NUL bytes, too many bytes or rows)
+  raise. Row-level problems become `RowError(row, column, message)`; all problems in
+  a row are reported, not just the first. `strict=True` raises `ImportFailedError`
+  carrying the full report.
+- No silent drops: `rows_read == len(cases) + rows that failed` (hypothesis property).
+  Duplicate ids are errors that name the first row. A CSV quoting error stops reading
+  at that row (Python's csv module cannot resynchronise) and is reported there.
+- Timestamps need a UTC offset; a plain `YYYY-MM-DD` date means midnight UTC.
+- Values are only ever strings: nothing is evaluated (`=1+1` stays text).
+- Parquet is deferred: pyarrow is a large native dependency for one format. Convert to
+  CSV or JSONL first.
+- Currency table: `scruple.ingest.currency`, from datasets/currency-codes at `31cfa13`
+  (ODC-PDDL-1.0; list published by SIX Group as ISO 4217 maintenance agency).
