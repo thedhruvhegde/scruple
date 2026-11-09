@@ -55,3 +55,10 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   windows are not sourced (public sources conflict: 15, 30, 45, 75 days). Mastercard
   disputes are modelled with the same collaboration-shaped flow as Visa consumer
   disputes (chargeback, second presentment, pre-arbitration, arbitration).
+- **A-15** The mapping from each reason code's key-evidence text (S1) to the simulator's
+  `EvidenceKind` values, and the split into required and supporting evidence, is ours.
+  S1 itself says its evidence field is a synthesis, not official network guidance.
+- **A-16** Mastercard does not use Visa's four categories. We map 4837, 4863, 4870 and
+  4871 to fraud; 4808 and 4812 to authorization; 4834 to processing error; 4841, 4850,
+  4853 and 4855 to consumer dispute. `legacy_family` (bridge to the original
+  three-family simulator) and `card_present` are also our labels.
