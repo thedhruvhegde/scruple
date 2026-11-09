@@ -25,6 +25,7 @@ from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT
 from scruple.verifiers.ledger_invariants import LEDGER_INVARIANTS
 from scruple.verifiers.process import PROCESS
 from scruple.verifiers.record import EpisodeRecord
+from scruple.verifiers.self_report import SELF_REPORT, TEXT_HYGIENE, WIN_RATE_CLAIM
 
 DISPUTE_CHECKS: tuple[Check, ...] = (
     RECORD_INTEGRITY,
@@ -37,8 +38,10 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     DEADLINES,
     DEADLINE_CREDIT,
     CALIBRATION_EPISODE,
+    SELF_REPORT,
+    TEXT_HYGIENE,
 )
-BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION)
+BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION, WIN_RATE_CLAIM)
 
 
 def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS) -> Scorecard:
