@@ -67,6 +67,10 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   loses ($600 Visa, $575 Mastercard). Public secondary sources (S16) report figures of
   this order, but real amounts depend on the acquirer and change over time. The
   "loser pays, merchant always pays its own fees" model is a simplification.
+- **A-18** Merchant profiles are synthetic: risk tiers (60% low, 30% medium, 10% high),
+  chargeback rates of 0.1-0.6%, 0.6-1.4% and 1.4-4.0% of settled transactions per tier,
+  log-normal monthly volume, and fraud reports at 20-60% of chargebacks. None of this is
+  calibrated to any real portfolio or MCC.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own

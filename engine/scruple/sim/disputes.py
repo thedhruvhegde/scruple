@@ -59,6 +59,7 @@ from scruple.sim.deadlines import (
 )
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
 from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
+from scruple.sim.merchants import MerchantProfile, generate_merchants
 from scruple.sim.models import Resolution, Stage
 from scruple.sim.networks import (
     Category,
@@ -89,6 +90,7 @@ class CardDispute(BaseModel):
     case_id: str
     txn_id: str
     merchant_id: str
+    mcc: str
     network: Network
     reason_code: str
     currency: str
@@ -147,6 +149,7 @@ class CaseMix(BaseModel):
     )
     p_inquiry: float = Field(0.2, ge=0, le=1)  # share opening as an inquiry
     p_claim_valid: float = Field(0.5, ge=0, le=1)
+    n_merchants: int = Field(40, ge=1)
 
 
 DEFAULT_MIX = CaseMix()
@@ -163,6 +166,7 @@ def generate_cases(
 ) -> list[CardDispute]:
     """Seeded synthetic disputes. Same (seed, n, mix, start) gives identical cases."""
     rng = random.Random(seed)
+    merchants = generate_merchants(seed, mix.n_merchants)
     networks = sorted(mix.network_weights, key=lambda x: x.value)
     weights = [mix.network_weights[x] for x in networks]
     out: list[CardDispute] = []
@@ -175,11 +179,13 @@ def generate_cases(
         valid = rng.random() < mix.p_claim_valid
         stage = Stage.INQUIRY if rng.random() < mix.p_inquiry else Stage.CHARGEBACK
         key = f"{seed}-{i:06d}"
+        merchant = rng.choice(merchants)
         out.append(
             CardDispute(
                 case_id=f"cd-{key}",
                 txn_id=f"tx-{key}",
-                merchant_id=f"m-{rng.randint(1, 40):03d}",
+                merchant_id=merchant.merchant_id,
+                mcc=merchant.mcc,
                 network=net,
                 reason_code=spec.code,
                 currency=CURRENCY,
@@ -257,6 +263,7 @@ class Observation(BaseModel):
     deadline: Deadline | None
     allowed_actions: tuple[str, ...]
     history: tuple[Transition, ...]
+    merchant: MerchantProfile | None = None
 
 
 class CaseOutcome(BaseModel):
@@ -317,6 +324,7 @@ class DisputeEngine:
         *,
         fees: dict[Network, FeeSchedule] | None = None,
         issuer: Issuer | None = None,
+        merchants: tuple[MerchantProfile, ...] = (),
         params: EngineParams | None = None,
         calendar: BusinessCalendar = DEFAULT_CALENDAR,
     ) -> None:
@@ -325,6 +333,7 @@ class DisputeEngine:
         self.issuer: Issuer = issuer if issuer is not None else TruthIssuer()
         self.params = params or EngineParams()
         self.calendar = calendar
+        self.merchants = {m.merchant_id: m for m in merchants}
         self.ledger = CardLedger()
         self._cases: dict[str, _CaseState] = {}
         for c in cases:
@@ -396,6 +405,7 @@ class DisputeEngine:
             deadline=self.deadline(case_id),
             allowed_actions=self.allowed_actions(case_id),
             history=st.life.history,
+            merchant=self.merchants.get(st.case.merchant_id),
         )
 
     def outcome(self, case_id: str) -> CaseOutcome | None:

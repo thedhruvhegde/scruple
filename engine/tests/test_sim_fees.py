@@ -31,6 +31,7 @@ def case(
         case_id="cd-1",
         txn_id="tx-1",
         merchant_id="m-001",
+        mcc="5999",
         network=network,
         reason_code=code,
         currency="USD",
