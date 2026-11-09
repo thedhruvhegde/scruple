@@ -147,3 +147,21 @@ Rules every adapter follows:
   and credit columns, ISO or day-first or month-first dates, row-level errors.
 - Bank files are all-or-nothing for structure (control totals are file-level); the CSV
   importer reports per row.
+
+## NACHA ACH returns (`scruple.ingest.nacha`)
+
+- Record layout, return addenda (type 99) and control rules from moov-io/ach at
+  `c7025ec` (Apache 2.0), checked against its public test files (two returns files, one
+  PPD debit). Return reason titles (R01 to R85) ported from its `addenda99.go`; unknown
+  codes such as R97 parse with no title.
+- Checked: every record exactly 94 ASCII characters (trimmed lines only with
+  `allow_trimmed=True`); record order; file header constants; transaction codes; addenda
+  indicator agrees with addenda present; return addenda trace equals its entry's trace;
+  batch control (service class, entry/addenda count, entry hash mod 10^10, debit and
+  credit totals, batch number); file control (batch count, block count, counts, hash,
+  totals); only all-9 filler after the file control.
+- Privacy: account number reduced to last four characters; receiver name and individual
+  id are not kept.
+- Tests: tampering of each control field, a generator of valid files (hypothesis round
+  trip, including entry hash overflow), single-byte mutation fuzzing.
+- Not done: IAT and ADV formats, notification of change (addenda 98) contents, writing files.
