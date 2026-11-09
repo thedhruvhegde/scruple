@@ -48,6 +48,7 @@ class Stage(StrEnum):
     INQUIRY = "inquiry"
     CHARGEBACK = "chargeback"
     REPRESENTMENT = "representment"
+    PRE_ARBITRATION = "pre_arbitration"  # used by scruple.sim.lifecycle only
     ARBITRATION = "arbitration"
     RESOLVED = "resolved"
 
