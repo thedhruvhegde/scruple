@@ -20,6 +20,7 @@ from __future__ import annotations
 import contextlib
 import json
 from collections.abc import Mapping, Sequence
+from datetime import timedelta
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
@@ -42,6 +43,8 @@ from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.dispute import score_record
 from scruple.verifiers.record import BaselineResult, EpisodeRecord, SelfReport, merchant_cost
 from scruple.verifiers.trace import Actor, EventKind, Trace
+
+MAX_IDLE_DAYS = 800
 
 DISPUTE_TASK = (
     "You are handling one card dispute for a merchant, across its lifecycle. All data "
@@ -228,13 +231,13 @@ class DisputeEpisode:
             day, Actor.AGENT, EventKind.TOOL_CALL, tool=name, args=logged, data=_jsonable(data)
         )
         if isinstance(parsed, WaitArgs):
-            self.session.advance(parsed.days)
+            end = day + timedelta(days=parsed.days)
             self.trace.append(
-                self.session.today,
-                Actor.CLOCK,
-                EventKind.CLOCK,
-                data={"from": str(day), "to": str(self.session.today)},
+                end, Actor.CLOCK, EventKind.CLOCK, data={"from": str(day), "to": str(end)}
             )
+            for _ in range(parsed.days):  # one day at a time, so every state is traced
+                self.session.advance(1)
+                self._sync_trace()
             result = {"status": self.session.status()}
         self._sync_trace()
         return result
@@ -426,7 +429,12 @@ class DisputeEpisode:
 
     def _close(self, report: SelfReport, *, lapsed: bool) -> DisputeScore:
         s = self.session
-        s.run_out()
+        for _ in range(MAX_IDLE_DAYS):  # the agent is idle: time runs a day at a time
+            if s.engine.is_resolved(s.case_id):
+                break
+            s.advance(1)
+            self._sync_trace()
+        s.run_out()  # never needed in practice; guarantees an outcome
         self._sync_trace()
         self.trace.append(
             s.today, Actor.ENV, EventKind.CLOSE, data={"lapsed": lapsed, "resolution": None}

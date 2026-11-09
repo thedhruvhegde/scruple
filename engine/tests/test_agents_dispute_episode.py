@@ -272,3 +272,15 @@ def test_openai_tool_schemas_are_closed() -> None:
     tools = dispute_openai_tools()
     assert {t["function"]["name"] for t in tools} == set(DISPUTE_TOOL_NAMES)
     assert all(t["function"]["parameters"]["additionalProperties"] is False for t in tools)
+
+
+def test_every_intermediate_state_is_traced_while_time_passes() -> None:
+    seed = find_seed(lambda c: c.opening_stage.value == "inquiry" and c.refund_in_flight is None)
+    ep = DisputeEpisode(seed)
+    ep.submit(REPORT)  # idle: inquiry lapses, then the chargeback lapses
+    states = [e.data["stage"] for e in ep.record().events(EventKind.STATE)]
+    assert states[:2] == ["inquiry", "chargeback"]
+    env_days = [
+        e.day for e in ep.trace if e.actor.value != "agent" and e.kind is not EventKind.CLOCK
+    ]
+    assert env_days == sorted(env_days)
