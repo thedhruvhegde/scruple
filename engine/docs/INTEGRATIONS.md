@@ -70,8 +70,8 @@ Rules every adapter follows:
   Several keys may be configured (rotation). One bad item rejects the whole delivery.
 - Shape and event list from Adyen/adyen-openapi `json/Webhooks-v1.json` at `d449f09`
   (MIT). `EVENT_MAP` equals the 19 webhooks tagged `Dispute` (contract test).
-  Note: that spec's `eventCode` enum omits five of those webhooks (`PREARBITRATION_ACCEPTED`,
-  `_DECLINED`, `_ISSUER_WITHDRAWN`, `SCHEME_ARBITRATION`, `_WON`/`_LOST`), so the wire model
+  Note: that spec's `eventCode` enum omits six of those webhooks (`PREARBITRATION_ACCEPTED`,
+  `_DECLINED`, `_ISSUER_WITHDRAWN`, `SCHEME_ARBITRATION`, `_WON`, `_LOST`), so the wire model
   keeps `eventCode` as a string and `EVENT_MAP` decides.
 - ASSUMPTION: (stage, state) per event is our reading of each webhook's one-line summary;
   `disputeStatus`, when present, overrides the state (`Expired`/`Undefended` read as LOST).
