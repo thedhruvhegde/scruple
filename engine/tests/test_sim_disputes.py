@@ -17,6 +17,7 @@ from scruple.sim.disputes import (
     CardDispute,
     DisputeEngine,
     Escalate,
+    Refund,
     Represent,
     RequestInfo,
     TruthIssuer,
@@ -180,9 +181,20 @@ BY_KIND: dict[str, AgentAction] = {
     "accept": Accept(),
     "represent": Represent(),
     "escalate": Escalate(),
+    "refund": Refund(amount_minor=500),
     "request_info": RequestInfo(),
 }
-action_st = st.sampled_from([Accept(), Represent(), Represent(evidence_ids=("x",)), Escalate()])
+action_st = st.sampled_from(
+    [
+        Accept(),
+        Represent(),
+        Represent(evidence_ids=("x",)),
+        Escalate(),
+        RequestInfo(),
+        Refund(amount_minor=500),
+        Refund(amount_minor=10**7),
+    ]
+)
 
 
 @settings(max_examples=60, deadline=None)
@@ -207,7 +219,7 @@ def test_ledger_balances_after_any_action_sequence(
         out = e.outcome(c.case_id)
         assert out is not None
         assert out.path[-1] is Stage.RESOLVED
-        assert out.cardholder_net_minor in (0, c.amount_minor)
+        assert out.cardholder_net_minor == e.ledger.returned(c.txn_id)
 
 
 def check_ledger(e: DisputeEngine, cases: list[CardDispute]) -> None:
@@ -215,7 +227,12 @@ def check_ledger(e: DisputeEngine, cases: list[CardDispute]) -> None:
     for entry in e.ledger.entries:
         assert sum(p.amount_minor for p in entry.postings) == 0
     for c in cases:
-        assert 0 <= e.ledger.returned(c.txn_id) <= e.ledger.captured(c.txn_id)
+        returned = e.ledger.returned(c.txn_id)
+        assert returned >= 0
+        if returned > e.ledger.captured(c.txn_id):
+            # only a network chargeback debit can over-credit, and the ledger flags it
+            assert c.txn_id in e.ledger.over_credited()
+            assert any(v.txn_id == c.txn_id for v in e.ledger.violations)
         assert e.ledger.balance(f"cardholder:{c.txn_id}", c.currency) == (
             e.ledger.returned(c.txn_id) - c.captured_minor
         )

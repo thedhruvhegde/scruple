@@ -4,6 +4,11 @@ Wraps the double-entry `Ledger` (every entry balances) and adds per-transaction
 tracking of what has gone back to the cardholder, so money-movement invariants can
 be checked as postings happen rather than only after a run.
 
+Double refunds (roadmap 027): a merchant refund that would return more than was
+captured is refused (`DoubleRefundError`). A network chargeback debit cannot be
+refused, so when it over-credits the cardholder the ledger records a `DoubleRefund`
+violation; `over_credited()` lists transactions that are still over-credited.
+
 Accounts: `merchant:<id>`, `cardholder:<txn>`, `processor:fees`, `network:fees`.
 """
 
@@ -11,9 +16,24 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from pydantic import BaseModel, ConfigDict
+
 from scruple.sim.ledger import JournalEntry, Ledger
 
 FEE_CURRENCY = "USD"
+
+
+class DoubleRefundError(ValueError):
+    """A refund that would return more to the cardholder than was captured."""
+
+
+class DoubleRefund(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    txn_id: str
+    case_id: str
+    entry_id: int  # the chargeback debit that over-credited
+    over_by: int  # txn currency minor units
 
 
 class CardLedger:
@@ -24,6 +44,7 @@ class CardLedger:
         self._merchant: dict[str, str] = {}
         # net amount returned to the cardholder per txn (refunds + chargebacks - reversals)
         self._returned: dict[str, int] = defaultdict(int)
+        self._violations: list[DoubleRefund] = []
 
     # --- queries ---------------------------------------------------------
     @property
@@ -68,10 +89,40 @@ class CardLedger:
             [(f"cardholder:{txn_id}", -amount), (f"merchant:{merchant_id}", amount)],
         )
 
+    def refund(self, txn_id: str, case_id: str | None, amount: int) -> JournalEntry:
+        """A merchant-initiated refund. Strict: refuses anything above the headroom."""
+        if amount > self.headroom(txn_id):
+            raise DoubleRefundError(
+                f"refund of {amount} on {txn_id} exceeds the {self.headroom(txn_id)} "
+                "not yet returned to the cardholder"
+            )
+        return self.to_cardholder("refund", txn_id, case_id, amount)
+
+    def chargeback_debit(self, txn_id: str, case_id: str, amount: int) -> JournalEntry:
+        """A network-forced debit. It always posts; if it over-credits the cardholder the
+        ledger records a `DoubleRefund` violation instead of refusing."""
+        over = amount - max(0, self.headroom(txn_id))
+        entry = self.to_cardholder("chargeback_debit", txn_id, case_id, amount)
+        if over > 0:
+            self._violations.append(
+                DoubleRefund(txn_id=txn_id, case_id=case_id, entry_id=entry.entry_id, over_by=over)
+            )
+        return entry
+
+    @property
+    def violations(self) -> tuple[DoubleRefund, ...]:
+        return tuple(self._violations)
+
+    def over_credited(self) -> dict[str, int]:
+        """Transactions where the cardholder currently holds more than was captured."""
+        return {
+            t: r - self._captured[t] for t, r in self._returned.items() if r > self._captured[t]
+        }
+
     def to_cardholder(
         self, kind: str, txn_id: str, case_id: str | None, amount: int
     ) -> JournalEntry:
-        """Move `amount` from merchant to cardholder (refund or chargeback debit)."""
+        """Move `amount` from merchant to cardholder. Prefer `refund`/`chargeback_debit`."""
         if amount <= 0:
             raise ValueError(f"{kind} must be positive")
         self._returned[txn_id] += amount

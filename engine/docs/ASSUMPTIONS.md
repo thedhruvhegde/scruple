@@ -93,6 +93,12 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   cardholder mistake) and the cardholder statements with their odds are invented.
   Friendly fraud always comes with device and IP evidence linking the cardholder; true
   fraud never does. Real friendly-fraud rates are disputed and not modelled.
+- **A-23** Refunds racing disputes: only valid claims race, always with a full refund
+  settling 5 days before to 10 days after the dispute opens. A refund that settles
+  before the chargeback debit leaves the cardholder paid twice until the merchant
+  represents with the refund record, which any issuer accepts (the dispute is moot).
+  A merchant refund after the debit is refused by the ledger (the processor would
+  bounce or the merchant would catch it); in reality such refunds often go through.
 - **A-24** Business days are Monday to Friday with no holidays by default. A stage's
   deadline counts from the day the stage was entered, and an action on the due date is
   on time. Real networks count from specific processing dates and use their own

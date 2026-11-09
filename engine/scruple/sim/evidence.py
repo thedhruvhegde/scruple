@@ -97,6 +97,7 @@ class EvidenceVault:
 
     def __init__(self, docs: Iterable[EvidenceDocument] = ()) -> None:
         self._docs: dict[str, EvidenceDocument] = {}
+        self._by_case: dict[str, list[EvidenceDocument]] = {}
         for d in docs:
             self.add(d)
 
@@ -104,12 +105,13 @@ class EvidenceVault:
         if doc.doc_id in self._docs:
             raise EvidenceError(f"duplicate evidence id {doc.doc_id}")
         self._docs[doc.doc_id] = doc
+        self._by_case.setdefault(doc.case_id, []).append(doc)
 
     def __len__(self) -> int:
         return len(self._docs)
 
     def for_case(self, case_id: str) -> tuple[EvidenceDocument, ...]:
-        return tuple(d for d in self._docs.values() if d.case_id == case_id)
+        return tuple(self._by_case.get(case_id, ()))
 
     def resolve(self, case_id: str, ids: Iterable[str]) -> tuple[EvidenceDocument, ...]:
         out: list[EvidenceDocument] = []

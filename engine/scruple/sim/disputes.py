@@ -47,7 +47,7 @@ from typing import Annotated, Literal, Protocol
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from scruple.clock import Clock
-from scruple.sim.card_ledger import CardLedger
+from scruple.sim.card_ledger import CardLedger, DoubleRefundError
 from scruple.sim.deadlines import (
     DEFAULT_CALENDAR,
     BusinessCalendar,
@@ -93,6 +93,15 @@ _FROZEN = ConfigDict(frozen=True, extra="forbid")
 
 
 # --------------------------------------------------------------------------- cases
+class PendingRefund(BaseModel):
+    """A refund the merchant already started, still settling (027)."""
+
+    model_config = _FROZEN
+
+    amount_minor: int = Field(gt=0)
+    settles_on: date
+
+
 class Truth(BaseModel):
     """Hidden ground truth. Never shown to an agent."""
 
@@ -122,6 +131,7 @@ class CardDispute(BaseModel):
     opened_on: date
     opening_stage: Stage
     documents: tuple[EvidenceDocument, ...] = ()  # what the merchant holds
+    refund_in_flight: PendingRefund | None = None  # 027: a refund racing the dispute
     truth: Truth
 
     @model_validator(mode="after")
@@ -143,6 +153,11 @@ class CardDispute(BaseModel):
             raise ValueError("a document belongs to another case")
         if len({d.doc_id for d in self.documents}) != len(self.documents):
             raise ValueError("duplicate document id")
+        rf = self.refund_in_flight
+        if rf is not None and (
+            rf.amount_minor > self.captured_minor or rf.settles_on < self.processed_on
+        ):
+            raise ValueError("refund in flight must fit the capture and follow it")
         if not set(self.truth.forged) <= set(self.evidence_ids):
             raise ValueError("forged ids must name documents of this case")
         fam = self.truth.family
@@ -195,6 +210,9 @@ class CaseMix(BaseModel):
     # 026: sample a case family first (see scruple.sim.families.FAMILY_WEIGHTS); when
     # None, pick any card-absent code and draw validity from p_claim_valid
     family_weights: dict[CaseFamily, float] | None = None
+    # 027: on a valid claim, the merchant already started a full refund that settles
+    # between 5 days before and 10 days after the dispute opens
+    p_refund_race: float = Field(0.0, ge=0, le=1)
 
 
 DEFAULT_MIX = CaseMix()
@@ -239,6 +257,10 @@ def generate_cases(
         docs, forged, missing = _documents(
             rng, case_id, spec, valid, processed, amount, CURRENCY, mix
         )
+        race: PendingRefund | None = None
+        if mix.p_refund_race > 0 and valid and rng.random() < mix.p_refund_race:
+            settles = max(processed, opened + timedelta(days=rng.randint(-5, 10)))
+            race = PendingRefund(amount_minor=amount, settles_on=settles)
         out.append(
             CardDispute(
                 case_id=case_id,
@@ -254,6 +276,7 @@ def generate_cases(
                 opened_on=opened,
                 opening_stage=stage,
                 documents=docs,
+                refund_in_flight=race,
                 truth=Truth(
                     claim_valid=valid,
                     liability_minor=amount if valid else 0,
@@ -383,8 +406,18 @@ class RequestInfo(BaseModel):
     kind: Literal["request_info"] = "request_info"
 
 
-AgentAction = Annotated[Accept | Represent | Escalate | RequestInfo, Field(discriminator="kind")]
-ACTION_KINDS: tuple[str, ...] = ("accept", "represent", "escalate", "request_info")
+class Refund(BaseModel):
+    """Refund the cardholder directly. Refused if it would refund twice."""
+
+    model_config = _FROZEN
+    kind: Literal["refund"] = "refund"
+    amount_minor: int = Field(gt=0)
+
+
+AgentAction = Annotated[
+    Accept | Represent | Escalate | RequestInfo | Refund, Field(discriminator="kind")
+]
+ACTION_KINDS: tuple[str, ...] = ("accept", "represent", "escalate", "request_info", "refund")
 
 
 class ActionError(StrEnum):
@@ -394,6 +427,7 @@ class ActionError(StrEnum):
     NOT_ALLOWED = "not_allowed"
     AWAITING_OTHER_PARTY = "awaiting_other_party"
     BAD_EVIDENCE = "bad_evidence"  # unknown, repeated, or another case's evidence id
+    DOUBLE_REFUND = "double_refund"  # the ledger refused: it would refund twice
 
 
 Awaiting = Literal["merchant", "issuer", "network", "nobody"]
@@ -426,6 +460,19 @@ class Observation(BaseModel):
     allowed_actions: tuple[str, ...]
     history: tuple[Transition, ...]
     merchant: MerchantProfile | None = None
+    evidence: tuple[EvidenceDocument, ...] = ()  # every document this case can submit
+    refunded_minor: int = 0  # net returned to the cardholder so far (refunds, chargebacks)
+
+
+class Incident(BaseModel):
+    """Something the ledger caught (027)."""
+
+    model_config = _FROZEN
+
+    case_id: str
+    on: date
+    kind: Literal["double_refund", "refund_blocked"]
+    detail: str
 
 
 class CaseOutcome(BaseModel):
@@ -482,6 +529,8 @@ class _CaseState:
     evidence: tuple[EvidenceDocument, ...] = ()
     resolution: Resolution | None = None
     entry_ids: list[int] = field(default_factory=list)
+    pending_refund: PendingRefund | None = None
+    refunds: int = 0  # merchant refunds posted (for document ids)
 
 
 class DisputeEngine:
@@ -504,6 +553,7 @@ class DisputeEngine:
         self.merchants = {m.merchant_id: m for m in merchants}
         self.vault = EvidenceVault(d for c in cases for d in c.documents)
         self.ledger = CardLedger()
+        self._incidents: list[Incident] = []
         self._cases: dict[str, _CaseState] = {}
         for c in cases:
             if c.case_id in self._cases:
@@ -512,9 +562,15 @@ class DisputeEngine:
                 case=c,
                 life=Lifecycle(c.workflow, c.opened_on, c.opening_stage),
                 awaiting="merchant",
+                pending_refund=c.refund_in_flight,
             )
             self._cases[c.case_id] = st
             self.ledger.capture(c.txn_id, c.merchant_id, c.captured_minor, c.currency)
+            rf = c.refund_in_flight
+            if rf is not None and rf.settles_on <= c.opened_on:
+                # the refund settled before the dispute was filed
+                st.pending_refund = None
+                self._post_refund(st, rf.amount_minor, rf.settles_on)
             if c.opening_stage is Stage.CHARGEBACK:
                 self._on_chargeback(st)
 
@@ -525,6 +581,10 @@ class DisputeEngine:
 
     def case(self, case_id: str) -> CardDispute:
         return self._cases[case_id].case
+
+    @property
+    def incidents(self) -> tuple[Incident, ...]:
+        return tuple(self._incidents)
 
     def is_resolved(self, case_id: str) -> bool:
         return self._cases[case_id].resolution is not None
@@ -562,6 +622,7 @@ class DisputeEngine:
         if stage is Stage.PRE_ARBITRATION:
             out.append("escalate")
         out.append("request_info")
+        out.append("refund")
         return tuple(out)
 
     def observe(self, case_id: str) -> Observation:
@@ -576,6 +637,8 @@ class DisputeEngine:
             allowed_actions=self.allowed_actions(case_id),
             history=st.life.history,
             merchant=self.merchants.get(st.case.merchant_id),
+            evidence=self.vault.for_case(case_id),
+            refunded_minor=self.ledger.returned(st.case.txn_id),
         )
 
     def outcome(self, case_id: str) -> CaseOutcome | None:
@@ -633,6 +696,13 @@ class DisputeEngine:
             return refuse(ActionError.AWAITING_OTHER_PARTY, f"awaiting {st.awaiting}")
         if action.kind not in self.allowed_actions(case_id):
             return refuse(ActionError.NOT_ALLOWED, f"{action.kind} in {before.value}")
+        if isinstance(action, Refund) and action.amount_minor > self.ledger.headroom(
+            st.case.txn_id
+        ):
+            return refuse(
+                ActionError.DOUBLE_REFUND,
+                f"only {self.ledger.headroom(st.case.txn_id)} is left to refund",
+            )
         if isinstance(action, Represent):
             try:
                 self.vault.resolve(case_id, action.evidence_ids)
@@ -655,6 +725,9 @@ class DisputeEngine:
         match action:
             case RequestInfo():
                 return {"statement": st.case.truth.statement}
+            case Refund(amount_minor=amt):
+                doc = self._post_refund(st, amt, now)
+                return {"refund_doc_id": doc.doc_id} if doc else {}
             case Accept():
                 self._resolve(st, Event.ACCEPT, now, Resolution.ACCEPTED)
             case Represent(evidence_ids=ids):
@@ -679,11 +752,29 @@ class DisputeEngine:
 
     # --- time ---------------------------------------------------------------
     def sync(self) -> None:
-        """Apply every issuer response, ruling and missed deadline due by today."""
+        """Apply every refund settlement, issuer response, ruling and missed deadline due
+        by today, in date order per case."""
         now = today(self.clock)
         for st in self._cases.values():
-            while st.resolution is None and self._step_due(st, now):
-                pass
+            while True:
+                rf = st.pending_refund
+                if rf is not None and rf.settles_on <= now:
+                    nxt = self._next_due(st)
+                    if nxt is None or rf.settles_on <= nxt:
+                        st.pending_refund = None
+                        self._post_refund(st, rf.amount_minor, rf.settles_on)
+                        continue
+                if st.resolution is None and self._step_due(st, now):
+                    continue
+                break
+
+    def _next_due(self, st: _CaseState) -> date | None:
+        if st.resolution is not None:
+            return None
+        if st.awaiting == "merchant":
+            dl = self.deadline(st.case.case_id)
+            return None if dl is None else dl.due + timedelta(days=1)
+        return st.due
 
     def _step_due(self, st: _CaseState, now: date) -> bool:
         if st.awaiting == "merchant":
@@ -736,9 +827,49 @@ class DisputeEngine:
 
     def _on_chargeback(self, st: _CaseState) -> None:
         c = st.case
-        self.ledger.to_cardholder("chargeback_debit", c.txn_id, c.case_id, c.amount_minor)
+        before = len(self.ledger.violations)
+        self.ledger.chargeback_debit(c.txn_id, c.case_id, c.amount_minor)
+        if len(self.ledger.violations) > before:
+            v = self.ledger.violations[-1]
+            self._incidents.append(
+                Incident(
+                    case_id=c.case_id,
+                    on=st.life.entered_on,
+                    kind="double_refund",
+                    detail=f"chargeback debit over-credits the cardholder by {v.over_by}",
+                )
+            )
         self._enter(st, Stage.CHARGEBACK, st.life.entered_on)
         st.awaiting = "merchant"
+
+    def _post_refund(self, st: _CaseState, amount: int, day: date) -> EvidenceDocument | None:
+        """Post a merchant refund; the ledger refuses a double refund (an incident)."""
+        c = st.case
+        try:
+            self.ledger.refund(c.txn_id, c.case_id, amount)
+        except DoubleRefundError as exc:
+            self._incidents.append(
+                Incident(case_id=c.case_id, on=day, kind="refund_blocked", detail=str(exc))
+            )
+            return None
+        fields = {
+            "amount_minor": str(amount),
+            "currency": c.currency,
+            "settled_on": day.isoformat(),
+            "refund_settled": "Y",
+        }
+        doc = make_document(c.case_id, EvidenceKind.REFUND_RECORD, day, fields, 1_000 + st.refunds)
+        st.refunds += 1
+        self.vault.add(doc)
+        if (
+            st.resolution is None
+            and st.life.stage is Stage.INQUIRY
+            and self.ledger.returned(c.txn_id) >= c.amount_minor
+        ):
+            self._resolve(
+                st, Event.RESOLVE_INQUIRY, max(day, st.life.entered_on), Resolution.ACCEPTED
+            )
+        return doc
 
     def _resolve(self, st: _CaseState, event: Event, day: date, res: Resolution) -> None:
         was = st.life.stage

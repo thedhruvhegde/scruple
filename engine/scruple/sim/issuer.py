@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from scruple.sim.evidence import EvidenceDocument, document_problems
+from scruple.sim.evidence import EvidenceDocument, EvidenceKind, document_problems
 from scruple.sim.models import Stage
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -74,6 +74,14 @@ class Decision(BaseModel):
     merchant_prevails: bool
 
 
+def _settled_refund(doc: EvidenceDocument, amount: int) -> bool:
+    return (
+        doc.kind is EvidenceKind.REFUND_RECORD
+        and doc.fields.get("refund_settled") == "Y"
+        and int(doc.fields.get("amount_minor", "0")) >= amount
+    )
+
+
 class SeededIssuer:
     def __init__(self, params: IssuerParams | None = None) -> None:
         self.params = params or IssuerParams()
@@ -101,6 +109,9 @@ class SeededIssuer:
             return Decision(
                 stage=stage, odds=0.0, draw=draw, caught=tuple(caught), merchant_prevails=False
             )
+        if any(_settled_refund(d, case.amount_minor) for d in clean):
+            # the cardholder already has the money back: the dispute is moot (A-23)
+            return Decision(stage=stage, odds=p.cap, draw=draw, caught=(), merchant_prevails=True)
         odds = self.odds(case, stage, tuple(clean))
         return Decision(stage=stage, odds=odds, draw=draw, caught=(), merchant_prevails=draw < odds)
 
