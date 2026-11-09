@@ -1,0 +1,510 @@
+{
+ "audit": [
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:01Z",
+   "entry_hash": "908e097b967a78a153f99d36704ea6df7b35d887a5f4c0d39b0c78a3ab03d08e",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "8396808fc37677060c2556a52de96e7aac8d3d0f997103f6cabf87f481630776",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-high-value-escalate",
+    "spec": {
+     "action": "escalate",
+     "conditions": [
+      {
+       "field": "amount_usd_minor",
+       "op": "gt",
+       "value": 1000000
+      }
+     ],
+     "description": "Disputes above $10,000 always go to a human analyst.",
+     "priority": 0
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 1
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:03Z",
+   "entry_hash": "7fe97696a5038d1ed2cd10f597ca4ec2a41767dc3337d1eff85f29e8c990d34d",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "56cf57d93000a2820fa025d331f66cffdf953bf2c23b3b0a8caa178739ca7ff9",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-late-evidence-accept",
+    "spec": {
+     "action": "accept",
+     "conditions": [
+      {
+       "field": "evidence_on_time",
+       "op": "eq",
+       "value": false
+      }
+     ],
+     "description": "If evidence cannot arrive before the deadline, accept.",
+     "priority": 10
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "908e097b967a78a153f99d36704ea6df7b35d887a5f4c0d39b0c78a3ab03d08e",
+   "seq": 2
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:05Z",
+   "entry_hash": "5d0520f8dc79d9ffa399dab5f4b1115fc6ff8b910c8826ca450ef676c2e305be",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "643d8d1b7fb797262d05103bc3f6af08086625e9b3ee4d2d4451960fc7caa200",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-duplicate-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "prior_dispute_on_txn",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest disputes on a transaction that was already disputed.",
+     "priority": 20
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "7fe97696a5038d1ed2cd10f597ca4ec2a41767dc3337d1eff85f29e8c990d34d",
+   "seq": 3
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:07Z",
+   "entry_hash": "091910f80b6aac4325a6a877d3d60969ab326cd3569c619ced7f4281845dd5fe",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "33153d93a768b6636936806bb139b885bbec62407cf9c33374374e6d698e5369",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-fraud-3ds-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "reason_code",
+       "op": "eq",
+       "value": "fraud"
+      },
+      {
+       "field": "three_ds",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest fraud claims on 3-D Secure authenticated transactions.",
+     "priority": 30
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "5d0520f8dc79d9ffa399dab5f4b1115fc6ff8b910c8826ca450ef676c2e305be",
+   "seq": 4
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:09Z",
+   "entry_hash": "8e8010ce545373f9035d617d7cff08b997fe6b66e862765b046b8bfaf5c7a1e8",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "920940ec8a35c826a0f3d7acbb7115bea306a505840537cf76f0cdb46a0cdd0a",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-refund-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "has_prior_refund",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest when a partial refund was already issued.",
+     "priority": 40
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "091910f80b6aac4325a6a877d3d60969ab326cd3569c619ced7f4281845dd5fe",
+   "seq": 5
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:11Z",
+   "entry_hash": "e6adba29d1cf6a0358192929ce43092d721267dcbe55a4b9303621c3a00a4628",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "d139ef1bf4d28739ad5ce1203e18d7946820f09fb9d1366db506fb1d6f77b8ee",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-fx-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "currency_mismatch",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest when dispute and settlement currencies differ.",
+     "priority": 45
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "8e8010ce545373f9035d617d7cff08b997fe6b66e862765b046b8bfaf5c7a1e8",
+   "seq": 6
+  },
+  {
+   "actor": "ops-team",
+   "at": "2026-01-01T00:00:13Z",
+   "entry_hash": "43eb1c822be4439c6ed8dd999c7b891e9fe3594a1521f27fa865cf4cb28b41d2",
+   "event_type": "rule.registered",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "dispute-agent-1",
+     "claimed_metrics": {},
+     "episode_ids": [
+      "ep-1",
+      "ep-2",
+      "ep-3"
+     ],
+     "notes": ""
+    },
+    "rule_id": "inr-delivered-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "reason_code",
+       "op": "eq",
+       "value": "not_received"
+      },
+      {
+       "field": "delivery_confirmed",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+     "priority": 50
+    },
+    "status": "candidate",
+    "version": 1
+   },
+   "prev_hash": "e6adba29d1cf6a0358192929ce43092d721267dcbe55a4b9303621c3a00a4628",
+   "seq": 7
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:14Z",
+   "entry_hash": "83fae76360622c5f7259c6fb59cd03d247bad7c32d11ecdc86383b12f5445499",
+   "event_type": "rule.status_changed",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "from_status": "candidate",
+    "reason": "shadow evaluation started",
+    "rule_id": "inr-delivered-contest",
+    "to_status": "shadow",
+    "version": 1
+   },
+   "prev_hash": "43eb1c822be4439c6ed8dd999c7b891e9fe3594a1521f27fa865cf4cb28b41d2",
+   "seq": 8
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:16Z",
+   "entry_hash": "eef74717f3ccfa73c60f81ca8a636e49bd82f6c99dcbbe333908b6f4f7403b46",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00001",
+    "decision_sha256": "8f88b4a6957d297c21dc1cc2d5d80b33fbf4d8756f381a4fa9b0d52b27547515",
+    "outcome": "promote",
+    "rule_id": "inr-delivered-contest",
+    "stage": "shadow",
+    "version": 1
+   },
+   "prev_hash": "83fae76360622c5f7259c6fb59cd03d247bad7c32d11ecdc86383b12f5445499",
+   "seq": 9
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:17Z",
+   "entry_hash": "01879a997c2693ad09a055af141e32958a8144d23e5a3168cbf7c147af12c8d7",
+   "event_type": "rule.status_changed",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00001",
+    "from_status": "shadow",
+    "reason": "shadow evaluation passed",
+    "rule_id": "inr-delivered-contest",
+    "to_status": "canary",
+    "version": 1
+   },
+   "prev_hash": "eef74717f3ccfa73c60f81ca8a636e49bd82f6c99dcbbe333908b6f4f7403b46",
+   "seq": 10
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:19Z",
+   "entry_hash": "790447fccf7d418d428f9bcef857c31d2a9b9b7c09efff403d97dd89a3774fb8",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00002",
+    "decision_sha256": "e7ca4ae3b4f6eee548734f3aad04551c919388458a8a55d6f19b3b63be6250cd",
+    "outcome": "canary_passed",
+    "rule_id": "inr-delivered-contest",
+    "stage": "canary",
+    "version": 1
+   },
+   "prev_hash": "01879a997c2693ad09a055af141e32958a8144d23e5a3168cbf7c147af12c8d7",
+   "seq": 11
+  },
+  {
+   "actor": "model-risk@demo.bank",
+   "at": "2026-01-01T00:00:20Z",
+   "entry_hash": "c03c170664cf4becf63a41daad650beab3ca814e72a826c0eb48a19cc39fab47",
+   "event_type": "approval.policy_set",
+   "payload": {
+    "policy": {
+     "approvers": [
+      {
+       "name": "alice@demo.bank",
+       "roles": [
+        "model-risk"
+       ]
+      },
+      {
+       "name": "bob@demo.bank",
+       "roles": []
+      },
+      {
+       "name": "carol@demo.bank",
+       "roles": []
+      }
+     ],
+     "grant_ttl_seconds": 259200,
+     "request_ttl_seconds": 604800,
+     "required": 2,
+     "required_role": "model-risk"
+    }
+   },
+   "prev_hash": "790447fccf7d418d428f9bcef857c31d2a9b9b7c09efff403d97dd89a3774fb8",
+   "seq": 12
+  },
+  {
+   "actor": "bob@demo.bank",
+   "at": "2026-01-01T00:00:22Z",
+   "entry_hash": "839a7c2958d02a1da2bd3adc24e6804915c3915056549c76985fdad795cc5100",
+   "event_type": "approval.requested",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "expires_at": "2026-01-08T00:00:21+00:00",
+    "proposer": "bob@demo.bank",
+    "requested_at": "2026-01-01T00:00:21+00:00",
+    "rule_id": "inr-delivered-contest",
+    "version": 1
+   },
+   "prev_hash": "c03c170664cf4becf63a41daad650beab3ca814e72a826c0eb48a19cc39fab47",
+   "seq": 13
+  },
+  {
+   "actor": "carol@demo.bank",
+   "at": "2026-01-01T00:00:26Z",
+   "entry_hash": "2d668d315d74ed508897fb3ea781bcaffd8687f5bdaa502648ed402e36b80312",
+   "event_type": "approval.granted",
+   "payload": {
+    "approver": "carol@demo.bank",
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "expires_at": "2026-01-04T00:00:25+00:00",
+    "granted_at": "2026-01-01T00:00:25+00:00",
+    "request_seq": 13,
+    "roles": [],
+    "rule_id": "inr-delivered-contest",
+    "version": 1
+   },
+   "prev_hash": "839a7c2958d02a1da2bd3adc24e6804915c3915056549c76985fdad795cc5100",
+   "seq": 14
+  },
+  {
+   "actor": "alice@demo.bank",
+   "at": "2026-01-01T00:00:28Z",
+   "entry_hash": "a7e31bb2ae6039babf9a3d2220eff775d5c43f97c0cbdf4221573b62f30716da",
+   "event_type": "approval.granted",
+   "payload": {
+    "approver": "alice@demo.bank",
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "expires_at": "2026-01-04T00:00:27+00:00",
+    "granted_at": "2026-01-01T00:00:27+00:00",
+    "request_seq": 13,
+    "roles": [
+     "model-risk"
+    ],
+    "rule_id": "inr-delivered-contest",
+    "version": 1
+   },
+   "prev_hash": "2d668d315d74ed508897fb3ea781bcaffd8687f5bdaa502648ed402e36b80312",
+   "seq": 15
+  },
+  {
+   "actor": "alice@demo.bank",
+   "at": "2026-01-01T00:00:30Z",
+   "entry_hash": "a12afc27b20183c6504aa652f2a176fbbe3e796000eef8025c5a542d5b179484",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00003",
+    "decision_sha256": "001e877a996a6d3778073d7b28da8fec6e24b03a054a1f04812565db93d1a020",
+    "outcome": "activated",
+    "rule_id": "inr-delivered-contest",
+    "stage": "activation",
+    "version": 1
+   },
+   "prev_hash": "a7e31bb2ae6039babf9a3d2220eff775d5c43f97c0cbdf4221573b62f30716da",
+   "seq": 16
+  },
+  {
+   "actor": "alice@demo.bank",
+   "at": "2026-01-01T00:00:31Z",
+   "entry_hash": "dcd7c02825c906aac6f90c215cf01af9cfd766b58991bd5e954cfe65204f969d",
+   "event_type": "approval.satisfied",
+   "payload": {
+    "approvers": [
+     "alice@demo.bank",
+     "carol@demo.bank"
+    ],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00003",
+    "request_seq": 13,
+    "rule_id": "inr-delivered-contest",
+    "version": 1
+   },
+   "prev_hash": "a12afc27b20183c6504aa652f2a176fbbe3e796000eef8025c5a542d5b179484",
+   "seq": 17
+  },
+  {
+   "actor": "alice@demo.bank",
+   "at": "2026-01-01T00:00:32Z",
+   "entry_hash": "ef23386c57ff60d094fe32999aa8b664466ca0be9aa5c843edd82e6d2f8895f9",
+   "event_type": "rule.activated",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "from_status": "canary",
+    "reason": "approved; decision dec-00003",
+    "retired_version": null,
+    "rollback_to": null,
+    "rule_id": "inr-delivered-contest",
+    "to_status": "active",
+    "version": 1
+   },
+   "prev_hash": "dcd7c02825c906aac6f90c215cf01af9cfd766b58991bd5e954cfe65204f969d",
+   "seq": 18
+  }
+ ],
+ "head": "ef23386c57ff60d094fe32999aa8b664466ca0be9aa5c843edd82e6d2f8895f9",
+ "steps": [
+  {
+   "counted": [],
+   "expired": [],
+   "missing": 2,
+   "reasons": [
+    "needs 2 more approval(s) of 2",
+    "needs an approval from role model-risk"
+   ],
+   "request_open": true,
+   "role_satisfied": false,
+   "satisfied": false
+  },
+  {
+   "approver": "bob@demo.bank",
+   "detail": "separation of duties: the proposer cannot approve",
+   "refused": "SeparationOfDutiesError"
+  },
+  {
+   "approver": "carol@demo.bank",
+   "decision": null,
+   "status": {
+    "counted": [
+     "carol@demo.bank"
+    ],
+    "expired": [],
+    "missing": 1,
+    "reasons": [
+     "needs 1 more approval(s) of 2",
+     "needs an approval from role model-risk"
+    ],
+    "request_open": true,
+    "role_satisfied": false,
+    "satisfied": false
+   }
+  },
+  {
+   "approver": "alice@demo.bank",
+   "decision": "dec-00003",
+   "status": {
+    "counted": [
+     "alice@demo.bank",
+     "carol@demo.bank"
+    ],
+    "expired": [],
+    "missing": 0,
+    "reasons": [],
+    "request_open": true,
+    "role_satisfied": true,
+    "satisfied": true
+   }
+  }
+ ]
+}

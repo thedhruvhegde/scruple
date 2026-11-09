@@ -1,0 +1,1400 @@
+{
+ "actions": [
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000008",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I do not recognise this charge"
+   },
+   "ok": true,
+   "stage_after": "inquiry",
+   "stage_before": "inquiry"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000008",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "resolved",
+   "stage_before": "inquiry"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000016",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I do not recognise this charge"
+   },
+   "ok": true,
+   "stage_after": "inquiry",
+   "stage_before": "inquiry"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000016",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "resolved",
+   "stage_before": "inquiry"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000003",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I did not make this purchase"
+   },
+   "ok": true,
+   "stage_after": "inquiry",
+   "stage_before": "inquiry"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000009",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I do not recognise this charge"
+   },
+   "ok": true,
+   "stage_after": "chargeback",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000003",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "resolved",
+   "stage_before": "inquiry"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000009",
+   "detail": "",
+   "entries": [
+    19
+   ],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "pre_arbitration",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000002",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I did not make this purchase"
+   },
+   "ok": true,
+   "stage_after": "chargeback",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000002",
+   "detail": "",
+   "entries": [
+    20
+   ],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "pre_arbitration",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000018",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I did not make this purchase"
+   },
+   "ok": true,
+   "stage_after": "chargeback",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "escalate",
+   "case_id": "cd-7-000009",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "arbitration",
+   "stage_before": "pre_arbitration"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000018",
+   "detail": "",
+   "entries": [
+    21
+   ],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "pre_arbitration",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000020",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I do not recognise this charge"
+   },
+   "ok": true,
+   "stage_after": "chargeback",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000020",
+   "detail": "",
+   "entries": [
+    22
+   ],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "pre_arbitration",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "escalate",
+   "case_id": "cd-7-000018",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "arbitration",
+   "stage_before": "pre_arbitration"
+  },
+  {
+   "action": "request_info",
+   "case_id": "cd-7-000012",
+   "detail": "",
+   "entries": [],
+   "error": null,
+   "info": {
+    "statement": "I do not recognise this charge"
+   },
+   "ok": true,
+   "stage_after": "chargeback",
+   "stage_before": "chargeback"
+  },
+  {
+   "action": "represent",
+   "case_id": "cd-7-000012",
+   "detail": "",
+   "entries": [
+    27
+   ],
+   "error": null,
+   "info": {},
+   "ok": true,
+   "stage_after": "pre_arbitration",
+   "stage_before": "chargeback"
+  }
+ ],
+ "cases": [
+  "cd-7-000002",
+  "cd-7-000003",
+  "cd-7-000008",
+  "cd-7-000009",
+  "cd-7-000012",
+  "cd-7-000016",
+  "cd-7-000018",
+  "cd-7-000020"
+ ],
+ "events": [
+  {
+   "case_id": "cd-7-000002",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000002",
+   "on": "2026-03-31",
+   "type": "chargeback_debited"
+  },
+  {
+   "amount_usd_minor": 1500,
+   "case_id": "cd-7-000002",
+   "kind": "fee:chargeback",
+   "payee": "processor:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000002",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000003",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000008",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "on": "2026-03-22",
+   "type": "chargeback_debited"
+  },
+  {
+   "amount_usd_minor": 1500,
+   "case_id": "cd-7-000009",
+   "kind": "fee:chargeback",
+   "payee": "processor:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000009",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000012",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000012",
+   "on": "2026-05-27",
+   "type": "chargeback_debited"
+  },
+  {
+   "amount_usd_minor": 1500,
+   "case_id": "cd-7-000012",
+   "kind": "fee:chargeback",
+   "payee": "processor:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000012",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000016",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "on": "2026-04-01",
+   "type": "chargeback_debited"
+  },
+  {
+   "amount_usd_minor": 1500,
+   "case_id": "cd-7-000018",
+   "kind": "fee:chargeback",
+   "payee": "processor:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000018",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000020",
+   "type": "captured"
+  },
+  {
+   "case_id": "cd-7-000020",
+   "on": "2026-04-06",
+   "type": "chargeback_debited"
+  },
+  {
+   "amount_usd_minor": 1500,
+   "case_id": "cd-7-000020",
+   "kind": "fee:chargeback",
+   "payee": "processor:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000020",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000008",
+   "on": "2026-01-21",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-a5ea460389eaad6e",
+     "ev-cf70579bbdf678b4",
+     "ev-037571dd27ac7ff9",
+     "ev-39911015e97d105d"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000008",
+   "on": "2026-01-22",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000008",
+   "doc_ids": [
+    "ev-a5ea460389eaad6e",
+    "ev-cf70579bbdf678b4",
+    "ev-037571dd27ac7ff9",
+    "ev-39911015e97d105d"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000008",
+   "event": "resolve_inquiry",
+   "on": "2026-01-22",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000008",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000008",
+   "resolution": "won",
+   "type": "case_resolved"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000016",
+   "on": "2026-03-04",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-e08bc13d191cba93",
+     "ev-e3777e24f65650a8",
+     "ev-bc53ada4e138b339",
+     "ev-98394da5735d4c8e",
+     "ev-3362cd8fa4409b50",
+     "ev-59995a0515de36ab"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000016",
+   "on": "2026-03-05",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000016",
+   "doc_ids": [
+    "ev-e08bc13d191cba93",
+    "ev-e3777e24f65650a8",
+    "ev-bc53ada4e138b339",
+    "ev-98394da5735d4c8e",
+    "ev-3362cd8fa4409b50",
+    "ev-59995a0515de36ab"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000016",
+   "event": "resolve_inquiry",
+   "on": "2026-03-05",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000016",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000016",
+   "resolution": "won",
+   "type": "case_resolved"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000003",
+   "on": "2026-03-22",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000009",
+   "on": "2026-03-22",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-8a46989285ccd5de",
+     "ev-4a38ce9d12a9b85c",
+     "ev-72339d6439281bc3",
+     "ev-1cde7ec0858a1a32",
+     "ev-31f49c4c98ee35db"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000003",
+   "on": "2026-03-23",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000003",
+   "doc_ids": [
+    "ev-8a46989285ccd5de",
+    "ev-4a38ce9d12a9b85c",
+    "ev-72339d6439281bc3",
+    "ev-1cde7ec0858a1a32",
+    "ev-31f49c4c98ee35db"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000003",
+   "event": "resolve_inquiry",
+   "on": "2026-03-23",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000003",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000003",
+   "resolution": "won",
+   "type": "case_resolved"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-cfc69086604fb9e6",
+     "ev-a01b72d980bea9dd"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000009",
+   "on": "2026-03-23",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "doc_ids": [
+    "ev-cfc69086604fb9e6",
+    "ev-a01b72d980bea9dd"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "event": "represent",
+   "on": "2026-03-23",
+   "type": "stage_fired"
+  },
+  {
+   "amount_usd_minor": 2500,
+   "case_id": "cd-7-000009",
+   "kind": "fee:pre_arbitration",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000009",
+   "due": "2026-04-02",
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000002",
+   "on": "2026-03-31",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-20825e173c57a18c",
+     "ev-61e5a736188b326b",
+     "ev-18007f5f0221aba8",
+     "ev-a9f8dfd6a9d848f0",
+     "ev-0b4ac63681b0497d",
+     "ev-74a562862ebc201a",
+     "ev-cba7d04670801a56"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000002",
+   "on": "2026-04-01",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000002",
+   "doc_ids": [
+    "ev-20825e173c57a18c",
+    "ev-61e5a736188b326b",
+    "ev-18007f5f0221aba8",
+    "ev-a9f8dfd6a9d848f0",
+    "ev-0b4ac63681b0497d",
+    "ev-74a562862ebc201a",
+    "ev-cba7d04670801a56"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000002",
+   "event": "represent",
+   "on": "2026-04-01",
+   "type": "stage_fired"
+  },
+  {
+   "amount_usd_minor": 2500,
+   "case_id": "cd-7-000002",
+   "kind": "fee:pre_arbitration",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000002",
+   "due": "2026-04-11",
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000018",
+   "on": "2026-04-01",
+   "type": "action_applied"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000009",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "on": "2026-04-02",
+   "type": "pre_arb_declined"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000009",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "kind": "escalate"
+   },
+   "case_id": "cd-7-000009",
+   "on": "2026-04-02",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "event": "escalate",
+   "on": "2026-04-02",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "network",
+   "case_id": "cd-7-000009",
+   "due": "2026-05-02",
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-206f8c906050e261",
+     "ev-3c2a2bada5cc0bc8",
+     "ev-6ef365a3838606f6",
+     "ev-0e4163a3c97e0cbf"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000018",
+   "on": "2026-04-02",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "doc_ids": [
+    "ev-206f8c906050e261",
+    "ev-3c2a2bada5cc0bc8",
+    "ev-6ef365a3838606f6",
+    "ev-0e4163a3c97e0cbf"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "event": "represent",
+   "on": "2026-04-02",
+   "type": "stage_fired"
+  },
+  {
+   "amount_usd_minor": 2500,
+   "case_id": "cd-7-000018",
+   "kind": "fee:pre_arbitration",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000018",
+   "due": "2026-04-12",
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000020",
+   "on": "2026-04-06",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-52c98814dc752c3c",
+     "ev-b7391a877b0ef8e9",
+     "ev-b05457fd1ae198c2",
+     "ev-49dcc1d49e4b37e0",
+     "ev-132b571ca7055d90",
+     "ev-c06afa72381a8742"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000020",
+   "on": "2026-04-07",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000020",
+   "doc_ids": [
+    "ev-52c98814dc752c3c",
+    "ev-b7391a877b0ef8e9",
+    "ev-b05457fd1ae198c2",
+    "ev-49dcc1d49e4b37e0",
+    "ev-132b571ca7055d90",
+    "ev-c06afa72381a8742"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000020",
+   "event": "represent",
+   "on": "2026-04-07",
+   "type": "stage_fired"
+  },
+  {
+   "amount_usd_minor": 2500,
+   "case_id": "cd-7-000020",
+   "kind": "fee:pre_arbitration",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000020",
+   "due": "2026-04-17",
+   "type": "awaiting_set"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000002",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000002",
+   "event": "issuer_accept",
+   "on": "2026-04-11",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000002",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000002",
+   "resolution": "won",
+   "type": "case_resolved"
+  },
+  {
+   "amount_minor": 29896,
+   "case_id": "cd-7-000002",
+   "on": "2026-04-11",
+   "type": "reversal_posted"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000018",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "on": "2026-04-12",
+   "type": "pre_arb_declined"
+  },
+  {
+   "awaiting": "merchant",
+   "case_id": "cd-7-000018",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "action": {
+    "kind": "escalate"
+   },
+   "case_id": "cd-7-000018",
+   "on": "2026-04-12",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "event": "escalate",
+   "on": "2026-04-12",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "network",
+   "case_id": "cd-7-000018",
+   "due": "2026-05-12",
+   "type": "awaiting_set"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000020",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000020",
+   "event": "issuer_accept",
+   "on": "2026-04-17",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000020",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000020",
+   "resolution": "won",
+   "type": "case_resolved"
+  },
+  {
+   "amount_minor": 20418,
+   "case_id": "cd-7-000020",
+   "on": "2026-04-17",
+   "type": "reversal_posted"
+  },
+  {
+   "awaiting": "network",
+   "case_id": "cd-7-000009",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "event": "ruling",
+   "on": "2026-05-02",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000009",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000009",
+   "resolution": "lost",
+   "type": "case_resolved"
+  },
+  {
+   "amount_usd_minor": 60000,
+   "case_id": "cd-7-000009",
+   "kind": "fee:arbitration_loss",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "network",
+   "case_id": "cd-7-000018",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "event": "ruling",
+   "on": "2026-05-12",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000018",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000018",
+   "resolution": "lost",
+   "type": "case_resolved"
+  },
+  {
+   "amount_usd_minor": 60000,
+   "case_id": "cd-7-000018",
+   "kind": "fee:arbitration_loss",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "action": {
+    "kind": "request_info"
+   },
+   "case_id": "cd-7-000012",
+   "on": "2026-05-27",
+   "type": "action_applied"
+  },
+  {
+   "action": {
+    "evidence_ids": [
+     "ev-0e4ac7606027191f",
+     "ev-bb521ededa7a9e40",
+     "ev-a0a42c87115a7dab",
+     "ev-b0b5e89458d4b055",
+     "ev-5e779045e6bbb410",
+     "ev-b844c601cba9d1cd",
+     "ev-e8ab7edf39265062"
+    ],
+    "kind": "represent"
+   },
+   "case_id": "cd-7-000012",
+   "on": "2026-05-28",
+   "type": "action_applied"
+  },
+  {
+   "case_id": "cd-7-000012",
+   "doc_ids": [
+    "ev-0e4ac7606027191f",
+    "ev-bb521ededa7a9e40",
+    "ev-a0a42c87115a7dab",
+    "ev-b0b5e89458d4b055",
+    "ev-5e779045e6bbb410",
+    "ev-b844c601cba9d1cd",
+    "ev-e8ab7edf39265062"
+   ],
+   "type": "evidence_submitted"
+  },
+  {
+   "case_id": "cd-7-000012",
+   "event": "represent",
+   "on": "2026-05-28",
+   "type": "stage_fired"
+  },
+  {
+   "amount_usd_minor": 2500,
+   "case_id": "cd-7-000012",
+   "kind": "fee:pre_arbitration",
+   "payee": "network:fees",
+   "type": "fee_charged"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000012",
+   "due": "2026-06-07",
+   "type": "awaiting_set"
+  },
+  {
+   "awaiting": "issuer",
+   "case_id": "cd-7-000012",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000012",
+   "event": "issuer_accept",
+   "on": "2026-06-07",
+   "type": "stage_fired"
+  },
+  {
+   "awaiting": "nobody",
+   "case_id": "cd-7-000012",
+   "due": null,
+   "type": "awaiting_set"
+  },
+  {
+   "case_id": "cd-7-000012",
+   "resolution": "won",
+   "type": "case_resolved"
+  },
+  {
+   "amount_minor": 11757,
+   "case_id": "cd-7-000012",
+   "on": "2026-06-07",
+   "type": "reversal_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-017",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-017:2025-09-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-017",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-017:2025-10-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-017",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-017:2025-12-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-017",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-017:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 1294400,
+   "case_id": null,
+   "kind": "fine:visa_vamp",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "visa_vamp:m-019:2025-12-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 991200,
+   "case_id": null,
+   "kind": "fine:visa_vamp",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "visa_vamp:m-019:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-019:2025-09-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-019:2025-10-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-019:2025-11-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-019:2025-12-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-019",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-019:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-021",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-021:2025-09-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-021",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-021:2025-10-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-021",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-021:2025-11-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-021",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-021:2025-12-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-021",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-021:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-027",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-027:2025-09-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-027",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-027:2025-10-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-027",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-027:2025-11-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-027",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-027:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-035",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-035:2025-10-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-035",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-035:2025-11-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 200000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-035",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-035:2025-12-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-035",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-035:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-040",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-040:2025-09-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-040",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-040:2025-10-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-040",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-040:2025-11-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-040",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-040:2025-12-01",
+   "type": "fine_posted"
+  },
+  {
+   "amount_usd_minor": 100000,
+   "case_id": null,
+   "kind": "fine:mastercard_ecm",
+   "merchant_id": "m-040",
+   "payee": "network:fines",
+   "ref": "mastercard_ecm:m-040:2026-01-01",
+   "type": "fine_posted"
+  },
+  {
+   "case_id": null,
+   "type": "fines_closed"
+  }
+ ],
+ "incidents": [],
+ "outcomes": {
+  "cd-7-000002": {
+   "cardholder_net_minor": 0,
+   "case_id": "cd-7-000002",
+   "correct": true,
+   "fees_usd_minor": 4000,
+   "liability_minor": 0,
+   "merchant_settled_minor": -552,
+   "path": [
+    "chargeback",
+    "pre_arbitration",
+    "resolved"
+   ],
+   "resolution": "won",
+   "resolved_on": "2026-04-11",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000003": {
+   "cardholder_net_minor": 0,
+   "case_id": "cd-7-000003",
+   "correct": false,
+   "fees_usd_minor": 0,
+   "liability_minor": 2070,
+   "merchant_settled_minor": 0,
+   "path": [
+    "inquiry",
+    "resolved"
+   ],
+   "resolution": "won",
+   "resolved_on": "2026-03-23",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000008": {
+   "cardholder_net_minor": 0,
+   "case_id": "cd-7-000008",
+   "correct": true,
+   "fees_usd_minor": 0,
+   "liability_minor": 0,
+   "merchant_settled_minor": 0,
+   "path": [
+    "inquiry",
+    "resolved"
+   ],
+   "resolution": "won",
+   "resolved_on": "2026-01-22",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000009": {
+   "cardholder_net_minor": 8207,
+   "case_id": "cd-7-000009",
+   "correct": true,
+   "fees_usd_minor": 64000,
+   "liability_minor": 8207,
+   "merchant_settled_minor": -8207,
+   "path": [
+    "chargeback",
+    "pre_arbitration",
+    "arbitration",
+    "resolved"
+   ],
+   "resolution": "lost",
+   "resolved_on": "2026-05-02",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000012": {
+   "cardholder_net_minor": 0,
+   "case_id": "cd-7-000012",
+   "correct": true,
+   "fees_usd_minor": 4000,
+   "liability_minor": 0,
+   "merchant_settled_minor": 0,
+   "path": [
+    "chargeback",
+    "pre_arbitration",
+    "resolved"
+   ],
+   "resolution": "won",
+   "resolved_on": "2026-06-07",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000016": {
+   "cardholder_net_minor": 0,
+   "case_id": "cd-7-000016",
+   "correct": true,
+   "fees_usd_minor": 0,
+   "liability_minor": 0,
+   "merchant_settled_minor": 0,
+   "path": [
+    "inquiry",
+    "resolved"
+   ],
+   "resolution": "won",
+   "resolved_on": "2026-03-05",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000018": {
+   "cardholder_net_minor": 2071,
+   "case_id": "cd-7-000018",
+   "correct": true,
+   "fees_usd_minor": 64000,
+   "liability_minor": 2071,
+   "merchant_settled_minor": -2071,
+   "path": [
+    "chargeback",
+    "pre_arbitration",
+    "arbitration",
+    "resolved"
+   ],
+   "resolution": "lost",
+   "resolved_on": "2026-05-12",
+   "settlement_currency": "USD"
+  },
+  "cd-7-000020": {
+   "cardholder_net_minor": 0,
+   "case_id": "cd-7-000020",
+   "correct": true,
+   "fees_usd_minor": 4000,
+   "liability_minor": 0,
+   "merchant_settled_minor": 97,
+   "path": [
+    "chargeback",
+    "pre_arbitration",
+    "resolved"
+   ],
+   "resolution": "won",
+   "resolved_on": "2026-04-17",
+   "settlement_currency": "USD"
+  }
+ },
+ "state_digest": "105ab5928a6c20b407998e30a79979b5894cf0398bf3f8fb910e40fa8cf90329",
+ "workflow": "allocation"
+}

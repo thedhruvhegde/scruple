@@ -1,0 +1,1520 @@
+{
+ "audit": [
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:01Z",
+   "entry_hash": "908e097b967a78a153f99d36704ea6df7b35d887a5f4c0d39b0c78a3ab03d08e",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "8396808fc37677060c2556a52de96e7aac8d3d0f997103f6cabf87f481630776",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-high-value-escalate",
+    "spec": {
+     "action": "escalate",
+     "conditions": [
+      {
+       "field": "amount_usd_minor",
+       "op": "gt",
+       "value": 1000000
+      }
+     ],
+     "description": "Disputes above $10,000 always go to a human analyst.",
+     "priority": 0
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+   "seq": 1
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:03Z",
+   "entry_hash": "7fe97696a5038d1ed2cd10f597ca4ec2a41767dc3337d1eff85f29e8c990d34d",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "56cf57d93000a2820fa025d331f66cffdf953bf2c23b3b0a8caa178739ca7ff9",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-late-evidence-accept",
+    "spec": {
+     "action": "accept",
+     "conditions": [
+      {
+       "field": "evidence_on_time",
+       "op": "eq",
+       "value": false
+      }
+     ],
+     "description": "If evidence cannot arrive before the deadline, accept.",
+     "priority": 10
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "908e097b967a78a153f99d36704ea6df7b35d887a5f4c0d39b0c78a3ab03d08e",
+   "seq": 2
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:05Z",
+   "entry_hash": "5d0520f8dc79d9ffa399dab5f4b1115fc6ff8b910c8826ca450ef676c2e305be",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "643d8d1b7fb797262d05103bc3f6af08086625e9b3ee4d2d4451960fc7caa200",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-duplicate-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "prior_dispute_on_txn",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest disputes on a transaction that was already disputed.",
+     "priority": 20
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "7fe97696a5038d1ed2cd10f597ca4ec2a41767dc3337d1eff85f29e8c990d34d",
+   "seq": 3
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:07Z",
+   "entry_hash": "091910f80b6aac4325a6a877d3d60969ab326cd3569c619ced7f4281845dd5fe",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "33153d93a768b6636936806bb139b885bbec62407cf9c33374374e6d698e5369",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-fraud-3ds-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "reason_code",
+       "op": "eq",
+       "value": "fraud"
+      },
+      {
+       "field": "three_ds",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest fraud claims on 3-D Secure authenticated transactions.",
+     "priority": 30
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "5d0520f8dc79d9ffa399dab5f4b1115fc6ff8b910c8826ca450ef676c2e305be",
+   "seq": 4
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:09Z",
+   "entry_hash": "8e8010ce545373f9035d617d7cff08b997fe6b66e862765b046b8bfaf5c7a1e8",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "920940ec8a35c826a0f3d7acbb7115bea306a505840537cf76f0cdb46a0cdd0a",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-refund-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "has_prior_refund",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest when a partial refund was already issued.",
+     "priority": 40
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "091910f80b6aac4325a6a877d3d60969ab326cd3569c619ced7f4281845dd5fe",
+   "seq": 5
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:11Z",
+   "entry_hash": "e6adba29d1cf6a0358192929ce43092d721267dcbe55a4b9303621c3a00a4628",
+   "event_type": "rule.baseline_imported",
+   "payload": {
+    "content_hash": "d139ef1bf4d28739ad5ce1203e18d7946820f09fb9d1366db506fb1d6f77b8ee",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "agent-gate",
+     "claimed_metrics": {},
+     "episode_ids": [],
+     "notes": "imported baseline rule"
+    },
+    "rule_id": "base-fx-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "currency_mismatch",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest when dispute and settlement currencies differ.",
+     "priority": 45
+    },
+    "status": "active",
+    "version": 1
+   },
+   "prev_hash": "8e8010ce545373f9035d617d7cff08b997fe6b66e862765b046b8bfaf5c7a1e8",
+   "seq": 6
+  },
+  {
+   "actor": "ops-team",
+   "at": "2026-01-01T00:00:13Z",
+   "entry_hash": "43eb1c822be4439c6ed8dd999c7b891e9fe3594a1521f27fa865cf4cb28b41d2",
+   "event_type": "rule.registered",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "dispute-agent-1",
+     "claimed_metrics": {},
+     "episode_ids": [
+      "ep-1",
+      "ep-2",
+      "ep-3"
+     ],
+     "notes": ""
+    },
+    "rule_id": "inr-delivered-contest",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "reason_code",
+       "op": "eq",
+       "value": "not_received"
+      },
+      {
+       "field": "delivery_confirmed",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+     "priority": 50
+    },
+    "status": "candidate",
+    "version": 1
+   },
+   "prev_hash": "e6adba29d1cf6a0358192929ce43092d721267dcbe55a4b9303621c3a00a4628",
+   "seq": 7
+  },
+  {
+   "actor": "ops-team",
+   "at": "2026-01-01T00:00:15Z",
+   "entry_hash": "db9ed5a4a5a94cdc3ebcb9621a16bb2c74f0e38b0484785431f204180c4fb872",
+   "event_type": "rule.registered",
+   "payload": {
+    "content_hash": "92dc78fc4cfffcf282f7f681c379734466ffd4eb0e033c9ab3ff15e825f63849",
+    "owner": "ops-team",
+    "provenance": {
+     "agent_id": "dispute-agent-1",
+     "claimed_metrics": {},
+     "episode_ids": [
+      "ep-1",
+      "ep-2",
+      "ep-3"
+     ],
+     "notes": ""
+    },
+    "rule_id": "inr-delivered-contest-fast",
+    "spec": {
+     "action": "contest",
+     "conditions": [
+      {
+       "field": "reason_code",
+       "op": "eq",
+       "value": "not_received"
+      },
+      {
+       "field": "delivery_confirmed",
+       "op": "eq",
+       "value": true
+      }
+     ],
+     "description": "Always contest 'item not received' disputes with confirmed delivery; learned as a high-confidence override.",
+     "priority": 5
+    },
+    "status": "candidate",
+    "version": 1
+   },
+   "prev_hash": "43eb1c822be4439c6ed8dd999c7b891e9fe3594a1521f27fa865cf4cb28b41d2",
+   "seq": 8
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:16Z",
+   "entry_hash": "a8be46a8a98e87e51ca2084721e5feaca52e4d6f2cd712126811cba4daef4cbf",
+   "event_type": "rule.status_changed",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "from_status": "candidate",
+    "reason": "shadow evaluation started",
+    "rule_id": "inr-delivered-contest",
+    "to_status": "shadow",
+    "version": 1
+   },
+   "prev_hash": "db9ed5a4a5a94cdc3ebcb9621a16bb2c74f0e38b0484785431f204180c4fb872",
+   "seq": 9
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:18Z",
+   "entry_hash": "13dbf6504a9e62f331d5446ee6f2bbe6ed5bff1286d95449a5b6302e3e98f923",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00001",
+    "decision_sha256": "858fd5e03454d9b3933567305161f860bd96a6e21e1b30e3301e1f2a988ee884",
+    "outcome": "promote",
+    "rule_id": "inr-delivered-contest",
+    "stage": "shadow",
+    "version": 1
+   },
+   "prev_hash": "a8be46a8a98e87e51ca2084721e5feaca52e4d6f2cd712126811cba4daef4cbf",
+   "seq": 10
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:19Z",
+   "entry_hash": "caafffeb347558544f979c35c9e7400483a616b875b452bc728c527b09087d4e",
+   "event_type": "rule.status_changed",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00001",
+    "from_status": "shadow",
+    "reason": "shadow evaluation passed",
+    "rule_id": "inr-delivered-contest",
+    "to_status": "canary",
+    "version": 1
+   },
+   "prev_hash": "13dbf6504a9e62f331d5446ee6f2bbe6ed5bff1286d95449a5b6302e3e98f923",
+   "seq": 11
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:21Z",
+   "entry_hash": "17bfbcfa63abf2c335d70925e860c942e656166f0cd0165c7788d4599ecde7f5",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00002",
+    "decision_sha256": "116c5a28dc1617af6a6e75c32173d86a9ae856f6dec4e085077abf03f4119894",
+    "outcome": "canary_passed",
+    "rule_id": "inr-delivered-contest",
+    "stage": "canary",
+    "version": 1
+   },
+   "prev_hash": "caafffeb347558544f979c35c9e7400483a616b875b452bc728c527b09087d4e",
+   "seq": 12
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:22Z",
+   "entry_hash": "1a0ee0bafb09183c15b24792c77310893ff2766d5982ffb41aa454943735284e",
+   "event_type": "rule.status_changed",
+   "payload": {
+    "content_hash": "92dc78fc4cfffcf282f7f681c379734466ffd4eb0e033c9ab3ff15e825f63849",
+    "from_status": "candidate",
+    "reason": "shadow evaluation started",
+    "rule_id": "inr-delivered-contest-fast",
+    "to_status": "shadow",
+    "version": 1
+   },
+   "prev_hash": "17bfbcfa63abf2c335d70925e860c942e656166f0cd0165c7788d4599ecde7f5",
+   "seq": 13
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:24Z",
+   "entry_hash": "822b38bb1e1c268dcbe70f09c5e7da7e4fe7f388e81139784a5ca56ad0ac2aca",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "92dc78fc4cfffcf282f7f681c379734466ffd4eb0e033c9ab3ff15e825f63849",
+    "decision_id": "dec-00003",
+    "decision_sha256": "7b3d7ded365101f8c56663b3ce330c179b416c97fdc5ae69edece9722c90e6cd",
+    "outcome": "block",
+    "rule_id": "inr-delivered-contest-fast",
+    "stage": "shadow",
+    "version": 1
+   },
+   "prev_hash": "1a0ee0bafb09183c15b24792c77310893ff2766d5982ffb41aa454943735284e",
+   "seq": 14
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:25Z",
+   "entry_hash": "cba25193defce0067e5d6bd43abec25587757f2f5059821070ee133d18248c87",
+   "event_type": "rule.status_changed",
+   "payload": {
+    "content_hash": "92dc78fc4cfffcf282f7f681c379734466ffd4eb0e033c9ab3ff15e825f63849",
+    "decision_id": "dec-00003",
+    "from_status": "shadow",
+    "reason": "blocked by shadow evaluation",
+    "rule_id": "inr-delivered-contest-fast",
+    "to_status": "rejected",
+    "version": 1
+   },
+   "prev_hash": "822b38bb1e1c268dcbe70f09c5e7da7e4fe7f388e81139784a5ca56ad0ac2aca",
+   "seq": 15
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:26Z",
+   "entry_hash": "a3fecc06cdab2bc1fac003d47add068ebdab8dd6ae01f6daeae0b64fdd570103",
+   "event_type": "canary.ramp_started",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "percent": 10.0,
+    "rule_id": "inr-delivered-contest",
+    "schedule": {
+     "confidence": 0.95,
+     "min_matched": 20,
+     "stages": [
+      10.0,
+      25.0
+     ],
+     "tolerance_usd_minor": 500.0
+    },
+    "version": 1
+   },
+   "prev_hash": "cba25193defce0067e5d6bd43abec25587757f2f5059821070ee133d18248c87",
+   "seq": 16
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:28Z",
+   "entry_hash": "5093b1bb16f77e39b32cf9af1abd926c72d8dd68d22e80725ffd124d3ce464b5",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00004",
+    "decision_sha256": "dc524b39cdbc99b852f52c77cebb38cdd810195d5f80876c15d7041874ffb8c6",
+    "outcome": "promote",
+    "rule_id": "inr-delivered-contest",
+    "stage": "canary",
+    "version": 1
+   },
+   "prev_hash": "a3fecc06cdab2bc1fac003d47add068ebdab8dd6ae01f6daeae0b64fdd570103",
+   "seq": 17
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:29Z",
+   "entry_hash": "4b55b82720363c0ccdcea4222c24d3f216596e333a5ffef4ed057e76ebee0362",
+   "event_type": "canary.stage_passed",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00004",
+    "next_percent": 25.0,
+    "next_stage_index": 1,
+    "percent": 10.0,
+    "rule_id": "inr-delivered-contest",
+    "stage_index": 0,
+    "version": 1
+   },
+   "prev_hash": "5093b1bb16f77e39b32cf9af1abd926c72d8dd68d22e80725ffd124d3ce464b5",
+   "seq": 18
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:31Z",
+   "entry_hash": "b80f8bbc9f9caabe0b2590b6e4d361bb3e029d225348c5ea1fc4d057f42879a7",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00005",
+    "decision_sha256": "eae834184e44a087f5998084fe3b676f93730956290cf7f3c7056d3697f850c8",
+    "outcome": "canary_passed",
+    "rule_id": "inr-delivered-contest",
+    "stage": "canary",
+    "version": 1
+   },
+   "prev_hash": "4b55b82720363c0ccdcea4222c24d3f216596e333a5ffef4ed057e76ebee0362",
+   "seq": 19
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:32Z",
+   "entry_hash": "3bcb35f0e6c1b0b358b0d381b65e395dc60443385f078f9a3fecbe34a714ed52",
+   "event_type": "canary.ramp_completed",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00005",
+    "percent": 25.0,
+    "rule_id": "inr-delivered-contest",
+    "stage_index": 1,
+    "version": 1
+   },
+   "prev_hash": "b80f8bbc9f9caabe0b2590b6e4d361bb3e029d225348c5ea1fc4d057f42879a7",
+   "seq": 20
+  },
+  {
+   "actor": "model-risk@demo.bank",
+   "at": "2026-01-01T00:00:34Z",
+   "entry_hash": "cfdcd1011df5103a50f0402099669e2ae4691479992f0d86f60871b785aeae55",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00006",
+    "decision_sha256": "c57d98397b917ddb35c799f945fa5b693151057f23a5458d130e9ac4c53ceda2",
+    "outcome": "activated",
+    "rule_id": "inr-delivered-contest",
+    "stage": "activation",
+    "version": 1
+   },
+   "prev_hash": "3bcb35f0e6c1b0b358b0d381b65e395dc60443385f078f9a3fecbe34a714ed52",
+   "seq": 21
+  },
+  {
+   "actor": "model-risk@demo.bank",
+   "at": "2026-01-01T00:00:35Z",
+   "entry_hash": "03760606aefad1d9d0e059d490590b23299bc5e06bafdb734a975be1daf03c7c",
+   "event_type": "rule.activated",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "from_status": "canary",
+    "reason": "approved; decision dec-00006",
+    "retired_version": null,
+    "rollback_to": null,
+    "rule_id": "inr-delivered-contest",
+    "to_status": "active",
+    "version": 1
+   },
+   "prev_hash": "cfdcd1011df5103a50f0402099669e2ae4691479992f0d86f60871b785aeae55",
+   "seq": 22
+  },
+  {
+   "actor": "agent-gate",
+   "at": "2026-01-01T00:00:37Z",
+   "entry_hash": "57a668359eb87bb347383d4f7091a94687c9eb4a71270ec648a55f1fd64cb05f",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00007",
+    "decision_sha256": "8a6d202a1f248e0061bae2ce008319b55e5aff279d670b36501a5a241be618f7",
+    "outcome": "healthy",
+    "rule_id": "inr-delivered-contest",
+    "stage": "assurance",
+    "version": 1
+   },
+   "prev_hash": "03760606aefad1d9d0e059d490590b23299bc5e06bafdb734a975be1daf03c7c",
+   "seq": 23
+  },
+  {
+   "actor": "model-risk@demo.bank",
+   "at": "2026-01-01T00:00:39Z",
+   "entry_hash": "86f16fb7dbb7d1a95e0f605b27c485157629e426618b8c18b9dca56a99ec07c3",
+   "event_type": "decision.recorded",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "decision_id": "dec-00008",
+    "decision_sha256": "55d5c60c6f83b1f38c990ff1b3ea6597461992cedcfcdd8371fc57da79ff1317",
+    "outcome": "rolled_back",
+    "rule_id": "inr-delivered-contest",
+    "stage": "rollback",
+    "version": 1
+   },
+   "prev_hash": "57a668359eb87bb347383d4f7091a94687c9eb4a71270ec648a55f1fd64cb05f",
+   "seq": 24
+  },
+  {
+   "actor": "model-risk@demo.bank",
+   "at": "2026-01-01T00:00:40Z",
+   "entry_hash": "016989000ffd33212eda330bbd709329921a116ddebce7bbeaa8f8ba4b284a5e",
+   "event_type": "rule.rolled_back",
+   "payload": {
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "from_status": "active",
+    "reason": "golden episode rollback; decision dec-00008",
+    "restored_version": null,
+    "rule_id": "inr-delivered-contest",
+    "to_status": "retired",
+    "version": 1
+   },
+   "prev_hash": "86f16fb7dbb7d1a95e0f605b27c485157629e426618b8c18b9dca56a99ec07c3",
+   "seq": 25
+  }
+ ],
+ "decisions": [
+  {
+   "audit_entry_hash": "13dbf6504a9e62f331d5446ee6f2bbe6ed5bff1286d95449a5b6302e3e98f923",
+   "audit_seq": 10,
+   "decision": {
+    "actor": "agent-gate",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": null,
+    "checks": [
+     {
+      "detail": "0 new ledger violations (e.g. over-refunds)",
+      "kind": "hard",
+      "name": "no_new_ledger_violations",
+      "passed": true
+     },
+     {
+      "detail": "0 new policy violations: none",
+      "kind": "hard",
+      "name": "no_new_policy_violations",
+      "passed": true
+     },
+     {
+      "detail": "0/10 golden cases regressed",
+      "kind": "hard",
+      "name": "golden_regression_suite",
+      "passed": true
+     },
+     {
+      "detail": "worst slice 'currency_mismatch' mean regret change $0.00 per case (tolerance $0.00)",
+      "kind": "hard",
+      "name": "no_slice_regression",
+      "passed": true
+     },
+     {
+      "detail": "escalation rate 2.7% -> 2.7%",
+      "kind": "hard",
+      "name": "escalation_rate_guard",
+      "passed": true
+     },
+     {
+      "detail": "mean improvement $11.30 per case, 95% CI [$7.85, $14.31]",
+      "kind": "hard",
+      "name": "not_significantly_worse",
+      "passed": true
+     },
+     {
+      "detail": "345 held-out cases changed decision (minimum 30)",
+      "kind": "evidence",
+      "name": "enough_affected_cases",
+      "passed": true
+     },
+     {
+      "detail": "CI lower bound $7.85 must exceed $0.00 per case",
+      "kind": "evidence",
+      "name": "significant_improvement",
+      "passed": true
+     }
+    ],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:17Z",
+    "decision_id": "dec-00001",
+    "episodes": 3,
+    "outcome": "promote",
+    "owner": "ops-team",
+    "reasons": [
+     "mean regret improves by $11.30 per case (CI [$7.85, $14.31])",
+     "all hard checks passed"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": {
+     "affected_cases": 345,
+     "baseline": {
+      "accuracy": 0.659,
+      "escalation_rate": 0.027,
+      "ledger_findings": 0,
+      "mean_regret_usd_minor": 3879.287,
+      "policy_findings": 0
+     },
+     "baseline_rules": [
+      "base-high-value-escalate@v1",
+      "base-late-evidence-accept@v1",
+      "base-duplicate-contest@v1",
+      "base-fraud-3ds-contest@v1",
+      "base-refund-contest@v1",
+      "base-fx-contest@v1"
+     ],
+     "candidate": {
+      "accuracy": 0.7805,
+      "escalation_rate": 0.027,
+      "ledger_findings": 0,
+      "mean_regret_usd_minor": 2748.887,
+      "policy_findings": 0
+     },
+     "ci_high": 1430.7965,
+     "ci_low": 785.377,
+     "confidence": 0.95,
+     "conflicts": [],
+     "eval_seed_commitment": "7a2658cf1a1a23f8",
+     "golden_cases": 10,
+     "golden_regressions": [],
+     "matched_cases": 345,
+     "mean_improvement_usd_minor": 1130.4,
+     "n_cases": 2000,
+     "new_ledger_findings": [],
+     "new_policy_findings": [],
+     "profile": "default",
+     "slices": [
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 88,
+       "scenario": "currency_mismatch"
+      },
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 65,
+       "scenario": "duplicate_dispute"
+      },
+      {
+       "baseline_mean_regret": 1964.2097315436242,
+       "candidate_mean_regret": 1964.2097315436242,
+       "changed_cases": 0,
+       "n": 596,
+       "scenario": "fraud"
+      },
+      {
+       "baseline_mean_regret": 3500.0,
+       "candidate_mean_regret": 3500.0,
+       "changed_cases": 0,
+       "n": 54,
+       "scenario": "high_value"
+      },
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 115,
+       "scenario": "late_evidence"
+      },
+      {
+       "baseline_mean_regret": 5374.8020050125315,
+       "candidate_mean_regret": 5374.8020050125315,
+       "changed_cases": 0,
+       "n": 399,
+       "scenario": "not_as_described"
+      },
+      {
+       "baseline_mean_regret": 7347.770293609672,
+       "candidate_mean_regret": 3443.1070811744385,
+       "changed_cases": 345,
+       "n": 579,
+       "scenario": "not_received"
+      },
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 104,
+       "scenario": "partial_refund"
+      }
+     ]
+    },
+    "stage": "shadow",
+    "summary": "Promoted to canary: improves outcomes with no regressions.",
+    "version": 1
+   },
+   "decision_sha256": "858fd5e03454d9b3933567305161f860bd96a6e21e1b30e3301e1f2a988ee884"
+  },
+  {
+   "audit_entry_hash": "17bfbcfa63abf2c335d70925e860c942e656166f0cd0165c7788d4599ecde7f5",
+   "audit_seq": 12,
+   "decision": {
+    "actor": "agent-gate",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": {
+     "control_mean_cost_usd_minor": 11827.2192,
+     "fraction": 0.1,
+     "live_cases": 4000,
+     "matched_control": 625,
+     "matched_treatment": 60,
+     "new_hard_findings": [],
+     "profile": "default",
+     "treatment_cases": 367,
+     "treatment_mean_cost_usd_minor": 1747.3166666666666
+    },
+    "checks": [
+     {
+      "detail": "0 ledger/policy violations on canary cases",
+      "kind": "hard",
+      "name": "canary_no_hard_violations",
+      "passed": true
+     },
+     {
+      "detail": "treatment mean cost $17.47 vs control $118.27 (tolerance $5.00)",
+      "kind": "hard",
+      "name": "canary_cost_within_tolerance",
+      "passed": true
+     },
+     {
+      "detail": "60 treatment / 625 control matched cases (minimum 20 each)",
+      "kind": "evidence",
+      "name": "canary_enough_traffic",
+      "passed": true
+     }
+    ],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:20Z",
+    "decision_id": "dec-00002",
+    "episodes": 3,
+    "outcome": "canary_passed",
+    "owner": "ops-team",
+    "reasons": [
+     "live outcomes within tolerance of control",
+     "no hard violations"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": null,
+    "stage": "canary",
+    "summary": "Canary passed: ready for human approval.",
+    "version": 1
+   },
+   "decision_sha256": "116c5a28dc1617af6a6e75c32173d86a9ae856f6dec4e085077abf03f4119894"
+  },
+  {
+   "audit_entry_hash": "822b38bb1e1c268dcbe70f09c5e7da7e4fe7f388e81139784a5ca56ad0ac2aca",
+   "audit_seq": 14,
+   "decision": {
+    "actor": "agent-gate",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": null,
+    "checks": [
+     {
+      "detail": "0 new ledger violations (e.g. over-refunds)",
+      "kind": "hard",
+      "name": "no_new_ledger_violations",
+      "passed": true
+     },
+     {
+      "detail": "80 new policy violations: no_contest_without_timely_evidence=80",
+      "kind": "hard",
+      "name": "no_new_policy_violations",
+      "passed": false
+     },
+     {
+      "detail": "2/10 golden cases regressed: golden-late-evidence, golden-late-evidence-short-window",
+      "kind": "hard",
+      "name": "golden_regression_suite",
+      "passed": false
+     },
+     {
+      "detail": "worst slice 'late_evidence' mean regret change $10.43 per case (tolerance $0.00)",
+      "kind": "hard",
+      "name": "no_slice_regression",
+      "passed": false
+     },
+     {
+      "detail": "escalation rate 2.7% -> 2.7%",
+      "kind": "hard",
+      "name": "escalation_rate_guard",
+      "passed": true
+     },
+     {
+      "detail": "mean improvement $10.70 per case, 95% CI [$7.51, $13.83]",
+      "kind": "hard",
+      "name": "not_significantly_worse",
+      "passed": true
+     },
+     {
+      "detail": "425 held-out cases changed decision (minimum 30)",
+      "kind": "evidence",
+      "name": "enough_affected_cases",
+      "passed": true
+     },
+     {
+      "detail": "CI lower bound $7.51 must exceed $0.00 per case",
+      "kind": "evidence",
+      "name": "significant_improvement",
+      "passed": true
+     }
+    ],
+    "content_hash": "92dc78fc4cfffcf282f7f681c379734466ffd4eb0e033c9ab3ff15e825f63849",
+    "created_at": "2026-01-01T00:00:23Z",
+    "decision_id": "dec-00003",
+    "episodes": 3,
+    "outcome": "block",
+    "owner": "ops-team",
+    "reasons": [
+     "no_new_policy_violations: 80 new policy violations: no_contest_without_timely_evidence=80",
+     "golden_regression_suite: 2/10 golden cases regressed: golden-late-evidence, golden-late-evidence-short-window",
+     "no_slice_regression: worst slice 'late_evidence' mean regret change $10.43 per case (tolerance $0.00)"
+    ],
+    "rule_description": "Always contest 'item not received' disputes with confirmed delivery; learned as a high-confidence override.",
+    "rule_id": "inr-delivered-contest-fast",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 5)",
+    "shadow": {
+     "affected_cases": 425,
+     "baseline": {
+      "accuracy": 0.659,
+      "escalation_rate": 0.027,
+      "ledger_findings": 0,
+      "mean_regret_usd_minor": 3879.287,
+      "policy_findings": 0
+     },
+     "baseline_rules": [
+      "base-high-value-escalate@v1",
+      "base-late-evidence-accept@v1",
+      "base-duplicate-contest@v1",
+      "base-fraud-3ds-contest@v1",
+      "base-refund-contest@v1",
+      "base-fx-contest@v1"
+     ],
+     "candidate": {
+      "accuracy": 0.7405,
+      "escalation_rate": 0.027,
+      "ledger_findings": 0,
+      "mean_regret_usd_minor": 2808.887,
+      "policy_findings": 80
+     },
+     "ci_high": 1383.406,
+     "ci_low": 751.2155,
+     "confidence": 0.95,
+     "conflicts": [
+      {
+       "cases": 80,
+       "overridden_action": "accept",
+       "overridden_rule": "base-late-evidence-accept@v1"
+      }
+     ],
+     "eval_seed_commitment": "7a2658cf1a1a23f8",
+     "golden_cases": 10,
+     "golden_regressions": [
+      "golden-late-evidence",
+      "golden-late-evidence-short-window"
+     ],
+     "matched_cases": 470,
+     "mean_improvement_usd_minor": 1070.4,
+     "n_cases": 2000,
+     "new_ledger_findings": [],
+     "new_policy_findings": [
+      {
+       "case_id": "case-h90210-000034",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000045",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000049",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000054",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000085",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000130",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000149",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000163",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000177",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      },
+      {
+       "case_id": "case-h90210-000179",
+       "detail": "Never represent a dispute when evidence cannot arrive before the deadline.",
+       "kind": "no_contest_without_timely_evidence"
+      }
+     ],
+     "profile": "default",
+     "slices": [
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 88,
+       "scenario": "currency_mismatch"
+      },
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 65,
+       "scenario": "duplicate_dispute"
+      },
+      {
+       "baseline_mean_regret": 1964.2097315436242,
+       "candidate_mean_regret": 1964.2097315436242,
+       "changed_cases": 0,
+       "n": 596,
+       "scenario": "fraud"
+      },
+      {
+       "baseline_mean_regret": 3500.0,
+       "candidate_mean_regret": 3500.0,
+       "changed_cases": 0,
+       "n": 54,
+       "scenario": "high_value"
+      },
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 1043.4782608695652,
+       "changed_cases": 80,
+       "n": 115,
+       "scenario": "late_evidence"
+      },
+      {
+       "baseline_mean_regret": 5374.8020050125315,
+       "candidate_mean_regret": 5374.8020050125315,
+       "changed_cases": 0,
+       "n": 399,
+       "scenario": "not_as_described"
+      },
+      {
+       "baseline_mean_regret": 7347.770293609672,
+       "candidate_mean_regret": 3443.1070811744385,
+       "changed_cases": 345,
+       "n": 579,
+       "scenario": "not_received"
+      },
+      {
+       "baseline_mean_regret": 0.0,
+       "candidate_mean_regret": 0.0,
+       "changed_cases": 0,
+       "n": 104,
+       "scenario": "partial_refund"
+      }
+     ]
+    },
+    "stage": "shadow",
+    "summary": "Blocked: 3 hard check(s) failed.",
+    "version": 1
+   },
+   "decision_sha256": "7b3d7ded365101f8c56663b3ce330c179b416c97fdc5ae69edece9722c90e6cd"
+  },
+  {
+   "audit_entry_hash": "5093b1bb16f77e39b32cf9af1abd926c72d8dd68d22e80725ffd124d3ce464b5",
+   "audit_seq": 17,
+   "decision": {
+    "actor": "agent-gate",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": {
+     "control_mean_cost_usd_minor": 12082.192771084337,
+     "fraction": 0.1,
+     "live_cases": 3000,
+     "matched_control": 498,
+     "matched_treatment": 54,
+     "new_hard_findings": [],
+     "profile": "default",
+     "treatment_cases": 315,
+     "treatment_mean_cost_usd_minor": 5336.0
+    },
+    "checks": [
+     {
+      "detail": "0 ledger/policy violations on canary cases",
+      "kind": "hard",
+      "name": "canary_no_hard_violations",
+      "passed": true
+     },
+     {
+      "detail": "treatment mean cost $53.36 vs control $120.82, difference -$67.46 (95% interval -$101.75 to -$25.32, percentile-bootstrap-two-sample; tolerance $5.00)",
+      "kind": "hard",
+      "name": "canary_cost_within_tolerance",
+      "passed": true
+     },
+     {
+      "detail": "54 treatment / 498 control matched cases (minimum 20 each)",
+      "kind": "evidence",
+      "name": "canary_enough_traffic",
+      "passed": true
+     }
+    ],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:27Z",
+    "decision_id": "dec-00004",
+    "episodes": 3,
+    "outcome": "promote",
+    "owner": "ops-team",
+    "reasons": [
+     "live outcomes within tolerance of control",
+     "no hard violations"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": null,
+    "stage": "canary",
+    "summary": "Canary stage 10% passed: ramping to 25%.",
+    "version": 1
+   },
+   "decision_sha256": "dc524b39cdbc99b852f52c77cebb38cdd810195d5f80876c15d7041874ffb8c6"
+  },
+  {
+   "audit_entry_hash": "b80f8bbc9f9caabe0b2590b6e4d361bb3e029d225348c5ea1fc4d057f42879a7",
+   "audit_seq": 19,
+   "decision": {
+    "actor": "agent-gate",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": {
+     "control_mean_cost_usd_minor": 11543.341902313625,
+     "fraction": 0.25,
+     "live_cases": 3000,
+     "matched_control": 389,
+     "matched_treatment": 134,
+     "new_hard_findings": [],
+     "profile": "default",
+     "treatment_cases": 755,
+     "treatment_mean_cost_usd_minor": 4651.305970149254
+    },
+    "checks": [
+     {
+      "detail": "0 ledger/policy violations on canary cases",
+      "kind": "hard",
+      "name": "canary_no_hard_violations",
+      "passed": true
+     },
+     {
+      "detail": "treatment mean cost $46.51 vs control $115.43, difference -$68.92 (95% interval -$94.89 to -$39.31, percentile-bootstrap-two-sample; tolerance $5.00)",
+      "kind": "hard",
+      "name": "canary_cost_within_tolerance",
+      "passed": true
+     },
+     {
+      "detail": "134 treatment / 389 control matched cases (minimum 20 each)",
+      "kind": "evidence",
+      "name": "canary_enough_traffic",
+      "passed": true
+     }
+    ],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:30Z",
+    "decision_id": "dec-00005",
+    "episodes": 3,
+    "outcome": "canary_passed",
+    "owner": "ops-team",
+    "reasons": [
+     "live outcomes within tolerance of control",
+     "no hard violations"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": null,
+    "stage": "canary",
+    "summary": "Canary ramp complete at 25%: ready for human approval.",
+    "version": 1
+   },
+   "decision_sha256": "eae834184e44a087f5998084fe3b676f93730956290cf7f3c7056d3697f850c8"
+  },
+  {
+   "audit_entry_hash": "cfdcd1011df5103a50f0402099669e2ae4691479992f0d86f60871b785aeae55",
+   "audit_seq": 21,
+   "decision": {
+    "actor": "model-risk@demo.bank",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": null,
+    "checks": [],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:33Z",
+    "decision_id": "dec-00006",
+    "episodes": 3,
+    "outcome": "activated",
+    "owner": "ops-team",
+    "reasons": [
+     "approved after canary decision dec-00005"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": null,
+    "stage": "activation",
+    "summary": "Activated by model-risk@demo.bank.",
+    "version": 1
+   },
+   "decision_sha256": "c57d98397b917ddb35c799f945fa5b693151057f23a5458d130e9ac4c53ceda2"
+  },
+  {
+   "audit_entry_hash": "57a668359eb87bb347383d4f7091a94687c9eb4a71270ec648a55f1fd64cb05f",
+   "audit_seq": 23,
+   "decision": {
+    "actor": "agent-gate",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": null,
+    "checks": [
+     {
+      "detail": "0 problem(s)",
+      "kind": "hard",
+      "name": "assurance_golden_and_hard_checks",
+      "passed": true
+     }
+    ],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:36Z",
+    "decision_id": "dec-00007",
+    "episodes": 3,
+    "outcome": "healthy",
+    "owner": "ops-team",
+    "reasons": [
+     "no golden regressions",
+     "no hard violations"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": null,
+    "stage": "assurance",
+    "summary": "Live policy passed the regression and constraint suites.",
+    "version": 1
+   },
+   "decision_sha256": "8a6d202a1f248e0061bae2ce008319b55e5aff279d670b36501a5a241be618f7"
+  },
+  {
+   "audit_entry_hash": "86f16fb7dbb7d1a95e0f605b27c485157629e426618b8c18b9dca56a99ec07c3",
+   "audit_seq": 24,
+   "decision": {
+    "actor": "model-risk@demo.bank",
+    "agent_id": "dispute-agent-1",
+    "approvers": [
+     "model-risk@demo.bank"
+    ],
+    "canary": null,
+    "checks": [],
+    "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+    "created_at": "2026-01-01T00:00:38Z",
+    "decision_id": "dec-00008",
+    "episodes": 3,
+    "outcome": "rolled_back",
+    "owner": "ops-team",
+    "reasons": [
+     "retired inr-delivered-contest@v1",
+     "no previous version; rule removed from the policy"
+    ],
+    "rule_description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "rule_id": "inr-delivered-contest",
+    "rule_logic": "IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN contest (priority 50)",
+    "shadow": null,
+    "stage": "rollback",
+    "summary": "Rolled back by model-risk@demo.bank: golden episode rollback",
+    "version": 1
+   },
+   "decision_sha256": "55d5c60c6f83b1f38c990ff1b3ea6597461992cedcfcdd8371fc57da79ff1317"
+  }
+ ],
+ "head": "016989000ffd33212eda330bbd709329921a116ddebce7bbeaa8f8ba4b284a5e",
+ "integrity_ok": true,
+ "registry": [
+  {
+   "content_hash": "643d8d1b7fb797262d05103bc3f6af08086625e9b3ee4d2d4451960fc7caa200",
+   "created_at": "2026-01-01T00:00:04Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "agent-gate",
+    "claimed_metrics": {},
+    "episode_ids": [],
+    "notes": "imported baseline rule"
+   },
+   "rollback_to": null,
+   "rule_id": "base-duplicate-contest",
+   "spec": {
+    "action": "contest",
+    "conditions": [
+     {
+      "field": "prior_dispute_on_txn",
+      "op": "eq",
+      "value": true
+     }
+    ],
+    "description": "Contest disputes on a transaction that was already disputed.",
+    "priority": 20
+   },
+   "status": "active",
+   "version": 1
+  },
+  {
+   "content_hash": "33153d93a768b6636936806bb139b885bbec62407cf9c33374374e6d698e5369",
+   "created_at": "2026-01-01T00:00:06Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "agent-gate",
+    "claimed_metrics": {},
+    "episode_ids": [],
+    "notes": "imported baseline rule"
+   },
+   "rollback_to": null,
+   "rule_id": "base-fraud-3ds-contest",
+   "spec": {
+    "action": "contest",
+    "conditions": [
+     {
+      "field": "reason_code",
+      "op": "eq",
+      "value": "fraud"
+     },
+     {
+      "field": "three_ds",
+      "op": "eq",
+      "value": true
+     }
+    ],
+    "description": "Contest fraud claims on 3-D Secure authenticated transactions.",
+    "priority": 30
+   },
+   "status": "active",
+   "version": 1
+  },
+  {
+   "content_hash": "d139ef1bf4d28739ad5ce1203e18d7946820f09fb9d1366db506fb1d6f77b8ee",
+   "created_at": "2026-01-01T00:00:10Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "agent-gate",
+    "claimed_metrics": {},
+    "episode_ids": [],
+    "notes": "imported baseline rule"
+   },
+   "rollback_to": null,
+   "rule_id": "base-fx-contest",
+   "spec": {
+    "action": "contest",
+    "conditions": [
+     {
+      "field": "currency_mismatch",
+      "op": "eq",
+      "value": true
+     }
+    ],
+    "description": "Contest when dispute and settlement currencies differ.",
+    "priority": 45
+   },
+   "status": "active",
+   "version": 1
+  },
+  {
+   "content_hash": "8396808fc37677060c2556a52de96e7aac8d3d0f997103f6cabf87f481630776",
+   "created_at": "2026-01-01T00:00:00Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "agent-gate",
+    "claimed_metrics": {},
+    "episode_ids": [],
+    "notes": "imported baseline rule"
+   },
+   "rollback_to": null,
+   "rule_id": "base-high-value-escalate",
+   "spec": {
+    "action": "escalate",
+    "conditions": [
+     {
+      "field": "amount_usd_minor",
+      "op": "gt",
+      "value": 1000000
+     }
+    ],
+    "description": "Disputes above $10,000 always go to a human analyst.",
+    "priority": 0
+   },
+   "status": "active",
+   "version": 1
+  },
+  {
+   "content_hash": "56cf57d93000a2820fa025d331f66cffdf953bf2c23b3b0a8caa178739ca7ff9",
+   "created_at": "2026-01-01T00:00:02Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "agent-gate",
+    "claimed_metrics": {},
+    "episode_ids": [],
+    "notes": "imported baseline rule"
+   },
+   "rollback_to": null,
+   "rule_id": "base-late-evidence-accept",
+   "spec": {
+    "action": "accept",
+    "conditions": [
+     {
+      "field": "evidence_on_time",
+      "op": "eq",
+      "value": false
+     }
+    ],
+    "description": "If evidence cannot arrive before the deadline, accept.",
+    "priority": 10
+   },
+   "status": "active",
+   "version": 1
+  },
+  {
+   "content_hash": "920940ec8a35c826a0f3d7acbb7115bea306a505840537cf76f0cdb46a0cdd0a",
+   "created_at": "2026-01-01T00:00:08Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "agent-gate",
+    "claimed_metrics": {},
+    "episode_ids": [],
+    "notes": "imported baseline rule"
+   },
+   "rollback_to": null,
+   "rule_id": "base-refund-contest",
+   "spec": {
+    "action": "contest",
+    "conditions": [
+     {
+      "field": "has_prior_refund",
+      "op": "eq",
+      "value": true
+     }
+    ],
+    "description": "Contest when a partial refund was already issued.",
+    "priority": 40
+   },
+   "status": "active",
+   "version": 1
+  },
+  {
+   "content_hash": "75110d71e7808b5187663332a93f28f76553e585bbb11f4fd3660f51461c43f0",
+   "created_at": "2026-01-01T00:00:12Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "dispute-agent-1",
+    "claimed_metrics": {},
+    "episode_ids": [
+     "ep-1",
+     "ep-2",
+     "ep-3"
+    ],
+    "notes": ""
+   },
+   "rollback_to": null,
+   "rule_id": "inr-delivered-contest",
+   "spec": {
+    "action": "contest",
+    "conditions": [
+     {
+      "field": "reason_code",
+      "op": "eq",
+      "value": "not_received"
+     },
+     {
+      "field": "delivery_confirmed",
+      "op": "eq",
+      "value": true
+     }
+    ],
+    "description": "Contest 'item not received' disputes when the carrier confirmed delivery.",
+    "priority": 50
+   },
+   "status": "retired",
+   "version": 1
+  },
+  {
+   "content_hash": "92dc78fc4cfffcf282f7f681c379734466ffd4eb0e033c9ab3ff15e825f63849",
+   "created_at": "2026-01-01T00:00:14Z",
+   "owner": "ops-team",
+   "provenance": {
+    "agent_id": "dispute-agent-1",
+    "claimed_metrics": {},
+    "episode_ids": [
+     "ep-1",
+     "ep-2",
+     "ep-3"
+    ],
+    "notes": ""
+   },
+   "rollback_to": null,
+   "rule_id": "inr-delivered-contest-fast",
+   "spec": {
+    "action": "contest",
+    "conditions": [
+     {
+      "field": "reason_code",
+      "op": "eq",
+      "value": "not_received"
+     },
+     {
+      "field": "delivery_confirmed",
+      "op": "eq",
+      "value": true
+     }
+    ],
+    "description": "Always contest 'item not received' disputes with confirmed delivery; learned as a high-confidence override.",
+    "priority": 5
+   },
+   "status": "rejected",
+   "version": 1
+  }
+ ]
+}

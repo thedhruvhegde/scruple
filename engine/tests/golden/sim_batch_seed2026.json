@@ -1,0 +1,2044 @@
+{
+ "digest": "244b46b801db9ff0f1988290148e2bad58b116c5d264e45ff79dd5694e48893a",
+ "run": {
+  "journal": [
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 1,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000000",
+      "amount_minor": -11058
+     },
+     {
+      "account": "merchant:m-033",
+      "amount_minor": 11058
+     }
+    ],
+    "txn_id": "txn-c2026-000000"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 2,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000001",
+      "amount_minor": -5258
+     },
+     {
+      "account": "merchant:m-007",
+      "amount_minor": 5258
+     }
+    ],
+    "txn_id": "txn-c2026-000001"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 3,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000002",
+      "amount_minor": -2967
+     },
+     {
+      "account": "merchant:m-025",
+      "amount_minor": 2967
+     }
+    ],
+    "txn_id": "txn-c2026-000002"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 4,
+    "kind": "refund",
+    "postings": [
+     {
+      "account": "merchant:m-025",
+      "amount_minor": -1453
+     },
+     {
+      "account": "cardholder:txn-c2026-000002",
+      "amount_minor": 1453
+     }
+    ],
+    "txn_id": "txn-c2026-000002"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 5,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000003",
+      "amount_minor": -5555
+     },
+     {
+      "account": "merchant:m-020",
+      "amount_minor": 5555
+     }
+    ],
+    "txn_id": "txn-c2026-000003"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 6,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000004",
+      "amount_minor": -5746
+     },
+     {
+      "account": "merchant:m-032",
+      "amount_minor": 5746
+     }
+    ],
+    "txn_id": "txn-c2026-000004"
+   },
+   {
+    "case_id": null,
+    "currency": "EUR",
+    "entry_id": 7,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000005",
+      "amount_minor": -8258
+     },
+     {
+      "account": "merchant:m-009",
+      "amount_minor": 8258
+     }
+    ],
+    "txn_id": "txn-c2026-000005"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 8,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000006",
+      "amount_minor": -9874
+     },
+     {
+      "account": "merchant:m-031",
+      "amount_minor": 9874
+     }
+    ],
+    "txn_id": "txn-c2026-000006"
+   },
+   {
+    "case_id": null,
+    "currency": "GBP",
+    "entry_id": 9,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000007",
+      "amount_minor": -4807
+     },
+     {
+      "account": "merchant:m-030",
+      "amount_minor": 4807
+     }
+    ],
+    "txn_id": "txn-c2026-000007"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 10,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000008",
+      "amount_minor": -31175
+     },
+     {
+      "account": "merchant:m-030",
+      "amount_minor": 31175
+     }
+    ],
+    "txn_id": "txn-c2026-000008"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 11,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000009",
+      "amount_minor": -21497
+     },
+     {
+      "account": "merchant:m-018",
+      "amount_minor": 21497
+     }
+    ],
+    "txn_id": "txn-c2026-000009"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 12,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000010",
+      "amount_minor": -12416
+     },
+     {
+      "account": "merchant:m-038",
+      "amount_minor": 12416
+     }
+    ],
+    "txn_id": "txn-c2026-000010"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 13,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000011",
+      "amount_minor": -37848
+     },
+     {
+      "account": "merchant:m-010",
+      "amount_minor": 37848
+     }
+    ],
+    "txn_id": "txn-c2026-000011"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 14,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000012",
+      "amount_minor": -4592
+     },
+     {
+      "account": "merchant:m-033",
+      "amount_minor": 4592
+     }
+    ],
+    "txn_id": "txn-c2026-000012"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 15,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000013",
+      "amount_minor": -8314
+     },
+     {
+      "account": "merchant:m-010",
+      "amount_minor": 8314
+     }
+    ],
+    "txn_id": "txn-c2026-000013"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 16,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000014",
+      "amount_minor": -8193
+     },
+     {
+      "account": "merchant:m-002",
+      "amount_minor": 8193
+     }
+    ],
+    "txn_id": "txn-c2026-000014"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 17,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000015",
+      "amount_minor": -9555
+     },
+     {
+      "account": "merchant:m-010",
+      "amount_minor": 9555
+     }
+    ],
+    "txn_id": "txn-c2026-000015"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 18,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000016",
+      "amount_minor": -1710
+     },
+     {
+      "account": "merchant:m-012",
+      "amount_minor": 1710
+     }
+    ],
+    "txn_id": "txn-c2026-000016"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 19,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000017",
+      "amount_minor": -10668
+     },
+     {
+      "account": "merchant:m-009",
+      "amount_minor": 10668
+     }
+    ],
+    "txn_id": "txn-c2026-000017"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 20,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000018",
+      "amount_minor": -5054
+     },
+     {
+      "account": "merchant:m-025",
+      "amount_minor": 5054
+     }
+    ],
+    "txn_id": "txn-c2026-000018"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 21,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000019",
+      "amount_minor": -7751
+     },
+     {
+      "account": "merchant:m-034",
+      "amount_minor": 7751
+     }
+    ],
+    "txn_id": "txn-c2026-000019"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 22,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000020",
+      "amount_minor": -24004
+     },
+     {
+      "account": "merchant:m-012",
+      "amount_minor": 24004
+     }
+    ],
+    "txn_id": "txn-c2026-000020"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 23,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000021",
+      "amount_minor": -33830
+     },
+     {
+      "account": "merchant:m-036",
+      "amount_minor": 33830
+     }
+    ],
+    "txn_id": "txn-c2026-000021"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 24,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000022",
+      "amount_minor": -2603
+     },
+     {
+      "account": "merchant:m-011",
+      "amount_minor": 2603
+     }
+    ],
+    "txn_id": "txn-c2026-000022"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 25,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000023",
+      "amount_minor": -3273
+     },
+     {
+      "account": "merchant:m-017",
+      "amount_minor": 3273
+     }
+    ],
+    "txn_id": "txn-c2026-000023"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 26,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000024",
+      "amount_minor": -12923
+     },
+     {
+      "account": "merchant:m-030",
+      "amount_minor": 12923
+     }
+    ],
+    "txn_id": "txn-c2026-000024"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 27,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000025",
+      "amount_minor": -2224240
+     },
+     {
+      "account": "merchant:m-024",
+      "amount_minor": 2224240
+     }
+    ],
+    "txn_id": "txn-c2026-000025"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 28,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000026",
+      "amount_minor": -36544
+     },
+     {
+      "account": "merchant:m-019",
+      "amount_minor": 36544
+     }
+    ],
+    "txn_id": "txn-c2026-000026"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 29,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000027",
+      "amount_minor": -11213
+     },
+     {
+      "account": "merchant:m-013",
+      "amount_minor": 11213
+     }
+    ],
+    "txn_id": "txn-c2026-000027"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 30,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000028",
+      "amount_minor": -7004
+     },
+     {
+      "account": "merchant:m-002",
+      "amount_minor": 7004
+     }
+    ],
+    "txn_id": "txn-c2026-000028"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 31,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000029",
+      "amount_minor": -9233
+     },
+     {
+      "account": "merchant:m-035",
+      "amount_minor": 9233
+     }
+    ],
+    "txn_id": "txn-c2026-000029"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 32,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000030",
+      "amount_minor": -1159421
+     },
+     {
+      "account": "merchant:m-009",
+      "amount_minor": 1159421
+     }
+    ],
+    "txn_id": "txn-c2026-000030"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 33,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000031",
+      "amount_minor": -10382
+     },
+     {
+      "account": "merchant:m-021",
+      "amount_minor": 10382
+     }
+    ],
+    "txn_id": "txn-c2026-000031"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 34,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000032",
+      "amount_minor": -19820
+     },
+     {
+      "account": "merchant:m-024",
+      "amount_minor": 19820
+     }
+    ],
+    "txn_id": "txn-c2026-000032"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 35,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000033",
+      "amount_minor": -5668
+     },
+     {
+      "account": "merchant:m-038",
+      "amount_minor": 5668
+     }
+    ],
+    "txn_id": "txn-c2026-000033"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 36,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000034",
+      "amount_minor": -2874
+     },
+     {
+      "account": "merchant:m-012",
+      "amount_minor": 2874
+     }
+    ],
+    "txn_id": "txn-c2026-000034"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 37,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000035",
+      "amount_minor": -99665
+     },
+     {
+      "account": "merchant:m-020",
+      "amount_minor": 99665
+     }
+    ],
+    "txn_id": "txn-c2026-000035"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 38,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000036",
+      "amount_minor": -5649
+     },
+     {
+      "account": "merchant:m-007",
+      "amount_minor": 5649
+     }
+    ],
+    "txn_id": "txn-c2026-000036"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 39,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000037",
+      "amount_minor": -1196
+     },
+     {
+      "account": "merchant:m-019",
+      "amount_minor": 1196
+     }
+    ],
+    "txn_id": "txn-c2026-000037"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 40,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000038",
+      "amount_minor": -5725
+     },
+     {
+      "account": "merchant:m-011",
+      "amount_minor": 5725
+     }
+    ],
+    "txn_id": "txn-c2026-000038"
+   },
+   {
+    "case_id": null,
+    "currency": "USD",
+    "entry_id": 41,
+    "kind": "capture",
+    "postings": [
+     {
+      "account": "cardholder:txn-c2026-000039",
+      "amount_minor": -6168
+     },
+     {
+      "account": "merchant:m-005",
+      "amount_minor": 6168
+     }
+    ],
+    "txn_id": "txn-c2026-000039"
+   },
+   {
+    "case_id": "case-c2026-000000",
+    "currency": "USD",
+    "entry_id": 42,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-033",
+      "amount_minor": -11058
+     },
+     {
+      "account": "cardholder:txn-c2026-000000",
+      "amount_minor": 11058
+     }
+    ],
+    "txn_id": "txn-c2026-000000"
+   },
+   {
+    "case_id": "case-c2026-000002",
+    "currency": "USD",
+    "entry_id": 43,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-025",
+      "amount_minor": -1514
+     },
+     {
+      "account": "cardholder:txn-c2026-000002",
+      "amount_minor": 1514
+     }
+    ],
+    "txn_id": "txn-c2026-000002"
+   },
+   {
+    "case_id": "case-c2026-000003",
+    "currency": "USD",
+    "entry_id": 44,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-020",
+      "amount_minor": -5555
+     },
+     {
+      "account": "cardholder:txn-c2026-000003",
+      "amount_minor": 5555
+     }
+    ],
+    "txn_id": "txn-c2026-000003"
+   },
+   {
+    "case_id": "case-c2026-000004",
+    "currency": "USD",
+    "entry_id": 45,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-032",
+      "amount_minor": -5746
+     },
+     {
+      "account": "cardholder:txn-c2026-000004",
+      "amount_minor": 5746
+     }
+    ],
+    "txn_id": "txn-c2026-000004"
+   },
+   {
+    "case_id": "case-c2026-000006",
+    "currency": "USD",
+    "entry_id": 46,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-031",
+      "amount_minor": -9874
+     },
+     {
+      "account": "cardholder:txn-c2026-000006",
+      "amount_minor": 9874
+     }
+    ],
+    "txn_id": "txn-c2026-000006"
+   },
+   {
+    "case_id": "case-c2026-000008",
+    "currency": "USD",
+    "entry_id": 47,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-030",
+      "amount_minor": -31175
+     },
+     {
+      "account": "cardholder:txn-c2026-000008",
+      "amount_minor": 31175
+     }
+    ],
+    "txn_id": "txn-c2026-000008"
+   },
+   {
+    "case_id": "case-c2026-000009",
+    "currency": "USD",
+    "entry_id": 48,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-018",
+      "amount_minor": -21497
+     },
+     {
+      "account": "cardholder:txn-c2026-000009",
+      "amount_minor": 21497
+     }
+    ],
+    "txn_id": "txn-c2026-000009"
+   },
+   {
+    "case_id": "case-c2026-000011",
+    "currency": "USD",
+    "entry_id": 49,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-010",
+      "amount_minor": -37848
+     },
+     {
+      "account": "cardholder:txn-c2026-000011",
+      "amount_minor": 37848
+     }
+    ],
+    "txn_id": "txn-c2026-000011"
+   },
+   {
+    "case_id": "case-c2026-000012",
+    "currency": "USD",
+    "entry_id": 50,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-033",
+      "amount_minor": -4592
+     },
+     {
+      "account": "cardholder:txn-c2026-000012",
+      "amount_minor": 4592
+     }
+    ],
+    "txn_id": "txn-c2026-000012"
+   },
+   {
+    "case_id": "case-c2026-000013",
+    "currency": "USD",
+    "entry_id": 51,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-010",
+      "amount_minor": -8314
+     },
+     {
+      "account": "cardholder:txn-c2026-000013",
+      "amount_minor": 8314
+     }
+    ],
+    "txn_id": "txn-c2026-000013"
+   },
+   {
+    "case_id": "case-c2026-000014",
+    "currency": "USD",
+    "entry_id": 52,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-002",
+      "amount_minor": -8193
+     },
+     {
+      "account": "cardholder:txn-c2026-000014",
+      "amount_minor": 8193
+     }
+    ],
+    "txn_id": "txn-c2026-000014"
+   },
+   {
+    "case_id": "case-c2026-000015",
+    "currency": "USD",
+    "entry_id": 53,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-010",
+      "amount_minor": -9555
+     },
+     {
+      "account": "cardholder:txn-c2026-000015",
+      "amount_minor": 9555
+     }
+    ],
+    "txn_id": "txn-c2026-000015"
+   },
+   {
+    "case_id": "case-c2026-000016",
+    "currency": "USD",
+    "entry_id": 54,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-012",
+      "amount_minor": -1710
+     },
+     {
+      "account": "cardholder:txn-c2026-000016",
+      "amount_minor": 1710
+     }
+    ],
+    "txn_id": "txn-c2026-000016"
+   },
+   {
+    "case_id": "case-c2026-000017",
+    "currency": "USD",
+    "entry_id": 55,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-009",
+      "amount_minor": -10668
+     },
+     {
+      "account": "cardholder:txn-c2026-000017",
+      "amount_minor": 10668
+     }
+    ],
+    "txn_id": "txn-c2026-000017"
+   },
+   {
+    "case_id": "case-c2026-000018",
+    "currency": "USD",
+    "entry_id": 56,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-025",
+      "amount_minor": -5054
+     },
+     {
+      "account": "cardholder:txn-c2026-000018",
+      "amount_minor": 5054
+     }
+    ],
+    "txn_id": "txn-c2026-000018"
+   },
+   {
+    "case_id": "case-c2026-000019",
+    "currency": "USD",
+    "entry_id": 57,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-034",
+      "amount_minor": -7751
+     },
+     {
+      "account": "cardholder:txn-c2026-000019",
+      "amount_minor": 7751
+     }
+    ],
+    "txn_id": "txn-c2026-000019"
+   },
+   {
+    "case_id": "case-c2026-000020",
+    "currency": "USD",
+    "entry_id": 58,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-012",
+      "amount_minor": -24004
+     },
+     {
+      "account": "cardholder:txn-c2026-000020",
+      "amount_minor": 24004
+     }
+    ],
+    "txn_id": "txn-c2026-000020"
+   },
+   {
+    "case_id": "case-c2026-000023",
+    "currency": "USD",
+    "entry_id": 59,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-017",
+      "amount_minor": -3273
+     },
+     {
+      "account": "cardholder:txn-c2026-000023",
+      "amount_minor": 3273
+     }
+    ],
+    "txn_id": "txn-c2026-000023"
+   },
+   {
+    "case_id": "case-c2026-000024",
+    "currency": "USD",
+    "entry_id": 60,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-030",
+      "amount_minor": -12923
+     },
+     {
+      "account": "cardholder:txn-c2026-000024",
+      "amount_minor": 12923
+     }
+    ],
+    "txn_id": "txn-c2026-000024"
+   },
+   {
+    "case_id": "case-c2026-000026",
+    "currency": "USD",
+    "entry_id": 61,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-019",
+      "amount_minor": -36544
+     },
+     {
+      "account": "cardholder:txn-c2026-000026",
+      "amount_minor": 36544
+     }
+    ],
+    "txn_id": "txn-c2026-000026"
+   },
+   {
+    "case_id": "case-c2026-000027",
+    "currency": "USD",
+    "entry_id": 62,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-013",
+      "amount_minor": -11213
+     },
+     {
+      "account": "cardholder:txn-c2026-000027",
+      "amount_minor": 11213
+     }
+    ],
+    "txn_id": "txn-c2026-000027"
+   },
+   {
+    "case_id": "case-c2026-000029",
+    "currency": "USD",
+    "entry_id": 63,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-035",
+      "amount_minor": -9233
+     },
+     {
+      "account": "cardholder:txn-c2026-000029",
+      "amount_minor": 9233
+     }
+    ],
+    "txn_id": "txn-c2026-000029"
+   },
+   {
+    "case_id": "case-c2026-000031",
+    "currency": "USD",
+    "entry_id": 64,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-021",
+      "amount_minor": -10382
+     },
+     {
+      "account": "cardholder:txn-c2026-000031",
+      "amount_minor": 10382
+     }
+    ],
+    "txn_id": "txn-c2026-000031"
+   },
+   {
+    "case_id": "case-c2026-000032",
+    "currency": "USD",
+    "entry_id": 65,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-024",
+      "amount_minor": -19820
+     },
+     {
+      "account": "cardholder:txn-c2026-000032",
+      "amount_minor": 19820
+     }
+    ],
+    "txn_id": "txn-c2026-000032"
+   },
+   {
+    "case_id": "case-c2026-000033",
+    "currency": "USD",
+    "entry_id": 66,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-038",
+      "amount_minor": -5668
+     },
+     {
+      "account": "cardholder:txn-c2026-000033",
+      "amount_minor": 5668
+     }
+    ],
+    "txn_id": "txn-c2026-000033"
+   },
+   {
+    "case_id": "case-c2026-000034",
+    "currency": "USD",
+    "entry_id": 67,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-012",
+      "amount_minor": -2874
+     },
+     {
+      "account": "cardholder:txn-c2026-000034",
+      "amount_minor": 2874
+     }
+    ],
+    "txn_id": "txn-c2026-000034"
+   },
+   {
+    "case_id": "case-c2026-000035",
+    "currency": "USD",
+    "entry_id": 68,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-020",
+      "amount_minor": -99665
+     },
+     {
+      "account": "cardholder:txn-c2026-000035",
+      "amount_minor": 99665
+     }
+    ],
+    "txn_id": "txn-c2026-000035"
+   },
+   {
+    "case_id": "case-c2026-000036",
+    "currency": "USD",
+    "entry_id": 69,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-007",
+      "amount_minor": -5649
+     },
+     {
+      "account": "cardholder:txn-c2026-000036",
+      "amount_minor": 5649
+     }
+    ],
+    "txn_id": "txn-c2026-000036"
+   },
+   {
+    "case_id": "case-c2026-000037",
+    "currency": "USD",
+    "entry_id": 70,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-019",
+      "amount_minor": -1196
+     },
+     {
+      "account": "cardholder:txn-c2026-000037",
+      "amount_minor": 1196
+     }
+    ],
+    "txn_id": "txn-c2026-000037"
+   },
+   {
+    "case_id": "case-c2026-000038",
+    "currency": "USD",
+    "entry_id": 71,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-011",
+      "amount_minor": -5725
+     },
+     {
+      "account": "cardholder:txn-c2026-000038",
+      "amount_minor": 5725
+     }
+    ],
+    "txn_id": "txn-c2026-000038"
+   },
+   {
+    "case_id": "case-c2026-000039",
+    "currency": "USD",
+    "entry_id": 72,
+    "kind": "chargeback_debit",
+    "postings": [
+     {
+      "account": "merchant:m-005",
+      "amount_minor": -6168
+     },
+     {
+      "account": "cardholder:txn-c2026-000039",
+      "amount_minor": 6168
+     }
+    ],
+    "txn_id": "txn-c2026-000039"
+   }
+  ],
+  "opening_entries": 41,
+  "results": [
+   {
+    "action": "accept",
+    "amount_usd_minor": 11058,
+    "case_id": "case-c2026-000000",
+    "cost_usd_minor": 11058,
+    "debit_txn_minor": 11058,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 11058,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000000"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 5258,
+    "case_id": "case-c2026-000001",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fraud-3ds-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000001"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 2967,
+    "case_id": "case-c2026-000002",
+    "cost_usd_minor": 1514,
+    "debit_txn_minor": 1514,
+    "decided_by": "base-refund-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 1514,
+    "regret_usd_minor": 0,
+    "resolution": "partial",
+    "scenario": "partial_refund",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000002"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 5555,
+    "case_id": "case-c2026-000003",
+    "cost_usd_minor": 5555,
+    "debit_txn_minor": 5555,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 5555,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000003"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 5746,
+    "case_id": "case-c2026-000004",
+    "cost_usd_minor": 5746,
+    "debit_txn_minor": 5746,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 5746,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000004"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 9274,
+    "case_id": "case-c2026-000005",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fx-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "currency_mismatch",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000005"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 9874,
+    "case_id": "case-c2026-000006",
+    "cost_usd_minor": 9874,
+    "debit_txn_minor": 9874,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 9874,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000006"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 6348,
+    "case_id": "case-c2026-000007",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fx-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "currency_mismatch",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000007"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 31175,
+    "case_id": "case-c2026-000008",
+    "cost_usd_minor": 31175,
+    "debit_txn_minor": 31175,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 31175,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000008"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 21497,
+    "case_id": "case-c2026-000009",
+    "cost_usd_minor": 21497,
+    "debit_txn_minor": 21497,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 21497,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000009"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 12416,
+    "case_id": "case-c2026-000010",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fraud-3ds-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000010"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 37848,
+    "case_id": "case-c2026-000011",
+    "cost_usd_minor": 37848,
+    "debit_txn_minor": 37848,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 37848,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000011"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 4592,
+    "case_id": "case-c2026-000012",
+    "cost_usd_minor": 4592,
+    "debit_txn_minor": 4592,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 4592,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000012"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 8314,
+    "case_id": "case-c2026-000013",
+    "cost_usd_minor": 8314,
+    "debit_txn_minor": 8314,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 8314,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000013"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 8193,
+    "case_id": "case-c2026-000014",
+    "cost_usd_minor": 8193,
+    "debit_txn_minor": 8193,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 8193,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000014"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 9555,
+    "case_id": "case-c2026-000015",
+    "cost_usd_minor": 9555,
+    "debit_txn_minor": 9555,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 9555,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000015"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 1710,
+    "case_id": "case-c2026-000016",
+    "cost_usd_minor": 1710,
+    "debit_txn_minor": 1710,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 1710,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000016"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 10668,
+    "case_id": "case-c2026-000017",
+    "cost_usd_minor": 10668,
+    "debit_txn_minor": 10668,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 10668,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000017"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 5054,
+    "case_id": "case-c2026-000018",
+    "cost_usd_minor": 5054,
+    "debit_txn_minor": 5054,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 5054,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000018"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 7751,
+    "case_id": "case-c2026-000019",
+    "cost_usd_minor": 7751,
+    "debit_txn_minor": 7751,
+    "decided_by": "base-late-evidence-accept@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 7751,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "late_evidence",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000019"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 24004,
+    "case_id": "case-c2026-000020",
+    "cost_usd_minor": 24004,
+    "debit_txn_minor": 24004,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 24004,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000020"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 33830,
+    "case_id": "case-c2026-000021",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fraud-3ds-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000021"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 2603,
+    "case_id": "case-c2026-000022",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fraud-3ds-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000022"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 3273,
+    "case_id": "case-c2026-000023",
+    "cost_usd_minor": 3273,
+    "debit_txn_minor": 3273,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 3273,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000023"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 12923,
+    "case_id": "case-c2026-000024",
+    "cost_usd_minor": 12923,
+    "debit_txn_minor": 12923,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 12923,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000024"
+   },
+   {
+    "action": "escalate",
+    "amount_usd_minor": 2224240,
+    "case_id": "case-c2026-000025",
+    "cost_usd_minor": 3500,
+    "debit_txn_minor": 0,
+    "decided_by": "base-high-value-escalate@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 3500,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 3500,
+    "resolution": "won",
+    "scenario": "high_value",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000025"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 36544,
+    "case_id": "case-c2026-000026",
+    "cost_usd_minor": 36544,
+    "debit_txn_minor": 36544,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 36544,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000026"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 11213,
+    "case_id": "case-c2026-000027",
+    "cost_usd_minor": 11213,
+    "debit_txn_minor": 11213,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 11213,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000027"
+   },
+   {
+    "action": "contest",
+    "amount_usd_minor": 7004,
+    "case_id": "case-c2026-000028",
+    "cost_usd_minor": 0,
+    "debit_txn_minor": 0,
+    "decided_by": "base-fraud-3ds-contest@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 0,
+    "resolution": "won",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000028"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 9233,
+    "case_id": "case-c2026-000029",
+    "cost_usd_minor": 9233,
+    "debit_txn_minor": 9233,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 9233,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000029"
+   },
+   {
+    "action": "escalate",
+    "amount_usd_minor": 1159421,
+    "case_id": "case-c2026-000030",
+    "cost_usd_minor": 3500,
+    "debit_txn_minor": 0,
+    "decided_by": "base-high-value-escalate@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 3500,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 3500,
+    "resolution": "won",
+    "scenario": "high_value",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "representment",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000030"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 10382,
+    "case_id": "case-c2026-000031",
+    "cost_usd_minor": 10382,
+    "debit_txn_minor": 10382,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 10382,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000031"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 19820,
+    "case_id": "case-c2026-000032",
+    "cost_usd_minor": 19820,
+    "debit_txn_minor": 19820,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 19820,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000032"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 5668,
+    "case_id": "case-c2026-000033",
+    "cost_usd_minor": 5668,
+    "debit_txn_minor": 5668,
+    "decided_by": "base-late-evidence-accept@v1",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 5668,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "late_evidence",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000033"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 2874,
+    "case_id": "case-c2026-000034",
+    "cost_usd_minor": 2874,
+    "debit_txn_minor": 2874,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 2874,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000034"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 99665,
+    "case_id": "case-c2026-000035",
+    "cost_usd_minor": 99665,
+    "debit_txn_minor": 99665,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 99665,
+    "resolution": "accepted",
+    "scenario": "not_as_described",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000035"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 5649,
+    "case_id": "case-c2026-000036",
+    "cost_usd_minor": 5649,
+    "debit_txn_minor": 5649,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 5649,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000036"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 1196,
+    "case_id": "case-c2026-000037",
+    "cost_usd_minor": 1196,
+    "debit_txn_minor": 1196,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 1196,
+    "regret_usd_minor": 0,
+    "resolution": "accepted",
+    "scenario": "fraud",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000037"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 5725,
+    "case_id": "case-c2026-000038",
+    "cost_usd_minor": 5725,
+    "debit_txn_minor": 5725,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 5725,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000038"
+   },
+   {
+    "action": "accept",
+    "amount_usd_minor": 6168,
+    "case_id": "case-c2026-000039",
+    "cost_usd_minor": 6168,
+    "debit_txn_minor": 6168,
+    "decided_by": "default",
+    "fee_usd_minor": 0,
+    "ops_usd_minor": 0,
+    "oracle_cost_usd_minor": 0,
+    "regret_usd_minor": 6168,
+    "resolution": "accepted",
+    "scenario": "not_received",
+    "stages": [
+     "inquiry",
+     "chargeback",
+     "resolved"
+    ],
+    "txn_id": "txn-c2026-000039"
+   }
+  ]
+ }
+}
