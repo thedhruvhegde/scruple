@@ -158,13 +158,9 @@ class AgentGate:
         self._require_approver(approver)
         if approver in (rv.owner, rv.provenance.agent_id):
             raise ApprovalError("segregation of duties: owner/agent cannot approve own rule")
+        self._require_ready_for_activation(rv)
         last = self._latest(rule_id, version, Stage.CANARY)
-        if (
-            rv.status is not RuleStatus.CANARY
-            or last is None
-            or last.decision.outcome is not Outcome.CANARY_PASSED
-        ):
-            raise ApprovalError(f"{rv.ref} has not passed canary")
+        assert last is not None
         verdict = Verdict(
             Outcome.ACTIVATED,
             f"Activated by {approver}.",
@@ -386,6 +382,11 @@ class AgentGate:
             or last.decision.outcome is not Outcome.CANARY_PASSED
         ):
             raise ApprovalError(f"{rv.ref} has not passed canary")
+        ramp = self.canary_state(rv.rule_id, rv.version)
+        if ramp is not None and ramp.status != "completed":
+            # A started ramp must finish: approving before its first stage was
+            # evaluated would skip the staged rollout entirely.
+            raise ApprovalError(f"{rv.ref} has not passed canary: its ramp is {ramp.status}")
 
     # --- staged canary ramp -----------------------------------------------------
 

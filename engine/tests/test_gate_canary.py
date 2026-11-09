@@ -210,6 +210,30 @@ def test_cannot_approve_mid_ramp() -> None:
         g.approve(GOOD_RULE_ID, 1, "model-risk@demo.bank")
 
 
+def test_cannot_approve_a_ramp_before_its_first_stage() -> None:
+    """Regression (found by tests/test_props_workflows.py): between starting a ramp
+    and evaluating its first stage, the latest canary decision was still the one-shot
+    CANARY_PASSED, so approval skipped the whole staged rollout."""
+    from scruple.gate.approval import ApprovalPolicy, NamedApprover
+    from scruple.service import ApprovalError
+
+    g = _gate()
+    g.start_canary_ramp(GOOD_RULE_ID, 1, SCHEDULE)
+    head = g.audit.head()
+    with pytest.raises(ApprovalError, match="ramp is ramping"):
+        g.approve(GOOD_RULE_ID, 1, "model-risk@demo.bank")
+    policy = ApprovalPolicy(
+        approvers=(NamedApprover(name="a@demo.bank"), NamedApprover(name="b@demo.bank")),
+        required=1,
+    )
+    g.set_approval_policy(policy, "model-risk@demo.bank")
+    head = g.audit.head()
+    with pytest.raises(ApprovalError, match="ramp is ramping"):
+        g.request_approval(GOOD_RULE_ID, 1, "ops-lead@demo.bank")
+    assert g.audit.head() == head
+    assert g.registry.get(GOOD_RULE_ID, 1).status is RuleStatus.CANARY
+
+
 def test_ramp_survives_reopening_the_database(tmp_path: object) -> None:
     from pathlib import Path
 
