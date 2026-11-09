@@ -313,9 +313,17 @@ def _cnp_codes(network: Network) -> tuple[ReasonCodeSpec, ...]:
 
 
 def generate_cases(
-    seed: int, n: int, mix: CaseMix = DEFAULT_MIX, start: date = START_DATE
+    seed: int,
+    n: int,
+    mix: CaseMix = DEFAULT_MIX,
+    start: date = START_DATE,
+    *,
+    id_prefix: str | None = None,
 ) -> list[CardDispute]:
-    """Seeded synthetic disputes. Same (seed, n, mix, start) gives identical cases."""
+    """Seeded synthetic disputes. Same (seed, n, mix, start) gives identical cases.
+
+    Case and transaction ids are `cd-<seed>-<i>` unless `id_prefix` is given (033: a
+    sealed split must not print its seed into the ids an agent sees)."""
     rng = random.Random(seed)
     merchants = generate_merchants(seed, mix.n_merchants)
     networks = sorted(mix.network_weights, key=lambda x: x.value)
@@ -343,7 +351,7 @@ def generate_cases(
         else:
             valid = CLAIM_VALID[family]
         stage = Stage.INQUIRY if rng.random() < mix.p_inquiry else Stage.CHARGEBACK
-        key = f"{seed}-{i:06d}"
+        key = f"{seed if id_prefix is None else id_prefix}-{i:06d}"
         merchant = rng.choice(merchants)
         case_id = f"cd-{key}"
         docs, forged, missing = _documents(rng, case_id, spec, valid, processed, amount, ccy, mix)

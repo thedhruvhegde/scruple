@@ -24,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError
 
 ENV_PREFIX = "SCRUPLE_"
 CONFIG_ENV = "SCRUPLE_CONFIG"
-SECRET_FIELDS = frozenset({"database_password"})
+SECRET_FIELDS = frozenset({"database_password", "heldout_salt"})
 
 
 class SettingsError(ValueError):
@@ -41,6 +41,9 @@ class Settings(BaseModel):
     )
     database_password: SecretStr | None = Field(
         default=None, description="env only; merged into a postgres URL without a password"
+    )
+    heldout_salt: SecretStr | None = Field(
+        default=None, description="env only; seals the held-out seed namespace (scruple.sim.splits)"
     )
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     log_format: Literal["json", "text"] = "json"
