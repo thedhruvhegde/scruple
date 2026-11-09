@@ -17,11 +17,13 @@ from scruple.verifiers.checks import (
     Scorecard,
     run_checks,
 )
+from scruple.verifiers.ledger_invariants import LEDGER_INVARIANTS
 from scruple.verifiers.record import EpisodeRecord
 
 DISPUTE_CHECKS: tuple[Check, ...] = (
     RECORD_INTEGRITY,
     OUTCOME_CORRECT,
+    LEDGER_INVARIANTS,
 )
 BATCH_CHECKS: tuple[BatchCheck, ...] = ()
 

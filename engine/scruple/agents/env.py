@@ -28,7 +28,6 @@ from scruple.sim.deadlines import today as sim_today
 from scruple.sim.disputes import (
     FULL_MIX,
     Accept,
-    CardDispute,
     CaseOutcome,
     DisputeEngine,
     Escalate,
@@ -40,6 +39,7 @@ from scruple.sim.disputes import (
 )
 from scruple.sim.disputes import ActionResult as DisputeActionResult
 from scruple.sim.disputes import AgentAction as DisputeAction
+from scruple.sim.disputes import CardDispute as CardDispute
 from scruple.sim.disputes import Observation as DisputeObservation
 from scruple.sim.disputes import generate_cases as generate_disputes
 from scruple.sim.engine import RunResult, Simulator, cost_usd, oracle, outcome_for
