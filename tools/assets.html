@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>scruple asset renderer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<style>
+  /* every asset is one fixed-size frame; tools/render.js screenshots it */
+  :root { --bone: #EDEAE1; --ink: #121513; --pine: #1D4A3A; --pine-deep: #12301F; --night: #0E1626; --screen: #0A1120; --brass: #E8C46A; --verm: #F27B55; --muted: #9EA8BD; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #000; }
+  .frame { position: relative; overflow: hidden; font-family: "Martian Mono", monospace; font-variation-settings: "wdth" 75; }
+  canvas { position: absolute; display: block; }
+  .msg { position: absolute; padding: 22px 26px; display: grid; gap: 12px; border: 1px solid #9C9F98; background: #E4E0D5; color: var(--ink); }
+  .msg.us { background: var(--pine); border-color: var(--pine); color: var(--bone); }
+  .meta { display: flex; align-items: center; gap: 12px; font-size: 18px; font-variation-settings: "wdth" 80; }
+  .meta b { font-weight: 600; }
+  .meta time { margin-left: auto; opacity: 0.7; }
+  .av { width: 34px; height: 34px; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--ink); color: var(--bone); }
+  .us .av { background: var(--bone); color: var(--pine); }
+  .say { font-weight: 500; letter-spacing: -0.02em; line-height: 1.18; }
+  .struck { color: #6B706C; text-decoration: line-through; text-decoration-color: #A63A1D; text-decoration-thickness: 0.09em; }
+  .us .say b { color: var(--brass); }
+  .word { position: absolute; font-weight: 600; letter-spacing: -0.05em; line-height: 1; }
+  .tag { position: absolute; font-variation-settings: "wdth" 80; letter-spacing: 0.02em; }
+  .mark { position: absolute; }
+  .label { position: absolute; font-size: 16px; font-variation-settings: "wdth" 80; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="../wonders.js"></script>
+<script>
+const MARK = (ink, weight) => `<svg viewBox="0 0 24 24"><g transform="rotate(-6 12 11)"><rect x="1.5" y="10" width="21" height="2.4" fill="${ink}"/><rect x="3" y="5.4" width="4.6" height="4.6" fill="${weight}"/></g><path d="M12 12.6L17.5 21.5H6.5Z" fill="${ink}"/></svg>`;
+const W_INDEX = Object.fromEntries(Wonders.list.map((w, i) => [w.name, i]));
+
+// draw one wonder into a box, as characters, at time t
+function wonder(frame, name, x, y, w, h, px, t = 2.4, bg = "#0A1120") {
+  const cv = document.createElement("canvas"), dpr = 2;
+  cv.style.left = x + "px"; cv.style.top = y + "px"; cv.style.width = w + "px"; cv.style.height = h + "px";
+  cv.width = w * dpr; cv.height = h * dpr; frame.appendChild(cv);
+  const g = cv.getContext("2d"); g.scale(dpr, dpr); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+  g.font = `500 ${px}px "Martian Mono", monospace`; g.textBaseline = "top";
+  const cw = g.measureText("M").width, ch = Math.round(px * 1.22), C = Math.floor(w / cw), R = Math.floor(h / ch);
+  const G = Wonders.make(W_INDEX[name], C, R, cw, ch); Wonders.step(G, t);
+  const ox = (w - C * cw) / 2, oy = (h - R * ch) / 2;
+  for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+    const i = r * C + c; if (G.code[i] === 32) continue;
+    g.fillStyle = Wonders.palette[G.col[i]]; g.fillText(String.fromCharCode(G.code[i]), ox + c * cw, oy + r * ch);
+  }
+}
+function el(frame, cls, html, css) { const d = document.createElement("div"); d.className = cls; d.innerHTML = html; Object.assign(d.style, css); frame.appendChild(d); return d; }
+const them = (css, fs) => `<div class="meta"><span class="av">A1</span><b>dispute-agent-01</b><time>14:02</time></div><p class="say" style="font-size:${fs}px"><span class="struck">I win 97% of disputes.</span> Promote my new rule.</p>`;
+const us = (fs) => `<div class="meta"><span class="av">S</span><b>scruple</b><time>14:02</time></div><p class="say" style="font-size:${fs}px">No. You filed <b>128</b> disputes you could never win.</p>`;
+function lockup(frame, x, y, size, ink, weight) {
+  el(frame, "mark", MARK(ink, weight), { left: x + "px", top: y + "px", width: size + "px", height: size + "px" });
+  el(frame, "word", "scruple", { left: x + size * 1.18 + "px", top: y + size * 0.02 + "px", fontSize: size * 0.95 + "px", color: ink });
+}
+
+const LAYOUTS = {
+  "github-social": [1280, 640, (f) => {
+    f.style.background = "#0A1120"; wonder(f, "taj mahal", 0, 0, 1280, 640, 10);
+    el(f, "", "", { position: "absolute", left: 0, top: 0, width: "1280px", height: "176px", background: "#0A1120", borderBottom: "1px solid #24324F" });
+    lockup(f, 56, 44, 64, "#EDEAE1", "#E8C46A");
+    el(f, "tag", "verifiers for agents that move money", { left: "60px", top: "126px", fontSize: "24px", color: "#B9C2D6" });
+  }],
+  "og": [1200, 630, (f) => {
+    f.style.background = "#EDEAE1"; wonder(f, "colosseum", 0, 250, 1200, 380, 10);
+    el(f, "msg them", them(0, 30), { left: "48px", top: "48px", width: "540px" });
+    el(f, "msg us", us(30), { left: "612px", top: "48px", width: "540px" });
+    el(f, "tag", "scruple / verifiers for agents that move money", { left: "48px", top: "206px", fontSize: "20px", color: "#565B57" });
+  }],
+  "x-header": [1500, 500, (f) => {
+    f.style.background = "#0A1120"; wonder(f, "great wall", 0, 0, 1500, 500, 10);
+    lockup(f, 540, 330, 54, "#EDEAE1", "#E8C46A");
+    el(f, "tag", "train on it. evaluate on it. ship through it.", { left: "544px", top: "410px", fontSize: "22px", color: "#E8C46A" });
+  }],
+  "linkedin": [1584, 396, (f) => {
+    f.style.background = "#12301F"; wonder(f, "petra", 860, 0, 724, 396, 9);
+    lockup(f, 64, 92, 60, "#EDEAE1", "#E8C46A");
+    el(f, "tag", "simulation and hack-resistant verifiers<br>for agents that move money", { left: "68px", top: "200px", fontSize: "28px", lineHeight: "1.3", color: "#EDEAE1" });
+    el(f, "tag", "train on it. evaluate on it. ship through it.", { left: "68px", top: "300px", fontSize: "18px", color: "#86D0AA" });
+  }],
+  "post-claim": [1080, 1080, (f) => {
+    f.style.background = "#EDEAE1";
+    el(f, "msg them", them(0, 46), { left: "64px", top: "72px", width: "820px" });
+    el(f, "msg us", us(46), { left: "196px", top: "312px", width: "820px" });
+    wonder(f, "chichen itza", 0, 580, 1080, 500, 10);
+    el(f, "mark", MARK("#1D4A3A", "#B8892E"), { left: "64px", top: "500px", width: "48px", height: "48px" });
+    el(f, "tag", "scruple", { left: "124px", top: "508px", fontSize: "28px", fontWeight: "600", color: "#1D4A3A" });
+  }],
+  "post-wonders": [1080, 1080, (f) => {
+    f.style.background = "#0E1626";
+    const names = ["taj mahal", "petra", "machu picchu", "christ the redeemer"];
+    names.forEach((n, i) => { const x = 40 + (i % 2) * 510, y = 150 + Math.floor(i / 2) * 455; wonder(f, n, x, y, 490, 420, 7); el(f, "label", n, { left: x + "px", top: y + 426 + "px", fontSize: "14px" }); });
+    el(f, "tag", "every visit draws a different wonder.<br>every rule is checked before it moves money.", { left: "40px", top: "40px", fontSize: "30px", lineHeight: "1.25", color: "#E6E3D6" });
+  }],
+  "post-definition": [1080, 1350, (f) => {
+    f.style.background = "#0E1626";
+    el(f, "mark", MARK("#E6E3D6", "#E8C46A"), { left: "80px", top: "120px", width: "360px", height: "360px" });
+    el(f, "word", "scruple", { left: "76px", top: "560px", fontSize: "190px", color: "#E6E3D6" });
+    el(f, "tag", "/ˈskruː.pəl/ noun", { left: "84px", top: "780px", fontSize: "26px", color: "#A1ABC0" });
+    el(f, "tag", "1. a unit of weight, 20 grains. the smallest<br>&nbsp;&nbsp;&nbsp;weight on an apothecary's scale.<br><br>2. a hesitation before doing something<br>&nbsp;&nbsp;&nbsp;that may be wrong.", { left: "84px", top: "850px", fontSize: "34px", lineHeight: "1.35", color: "#E6E3D6" });
+    el(f, "tag", "verifiers for agents that move money", { left: "84px", top: "1220px", fontSize: "24px", color: "#E8C46A" });
+  }],
+  "story": [1080, 1920, (f) => {
+    f.style.background = "#EDEAE1";
+    el(f, "msg them", them(0, 50), { left: "60px", top: "160px", width: "900px" });
+    el(f, "msg us", us(50), { left: "120px", top: "420px", width: "900px" });
+    wonder(f, "christ the redeemer", 0, 760, 1080, 1160, 11);
+    lockup(f, 60, 64, 54, "#1D4A3A", "#B8892E");
+  }],
+  "thumbnail": [1280, 720, (f) => {
+    f.style.background = "#0A1120"; wonder(f, "machu picchu", 0, 0, 1280, 720, 10);
+    el(f, "", "", { position: "absolute", left: 0, top: "490px", width: "1280px", height: "230px", background: "#0A1120", borderTop: "1px solid #24324F" });
+    lockup(f, 64, 520, 90, "#EDEAE1", "#E8C46A");
+    el(f, "tag", "test what an agent learned before it touches money", { left: "68px", top: "640px", fontSize: "28px", color: "#E8C46A" });
+  }],
+  "readme-hero": [1600, 520, (f) => {
+    f.style.background = "#0A1120"; wonder(f, "taj mahal", 0, 0, 1600, 520, 10);
+    el(f, "", "", { position: "absolute", left: 0, top: 0, width: "620px", height: "520px", background: "#0A1120", borderRight: "1px solid #24324F" });
+    lockup(f, 64, 190, 70, "#EDEAE1", "#E8C46A");
+    el(f, "tag", "verifiers for agents that move money", { left: "68px", top: "290px", fontSize: "24px", color: "#B9C2D6" });
+  }],
+  "avatar": [400, 400, (f) => {
+    f.style.background = "#0E1626";
+    el(f, "mark", MARK("#E6E3D6", "#E8C46A"), { left: "70px", top: "70px", width: "260px", height: "260px" });
+  }],
+  "avatar-ascii": [400, 400, (f) => { f.style.background = "#0A1120"; wonder(f, "taj mahal", 0, 0, 400, 400, 6); }],
+};
+
+window.renderAsset = async (name) => {
+  await document.fonts.load('500 10px "Martian Mono"'); await document.fonts.load('600 40px "Martian Mono"');
+  const [w, h, fn] = LAYOUTS[name], root = document.getElementById("root"); root.innerHTML = "";
+  const f = document.createElement("div"); f.className = "frame"; f.style.width = w + "px"; f.style.height = h + "px"; root.appendChild(f);
+  fn(f); return [w, h];
+};
+window.ASSETS = Object.keys(LAYOUTS);
+</script>
+</body>
+</html>
