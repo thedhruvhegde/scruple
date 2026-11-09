@@ -11,6 +11,7 @@ from typing import Any
 from scruple.ci.comment import render_comment
 from scruple.ci.config import load_candidate, load_config
 from scruple.ci.github import DEFAULT_API, GitHubClient, Transport, UrllibTransport, token_from_env
+from scruple.ci.history import HistorySection
 from scruple.ci.runner import run_candidate
 from scruple.ci.scorecard import Scorecard, load_scorecard
 from scruple.ci.status import payload_for
@@ -37,6 +38,17 @@ def cmd_ci_run(args: argparse.Namespace) -> int:
     cfg = load_config(args.config)
     if args.db:
         cfg = cfg.model_copy(update={"ci": cfg.ci.model_copy(update={"db": args.db})})
+    if args.history:
+        base = cfg.history.model_dump() if cfg.history is not None else {}
+        base.update(
+            file=str(Path(args.history).resolve()),
+            format=args.history_format or None,
+            import_config=str(Path(args.history_config).resolve())
+            if args.history_config
+            else base.get("import_config"),
+            label=args.history_label or base.get("label"),
+        )
+        cfg = cfg.model_copy(update={"history": HistorySection.model_validate(base)})
     cand_path = Path(args.candidate) if args.candidate else cfg.resolve(cfg.candidate.file)
     run = run_candidate(cfg, load_candidate(cand_path))
     out = Path(args.out) if args.out else cfg.resolve(cfg.ci.scorecard)
@@ -48,6 +60,22 @@ def cmd_ci_run(args: argparse.Namespace) -> int:
         print(f"  {d.decision_id} {d.stage.value:<7} {d.outcome.value:<14} {d.summary}")
     for r in card.regressions:
         print(f"  REGRESSION {r.kind}: {r.name}: {r.detail}")
+    h = card.history
+    if h is not None and card.synthetic_verdict is not None:
+        tag = " [SYNTHETIC DATA]" if h.synthetic else ""
+        print(f"  source synthetic held-out cases: {card.synthetic_verdict.value.upper()}")
+        print(
+            f"  source partner history{tag}: {h.verdict.upper()} ({h.backtest_verdict}; "
+            f"{h.why}) {h.n_included} cases, {h.n_observed} observed, "
+            f"{h.n_estimated} estimated"
+        )
+        for hr in h.by_reason:
+            short = hr.verdict != "no change" and not hr.sufficient
+            need = f", needs {hr.cases_needed or '?'} cases" if short else ""
+            print(
+                f"    {hr.reason:<24} {hr.verdict:<22} n={hr.n} "
+                f"({hr.n_observed} obs, {hr.n_estimated} est){need}"
+            )
     print(f"scorecard written to {out}")
     if args.evidence:
         write_evidence(run.gate, card.rule_id, card.version, Path(args.evidence))
@@ -119,6 +147,19 @@ def add_ci_parser(sub: Any) -> None:
     r.add_argument("--out", default=None, help="scorecard path (overrides config)")
     r.add_argument("--db", default=None, help="SQLite path (default: in-memory)")
     r.add_argument("--evidence", default=None, help="also write an evidence pack to this dir")
+    r.add_argument(
+        "--history",
+        default=None,
+        help="also gate on the partner's history: a case store or an export file",
+    )
+    r.add_argument(
+        "--history-format",
+        default=None,
+        choices=["store", "stripe", "adyen", "csv", "jsonl"],
+        help="default: a case store, else from the file suffix",
+    )
+    r.add_argument("--history-config", default=None, help="ImportConfig JSON for csv / jsonl")
+    r.add_argument("--history-label", default=None, help="dataset name on the scorecard")
 
     m = ci_sub.add_parser("render", help="render a scorecard as markdown")
     m.set_defaults(fn=cmd_ci_render)

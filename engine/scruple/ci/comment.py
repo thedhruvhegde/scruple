@@ -7,6 +7,8 @@ instead of adding a new one on every push.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from scruple.ci.scorecard import Scorecard, Verdict
 
 MARKER = "<!-- scruple-gate -->"
@@ -130,6 +132,8 @@ def render_comment(card: Scorecard) -> str:
                 f"of {q.n_matched:,} matched cases"
             )
         w("")
+    if card.history is not None:
+        _history(w, card)
     failed = [c for c in card.checks if not c.passed]
     passed = len(card.checks) - len(failed)
     w(f"<details><summary>Checks ({passed}/{len(card.checks)} passed)</summary>")
@@ -142,8 +146,71 @@ def render_comment(card: Scorecard) -> str:
     w("")
     w("</details>")
     w("")
+    footer = (
+        "Synthetic simulator data only."
+        if card.history is None
+        else "Synthetic held-out cases, plus the history above (labelled by source)."
+    )
     w(
-        "Synthetic simulator data only. Thresholds are illustrative defaults. "
+        f"{footer} Thresholds are illustrative defaults. "
         f"Config `{card.config_sha256[:16]}`, audit head `{card.audit_head[:16]}`."
     )
     return "\n".join(out) + "\n"
+
+
+def _money(minor: float, currency: str) -> str:
+    return f"{minor / 100:,.2f} {currency}"
+
+
+def _history(w: Callable[[str], None], card: Scorecard) -> None:
+    h = card.history
+    assert h is not None
+    syn = card.synthetic_verdict.value.upper() if card.synthetic_verdict else "?"
+    tag = " (SYNTHETIC data)" if h.synthetic else ""
+    w("### Sources")
+    w("")
+    w("| Source | Verdict | Cases |")
+    w("|---|---|---|")
+    stats_n = card.statistics.n_cases if card.statistics else 0
+    w(f"| synthetic held-out cases | **{syn}** | {stats_n:,} |")
+    w(
+        f"| partner history{tag} | **{h.verdict.upper()}** | {h.n_included:,} "
+        f"({h.n_observed:,} observed, {h.n_estimated:,} estimated) |"
+    )
+    w("")
+    w(f"### Partner history: {h.verdict.upper()}{tag}")
+    w("")
+    w(f"Dataset: {_cell(h.dataset)}. Content hash `{h.history_sha256[:16]}`.")
+    w("")
+    w(f"- Backtest verdict **{h.backtest_verdict}**: {_cell(h.why)}.")
+    w(
+        f"- Cost, history (observed): {_money(h.baseline_cost, h.currency)}; candidate: "
+        f"{_money(h.candidate_cost, h.currency)}, of which observed "
+        f"{_money(h.candidate_cost_observed, h.currency)} and estimated "
+        f"{_money(h.candidate_cost_estimated, h.currency)} (estimate band "
+        f"{_money(h.candidate_cost_low, h.currency)} to "
+        f"{_money(h.candidate_cost_high, h.currency)})"
+    )
+    if h.mean_diff is not None and h.ci_low is not None and h.ci_high is not None:
+        w(
+            f"- Mean change per case {_money(h.mean_diff, h.currency)}, anytime-valid "
+            f"interval [{_money(h.ci_low, h.currency)}, {_money(h.ci_high, h.currency)}]"
+        )
+    w(f"- Method: {_cell(h.method)}")
+    w(f"- Estimated costs from: {_cell(h.profile)}")
+    if h.rule_fields_defaulted:
+        shown = ", ".join(f"{k} ({v})" for k, v in h.rule_fields_defaulted.items())
+        w(f"- Rule fields not in the export, default used (cases): {_cell(shown)}")
+    w("")
+    if h.by_reason:
+        w("| Reason | Cases | Observed | Estimated | Verdict | Cases needed |")
+        w("|---|---:|---:|---:|---|---:|")
+        for r in h.by_reason:
+            need = "-" if r.verdict == "no change" else f"{r.cases_needed or 0:,}"
+            if r.verdict != "no change" and not r.sufficient:
+                need += " (insufficient)"
+            w(
+                f"| `{_cell(r.reason)}` | {r.n:,} | {r.n_observed:,} | {r.n_estimated:,} | "
+                f"{r.verdict} | {need} |"
+            )
+        w("")

@@ -15,6 +15,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, SerializerFunctionWrapHandler, model_serializer
 
 from scruple.audit.report import usd
+from scruple.ci.history import HistoryGate
 from scruple.gate.config import GateConfig
 from scruple.gate.evalue import METHOD as EVALUE_METHOD
 from scruple.gate.evalue import EValueEvidence
@@ -109,11 +110,15 @@ class Scorecard(BaseModel):
     # bootstrap scorecards are byte-identical to before.
     evalue: EValueEvidence | None = None
     canary_sequential: SequentialCanaryResult | None = None
+    # Partner history (`scruple ci run --history`): a second source, kept apart. With
+    # it, `verdict` is the worse of `synthetic_verdict` and `history.verdict`.
+    synthetic_verdict: Verdict | None = None
+    history: HistoryGate | None = None
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
         data: dict[str, Any] = handler(self)
-        for k in ("evalue", "canary_sequential"):
+        for k in ("evalue", "canary_sequential", "synthetic_verdict", "history"):
             if data.get(k) is None:
                 data.pop(k, None)
         return data
@@ -244,6 +249,23 @@ def build_scorecard(
         audit_head=audit_head,
         evalue=None if shadow is None else shadow.evalue,
         canary_sequential=None if canary is None else canary.sequential,
+    )
+
+
+def with_history(card: Scorecard, history: HistoryGate, fail_on_hold: bool = True) -> Scorecard:
+    """Add the partner-history source; the overall verdict becomes the worse of the two."""
+    from scruple.ci.history import combine
+
+    verdict = Verdict(combine(card.verdict.value, history.verdict))
+    return card.model_copy(
+        update={
+            "data": "synthetic held-out cases and "
+            + ("SYNTHETIC partner-shaped history" if history.synthetic else "partner history"),
+            "synthetic_verdict": card.verdict,
+            "history": history,
+            "verdict": verdict,
+            "exit_code": exit_code_for(verdict, fail_on_hold),
+        }
     )
 
 

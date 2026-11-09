@@ -34,9 +34,15 @@ def _check_sha(sha: str) -> str:
 
 def description(card: Scorecard) -> str:
     n = len(card.regressions)
+    h = card.history
+    if h is None:
+        data = "synthetic data"
+    else:
+        data = f"synthetic {card.synthetic_verdict.value if card.synthetic_verdict else '?'}"
+        data += f", {'synthetic ' if h.synthetic else ''}history {h.verdict}"
     text = (
         f"{card.verdict.value.upper()}: {card.rule_id}@v{card.version}, "
-        f"{n} regression{'s' if n != 1 else ''} (synthetic data)"
+        f"{n} regression{'s' if n != 1 else ''} ({data})"
     )
     return text if len(text) <= DESCRIPTION_LIMIT else text[: DESCRIPTION_LIMIT - 3] + "..."
 

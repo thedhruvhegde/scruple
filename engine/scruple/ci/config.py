@@ -12,6 +12,9 @@ Example:
     fail_on_hold = true
     scorecard = "scruple-scorecard.json"
 
+    [history]                       # optional: also gate on the partner's history
+    file = "cases.db"               # a `scruple ingest` case store, or an export
+
 Paths are resolved relative to the directory that holds the config file.
 """
 
@@ -24,6 +27,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from scruple.ci.history import HistorySection
 from scruple.domain import RuleSpec
 from scruple.gate.config import GateConfig
 from scruple.registry import Provenance
@@ -62,6 +66,7 @@ class CIConfig(BaseModel):
     candidate: CandidateSection
     gate: GateConfig = GateConfig()
     ci: CISection = CISection()
+    history: HistorySection | None = None
     root: str = "."  # directory the config was loaded from; set by load_config
 
     def resolve(self, path: str) -> Path:
