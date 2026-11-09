@@ -19,7 +19,9 @@ def paired_bootstrap_ci(
     if n == 0:
         return 0.0, 0.0, 0.0
     mean = sum(diffs) / n
-    nonzero = [d for d in diffs if d != 0]
+    # Sorted, so the interval depends on the differences, not on the order the cases
+    # happened to arrive in (the same evidence must always give the same verdict).
+    nonzero = sorted(d for d in diffs if d != 0)
     if not nonzero:
         return 0.0, 0.0, 0.0
     p = len(nonzero) / n

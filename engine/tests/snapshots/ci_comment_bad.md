@@ -24,7 +24,7 @@ Logic: `IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN con
 
 ### Statistics
 
-- Mean regret improvement: **$10.70** per case, 95% interval [$7.34, $14.30]
+- Mean regret improvement: **$10.70** per case, 95% interval [$7.53, $13.68]
 - 2,000 held-out cases, 425 changed decision; method `percentile-bootstrap-paired`
 
 <details><summary>Per-scenario regret (minor units per case)</summary>
@@ -51,10 +51,10 @@ Logic: `IF reason_code eq 'not_received' AND delivery_confirmed eq True THEN con
 | golden_regression_suite | hard | **FAIL** | 2/10 golden cases regressed: golden-late-evidence, golden-late-evidence-short-window |
 | no_slice_regression | hard | **FAIL** | worst slice 'late_evidence' mean regret change $10.43 per case (tolerance $0.00) |
 | escalation_rate_guard | hard | pass | escalation rate 2.7% -> 2.7% |
-| not_significantly_worse | hard | pass | mean improvement $10.70 per case, 95% CI [$7.34, $14.30] |
+| not_significantly_worse | hard | pass | mean improvement $10.70 per case, 95% CI [$7.53, $13.68] |
 | enough_affected_cases | evidence | pass | 425 held-out cases changed decision (minimum 30) |
-| significant_improvement | evidence | pass | CI lower bound $7.34 must exceed $0.00 per case |
+| significant_improvement | evidence | pass | CI lower bound $7.53 must exceed $0.00 per case |
 
 </details>
 
-Synthetic simulator data only. Thresholds are illustrative defaults. Config `b761d070feba74cf`, audit head `d5b38bc934cc9325`.
+Synthetic simulator data only. Thresholds are illustrative defaults. Config `b761d070feba74cf`, audit head `fe08e38547f8c7b9`.

@@ -86,3 +86,13 @@ def test_bootstrap_is_seeded_and_brackets_the_mean() -> None:
 def test_bootstrap_degenerate_inputs() -> None:
     assert paired_bootstrap_ci([], 100, 0.95, 1) == (0.0, 0.0, 0.0)
     assert paired_bootstrap_ci([0, 0, 0], 100, 0.95, 1) == (0.0, 0.0, 0.0)
+
+
+def test_bootstrap_interval_does_not_depend_on_case_order() -> None:
+    """Regression (found by tests/test_metamorphic.py): resampling drew from the
+    non-zero differences in arrival order, so the same evidence in another order gave
+    another interval (here the upper bound moved from 0.18 to 0.27)."""
+    diffs = [0] * 9 + [1, -2]
+    assert paired_bootstrap_ci(diffs, 300, 0.95, 7) == paired_bootstrap_ci(
+        list(reversed(diffs)), 300, 0.95, 7
+    )
