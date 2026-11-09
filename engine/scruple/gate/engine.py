@@ -33,6 +33,7 @@ from .models import (
     ShadowMetrics,
     SliceStat,
 )
+from .provider import provider_for
 from .regression import golden_cases
 from .stats import paired_bootstrap_ci
 
@@ -80,9 +81,13 @@ def evaluate_shadow(
     diffs = [b_out.regret[i] - c_out.regret[i] for i in ids]  # positive = better
     affected = sum(1 for i in ids if b_out.action[i] is not c_out.action[i])
     matched = sum(1 for r in c_run.results if r.decided_by == candidate.ref)
-    mean, lo, hi = paired_bootstrap_ci(
-        diffs, cfg.bootstrap_resamples, cfg.confidence, cfg.stats_seed
-    )
+    if cfg.stats == "evalue":
+        iv = provider_for(cfg).paired_interval(diffs, cfg.confidence)
+        mean, lo, hi = iv.mean, iv.low, iv.high
+    else:
+        mean, lo, hi = paired_bootstrap_ci(
+            diffs, cfg.bootstrap_resamples, cfg.confidence, cfg.stats_seed
+        )
     slices = _slices(cases, b_out, c_out)
     golden_n, golden_regressions = _golden(baseline, cand_policy)
     conflicts = _conflicts(cases, c_run, candidate, baseline)

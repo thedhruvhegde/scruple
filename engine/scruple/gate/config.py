@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.sim.generator import DEFAULT_PROFILE, Profile
@@ -22,6 +24,17 @@ class GateConfig(BaseModel):
     stats_seed: int = 7
     min_affected_cases: int = Field(default=30, ge=1)
     min_mean_improvement_usd_minor: float = 0.0  # CI lower bound must exceed this
+
+    # Statistics engine. "bootstrap": the seeded percentile bootstrap plus the
+    # zero-tolerance slice check (default). "evalue": anytime-valid betting
+    # e-processes (scruple.stats) with per-case-type e-BH, sample-size planning and a
+    # sequential canary. See docs/DESIGN.md "Statistics" and docs/DECISIONS.md.
+    stats: Literal["bootstrap", "evalue"] = "bootstrap"
+    # Declared bound on |candidate - baseline| loss per case for the e-value provider
+    # when no per-case-type cap applies (USD minor). ASSUMPTION: the largest synthetic
+    # amount ($50,000) plus every fee and the escalation cost. Must be set before
+    # outcomes are seen; a case that breaks it fails the gate closed.
+    evalue_cost_cap_usd_minor: float = Field(default=5_030_000.0, gt=0.0)
 
     # Regression guards (hard)
     slice_tolerance_usd_minor: float = 0.0  # any slice-mean worsening blocks

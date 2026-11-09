@@ -47,7 +47,7 @@ from scruple.gate.canary import (
 from scruple.gate.config import GateConfig
 from scruple.gate.engine import Verdict, evaluate_canary, evaluate_shadow, policy_from
 from scruple.gate.models import CheckResult, Decision, DecisionRecord, Outcome, Stage
-from scruple.gate.provider import BootstrapProvider, StatsProvider
+from scruple.gate.provider import StatsProvider, provider_for
 from scruple.gate.regression import golden_cases
 from scruple.gate.shadow import ShadowRecorder
 from scruple.hashing import content_hash
@@ -448,7 +448,7 @@ class AgentGate:
             cases,
             state.schedule,
             state.stage_index,
-            provider or BootstrapProvider(self.config.bootstrap_resamples, self.config.stats_seed),
+            provider or provider_for(self.config),
         )
         verdict = Verdict(
             res.gate_outcome,
@@ -554,7 +554,9 @@ class AgentGate:
         Reads the registry once; the recorder holds no handle to storage."""
         rv = self.registry.get(rule_id, version)
         active = [r for r in self.registry.active_rules() if r.rule_id != rule_id]
-        return ShadowRecorder(rv, active, provider, self.config.confidence)
+        return ShadowRecorder(
+            rv, active, provider or provider_for(self.config), self.config.confidence
+        )
 
     # --- reads -----------------------------------------------------------------
 
