@@ -1,10 +1,6 @@
-"""Storage interface and the SQLite implementation.
+"""SQLite implementation of the storage interfaces in `scruple.storage.base`.
 
-The `Storage` protocol is the only thing the rest of the package depends on, so a
-Postgres implementation can replace SQLiteStorage later. Append-only guarantees are
-enforced twice: by the API of this class (no update/delete methods for history) and
-by database triggers (so a stray SQL statement also fails). Neither stops someone
-with raw file access; the hash chain in scruple.audit detects that case.
+Append-only history is enforced by triggers, so a stray SQL statement also fails.
 """
 
 from __future__ import annotations
@@ -13,30 +9,12 @@ import json
 import sqlite3
 import threading
 from collections.abc import Iterator
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 from datetime import datetime
-from typing import Protocol
 
 from scruple.audit.models import AuditEntry
 from scruple.domain import RuleSpec
 from scruple.registry.models import Provenance, RuleStatus, RuleVersion
-
-
-class Storage(Protocol):
-    def transaction(self) -> AbstractContextManager[None]: ...
-    def insert_rule_version(self, rv: RuleVersion) -> None: ...
-    def update_rule_status(self, rule_id: str, version: int, status: RuleStatus) -> None: ...
-    def set_rollback_to(self, rule_id: str, version: int, rollback_to: int | None) -> None: ...
-    def get_rule_version(self, rule_id: str, version: int) -> RuleVersion | None: ...
-    def list_rule_versions(self, rule_id: str | None = None) -> list[RuleVersion]: ...
-    def append_audit(self, entry: AuditEntry) -> None: ...
-    def last_audit(self) -> AuditEntry | None: ...
-    def list_audit(self) -> list[AuditEntry]: ...
-    def insert_decision(self, decision_id: str, rule_id: str, version: int, body: str) -> None: ...
-    def get_decision(self, decision_id: str) -> str | None: ...
-    def list_decisions(self, rule_id: str | None = None) -> list[str]: ...
-    def count_decisions(self) -> int: ...
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS rule_versions (
