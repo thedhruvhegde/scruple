@@ -138,3 +138,8 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   early-warning levels, acquirer-level thresholds, enumeration ratios, regional
   differences and the HECM issuer recovery assessment are not modelled. Sources
   disagree on fines; the S14 schedule was picked.
+- **A-30** Difficulty knob (scruple/sim/difficulty.py): the schedule that maps one
+  number in [0, 1] to evidence availability, forgery and missing-evidence rates and
+  tempered family weights (`w ** (2 d)`) is ours. "Ambiguity" means the evidence a
+  merchant holds says less about who is right; "rarity" means rare case families get
+  rarer. Neither is calibrated to real dispute data. `d = 0.5` equals `FULL_MIX`.

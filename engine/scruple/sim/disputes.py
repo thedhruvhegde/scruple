@@ -28,7 +28,9 @@ Generation: `generate_cases(seed, n, mix)` returns `CardDispute`s, deterministic
 - `p_missing_evidence`, `p_forged_evidence` (024)
 - `p_refund_race` (027), `p_split_shipment`, `p_partial_dispute` (028)
 - `p_foreign_currency` (029), `p_ce3_history` (030)
-`FULL_MIX` turns every feature on at moderate rates.
+- `p_required_held_*`, `p_supporting_held_*` (032): evidence availability
+`FULL_MIX` turns every feature on at moderate rates. `scruple.sim.difficulty.
+difficulty_mix(d)` maps one number in [0, 1] to a mix (0.5 is exactly `FULL_MIX`).
 
 Actions (`AgentAction`, a pydantic union discriminated on `kind`; `ACTION_KINDS`):
 
@@ -281,6 +283,12 @@ class CaseMix(BaseModel):
     p_foreign_currency: float = Field(0.0, ge=0, le=1)
     # 030: a fraud dispute comes with the card's order history at this merchant
     p_ce3_history: float = Field(0.0, ge=0, le=1)
+    # 032: evidence availability (A-19). The defaults are the original constants, so
+    # existing seeds are unchanged; `scruple.sim.difficulty` moves them together.
+    p_required_held_invalid: float = Field(1.0, ge=0, le=1)  # merchant in the right
+    p_required_held_valid: float = Field(0.25, ge=0, le=1)  # merchant facing a valid claim
+    p_supporting_held_invalid: float = Field(0.6, ge=0, le=1)
+    p_supporting_held_valid: float = Field(0.2, ge=0, le=1)
 
 
 DEFAULT_MIX = CaseMix()
@@ -411,7 +419,8 @@ def generate_cases(
 
 # Chance that the merchant holds each evidence kind (ASSUMPTION A-19). A merchant in
 # the right usually holds what the reason code needs; one facing a valid claim rarely
-# does. Every case has a receipt and an authorization record.
+# does. Every case has a receipt and an authorization record. These are the defaults
+# of the `CaseMix.p_*_held_*` fields (032).
 P_REQUIRED_HELD = {False: 1.0, True: 0.25}  # keyed by claim_valid
 P_SUPPORTING_HELD = {False: 0.6, True: 0.2}
 ALWAYS_HELD = (EvidenceKind.RECEIPT, EvidenceKind.AUTHORIZATION_RECORD)
@@ -464,11 +473,13 @@ def _documents(
     """(documents held, forged doc ids, required kinds lost). Draws extra randomness
     only when the 024 options are non-zero, so default seeds are unchanged."""
     kinds: list[EvidenceKind] = list(ALWAYS_HELD)
+    p_req = mix.p_required_held_valid if valid else mix.p_required_held_invalid
+    p_sup = mix.p_supporting_held_valid if valid else mix.p_supporting_held_invalid
     for k in spec.required_evidence:
-        if k not in kinds and rng.random() < P_REQUIRED_HELD[valid]:
+        if k not in kinds and rng.random() < p_req:
             kinds.append(k)
     for k in spec.supporting_evidence:
-        if k not in kinds and rng.random() < P_SUPPORTING_HELD[valid]:
+        if k not in kinds and rng.random() < p_sup:
             kinds.append(k)
     missing: list[EvidenceKind] = []
     if mix.p_missing_evidence > 0 and not valid:
