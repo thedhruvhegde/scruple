@@ -109,6 +109,11 @@ class SeededIssuer:
             return Decision(
                 stage=stage, odds=0.0, draw=draw, caught=tuple(caught), merchant_prevails=False
             )
+        if case.ce3().eligible and any(
+            d.kind is EvidenceKind.PRIOR_UNDISPUTED_HISTORY for d in clean
+        ):
+            # CE 3.0 met and submitted: liability moves to the issuer (S2-S4, A-28)
+            return Decision(stage=stage, odds=p.cap, draw=draw, caught=(), merchant_prevails=True)
         if any(_settled_refund(d, case.amount_minor) for d in clean):
             # the cardholder already has the money back: the dispute is moot (A-23)
             return Decision(stage=stage, odds=p.cap, draw=draw, caught=(), merchant_prevails=True)

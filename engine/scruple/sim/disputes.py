@@ -50,6 +50,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from scruple.clock import Clock
 from scruple.domain import ReasonCode
 from scruple.sim.card_ledger import CardLedger, DoubleRefundError
+from scruple.sim.ce3 import CE3Result, Fingerprint, PriorTransaction, ce3_eligibility
 from scruple.sim.deadlines import (
     DEFAULT_CALENDAR,
     BusinessCalendar,
@@ -149,6 +150,8 @@ class CardDispute(BaseModel):
     refund_in_flight: PendingRefund | None = None  # 027: a refund racing the dispute
     shipments: tuple[Shipment, ...] = ()  # 028: a split order; empty for one parcel
     settlement_currency: str = "USD"  # 029: the merchant's currency
+    fingerprint: Fingerprint | None = None  # 030: CE 3.0 data elements of this txn
+    prior_transactions: tuple[PriorTransaction, ...] = ()  # 030: same card, this merchant
     truth: Truth
 
     @model_validator(mode="after")
@@ -190,6 +193,16 @@ class CardDispute(BaseModel):
         if CLAIM_VALID[fam] is not self.truth.claim_valid:
             raise ValueError(f"{fam.value} implies claim_valid={CLAIM_VALID[fam]}")
         return self
+
+    def ce3(self) -> CE3Result:
+        """Visa Compelling Evidence 3.0 eligibility (scruple.sim.ce3)."""
+        return ce3_eligibility(
+            self.network,
+            self.reason_code,
+            self.processed_on,
+            self.fingerprint,
+            self.prior_transactions,
+        )
 
     @property
     def evidence_ids(self) -> tuple[str, ...]:
@@ -243,6 +256,8 @@ class CaseMix(BaseModel):
     p_partial_dispute: float = Field(0.0, ge=0, le=1)
     # 029: the cardholder pays in EUR, GBP or JPY; the merchant settles in USD
     p_foreign_currency: float = Field(0.0, ge=0, le=1)
+    # 030: a fraud dispute comes with the card's order history at this merchant
+    p_ce3_history: float = Field(0.0, ge=0, le=1)
 
 
 DEFAULT_MIX = CaseMix()
@@ -308,6 +323,21 @@ def generate_cases(
         elif mix.p_partial_dispute > 0 and rng.random() < mix.p_partial_dispute:
             amount = max(1, captured * rng.randint(20, 80) // 100)
             liability = amount if valid else 0
+        fingerprint: Fingerprint | None = None
+        priors: tuple[PriorTransaction, ...] = ()
+        if (
+            mix.p_ce3_history > 0
+            and spec.category is Category.FRAUD
+            and rng.random() < mix.p_ce3_history
+        ):
+            fingerprint, priors = _history(rng, case_id, processed, valid)
+            fields = {"prior_txn_ids": ",".join(x.txn_id for x in priors), "currency": ccy}
+            docs = (
+                *docs,
+                make_document(
+                    case_id, EvidenceKind.PRIOR_UNDISPUTED_HISTORY, processed, fields, len(docs)
+                ),
+            )
         race: PendingRefund | None = None
         if mix.p_refund_race > 0 and valid and rng.random() < mix.p_refund_race:
             settles = max(processed, opened + timedelta(days=rng.randint(-5, 10)))
@@ -330,6 +360,8 @@ def generate_cases(
                 documents=docs,
                 refund_in_flight=race,
                 shipments=shipments,
+                fingerprint=fingerprint,
+                prior_transactions=priors,
                 truth=Truth(
                     claim_valid=valid,
                     liability_minor=liability,
@@ -477,6 +509,43 @@ def _split(
                 make_document(case_id, EvidenceKind.DELIVERY_PROOF, day, fields, first_index + j)
             )
     return tuple(ships), tuple(docs)
+
+
+def _history(
+    rng: random.Random, case_id: str, processed: date, valid: bool
+) -> tuple[Fingerprint, tuple[PriorTransaction, ...]]:
+    """The card's earlier orders at this merchant (A-28). Friendly fraud: the disputed
+    order shares the cardholder's account, IP and device, and most histories are old
+    enough to qualify for CE 3.0. True fraud: the disputed order comes from a new
+    device, IP and address, so nothing matches."""
+    tag = f"{rng.getrandbits(40):010x}"
+    owner = Fingerprint(
+        account_id=f"acct-{tag}",
+        ip=f"198.51.100.{rng.randint(1, 254)}",
+        shipping_address=f"addr-{tag}",
+        device_id=f"device-{tag}-{rng.randint(0, 9)}",
+    )
+    priors: list[PriorTransaction] = []
+    for j in range(rng.randint(2, 4)):
+        age = rng.randint(121, 364) if rng.random() < 0.8 else rng.randint(10, 119)
+        priors.append(
+            PriorTransaction(
+                txn_id=f"{case_id}-p{j + 1}",
+                processed_on=processed - timedelta(days=age),
+                disputed=rng.random() < 0.1,
+                fingerprint=owner,
+            )
+        )
+    if valid:  # a fraudster used the card
+        current = Fingerprint(
+            account_id=f"acct-{tag}-x",
+            ip=f"192.0.2.{rng.randint(1, 254)}",
+            shipping_address=f"addr-{tag}-x",
+            device_id=f"device-{tag}-fraud",
+        )
+    else:
+        current = owner
+    return current, tuple(priors)
 
 
 # ------------------------------------------------------------------------- actions

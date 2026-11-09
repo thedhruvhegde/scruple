@@ -122,3 +122,11 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   rates. Every posting converts at the rate of its own day, so the merchant bears the
   FX difference between a chargeback debit and its reversal; real schemes convert at
   specific settlement dates and can apply markups, which are not modelled.
+- **A-28** CE 3.0 (scruple/sim/ce3.py): implemented from secondary descriptions of
+  Visa's rule (S2-S5), not the rule text. The 120/365-day bounds are treated as
+  exclusive ("more than 120, fewer than 365", S4). When a case meets the criteria and
+  the merchant submits its order history, the simulated issuer always lets the merchant
+  prevail (liability moves to the issuer). Not modelled: the reported October 2026
+  cross-merchant change (S6), fraud-report exclusions, the public-IP requirement and
+  the data exchange itself. Generated histories (2-4 prior orders, 80% inside the age
+  window, 10% disputed) are synthetic.
