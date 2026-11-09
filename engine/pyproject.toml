@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.13",
+    "defusedxml>=0.7.1",
     "fastapi>=0.115",
     "fpdf2>=2.9.0",
     "psycopg[binary]>=3.2",
@@ -45,6 +46,7 @@ dev = [
     "claude-agent-sdk>=0.2",
     "langgraph>=1.0",
     "hypothesis>=6.170.15",
+    "types-defusedxml>=0.7.0.20260504",
 ]
 
 [build-system]

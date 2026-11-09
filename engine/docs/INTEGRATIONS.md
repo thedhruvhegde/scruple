@@ -126,3 +126,24 @@ Rules every adapter follows:
   Modern-Treasury/modern-treasury-python at `cf80342` (MIT). ASSUMPTION: every account is
   treated as debit-normal (positive line = debit); real use needs each account's normal
   balance. Mapping stubs only: no Formance or Modern Treasury HTTP client.
+
+## Bank statements (`scruple.ingest.bank`)
+
+- Output: `BankStatement` (account, currency, balances, entries). Entry amounts are
+  unsigned minor units plus a direction; `description` is the bank's free text, truncated
+  to 500 characters, to be redacted before storage.
+- BAI2 (`parse_bai2`): layout, continuation joining and integrity rules ported from
+  ministryofjustice/bai2 at `6696a72` (MIT); passes its four real sample files. Account,
+  group and file control totals, record counts, account and group counts are all checked
+  (`check_integrity=False` must be asked for). Type code direction table ported from the
+  same library. ASSUMPTION: amounts are minor units of the account currency; a missing
+  currency is an error unless `default_currency` is given (the library assumes USD).
+- camt.053 (`parse_camt053`): versions 001.02 to 001.13, defusedxml with DTDs, entities
+  and external references forbidden (billion laughs, XXE and external DTD tests). Real
+  public sample: prowide-iso20022 (Apache 2.0, header and balances only). The entry-level
+  fixture is hand-made and labelled so. Amounts parsed exactly with the ISO 4217 exponent;
+  more decimals than the currency allows is an error.
+- CSV (`import_bank_csv`): declared columns, one signed amount column or separate debit
+  and credit columns, ISO or day-first or month-first dates, row-level errors.
+- Bank files are all-or-nothing for structure (control totals are file-level); the CSV
+  importer reports per row.
