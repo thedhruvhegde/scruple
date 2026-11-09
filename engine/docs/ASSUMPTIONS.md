@@ -130,3 +130,11 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   cross-merchant change (S6), fraud-report exclusions, the public-IP requirement and
   the data exchange itself. Generated histories (2-4 prior orders, 80% inside the age
   window, 10% disputed) are synthetic.
+- **A-29** Monitoring programmes (scruple/sim/monitoring.py): thresholds come from
+  secondary sources (S13, S14, S15) and are applied at merchant level only, with US
+  timing for VAMP. Not sourced, so assumed: the Mastercard ratio uses the previous
+  month's settled transactions; ECM/HECM fines after the third month stay at the
+  month-3 amount; the VAMP fee applies per chargeback in an excessive month. VAMP
+  early-warning levels, acquirer-level thresholds, enumeration ratios, regional
+  differences and the HECM issuer recovery assessment are not modelled. Sources
+  disagree on fines; the S14 schedule was picked.

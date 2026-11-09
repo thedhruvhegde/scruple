@@ -84,6 +84,8 @@ from scruple.sim.issuer import SeededIssuer
 from scruple.sim.lifecycle import OPENING_STAGES, Event, Lifecycle, Transition
 from scruple.sim.merchants import MerchantProfile, generate_merchants
 from scruple.sim.models import Resolution, Stage
+from scruple.sim.monitoring import MonthStatus, post_fines
+from scruple.sim.monitoring import evaluate as evaluate_programs
 from scruple.sim.networks import (
     Category,
     Network,
@@ -729,6 +731,7 @@ class DisputeEngine:
         self.vault = EvidenceVault(d for c in cases for d in c.documents)
         self.ledger = CardLedger(fx or FX)
         self._incidents: list[Incident] = []
+        self._fined = False
         self._cases: dict[str, _CaseState] = {}
         for c in cases:
             if c.case_id in self._cases:
@@ -767,6 +770,15 @@ class DisputeEngine:
     @property
     def incidents(self) -> tuple[Incident, ...]:
         return tuple(self._incidents)
+
+    def post_monitoring_fines(self) -> tuple[MonthStatus, ...]:
+        """Evaluate VAMP and ECM over every known merchant's history and post the fines
+        (scruple.sim.monitoring). Posts at most once per engine."""
+        statuses = tuple(s for m in self.merchants.values() for s in evaluate_programs(m))
+        if not self._fined:
+            post_fines(self.ledger, statuses)
+            self._fined = True
+        return statuses
 
     def is_resolved(self, case_id: str) -> bool:
         return self._cases[case_id].resolution is not None

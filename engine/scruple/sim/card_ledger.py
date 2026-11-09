@@ -195,6 +195,20 @@ class CardLedger:
             [(f"cardholder:{txn_id}", -posted), (f"merchant:{m}", posted)],
         )
 
+    def merchant_charge(
+        self, kind: str, merchant_id: str, amount_usd: int, payee: str, ref: str
+    ) -> JournalEntry:
+        """A charge not tied to one transaction (e.g. a monitoring programme fine)."""
+        if amount_usd <= 0:
+            raise ValueError("charges must be positive")
+        return self.ledger.post(
+            kind,
+            ref,
+            None,
+            FEE_CURRENCY,
+            [(f"merchant:{merchant_id}", -amount_usd), (payee, amount_usd)],
+        )
+
     def fee(
         self, kind: str, txn_id: str, case_id: str | None, amount_usd: int, payee: str
     ) -> JournalEntry | None:
