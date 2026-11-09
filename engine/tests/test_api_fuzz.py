@@ -12,7 +12,8 @@ Checks left out, and why:
   route that matched the path (e.g. POST for /rules, not GET), a framework detail;
 - `positive_data_acceptance` on the Stripe webhook (raw bytes verified against a
   signature, so "schema-valid" unsigned bodies must get 400) and on POST /rules
-  (a condition's value type depends on its field, which JSON Schema cannot say).
+  (a condition's value type depends on its field, which JSON Schema cannot say),
+  and on the imported-shadow routes (ISO 4217 membership, stage and state agreement).
 
 Synthetic data only.
 """
@@ -60,9 +61,17 @@ def _app() -> Any:
 
 
 APP = _app()
-# Bodies whose validity the schema cannot express: a raw signed webhook, and rules
-# whose condition value type depends on the field (`mcc` needs a string, ...).
-CROSS_FIELD_OR_RAW = {"/ingest/stripe/webhook", "/rules"}
+# Bodies whose validity the schema cannot express: a raw signed webhook, rules
+# whose condition value type depends on the field (`mcc` needs a string, ...), and
+# imported cases, whose currency must be a listed ISO 4217 code and whose state must
+# agree with the stage (tests/test_gate_shadow_imported.py covers valid batches).
+IMPORTED = "/shadow/rules/{rule_id}/versions/{version}/imported"
+CROSS_FIELD_OR_RAW = {
+    "/ingest/stripe/webhook",
+    "/rules",
+    f"{IMPORTED}/decisions",
+    f"{IMPORTED}/outcomes",
+}
 schema = schemathesis.openapi.from_asgi("/openapi.json", APP)
 
 
