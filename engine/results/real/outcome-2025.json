@@ -1,0 +1,249 @@
+{
+  "data": "Real data: CFPB Consumer Complaint Database narratives (public domain, 17 USC 105), frozen splits data/real/v1 (see docs/data/CFPB.md). Not synthetic.",
+  "dataset": "cfpb2025",
+  "reproduce": "uv run scruple realdata baselines --task outcome-2025",
+  "results": {
+    "keywords": {
+      "auroc": {
+        "hi": 0.545977,
+        "lo": 0.490172,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.516918
+      },
+      "balanced_accuracy": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "base_rate": 0.185418,
+      "baseline": "keywords",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "brier": {
+        "hi": 0.16301,
+        "lo": 0.139137,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.150974
+      },
+      "dataset": "cfpb2025",
+      "ece": {
+        "hi": 0.029237,
+        "lo": 0.001993,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.007973
+      },
+      "fit": {
+        "flagged_share_train": 0.2719,
+        "p_flagged": 0.204388,
+        "p_unflagged": 0.168607
+      },
+      "n": 1591,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "reliability": [
+        {
+          "hi": 0.2,
+          "lo": 0.1,
+          "mean_p": 0.168607,
+          "n": 1198.0,
+          "rate": 0.178631
+        },
+        {
+          "hi": 0.3,
+          "lo": 0.2,
+          "mean_p": 0.204388,
+          "n": 393.0,
+          "rate": 0.206107
+        }
+      ],
+      "task": "outcome-2025"
+    },
+    "majority": {
+      "auroc": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "balanced_accuracy": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "base_rate": 0.185418,
+      "baseline": "majority",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "brier": {
+        "hi": 0.163229,
+        "lo": 0.138958,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.151088
+      },
+      "dataset": "cfpb2025",
+      "ece": {
+        "hi": 0.025954,
+        "lo": 0.000168,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.007082
+      },
+      "fit": {
+        "p_relief": 0.178336
+      },
+      "n": 1591,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "reliability": [
+        {
+          "hi": 0.2,
+          "lo": 0.1,
+          "mean_p": 0.178336,
+          "n": 1591.0,
+          "rate": 0.185418
+        }
+      ],
+      "task": "outcome-2025"
+    },
+    "tfidf_lr": {
+      "auroc": {
+        "hi": 0.736505,
+        "lo": 0.671229,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.70441
+      },
+      "balanced_accuracy": {
+        "hi": 0.508773,
+        "lo": 0.5,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.50339
+      },
+      "base_rate": 0.185418,
+      "baseline": "tfidf_lr",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "brier": {
+        "hi": 0.151535,
+        "lo": 0.128541,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.140145
+      },
+      "dataset": "cfpb2025",
+      "ece": {
+        "hi": 0.043989,
+        "lo": 0.015497,
+        "n": 1591,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.022816
+      },
+      "fit": {
+        "C": 2.0,
+        "dev_selection": {
+          "by_C": {
+            "0.5": -0.14384,
+            "2.0": -0.138932,
+            "8.0": -0.139899
+          },
+          "metric": "-brier"
+        }
+      },
+      "n": 1591,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "reliability": [
+        {
+          "hi": 0.1,
+          "lo": 0.0,
+          "mean_p": 0.079825,
+          "n": 239.0,
+          "rate": 0.058577
+        },
+        {
+          "hi": 0.2,
+          "lo": 0.1,
+          "mean_p": 0.147685,
+          "n": 913.0,
+          "rate": 0.145674
+        },
+        {
+          "hi": 0.3,
+          "lo": 0.2,
+          "mean_p": 0.24181,
+          "n": 337.0,
+          "rate": 0.317507
+        },
+        {
+          "hi": 0.4,
+          "lo": 0.3,
+          "mean_p": 0.342701,
+          "n": 82.0,
+          "rate": 0.378049
+        },
+        {
+          "hi": 0.5,
+          "lo": 0.4,
+          "mean_p": 0.43832,
+          "n": 18.0,
+          "rate": 0.444444
+        },
+        {
+          "hi": 0.6,
+          "lo": 0.5,
+          "mean_p": 0.566728,
+          "n": 2.0,
+          "rate": 1.0
+        }
+      ],
+      "task": "outcome-2025"
+    }
+  },
+  "splits": {
+    "dev": {
+      "n": 797,
+      "sha256_jsonl": "4bd1f7d725520a603ae4580bac0c56c9d0e31f47bb51ec4b318da218a9ecac0b"
+    },
+    "test": {
+      "n": 1591,
+      "sha256_jsonl": "a10e286dc33fa3fe66229c9250fdfc5f49589a1b64c08271d1719499604d0498"
+    },
+    "train": {
+      "n": 3185,
+      "sha256_jsonl": "91b0998c30a454beed1fcfae9db08852555020f760af43568388149f53ee9d19"
+    },
+    "version": "v1"
+  },
+  "task": "outcome-2025"
+}

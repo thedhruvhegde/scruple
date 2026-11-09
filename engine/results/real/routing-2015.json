@@ -1,0 +1,1878 @@
+{
+  "data": "Real data: CFPB Consumer Complaint Database narratives (public domain, 17 USC 105), frozen splits data/real/v1 (see docs/data/CFPB.md). Not synthetic.",
+  "dataset": "cfpb2015",
+  "reproduce": "uv run scruple realdata baselines --task routing-2015",
+  "results": {
+    "keywords": {
+      "baseline": "keywords",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "dataset": "cfpb2015",
+      "fit": {},
+      "issue": {
+        "accuracy": {
+          "hi": 0.133598,
+          "lo": 0.110119,
+          "n": 3024,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.121032
+        },
+        "confusion": {
+          "APR or interest rate": {
+            "APR or interest rate": 33,
+            "Billing disputes": 1,
+            "Billing statement": 1,
+            "Cash advance fee": 2,
+            "Credit card protection / Debt protection": 16,
+            "Late fee": 2,
+            "Making/receiving payments, sending money": 13,
+            "Using a debit or ATM card": 6,
+            "Wrong amount charged or received": 2
+          },
+          "Account opening, closing, or management": {
+            "APR or interest rate": 10,
+            "Account opening, closing, or management": 57,
+            "Advertising and marketing": 2,
+            "Application processing delay": 2,
+            "Balance transfer": 5,
+            "Balance transfer fee": 14,
+            "Billing statement": 2,
+            "Cash advance fee": 3,
+            "Closing/Cancelling account": 1,
+            "Convenience checks": 2,
+            "Credit card protection / Debt protection": 44,
+            "Credit line increase/decrease": 11,
+            "Customer service / Customer relations": 41,
+            "Deposits and withdrawals": 6,
+            "Fees": 2,
+            "Identity theft / Fraud / Embezzlement": 31,
+            "Incorrect/missing disclosures or info": 1,
+            "Late fee": 6,
+            "Making/receiving payments, sending money": 43,
+            "Managing, opening, or closing account": 1,
+            "Money was not available when promised": 9,
+            "Overdraft, savings or rewards features": 3,
+            "Payoff process": 2,
+            "Problems caused by my funds being low": 66,
+            "Sale of account": 1,
+            "Unauthorized transactions/trans. issues": 4,
+            "Using a debit or ATM card": 44,
+            "Wrong amount charged or received": 30
+          },
+          "Adding money": {
+            "Customer service / Customer relations": 1,
+            "Late fee": 2,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 4,
+            "Using a debit or ATM card": 4,
+            "Wrong amount charged or received": 1
+          },
+          "Advertising and marketing": {
+            "APR or interest rate": 7,
+            "Account opening, closing, or management": 2,
+            "Application processing delay": 1,
+            "Balance transfer fee": 1,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 38,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 5,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 2,
+            "Problems caused by my funds being low": 3,
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 11,
+            "Wrong amount charged or received": 3
+          },
+          "Advertising, marketing or disclosures": {
+            "Using a debit or ATM card": 2
+          },
+          "Application processing delay": {
+            "APR or interest rate": 1,
+            "Credit card protection / Debt protection": 4,
+            "Making/receiving payments, sending money": 1,
+            "Using a debit or ATM card": 1
+          },
+          "Arbitration": {
+            "APR or interest rate": 1,
+            "Credit card protection / Debt protection": 1,
+            "Making/receiving payments, sending money": 2,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 1
+          },
+          "Balance transfer": {
+            "APR or interest rate": 1,
+            "Balance transfer": 3,
+            "Balance transfer fee": 3,
+            "Cash advance fee": 1,
+            "Credit card protection / Debt protection": 8,
+            "Customer service / Customer relations": 2,
+            "Making/receiving payments, sending money": 2,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 2
+          },
+          "Balance transfer fee": {
+            "Balance transfer fee": 2,
+            "Credit card protection / Debt protection": 2
+          },
+          "Bankruptcy": {
+            "Credit card protection / Debt protection": 6,
+            "Customer service / Customer relations": 1,
+            "Making/receiving payments, sending money": 1,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 1
+          },
+          "Billing disputes": {
+            "APR or interest rate": 4,
+            "Account opening, closing, or management": 5,
+            "Balance transfer fee": 1,
+            "Billing disputes": 5,
+            "Billing statement": 6,
+            "Cash advance fee": 2,
+            "Credit card protection / Debt protection": 93,
+            "Credit line increase/decrease": 4,
+            "Customer service / Customer relations": 24,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 3,
+            "Incorrect/missing disclosures or info": 1,
+            "Late fee": 21,
+            "Making/receiving payments, sending money": 19,
+            "Money was not available when promised": 3,
+            "Payoff process": 1,
+            "Problems caused by my funds being low": 5,
+            "Unauthorized transactions/trans. issues": 1,
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 23,
+            "Wrong amount charged or received": 21
+          },
+          "Billing statement": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 1,
+            "Balance transfer fee": 1,
+            "Billing disputes": 2,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 22,
+            "Credit line increase/decrease": 2,
+            "Customer service / Customer relations": 8,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Late fee": 3,
+            "Making/receiving payments, sending money": 6,
+            "Problems caused by my funds being low": 3,
+            "Using a debit or ATM card": 5,
+            "Wrong amount charged or received": 3
+          },
+          "Cash advance": {
+            "APR or interest rate": 2,
+            "Identity theft / Fraud / Embezzlement": 1
+          },
+          "Cash advance fee": {
+            "Cash advance fee": 3,
+            "Credit card protection / Debt protection": 1
+          },
+          "Closing/Cancelling account": {
+            "Account opening, closing, or management": 10,
+            "Balance transfer fee": 1,
+            "Billing disputes": 1,
+            "Cash advance fee": 1,
+            "Credit card protection / Debt protection": 67,
+            "Credit line increase/decrease": 3,
+            "Customer service / Customer relations": 9,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Late fee": 2,
+            "Making/receiving payments, sending money": 4,
+            "Problems caused by my funds being low": 5,
+            "Rewards": 1,
+            "Using a debit or ATM card": 13,
+            "Wrong amount charged or received": 3
+          },
+          "Convenience checks": {
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 1,
+            "Wrong amount charged or received": 1
+          },
+          "Credit card protection / Debt protection": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 1,
+            "Credit card protection / Debt protection": 25,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 4,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 3,
+            "Late fee": 2,
+            "Making/receiving payments, sending money": 5,
+            "Problems caused by my funds being low": 2,
+            "Using a debit or ATM card": 5,
+            "Wrong amount charged or received": 2
+          },
+          "Credit determination": {
+            "APR or interest rate": 1,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 27,
+            "Credit line increase/decrease": 3,
+            "Customer service / Customer relations": 2,
+            "Identity theft / Fraud / Embezzlement": 3,
+            "Late fee": 2,
+            "Making/receiving payments, sending money": 3,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 4
+          },
+          "Credit line increase/decrease": {
+            "APR or interest rate": 3,
+            "Account opening, closing, or management": 2,
+            "Credit card protection / Debt protection": 17,
+            "Credit line increase/decrease": 9,
+            "Customer service / Customer relations": 2,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 4,
+            "Problems caused by my funds being low": 2
+          },
+          "Customer service / Customer relations": {
+            "APR or interest rate": 1,
+            "Account opening, closing, or management": 4,
+            "Balance transfer": 1,
+            "Billing disputes": 1,
+            "Credit card protection / Debt protection": 27,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 18,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Late fee": 2,
+            "Making/receiving payments, sending money": 10,
+            "Problems caused by my funds being low": 7,
+            "Using a debit or ATM card": 7,
+            "Wrong amount charged or received": 2
+          },
+          "Delinquent account": {
+            "Account opening, closing, or management": 4,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 34,
+            "Credit line increase/decrease": 2,
+            "Customer service / Customer relations": 3,
+            "Delinquent account": 1,
+            "Identity theft / Fraud / Embezzlement": 3,
+            "Late fee": 5,
+            "Making/receiving payments, sending money": 15,
+            "Managing, opening, or closing account": 1,
+            "Problems caused by my funds being low": 4,
+            "Unauthorized transactions/trans. issues": 1,
+            "Using a debit or ATM card": 2,
+            "Wrong amount charged or received": 5
+          },
+          "Deposits and withdrawals": {
+            "Account opening, closing, or management": 10,
+            "Adding money": 1,
+            "Balance transfer": 3,
+            "Balance transfer fee": 3,
+            "Billing disputes": 3,
+            "Billing statement": 1,
+            "Cash advance fee": 3,
+            "Convenience checks": 2,
+            "Credit card protection / Debt protection": 12,
+            "Credit line increase/decrease": 2,
+            "Customer service / Customer relations": 24,
+            "Deposits and withdrawals": 9,
+            "Identity theft / Fraud / Embezzlement": 16,
+            "Late fee": 5,
+            "Making/receiving payments, sending money": 34,
+            "Money was not available when promised": 12,
+            "Problems caused by my funds being low": 76,
+            "Unauthorized transactions/trans. issues": 4,
+            "Using a debit or ATM card": 43,
+            "Wrong amount charged or received": 16
+          },
+          "Fees": {
+            "Balance transfer fee": 1,
+            "Credit card protection / Debt protection": 1,
+            "Fees": 1,
+            "Late fee": 1,
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 3
+          },
+          "Forbearance / Workout plans": {
+            "Credit card protection / Debt protection": 1,
+            "Credit determination": 1,
+            "Making/receiving payments, sending money": 1,
+            "Using a debit or ATM card": 2,
+            "Wrong amount charged or received": 1
+          },
+          "Fraud or scam": {
+            "Account opening, closing, or management": 3,
+            "Balance transfer": 2,
+            "Balance transfer fee": 2,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 4,
+            "Customer service / Customer relations": 9,
+            "Fraud or scam": 2,
+            "Identity theft / Fraud / Embezzlement": 3,
+            "Incorrect/missing disclosures or info": 1,
+            "Making/receiving payments, sending money": 25,
+            "Money was not available when promised": 2,
+            "Problems caused by my funds being low": 12,
+            "Using a debit or ATM card": 14,
+            "Wrong amount charged or received": 5
+          },
+          "Identity theft / Fraud / Embezzlement": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 4,
+            "Adding money": 1,
+            "Balance transfer fee": 1,
+            "Billing disputes": 1,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 58,
+            "Customer service / Customer relations": 5,
+            "Delinquent account": 1,
+            "Identity theft / Fraud / Embezzlement": 36,
+            "Late fee": 2,
+            "Making/receiving payments, sending money": 4,
+            "Problems caused by my funds being low": 9,
+            "Unauthorized transactions/trans. issues": 2,
+            "Using a debit or ATM card": 9,
+            "Wrong amount charged or received": 7
+          },
+          "Incorrect/missing disclosures or info": {
+            "Customer service / Customer relations": 1,
+            "Making/receiving payments, sending money": 3,
+            "Money was not available when promised": 1
+          },
+          "Late fee": {
+            "APR or interest rate": 1,
+            "Credit card protection / Debt protection": 10,
+            "Customer service / Customer relations": 9,
+            "Fraud or scam": 1,
+            "Late fee": 32,
+            "Making/receiving payments, sending money": 12,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 3,
+            "Wrong amount charged or received": 2
+          },
+          "Making/receiving payments, sending money": {
+            "APR or interest rate": 1,
+            "Account opening, closing, or management": 6,
+            "Balance transfer": 1,
+            "Balance transfer fee": 1,
+            "Cash advance fee": 3,
+            "Credit card protection / Debt protection": 9,
+            "Credit line increase/decrease": 3,
+            "Customer service / Customer relations": 16,
+            "Deposits and withdrawals": 1,
+            "Identity theft / Fraud / Embezzlement": 11,
+            "Late fee": 5,
+            "Making/receiving payments, sending money": 15,
+            "Money was not available when promised": 1,
+            "Overdraft, savings or rewards features": 1,
+            "Problems caused by my funds being low": 13,
+            "Unauthorized transactions/trans. issues": 2,
+            "Using a debit or ATM card": 12,
+            "Wrong amount charged or received": 8
+          },
+          "Managing, opening, or closing account": {
+            "Account opening, closing, or management": 2,
+            "Billing disputes": 1,
+            "Credit card protection / Debt protection": 3,
+            "Customer service / Customer relations": 8,
+            "Deposits and withdrawals": 3,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Making/receiving payments, sending money": 5,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 13,
+            "Using a debit or ATM card": 14
+          },
+          "Money was not available when promised": {
+            "Balance transfer fee": 1,
+            "Customer service / Customer relations": 3,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Making/receiving payments, sending money": 7,
+            "Money was not available when promised": 6,
+            "Problems caused by my funds being low": 3,
+            "Using a debit or ATM card": 2
+          },
+          "Other": {
+            "APR or interest rate": 5,
+            "Account opening, closing, or management": 4,
+            "Balance transfer": 1,
+            "Balance transfer fee": 2,
+            "Billing disputes": 3,
+            "Billing statement": 2,
+            "Credit card protection / Debt protection": 79,
+            "Credit line increase/decrease": 3,
+            "Customer service / Customer relations": 15,
+            "Identity theft / Fraud / Embezzlement": 5,
+            "Late fee": 3,
+            "Making/receiving payments, sending money": 16,
+            "Problems caused by my funds being low": 5,
+            "Unauthorized transactions/trans. issues": 1,
+            "Using a debit or ATM card": 17,
+            "Wrong amount charged or received": 4
+          },
+          "Other fee": {
+            "APR or interest rate": 7,
+            "Balance transfer fee": 1,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 15,
+            "Customer service / Customer relations": 2,
+            "Late fee": 5,
+            "Making/receiving payments, sending money": 5,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 6,
+            "Wrong amount charged or received": 1
+          },
+          "Other service issues": {
+            "Account opening, closing, or management": 1,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 2,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Making/receiving payments, sending money": 1,
+            "Problems caused by my funds being low": 3,
+            "Using a debit or ATM card": 3
+          },
+          "Other transaction issues": {
+            "Adding money": 1,
+            "Balance transfer fee": 1,
+            "Customer service / Customer relations": 3,
+            "Fraud or scam": 2,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 16,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 10,
+            "Wrong amount charged or received": 4
+          },
+          "Overdraft, savings or rewards features": {
+            "Account opening, closing, or management": 1
+          },
+          "Overlimit fee": {
+            "Customer service / Customer relations": 1,
+            "Late fee": 1,
+            "Overlimit fee": 1
+          },
+          "Payoff process": {
+            "APR or interest rate": 4,
+            "Account opening, closing, or management": 1,
+            "Balance transfer": 1,
+            "Balance transfer fee": 1,
+            "Billing statement": 2,
+            "Credit card protection / Debt protection": 17,
+            "Customer service / Customer relations": 2,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 6,
+            "Problems caused by my funds being low": 2,
+            "Using a debit or ATM card": 3,
+            "Wrong amount charged or received": 3
+          },
+          "Privacy": {
+            "Credit card protection / Debt protection": 4,
+            "Customer service / Customer relations": 1,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Late fee": 2,
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 1
+          },
+          "Problems caused by my funds being low": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 2,
+            "Adding money": 1,
+            "Balance transfer": 2,
+            "Balance transfer fee": 16,
+            "Cash advance fee": 2,
+            "Credit card protection / Debt protection": 15,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 14,
+            "Deposits and withdrawals": 4,
+            "Fees": 6,
+            "Identity theft / Fraud / Embezzlement": 4,
+            "Late fee": 7,
+            "Making/receiving payments, sending money": 9,
+            "Money was not available when promised": 9,
+            "Overdraft, savings or rewards features": 4,
+            "Problems caused by my funds being low": 37,
+            "Transaction issue": 1,
+            "Unauthorized transactions/trans. issues": 2,
+            "Using a debit or ATM card": 25,
+            "Wrong amount charged or received": 20
+          },
+          "Rewards": {
+            "Account opening, closing, or management": 1,
+            "Billing disputes": 1,
+            "Credit card protection / Debt protection": 22,
+            "Customer service / Customer relations": 9,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Incorrect/missing disclosures or info": 1,
+            "Making/receiving payments, sending money": 3,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 2,
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 12,
+            "Wrong amount charged or received": 3
+          },
+          "Sale of account": {
+            "Account opening, closing, or management": 1,
+            "Credit card protection / Debt protection": 3,
+            "Customer service / Customer relations": 2,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 1
+          },
+          "Transaction issue": {
+            "APR or interest rate": 3,
+            "Balance transfer": 1,
+            "Billing statement": 2,
+            "Cash advance fee": 1,
+            "Credit card protection / Debt protection": 15,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 4,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Making/receiving payments, sending money": 4,
+            "Problems caused by my funds being low": 3,
+            "Unauthorized transactions/trans. issues": 1,
+            "Using a debit or ATM card": 8,
+            "Wrong amount charged or received": 5
+          },
+          "Unauthorized transactions/trans. issues": {
+            "Account opening, closing, or management": 3,
+            "Balance transfer": 2,
+            "Cash advance fee": 1,
+            "Credit card protection / Debt protection": 3,
+            "Customer service / Customer relations": 6,
+            "Deposits and withdrawals": 1,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Making/receiving payments, sending money": 3,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 13,
+            "Using a debit or ATM card": 22,
+            "Wrong amount charged or received": 2
+          },
+          "Unsolicited issuance of credit card": {
+            "Billing disputes": 2,
+            "Billing statement": 1,
+            "Credit card protection / Debt protection": 23,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 2,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 1,
+            "Unauthorized transactions/trans. issues": 1,
+            "Unsolicited issuance of credit card": 1,
+            "Using a debit or ATM card": 2
+          },
+          "Using a debit or ATM card": {
+            "Account opening, closing, or management": 1,
+            "Balance transfer fee": 2,
+            "Credit card protection / Debt protection": 8,
+            "Customer service / Customer relations": 9,
+            "Deposits and withdrawals": 1,
+            "Identity theft / Fraud / Embezzlement": 6,
+            "Making/receiving payments, sending money": 7,
+            "Money was not available when promised": 1,
+            "Problems caused by my funds being low": 11,
+            "Transaction issue": 1,
+            "Unauthorized transactions/trans. issues": 4,
+            "Using a debit or ATM card": 68,
+            "Wrong amount charged or received": 4
+          },
+          "Wrong amount charged or received": {
+            "Account opening, closing, or management": 1,
+            "Customer service / Customer relations": 2,
+            "Making/receiving payments, sending money": 1,
+            "Problems caused by my funds being low": 1,
+            "Wrong amount charged or received": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.09009,
+          "lo": 0.056213,
+          "n": 3024,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.07429
+        },
+        "per_class": {
+          "APR or interest rate": {
+            "n": 76,
+            "recall": 0.434211
+          },
+          "Account opening, closing, or management": {
+            "n": 443,
+            "recall": 0.128668
+          },
+          "Adding money": {
+            "n": 13,
+            "recall": 0.0
+          },
+          "Advertising and marketing": {
+            "n": 77,
+            "recall": 0.0
+          },
+          "Advertising, marketing or disclosures": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Application processing delay": {
+            "n": 7,
+            "recall": 0.0
+          },
+          "Arbitration": {
+            "n": 6,
+            "recall": 0.0
+          },
+          "Balance transfer": {
+            "n": 23,
+            "recall": 0.130435
+          },
+          "Balance transfer fee": {
+            "n": 4,
+            "recall": 0.5
+          },
+          "Bankruptcy": {
+            "n": 10,
+            "recall": 0.0
+          },
+          "Billing disputes": {
+            "n": 244,
+            "recall": 0.020492
+          },
+          "Billing statement": {
+            "n": 60,
+            "recall": 0.016667
+          },
+          "Cash advance": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Cash advance fee": {
+            "n": 4,
+            "recall": 0.75
+          },
+          "Closing/Cancelling account": {
+            "n": 122,
+            "recall": 0.0
+          },
+          "Convenience checks": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Credit card protection / Debt protection": {
+            "n": 53,
+            "recall": 0.471698
+          },
+          "Credit determination": {
+            "n": 48,
+            "recall": 0.0
+          },
+          "Credit line increase/decrease": {
+            "n": 41,
+            "recall": 0.219512
+          },
+          "Customer service / Customer relations": {
+            "n": 83,
+            "recall": 0.216867
+          },
+          "Delinquent account": {
+            "n": 81,
+            "recall": 0.012346
+          },
+          "Deposits and withdrawals": {
+            "n": 279,
+            "recall": 0.032258
+          },
+          "Fees": {
+            "n": 8,
+            "recall": 0.125
+          },
+          "Forbearance / Workout plans": {
+            "n": 6,
+            "recall": 0.0
+          },
+          "Fraud or scam": {
+            "n": 85,
+            "recall": 0.023529
+          },
+          "Identity theft / Fraud / Embezzlement": {
+            "n": 143,
+            "recall": 0.251748
+          },
+          "Incorrect/missing disclosures or info": {
+            "n": 5,
+            "recall": 0.0
+          },
+          "Late fee": {
+            "n": 71,
+            "recall": 0.450704
+          },
+          "Making/receiving payments, sending money": {
+            "n": 109,
+            "recall": 0.137615
+          },
+          "Managing, opening, or closing account": {
+            "n": 52,
+            "recall": 0.0
+          },
+          "Money was not available when promised": {
+            "n": 23,
+            "recall": 0.26087
+          },
+          "Other": {
+            "n": 165,
+            "recall": 0.0
+          },
+          "Other fee": {
+            "n": 44,
+            "recall": 0.0
+          },
+          "Other service issues": {
+            "n": 12,
+            "recall": 0.0
+          },
+          "Other transaction issues": {
+            "n": 39,
+            "recall": 0.0
+          },
+          "Overdraft, savings or rewards features": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Overlimit fee": {
+            "n": 3,
+            "recall": 0.333333
+          },
+          "Payoff process": {
+            "n": 44,
+            "recall": 0.0
+          },
+          "Privacy": {
+            "n": 11,
+            "recall": 0.0
+          },
+          "Problems caused by my funds being low": {
+            "n": 183,
+            "recall": 0.202186
+          },
+          "Rewards": {
+            "n": 57,
+            "recall": 0.0
+          },
+          "Sale of account": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Transaction issue": {
+            "n": 50,
+            "recall": 0.0
+          },
+          "Unauthorized transactions/trans. issues": {
+            "n": 59,
+            "recall": 0.0
+          },
+          "Unsolicited issuance of credit card": {
+            "n": 35,
+            "recall": 0.028571
+          },
+          "Using a debit or ATM card": {
+            "n": 123,
+            "recall": 0.552846
+          },
+          "Wrong amount charged or received": {
+            "n": 6,
+            "recall": 0.166667
+          }
+        }
+      },
+      "n": 3024,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "task": "routing-2015"
+    },
+    "majority": {
+      "baseline": "majority",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "dataset": "cfpb2015",
+      "fit": {
+        "label": "Account opening, closing, or management"
+      },
+      "issue": {
+        "accuracy": {
+          "hi": 0.1594,
+          "lo": 0.134921,
+          "n": 3024,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.146495
+        },
+        "confusion": {
+          "APR or interest rate": {
+            "Account opening, closing, or management": 76
+          },
+          "Account opening, closing, or management": {
+            "Account opening, closing, or management": 443
+          },
+          "Adding money": {
+            "Account opening, closing, or management": 13
+          },
+          "Advertising and marketing": {
+            "Account opening, closing, or management": 77
+          },
+          "Advertising, marketing or disclosures": {
+            "Account opening, closing, or management": 2
+          },
+          "Application processing delay": {
+            "Account opening, closing, or management": 7
+          },
+          "Arbitration": {
+            "Account opening, closing, or management": 6
+          },
+          "Balance transfer": {
+            "Account opening, closing, or management": 23
+          },
+          "Balance transfer fee": {
+            "Account opening, closing, or management": 4
+          },
+          "Bankruptcy": {
+            "Account opening, closing, or management": 10
+          },
+          "Billing disputes": {
+            "Account opening, closing, or management": 244
+          },
+          "Billing statement": {
+            "Account opening, closing, or management": 60
+          },
+          "Cash advance": {
+            "Account opening, closing, or management": 3
+          },
+          "Cash advance fee": {
+            "Account opening, closing, or management": 4
+          },
+          "Closing/Cancelling account": {
+            "Account opening, closing, or management": 122
+          },
+          "Convenience checks": {
+            "Account opening, closing, or management": 3
+          },
+          "Credit card protection / Debt protection": {
+            "Account opening, closing, or management": 53
+          },
+          "Credit determination": {
+            "Account opening, closing, or management": 48
+          },
+          "Credit line increase/decrease": {
+            "Account opening, closing, or management": 41
+          },
+          "Customer service / Customer relations": {
+            "Account opening, closing, or management": 83
+          },
+          "Delinquent account": {
+            "Account opening, closing, or management": 81
+          },
+          "Deposits and withdrawals": {
+            "Account opening, closing, or management": 279
+          },
+          "Fees": {
+            "Account opening, closing, or management": 8
+          },
+          "Forbearance / Workout plans": {
+            "Account opening, closing, or management": 6
+          },
+          "Fraud or scam": {
+            "Account opening, closing, or management": 85
+          },
+          "Identity theft / Fraud / Embezzlement": {
+            "Account opening, closing, or management": 143
+          },
+          "Incorrect/missing disclosures or info": {
+            "Account opening, closing, or management": 5
+          },
+          "Late fee": {
+            "Account opening, closing, or management": 71
+          },
+          "Making/receiving payments, sending money": {
+            "Account opening, closing, or management": 109
+          },
+          "Managing, opening, or closing account": {
+            "Account opening, closing, or management": 52
+          },
+          "Money was not available when promised": {
+            "Account opening, closing, or management": 23
+          },
+          "Other": {
+            "Account opening, closing, or management": 165
+          },
+          "Other fee": {
+            "Account opening, closing, or management": 44
+          },
+          "Other service issues": {
+            "Account opening, closing, or management": 12
+          },
+          "Other transaction issues": {
+            "Account opening, closing, or management": 39
+          },
+          "Overdraft, savings or rewards features": {
+            "Account opening, closing, or management": 1
+          },
+          "Overlimit fee": {
+            "Account opening, closing, or management": 3
+          },
+          "Payoff process": {
+            "Account opening, closing, or management": 44
+          },
+          "Privacy": {
+            "Account opening, closing, or management": 11
+          },
+          "Problems caused by my funds being low": {
+            "Account opening, closing, or management": 183
+          },
+          "Rewards": {
+            "Account opening, closing, or management": 57
+          },
+          "Sale of account": {
+            "Account opening, closing, or management": 8
+          },
+          "Transaction issue": {
+            "Account opening, closing, or management": 50
+          },
+          "Unauthorized transactions/trans. issues": {
+            "Account opening, closing, or management": 59
+          },
+          "Unsolicited issuance of credit card": {
+            "Account opening, closing, or management": 35
+          },
+          "Using a debit or ATM card": {
+            "Account opening, closing, or management": 123
+          },
+          "Wrong amount charged or received": {
+            "Account opening, closing, or management": 6
+          }
+        },
+        "macro_f1": {
+          "hi": 0.005945,
+          "lo": 0.005124,
+          "n": 3024,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.005437
+        },
+        "per_class": {
+          "APR or interest rate": {
+            "n": 76,
+            "recall": 0.0
+          },
+          "Account opening, closing, or management": {
+            "n": 443,
+            "recall": 1.0
+          },
+          "Adding money": {
+            "n": 13,
+            "recall": 0.0
+          },
+          "Advertising and marketing": {
+            "n": 77,
+            "recall": 0.0
+          },
+          "Advertising, marketing or disclosures": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Application processing delay": {
+            "n": 7,
+            "recall": 0.0
+          },
+          "Arbitration": {
+            "n": 6,
+            "recall": 0.0
+          },
+          "Balance transfer": {
+            "n": 23,
+            "recall": 0.0
+          },
+          "Balance transfer fee": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Bankruptcy": {
+            "n": 10,
+            "recall": 0.0
+          },
+          "Billing disputes": {
+            "n": 244,
+            "recall": 0.0
+          },
+          "Billing statement": {
+            "n": 60,
+            "recall": 0.0
+          },
+          "Cash advance": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Cash advance fee": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Closing/Cancelling account": {
+            "n": 122,
+            "recall": 0.0
+          },
+          "Convenience checks": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Credit card protection / Debt protection": {
+            "n": 53,
+            "recall": 0.0
+          },
+          "Credit determination": {
+            "n": 48,
+            "recall": 0.0
+          },
+          "Credit line increase/decrease": {
+            "n": 41,
+            "recall": 0.0
+          },
+          "Customer service / Customer relations": {
+            "n": 83,
+            "recall": 0.0
+          },
+          "Delinquent account": {
+            "n": 81,
+            "recall": 0.0
+          },
+          "Deposits and withdrawals": {
+            "n": 279,
+            "recall": 0.0
+          },
+          "Fees": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Forbearance / Workout plans": {
+            "n": 6,
+            "recall": 0.0
+          },
+          "Fraud or scam": {
+            "n": 85,
+            "recall": 0.0
+          },
+          "Identity theft / Fraud / Embezzlement": {
+            "n": 143,
+            "recall": 0.0
+          },
+          "Incorrect/missing disclosures or info": {
+            "n": 5,
+            "recall": 0.0
+          },
+          "Late fee": {
+            "n": 71,
+            "recall": 0.0
+          },
+          "Making/receiving payments, sending money": {
+            "n": 109,
+            "recall": 0.0
+          },
+          "Managing, opening, or closing account": {
+            "n": 52,
+            "recall": 0.0
+          },
+          "Money was not available when promised": {
+            "n": 23,
+            "recall": 0.0
+          },
+          "Other": {
+            "n": 165,
+            "recall": 0.0
+          },
+          "Other fee": {
+            "n": 44,
+            "recall": 0.0
+          },
+          "Other service issues": {
+            "n": 12,
+            "recall": 0.0
+          },
+          "Other transaction issues": {
+            "n": 39,
+            "recall": 0.0
+          },
+          "Overdraft, savings or rewards features": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Overlimit fee": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Payoff process": {
+            "n": 44,
+            "recall": 0.0
+          },
+          "Privacy": {
+            "n": 11,
+            "recall": 0.0
+          },
+          "Problems caused by my funds being low": {
+            "n": 183,
+            "recall": 0.0
+          },
+          "Rewards": {
+            "n": 57,
+            "recall": 0.0
+          },
+          "Sale of account": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Transaction issue": {
+            "n": 50,
+            "recall": 0.0
+          },
+          "Unauthorized transactions/trans. issues": {
+            "n": 59,
+            "recall": 0.0
+          },
+          "Unsolicited issuance of credit card": {
+            "n": 35,
+            "recall": 0.0
+          },
+          "Using a debit or ATM card": {
+            "n": 123,
+            "recall": 0.0
+          },
+          "Wrong amount charged or received": {
+            "n": 6,
+            "recall": 0.0
+          }
+        }
+      },
+      "n": 3024,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "task": "routing-2015"
+    },
+    "tfidf_lr": {
+      "baseline": "tfidf_lr",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "dataset": "cfpb2015",
+      "fit": {
+        "C": 8.0,
+        "dev_selection": {
+          "by_C": {
+            "0.5": 0.077266,
+            "2.0": 0.1773,
+            "8.0": 0.211232
+          },
+          "metric": "macro_f1"
+        }
+      },
+      "issue": {
+        "accuracy": {
+          "hi": 0.45205,
+          "lo": 0.417659,
+          "n": 3024,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.434854
+        },
+        "confusion": {
+          "APR or interest rate": {
+            "APR or interest rate": 44,
+            "Account opening, closing, or management": 8,
+            "Advertising and marketing": 1,
+            "Billing disputes": 15,
+            "Closing/Cancelling account": 2,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Other": 2,
+            "Payoff process": 3
+          },
+          "Account opening, closing, or management": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 350,
+            "Billing disputes": 10,
+            "Closing/Cancelling account": 2,
+            "Credit determination": 3,
+            "Customer service / Customer relations": 1,
+            "Deposits and withdrawals": 42,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Making/receiving payments, sending money": 1,
+            "Managing, opening, or closing account": 1,
+            "Other": 3,
+            "Payoff process": 1,
+            "Problems caused by my funds being low": 15,
+            "Rewards": 1,
+            "Unsolicited issuance of credit card": 4,
+            "Using a debit or ATM card": 5
+          },
+          "Adding money": {
+            "Account opening, closing, or management": 2,
+            "Deposits and withdrawals": 2,
+            "Fraud or scam": 2,
+            "Managing, opening, or closing account": 2,
+            "Unauthorized transactions/trans. issues": 5
+          },
+          "Advertising and marketing": {
+            "APR or interest rate": 8,
+            "Account opening, closing, or management": 8,
+            "Advertising and marketing": 35,
+            "Billing disputes": 7,
+            "Closing/Cancelling account": 1,
+            "Credit line increase/decrease": 1,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Other": 6,
+            "Rewards": 10
+          },
+          "Advertising, marketing or disclosures": {
+            "Account opening, closing, or management": 1,
+            "Fraud or scam": 1
+          },
+          "Application processing delay": {
+            "Account opening, closing, or management": 1,
+            "Billing disputes": 1,
+            "Credit determination": 3,
+            "Customer service / Customer relations": 1,
+            "Other": 1
+          },
+          "Arbitration": {
+            "Account opening, closing, or management": 2,
+            "Billing disputes": 1,
+            "Deposits and withdrawals": 1,
+            "Identity theft / Fraud / Embezzlement": 2
+          },
+          "Balance transfer": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 5,
+            "Balance transfer": 6,
+            "Billing disputes": 4,
+            "Closing/Cancelling account": 1,
+            "Customer service / Customer relations": 1,
+            "Deposits and withdrawals": 2,
+            "Making/receiving payments, sending money": 1,
+            "Other": 1
+          },
+          "Balance transfer fee": {
+            "Account opening, closing, or management": 2,
+            "Advertising and marketing": 1,
+            "Other": 1
+          },
+          "Bankruptcy": {
+            "Account opening, closing, or management": 2,
+            "Bankruptcy": 1,
+            "Billing disputes": 1,
+            "Closing/Cancelling account": 1,
+            "Other": 5
+          },
+          "Billing disputes": {
+            "APR or interest rate": 7,
+            "Account opening, closing, or management": 15,
+            "Advertising and marketing": 1,
+            "Billing disputes": 151,
+            "Billing statement": 4,
+            "Closing/Cancelling account": 5,
+            "Credit card protection / Debt protection": 1,
+            "Credit line increase/decrease": 3,
+            "Customer service / Customer relations": 3,
+            "Delinquent account": 3,
+            "Deposits and withdrawals": 5,
+            "Fraud or scam": 2,
+            "Identity theft / Fraud / Embezzlement": 14,
+            "Late fee": 8,
+            "Making/receiving payments, sending money": 2,
+            "Other": 15,
+            "Payoff process": 1,
+            "Problems caused by my funds being low": 1,
+            "Using a debit or ATM card": 3
+          },
+          "Billing statement": {
+            "APR or interest rate": 1,
+            "Account opening, closing, or management": 4,
+            "Billing disputes": 29,
+            "Billing statement": 6,
+            "Closing/Cancelling account": 4,
+            "Credit card protection / Debt protection": 1,
+            "Customer service / Customer relations": 2,
+            "Delinquent account": 1,
+            "Deposits and withdrawals": 2,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Late fee": 3,
+            "Other": 5,
+            "Rewards": 1
+          },
+          "Cash advance": {
+            "APR or interest rate": 2,
+            "Payoff process": 1
+          },
+          "Cash advance fee": {
+            "Account opening, closing, or management": 1,
+            "Billing disputes": 3
+          },
+          "Closing/Cancelling account": {
+            "APR or interest rate": 1,
+            "Account opening, closing, or management": 17,
+            "Advertising and marketing": 1,
+            "Billing disputes": 13,
+            "Closing/Cancelling account": 60,
+            "Credit determination": 2,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 1,
+            "Delinquent account": 1,
+            "Deposits and withdrawals": 4,
+            "Identity theft / Fraud / Embezzlement": 4,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 1,
+            "Other": 15
+          },
+          "Convenience checks": {
+            "APR or interest rate": 1,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Payoff process": 1
+          },
+          "Credit card protection / Debt protection": {
+            "APR or interest rate": 3,
+            "Account opening, closing, or management": 6,
+            "Billing disputes": 12,
+            "Closing/Cancelling account": 2,
+            "Delinquent account": 1,
+            "Deposits and withdrawals": 3,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 12,
+            "Late fee": 1,
+            "Other": 9,
+            "Other transaction issues": 1,
+            "Transaction issue": 1,
+            "Using a debit or ATM card": 1
+          },
+          "Credit determination": {
+            "APR or interest rate": 3,
+            "Account opening, closing, or management": 8,
+            "Advertising and marketing": 3,
+            "Billing disputes": 3,
+            "Billing statement": 1,
+            "Closing/Cancelling account": 4,
+            "Credit determination": 5,
+            "Credit line increase/decrease": 5,
+            "Delinquent account": 2,
+            "Identity theft / Fraud / Embezzlement": 5,
+            "Other": 7,
+            "Problems caused by my funds being low": 2
+          },
+          "Credit line increase/decrease": {
+            "APR or interest rate": 4,
+            "Account opening, closing, or management": 3,
+            "Billing disputes": 4,
+            "Closing/Cancelling account": 2,
+            "Credit determination": 1,
+            "Credit line increase/decrease": 20,
+            "Late fee": 1,
+            "Other": 6
+          },
+          "Customer service / Customer relations": {
+            "APR or interest rate": 1,
+            "Account opening, closing, or management": 15,
+            "Advertising and marketing": 3,
+            "Billing disputes": 23,
+            "Closing/Cancelling account": 7,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 7,
+            "Delinquent account": 1,
+            "Deposits and withdrawals": 3,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 6,
+            "Managing, opening, or closing account": 2,
+            "Other": 11,
+            "Rewards": 1,
+            "Unsolicited issuance of credit card": 1
+          },
+          "Delinquent account": {
+            "Account opening, closing, or management": 10,
+            "Billing disputes": 24,
+            "Closing/Cancelling account": 2,
+            "Credit determination": 1,
+            "Delinquent account": 14,
+            "Deposits and withdrawals": 3,
+            "Identity theft / Fraud / Embezzlement": 5,
+            "Late fee": 4,
+            "Other": 18
+          },
+          "Deposits and withdrawals": {
+            "Account opening, closing, or management": 90,
+            "Billing disputes": 3,
+            "Deposits and withdrawals": 140,
+            "Fraud or scam": 6,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Making/receiving payments, sending money": 4,
+            "Managing, opening, or closing account": 3,
+            "Other transaction issues": 1,
+            "Problems caused by my funds being low": 16,
+            "Rewards": 1,
+            "Unauthorized transactions/trans. issues": 4,
+            "Using a debit or ATM card": 10
+          },
+          "Fees": {
+            "Account opening, closing, or management": 3,
+            "Advertising and marketing": 1,
+            "Billing disputes": 1,
+            "Closing/Cancelling account": 1,
+            "Problems caused by my funds being low": 1,
+            "Rewards": 1
+          },
+          "Forbearance / Workout plans": {
+            "APR or interest rate": 1,
+            "Account opening, closing, or management": 1,
+            "Billing disputes": 2,
+            "Other": 1,
+            "Problems caused by my funds being low": 1
+          },
+          "Fraud or scam": {
+            "Account opening, closing, or management": 14,
+            "Billing disputes": 7,
+            "Closing/Cancelling account": 1,
+            "Deposits and withdrawals": 20,
+            "Fraud or scam": 25,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Making/receiving payments, sending money": 3,
+            "Managing, opening, or closing account": 5,
+            "Other transaction issues": 2,
+            "Unauthorized transactions/trans. issues": 7
+          },
+          "Identity theft / Fraud / Embezzlement": {
+            "Account opening, closing, or management": 19,
+            "Advertising and marketing": 1,
+            "Billing disputes": 26,
+            "Closing/Cancelling account": 3,
+            "Customer service / Customer relations": 2,
+            "Deposits and withdrawals": 4,
+            "Identity theft / Fraud / Embezzlement": 72,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 4,
+            "Other": 9,
+            "Using a debit or ATM card": 2
+          },
+          "Incorrect/missing disclosures or info": {
+            "Account opening, closing, or management": 2,
+            "Fraud or scam": 1,
+            "Other transaction issues": 2
+          },
+          "Late fee": {
+            "Account opening, closing, or management": 2,
+            "Billing disputes": 25,
+            "Billing statement": 3,
+            "Late fee": 36,
+            "Making/receiving payments, sending money": 1,
+            "Other": 2,
+            "Payoff process": 1,
+            "Problems caused by my funds being low": 1
+          },
+          "Making/receiving payments, sending money": {
+            "Account opening, closing, or management": 36,
+            "Billing disputes": 8,
+            "Closing/Cancelling account": 1,
+            "Credit line increase/decrease": 1,
+            "Deposits and withdrawals": 34,
+            "Late fee": 6,
+            "Making/receiving payments, sending money": 11,
+            "Other": 1,
+            "Other fee": 1,
+            "Problems caused by my funds being low": 5,
+            "Rewards": 1,
+            "Using a debit or ATM card": 4
+          },
+          "Managing, opening, or closing account": {
+            "Account opening, closing, or management": 9,
+            "Billing disputes": 1,
+            "Closing/Cancelling account": 2,
+            "Customer service / Customer relations": 2,
+            "Deposits and withdrawals": 9,
+            "Fraud or scam": 2,
+            "Managing, opening, or closing account": 15,
+            "Other": 3,
+            "Unauthorized transactions/trans. issues": 7,
+            "Using a debit or ATM card": 2
+          },
+          "Money was not available when promised": {
+            "Account opening, closing, or management": 5,
+            "Billing disputes": 1,
+            "Deposits and withdrawals": 8,
+            "Fraud or scam": 3,
+            "Money was not available when promised": 2,
+            "Other transaction issues": 4
+          },
+          "Other": {
+            "APR or interest rate": 7,
+            "Account opening, closing, or management": 25,
+            "Advertising and marketing": 6,
+            "Billing disputes": 31,
+            "Closing/Cancelling account": 5,
+            "Credit card protection / Debt protection": 1,
+            "Credit determination": 1,
+            "Credit line increase/decrease": 1,
+            "Customer service / Customer relations": 1,
+            "Delinquent account": 6,
+            "Deposits and withdrawals": 7,
+            "Identity theft / Fraud / Embezzlement": 9,
+            "Late fee": 2,
+            "Other": 56,
+            "Other fee": 2,
+            "Rewards": 4,
+            "Using a debit or ATM card": 1
+          },
+          "Other fee": {
+            "APR or interest rate": 3,
+            "Account opening, closing, or management": 7,
+            "Advertising and marketing": 2,
+            "Billing disputes": 17,
+            "Closing/Cancelling account": 1,
+            "Customer service / Customer relations": 1,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Late fee": 5,
+            "Other": 1,
+            "Other fee": 4,
+            "Payoff process": 1
+          },
+          "Other service issues": {
+            "Account opening, closing, or management": 3,
+            "Deposits and withdrawals": 2,
+            "Fraud or scam": 5,
+            "Other transaction issues": 2
+          },
+          "Other transaction issues": {
+            "Account opening, closing, or management": 10,
+            "Billing disputes": 3,
+            "Deposits and withdrawals": 7,
+            "Fraud or scam": 3,
+            "Making/receiving payments, sending money": 3,
+            "Other transaction issues": 13
+          },
+          "Overdraft, savings or rewards features": {
+            "Account opening, closing, or management": 1
+          },
+          "Overlimit fee": {
+            "Account opening, closing, or management": 1,
+            "Problems caused by my funds being low": 2
+          },
+          "Payoff process": {
+            "APR or interest rate": 4,
+            "Account opening, closing, or management": 3,
+            "Balance transfer": 1,
+            "Billing disputes": 22,
+            "Closing/Cancelling account": 3,
+            "Deposits and withdrawals": 2,
+            "Making/receiving payments, sending money": 1,
+            "Other": 4,
+            "Payoff process": 4
+          },
+          "Privacy": {
+            "Account opening, closing, or management": 3,
+            "Billing disputes": 1,
+            "Billing statement": 1,
+            "Credit determination": 1,
+            "Customer service / Customer relations": 2,
+            "Identity theft / Fraud / Embezzlement": 1,
+            "Other": 1,
+            "Unsolicited issuance of credit card": 1
+          },
+          "Problems caused by my funds being low": {
+            "Account opening, closing, or management": 31,
+            "Billing disputes": 3,
+            "Deposits and withdrawals": 14,
+            "Late fee": 1,
+            "Other": 1,
+            "Problems caused by my funds being low": 130,
+            "Using a debit or ATM card": 3
+          },
+          "Rewards": {
+            "Account opening, closing, or management": 3,
+            "Advertising and marketing": 13,
+            "Billing disputes": 5,
+            "Closing/Cancelling account": 6,
+            "Other": 2,
+            "Rewards": 26,
+            "Unauthorized transactions/trans. issues": 2
+          },
+          "Sale of account": {
+            "Account opening, closing, or management": 1,
+            "Billing disputes": 4,
+            "Closing/Cancelling account": 1,
+            "Other": 1,
+            "Unsolicited issuance of credit card": 1
+          },
+          "Transaction issue": {
+            "APR or interest rate": 2,
+            "Account opening, closing, or management": 1,
+            "Advertising and marketing": 1,
+            "Billing disputes": 29,
+            "Deposits and withdrawals": 4,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Late fee": 1,
+            "Making/receiving payments, sending money": 3,
+            "Other": 5,
+            "Payoff process": 1,
+            "Transaction issue": 1
+          },
+          "Unauthorized transactions/trans. issues": {
+            "Account opening, closing, or management": 3,
+            "Billing disputes": 4,
+            "Deposits and withdrawals": 13,
+            "Fraud or scam": 6,
+            "Identity theft / Fraud / Embezzlement": 2,
+            "Managing, opening, or closing account": 12,
+            "Other": 1,
+            "Unauthorized transactions/trans. issues": 16,
+            "Using a debit or ATM card": 2
+          },
+          "Unsolicited issuance of credit card": {
+            "Account opening, closing, or management": 5,
+            "Advertising and marketing": 3,
+            "Billing disputes": 3,
+            "Closing/Cancelling account": 4,
+            "Credit card protection / Debt protection": 1,
+            "Fraud or scam": 1,
+            "Identity theft / Fraud / Embezzlement": 3,
+            "Other": 5,
+            "Unsolicited issuance of credit card": 10
+          },
+          "Using a debit or ATM card": {
+            "Account opening, closing, or management": 16,
+            "Billing disputes": 10,
+            "Deposits and withdrawals": 27,
+            "Fraud or scam": 2,
+            "Identity theft / Fraud / Embezzlement": 4,
+            "Managing, opening, or closing account": 2,
+            "Problems caused by my funds being low": 5,
+            "Unauthorized transactions/trans. issues": 2,
+            "Using a debit or ATM card": 55
+          },
+          "Wrong amount charged or received": {
+            "APR or interest rate": 1,
+            "Deposits and withdrawals": 3,
+            "Making/receiving payments, sending money": 1,
+            "Problems caused by my funds being low": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.234809,
+          "lo": 0.202004,
+          "n": 3024,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.216615
+        },
+        "per_class": {
+          "APR or interest rate": {
+            "n": 76,
+            "recall": 0.578947
+          },
+          "Account opening, closing, or management": {
+            "n": 443,
+            "recall": 0.790068
+          },
+          "Adding money": {
+            "n": 13,
+            "recall": 0.0
+          },
+          "Advertising and marketing": {
+            "n": 77,
+            "recall": 0.454545
+          },
+          "Advertising, marketing or disclosures": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Application processing delay": {
+            "n": 7,
+            "recall": 0.0
+          },
+          "Arbitration": {
+            "n": 6,
+            "recall": 0.0
+          },
+          "Balance transfer": {
+            "n": 23,
+            "recall": 0.26087
+          },
+          "Balance transfer fee": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Bankruptcy": {
+            "n": 10,
+            "recall": 0.1
+          },
+          "Billing disputes": {
+            "n": 244,
+            "recall": 0.618852
+          },
+          "Billing statement": {
+            "n": 60,
+            "recall": 0.1
+          },
+          "Cash advance": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Cash advance fee": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Closing/Cancelling account": {
+            "n": 122,
+            "recall": 0.491803
+          },
+          "Convenience checks": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Credit card protection / Debt protection": {
+            "n": 53,
+            "recall": 0.0
+          },
+          "Credit determination": {
+            "n": 48,
+            "recall": 0.104167
+          },
+          "Credit line increase/decrease": {
+            "n": 41,
+            "recall": 0.487805
+          },
+          "Customer service / Customer relations": {
+            "n": 83,
+            "recall": 0.084337
+          },
+          "Delinquent account": {
+            "n": 81,
+            "recall": 0.17284
+          },
+          "Deposits and withdrawals": {
+            "n": 279,
+            "recall": 0.501792
+          },
+          "Fees": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Forbearance / Workout plans": {
+            "n": 6,
+            "recall": 0.0
+          },
+          "Fraud or scam": {
+            "n": 85,
+            "recall": 0.294118
+          },
+          "Identity theft / Fraud / Embezzlement": {
+            "n": 143,
+            "recall": 0.503497
+          },
+          "Incorrect/missing disclosures or info": {
+            "n": 5,
+            "recall": 0.0
+          },
+          "Late fee": {
+            "n": 71,
+            "recall": 0.507042
+          },
+          "Making/receiving payments, sending money": {
+            "n": 109,
+            "recall": 0.100917
+          },
+          "Managing, opening, or closing account": {
+            "n": 52,
+            "recall": 0.288462
+          },
+          "Money was not available when promised": {
+            "n": 23,
+            "recall": 0.086957
+          },
+          "Other": {
+            "n": 165,
+            "recall": 0.339394
+          },
+          "Other fee": {
+            "n": 44,
+            "recall": 0.090909
+          },
+          "Other service issues": {
+            "n": 12,
+            "recall": 0.0
+          },
+          "Other transaction issues": {
+            "n": 39,
+            "recall": 0.333333
+          },
+          "Overdraft, savings or rewards features": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Overlimit fee": {
+            "n": 3,
+            "recall": 0.0
+          },
+          "Payoff process": {
+            "n": 44,
+            "recall": 0.090909
+          },
+          "Privacy": {
+            "n": 11,
+            "recall": 0.0
+          },
+          "Problems caused by my funds being low": {
+            "n": 183,
+            "recall": 0.710383
+          },
+          "Rewards": {
+            "n": 57,
+            "recall": 0.45614
+          },
+          "Sale of account": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Transaction issue": {
+            "n": 50,
+            "recall": 0.02
+          },
+          "Unauthorized transactions/trans. issues": {
+            "n": 59,
+            "recall": 0.271186
+          },
+          "Unsolicited issuance of credit card": {
+            "n": 35,
+            "recall": 0.285714
+          },
+          "Using a debit or ATM card": {
+            "n": 123,
+            "recall": 0.447154
+          },
+          "Wrong amount charged or received": {
+            "n": 6,
+            "recall": 0.0
+          }
+        }
+      },
+      "n": 3024,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "task": "routing-2015"
+    }
+  },
+  "splits": {
+    "dev": {
+      "n": 1511,
+      "sha256_jsonl": "8601a43f2161aa33a32966f88bbe88eff513bca16b5e6894ba260e65542f65e1"
+    },
+    "test": {
+      "n": 3024,
+      "sha256_jsonl": "39f3df84449421209d187460df683d49588830ceb8e18d714d320464105cb98e"
+    },
+    "train": {
+      "n": 6802,
+      "sha256_jsonl": "aa0c21f9c305a3033541355433e831a4d0411c5ee0381d9a7138a66aa42fd24b"
+    },
+    "version": "v1"
+  },
+  "task": "routing-2015"
+}

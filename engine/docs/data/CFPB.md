@@ -138,3 +138,20 @@ belongs to the predicted regime's part (1005 for reg_e, 1026 for reg_z).
 Answers are strict JSON objects with exactly the asked keys. A malformed or missing
 answer counts as wrong: an invalid class for classification, and probability
 `1 - y` (the worst possible) for outcome prediction.
+
+## Evaluating a model
+
+```bash
+# 1. prompts (deterministic sample by sha256(seed:id); test is the sealed split)
+uv run scruple realdata prompt --task regime-2015 --split test --n 300 --seed 1 --out p.jsonl
+# 2a. any model or agent writes a.jsonl: {"id": ..., "answer": "<raw reply>"} per line
+# 2b. or a hosted model through scruple's runners (needs ANTHROPIC_API_KEY / OPENAI_API_KEY)
+uv run scruple realdata run --prompts p.jsonl --provider anthropic --out a.jsonl
+# 3. grade; prompted ids with no answer count as wrong
+uv run scruple realdata grade --task regime-2015 --answers a.jsonl --prompts p.jsonl --out card.json
+```
+
+`run` makes one plain completion per prompt (no tools, temperature 0) through
+`scruple.agents.runners` (retries, timeouts, model defaults); a failed request is
+recorded with an empty answer and graded as wrong. It has only been exercised
+against fake transports. Baseline numbers: docs/results/REAL_BASELINES.md.

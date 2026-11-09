@@ -1,0 +1,1594 @@
+{
+  "data": "Real data: CFPB Consumer Complaint Database narratives (public domain, 17 USC 105), frozen splits data/real/v1 (see docs/data/CFPB.md). Not synthetic.",
+  "dataset": "cfpb2025",
+  "reproduce": "uv run scruple realdata baselines --task routing-2025",
+  "results": {
+    "keywords": {
+      "baseline": "keywords",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "dataset": "cfpb2025",
+      "fit": {},
+      "issue": {
+        "accuracy": {
+          "hi": 0.232165,
+          "lo": 0.194618,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.214018
+        },
+        "confusion": {
+          "Closing an account": {
+            "Closing an account": 84,
+            "Credit monitoring or identity theft protection services": 18,
+            "Improper use of your report": 29,
+            "Incorrect information on your report": 4,
+            "Managing an account": 12,
+            "Opening an account": 31,
+            "Problem caused by your funds being low": 23,
+            "Problem with a company's investigation into an existing problem": 23,
+            "Problem with a lender or other company charging your account": 12,
+            "Unable to get your credit report or credit score": 1
+          },
+          "Improper use of your report": {
+            "Improper use of your report": 1
+          },
+          "Incorrect information on your report": {
+            "Improper use of your report": 2
+          },
+          "Managing an account": {
+            "Closing an account": 103,
+            "Credit monitoring or identity theft protection services": 81,
+            "Improper use of your report": 121,
+            "Incorrect information on your report": 17,
+            "Managing an account": 129,
+            "Opening an account": 92,
+            "Problem caused by your funds being low": 102,
+            "Problem with a company's investigation into an existing problem": 117,
+            "Problem with a lender or other company charging your account": 96,
+            "Problem with fraud alerts or security freezes": 5,
+            "Unable to get your credit report or credit score": 20
+          },
+          "Opening an account": {
+            "Closing an account": 6,
+            "Credit monitoring or identity theft protection services": 20,
+            "Improper use of your report": 21,
+            "Incorrect information on your report": 6,
+            "Managing an account": 9,
+            "Opening an account": 50,
+            "Problem caused by your funds being low": 5,
+            "Problem with a company's investigation into an existing problem": 7,
+            "Problem with a lender or other company charging your account": 4
+          },
+          "Problem caused by your funds being low": {
+            "Closing an account": 14,
+            "Credit monitoring or identity theft protection services": 8,
+            "Improper use of your report": 18,
+            "Managing an account": 4,
+            "Opening an account": 3,
+            "Problem caused by your funds being low": 37,
+            "Problem with a company's investigation into an existing problem": 3,
+            "Problem with a lender or other company charging your account": 17,
+            "Unable to get your credit report or credit score": 2
+          },
+          "Problem with a company's investigation into an existing problem": {
+            "Credit monitoring or identity theft protection services": 1,
+            "Improper use of your report": 1,
+            "Problem caused by your funds being low": 1,
+            "Problem with a company's investigation into an existing problem": 1
+          },
+          "Problem with a lender or other company charging your account": {
+            "Closing an account": 11,
+            "Credit monitoring or identity theft protection services": 33,
+            "Improper use of your report": 33,
+            "Incorrect information on your report": 6,
+            "Managing an account": 39,
+            "Opening an account": 17,
+            "Problem caused by your funds being low": 11,
+            "Problem with a company's investigation into an existing problem": 43,
+            "Problem with a lender or other company charging your account": 40,
+            "Unable to get your credit report or credit score": 3
+          },
+          "Problem with fraud alerts or security freezes": {
+            "Improper use of your report": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.214279,
+          "lo": 0.145489,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.155176
+        },
+        "per_class": {
+          "Closing an account": {
+            "n": 237,
+            "recall": 0.35443
+          },
+          "Improper use of your report": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Incorrect information on your report": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Managing an account": {
+            "n": 883,
+            "recall": 0.146093
+          },
+          "Opening an account": {
+            "n": 128,
+            "recall": 0.390625
+          },
+          "Problem caused by your funds being low": {
+            "n": 106,
+            "recall": 0.349057
+          },
+          "Problem with a company's investigation into an existing problem": {
+            "n": 4,
+            "recall": 0.25
+          },
+          "Problem with a lender or other company charging your account": {
+            "n": 236,
+            "recall": 0.169492
+          },
+          "Problem with fraud alerts or security freezes": {
+            "n": 1,
+            "recall": 0.0
+          }
+        }
+      },
+      "issue_sub_issue": {
+        "accuracy": {
+          "hi": 0.122669,
+          "lo": 0.093226,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.10826
+        },
+        "confusion": {
+          "Closing an account | Can't close your account": {
+            "Closing an account | Can't close your account": 3,
+            "Closing an account | Company closed your account": 4,
+            "Closing an account | Funds not received from closed account": 5,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 4,
+            "Incorrect information on your report | Account status incorrect": 1,
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Account opened without my consent or knowledge": 2,
+            "Opening an account | Didn't receive terms that were advertised": 3,
+            "Opening an account | Unable to open an account": 1,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 2,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 3,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1
+          },
+          "Closing an account | Company closed your account": {
+            "Closing an account | Company closed your account": 9,
+            "Closing an account | Funds not received from closed account": 27,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 11,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 8,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 7,
+            "Incorrect information on your report | Information belongs to someone else": 2,
+            "Incorrect information on your report | Old information reappears or never goes away": 1,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem using a debit or ATM card": 4,
+            "Opening an account | Account opened without my consent or knowledge": 3,
+            "Opening an account | Didn't receive terms that were advertised": 9,
+            "Opening an account | Unable to open an account": 1,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 5,
+            "Problem caused by your funds being low | Late or other fees": 1,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 2,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 3,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 8,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 4,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 6
+          },
+          "Closing an account | Fees charged for closing account": {
+            "Closing an account | Company closed your account": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 1
+          },
+          "Closing an account | Funds not received from closed account": {
+            "Closing an account | Company closed your account": 1,
+            "Closing an account | Funds not received from closed account": 34,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 5,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 3,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 5,
+            "Managing an account | Funds not handled or disbursed as instructed": 3,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Account opened without my consent or knowledge": 2,
+            "Opening an account | Didn't receive terms that were advertised": 9,
+            "Opening an account | Unable to open an account": 1,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 3,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 4,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 4,
+            "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": 1,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 5,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 1
+          },
+          "Improper use of your report | Reporting company used your report improperly": {
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1
+          },
+          "Incorrect information on your report | Account status incorrect": {
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1
+          },
+          "Incorrect information on your report | Information belongs to someone else": {
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 1
+          },
+          "Managing an account | Banking errors": {
+            "Closing an account | Fees charged for closing account": 1,
+            "Closing an account | Funds not received from closed account": 5,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 10,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 3,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 6,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem making or receiving payments": 1,
+            "Managing an account | Problem using a debit or ATM card": 6,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Opening an account | Didn't receive terms that were advertised": 9,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 5,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 2,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 7,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 9,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 2
+          },
+          "Managing an account | Cashing a check": {
+            "Closing an account | Company closed your account": 1,
+            "Closing an account | Funds not received from closed account": 4,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 1,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 3,
+            "Incorrect information on your report | Information belongs to someone else": 2,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Opening an account | Didn't receive terms that were advertised": 4,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 3,
+            "Problem with fraud alerts or security freezes | ": 1
+          },
+          "Managing an account | Deposits and withdrawals": {
+            "Closing an account | Can't close your account": 1,
+            "Closing an account | Company closed your account": 4,
+            "Closing an account | Funds not received from closed account": 40,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 15,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 3,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 13,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 22,
+            "Improper use of your report | Reporting company used your report improperly": 1,
+            "Incorrect information on your report | Account status incorrect": 2,
+            "Incorrect information on your report | Information belongs to someone else": 1,
+            "Incorrect information on your report | Old information reappears or never goes away": 1,
+            "Incorrect information on your report | Personal information incorrect": 1,
+            "Managing an account | Cashing a check": 3,
+            "Managing an account | Deposits and withdrawals": 7,
+            "Managing an account | Funds not handled or disbursed as instructed": 13,
+            "Managing an account | Problem using a debit or ATM card": 25,
+            "Opening an account | Account opened without my consent or knowledge": 10,
+            "Opening an account | Didn't receive terms that were advertised": 17,
+            "Opening an account | Unable to open an account": 1,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 15,
+            "Problem caused by your funds being low | Late or other fees": 8,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 11,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 18,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 15,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 6,
+            "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": 1,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 11,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 29,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 5,
+            "Problem with fraud alerts or security freezes | ": 1,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 9
+          },
+          "Managing an account | Deposits or withdrawals": {
+            "Closing an account | Can't close your account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 1,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 2,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Problem caused by your funds being low | Late or other fees": 1
+          },
+          "Managing an account | Fee problem": {
+            "Closing an account | Fees charged for closing account": 1,
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 3,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 1,
+            "Managing an account | Deposits and withdrawals": 1,
+            "Managing an account | Problem using a debit or ATM card": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 2,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 1
+          },
+          "Managing an account | Funds not handled or disbursed as instructed": {
+            "Closing an account | Funds not received from closed account": 23,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 14,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 7,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 9,
+            "Incorrect information on your report | Information belongs to someone else": 1,
+            "Incorrect information on your report | Old information reappears or never goes away": 2,
+            "Managing an account | Deposits and withdrawals": 1,
+            "Managing an account | Funds not handled or disbursed as instructed": 5,
+            "Managing an account | Problem using a debit or ATM card": 5,
+            "Opening an account | Account opened without my consent or knowledge": 6,
+            "Opening an account | Didn't receive terms that were advertised": 13,
+            "Opening an account | Unable to open an account": 1,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 8,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 7,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 2,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 2,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 13,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1,
+            "Problem with fraud alerts or security freezes | ": 1,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 1
+          },
+          "Managing an account | Problem accessing account": {
+            "Closing an account | Company closed your account": 4,
+            "Closing an account | Funds not received from closed account": 6,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 6,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 2,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 3,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 7,
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Deposits and withdrawals": 2,
+            "Managing an account | Funds not handled or disbursed as instructed": 2,
+            "Managing an account | Problem accessing account": 2,
+            "Managing an account | Problem using a debit or ATM card": 6,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Opening an account | Didn't receive terms that were advertised": 11,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Late or other fees": 1,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 2,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 14,
+            "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 4,
+            "Problem with fraud alerts or security freezes | ": 1,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 2
+          },
+          "Managing an account | Problem making or receiving payments": {
+            "Closing an account | Funds not received from closed account": 4,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 3,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 4,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 7,
+            "Incorrect information on your report | Account status incorrect": 1,
+            "Incorrect information on your report | Old information reappears or never goes away": 2,
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Deposits and withdrawals": 1,
+            "Managing an account | Problem using a debit or ATM card": 4,
+            "Opening an account | Didn't receive terms that were advertised": 5,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 3,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 2,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 4,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 2,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 4,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 7,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 2,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 2
+          },
+          "Managing an account | Problem using a debit or ATM card": {
+            "Closing an account | Company closed your account": 1,
+            "Closing an account | Funds not received from closed account": 6,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 19,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 14,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 16,
+            "Improper use of your report | Reporting company used your report improperly": 2,
+            "Incorrect information on your report | Account status incorrect": 1,
+            "Incorrect information on your report | Information belongs to someone else": 2,
+            "Incorrect information on your report | Old information reappears or never goes away": 1,
+            "Managing an account | Deposits and withdrawals": 4,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem using a debit or ATM card": 33,
+            "Opening an account | Account opened without my consent or knowledge": 4,
+            "Opening an account | Didn't receive terms that were advertised": 7,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Late or other fees": 1,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 2,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 4,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 18,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 2,
+            "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": 1,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 23,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 15,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 8,
+            "Problem with fraud alerts or security freezes | ": 1,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 4
+          },
+          "Managing an account | Problem with renewal": {
+            "Managing an account | Funds not handled or disbursed as instructed": 1
+          },
+          "Opening an account | Account opened without my consent or knowledge": {
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 8,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 3,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 2,
+            "Incorrect information on your report | Information belongs to someone else": 2,
+            "Incorrect information on your report | Personal information incorrect": 1,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Account opened without my consent or knowledge": 8,
+            "Opening an account | Didn't receive terms that were advertised": 2,
+            "Opening an account | Unable to open an account": 2,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 3,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1
+          },
+          "Opening an account | Confusing or missing disclosures": {
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 2,
+            "Managing an account | Problem using a debit or ATM card": 2,
+            "Opening an account | Account opened without my consent or knowledge": 2,
+            "Opening an account | Didn't receive terms that were advertised": 2
+          },
+          "Opening an account | Didn't receive terms that were advertised": {
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 2,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 3,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Opening an account | Didn't receive terms that were advertised": 18,
+            "Opening an account | Unable to open an account": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 2
+          },
+          "Opening an account | Unable to open an account": {
+            "Closing an account | Company closed your account": 3,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 5,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 13,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 3,
+            "Incorrect information on your report | Account status incorrect": 2,
+            "Incorrect information on your report | Old information reappears or never goes away": 1,
+            "Managing an account | Banking errors": 2,
+            "Managing an account | Problem using a debit or ATM card": 3,
+            "Opening an account | Account opened without my consent or knowledge": 2,
+            "Opening an account | Didn't receive terms that were advertised": 5,
+            "Opening an account | Unable to open an account": 7,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 2,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 1
+          },
+          "Problem caused by your funds being low | Bounced checks or returned payments": {
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 2,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 2,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 1
+          },
+          "Problem caused by your funds being low | Late or other fees": {
+            "Closing an account | Fees charged for closing account": 2,
+            "Closing an account | Funds not received from closed account": 2,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1
+          },
+          "Problem caused by your funds being low | Non-sufficient funds and associated fees": {
+            "Closing an account | Fees charged for closing account": 2,
+            "Closing an account | Funds not received from closed account": 4,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 4,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 1,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 4,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 3,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 5,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 1
+          },
+          "Problem caused by your funds being low | Overdrafts and overdraft fees": {
+            "Closing an account | Fees charged for closing account": 2,
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 5,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 5,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 4,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem using a debit or ATM card": 2,
+            "Opening an account | Account opened without my consent or knowledge": 2,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 27,
+            "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 6,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 4,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 1
+          },
+          "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": {
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 1
+          },
+          "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": {
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 1
+          },
+          "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": {
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 1
+          },
+          "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": {
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 3,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 1,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Didn't receive terms that were advertised": 2,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 1
+          },
+          "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": {
+            "Closing an account | Company closed your account": 1,
+            "Closing an account | Funds not received from closed account": 1,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 4,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 1,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 4,
+            "Managing an account | Problem using a debit or ATM card": 7,
+            "Opening an account | Didn't receive terms that were advertised": 3,
+            "Problem caused by your funds being low | Late or other fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 8,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 2
+          },
+          "Problem with a lender or other company charging your account | Transaction was not authorized": {
+            "Closing an account | Funds not received from closed account": 8,
+            "Credit monitoring or identity theft protection services | Didn't receive services that were advertised": 25,
+            "Credit monitoring or identity theft protection services | Problem canceling credit monitoring or identify theft protection service": 1,
+            "Improper use of your report | Credit inquiries on your report that you don't recognize": 9,
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 17,
+            "Improper use of your report | Reporting company used your report improperly": 1,
+            "Incorrect information on your report | Account status incorrect": 1,
+            "Incorrect information on your report | Information belongs to someone else": 1,
+            "Incorrect information on your report | Old information reappears or never goes away": 3,
+            "Incorrect information on your report | Personal information incorrect": 1,
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem using a debit or ATM card": 29,
+            "Opening an account | Account opened without my consent or knowledge": 3,
+            "Opening an account | Didn't receive terms that were advertised": 9,
+            "Problem caused by your funds being low | Bounced checks or returned payments": 1,
+            "Problem caused by your funds being low | Late or other fees": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 7,
+            "Problem with a company's investigation into an existing problem | Difficulty submitting a dispute or getting information about a dispute over the phone": 22,
+            "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": 3,
+            "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": 17,
+            "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": 1,
+            "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": 18,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 9,
+            "Unable to get your credit report or credit score | Other problem getting your report or credit score": 2
+          },
+          "Problem with fraud alerts or security freezes | ": {
+            "Improper use of your report | Received unsolicited financial product or insurance offers after opting out": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.089985,
+          "lo": 0.062538,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.069425
+        },
+        "per_class": {
+          "Closing an account | Can't close your account": {
+            "n": 36,
+            "recall": 0.083333
+          },
+          "Closing an account | Company closed your account": {
+            "n": 113,
+            "recall": 0.079646
+          },
+          "Closing an account | Fees charged for closing account": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Closing an account | Funds not received from closed account": {
+            "n": 84,
+            "recall": 0.404762
+          },
+          "Improper use of your report | Reporting company used your report improperly": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report | Account status incorrect": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report | Information belongs to someone else": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Managing an account | Banking errors": {
+            "n": 72,
+            "recall": 0.0
+          },
+          "Managing an account | Cashing a check": {
+            "n": 23,
+            "recall": 0.0
+          },
+          "Managing an account | Deposits and withdrawals": {
+            "n": 309,
+            "recall": 0.022654
+          },
+          "Managing an account | Deposits or withdrawals": {
+            "n": 7,
+            "recall": 0.0
+          },
+          "Managing an account | Fee problem": {
+            "n": 14,
+            "recall": 0.0
+          },
+          "Managing an account | Funds not handled or disbursed as instructed": {
+            "n": 124,
+            "recall": 0.040323
+          },
+          "Managing an account | Problem accessing account": {
+            "n": 80,
+            "recall": 0.025
+          },
+          "Managing an account | Problem making or receiving payments": {
+            "n": 62,
+            "recall": 0.0
+          },
+          "Managing an account | Problem using a debit or ATM card": {
+            "n": 191,
+            "recall": 0.172775
+          },
+          "Managing an account | Problem with renewal": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Opening an account | Account opened without my consent or knowledge": {
+            "n": 37,
+            "recall": 0.216216
+          },
+          "Opening an account | Confusing or missing disclosures": {
+            "n": 9,
+            "recall": 0.0
+          },
+          "Opening an account | Didn't receive terms that were advertised": {
+            "n": 31,
+            "recall": 0.580645
+          },
+          "Opening an account | Unable to open an account": {
+            "n": 51,
+            "recall": 0.137255
+          },
+          "Problem caused by your funds being low | Bounced checks or returned payments": {
+            "n": 9,
+            "recall": 0.111111
+          },
+          "Problem caused by your funds being low | Late or other fees": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Non-sufficient funds and associated fees": {
+            "n": 27,
+            "recall": 0.037037
+          },
+          "Problem caused by your funds being low | Overdrafts and overdraft fees": {
+            "n": 62,
+            "recall": 0.435484
+          },
+          "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": {
+            "n": 1,
+            "recall": 1.0
+          },
+          "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": {
+            "n": 11,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": {
+            "n": 34,
+            "recall": 0.235294
+          },
+          "Problem with a lender or other company charging your account | Transaction was not authorized": {
+            "n": 191,
+            "recall": 0.04712
+          },
+          "Problem with fraud alerts or security freezes | ": {
+            "n": 1,
+            "recall": 0.0
+          }
+        }
+      },
+      "n": 1598,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "task": "routing-2025"
+    },
+    "majority": {
+      "baseline": "majority",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "dataset": "cfpb2025",
+      "fit": {
+        "label": "Managing an account | Deposits and withdrawals"
+      },
+      "issue": {
+        "accuracy": {
+          "hi": 0.576971,
+          "lo": 0.529412,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.552566
+        },
+        "confusion": {
+          "Closing an account": {
+            "Managing an account": 237
+          },
+          "Improper use of your report": {
+            "Managing an account": 1
+          },
+          "Incorrect information on your report": {
+            "Managing an account": 2
+          },
+          "Managing an account": {
+            "Managing an account": 883
+          },
+          "Opening an account": {
+            "Managing an account": 128
+          },
+          "Problem caused by your funds being low": {
+            "Managing an account": 106
+          },
+          "Problem with a company's investigation into an existing problem": {
+            "Managing an account": 4
+          },
+          "Problem with a lender or other company charging your account": {
+            "Managing an account": 236
+          },
+          "Problem with fraud alerts or security freezes": {
+            "Managing an account": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.104684,
+          "lo": 0.077337,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.07909
+        },
+        "per_class": {
+          "Closing an account": {
+            "n": 237,
+            "recall": 0.0
+          },
+          "Improper use of your report": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Managing an account": {
+            "n": 883,
+            "recall": 1.0
+          },
+          "Opening an account": {
+            "n": 128,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low": {
+            "n": 106,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account": {
+            "n": 236,
+            "recall": 0.0
+          },
+          "Problem with fraud alerts or security freezes": {
+            "n": 1,
+            "recall": 0.0
+          }
+        }
+      },
+      "issue_sub_issue": {
+        "accuracy": {
+          "hi": 0.213392,
+          "lo": 0.175219,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.193367
+        },
+        "confusion": {
+          "Closing an account | Can't close your account": {
+            "Managing an account | Deposits and withdrawals": 36
+          },
+          "Closing an account | Company closed your account": {
+            "Managing an account | Deposits and withdrawals": 113
+          },
+          "Closing an account | Fees charged for closing account": {
+            "Managing an account | Deposits and withdrawals": 4
+          },
+          "Closing an account | Funds not received from closed account": {
+            "Managing an account | Deposits and withdrawals": 84
+          },
+          "Improper use of your report | Reporting company used your report improperly": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Incorrect information on your report | Account status incorrect": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Incorrect information on your report | Information belongs to someone else": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Managing an account | Banking errors": {
+            "Managing an account | Deposits and withdrawals": 72
+          },
+          "Managing an account | Cashing a check": {
+            "Managing an account | Deposits and withdrawals": 23
+          },
+          "Managing an account | Deposits and withdrawals": {
+            "Managing an account | Deposits and withdrawals": 309
+          },
+          "Managing an account | Deposits or withdrawals": {
+            "Managing an account | Deposits and withdrawals": 7
+          },
+          "Managing an account | Fee problem": {
+            "Managing an account | Deposits and withdrawals": 14
+          },
+          "Managing an account | Funds not handled or disbursed as instructed": {
+            "Managing an account | Deposits and withdrawals": 124
+          },
+          "Managing an account | Problem accessing account": {
+            "Managing an account | Deposits and withdrawals": 80
+          },
+          "Managing an account | Problem making or receiving payments": {
+            "Managing an account | Deposits and withdrawals": 62
+          },
+          "Managing an account | Problem using a debit or ATM card": {
+            "Managing an account | Deposits and withdrawals": 191
+          },
+          "Managing an account | Problem with renewal": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Opening an account | Account opened without my consent or knowledge": {
+            "Managing an account | Deposits and withdrawals": 37
+          },
+          "Opening an account | Confusing or missing disclosures": {
+            "Managing an account | Deposits and withdrawals": 9
+          },
+          "Opening an account | Didn't receive terms that were advertised": {
+            "Managing an account | Deposits and withdrawals": 31
+          },
+          "Opening an account | Unable to open an account": {
+            "Managing an account | Deposits and withdrawals": 51
+          },
+          "Problem caused by your funds being low | Bounced checks or returned payments": {
+            "Managing an account | Deposits and withdrawals": 9
+          },
+          "Problem caused by your funds being low | Late or other fees": {
+            "Managing an account | Deposits and withdrawals": 8
+          },
+          "Problem caused by your funds being low | Non-sufficient funds and associated fees": {
+            "Managing an account | Deposits and withdrawals": 27
+          },
+          "Problem caused by your funds being low | Overdrafts and overdraft fees": {
+            "Managing an account | Deposits and withdrawals": 62
+          },
+          "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": {
+            "Managing an account | Deposits and withdrawals": 2
+          },
+          "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": {
+            "Managing an account | Deposits and withdrawals": 11
+          },
+          "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": {
+            "Managing an account | Deposits and withdrawals": 34
+          },
+          "Problem with a lender or other company charging your account | Transaction was not authorized": {
+            "Managing an account | Deposits and withdrawals": 191
+          },
+          "Problem with fraud alerts or security freezes | ": {
+            "Managing an account | Deposits and withdrawals": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.012501,
+          "lo": 0.009796,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.010127
+        },
+        "per_class": {
+          "Closing an account | Can't close your account": {
+            "n": 36,
+            "recall": 0.0
+          },
+          "Closing an account | Company closed your account": {
+            "n": 113,
+            "recall": 0.0
+          },
+          "Closing an account | Fees charged for closing account": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Closing an account | Funds not received from closed account": {
+            "n": 84,
+            "recall": 0.0
+          },
+          "Improper use of your report | Reporting company used your report improperly": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report | Account status incorrect": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report | Information belongs to someone else": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Managing an account | Banking errors": {
+            "n": 72,
+            "recall": 0.0
+          },
+          "Managing an account | Cashing a check": {
+            "n": 23,
+            "recall": 0.0
+          },
+          "Managing an account | Deposits and withdrawals": {
+            "n": 309,
+            "recall": 1.0
+          },
+          "Managing an account | Deposits or withdrawals": {
+            "n": 7,
+            "recall": 0.0
+          },
+          "Managing an account | Fee problem": {
+            "n": 14,
+            "recall": 0.0
+          },
+          "Managing an account | Funds not handled or disbursed as instructed": {
+            "n": 124,
+            "recall": 0.0
+          },
+          "Managing an account | Problem accessing account": {
+            "n": 80,
+            "recall": 0.0
+          },
+          "Managing an account | Problem making or receiving payments": {
+            "n": 62,
+            "recall": 0.0
+          },
+          "Managing an account | Problem using a debit or ATM card": {
+            "n": 191,
+            "recall": 0.0
+          },
+          "Managing an account | Problem with renewal": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Opening an account | Account opened without my consent or knowledge": {
+            "n": 37,
+            "recall": 0.0
+          },
+          "Opening an account | Confusing or missing disclosures": {
+            "n": 9,
+            "recall": 0.0
+          },
+          "Opening an account | Didn't receive terms that were advertised": {
+            "n": 31,
+            "recall": 0.0
+          },
+          "Opening an account | Unable to open an account": {
+            "n": 51,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Bounced checks or returned payments": {
+            "n": 9,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Late or other fees": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Non-sufficient funds and associated fees": {
+            "n": 27,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Overdrafts and overdraft fees": {
+            "n": 62,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": {
+            "n": 11,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": {
+            "n": 34,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Transaction was not authorized": {
+            "n": 191,
+            "recall": 0.0
+          },
+          "Problem with fraud alerts or security freezes | ": {
+            "n": 1,
+            "recall": 0.0
+          }
+        }
+      },
+      "n": 1598,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "task": "routing-2025"
+    },
+    "tfidf_lr": {
+      "baseline": "tfidf_lr",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "dataset": "cfpb2025",
+      "fit": {
+        "C": 8.0,
+        "dev_selection": {
+          "by_C": {
+            "0.5": 0.069707,
+            "2.0": 0.141855,
+            "8.0": 0.172555
+          },
+          "metric": "macro_f1"
+        }
+      },
+      "issue": {
+        "accuracy": {
+          "hi": 0.654568,
+          "lo": 0.606383,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.630788
+        },
+        "confusion": {
+          "Closing an account": {
+            "Closing an account": 95,
+            "Managing an account": 132,
+            "Opening an account": 5,
+            "Problem caused by your funds being low": 1,
+            "Problem with a lender or other company charging your account": 4
+          },
+          "Improper use of your report": {
+            "Opening an account": 1
+          },
+          "Incorrect information on your report": {
+            "Managing an account": 1,
+            "Opening an account": 1
+          },
+          "Managing an account": {
+            "Closing an account": 41,
+            "Managing an account": 697,
+            "Opening an account": 15,
+            "Problem caused by your funds being low": 4,
+            "Problem with a lender or other company charging your account": 126
+          },
+          "Opening an account": {
+            "Closing an account": 12,
+            "Managing an account": 34,
+            "Opening an account": 74,
+            "Problem with a lender or other company charging your account": 8
+          },
+          "Problem caused by your funds being low": {
+            "Closing an account": 4,
+            "Managing an account": 45,
+            "Opening an account": 1,
+            "Problem caused by your funds being low": 42,
+            "Problem with a lender or other company charging your account": 14
+          },
+          "Problem with a company's investigation into an existing problem": {
+            "Managing an account": 3,
+            "Opening an account": 1
+          },
+          "Problem with a lender or other company charging your account": {
+            "Closing an account": 4,
+            "Managing an account": 131,
+            "Problem caused by your funds being low": 1,
+            "Problem with a lender or other company charging your account": 100
+          },
+          "Problem with fraud alerts or security freezes": {
+            "Managing an account": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.424914,
+          "lo": 0.297911,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.313003
+        },
+        "per_class": {
+          "Closing an account": {
+            "n": 237,
+            "recall": 0.400844
+          },
+          "Improper use of your report": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Managing an account": {
+            "n": 883,
+            "recall": 0.789354
+          },
+          "Opening an account": {
+            "n": 128,
+            "recall": 0.578125
+          },
+          "Problem caused by your funds being low": {
+            "n": 106,
+            "recall": 0.396226
+          },
+          "Problem with a company's investigation into an existing problem": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account": {
+            "n": 236,
+            "recall": 0.423729
+          },
+          "Problem with fraud alerts or security freezes": {
+            "n": 1,
+            "recall": 0.0
+          }
+        }
+      },
+      "issue_sub_issue": {
+        "accuracy": {
+          "hi": 0.417397,
+          "lo": 0.366708,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.391114
+        },
+        "confusion": {
+          "Closing an account | Can't close your account": {
+            "Closing an account | Can't close your account": 3,
+            "Closing an account | Company closed your account": 7,
+            "Managing an account | Deposits and withdrawals": 15,
+            "Managing an account | Funds not handled or disbursed as instructed": 2,
+            "Managing an account | Problem accessing account": 3,
+            "Managing an account | Problem using a debit or ATM card": 2,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 2
+          },
+          "Closing an account | Company closed your account": {
+            "Closing an account | Company closed your account": 50,
+            "Closing an account | Funds not received from closed account": 5,
+            "Managing an account | Cashing a check": 1,
+            "Managing an account | Deposits and withdrawals": 45,
+            "Managing an account | Problem accessing account": 2,
+            "Managing an account | Problem using a debit or ATM card": 6,
+            "Opening an account | Unable to open an account": 2,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 2
+          },
+          "Closing an account | Fees charged for closing account": {
+            "Closing an account | Can't close your account": 1,
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 1,
+            "Managing an account | Funds not handled or disbursed as instructed": 1
+          },
+          "Closing an account | Funds not received from closed account": {
+            "Closing an account | Can't close your account": 1,
+            "Closing an account | Company closed your account": 7,
+            "Closing an account | Funds not received from closed account": 20,
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Deposits and withdrawals": 48,
+            "Managing an account | Funds not handled or disbursed as instructed": 4,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Opening an account | Unable to open an account": 1
+          },
+          "Improper use of your report | Reporting company used your report improperly": {
+            "Opening an account | Unable to open an account": 1
+          },
+          "Incorrect information on your report | Account status incorrect": {
+            "Managing an account | Funds not handled or disbursed as instructed": 1
+          },
+          "Incorrect information on your report | Information belongs to someone else": {
+            "Opening an account | Unable to open an account": 1
+          },
+          "Managing an account | Banking errors": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Banking errors": 10,
+            "Managing an account | Cashing a check": 1,
+            "Managing an account | Deposits and withdrawals": 32,
+            "Managing an account | Funds not handled or disbursed as instructed": 4,
+            "Managing an account | Problem using a debit or ATM card": 9,
+            "Opening an account | Didn't receive terms that were advertised": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 11
+          },
+          "Managing an account | Cashing a check": {
+            "Closing an account | Company closed your account": 2,
+            "Closing an account | Funds not received from closed account": 2,
+            "Managing an account | Deposits and withdrawals": 17,
+            "Opening an account | Unable to open an account": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1
+          },
+          "Managing an account | Deposits and withdrawals": {
+            "Closing an account | Company closed your account": 10,
+            "Closing an account | Funds not received from closed account": 4,
+            "Managing an account | Deposits and withdrawals": 233,
+            "Managing an account | Funds not handled or disbursed as instructed": 5,
+            "Managing an account | Problem accessing account": 8,
+            "Managing an account | Problem using a debit or ATM card": 26,
+            "Opening an account | Account opened without my consent or knowledge": 1,
+            "Opening an account | Didn't receive terms that were advertised": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 21
+          },
+          "Managing an account | Deposits or withdrawals": {
+            "Managing an account | Deposits and withdrawals": 4,
+            "Opening an account | Unable to open an account": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 2
+          },
+          "Managing an account | Fee problem": {
+            "Managing an account | Deposits and withdrawals": 4,
+            "Managing an account | Problem accessing account": 1,
+            "Managing an account | Problem using a debit or ATM card": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 3,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 3
+          },
+          "Managing an account | Funds not handled or disbursed as instructed": {
+            "Closing an account | Company closed your account": 5,
+            "Closing an account | Funds not received from closed account": 7,
+            "Managing an account | Banking errors": 2,
+            "Managing an account | Deposits and withdrawals": 72,
+            "Managing an account | Funds not handled or disbursed as instructed": 4,
+            "Managing an account | Problem using a debit or ATM card": 9,
+            "Opening an account | Didn't receive terms that were advertised": 5,
+            "Opening an account | Unable to open an account": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 19
+          },
+          "Managing an account | Problem accessing account": {
+            "Closing an account | Company closed your account": 9,
+            "Managing an account | Deposits and withdrawals": 49,
+            "Managing an account | Problem accessing account": 15,
+            "Managing an account | Problem using a debit or ATM card": 5,
+            "Opening an account | Didn't receive terms that were advertised": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1
+          },
+          "Managing an account | Problem making or receiving payments": {
+            "Managing an account | Banking errors": 2,
+            "Managing an account | Deposits and withdrawals": 34,
+            "Managing an account | Funds not handled or disbursed as instructed": 3,
+            "Managing an account | Problem accessing account": 4,
+            "Managing an account | Problem making or receiving payments": 2,
+            "Managing an account | Problem using a debit or ATM card": 5,
+            "Opening an account | Didn't receive terms that were advertised": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 11
+          },
+          "Managing an account | Problem using a debit or ATM card": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 31,
+            "Managing an account | Problem using a debit or ATM card": 102,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 57
+          },
+          "Managing an account | Problem with renewal": {
+            "Managing an account | Banking errors": 1
+          },
+          "Opening an account | Account opened without my consent or knowledge": {
+            "Closing an account | Company closed your account": 3,
+            "Managing an account | Deposits and withdrawals": 8,
+            "Managing an account | Problem accessing account": 2,
+            "Managing an account | Problem using a debit or ATM card": 2,
+            "Opening an account | Account opened without my consent or knowledge": 18,
+            "Opening an account | Unable to open an account": 3,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 1
+          },
+          "Opening an account | Confusing or missing disclosures": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 4,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Didn't receive terms that were advertised": 3
+          },
+          "Opening an account | Didn't receive terms that were advertised": {
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Deposits and withdrawals": 2,
+            "Managing an account | Funds not handled or disbursed as instructed": 2,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Didn't receive terms that were advertised": 25
+          },
+          "Opening an account | Unable to open an account": {
+            "Closing an account | Company closed your account": 7,
+            "Closing an account | Funds not received from closed account": 1,
+            "Managing an account | Deposits and withdrawals": 10,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Opening an account | Account opened without my consent or knowledge": 3,
+            "Opening an account | Unable to open an account": 22,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 7
+          },
+          "Problem caused by your funds being low | Bounced checks or returned payments": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 4,
+            "Managing an account | Problem making or receiving payments": 1,
+            "Managing an account | Problem using a debit or ATM card": 2,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1
+          },
+          "Problem caused by your funds being low | Late or other fees": {
+            "Managing an account | Deposits and withdrawals": 3,
+            "Problem caused by your funds being low | Non-sufficient funds and associated fees": 2,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 3
+          },
+          "Problem caused by your funds being low | Non-sufficient funds and associated fees": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 10,
+            "Managing an account | Funds not handled or disbursed as instructed": 3,
+            "Managing an account | Problem accessing account": 1,
+            "Managing an account | Problem using a debit or ATM card": 2,
+            "Opening an account | Didn't receive terms that were advertised": 1,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 3,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 6
+          },
+          "Problem caused by your funds being low | Overdrafts and overdraft fees": {
+            "Closing an account | Can't close your account": 1,
+            "Closing an account | Funds not received from closed account": 1,
+            "Managing an account | Deposits and withdrawals": 14,
+            "Managing an account | Funds not handled or disbursed as instructed": 2,
+            "Managing an account | Problem using a debit or ATM card": 3,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 36,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 5
+          },
+          "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": {
+            "Managing an account | Deposits and withdrawals": 1
+          },
+          "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": {
+            "Managing an account | Problem using a debit or ATM card": 1
+          },
+          "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": {
+            "Managing an account | Deposits and withdrawals": 1,
+            "Opening an account | Unable to open an account": 1
+          },
+          "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 3,
+            "Managing an account | Funds not handled or disbursed as instructed": 1,
+            "Managing an account | Problem using a debit or ATM card": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 5
+          },
+          "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": {
+            "Closing an account | Company closed your account": 1,
+            "Managing an account | Deposits and withdrawals": 9,
+            "Managing an account | Funds not handled or disbursed as instructed": 2,
+            "Managing an account | Problem using a debit or ATM card": 12,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 10
+          },
+          "Problem with a lender or other company charging your account | Transaction was not authorized": {
+            "Closing an account | Company closed your account": 2,
+            "Managing an account | Banking errors": 1,
+            "Managing an account | Deposits and withdrawals": 38,
+            "Managing an account | Funds not handled or disbursed as instructed": 4,
+            "Managing an account | Problem making or receiving payments": 1,
+            "Managing an account | Problem using a debit or ATM card": 59,
+            "Problem caused by your funds being low | Overdrafts and overdraft fees": 1,
+            "Problem with a lender or other company charging your account | Transaction was not authorized": 85
+          },
+          "Problem with fraud alerts or security freezes | ": {
+            "Managing an account | Deposits and withdrawals": 1
+          }
+        },
+        "macro_f1": {
+          "hi": 0.204956,
+          "lo": 0.160175,
+          "n": 1598,
+          "n_boot": 1000,
+          "n_boot_undefined": 0,
+          "value": 0.165365
+        },
+        "per_class": {
+          "Closing an account | Can't close your account": {
+            "n": 36,
+            "recall": 0.083333
+          },
+          "Closing an account | Company closed your account": {
+            "n": 113,
+            "recall": 0.442478
+          },
+          "Closing an account | Fees charged for closing account": {
+            "n": 4,
+            "recall": 0.0
+          },
+          "Closing an account | Funds not received from closed account": {
+            "n": 84,
+            "recall": 0.238095
+          },
+          "Improper use of your report | Reporting company used your report improperly": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report | Account status incorrect": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Incorrect information on your report | Information belongs to someone else": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Managing an account | Banking errors": {
+            "n": 72,
+            "recall": 0.138889
+          },
+          "Managing an account | Cashing a check": {
+            "n": 23,
+            "recall": 0.0
+          },
+          "Managing an account | Deposits and withdrawals": {
+            "n": 309,
+            "recall": 0.754045
+          },
+          "Managing an account | Deposits or withdrawals": {
+            "n": 7,
+            "recall": 0.0
+          },
+          "Managing an account | Fee problem": {
+            "n": 14,
+            "recall": 0.0
+          },
+          "Managing an account | Funds not handled or disbursed as instructed": {
+            "n": 124,
+            "recall": 0.032258
+          },
+          "Managing an account | Problem accessing account": {
+            "n": 80,
+            "recall": 0.1875
+          },
+          "Managing an account | Problem making or receiving payments": {
+            "n": 62,
+            "recall": 0.032258
+          },
+          "Managing an account | Problem using a debit or ATM card": {
+            "n": 191,
+            "recall": 0.534031
+          },
+          "Managing an account | Problem with renewal": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Opening an account | Account opened without my consent or knowledge": {
+            "n": 37,
+            "recall": 0.486486
+          },
+          "Opening an account | Confusing or missing disclosures": {
+            "n": 9,
+            "recall": 0.0
+          },
+          "Opening an account | Didn't receive terms that were advertised": {
+            "n": 31,
+            "recall": 0.806452
+          },
+          "Opening an account | Unable to open an account": {
+            "n": 51,
+            "recall": 0.431373
+          },
+          "Problem caused by your funds being low | Bounced checks or returned payments": {
+            "n": 9,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Late or other fees": {
+            "n": 8,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Non-sufficient funds and associated fees": {
+            "n": 27,
+            "recall": 0.0
+          },
+          "Problem caused by your funds being low | Overdrafts and overdraft fees": {
+            "n": 62,
+            "recall": 0.580645
+          },
+          "Problem with a company's investigation into an existing problem | Investigation took more than 30 days": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem | Problem with personal statement of dispute": {
+            "n": 1,
+            "recall": 0.0
+          },
+          "Problem with a company's investigation into an existing problem | Their investigation did not fix an error on your report": {
+            "n": 2,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Can't stop withdrawals from your account": {
+            "n": 11,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Money was taken from your account on the wrong day or for the wrong amount": {
+            "n": 34,
+            "recall": 0.0
+          },
+          "Problem with a lender or other company charging your account | Transaction was not authorized": {
+            "n": 191,
+            "recall": 0.445026
+          },
+          "Problem with fraud alerts or security freezes | ": {
+            "n": 1,
+            "recall": 0.0
+          }
+        }
+      },
+      "n": 1598,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "task": "routing-2025"
+    }
+  },
+  "splits": {
+    "dev": {
+      "n": 798,
+      "sha256_jsonl": "4bd1f7d725520a603ae4580bac0c56c9d0e31f47bb51ec4b318da218a9ecac0b"
+    },
+    "test": {
+      "n": 1598,
+      "sha256_jsonl": "a10e286dc33fa3fe66229c9250fdfc5f49589a1b64c08271d1719499604d0498"
+    },
+    "train": {
+      "n": 3198,
+      "sha256_jsonl": "91b0998c30a454beed1fcfae9db08852555020f760af43568388149f53ee9d19"
+    },
+    "version": "v1"
+  },
+  "task": "routing-2025"
+}

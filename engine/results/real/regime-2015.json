@@ -1,0 +1,279 @@
+{
+  "data": "Real data: CFPB Consumer Complaint Database narratives (public domain, 17 USC 105), frozen splits data/real/v1 (see docs/data/CFPB.md). Not synthetic.",
+  "dataset": "cfpb2015",
+  "reproduce": "uv run scruple realdata baselines --task regime-2015",
+  "results": {
+    "keywords": {
+      "accuracy": {
+        "hi": 0.810242,
+        "lo": 0.753927,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.782723
+      },
+      "balanced_accuracy": {
+        "hi": 0.779556,
+        "lo": 0.725347,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.752336
+      },
+      "baseline": "keywords",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "citation_consistent": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 1.0
+      },
+      "citation_exists": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 1.0
+      },
+      "confusion": {
+        "reg_e": {
+          "reg_e": 177,
+          "reg_z": 150
+        },
+        "reg_z": {
+          "reg_e": 16,
+          "reg_z": 421
+        }
+      },
+      "dataset": "cfpb2015",
+      "fit": {},
+      "macro_f1": {
+        "hi": 0.788924,
+        "lo": 0.726479,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.758043
+      },
+      "n": 764,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "per_class": {
+        "reg_e": {
+          "n": 327,
+          "recall": 0.541284
+        },
+        "reg_z": {
+          "n": 437,
+          "recall": 0.963387
+        }
+      },
+      "strict_accuracy": {
+        "hi": 0.810242,
+        "lo": 0.753927,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.782723
+      },
+      "task": "regime-2015"
+    },
+    "majority": {
+      "accuracy": {
+        "hi": 0.606021,
+        "lo": 0.536616,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.57199
+      },
+      "balanced_accuracy": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "baseline": "majority",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "citation_consistent": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 1.0
+      },
+      "citation_exists": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 1.0
+      },
+      "confusion": {
+        "reg_e": {
+          "reg_z": 327
+        },
+        "reg_z": {
+          "reg_z": 437
+        }
+      },
+      "dataset": "cfpb2015",
+      "fit": {
+        "label": "reg_z"
+      },
+      "macro_f1": {
+        "hi": 0.377343,
+        "lo": 0.34922,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.363863
+      },
+      "n": 764,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "per_class": {
+        "reg_e": {
+          "n": 327,
+          "recall": 0.0
+        },
+        "reg_z": {
+          "n": 437,
+          "recall": 1.0
+        }
+      },
+      "strict_accuracy": {
+        "hi": 0.606021,
+        "lo": 0.536616,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.57199
+      },
+      "task": "regime-2015"
+    },
+    "tfidf_lr": {
+      "accuracy": {
+        "hi": 0.907101,
+        "lo": 0.858606,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.882199
+      },
+      "balanced_accuracy": {
+        "hi": 0.898064,
+        "lo": 0.846144,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.871623
+      },
+      "baseline": "tfidf_lr",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "citation_consistent": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 1.0
+      },
+      "citation_exists": {
+        "hi": 1.0,
+        "lo": 1.0,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 1.0
+      },
+      "confusion": {
+        "reg_e": {
+          "reg_e": 261,
+          "reg_z": 66
+        },
+        "reg_z": {
+          "reg_e": 24,
+          "reg_z": 413
+        }
+      },
+      "dataset": "cfpb2015",
+      "fit": {
+        "C": 2.0,
+        "dev_selection": {
+          "by_C": {
+            "0.5": 0.836257,
+            "2.0": 0.874559,
+            "8.0": 0.873044
+          },
+          "metric": "macro_f1"
+        }
+      },
+      "macro_f1": {
+        "hi": 0.903843,
+        "lo": 0.851585,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.877344
+      },
+      "n": 764,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "per_class": {
+        "reg_e": {
+          "n": 327,
+          "recall": 0.798165
+        },
+        "reg_z": {
+          "n": 437,
+          "recall": 0.94508
+        }
+      },
+      "strict_accuracy": {
+        "hi": 0.907101,
+        "lo": 0.858606,
+        "n": 764,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.882199
+      },
+      "task": "regime-2015"
+    }
+  },
+  "splits": {
+    "dev": {
+      "n": 383,
+      "sha256_jsonl": "8601a43f2161aa33a32966f88bbe88eff513bca16b5e6894ba260e65542f65e1"
+    },
+    "test": {
+      "n": 764,
+      "sha256_jsonl": "39f3df84449421209d187460df683d49588830ceb8e18d714d320464105cb98e"
+    },
+    "train": {
+      "n": 1718,
+      "sha256_jsonl": "aa0c21f9c305a3033541355433e831a4d0411c5ee0381d9a7138a66aa42fd24b"
+    },
+    "version": "v1"
+  },
+  "task": "regime-2015"
+}

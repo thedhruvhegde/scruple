@@ -1,0 +1,277 @@
+{
+  "data": "Real data: CFPB Consumer Complaint Database narratives (public domain, 17 USC 105), frozen splits data/real/v1 (see docs/data/CFPB.md). Not synthetic.",
+  "dataset": "cfpb2015",
+  "reproduce": "uv run scruple realdata baselines --task outcome-2015",
+  "results": {
+    "keywords": {
+      "auroc": {
+        "hi": 0.597151,
+        "lo": 0.560128,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.579282
+      },
+      "balanced_accuracy": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "base_rate": 0.343866,
+      "baseline": "keywords",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "brier": {
+        "hi": 0.225697,
+        "lo": 0.215794,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.220597
+      },
+      "dataset": "cfpb2015",
+      "ece": {
+        "hi": 0.036772,
+        "lo": 0.005872,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.019651
+      },
+      "fit": {
+        "flagged_share_train": 0.357335,
+        "p_flagged": 0.463762,
+        "p_unflagged": 0.30212
+      },
+      "n": 2975,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "reliability": [
+        {
+          "hi": 0.4,
+          "lo": 0.3,
+          "mean_p": 0.30212,
+          "n": 1845.0,
+          "rate": 0.286179
+        },
+        {
+          "hi": 0.5,
+          "lo": 0.4,
+          "mean_p": 0.463762,
+          "n": 1130.0,
+          "rate": 0.438053
+        }
+      ],
+      "task": "outcome-2015"
+    },
+    "majority": {
+      "auroc": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "balanced_accuracy": {
+        "hi": 0.5,
+        "lo": 0.5,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.5
+      },
+      "base_rate": 0.343866,
+      "baseline": "majority",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "brier": {
+        "hi": 0.230494,
+        "lo": 0.221258,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.225878
+      },
+      "dataset": "cfpb2015",
+      "ece": {
+        "hi": 0.032502,
+        "lo": 0.001459,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.016014
+      },
+      "fit": {
+        "p_relief": 0.35988
+      },
+      "n": 2975,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "reliability": [
+        {
+          "hi": 0.4,
+          "lo": 0.3,
+          "mean_p": 0.35988,
+          "n": 2975.0,
+          "rate": 0.343866
+        }
+      ],
+      "task": "outcome-2015"
+    },
+    "tfidf_lr": {
+      "auroc": {
+        "hi": 0.740651,
+        "lo": 0.702643,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.722499
+      },
+      "balanced_accuracy": {
+        "hi": 0.645408,
+        "lo": 0.612042,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.628563
+      },
+      "base_rate": 0.343866,
+      "baseline": "tfidf_lr",
+      "bootstrap": {
+        "ci": 0.95,
+        "n_boot": 1000,
+        "seed": 0
+      },
+      "brier": {
+        "hi": 0.197659,
+        "lo": 0.184306,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.191049
+      },
+      "dataset": "cfpb2015",
+      "ece": {
+        "hi": 0.037733,
+        "lo": 0.015162,
+        "n": 2975,
+        "n_boot": 1000,
+        "n_boot_undefined": 0,
+        "value": 0.018067
+      },
+      "fit": {
+        "C": 2.0,
+        "dev_selection": {
+          "by_C": {
+            "0.5": -0.193789,
+            "2.0": -0.185479,
+            "8.0": -0.190864
+          },
+          "metric": "-brier"
+        }
+      },
+      "n": 2975,
+      "n_invalid": 0,
+      "n_missing": 0,
+      "reliability": [
+        {
+          "hi": 0.1,
+          "lo": 0.0,
+          "mean_p": 0.080717,
+          "n": 84.0,
+          "rate": 0.095238
+        },
+        {
+          "hi": 0.2,
+          "lo": 0.1,
+          "mean_p": 0.155802,
+          "n": 532.0,
+          "rate": 0.152256
+        },
+        {
+          "hi": 0.3,
+          "lo": 0.2,
+          "mean_p": 0.249209,
+          "n": 697.0,
+          "rate": 0.232425
+        },
+        {
+          "hi": 0.4,
+          "lo": 0.3,
+          "mean_p": 0.3473,
+          "n": 632.0,
+          "rate": 0.343354
+        },
+        {
+          "hi": 0.5,
+          "lo": 0.4,
+          "mean_p": 0.447336,
+          "n": 453.0,
+          "rate": 0.406181
+        },
+        {
+          "hi": 0.6,
+          "lo": 0.5,
+          "mean_p": 0.544989,
+          "n": 269.0,
+          "rate": 0.527881
+        },
+        {
+          "hi": 0.7,
+          "lo": 0.6,
+          "mean_p": 0.642297,
+          "n": 134.0,
+          "rate": 0.604478
+        },
+        {
+          "hi": 0.8,
+          "lo": 0.7,
+          "mean_p": 0.749263,
+          "n": 87.0,
+          "rate": 0.770115
+        },
+        {
+          "hi": 0.9,
+          "lo": 0.8,
+          "mean_p": 0.841738,
+          "n": 71.0,
+          "rate": 0.915493
+        },
+        {
+          "hi": 1.0,
+          "lo": 0.9,
+          "mean_p": 0.931988,
+          "n": 16.0,
+          "rate": 1.0
+        }
+      ],
+      "task": "outcome-2015"
+    }
+  },
+  "splits": {
+    "dev": {
+      "n": 1478,
+      "sha256_jsonl": "8601a43f2161aa33a32966f88bbe88eff513bca16b5e6894ba260e65542f65e1"
+    },
+    "test": {
+      "n": 2975,
+      "sha256_jsonl": "39f3df84449421209d187460df683d49588830ceb8e18d714d320464105cb98e"
+    },
+    "train": {
+      "n": 6680,
+      "sha256_jsonl": "aa0c21f9c305a3033541355433e831a4d0411c5ee0381d9a7138a66aa42fd24b"
+    },
+    "version": "v1"
+  },
+  "task": "outcome-2015"
+}
