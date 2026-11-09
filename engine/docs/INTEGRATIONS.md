@@ -204,3 +204,21 @@ Rules every adapter follows:
 - Property test over generated PANs (several brands, 13 to 19 digits, separators):
   tokenise, log, write to a SQLite file, then search the bytes and the log text for the
   PAN. It never appears.
+
+## Field-level encryption (`scruple.security.crypto`)
+
+- `FieldCipher`: AES-256-GCM (`cryptography`), 32-byte keys with ids, a fresh 96-bit
+  random nonce per encryption. Envelope: `enc:v1:<key id>:<nonce>:<ciphertext+tag>`
+  (base64url), storable in any text column.
+- Associated data binds version, key id and a caller context (record and field), so a
+  ciphertext moved to another field or record, or relabelled with another key id (even
+  one holding the same key bytes), fails authentication.
+- Rotation: `rotate` and `rotate_record` re-encrypt under the active key; old keys stay
+  readable while in the ring; removing a key crypto-shreds its envelopes.
+- NIST SP 800-38D section 8.3: with random nonces, keep one key under 2**32
+  encryptions. Nothing counts encryptions yet; rotate on a schedule.
+- Tests: an independent `AESGCM` decrypt of a pinned vector, a flip of every ciphertext
+  byte and of the nonce, context swaps, key relabelling, truncation, malformed envelopes,
+  rotation and shredding, hypothesis round trips and parser fuzzing.
+- Not done: key storage (KMS, envelope keys wrapped by a KEK), per-tenant keys, and
+  wiring encryption into a storage layer (scruple's storage only holds rules and audit).
