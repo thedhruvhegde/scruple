@@ -31,8 +31,16 @@ def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
     from scruple.api.app import create_app
+    from scruple.logging import configure_logging
+    from scruple.settings import load_settings
 
-    uvicorn.run(create_app(_gate(args)), host=args.host, port=args.port)
+    settings = load_settings()
+    configure_logging(settings.log_level, settings.log_format)
+    # log_config=None: uvicorn's loggers propagate to our JSON handler; the
+    # request-id middleware writes the access line.
+    uvicorn.run(
+        create_app(_gate(args)), host=args.host, port=args.port, log_config=None, access_log=False
+    )
     return 0
 
 

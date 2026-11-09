@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
+from scruple.logging import RequestIDMiddleware
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
@@ -89,6 +90,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or load_settings().database_dsn())
         gate.bootstrap_baseline()
     g = gate
+    app.add_middleware(RequestIDMiddleware)
 
     def _err(status: int):  # type: ignore[no-untyped-def]
         async def handler(_r: Request, exc: Exception) -> JSONResponse:
