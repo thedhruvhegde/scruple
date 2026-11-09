@@ -13,6 +13,13 @@ is rendered from the JSON with a fixed creation date taken from the chain.
 
 Secrets: the held-out and canary seeds are operator-held (docs/DECISIONS.md D-013),
 so the pack carries only the config hash and seed commitments, never the config.
+
+History: `lifecycle` states what happened to the version, in order. The gate verdict
+is the verdict of the last *gate* decision (shadow, canary, activation, assurance) at
+the time it was made; a manual rollback is an operator event, not a gate verdict, so
+it does not turn an earlier PASS into BLOCK. The current status, every status change
+and the rollback (who, when, why, which version was restored) are listed separately
+(schema version 2; version 1 read the verdict from the last decision of any kind).
 """
 
 from __future__ import annotations
@@ -37,11 +44,13 @@ from scruple.gate.approval import (
 )
 from scruple.gate.canary import CanaryState
 from scruple.gate.engine import seed_commitment
-from scruple.gate.models import Decision
+from scruple.gate.models import Decision, DecisionRecord, Outcome, Stage
 from scruple.hashing import canonical_json, content_hash, sha256_hex
 from scruple.service import AgentGate
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+
+_PASS = {Outcome.PROMOTE, Outcome.CANARY_PASSED, Outcome.ACTIVATED, Outcome.HEALTHY}
 
 
 class SegmentProof(BaseModel):
@@ -74,6 +83,48 @@ class Approvals(BaseModel):
     satisfied: tuple[dict[str, Any], ...]  # approval.satisfied payloads for this version
 
 
+class LifecycleEvent(BaseModel):
+    """One step in the version's history, from the audit chain."""
+
+    model_config = ConfigDict(frozen=True)
+
+    seq: int
+    at: datetime
+    event: str  # audit event type
+    actor: str
+    decision_id: str | None = None
+    stage: str | None = None
+    outcome: str | None = None
+    verdict_at_decision: str | None = None  # pass / hold / block, for gate decisions
+    from_status: str | None = None
+    to_status: str | None = None
+    detail: str = ""
+
+
+class Rollback(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    decision_id: str | None
+    actor: str
+    at: datetime
+    reason: str
+    restored_version: int | None
+
+
+class Lifecycle(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    gate_verdict: str  # verdict of the last gate decision, as it was decided
+    gate_decision_id: str
+    gate_stage: str
+    gate_decided_at: datetime
+    current_status: str
+    rolled_back: Rollback | None
+    retired_by_version: int | None  # a newer version replaced it on activation
+    events: tuple[LifecycleEvent, ...]
+    statement: str  # the history in one paragraph, for the PDF and reviewers
+
+
 class EvidencePack(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -83,6 +134,7 @@ class EvidencePack(BaseModel):
     version: int
     content_hash: str
     status: str
+    lifecycle: Lifecycle
     scorecard: Scorecard
     decisions: tuple[Decision, ...]
     statistics: dict[str, Any]
@@ -146,6 +198,126 @@ def verify_segment(
     )
 
 
+def _verdict_at(outcome: Outcome) -> str:
+    if outcome in _PASS:
+        return "pass"
+    return "hold" if outcome is Outcome.HOLD else "block"
+
+
+def build_lifecycle(
+    records: Sequence[DecisionRecord],
+    entries: Sequence[AuditEntry],
+    rule_id: str,
+    version: int,
+    status: str,
+) -> Lifecycle:
+    """The version's history from its decisions and the audit chain (pure)."""
+    gate_records = [r for r in records if r.decision.stage is not Stage.ROLLBACK]
+    last = (gate_records or list(records))[-1].decision
+    by_id = {r.decision.decision_id: r.decision for r in records}
+    events: list[LifecycleEvent] = []
+    rollback: Rollback | None = None
+    retired_by: int | None = None
+    pending_rollback_decision: str | None = None
+    for e in entries:
+        p = e.payload
+        if p.get("rule_id") != rule_id:
+            continue
+        v = int(p.get("version", -1))
+        if e.event_type == "rule.activated" and p.get("retired_version") == version:
+            retired_by = v
+            events.append(
+                LifecycleEvent(
+                    seq=e.seq,
+                    at=e.at,
+                    event=e.event_type,
+                    actor=e.actor,
+                    from_status="active",
+                    to_status="retired",
+                    detail=f"retired when v{v} was activated",
+                )
+            )
+            continue
+        if v != version:
+            continue
+        if e.event_type == "decision.recorded":
+            d = by_id.get(str(p.get("decision_id")))
+            if d is None:
+                continue
+            if d.stage is Stage.ROLLBACK:
+                pending_rollback_decision = d.decision_id
+            events.append(
+                LifecycleEvent(
+                    seq=e.seq,
+                    at=d.created_at,
+                    event=e.event_type,
+                    actor=d.actor,
+                    decision_id=d.decision_id,
+                    stage=d.stage.value,
+                    outcome=d.outcome.value,
+                    verdict_at_decision=None
+                    if d.stage is Stage.ROLLBACK
+                    else _verdict_at(d.outcome),
+                    detail=d.summary,
+                )
+            )
+        elif e.event_type.startswith("rule."):
+            reason = str(p.get("reason", ""))
+            events.append(
+                LifecycleEvent(
+                    seq=e.seq,
+                    at=e.at,
+                    event=e.event_type,
+                    actor=e.actor,
+                    from_status=p.get("from_status"),
+                    to_status=p.get("to_status", p.get("status")),
+                    detail=reason,
+                )
+            )
+            if e.event_type == "rule.rolled_back":
+                rv = p.get("restored_version")
+                rollback = Rollback(
+                    decision_id=pending_rollback_decision,
+                    actor=e.actor,
+                    at=e.at,
+                    reason=reason,
+                    restored_version=None if rv is None else int(rv),
+                )
+    verdict = _verdict_at(last.outcome)
+    parts = [
+        f"Gate verdict {verdict.upper()} at {last.decision_id} ({last.stage.value}, "
+        f"{last.outcome.value}, {last.created_at.isoformat()})."
+    ]
+    activated = next((x for x in events if x.event == "rule.activated"), None)
+    if activated is not None and activated.to_status == "active":
+        parts.append(f"Activated by {activated.actor} at {activated.at.isoformat()}.")
+    if rollback is not None:
+        restored = (
+            f"v{rollback.restored_version} restored"
+            if rollback.restored_version is not None
+            else "no earlier version to restore"
+        )
+        parts.append(
+            f"Rolled back by {rollback.actor} at {rollback.at.isoformat()}"
+            + (f" ({rollback.decision_id})" if rollback.decision_id else "")
+            + f": {rollback.reason}; {restored}."
+        )
+    if retired_by is not None:
+        parts.append(f"Retired when v{retired_by} was activated.")
+    parts.append(f"Current status: {status}.")
+    return Lifecycle(
+        gate_verdict=verdict,
+        gate_decision_id=last.decision_id,
+        gate_stage=last.stage.value,
+        gate_decided_at=last.created_at,
+        current_status=status,
+        rolled_back=rollback,
+        retired_by_version=retired_by,
+        events=tuple(events),
+        statement=" ".join(parts),
+    )
+
+
 def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> EvidencePack:
     rv = gate.registry.get(rule_id, version)
     records = [r for r in gate.decisions(rule_id) if r.decision.version == version]
@@ -170,7 +342,10 @@ def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> Evidence
         else None
     )
     satisfied = tuple(e.payload for e in mine if e.event_type == EVENT_SATISFIED)
-    card = build_scorecard(records, gate.config, gate.audit.head())
+    # The scorecard's verdict is the gate's: a manual rollback is listed in the
+    # lifecycle and the decisions, not scored as a gate verdict.
+    gate_records = [r for r in records if r.decision.stage is not Stage.ROLLBACK] or records
+    card = build_scorecard(gate_records, gate.config, gate.audit.head())
     stats: dict[str, Any] = {
         "method": card.statistics.method if card.statistics else None,
         "shadow": None if card.statistics is None else card.statistics.model_dump(mode="json"),
@@ -200,6 +375,7 @@ def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> Evidence
         version=version,
         content_hash=rv.content_hash,
         status=rv.status.value,
+        lifecycle=build_lifecycle(records, entries, rule_id, version, rv.status.value),
         scorecard=card,
         decisions=tuple(r.decision for r in records),
         statistics=stats,

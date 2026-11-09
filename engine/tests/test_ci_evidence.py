@@ -143,7 +143,8 @@ def test_pdf_parses_and_contains_key_fields(gate: AgentGate) -> None:
     text = _pdf_text(data)
     for needle in (
         f"{GOOD_RULE_ID}@v1",
-        "Verdict: PASS",
+        "Gate verdict: PASS",
+        "Current status: active",
         pack.pack_sha256,
         pack.content_hash,
         pack.audit.proof.chain_head,

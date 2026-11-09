@@ -54,7 +54,22 @@ def render_pdf(pack: EvidencePack) -> bytes:
     doc.set_font("Helvetica", style="B", size=15)
     doc.multi_cell(width, 9, _t(f"Evidence pack: {pack.rule_id}@v{pack.version}"))
     doc.set_font("Helvetica", size=9)
-    line(f"Verdict: {card.verdict.value.upper()}    Status: {pack.status}")
+    lc = pack.lifecycle
+    line(
+        f"Gate verdict: {lc.gate_verdict.upper()} (at {lc.gate_decision_id}, {lc.gate_stage}, "
+        f"{lc.gate_decided_at.isoformat()})"
+    )
+    line(f"Current status: {lc.current_status}")
+    if lc.rolled_back is not None:
+        rb = lc.rolled_back
+        restored = f"v{rb.restored_version}" if rb.restored_version is not None else "none"
+        line(
+            f"Rolled back: by {rb.actor} at {rb.at.isoformat()}"
+            + (f" ({rb.decision_id})" if rb.decision_id else "")
+            + f"; reason: {rb.reason}; restored: {restored}"
+        )
+    if lc.retired_by_version is not None:
+        line(f"Retired: replaced by v{lc.retired_by_version}")
     line(f"Content hash: {pack.content_hash}")
     line(f"Pack SHA-256: {sha}")
     line(f"Config SHA-256: {pack.config_sha256}")
@@ -67,6 +82,21 @@ def render_pdf(pack: EvidencePack) -> bytes:
     h("Rule")
     line(card.rule_description)
     line(f"Logic: {card.rule_logic}")
+
+    h("History")
+    line(lc.statement)
+    for ev in lc.events:
+        if ev.decision_id:
+            v = f" verdict {ev.verdict_at_decision}" if ev.verdict_at_decision else ""
+            line(
+                f"{ev.at.isoformat()}  {ev.decision_id}  {ev.stage}  {ev.outcome}{v}  "
+                f"by {ev.actor}: {ev.detail}"
+            )
+        else:
+            line(
+                f"{ev.at.isoformat()}  {ev.event}  {ev.from_status} -> {ev.to_status}  "
+                f"by {ev.actor}: {ev.detail}"
+            )
 
     h("Decisions")
     for d in pack.decisions:
