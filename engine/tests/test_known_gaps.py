@@ -11,6 +11,7 @@ from scruple.gate import GateConfig, Outcome, evaluate_shadow
 from scruple.registry import Provenance, Registry
 from scruple.sim.generator import Profile
 from scruple.sim.library import GOOD_RULE, GOOD_RULE_ID, C
+from scruple.verifiers.exploits import EXPLOIT_BY_ID, run_exploit
 from tests.helpers import baseline_versions, rv
 
 CFG = GateConfig(n_cases=2_000, bootstrap_resamples=500)
@@ -48,3 +49,18 @@ def test_gap_shadow_replay_trusts_history_under_drift() -> None:
         evaluate_shadow(rv(GOOD_RULE_ID, GOOD_RULE), baseline_versions(), drifted).outcome
         is not Outcome.PROMOTE
     )
+
+
+# --- dispute-episode scorecard (verifiers 061-070), see docs/VERIFIER_FINDINGS.md -------
+
+
+def test_gap_memorised_outcomes_pass_the_episode_scorecard() -> None:
+    """G-8 (X33): an agent that recognises evaluation cases by an observable fingerprint
+    and replays the winning move learned from leaked cases wins more often than the
+    honest policy, and no hard check fires: the episodes look clean. Catching it needs
+    held-out generators (a different case distribution), which the scorecard lacks."""
+    run = run_exploit(EXPLOIT_BY_ID["X33"], range(120))
+    assert run.fooled and run.naive_exploit > run.naive_honest
+    assert run.fired_on == 0
+    assert run.gate_rate == 1.0
+    assert run.status == "not caught"
