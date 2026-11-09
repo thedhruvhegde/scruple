@@ -83,7 +83,10 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         description="Change control for agent learning (synthetic demo).",
     )
     if gate is None:
-        gate = AgentGate.open(os.environ.get("AGENT_GATE_DB", "agent-gate.db"))
+        from scruple.settings import load_settings
+
+        # AGENT_GATE_DB is the pre-rename variable; SCRUPLE_DATABASE_URL replaces it.
+        gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or load_settings().database_dsn())
         gate.bootstrap_baseline()
     g = gate
 
