@@ -187,7 +187,7 @@ class Runner(ABC):
                 return self._finish(episode, "timeout", turn, usage, str(exc) or "timeout")
             except (httpx.HTTPError, RunnerHTTPError) as exc:
                 return self._finish(episode, "http_error", turn, usage, str(exc))
-            except (ValueError, KeyError, TypeError, AttributeError) as exc:
+            except (ValueError, LookupError, TypeError, AttributeError) as exc:
                 return self._finish(episode, "bad_response", turn, usage, repr(exc))
             usage.input_tokens += mt.input_tokens
             usage.output_tokens += mt.output_tokens
