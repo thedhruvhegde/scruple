@@ -127,7 +127,7 @@ def cmd_version(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="agent-gate", description=__doc__)
+    p = argparse.ArgumentParser(prog="scruple", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def add(name: str, fn: object, help_: str, db: bool = True) -> argparse.ArgumentParser:
