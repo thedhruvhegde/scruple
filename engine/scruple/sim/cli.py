@@ -46,6 +46,17 @@ def add_sim_parser(sub: Any) -> None:
     sc = ss.add_parser("scenarios", help="run the hand-written scenarios through the engine")
     sc.set_defaults(fn=cmd_scenarios)
     sc.add_argument("--dir", default=None, help="scenario directory (default: built-in)")
+    f = ss.add_parser("fidelity", help="compare the synthetic mix with real CFPB marginals")
+    f.set_defaults(fn=cmd_fidelity)
+    f.add_argument("--profile", choices=["default", "calibrated"], default="default")
+    f.add_argument("--n", type=int, default=4_000, help="synthetic cases")
+    f.add_argument("--seed", type=int, default=1)
+    f.add_argument("--boot", type=int, default=2_000, help="bootstrap resamples")
+    f.add_argument("--calibrate", action="store_true", help="fit family weights; before/after")
+    f.add_argument("--calibration-n", type=int, default=1_500, help="cases per fit evaluation")
+    f.add_argument("--save", action="store_true", help="with --calibrate: write the profile")
+    f.add_argument("--raw-dir", default=None, help="rebuild counts from the raw CFPB CSVs")
+    f.add_argument("--write-aggregates", action="store_true", help="with --raw-dir: save them")
 
 
 def cmd_scenarios(args: argparse.Namespace) -> int:
@@ -59,3 +70,51 @@ def cmd_scenarios(args: argparse.Namespace) -> int:
     failed = sum(1 for r in runs if not r.passed)
     print(f"{len(runs) - failed}/{len(runs)} scenarios passed (synthetic)")
     return 1 if failed else 0
+
+
+def cmd_fidelity(args: argparse.Namespace) -> int:
+    import json
+
+    from scruple.sim.disputes import FULL_MIX
+    from scruple.sim.fidelity import (
+        AGGREGATES,
+        CALIBRATED,
+        build_aggregates,
+        calibrate,
+        calibrated_mix,
+        fidelity,
+        load_aggregates,
+        save_calibration,
+    )
+
+    if args.raw_dir:
+        agg = build_aggregates(args.raw_dir)
+        if args.write_aggregates:
+            AGGREGATES.write_text(json.dumps(agg, indent=1, sort_keys=True) + "\n")
+            print(f"wrote {AGGREGATES}")
+    else:
+        agg = load_aggregates()
+    for p in agg["provenance"]:
+        print(
+            f"real data: {p['id']} {p['mirror_repo']}@{p['mirror_commit'][:12]} "
+            f"sha256 {p['file_sha256'][:16]} ({p['licence']})"
+        )
+    n, seed, boot = args.n, args.seed, args.boot
+    if args.calibrate:
+        before = fidelity(FULL_MIX, "FULL_MIX (default)", agg, n, seed, boot)
+        cal = calibrate(agg, n=args.calibration_n)
+        after_mix = FULL_MIX.model_copy(update={"family_weights": cal.family_weights})
+        after = fidelity(after_mix, "calibrated", agg, n, seed, boot)
+        print("\n".join(before.lines()))
+        print("\n".join(after.lines()))
+        print(
+            f"fitted: fraud share {cal.fraud_share:.4f}, valid share within fraud "
+            f"{cal.valid_fraud:.4f}, within other families {cal.valid_other:.4f}"
+        )
+        if args.save:
+            save_calibration(cal)
+            print(f"wrote {CALIBRATED}")
+        return 0
+    mix = calibrated_mix() if args.profile == "calibrated" else FULL_MIX
+    print("\n".join(fidelity(mix, args.profile, agg, n, seed, boot).lines()))
+    return 0

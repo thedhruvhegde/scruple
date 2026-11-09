@@ -1,0 +1,528 @@
+{
+ "checking_subissue_response": {
+  "Closing an account / Can't close your account": {
+   "Closed with explanation": 137,
+   "Closed with monetary relief": 21,
+   "Closed with non-monetary relief": 22
+  },
+  "Closing an account / Company closed your account": {
+   "Closed with explanation": 474,
+   "Closed with monetary relief": 58,
+   "Closed with non-monetary relief": 30,
+   "Untimely response": 2
+  },
+  "Closing an account / Fees charged for closing account": {
+   "Closed with explanation": 16,
+   "Closed with monetary relief": 6
+  },
+  "Closing an account / Funds not received from closed account": {
+   "Closed with explanation": 335,
+   "Closed with monetary relief": 61,
+   "Closed with non-monetary relief": 20,
+   "Untimely response": 2
+  },
+  "Credit monitoring or identity theft protection services / Didn't receive services that were advertised": {
+   "Closed with explanation": 2
+  },
+  "Credit monitoring or identity theft protection services / Problem canceling credit monitoring or identify theft protection service": {
+   "Closed with explanation": 1
+  },
+  "Improper use of your report / Credit inquiries on your report that you don't recognize": {
+   "Closed with explanation": 1
+  },
+  "Improper use of your report / Received unsolicited financial product or insurance offers after opting out": {
+   "Closed with explanation": 1
+  },
+  "Improper use of your report / Reporting company used your report improperly": {
+   "Closed with explanation": 3
+  },
+  "Incorrect information on your report / Account information incorrect": {
+   "Closed with explanation": 2
+  },
+  "Incorrect information on your report / Account status incorrect": {
+   "Closed with explanation": 5,
+   "Closed with non-monetary relief": 2
+  },
+  "Incorrect information on your report / Information belongs to someone else": {
+   "Closed with explanation": 3
+  },
+  "Incorrect information on your report / Old information reappears or never goes away": {
+   "Closed with explanation": 2
+  },
+  "Incorrect information on your report / Personal information incorrect": {
+   "Closed with explanation": 1
+  },
+  "Managing an account / Banking errors": {
+   "Closed with explanation": 301,
+   "Closed with monetary relief": 47,
+   "Closed with non-monetary relief": 10,
+   "Untimely response": 2
+  },
+  "Managing an account / Cashing a check": {
+   "Closed with explanation": 94,
+   "Closed with monetary relief": 13,
+   "Closed with non-monetary relief": 6
+  },
+  "Managing an account / Deposits and withdrawals": {
+   "Closed with explanation": 1253,
+   "Closed with monetary relief": 166,
+   "Closed with non-monetary relief": 124,
+   "Untimely response": 3
+  },
+  "Managing an account / Deposits or withdrawals": {
+   "Closed with explanation": 27,
+   "Closed with monetary relief": 4,
+   "Closed with non-monetary relief": 2,
+   "Untimely response": 1
+  },
+  "Managing an account / Fee problem": {
+   "Closed with explanation": 50,
+   "Closed with monetary relief": 20,
+   "Closed with non-monetary relief": 1
+  },
+  "Managing an account / Funds not handled or disbursed as instructed": {
+   "Closed with explanation": 523,
+   "Closed with monetary relief": 73,
+   "Closed with non-monetary relief": 23,
+   "Untimely response": 1
+  },
+  "Managing an account / Problem accessing account": {
+   "Closed with explanation": 333,
+   "Closed with monetary relief": 21,
+   "Closed with non-monetary relief": 45
+  },
+  "Managing an account / Problem making or receiving payments": {
+   "Closed with explanation": 271,
+   "Closed with monetary relief": 24,
+   "Closed with non-monetary relief": 15,
+   "Untimely response": 1
+  },
+  "Managing an account / Problem using a debit or ATM card": {
+   "Closed with explanation": 773,
+   "Closed with monetary relief": 162,
+   "Closed with non-monetary relief": 19,
+   "In progress": 1,
+   "Untimely response": 2
+  },
+  "Managing an account / Problem with fees or penalties": {
+   "Closed with explanation": 1
+  },
+  "Managing an account / Problem with renewal": {
+   "Closed with explanation": 5
+  },
+  "Opening an account / Account opened without my consent or knowledge": {
+   "Closed with explanation": 151,
+   "Closed with monetary relief": 2,
+   "Closed with non-monetary relief": 31
+  },
+  "Opening an account / Confusing or missing disclosures": {
+   "Closed with explanation": 38,
+   "Closed with monetary relief": 4,
+   "Closed with non-monetary relief": 2
+  },
+  "Opening an account / Didn't receive terms that were advertised": {
+   "Closed with explanation": 118,
+   "Closed with monetary relief": 32,
+   "Closed with non-monetary relief": 4
+  },
+  "Opening an account / Unable to open an account": {
+   "Closed with explanation": 230,
+   "Closed with monetary relief": 11,
+   "Closed with non-monetary relief": 18
+  },
+  "Problem caused by your funds being low / Bounced checks or returned payments": {
+   "Closed with explanation": 37,
+   "Closed with monetary relief": 6,
+   "Closed with non-monetary relief": 1
+  },
+  "Problem caused by your funds being low / Late or other fees": {
+   "Closed with explanation": 29,
+   "Closed with monetary relief": 10
+  },
+  "Problem caused by your funds being low / Non-sufficient funds and associated fees": {
+   "Closed with explanation": 105,
+   "Closed with monetary relief": 26,
+   "Closed with non-monetary relief": 5
+  },
+  "Problem caused by your funds being low / Overdrafts and overdraft fees": {
+   "Closed with explanation": 240,
+   "Closed with monetary relief": 63,
+   "Closed with non-monetary relief": 9,
+   "Untimely response": 1
+  },
+  "Problem with a company's investigation into an existing problem / Difficulty submitting a dispute or getting information about a dispute over the phone": {
+   "Closed with explanation": 1
+  },
+  "Problem with a company's investigation into an existing problem / Investigation took more than 30 days": {
+   "Closed with explanation": 3
+  },
+  "Problem with a company's investigation into an existing problem / Problem with personal statement of dispute": {
+   "Closed with explanation": 3,
+   "Closed with monetary relief": 1
+  },
+  "Problem with a company's investigation into an existing problem / Their investigation did not fix an error on your report": {
+   "Closed with explanation": 9,
+   "Closed with monetary relief": 1
+  },
+  "Problem with a lender or other company charging your account / Can't stop withdrawals from your account": {
+   "Closed with explanation": 50,
+   "Closed with monetary relief": 7
+  },
+  "Problem with a lender or other company charging your account / Money was taken from your account on the wrong day or for the wrong amount": {
+   "Closed with explanation": 135,
+   "Closed with monetary relief": 33,
+   "Closed with non-monetary relief": 2
+  },
+  "Problem with a lender or other company charging your account / Transaction was not authorized": {
+   "Closed with explanation": 771,
+   "Closed with monetary relief": 150,
+   "Closed with non-monetary relief": 27,
+   "Untimely response": 5
+  },
+  "Problem with fraud alerts or security freezes / ": {
+   "Closed with explanation": 2,
+   "Closed with non-monetary relief": 1,
+   "Untimely response": 1
+  },
+  "Unable to get your credit report or credit score / Other problem getting your report or credit score": {
+   "Closed with monetary relief": 1
+  }
+ },
+ "credit_card_issue_response": {
+  "APR or interest rate": {
+   "Closed": 32,
+   "Closed with explanation": 2281,
+   "Closed with monetary relief": 1102,
+   "Closed with non-monetary relief": 424,
+   "Closed with relief": 342,
+   "Closed without relief": 427,
+   "In progress": 9,
+   "Untimely response": 3
+  },
+  "Advertising and marketing": {
+   "Closed": 9,
+   "Closed with explanation": 1352,
+   "Closed with monetary relief": 268,
+   "Closed with non-monetary relief": 447,
+   "Closed with relief": 31,
+   "Closed without relief": 78,
+   "In progress": 6,
+   "Untimely response": 1
+  },
+  "Application processing delay": {
+   "Closed": 7,
+   "Closed with explanation": 280,
+   "Closed with monetary relief": 19,
+   "Closed with non-monetary relief": 45,
+   "Closed with relief": 10,
+   "Closed without relief": 28,
+   "In progress": 1,
+   "Untimely response": 1
+  },
+  "Arbitration": {
+   "Closed with explanation": 178,
+   "Closed with monetary relief": 33,
+   "Closed with non-monetary relief": 20,
+   "Closed with relief": 10,
+   "Closed without relief": 10,
+   "Untimely response": 2
+  },
+  "Balance transfer": {
+   "Closed": 5,
+   "Closed with explanation": 452,
+   "Closed with monetary relief": 204,
+   "Closed with non-monetary relief": 69,
+   "Closed with relief": 40,
+   "Closed without relief": 48,
+   "In progress": 3,
+   "Untimely response": 2
+  },
+  "Balance transfer fee": {
+   "Closed": 2,
+   "Closed with explanation": 86,
+   "Closed with monetary relief": 44,
+   "Closed with non-monetary relief": 11,
+   "Closed with relief": 15,
+   "Closed without relief": 10,
+   "In progress": 1
+  },
+  "Bankruptcy": {
+   "Closed": 4,
+   "Closed with explanation": 284,
+   "Closed with monetary relief": 14,
+   "Closed with non-monetary relief": 58,
+   "Closed with relief": 2,
+   "Closed without relief": 15,
+   "In progress": 2
+  },
+  "Billing disputes": {
+   "Closed": 87,
+   "Closed with explanation": 5775,
+   "Closed with monetary relief": 3473,
+   "Closed with non-monetary relief": 689,
+   "Closed with relief": 436,
+   "Closed without relief": 515,
+   "In progress": 51,
+   "Untimely response": 16
+  },
+  "Billing statement": {
+   "Closed": 8,
+   "Closed with explanation": 1086,
+   "Closed with monetary relief": 579,
+   "Closed with non-monetary relief": 134,
+   "Closed with relief": 80,
+   "Closed without relief": 111,
+   "In progress": 13,
+   "Untimely response": 5
+  },
+  "Cash advance": {
+   "Closed": 1,
+   "Closed with explanation": 121,
+   "Closed with monetary relief": 44,
+   "Closed with non-monetary relief": 8,
+   "Closed with relief": 8,
+   "Closed without relief": 8,
+   "In progress": 3
+  },
+  "Cash advance fee": {
+   "Closed with explanation": 69,
+   "Closed with monetary relief": 64,
+   "Closed with non-monetary relief": 5,
+   "Closed with relief": 12,
+   "Closed without relief": 8,
+   "Untimely response": 1
+  },
+  "Closing/Cancelling account": {
+   "Closed": 37,
+   "Closed with explanation": 3145,
+   "Closed with monetary relief": 667,
+   "Closed with non-monetary relief": 497,
+   "Closed with relief": 128,
+   "Closed without relief": 297,
+   "In progress": 8,
+   "Untimely response": 7
+  },
+  "Collection debt dispute": {
+   "Closed": 11,
+   "Closed with explanation": 438,
+   "Closed with monetary relief": 113,
+   "Closed with non-monetary relief": 84,
+   "Closed with relief": 63,
+   "Closed without relief": 194,
+   "Untimely response": 1
+  },
+  "Collection practices": {
+   "Closed": 10,
+   "Closed with explanation": 461,
+   "Closed with monetary relief": 103,
+   "Closed with non-monetary relief": 101,
+   "Closed with relief": 61,
+   "Closed without relief": 263,
+   "Untimely response": 4
+  },
+  "Convenience checks": {
+   "Closed with explanation": 64,
+   "Closed with monetary relief": 25,
+   "Closed with non-monetary relief": 8,
+   "Closed with relief": 7,
+   "Closed without relief": 9
+  },
+  "Credit card protection / Debt protection": {
+   "Closed": 12,
+   "Closed with explanation": 1076,
+   "Closed with monetary relief": 529,
+   "Closed with non-monetary relief": 151,
+   "Closed with relief": 122,
+   "Closed without relief": 150,
+   "In progress": 6,
+   "Untimely response": 4
+  },
+  "Credit determination": {
+   "Closed": 22,
+   "Closed with explanation": 1710,
+   "Closed with monetary relief": 56,
+   "Closed with non-monetary relief": 284,
+   "Closed with relief": 23,
+   "Closed without relief": 223,
+   "In progress": 6
+  },
+  "Credit line increase/decrease": {
+   "Closed": 8,
+   "Closed with explanation": 1261,
+   "Closed with monetary relief": 98,
+   "Closed with non-monetary relief": 144,
+   "Closed with relief": 42,
+   "Closed without relief": 174,
+   "In progress": 2,
+   "Untimely response": 3
+  },
+  "Credit reporting": {
+   "Closed": 27,
+   "Closed with explanation": 827,
+   "Closed with monetary relief": 113,
+   "Closed with non-monetary relief": 278,
+   "Closed with relief": 89,
+   "Closed without relief": 361,
+   "Untimely response": 5
+  },
+  "Customer service / Customer relations": {
+   "Closed": 19,
+   "Closed with explanation": 1605,
+   "Closed with monetary relief": 436,
+   "Closed with non-monetary relief": 286,
+   "Closed with relief": 56,
+   "Closed without relief": 91,
+   "In progress": 4
+  },
+  "Delinquent account": {
+   "Closed": 21,
+   "Closed with explanation": 1538,
+   "Closed with monetary relief": 295,
+   "Closed with non-monetary relief": 410,
+   "Closed with relief": 20,
+   "Closed without relief": 48,
+   "In progress": 15
+  },
+  "Forbearance / Workout plans": {
+   "Closed": 7,
+   "Closed with explanation": 265,
+   "Closed with monetary relief": 54,
+   "Closed with non-monetary relief": 42,
+   "Closed with relief": 20,
+   "Closed without relief": 63,
+   "Untimely response": 1
+  },
+  "Identity theft / Fraud / Embezzlement": {
+   "Closed": 56,
+   "Closed with explanation": 3459,
+   "Closed with monetary relief": 1011,
+   "Closed with non-monetary relief": 761,
+   "Closed with relief": 154,
+   "Closed without relief": 397,
+   "In progress": 46,
+   "Untimely response": 15
+  },
+  "Late fee": {
+   "Closed": 17,
+   "Closed with explanation": 963,
+   "Closed with monetary relief": 1456,
+   "Closed with non-monetary relief": 87,
+   "Closed with relief": 221,
+   "Closed without relief": 80,
+   "In progress": 5,
+   "Untimely response": 1
+  },
+  "Other": {
+   "Closed": 52,
+   "Closed with explanation": 4392,
+   "Closed with monetary relief": 820,
+   "Closed with non-monetary relief": 854,
+   "Closed with relief": 118,
+   "Closed without relief": 244,
+   "In progress": 29,
+   "Untimely response": 7
+  },
+  "Other fee": {
+   "Closed": 5,
+   "Closed with explanation": 687,
+   "Closed with monetary relief": 704,
+   "Closed with non-monetary relief": 73,
+   "Closed with relief": 116,
+   "Closed without relief": 79,
+   "In progress": 3,
+   "Untimely response": 1
+  },
+  "Overlimit fee": {
+   "Closed": 2,
+   "Closed with explanation": 86,
+   "Closed with monetary relief": 65,
+   "Closed with non-monetary relief": 8,
+   "Closed with relief": 9,
+   "Closed without relief": 8
+  },
+  "Payoff process": {
+   "Closed": 12,
+   "Closed with explanation": 1023,
+   "Closed with monetary relief": 399,
+   "Closed with non-monetary relief": 138,
+   "Closed with relief": 85,
+   "Closed without relief": 108,
+   "In progress": 8
+  },
+  "Privacy": {
+   "Closed with explanation": 282,
+   "Closed with monetary relief": 18,
+   "Closed with non-monetary relief": 47,
+   "Closed with relief": 13,
+   "Closed without relief": 26,
+   "In progress": 1,
+   "Untimely response": 2
+  },
+  "Rewards": {
+   "Closed": 7,
+   "Closed with explanation": 958,
+   "Closed with monetary relief": 331,
+   "Closed with non-monetary relief": 324,
+   "Closed with relief": 85,
+   "Closed without relief": 85,
+   "In progress": 5,
+   "Untimely response": 3
+  },
+  "Sale of account": {
+   "Closed": 3,
+   "Closed with explanation": 182,
+   "Closed with monetary relief": 29,
+   "Closed with non-monetary relief": 25,
+   "Closed with relief": 4,
+   "Closed without relief": 6,
+   "Untimely response": 1
+  },
+  "Transaction issue": {
+   "Closed": 12,
+   "Closed with explanation": 1098,
+   "Closed with monetary relief": 500,
+   "Closed with non-monetary relief": 99,
+   "Closed with relief": 76,
+   "Closed without relief": 78,
+   "In progress": 2,
+   "Untimely response": 2
+  },
+  "Unsolicited issuance of credit card": {
+   "Closed": 8,
+   "Closed with explanation": 678,
+   "Closed with monetary relief": 115,
+   "Closed with non-monetary relief": 258,
+   "Closed with relief": 23,
+   "Closed without relief": 67,
+   "In progress": 6
+  }
+ },
+ "note": "Counts only, derived from public-domain CFPB complaint data; no rows or narratives. Rebuild: scruple sim fidelity --raw-dir <dir> --write-aggregates",
+ "provenance": [
+  {
+   "dataset": "CFPB Consumer Complaint Database, Kaggle snapshot 'Consumer Finance Complaints' (file dated 2016-04-26), received 2012-01-01..2015-12-31",
+   "derivation": "rows of the mirror file with product in Credit card, Bank account or service, Prepaid card, Money transfers",
+   "file": "cfpb_2012_2015/payments_subset.csv",
+   "file_sha256": "0ae2fefa23550ef941f9fcbf198d2e1e82ef51dd7bedca4478d4d4c7f40c3393",
+   "id": "cfpb_2012_2015",
+   "licence": "US federal government work, public domain (17 USC 105)",
+   "mirror_commit": "e75a4b1fafb011873055c2d39ce7a48f835f0c86",
+   "mirror_path": "data/consumer_complaints.csv.zip",
+   "mirror_repo": "https://github.com/jiegzhan/multi-class-text-classification-cnn",
+   "mirror_sha256": "38b11cfd7ebd5ec92b56bc86a453251b684c06dcdc7ef2979450458227d9c41d",
+   "rows_read": "135313"
+  },
+  {
+   "dataset": "CFPB Consumer Complaint Database, checking or savings account complaints received 2025-05-14..2026-04-24 (random sample of 8,000)",
+   "derivation": "CFPB columns only",
+   "file": "cfpb_checking_2025_2026/checking_complaints_sample.csv",
+   "file_sha256": "483854821b404dc6ef9454c06b8aab1be464a1b0cdb0c941c2610f942a81c318",
+   "id": "cfpb_checking_2025_2026",
+   "licence": "underlying data US federal government work, public domain",
+   "mirror_commit": "5ddb49aeb18218b10d11df15cfe60a5dbe8ece09",
+   "mirror_path": "data/outputs/sample_metadata.csv",
+   "mirror_repo": "https://github.com/mhoehler22/cfpb-agglomerative-clustering",
+   "rows_read": "8000"
+  }
+ ]
+}

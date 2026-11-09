@@ -1,0 +1,21 @@
+{
+  "family_weights": {
+    "buyers_remorse": 0.3238882850066748,
+    "cardholder_mistake": 0.09716648550200244,
+    "friendly_fraud": 0.34820848828286405,
+    "merchant_error": 0.0576841853021147,
+    "service_failure": 0.1730525559063441,
+    "true_fraud": 0.0
+  },
+  "fraud_share": 0.34820848828286405,
+  "n_per_eval": 1500,
+  "note": "Opt-in generator profile fitted to CFPB 2012-2015 credit card complaint marginals (scruple.sim.fidelity.calibrate). Synthetic cases; not a claim about real dispute mixes. Defaults (FULL_MIX) are unchanged.",
+  "seed": 11,
+  "targets": {
+    "fraud_share": 0.34820848828286405,
+    "relief_billing": 0.3464684756584198,
+    "relief_fraud": 0.19122375638358238
+  },
+  "valid_fraud": 0.0,
+  "valid_other": 0.35400390625
+}

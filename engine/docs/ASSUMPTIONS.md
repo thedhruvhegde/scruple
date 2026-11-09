@@ -153,3 +153,10 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   processed within 60 days of the start date and disputed 3 to 90 days later. None of
   this is calibrated; see docs/results/SIM_FIDELITY.md for how far one public dataset
   is from it.
+- **A-33** Fidelity mapping (scruple/sim/fidelity.py): CFPB "Identity theft / Fraud /
+  Embezzlement" maps to fraud reason codes and "Billing disputes" to every other
+  category; "Closed with monetary relief" maps to the cardholder ending with money back
+  under a fixed reference merchant policy. These mappings, the policy and the
+  calibrated profile fitted through them are ours; complaints are not network
+  disputes, and the calibrated profile's zero true-fraud share is an artefact of the
+  fit (see the results file), not an estimate.
