@@ -356,10 +356,56 @@ class AgentGate:
             return Arm.BASELINE
         return assign(case_id, state.content_hash, state.percent)
 
+    def breach_canary(self, rule_id: str, version: int, actor: str, reason: str) -> DecisionRecord:
+        """Kill switch: stop a ramp now (for example on an external alert). Same
+        one-step rollback as an automatic breach. Needs an approver or the system."""
+        if actor != SYSTEM_ACTOR:
+            self._require_approver(actor)
+        state = self.canary_state(rule_id, version)
+        if state is None or state.status != "ramping":
+            raise InvalidTransitionError(f"{rule_id}@v{version} has no ramp in progress")
+        rv = self.registry.get(rule_id, version)
+        verdict = Verdict(
+            Outcome.ROLLBACK,
+            f"Canary stopped by {actor} at {state.percent:g}%: {reason}",
+            (f"manual breach: {reason}",),
+            (),
+        )
+        with self.storage.transaction():
+            rec = self._record(Stage.CANARY, rv, verdict, actor)
+            base = {
+                "rule_id": rule_id,
+                "version": version,
+                "content_hash": rv.content_hash,
+                "stage_index": state.stage_index,
+                "percent": state.percent,
+                "decision_id": rec.decision.decision_id,
+                "manual": True,
+                "reason": reason,
+            }
+            self._canary_breach(rv, rec, base, actor)
+        return rec
+
     def _canary_breach(
         self, rv: RuleVersion, rec: DecisionRecord, base: dict[str, Any], actor: str
     ) -> None:
-        self.audit.append(EVENT_BREACHED, actor, base)
+        """One step, one transaction: mark the ramp breached (traffic share drops to
+        zero) and reject the version, reusing the canary auto-rollback transition."""
+        with self.storage.transaction():
+            self.audit.append(EVENT_BREACHED, actor, base)
+            self.registry.transition(
+                rv.rule_id,
+                rv.version,
+                RuleStatus.REJECTED,
+                actor,
+                f"automatic rollback: canary breach at {base['percent']:g}%",
+                {
+                    "decision_id": rec.decision.decision_id,
+                    "auto_rollback": True,
+                    "stage_index": base["stage_index"],
+                    "percent": base["percent"],
+                },
+            )
 
     # --- shadow mode (read-only) -------------------------------------------------
 
