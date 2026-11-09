@@ -10,3 +10,4 @@ htmlcov/
 *.db-journal
 demo-output/
 dist/
+site/local/
