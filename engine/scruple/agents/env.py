@@ -64,6 +64,105 @@ class GroundTruth(BaseModel):
     claim_valid: bool
 
 
+class EvidenceDoc(BaseModel):
+    """A synthetic evidence document. Its body is built from whitelisted fields only."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    evidence_id: str
+    kind: str
+    title: str
+    body: dict[str, FieldValue]
+
+
+class LedgerPosting(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    account: str  # anonymised: merchant | cardholder | network_fees
+    amount_minor: int
+
+
+class LedgerEntryView(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    entry: int
+    kind: str  # capture | refund | chargeback_debit | fee
+    currency: str
+    earlier_dispute: bool  # posted for an earlier dispute on the same transaction
+    postings: tuple[LedgerPosting, ...]
+
+
+class LedgerView(BaseModel):
+    """A read-only copy of the journal for this transaction. Mutating it changes
+    nothing: every call builds a fresh copy from the simulator's journal."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    entries: tuple[LedgerEntryView, ...]
+    balances: dict[str, int]  # "account currency" -> balance, minor units
+    read_only: bool = True
+
+
+class InfoResponse(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    answer: str
+    new_evidence_ids: tuple[str, ...] = ()
+
+
+def _anon(account: str) -> str:
+    if account.startswith("merchant:"):
+        return "merchant"
+    if account.startswith("cardholder:"):
+        return "cardholder"
+    return account.replace(":", "_")
+
+
+def evidence_for(view: dict[str, FieldValue]) -> tuple[EvidenceDoc, ...]:
+    """Evidence documents as a pure function of the whitelisted view."""
+    docs: list[tuple[str, str, dict[str, FieldValue]]] = [
+        (
+            "authorization",
+            "Authorization record",
+            {"three_ds_authenticated": view["three_ds"], "mcc": view["mcc"]},
+        )
+    ]
+    if view["delivery_confirmed"]:
+        docs.append(("delivery", "Carrier delivery confirmation", {"delivered": True}))
+    if view["has_prior_refund"]:
+        docs.append(("refund_record", "Earlier partial refund", {"prior_refund_issued": True}))
+    if view["prior_dispute_on_txn"]:
+        docs.append(
+            (
+                "prior_dispute",
+                "Earlier dispute on the same transaction",
+                {"earlier_dispute_on_same_transaction": True},
+            )
+        )
+    if view["currency_mismatch"]:
+        docs.append(
+            (
+                "fx_record",
+                "Settlement and dispute currencies",
+                {"dispute_and_settlement_currency_differ": True},
+            )
+        )
+    docs.append(
+        (
+            "merchant_statement",
+            "Merchant response packet",
+            {
+                "reason_code": view["reason_code"],
+                "ready_before_response_deadline": view["evidence_on_time"],
+            },
+        )
+    )
+    return tuple(
+        EvidenceDoc(evidence_id=f"ev-{i:02d}", kind=k, title=t, body=b)
+        for i, (k, t, b) in enumerate(docs, start=1)
+    )
+
+
 def observable(case: DisputeCase) -> dict[str, FieldValue]:
     """The whitelisted view of a case, and nothing else."""
     view = case.view()
@@ -94,6 +193,38 @@ class SimCase:
 
     def observable(self) -> dict[str, FieldValue]:
         return observable(self._target)
+
+    def evidence(self) -> tuple[EvidenceDoc, ...]:
+        return evidence_for(self.observable())
+
+    def ledger_view(self) -> LedgerView:
+        target = self._target.case_id
+        entries: list[LedgerEntryView] = []
+        balances: dict[str, int] = {}
+        for e in self._sim.result().journal:
+            postings = tuple(
+                LedgerPosting(account=_anon(p.account), amount_minor=p.amount_minor)
+                for p in e.postings
+            )
+            for p in postings:
+                key = f"{p.account} {e.currency}"
+                balances[key] = balances.get(key, 0) + p.amount_minor
+            entries.append(
+                LedgerEntryView(
+                    entry=e.entry_id,
+                    kind=e.kind,
+                    currency=e.currency,
+                    earlier_dispute=e.case_id is not None and e.case_id != target,
+                    postings=postings,
+                )
+            )
+        return LedgerView(entries=tuple(entries), balances=dict(sorted(balances.items())))
+
+    def request_info(self, question: str) -> InfoResponse:
+        # ADAPTER: the current simulator has nothing beyond the evidence list. A richer
+        # simulator can answer from cardholder or issuer messages here.
+        del question
+        return InfoResponse(answer="No further information is available for this case.")
 
     # --- what the agent may do --------------------------------------------------
 

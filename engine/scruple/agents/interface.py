@@ -8,7 +8,8 @@ OpenAI, local) drive the same episode through the same tools.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from scruple.agents.env import ActionKind, GroundTruth
 from scruple.agents.episode import Episode, EpisodeError
@@ -23,8 +24,12 @@ class Toolbox:
         # Only set for reference agents (the oracle) when the caller explicitly asks.
         self.ground_truth = ground_truth
 
-    def act(self, kind: ActionKind | str) -> dict[str, object]:
-        return self.__episode.act(ActionKind(kind))
+    def call(self, name: str, **args: Any) -> dict[str, Any]:
+        """Call any tool in `scruple.agents.tools.TOOLS` by name."""
+        return self.__episode.call(name, args)
+
+    def act(self, kind: ActionKind | str, evidence_ids: Sequence[str] = ()) -> dict[str, Any]:
+        return self.__episode.act(ActionKind(kind), evidence_ids)
 
 
 Agent = Callable[[Observation, Toolbox], Decision]
