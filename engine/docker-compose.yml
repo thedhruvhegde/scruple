@@ -1,0 +1,48 @@
+# API plus PostgreSQL 16. The password is never stored here: export it or put it
+# in an untracked .env file (see .env.example), then:
+#   POSTGRES_PASSWORD=... docker compose up --build
+#   curl localhost:8000/version
+name: scruple
+
+x-password: &password ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD, see .env.example}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: scruple
+      POSTGRES_DB: scruple
+      POSTGRES_PASSWORD: *password
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "scruple", "-d", "scruple"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+
+  api:
+    build:
+      context: .
+      args:
+        BUILD_COMMIT: ${BUILD_COMMIT:-unknown}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+    environment:
+      SCRUPLE_DATABASE_URL: postgresql://scruple@postgres:5432/scruple
+      SCRUPLE_DATABASE_PASSWORD: *password
+      SCRUPLE_LOG_LEVEL: ${SCRUPLE_LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  pgdata:

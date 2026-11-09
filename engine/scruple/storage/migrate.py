@@ -39,8 +39,20 @@ def downgrade(url: str, revision: str = "base") -> None:
     command.downgrade(config(url), revision)
 
 
+def main() -> int:
+    """`python -m scruple.storage.migrate`: upgrade the configured database to head."""
+    from scruple.settings import load_settings
+
+    upgrade(load_settings().database_dsn())
+    return 0
+
+
 def head() -> str:
     heads = ScriptDirectory.from_config(config("postgresql://")).get_heads()
     if len(heads) != 1:
         raise RuntimeError(f"expected one migration head, found {heads}")
     return heads[0]
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

@@ -16,7 +16,10 @@ DEFAULT_DB = "agent-gate.db"
 
 
 def _gate(args: argparse.Namespace) -> AgentGate:
-    g = AgentGate.open(args.db)
+    from scruple.settings import load_settings
+
+    # --db wins; else SCRUPLE_DATABASE_URL (+ password) from settings; else DEFAULT_DB.
+    g = AgentGate.open(args.db or load_settings().database_dsn())
     g.bootstrap_baseline()
     return g
 
@@ -132,7 +135,12 @@ def build_parser() -> argparse.ArgumentParser:
         sp = sub.add_parser(name, help=help_)
         sp.set_defaults(fn=fn)
         if db:
-            sp.add_argument("--db", default=DEFAULT_DB, help="SQLite database path")
+            sp.add_argument(
+                "--db",
+                default=None,
+                help="SQLite path or postgresql:// URL "
+                f"(default: $SCRUPLE_DATABASE_URL, else {DEFAULT_DB})",
+            )
         return sp
 
     d = add("demo", cmd_demo, "run the end-to-end demo on synthetic data", db=False)

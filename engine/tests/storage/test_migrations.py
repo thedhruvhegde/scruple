@@ -156,6 +156,19 @@ def test_alembic_cli_uses_the_env_url(empty_db: str) -> None:
     assert "decisions" in _tables(empty_db)
 
 
+@pytest.mark.postgres
+def test_container_migrate_entry_point(empty_db: str) -> None:
+    out = subprocess.run(
+        [sys.executable, "-m", "scruple.storage.migrate"],
+        env={"SCRUPLE_DATABASE_URL": empty_db, "PATH": ""},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert out.returncode == 0, out.stderr
+    assert {"rule_versions", "audit_events", "decisions"} <= _tables(empty_db)
+
+
 def test_alembic_cli_without_a_url_fails_clearly() -> None:
     out = subprocess.run(
         [sys.executable, "-m", "alembic", "upgrade", "head"],

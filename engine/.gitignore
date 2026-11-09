@@ -12,3 +12,4 @@ demo-output/
 dist/
 site/local/
 .hypothesis/
+.env
