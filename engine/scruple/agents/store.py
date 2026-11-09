@@ -1,6 +1,7 @@
 """A local file store so an episode can span several processes (the CLI).
 
-Each episode is one JSON file holding its seed, case type, nonce and call log. An
+Each episode is one JSON file holding its kind (`simple`, the default, or `dispute`),
+seed, case type (the case family for `dispute`), nonce and call log. An
 episode is rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
 assumed (a terminal session); concurrent writers to the same episode are not locked.
@@ -14,6 +15,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
 
 DEFAULT_STORE = ".scruple/episodes"
@@ -26,6 +28,15 @@ def default_store() -> Path:
 
 class UnknownEpisodeError(KeyError):
     pass
+
+
+KINDS = ("simple", "dispute")
+
+
+def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> Episode | DisputeEpisode:
+    if kind == "dispute":
+        return DisputeEpisode(seed, case_type, nonce=nonce)
+    return Episode(seed, case_type, nonce=nonce)
 
 
 class EpisodeStore:
@@ -51,20 +62,27 @@ class EpisodeStore:
         record: dict[str, Any] = json.loads(path.read_text())
         return record
 
-    def start(self, seed: int, case_type: str | None) -> Episode:
+    def start(
+        self, seed: int, case_type: str | None, kind: str = "simple"
+    ) -> Episode | DisputeEpisode:
+        if kind not in KINDS:
+            raise ValueError(f"unknown episode kind {kind!r}; choose from {', '.join(KINDS)}")
         nonce = len(list(self.root.glob("ep-*.json"))) if self.root.exists() else 0
-        ep = Episode(seed, case_type, nonce=nonce)
+        ep = _new(kind, seed, case_type, nonce)
         while self._path(ep.episode_id).exists():  # pragma: no cover - only on races
             nonce += 1
-            ep = Episode(seed, case_type, nonce=nonce)
-        self._write(
-            ep.episode_id, {"seed": seed, "case_type": case_type, "nonce": nonce, "calls": []}
-        )
+            ep = _new(kind, seed, case_type, nonce)
+        record: dict[str, Any] = {"seed": seed, "case_type": case_type, "nonce": nonce, "calls": []}
+        if kind != "simple":
+            record["kind"] = kind
+        self._write(ep.episode_id, record)
         return ep
 
-    def load(self, episode_id: str) -> Episode:
+    def load(self, episode_id: str) -> Episode | DisputeEpisode:
         r = self._read(episode_id)
         calls = [(c["tool"], c["args"]) for c in r["calls"]]
+        if r.get("kind", "simple") == "dispute":
+            return DisputeEpisode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
         return Episode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
 
     def call(self, episode_id: str, tool: str, args: Any) -> dict[str, Any]:
@@ -85,4 +103,4 @@ class EpisodeStore:
         return calls
 
 
-__all__ = ["EpisodeError", "EpisodeStore", "UnknownEpisodeError", "default_store"]
+__all__ = ["KINDS", "EpisodeError", "EpisodeStore", "UnknownEpisodeError", "default_store"]

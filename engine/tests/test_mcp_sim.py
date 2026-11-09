@@ -37,7 +37,9 @@ def test_lists_episode_tools() -> None:
         return list((await c.list_tools()).tools)
 
     tools = {t.name: t for t in session(fn)}
-    assert set(tools) == {*TOOL_NAMES, "start_episode", "list_case_types"}
+    dispute = {"start_dispute_episode", "list_case_families", "accept", "wait"}
+    dispute |= {"upload_evidence", "submit_dispute"}
+    assert set(tools) == {*TOOL_NAMES, "start_episode", "list_case_types", *dispute}
     for name in TOOL_NAMES:
         assert "episode_id" in tools[name].input_schema["required"]
     assert tools["represent"].input_schema["properties"]["evidence_ids"]["type"] == "array"

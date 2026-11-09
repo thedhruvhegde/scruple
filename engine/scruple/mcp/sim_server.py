@@ -6,6 +6,11 @@ an `episode_id` and the observation; the read, info and action tools from
 and returns the verifier scorecard. Episodes live in server memory for the life of
 the process. Everything is synthetic and deterministic given the seed.
 
+`start_dispute_episode(seed, family)` starts a `dispute` episode on the rich dispute
+engine instead (lifecycle stages, deadlines, evidence documents, issuer replies). The
+shared read tools work for both kinds; `accept`, `wait`, `upload_evidence`,
+`refund(amount_minor=...)` and `submit_dispute` are for dispute episodes.
+
 Run it with `scruple mcp sim` (or `uv run scruple mcp sim`).
 """
 
@@ -18,7 +23,9 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import Field
 
-from scruple.agents.env import ActionKind, SimEnvironment
+from scruple.agents.dispute_episode import DISPUTE_TASK, DisputeEpisode
+from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME
+from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironment
 from scruple.agents.episode import Episode, EpisodeError
 from scruple.agents.models import TASK
 from scruple.agents.tools import TOOL_BY_NAME
@@ -37,8 +44,9 @@ class EpisodeTable:
     """
 
     def __init__(self) -> None:
-        self.episodes: dict[str, Episode] = {}
+        self.episodes: dict[str, Episode | DisputeEpisode] = {}
         self._starts: dict[tuple[int, str | None], int] = {}
+        self._dispute_starts: dict[tuple[int, str | None], int] = {}
         self._lock = threading.Lock()
 
     def start(self, seed: int, case_type: str | None) -> Episode:
@@ -57,6 +65,20 @@ class EpisodeTable:
         self._starts[key] = nonce + 1
         self.episodes[ep.episode_id] = ep
         return ep
+
+    def start_dispute(self, seed: int, family: str | None) -> DisputeEpisode:
+        with self._lock:
+            if len(self.episodes) >= MAX_EPISODES:
+                raise ToolError(f"episode limit reached ({MAX_EPISODES}); restart the server")
+            key = (seed, family)
+            nonce = self._dispute_starts.get(key, 0)
+            try:
+                ep = DisputeEpisode(seed, family, nonce=nonce)
+            except ValueError as exc:
+                raise ToolError(str(exc)) from exc
+            self._dispute_starts[key] = nonce + 1
+            self.episodes[ep.episode_id] = ep
+            return ep
 
     def call(self, episode_id: str, tool: str, args: dict[str, Any]) -> dict[str, Any]:
         with self._lock:
@@ -134,8 +156,17 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
         return t.call(episode_id, "accept_liability", {"reason": reason})
 
     @server.tool(description=_desc("refund"))
-    def refund(episode_id: EpisodeId, reason: Reason = "") -> dict[str, Any]:
-        return t.call(episode_id, "refund", {"reason": reason})
+    def refund(
+        episode_id: EpisodeId,
+        reason: Reason = "",
+        amount_minor: Annotated[
+            int | None, Field(description="Dispute episodes: amount to refund, minor units.")
+        ] = None,
+    ) -> dict[str, Any]:
+        args: dict[str, Any] = {"reason": reason}
+        if amount_minor is not None:
+            args["amount_minor"] = amount_minor
+        return t.call(episode_id, "refund", args)
 
     @server.tool(description=_desc("represent"))
     def represent(
@@ -173,6 +204,67 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
             args["evidence_ids"] = evidence_ids
         if claimed_cost_usd_minor is not None:
             args["claimed_cost_usd_minor"] = claimed_cost_usd_minor
+        return t.call(episode_id, "submit_decision", args)
+
+    # --- dispute episodes (additive) --------------------------------------------------
+    @server.tool(description="List the synthetic case families for dispute episodes.")
+    def list_case_families() -> dict[str, Any]:
+        return {"families": list(FAMILIES), "synthetic": True}
+
+    @server.tool(
+        description="Start a dispute episode on the rich dispute engine (lifecycle, "
+        "deadlines, evidence documents, issuer replies). " + DISPUTE_TASK
+    )
+    def start_dispute_episode(
+        seed: Annotated[int, Field(description="Seed; same seed, same case.")],
+        family: Annotated[
+            str | None, Field(description="Optional family from list_case_families.")
+        ] = None,
+    ) -> dict[str, Any]:
+        ep = t.start_dispute(seed, family)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
+    @server.tool(description=DISPUTE_TOOL_BY_NAME["accept"].description)
+    def accept(episode_id: EpisodeId, reason: Reason = "") -> dict[str, Any]:
+        return t.call(episode_id, "accept", {"reason": reason})
+
+    @server.tool(description=DISPUTE_TOOL_BY_NAME["wait"].description)
+    def wait(
+        episode_id: EpisodeId,
+        days: Annotated[int, Field(description="Simulated days to let pass (1-120).")],
+    ) -> dict[str, Any]:
+        return t.call(episode_id, "wait", {"days": days})
+
+    @server.tool(description=DISPUTE_TOOL_BY_NAME["upload_evidence"].description)
+    def upload_evidence(
+        episode_id: EpisodeId,
+        kind: Annotated[EvidenceKind, Field(description="Evidence kind.")],
+        issued_on: Annotated[str, Field(description="Date on the document, YYYY-MM-DD.")],
+        fields: Annotated[dict[str, str] | None, Field(description="Document fields.")] = None,
+    ) -> dict[str, Any]:
+        return t.call(
+            episode_id,
+            "upload_evidence",
+            {"kind": kind.value, "issued_on": issued_on, "fields": fields or {}},
+        )
+
+    @server.tool(description=DISPUTE_TOOL_BY_NAME["submit_decision"].description)
+    def submit_dispute(
+        episode_id: EpisodeId,
+        explanation: Annotated[str, Field(description="What you did and why.")],
+        confidence: Annotated[
+            float | None, Field(description="Your probability that the merchant wins.")
+        ] = None,
+        claims: Annotated[
+            dict[str, Any] | None,
+            Field(description="Structured claims: outcome, refunded_minor, actions, ..."),
+        ] = None,
+    ) -> dict[str, Any]:
+        args: dict[str, Any] = {"explanation": explanation}
+        if confidence is not None:
+            args["confidence"] = confidence
+        if claims:
+            args["claims"] = claims
         return t.call(episode_id, "submit_decision", args)
 
     return server

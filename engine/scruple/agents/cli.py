@@ -14,9 +14,12 @@ import argparse
 import json
 from typing import Any
 
+from scruple.agents.dispute_tools import DISPUTE_TOOL_NAMES, dispute_anthropic_tools
 from scruple.agents.episode import EpisodeError
-from scruple.agents.store import EpisodeStore, UnknownEpisodeError
+from scruple.agents.store import KINDS, EpisodeStore, UnknownEpisodeError
 from scruple.agents.tools import TOOL_NAMES, anthropic_tools
+
+ALL_TOOL_NAMES = tuple(dict.fromkeys((*TOOL_NAMES, *DISPUTE_TOOL_NAMES)))
 
 
 def _print(obj: Any) -> None:
@@ -51,7 +54,7 @@ def cmd_episode(args: argparse.Namespace) -> int:
     store = EpisodeStore(args.store)
     match args.episode_cmd:
         case "start":
-            ep = store.start(args.seed, args.case_type)
+            ep = store.start(args.seed, args.case_type, args.kind)
             _print(
                 {
                     "episode_id": ep.episode_id,
@@ -62,7 +65,7 @@ def cmd_episode(args: argparse.Namespace) -> int:
             )
             return 0
         case "tools":
-            _print(anthropic_tools())
+            _print(dispute_anthropic_tools() if args.kind == "dispute" else anthropic_tools())
             return 0
         case "call":
             return _call(store, args.episode_id, args.tool, args.json)
@@ -78,7 +81,8 @@ def cmd_episode(args: argparse.Namespace) -> int:
                 {
                     "episode_id": ep.episode_id,
                     "closed": ep.closed,
-                    "action": None if ep.action is None else ep.action.value,
+                    "kind": getattr(ep, "kind", "simple"),
+                    "action": None if ep.action is None else str(ep.action),
                     "calls": store.log(args.episode_id),
                     "score": None if ep.score is None else ep.score.model_dump(mode="json"),
                 }
@@ -95,11 +99,15 @@ def add_episode_parser(sub: Any) -> None:
     es = p.add_subparsers(dest="episode_cmd", required=True)
     st = es.add_parser("start", parents=[common], help="start an episode and print its observation")
     st.add_argument("--seed", type=int, required=True)
-    st.add_argument("--case-type", default=None, help="synthetic case type (optional)")
-    es.add_parser("tools", parents=[common], help="print the tool definitions (JSON schema)")
+    st.add_argument(
+        "--case-type", default=None, help="synthetic case type, or case family for dispute"
+    )
+    st.add_argument("--kind", choices=KINDS, default="simple", help="episode kind")
+    tl = es.add_parser("tools", parents=[common], help="print the tool definitions (JSON schema)")
+    tl.add_argument("--kind", choices=KINDS, default="simple")
     c = es.add_parser("call", parents=[common], help="call a tool on an episode")
     c.add_argument("episode_id")
-    c.add_argument("tool", choices=TOOL_NAMES)
+    c.add_argument("tool", choices=ALL_TOOL_NAMES)
     c.add_argument("json", nargs="?", default=None, help="tool arguments as a JSON object")
     sb = es.add_parser(
         "submit", parents=[common], help="submit the decision and print the scorecard"
