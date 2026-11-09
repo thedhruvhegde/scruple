@@ -62,3 +62,7 @@ simplification of a sourced rule. Data files flag these values with `assumption:
   4871 to fraud; 4808 and 4812 to authorization; 4834 to processing error; 4841, 4850,
   4853 and 4855 to consumer dispute. `legacy_family` (bridge to the original
   three-family simulator) and `card_present` are also our labels.
+- **A-24** Business days are Monday to Friday with no holidays by default. A stage's
+  deadline counts from the day the stage was entered, and an action on the due date is
+  on time. Real networks count from specific processing dates and use their own
+  calendars; processors often set shorter internal deadlines (S10).
