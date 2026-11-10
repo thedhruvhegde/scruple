@@ -24,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError
 
 ENV_PREFIX = "SCRUPLE_"
 CONFIG_ENV = "SCRUPLE_CONFIG"
-SECRET_FIELDS = frozenset({"database_password", "heldout_salt"})
+SECRET_FIELDS = frozenset({"database_password", "heldout_salt", "metrics_token"})
 
 
 class SettingsError(ValueError):
@@ -90,6 +90,15 @@ class Settings(BaseModel):
     web_graceful_timeout: int = Field(default=30, ge=0, le=3600)
     web_keepalive: int = Field(default=5, ge=0, le=3600)
     web_max_requests: int = Field(default=0, ge=0)
+    # Observability (scruple.observability). The token is a secret: env only.
+    metrics_token: SecretStr | None = Field(
+        default=None, description="env only; bearer token required for GET /metrics"
+    )
+    metrics_public: bool = Field(
+        default=False, description="serve /metrics without a token (private networks only)"
+    )
+    otel_enabled: bool = False
+    otel_service_name: str = Field(default="scruple-engine", min_length=1, max_length=128)
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""

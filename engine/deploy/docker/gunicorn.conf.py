@@ -22,6 +22,8 @@ different workers, so keep SCRUPLE_WEB_WORKERS=1 if you use the shadow endpoints
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 from scruple.logging import configure_logging
@@ -53,11 +55,20 @@ proc_name = "scruple"
 control_socket_disable = True
 
 
+MULTIPROC_ENV = "PROMETHEUS_MULTIPROC_DIR"
+
+
 def on_starting(server: Any) -> None:
-    """Master, before forking: JSON logging, and the baseline imported exactly once."""
+    """Master, before forking: JSON logging, an empty metrics directory (samples of
+    a previous run would be summed into this one), and the baseline imported once."""
     from scruple.service import AgentGate
 
     configure_logging(_settings.log_level, _settings.log_format)
+    if multiproc := os.environ.get(MULTIPROC_ENV):
+        path = Path(multiproc)
+        path.mkdir(parents=True, exist_ok=True)
+        for stale in path.glob("*.db"):
+            stale.unlink()
     gate = AgentGate.open(_settings.database_dsn())
     try:
         gate.bootstrap_baseline()
@@ -67,3 +78,11 @@ def on_starting(server: Any) -> None:
 
 def post_worker_init(worker: Any) -> None:
     configure_logging(_settings.log_level, _settings.log_format)
+
+
+def child_exit(server: Any, worker: Any) -> None:
+    """Drop a dead worker's live gauges (in-flight requests) from the aggregate."""
+    if os.environ.get(MULTIPROC_ENV):
+        from prometheus_client import multiprocess
+
+        multiprocess.mark_process_dead(worker.pid)  # type: ignore[no-untyped-call]

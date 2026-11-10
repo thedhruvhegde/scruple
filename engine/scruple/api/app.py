@@ -48,6 +48,7 @@ from scruple.ingest.api import ingest_router
 from scruple.jobs.api import jobs_router
 from scruple.jobs.queue import JobError, queue_for
 from scruple.logging import RequestIDMiddleware
+from scruple.observability import install_observability
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
@@ -57,6 +58,7 @@ from scruple.registry import (
 )
 from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
 from scruple.service import AgentGate, ApprovalError, IntegrityReport
+from scruple.settings import Settings
 from scruple.storage.imported_shadow import DurableImportedShadow, imported_shadows
 from scruple.version import BuildInfo, build_info, package_version
 
@@ -179,6 +181,7 @@ def _page[T](items: list[T], response: Response, limit: int | None, offset: int)
 
 def create_app(
     gate: AgentGate | None = None,
+    settings: Settings | None = None,
     *,
     auth: Authenticator | None = None,
     limits: Limits | None = None,
@@ -203,25 +206,25 @@ def create_app(
         docs_url=None,
         redoc_url=None,
     )
-    if gate is None:
+    if settings is None:
         from scruple.settings import load_settings
 
+        settings = load_settings()
+    if gate is None:
         # AGENT_GATE_DB is the pre-rename variable; SCRUPLE_DATABASE_URL replaces it.
-        gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or load_settings().database_dsn())
+        gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or settings.database_dsn())
         gate.bootstrap_baseline()
     root = gate
     app.state.gates = TenantGates(root)
     if auth is None:
         from scruple.auth.config import build_authenticator
-        from scruple.settings import load_settings
 
-        auth = build_authenticator(load_settings(), root.storage)
+        auth = build_authenticator(settings, root.storage)
     if limits is None:
-        from scruple.settings import load_settings
-
-        limits = Limits.from_settings(load_settings())
+        limits = Limits.from_settings(settings)
     app.add_middleware(AuthMiddleware, authenticator=auth, limits=limits)
     app.add_middleware(RequestIDMiddleware)
+    install_observability(app, root, settings)
 
     def _err(status: int):  # type: ignore[no-untyped-def]
         async def handler(_r: Request, exc: Exception) -> JSONResponse:

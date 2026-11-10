@@ -42,6 +42,7 @@ dependencies = [
     "pyjwt[crypto]>=2.10",
     "gunicorn>=25.1",
     "uvicorn-worker>=0.3",
+    "prometheus-client>=0.21",
 ]
 
 [project.scripts]
@@ -79,6 +80,10 @@ dev = [
     "pypdf>=7.0.0",
     "jsonschema>=4.26.0",
 ]
+otel = [
+    "opentelemetry-exporter-otlp-proto-http>=1.27",
+    "opentelemetry-sdk>=1.27",
+]
 
 [dependency-groups]
 dev = [
@@ -99,6 +104,8 @@ dev = [
     "scikit-learn>=1.9.1",
     "pytest-xdist>=3.8.0",
     "schemathesis>=4.33.1",
+    "opentelemetry-sdk>=1.27",
+    "opentelemetry-exporter-otlp-proto-http>=1.27",
 ]
 
 [build-system]
