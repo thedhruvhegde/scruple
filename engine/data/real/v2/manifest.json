@@ -1,0 +1,86 @@
+{
+  "files": {
+    "cfpb_cc2024/meta.csv.gz": {
+      "derived_from": "cfpb_cc_2024_2026/ccdb_disputes_raw.zip",
+      "rows": 21508,
+      "sha256": "1a5a61b24b062f77b358719ce84e65b212ef4968776c0a8d3ed07902b5ff087d",
+      "sha256_content": "0b98cb079599ab95d976f9a36a720a742d2b6e62650b3bf32951e4982bd39961"
+    },
+    "cfpb_cc2024/narratives.jsonl.gz": {
+      "derived_from": "cfpb_cc_2024_2026/ccdb_disputes_raw.zip",
+      "rows": 3000,
+      "sha256": "405f5fcf93db08f750b4c05f722867a69964b26b5d424acdaa8d09c86e66078e",
+      "sha256_content": "b978961cacfa9b0a90d1e86abfea2e92b07c95c0064a5562ecf3920911c83d3d"
+    },
+    "enforcement/cfpb_enforcement_orders.csv": {
+      "derived_from": "cfpb_enforcement/Disp.csv",
+      "rows": 359,
+      "sha256": "47ff0f70ee510e08a1f3e098f8f8a0a9fa95c5dd969743a20bacd4aee530225b",
+      "sha256_content": "47ff0f70ee510e08a1f3e098f8f8a0a9fa95c5dd969743a20bacd4aee530225b"
+    },
+    "timeliness/cfpb2015_payments.csv.gz": {
+      "derived_from": "cfpb_2012_2015/payments_subset.csv",
+      "rows": 135313,
+      "sha256": "9dc7dfb8ae7a8ee2a16c1336d2a3c7d76c5186119d6ee19432256a1e09b6726c",
+      "sha256_content": "a361b1bcd5d71ec1bfb9bb1984c8e6408a8aa8844ae53658aa491a47482f1f77"
+    },
+    "timeliness/cfpb2025_checking.csv.gz": {
+      "derived_from": "cfpb_checking_2025_2026/checking_complaints_sample.csv",
+      "rows": 8000,
+      "sha256": "c1a517de0704e60fb49ead7f8954d2d51ccb7ea510c1d7287c1810f35ba73359",
+      "sha256_content": "c32ebbadf076d68624fef2294e394b171a26d950746157286a118138bbf16a6e"
+    }
+  },
+  "narrative_sample": 3000,
+  "procedure": "scruple.realdata.v2.build_v2 (see module docstring)",
+  "raw": [
+    {
+      "derivation": null,
+      "derived_from": null,
+      "local_path": "cfpb_cc_2024_2026/ccdb_disputes_raw.zip",
+      "repo": "cfpb-cc-disputes-2024-2026",
+      "repo_path": "ccdb_disputes_raw.zip",
+      "sha256": "0b121cdacd059afba27c15871f8ea78a90060f9951613df5688184d9960a060f"
+    },
+    {
+      "derivation": null,
+      "derived_from": null,
+      "local_path": "cfpb_enforcement/Disp.csv",
+      "repo": "cfpb-enforcement-relief",
+      "repo_path": "Disp.csv",
+      "sha256": "5cd6578cced51eec5ba21bd6f86317ee82242009a55e7f184894451eb694829b"
+    },
+    {
+      "derivation": "rows whose product is one of PAYMENTS_PRODUCTS, csv.writer, '\\n' line ends",
+      "derived_from": "cfpb_2012_2015/consumer_complaints.csv.zip",
+      "local_path": "cfpb_2012_2015/payments_subset.csv",
+      "repo": "cfpb-2012-2015",
+      "repo_path": null,
+      "sha256": "0ae2fefa23550ef941f9fcbf198d2e1e82ef51dd7bedca4478d4d4c7f40c3393"
+    },
+    {
+      "derivation": "first 18 (CFPB) columns; drops clean_text and word_count",
+      "derived_from": "cfpb_checking_2025_2026/sample_metadata.csv",
+      "local_path": "cfpb_checking_2025_2026/checking_complaints_sample.csv",
+      "repo": "cfpb-checking-2025-2026",
+      "repo_path": null,
+      "sha256": "483854821b404dc6ef9454c06b8aab1be464a1b0cdb0c941c2610f942a81c318"
+    }
+  ],
+  "repos": [
+    {
+      "commit": "aaa209545cd6cfa695233512cc0feb77fcbf51d3",
+      "licence": "CFPB data: public domain (17 USC 105); repo has no licence file, only the CFPB columns are kept (the author's P1-P6 tags are dropped)",
+      "name": "cfpb-cc-disputes-2024-2026",
+      "url": "https://github.com/THEpranavsomalraju/card-dispute-prd"
+    },
+    {
+      "commit": "13014e6ec9fe02b44855c5866de40f9694089582",
+      "licence": "CFPB records released under FOIA to the Data Liberation Project (public domain government records); the repo's generated files are CC BY-SA 4.0, so the derived table is redistributed under CC BY-SA 4.0 with attribution",
+      "name": "cfpb-enforcement-relief",
+      "url": "https://github.com/LukasNichols/CFPB_Enforcement_Relief_And_Penalties"
+    }
+  ],
+  "seed": 2026,
+  "version": "v2"
+}

@@ -2,7 +2,8 @@
 
 This is the only real data in scruple. Everything else (the simulator, the demo, the
 gate) is synthetic. The real-data suite lives in `scruple/realdata/`; the frozen
-splits are in `data/real/v1/`.
+splits are in `data/real/v1/`, the v2 additions (more products, dates, enforcement
+orders) in `data/real/v2/` (section "v2 additions" below).
 
 ## Sources and licence
 
@@ -155,3 +156,60 @@ uv run scruple realdata grade --task regime-2015 --answers a.jsonl --prompts p.j
 `scruple.agents.runners` (retries, timeouts, model defaults); a failed request is
 recorded with an empty answer and graded as wrong. It has only been exercised
 against fake transports. Baseline numbers: docs/results/REAL_BASELINES.md.
+
+## v2 additions (`data/real/v2/`, `scruple/realdata/v2.py`)
+
+v2 adds files next to v1 and changes nothing in it. About 3.7 MB committed.
+
+| file | rows | what | derived from |
+|---|---|---|---|
+| `cfpb_cc2024/meta.csv.gz` | 21,508 | credit card dispute complaints received 2024-08-04 to 2026-07-15, current taxonomy, no narrative | `ccdb_disputes_raw.zip` |
+| `cfpb_cc2024/narratives.jsonl.gz` | 3,000 | narratives of a deterministic sample of the rows above (first 3,000 by sha256(`2026:<complaint id>`)) | same |
+| `timeliness/cfpb2015_payments.csv.gz` | 135,313 | dates and response fields of every 2012-2015 payments row (with or without narrative) | v1 `payments_subset.csv` |
+| `timeliness/cfpb2025_checking.csv.gz` | 8,000 | dates and response fields of the 2025-2026 checking sample | v1 `checking_complaints_sample.csv` |
+| `enforcement/cfpb_enforcement_orders.csv` | 359 | CFPB enforcement orders 2012-2023: caption, forum, docket, order dates, ordered and suspended amounts (penalty, redress, disgorgement, other relief) | `Disp.csv` |
+
+Meta columns: complaint id, date received, date sent to company (ISO dates),
+product, sub-product, issue, sub-issue, company, state, submitted via, company
+response, timely response. ZIP code, tags, consent and the public response are dropped.
+
+| source | mirror (pinned commit) | licence |
+|---|---|---|
+| card disputes 2024-2026 | github.com/THEpranavsomalraju/card-dispute-prd @ `aaa20954`, `ccdb_disputes_raw.zip` (sha256 `0b121cda...`). The author pulled the CFPB API on 2026-08-04 (trailing 24 months), kept credit card rows with a narrative whose issue is a purchase or investigation problem. | CFPB data, public domain. The repo has no licence file; we keep only the CFPB columns and drop the author's keyword tags P1-P6. |
+| enforcement orders | github.com/LukasNichols/CFPB_Enforcement_Relief_And_Penalties @ `13014e6e`, `Disp.csv` (sha256 `5cd6578c...`). CFPB records released under FOIA to the Data Liberation Project. | Government records, public domain. The repo licenses files its author generated under CC BY-SA 4.0, so we redistribute the derived table under CC BY-SA 4.0, attributed to Lukas Nichols and the Data Liberation Project. |
+
+Rebuild: `uv run scruple realdata fetch-v2 --dest DIR` (anonymous git, pinned
+commits, sha256 checked), put the v1 raw files in the same DIR
+(`scripts/fetch_real_data.sh DIR`), then `uv run scruple realdata build-v2 --src DIR`
+rewrites `data/real/v2/` byte for byte (tested in the slow suite). `manifest.json`
+holds the sha256 of every file and of its decompressed content; loaders check the
+content hash on every load.
+
+What the card-dispute set covers: product credit card only (general purpose 19,541,
+store card 1,967); issues "Problem with a purchase shown on your statement" 20,441
+and "Problem with a company's investigation into an existing problem" 1,067; top
+sub-issues "isn't resolving a dispute about a purchase" 15,226, "charged for
+something you did not purchase" 4,590. Responses: explanation 14,429, monetary
+relief 5,645, non-monetary 1,415, untimely 19. Timely = No on 157. Every row has a
+narrative upstream; only the 3,000-row sample's narratives are committed.
+
+Known limits of the v2 files:
+
+- The card-dispute pull is a third party's filter of the CFPB API (credit card
+  dispute issues with a narrative, per its README); we could not re-run it.
+- 1,644 of the 135,313 2012-2015 rows have a date sent to company one day before
+  the date received (as published; probably a time-zone artefact). They are kept.
+- The enforcement table has no statute or regulation column, so it cannot say which
+  orders concern Reg E or Reg Z. It is context only; no task or result uses it to
+  make a claim about a regulation. Some captions are empty in the source.
+- No prepaid or money-transfer complaints newer than 2016 were found on a reachable
+  public mirror with a usable licence; the GitHub repositories found for those
+  products held only READMEs or dashboards.
+- Searched and not used: cfarm/scrape-enforcement-actions (a scraper, CC0, no
+  data), BrandonJenkins09/Federal-Enforcement-Datasets (README only, data sold
+  elsewhere), Duckky153/consumer-complaint-operations (a dashboard bundle),
+  aastharijal/CFPB-Money-Transfer-Analysis and sheha61-boop/cfpb-payment-complaints-analysis
+  (README only).
+
+No new card-network reason-code reference with a licence was found beyond the CC
+BY 4.0 table already pinned (S1 in docs/SOURCES.md).
