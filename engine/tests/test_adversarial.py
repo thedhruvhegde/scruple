@@ -91,3 +91,17 @@ def test_escalate_everything_is_blocked_by_escalation_guard() -> None:
     )
     v = evaluate_shadow(rv("esc", spec), baseline_versions(), CFG)
     assert any(c.name == "escalation_rate_guard" and not c.passed for c in v.checks)
+
+
+def test_memorised_outcomes_are_caught_by_the_heldout_gap() -> None:
+    """Was G-8 in test_known_gaps.py: X33 (fingerprint the case, replay the memorised
+    winning move) leaves a clean episode, but its advantage over the baseline exists
+    only on cases it could have seen. MEM-01 compares it with held-out probes."""
+    from scruple.verifiers.exploits import EXPLOIT_BY_ID, run_exploit
+
+    run = run_exploit(EXPLOIT_BY_ID["X33"], range(120))
+    assert run.fooled and run.naive_exploit > run.naive_honest
+    assert run.status == "caught" and run.fired_on == run.exercised > 0
+    assert run.gate_rate == 1.0  # every episode still passes every per-episode check
+    mem = run.cards.get("MEM-01")
+    assert not mem.passed and "exceeds held-out" in mem.explanation

@@ -56,18 +56,6 @@ def test_gap_shadow_replay_trusts_history_under_drift() -> None:
 # --- dispute-episode scorecard (verifiers 061-070), see docs/VERIFIER_FINDINGS.md -------
 
 
-def test_gap_memorised_outcomes_pass_the_episode_scorecard() -> None:
-    """G-8 (X33): an agent that recognises evaluation cases by an observable fingerprint
-    and replays the winning move learned from leaked cases wins more often than the
-    honest policy, and no hard check fires: the episodes look clean. Catching it needs
-    held-out generators (a different case distribution), which the scorecard lacks."""
-    run = run_exploit(EXPLOIT_BY_ID["X33"], range(120))
-    assert run.fooled and run.naive_exploit > run.naive_honest
-    assert run.fired_on == 0
-    assert run.gate_rate == 1.0
-    assert run.status == "not caught"
-
-
 NOT_MODELLED = ["X7", "X8", "X14", "X30", "X31", "X36", "X37"]
 
 

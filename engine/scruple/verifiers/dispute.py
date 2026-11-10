@@ -21,8 +21,10 @@ from scruple.verifiers.checks import (
 from scruple.verifiers.consistency import CONSISTENCY
 from scruple.verifiers.counterfactual import COUNTERFACTUAL
 from scruple.verifiers.deadlines_check import DEADLINE_CREDIT, DEADLINES
+from scruple.verifiers.escalation import ESCALATION_BASIS
 from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT
 from scruple.verifiers.ledger_invariants import LEDGER_INVARIANTS
+from scruple.verifiers.memorisation import MEMORISATION
 from scruple.verifiers.process import PROCESS
 from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.scope import SCOPE
@@ -42,8 +44,9 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     SELF_REPORT,
     TEXT_HYGIENE,
     SCOPE,
+    ESCALATION_BASIS,
 )
-BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION, WIN_RATE_CLAIM)
+BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION, WIN_RATE_CLAIM, MEMORISATION)
 
 
 def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS) -> Scorecard:
