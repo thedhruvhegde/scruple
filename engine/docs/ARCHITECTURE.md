@@ -215,3 +215,113 @@ its file through the same `RegisterIn` model as `POST /rules`.
 Not yet built: connection pooling (one connection per store, behind a lock), typed
 ids, real authn, signed audit checkpoints. The demo (`scruple demo`) still writes
 SQLite files.
+
+## 11. Persistence of runtime state, and jobs
+
+Everything a running service learns is stored, so a restart (or a second replica)
+loses nothing. Every new table carries `tenant_id` (default `"default"` until
+authenticated tenants are wired through the API) and is append-only unless stated.
+
+```
+ gate database (SQLite file or Postgres; alembic 0002-0005)
+ ├─ imported_shadow_events     accepted batches, replayed to rebuild a recorder
+ ├─ imported_shadow_summaries  the summary after every batch (aggregate)
+ ├─ episodes, episode_calls    simulator episodes for the API / MCP server
+ ├─ jobs (mutable state)       the queue: queued → running → succeeded|failed|cancelled
+ ├─ job_events                 every submit, claim, retry, timeout, cancel, result
+ └─ retention_policies, retention_purges
+
+ case store (one partner's SQLite file, scruple.ingest.store)
+ ├─ cases, movements, ...      imports, versioned
+ ├─ webhook_events             event id, time, payload hash (idempotency key)
+ └─ webhook_case_events        each case an event carried, applied or stale
+```
+
+**Imported shadow** (`scruple/storage/imported_shadow.py`). The recorder in
+`scruple/gate/shadow_imported.py` stays pure. `DurableImportedShadow` appends each
+batch the recorder accepted (canonical JSON plus its SHA-256) and the summary after it,
+inside the backend's write transaction, after catching up on batches other processes
+wrote. A fresh process rebuilds by replay: `record` and `observe` are deterministic
+and all-or-nothing, so replay reproduces the state exactly. A failed write drops the
+in-memory recorder, so memory can never run ahead of storage. API:
+`GET /shadow/rules/{id}/versions/{v}/imported/history` lists the stored summaries.
+
+**Webhooks** (`scruple/ingest/api.py`, `CaseStore.write_webhook`). An accepted Stripe
+or Adyen delivery becomes one ingest run. Idempotent by (tenant, source, event id):
+a redelivery, including one after a restart, stores nothing. Out of order safe: a case
+becomes current only if no newer webhook event already applied to it; a late, older
+event is kept with `applied = 0`. If the store write fails the route answers 503 and
+the id is forgotten, so the provider's retry is processed. Adyen items have no event
+id; scruple uses `pspReference:eventCode:eventDate` (ASSUMPTION, see the module).
+
+**Episodes** (`scruple/agents/store_db.py`). The CLI keeps its JSON file store; the
+MCP server (`scruple mcp sim --episode-db ...`) uses `DbEpisodeStore`, and so can any
+API route (`DbEpisodeStore.on(gate.storage)`; none is mounted yet), with the same
+semantics: replay of the call log, refused calls logged, calls on a closed
+episode not logged. Calls run in the write transaction, so several processes can
+drive one episode; each caches live episodes and replays only when another process
+appended calls.
+
+**Jobs** (`scruple/jobs/`). Long work (gate evaluation on the full case count,
+backtests, bench scoring) no longer runs inside a request.
+
+```
+ POST /jobs ──► jobs row (queued) ◄── claim ── scruple worker ──► child process
+ GET /jobs/{id}      ▲    │ heartbeat (lease) every lease/3          (handler)
+ POST /jobs/{id}/cancel   │ succeed | fail → retry with backoff | cancelled
+                          └ fenced on (lease_owner, attempt)
+```
+
+- Claiming: Postgres `FOR UPDATE SKIP LOCKED` on a connection without the gate's
+  advisory lock, so workers never take the same job and never wait on each other;
+  SQLite serialises claims with `BEGIN IMMEDIATE`.
+- Crash recovery: a worker heartbeats its lease; if it dies, the lease expires and the
+  next claim takes the job as a new attempt. Every write is fenced on the lease owner
+  and attempt number, so a stalled worker that wakes up writes nothing.
+- Retries: exponential backoff (base x 2^(attempt-1), capped, no jitter so schedules
+  reproduce under an injected clock) until `max_attempts`; `PermanentJobError` (bad
+  params, a sealed benchmark) fails at once.
+- Timeouts and cancellation: the default `process` isolation runs each job in a
+  spawned child that is terminated on timeout or cancel; `thread` isolation (tests)
+  abandons the thread and discards its result.
+- Idempotency keys (`Idempotency-Key` header or body) are unique per tenant; the same
+  key with a different submission is a 409.
+- Results are stored on the job with their SHA-256. A gate evaluation or backtest is
+  linked to its rule version by one `job.succeeded` audit entry (written once per job,
+  even across retries), so it appears in that version's evidence pack audit segment.
+  A gate-evaluation retry that finds the version already evaluated (the crash came
+  after the commit) returns those decisions with `resumed: true`.
+- Submitted jobs never name code or files: bench agents are the built-in ones, and a
+  backtest reads either a synthetic history or the case store the worker was started
+  with (`--case-store`).
+
+**Retention** (`scruple/storage/retention.py`). A per-tenant policy (days; the latest
+one set wins; setting one is audited) deletes row-level case data older than the
+cutoff: imported-shadow events in the gate database, and, in the tenant's case store,
+every version of each case opened before the cutoff, its movements and webhook case
+bodies. Kept: the audit log, decisions, rule versions, imported-shadow summaries, run
+reports, webhook event ids and hashes (so redeliveries stay refused), jobs.
+
+How the audit chain stays verifiable: no audit entry is deleted or edited, so the
+chain recomputes unchanged, and each purge appends a `retention.purged` entry naming
+tenant, table, cutoff, row count and a SHA-256 digest over the deleted rows' keys and
+body hashes. A deletion is therefore itself on the tamper-evident record, and a backup
+can be checked against the digest. Audit payloads never contain case rows, so no entry
+refers to purged data. The append-only triggers stay for every other path: SQLite
+drops and recreates the one DELETE trigger inside the purge transaction; on Postgres
+the trigger allows a delete only when the transaction set `scruple.retention =
+'purge'` (TRUNCATE stays refused). That setting guards against stray SQL, it is not an
+access control: grant DELETE on `imported_shadow_events` only to the role that runs
+retention (`app_role_grants` does not grant it).
+
+Commands: `scruple worker [--db URL] [--case-store FILE] [--once]`,
+`scruple retention set --tenant T --days N`, `scruple retention apply [--case-store FILE]`,
+`scruple mcp sim --episode-db URL`.
+
+Known limits: decisions re-sent for a case whose imported-shadow events were purged
+are accepted as new (the case ids went with the rows); re-importing an old export
+file brings purged cases back; a case store is one tenant's file, so its `cases` rows
+carry no tenant column. Retention does not cover episodes (synthetic) or job results
+(no case rows by construction), and nothing schedules `retention apply` yet (run it
+from cron, or submit it as a job once that kind exists). Migrations 0002-0005 are
+linear after 0001; a branch adding its own 0002 must be renumbered on merge.
