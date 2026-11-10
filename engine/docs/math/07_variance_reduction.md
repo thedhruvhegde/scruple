@@ -235,7 +235,97 @@ regressions over caps. Power `1 - beta` at level `alpha` needs the budget
 
 ## Simulation evidence (synthetic, seeded)
 
-Pasted from `uv run python scripts/exp_e3_mc.py` (added with the Monte Carlo commit).
+`uv run python scripts/exp_e3_mc.py` (about 40 minutes on a shared 4-core container;
+`--quick` for a small version). Six types with shares (0.28, 0.22, 0.20, 0.18, 0.06,
+0.06). `current` is the block family of `evaluate_pairs` (one e-process per type plus
+a pooled one, e-Bonferroni on running maxima at `alpha`); `stratified` is
+`StratifiedBettingEProcess` alone at `alpha`; `vr` is the composed rule of
+`evaluate_pairs_vr` (`current` at `0.2 alpha` or `stratified` at `0.8 alpha`). Every
+rate is "ever rejected by n", so it bounds every stopping rule; `@t` rates are at
+earlier horizons on the same paths.
+
+```
+## block tests: type-I error, sup over time (alpha=0.05, reps=1000, n=3000)
+3 x binomial SE at alpha: 0.0207
+boundary (all types mean 0): current=0.007, stratified=0.026, vr=0.021, current@750=0.001, stratified@750=0.005, vr@750=0.004, current@1500=0.003, stratified@1500=0.014, vr@1500=0.011
+mixed (some types below 0): current=0.004, stratified=0.016, vr=0.012, current@750=0.000, stratified@750=0.001, vr@750=0.000, current@1500=0.002, stratified@1500=0.007, vr@1500=0.005
+shapes (6 laws, mean 0): current=0.005, stratified=0.022, vr=0.016, current@750=0.003, stratified@750=0.018, vr@750=0.013, current@1500=0.004, stratified@1500=0.019, vr@1500=0.014
+
+## block tests: power P(block by n=2000), reps=300
+types with shares (0.28, 0.22, 0.20, 0.18, 0.06, 0.06); X ternary, P(X != 0) = 0.2
+one 6% type up by d, others down 0.01:
+  d=0.02: current=0.000, stratified=0.007, vr=0.000
+  d=0.04: current=0.000, stratified=0.047, vr=0.027
+  d=0.06: current=0.023, stratified=0.190, vr=0.143
+  d=0.08: current=0.170, stratified=0.450, vr=0.400
+  d=0.10: current=0.567, stratified=0.800, vr=0.737
+one 6% type up by d, others at 0:
+  d=0.02: current=0.003, stratified=0.017, vr=0.013
+  d=0.04: current=0.003, stratified=0.070, vr=0.053
+  d=0.06: current=0.037, stratified=0.203, vr=0.147
+  d=0.08: current=0.180, stratified=0.437, vr=0.380
+  d=0.10: current=0.573, stratified=0.743, vr=0.710
+two types up by d (28%, 18%):
+  d=0.02: current=0.213, stratified=0.400, vr=0.360
+  d=0.04: current=0.933, stratified=0.983, vr=0.987
+  d=0.06: current=1.000, stratified=1.000, vr=1.000
+  d=0.08: current=1.000, stratified=1.000, vr=1.000
+  d=0.10: current=1.000, stratified=1.000, vr=1.000
+every type up by d/5:
+  d=0.02: current=0.020, stratified=0.063, vr=0.040
+  d=0.04: current=0.093, stratified=0.150, vr=0.127
+  d=0.06: current=0.257, stratified=0.280, vr=0.280
+  d=0.08: current=0.497, stratified=0.473, vr=0.477
+  d=0.10: current=0.753, stratified=0.727, vr=0.747
+
+## certificates (marginal null, known type shares), reps=300, n=2000
+type means (0.3, -0.3, 0.2, -0.2, 0.1, -0.1) + offset; null: marginal mean >= m0
+null boundary (offset 0, m0 = 0.0220): plain=0.030, post_stratified=0.030, control_variate=0.030
+  improvement 0.01: plain=0.080, post_stratified=0.127, control_variate=0.110
+  improvement 0.02: plain=0.253, post_stratified=0.423, control_variate=0.360
+  improvement 0.03: plain=0.583, post_stratified=0.813, control_variate=0.763
+  improvement 0.04: plain=0.847, post_stratified=0.947, control_variate=0.943
+
+## control variate, one covariate: P(reject by n=2000), reps=200, mean 0.02
+X = 0.02 + b Z + U(-0.2, 0.2), Z ~ U(-1, 1); known centre vs running centre
+  b=0.0 (corr 0.00): plain=1.000, known=1.000, running=0.800
+  b=0.2 (corr 0.71): plain=0.995, known=1.000, running=0.000
+  b=0.4 (corr 0.89): plain=0.795, known=1.000, running=0.000
+  b=0.6 (corr 0.95): plain=0.385, known=1.000, running=0.000
+
+## planning: cases of one 6% type to flag its regression (bernstein, power 0.8)
+cap 20000, regression 1000, sd 4000 (USD minor, illustrative)
+  current (e-Bonferroni, alpha/(K+1), K=6): 781
+  stratified (0.8 alpha):                    591
+  control variate, R^2=0.00, theta_max=1:  968
+  control variate, R^2=0.25, theta_max=1:  869
+  control variate, R^2=0.50, theta_max=1:  761
+  control variate, R^2=0.75, theta_max=1:  636
+  plain at alpha (reference):                565
+```
+
+Reading:
+
+- Validity: the worst null rate of any variance-reduced block test is 0.026 and of the
+  certificates 0.030, against `alpha = 0.05` (Monte Carlo bound `alpha + 3 SE = 0.071`),
+  with optional stopping.
+- Power: when one rare type regresses the composed rule's power rises from 0.17 to
+  0.40 (d = 0.08) and from 0.57 to 0.74 (d = 0.10); when two types regress, from 0.21
+  to 0.36 at d = 0.02. When a regression is spread thinly over every type the pooled
+  test is already the right tool and the composed rule matches it (0.747 vs 0.753 at
+  d = 0.10): the activation rule and the smaller share of `alpha` cost a little there.
+- Certificates: with known type shares, post-stratification raises power from 0.58
+  to 0.81 at an improvement of 0.03, by removing the between-type variance.
+- Control variates: with a known covariate mean power rises from 0.385 to 1.000 at
+  correlation 0.95; with the centre learned from the same stream it falls to 0, as
+  the Section 7.4 heuristic says (the drift penalty dominates).
+- Planning: the stratified plan needs 591 rare-type cases against 781 for e-Bonferroni
+  over 7 processes. A control variate pays for its wider bet range
+  (`theta_max = 1` triples the range): in this plan it does not beat the plain test
+  even at `R^2 = 0.75` (636 against 565 cases at the same `alpha`). The guaranteed
+  plan is conservative about the range, while the simulation above shows large gains
+  when the covariate is strong; plan with it only when `R^2` and a coefficient bound
+  are known from history, and otherwise plan without it.
 
 ## References
 
