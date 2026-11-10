@@ -1,0 +1,97 @@
+{
+ "allocation": {
+  "collected_minor": 0,
+  "open_minor": 0,
+  "voided_minor": 0,
+  "written_off_minor": 196000
+ },
+ "events": [
+  {
+   "on": "2026-06-01",
+   "type": "invoiced"
+  },
+  {
+   "attempt": 0,
+   "on": "2026-06-12",
+   "type": "debit_settled"
+  },
+  {
+   "addenda_info": "RECEIVER CONTACTED RDFI",
+   "attempt": 0,
+   "code": "R03",
+   "on": "2026-06-12",
+   "return_id": "RET-1",
+   "settles_on": "2026-06-17",
+   "trace_number": "907645653755949",
+   "type": "return_scheduled"
+  },
+  {
+   "addenda_info": "",
+   "attempt": 0,
+   "code": "R03",
+   "on": "2026-06-12",
+   "return_id": "RET-2",
+   "settles_on": "2026-06-19",
+   "trace_number": "256623484869721",
+   "type": "return_scheduled"
+  },
+  {
+   "on": "2026-06-17",
+   "return_id": "RET-1",
+   "type": "return_settled"
+  },
+  {
+   "on": "2026-06-19",
+   "return_id": "RET-2",
+   "type": "return_settled"
+  },
+  {
+   "action": "dishonor",
+   "args": {
+    "code": "R67",
+    "return_id": "RET-2"
+   },
+   "on": "2026-06-19",
+   "type": "action_applied"
+  },
+  {
+   "code": "R67",
+   "on": "2026-06-19",
+   "return_id": "RET-2",
+   "settles_on": "2026-06-22",
+   "type": "dishonor_submitted"
+  },
+  {
+   "on": "2026-06-22",
+   "return_id": "RET-2",
+   "type": "dishonor_settled"
+  },
+  {
+   "on": "2026-06-24",
+   "return_id": "RET-2",
+   "type": "dishonor_final"
+  },
+  {
+   "action": "write_off",
+   "args": {},
+   "on": "2026-06-24",
+   "type": "action_applied"
+  },
+  {
+   "amount_minor": 196000,
+   "on": "2026-06-24",
+   "type": "written_off"
+  }
+ ],
+ "family": "duplicate_return",
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 7,
+ "synthetic": true,
+ "trace_head": "f54dda39ebcfab610f89466435195405245bf749684806debabd0bc1be91faed"
+}

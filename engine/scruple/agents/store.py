@@ -1,7 +1,7 @@
 """A local file store so an episode can span several processes (the CLI).
 
-Each episode is one JSON file holding its kind (`simple`, the default, or `dispute`),
-seed, case type (the case family for `dispute`), nonce and call log. An
+Each episode is one JSON file holding its kind (`simple`, the default, `dispute` or
+`ach`), seed, case type (the case family for `dispute`), nonce and call log. An
 episode is rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
 assumed (a terminal session); concurrent writers to the same episode are not locked.
@@ -15,6 +15,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from scruple.agents.ach_episode import AchEpisode
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
 
@@ -30,10 +31,14 @@ class UnknownEpisodeError(KeyError):
     pass
 
 
-KINDS = ("simple", "dispute")
+KINDS = ("simple", "dispute", "ach")
+AnyEpisode = Episode | DisputeEpisode | AchEpisode
+WORKFLOW_KINDS: dict[str, type[AchEpisode]] = {"ach": AchEpisode}
 
 
-def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> Episode | DisputeEpisode:
+def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
+    if kind in WORKFLOW_KINDS:
+        return WORKFLOW_KINDS[kind](seed, case_type, nonce=nonce)
     if kind == "dispute":
         return DisputeEpisode(seed, case_type, nonce=nonce)
     return Episode(seed, case_type, nonce=nonce)
@@ -62,9 +67,7 @@ class EpisodeStore:
         record: dict[str, Any] = json.loads(path.read_text())
         return record
 
-    def start(
-        self, seed: int, case_type: str | None, kind: str = "simple"
-    ) -> Episode | DisputeEpisode:
+    def start(self, seed: int, case_type: str | None, kind: str = "simple") -> AnyEpisode:
         if kind not in KINDS:
             raise ValueError(f"unknown episode kind {kind!r}; choose from {', '.join(KINDS)}")
         nonce = len(list(self.root.glob("ep-*.json"))) if self.root.exists() else 0
@@ -78,9 +81,12 @@ class EpisodeStore:
         self._write(ep.episode_id, record)
         return ep
 
-    def load(self, episode_id: str) -> Episode | DisputeEpisode:
+    def load(self, episode_id: str) -> AnyEpisode:
         r = self._read(episode_id)
         calls = [(c["tool"], c["args"]) for c in r["calls"]]
+        if r.get("kind") in WORKFLOW_KINDS:
+            cls = WORKFLOW_KINDS[r["kind"]]
+            return cls.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
         if r.get("kind", "simple") == "dispute":
             return DisputeEpisode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
         return Episode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
