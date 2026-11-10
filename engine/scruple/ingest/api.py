@@ -9,6 +9,10 @@ POST /ingest/adyen/webhook verifies every notification item's `hmacSignature` wi
 the keys in `SCRUPLE_ADYEN_HMAC_KEYS` (comma separated hex, for rotation); one bad
 item rejects the delivery. Without a key the route answers 503.
 
+Tenancy: webhooks authenticate by the provider's signature, not an API key, so the
+tenant they write for is configuration (`tenant_id`, or `SCRUPLE_INGEST_TENANT`,
+default "default"); a case store is one tenant's file.
+
 Persistence: with a case store (the constructor, or `SCRUPLE_CASE_STORE`), every
 accepted delivery is written to it (`CaseStore.write_webhook`): idempotent by event
 id, so a redelivery after a restart is acknowledged as a duplicate and stores nothing;
@@ -26,6 +30,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, Request
@@ -39,10 +44,12 @@ from scruple.ingest.limits import MAX_JSON_BYTES
 from scruple.ingest.models import IngestBatch
 from scruple.ingest.store import DEFAULT_TENANT, CaseStore, RawPanRefusedError, StoreError
 from scruple.ingest.stripe.webhook import SIGNATURE_HEADER, StripeWebhookReceiver
+from scruple.storage.sql import TENANT_PATTERN
 
 SECRETS_ENV = "SCRUPLE_STRIPE_WEBHOOK_SECRETS"
 ADYEN_KEYS_ENV = "SCRUPLE_ADYEN_HMAC_KEYS"
 CASE_STORE_ENV = "SCRUPLE_CASE_STORE"
+TENANT_ENV = "SCRUPLE_INGEST_TENANT"
 
 
 class WebhookAck(BaseModel):
@@ -95,13 +102,18 @@ def ingest_router(
     *,
     store: CaseStore | None = None,
     adyen_keys: list[str] | None = None,
-    tenant_id: str = DEFAULT_TENANT,
+    tenant_id: str | None = None,
     synthetic: bool = False,
 ) -> APIRouter:
     router = APIRouter(prefix="/ingest", tags=["ingest"])
     receiver = stripe if stripe is not None else _from_env()
     cases = store if store is not None else _store_from_env()
     keys = adyen_keys if adyen_keys is not None else _split(ADYEN_KEYS_ENV)
+    # Webhooks carry no API key: the provider's signing secret identifies the sender, so
+    # one deployment's secrets and case store belong to one tenant (default "default").
+    tenant_id = tenant_id or os.environ.get(TENANT_ENV, "").strip() or DEFAULT_TENANT
+    if not re.match(TENANT_PATTERN, tenant_id):
+        raise ValueError(f"invalid {TENANT_ENV} {tenant_id!r}")
 
     @router.post(
         "/stripe/webhook", openapi_extra={RAW_BODY: True}, dependencies=[signed("stripe-signature")]

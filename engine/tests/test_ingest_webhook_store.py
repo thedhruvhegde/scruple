@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from scruple.ingest.api import ADYEN_KEYS_ENV, ingest_router
+from scruple.ingest.api import ADYEN_KEYS_ENV, TENANT_ENV, ingest_router
 from scruple.ingest.models import CaseState
 from scruple.ingest.store import CaseStore, StoreError
 from scruple.ingest.stripe.webhook import StripeWebhookReceiver, sign_header
@@ -205,3 +205,12 @@ def test_webhook_tables_are_append_only(store: CaseStore) -> None:
     for sql in ("DELETE FROM webhook_events", "UPDATE webhook_case_events SET applied = 0"):
         with pytest.raises(sqlite3.DatabaseError, match="append-only"):
             store._db.execute(sql)
+
+
+def test_ingest_tenant_comes_from_configuration(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Webhooks carry no API key, so the tenant they write for is configuration."""
+    monkeypatch.setenv(TENANT_ENV, "Not A Tenant")
+    with pytest.raises(ValueError, match=TENANT_ENV):
+        ingest_router()
+    monkeypatch.setenv(TENANT_ENV, "bank-a")
+    assert ingest_router().routes  # a valid tenant id is accepted

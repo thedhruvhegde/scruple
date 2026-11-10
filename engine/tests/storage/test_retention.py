@@ -25,6 +25,7 @@ from scruple.storage.retention import (
     digest,
     retention_for,
     set_policy,
+    tenant_gate,
 )
 from tests.storage.conftest import RawStorage
 from tests.test_gate_shadow_imported import Always, decisions, synthetic
@@ -60,7 +61,7 @@ def test_policy_validation() -> None:
         RetentionPolicy(tenant_id="bad tenant!", days=5)
 
 
-def test_latest_policy_wins_and_is_audited(store: RawStorage) -> None:
+def test_latest_policy_wins_and_is_audited_in_the_tenants_chain(store: RawStorage) -> None:
     gate = AgentGate(store, SteppingClock())
     set_policy(gate, RetentionPolicy(tenant_id="t1", days=90), "ops")
     set_policy(gate, RetentionPolicy(tenant_id="t1", days=30), "ops")
@@ -69,7 +70,11 @@ def test_latest_policy_wins_and_is_audited(store: RawStorage) -> None:
         RetentionPolicy(tenant_id="t1", days=30),
         RetentionPolicy(tenant_id="t2", days=7),
     ]
-    assert [e.event_type for e in gate.audit.entries()] == [EVENT_POLICY] * 3
+    t1, t2 = tenant_gate(gate, "t1"), tenant_gate(gate, "t2")
+    assert [e.event_type for e in t1.audit.entries()] == [EVENT_POLICY] * 2
+    assert [e.payload["tenant_id"] for e in t2.audit.entries()] == ["t2"]
+    assert gate.audit.entries() == []  # nothing in the operator's (default) chain
+    assert t1.audit.verify().ok and t2.audit.verify().ok
 
 
 def test_purge_deletes_old_rows_keeps_aggregates_and_the_chain(store: RawStorage) -> None:
@@ -82,7 +87,9 @@ def test_purge_deletes_old_rows_keeps_aggregates_and_the_chain(store: RawStorage
     other.record(BATCH[:5])  # another tenant, with no policy
     history_before = [s.body_json for s in old.history()]
     set_policy(gate, RetentionPolicy(tenant_id="t1", days=30), "ops")
-    head_before = gate.audit.head()
+    t1 = tenant_gate(gate, "t1")
+    head_before = t1.audit.head()
+    default_before = gate.audit.entries()
 
     clock.t = T0 + timedelta(days=45)
     [purge] = apply_retention(gate)
@@ -98,10 +105,11 @@ def test_purge_deletes_old_rows_keeps_aggregates_and_the_chain(store: RawStorage
     assert keep.record(BATCH[20:25]).total_recorded == 15  # and numbering moves on
     assert _shadow(store, clock, "t2").summary().decisions == 5  # untouched
 
-    # The audit chain is intact, verifies, and records the purge with its digest.
-    chain = gate.audit.verify()
-    assert chain.ok and gate.verify_integrity().ok
-    entries = gate.audit.entries()
+    # t1's audit chain is intact, verifies, and records the purge with its digest.
+    chain = t1.audit.verify()
+    assert chain.ok and t1.verify_integrity().ok
+    assert gate.audit.entries() == default_before and gate.audit.verify().ok
+    entries = t1.audit.entries()
     assert entries[-2].entry_hash == head_before
     last = entries[-1]
     assert last.event_type == EVENT_PURGED and last.seq == purge.audit_seq
@@ -110,7 +118,7 @@ def test_purge_deletes_old_rows_keeps_aggregates_and_the_chain(store: RawStorage
 
     # Applying again deletes nothing and records nothing.
     assert apply_retention(gate) == []
-    assert len(gate.audit.entries()) == len(entries)
+    assert len(t1.audit.entries()) == len(entries)
 
 
 def test_the_append_only_trigger_still_holds_outside_a_purge(store: RawStorage) -> None:
@@ -182,9 +190,10 @@ def test_case_store_purge(tmp_path: Path, store: RawStorage) -> None:
     assert again.duplicate
     [meta] = cs.purges()
     assert meta["tables"]["cases"]["digest_sha256"] == by_table["cases"].digest_sha256
-    purged = [e for e in gate.audit.entries() if e.event_type == EVENT_PURGED]
+    t1 = tenant_gate(gate, "t1")
+    purged = [e for e in t1.audit.entries() if e.event_type == EVENT_PURGED]
     assert {e.payload["table"] for e in purged} == {"cases", "movements", "webhook_case_events"}
-    assert gate.audit.verify().ok
+    assert t1.audit.verify().ok and gate.audit.verify().ok
     import sqlite3
 
     with pytest.raises(sqlite3.DatabaseError, match="append-only"):

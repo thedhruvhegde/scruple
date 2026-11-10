@@ -13,15 +13,17 @@ rule versions, imported-shadow summary snapshots (the aggregates at every point)
 ingest run reports and their counts, webhook event ids and payload hashes (still
 needed to refuse redeliveries), jobs and their results.
 
-How the audit chain stays verifiable. Nothing in `audit_events` is deleted or edited,
-so `scruple audit verify` recomputes the same chain. Each purge appends one audit
-entry, `retention.purged`, whose payload names the tenant, the table, the cutoff, the
-number of rows deleted and a SHA-256 digest over the deleted rows (their keys and body
-hashes, in key order). The purge is therefore itself on the tamper-evident record: an
-auditor holding an anchored head can see that a deletion happened, when, under which
-policy, and (from a backup) check that exactly those rows went. A row that disappears
-without such an entry is unexplained. Audit payloads never contain case rows, so no
-audit entry refers to data that retention removed.
+How the audit chain stays verifiable. Nothing in `audit_events` is deleted or edited, so
+`scruple audit verify` recomputes the same chain. Each purge appends one audit entry,
+`retention.purged`, to the purged tenant's own chain (its `audit_seq` in
+`retention_purges` is a seq in that chain; policy changes go there too), whose payload
+names the tenant, the table, the cutoff, the number of rows deleted and a SHA-256 digest
+over the deleted rows (their keys and body hashes, in key order). The purge is therefore
+itself on the tamper-evident record: an auditor holding an anchored head can see that a
+deletion happened, when, under which policy, and (from a backup) check that exactly
+those rows went. A row that disappears without such an entry is unexplained. Audit
+payloads never contain case rows, so no audit entry refers to data that retention
+removed.
 
 How deletion gets past the append-only triggers. The triggers stay in place for every
 other path. SQLite: the purge drops the one table's DELETE trigger, deletes and
@@ -42,6 +44,7 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.storage.base import DEFAULT_TENANT
+from scruple.storage.sql import TENANT_PATTERN
 
 if TYPE_CHECKING:
     from scruple.ingest.store import CaseStore
@@ -125,7 +128,7 @@ CREATE OR REPLACE TRIGGER imported_shadow_events_no_delete BEFORE DELETE
 class RetentionPolicy(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    tenant_id: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
+    tenant_id: str = Field(pattern=TENANT_PATTERN)  # the same ids as authentication
     days: int = Field(ge=1, le=36_500)
 
 
@@ -243,12 +246,27 @@ def retention_for(storage: object) -> SQLRetention:
     return repo
 
 
+def tenant_gate(gate: AgentGate, tenant: str) -> AgentGate:
+    """`gate` over `tenant`'s view of the same storage (same clock and config). Policy
+    changes and purges are recorded in the affected tenant's own audit chain, so the
+    tenant's auditor, who can verify only that chain, sees every deletion of its data."""
+    if getattr(gate.storage, "tenant", DEFAULT_TENANT) == tenant:
+        return gate
+    from scruple.service import AgentGate
+
+    for_tenant = getattr(gate.storage, "for_tenant", None)
+    if for_tenant is None:  # pragma: no cover - every SQL backend has it
+        raise TypeError(f"{type(gate.storage).__name__} cannot serve tenant {tenant!r}")
+    return AgentGate(for_tenant(tenant), gate.clock, gate.config)
+
+
 def set_policy(gate: AgentGate, policy: RetentionPolicy, actor: str) -> None:
-    """Store a tenant's policy and put the change on the audit record."""
+    """Store a tenant's policy and put the change on that tenant's audit record."""
     repo = retention_for(gate.storage)
+    tg = tenant_gate(gate, policy.tenant_id)
     with gate.storage.transaction():
         repo.set_policy(policy, gate.clock.now(), actor)
-        gate.record_runtime_event(
+        tg.record_runtime_event(
             EVENT_POLICY, actor, {"tenant_id": policy.tenant_id, "days": policy.days}
         )
 
@@ -312,7 +330,7 @@ def _record(
     at: datetime,
     actor: str,
 ) -> PurgeResult:
-    entry = gate.record_runtime_event(
+    entry = tenant_gate(gate, policy.tenant_id).record_runtime_event(
         EVENT_PURGED,
         actor,
         {
@@ -406,4 +424,5 @@ __all__ = [
     "digest",
     "retention_for",
     "set_policy",
+    "tenant_gate",
 ]
