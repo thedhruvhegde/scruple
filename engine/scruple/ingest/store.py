@@ -20,11 +20,12 @@ file (DATA_CHECKLIST.md "Deletion at the end").
 
 Webhooks (`write_webhook`). Each accepted Stripe or Adyen delivery is one ingest run,
 recorded in `webhook_events` under its event id, so a redelivery (the provider's own
-retries, or a replay after a restart) is recognised and stored nothing. Providers do
-not promise delivery order (Stripe's webhook documentation says events may arrive out
-of order), so every case an event carries is kept in `webhook_case_events` with the
-event's own timestamp, and becomes the case's current version only if no webhook event
-already applied to that case is newer. A late, older event is kept (`applied = 0`)
+retries, or a replay after a restart) is recognised and stored nothing. Delivery order
+is not relied on (ASSUMPTION: a provider may retry or deliver events out of order; not
+checked against provider documentation in this build), so every case an event
+carries is kept in `webhook_case_events` with the event's own timestamp, and becomes
+the case's current version only if no webhook event already applied to that case is
+newer. A late, older event is kept (`applied = 0`)
 but never overwrites a newer state. Equal timestamps: the later arrival wins.
 
 Retention (`purge`). The one sanctioned delete: a tenant's retention policy
