@@ -97,7 +97,7 @@ def test_integrity_detects_missing_records() -> None:
     s.unsafe_execute("DELETE FROM decisions WHERE decision_id='dec-00001'")  # type: ignore[attr-defined]
     s.unsafe_execute(  # type: ignore[attr-defined]
         "INSERT INTO rule_versions SELECT 'ghost-rule', version, content_hash, spec_json, "
-        "owner, provenance_json, created_at, status, rollback_to FROM rule_versions "
+        "owner, provenance_json, created_at, status, rollback_to, tenant_id FROM rule_versions "
         "WHERE rule_id='base-refund-contest'"
     )
     problems = " | ".join(g.verify_integrity().problems)

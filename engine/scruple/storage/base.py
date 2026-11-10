@@ -97,8 +97,15 @@ class Storage(
     ApiKeyRepository,
     Protocol,
 ):
-    """Everything the service needs from a backend, in one transactional object."""
+    """Everything the service needs from a backend, in one transactional object.
 
+    A store is bound to one tenant (`tenant`); history reads and writes see only
+    that tenant's rows. `for_tenant` gives a view of the same connection bound to
+    another tenant."""
+
+    tenant: str
+
+    def for_tenant(self, tenant: str) -> Storage: ...
     def close(self) -> None: ...
 
 

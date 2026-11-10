@@ -122,7 +122,7 @@ client = TestClient(APP)
         ("get", "/decisions/dec-99999/report", None, 404),
         ("post", "/rules/no-such-rule/versions/1/evaluate", None, 404),
         ("post", f"/rules/{GOOD_RULE_ID}/versions/1/approve", None, 403),
-        ("post", "/rules/baseline-x/rollback", {"reason": "no such rule"}, 409),
+        ("post", "/rules/baseline-x/rollback", {"reason": "no such rule"}, 404),
         ("post", "/ingest/stripe/webhook", None, 400),
     ],
 )

@@ -277,11 +277,7 @@ class ApiKeyService:
     # --- internals -------------------------------------------------------------------
 
     def _tenant_store(self, tenant: str) -> Storage:
-        for_tenant = getattr(self._storage, "for_tenant", None)
-        if for_tenant is None:
-            return self._storage
-        store: Storage = for_tenant(tenant)
-        return store
+        return self._storage.for_tenant(tenant)
 
     def _cached(self, fingerprint: bytes, key_id: str) -> bool:
         with self._lock:

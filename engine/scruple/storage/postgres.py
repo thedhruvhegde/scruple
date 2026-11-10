@@ -36,7 +36,10 @@ SCHEMA_NAME = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
 _HISTORY_MESSAGES = ("append-only", "immutable")
 
 # Keep in step with the alembic migrations (scruple/storage/migrations); a test
-# checks that both produce the same catalog.
+# checks that both produce the same catalog. The DDL is cumulative and idempotent,
+# like the migrations: 0001 tables, 0002 api keys, 0003 tenancy (a column added
+# to existing tables, then the primary keys widened), so `create_schema=True` also
+# upgrades a database made by an older version.
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS rule_versions (
     rule_id TEXT NOT NULL,
@@ -159,6 +162,45 @@ CREATE OR REPLACE TRIGGER api_keys_no_delete BEFORE DELETE ON api_keys
     FOR EACH ROW EXECUTE FUNCTION scruple_refuse('api keys are append-only; revoke instead');
 CREATE OR REPLACE TRIGGER api_keys_no_truncate BEFORE TRUNCATE ON api_keys
     FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse('api keys are append-only; revoke instead');
+
+-- tenancy (migration 0003): every history row belongs to a tenant
+ALTER TABLE rule_versions ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'default';
+ALTER TABLE audit_events ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'default';
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS tenant_id TEXT NOT NULL DEFAULT 'default';
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = 'rule_versions'::regclass AND contype = 'p'
+          AND pg_get_constraintdef(oid) LIKE '%tenant_id%'
+    ) THEN
+        ALTER TABLE rule_versions DROP CONSTRAINT rule_versions_pkey,
+            ADD CONSTRAINT rule_versions_pkey PRIMARY KEY (tenant_id, rule_id, version);
+        ALTER TABLE audit_events DROP CONSTRAINT audit_events_pkey,
+            ADD CONSTRAINT audit_events_pkey PRIMARY KEY (tenant_id, seq);
+        ALTER TABLE decisions DROP CONSTRAINT decisions_pkey,
+            ADD CONSTRAINT decisions_pkey PRIMARY KEY (tenant_id, decision_id);
+    END IF;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION scruple_rule_content_immutable() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF NEW.rule_id IS DISTINCT FROM OLD.rule_id
+       OR NEW.version IS DISTINCT FROM OLD.version
+       OR NEW.content_hash IS DISTINCT FROM OLD.content_hash
+       OR NEW.spec_json IS DISTINCT FROM OLD.spec_json
+       OR NEW.owner IS DISTINCT FROM OLD.owner
+       OR NEW.provenance_json IS DISTINCT FROM OLD.provenance_json
+       OR NEW.created_at IS DISTINCT FROM OLD.created_at
+       OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id THEN
+        RAISE EXCEPTION 'rule content is immutable';
+    END IF;
+    RETURN NEW;
+END
+$$;
 """
 
 
