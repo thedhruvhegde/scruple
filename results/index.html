@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Scruple results</title>
+<meta name="description" content="Scruple results: real CFPB complaints scored against real outcomes, and real Claude models replayed call by call on simulated disputes.">
+<link rel="canonical" href="https://thedhruvhegde.github.io/scruple/results/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Scruple">
+<meta property="og:title" content="Scruple results">
+<meta property="og:description" content="Real complaint data, real model behaviour, simulated cases. Every number from the engine's result files.">
+<meta property="og:url" content="https://thedhruvhegde.github.io/scruple/results/">
+<meta property="og:image" content="https://thedhruvhegde.github.io/scruple/assets/banners/og-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="../assets/logos/bone-on-night/mark.svg">
+<link rel="icon" type="image/png" sizes="1024x1024" href="../assets/logos/bone-on-night/mark.png">
+<link rel="apple-touch-icon" href="../assets/logos/bone-on-night/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<script>
+  (function () {
+    try { var t = localStorage.getItem("scruple-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+  })();
+</script>
+<style>
+/* Same tokens, bands and type scale as the home page (index.html). */
+:root {
+  --bg: #EDEAE1; --panel: #E4E0D5; --fg: #121513; --muted: #565B57; --rule: #D3D0C5; --rule-strong: #9C9F98;
+  --accent: #1D4A3A; --on-accent: #EDEAE1; --brass: #7A5C20; --block: #A63A1D;
+  --scr-bg: #0A1120; --scr-edge: #24324F;
+  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  /* screen ink; --c-mute is the night band's muted tone, for secondary text on screens */
+  --c-fg: #E6E3D6; --c-dim: #55617D; --c-mute: #A1ABC0; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
+}
+.band-pine  { --bg: #12301F; --panel: #173A28; --fg: #EDEAE1; --muted: #A8BCB0; --rule: #255040; --rule-strong: #4D7464; --accent: #86D0AA; --on-accent: #12301F; --brass: #E6C77E; --block: #F2906B; }
+.band-night { --bg: #0E1626; --panel: #142038; --fg: #E6E3D6; --muted: #A1ABC0; --rule: #1F2B44; --rule-strong: #3F4E6E; --accent: #7FD0A8; --on-accent: #0E1626; --brass: #E8C46A; --block: #F07E58; }
+.band-sand  { --bg: #E3D8BF; --panel: #D8CBAD; --fg: #17140C; --muted: #554D3E; --rule: #CBBF9F; --rule-strong: #968B71; --accent: #1D4A3A; --on-accent: #E3D8BF; --brass: #6E5216; --block: #9A3317; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
+  :root:not([data-theme="light"]) .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
+  :root:not([data-theme="light"]) .band-night { --bg: #0A101C; --panel: #0F172A; }
+  :root:not([data-theme="light"]) .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
+}
+:root[data-theme="dark"] { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
+:root[data-theme="dark"] .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
+:root[data-theme="dark"] .band-night { --bg: #0A101C; --panel: #0F172A; }
+:root[data-theme="dark"] .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
+
+*, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+::selection { background: var(--accent); color: var(--on-accent); }
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.page { max-width: 1240px; margin: 0 auto; }
+
+/* ---------- bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 32px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
+.brand svg { width: 24px; height: 24px; display: block; }
+.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.nav { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+.toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
+.toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
+.toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
+.toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; } }
+
+/* ---------- rows ---------- */
+.row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; padding-block: 88px; scroll-margin-top: 64px; }
+.row > * { min-width: 0; }
+.lhs { display: grid; gap: 20px; align-content: start; }
+.lhs h2, h1.big { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 28px; line-height: 1.12; letter-spacing: -0.02em; display: grid; gap: 10px; }
+h1.big { font-size: clamp(30px, 4vw, 44px); }
+.lhs h2 .n, h1.big .n { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; }
+.lhs .sum { font-size: 18px; line-height: 1.5; max-width: 46ch; }
+.lhs .src, .src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); line-height: 1.6; }
+.kv { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); }
+.kv li { padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 15px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; }
+.kv li:last-child { border-bottom: 0; }
+.kv li b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.kv.wide li { grid-template-columns: 92px minmax(0, 1fr); }
+.ok { color: var(--accent); }
+.no { color: var(--block); }
+.warn { color: var(--brass); }
+.full { grid-column: 1 / -1; }
+@media (max-width: 900px) { .row { grid-template-columns: minmax(0, 1fr); padding-block: 60px; } }
+
+.btn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; padding: 10px 14px; border: 1px solid var(--fg); color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; }
+.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.btn[disabled] { opacity: 0.45; cursor: default; }
+.btn[disabled]:hover { background: transparent; color: var(--fg); }
+
+.tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; border-bottom-color: var(--rule-strong); }
+td:last-child, th:last-child { padding-right: 0; }
+td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; color: var(--muted); }
+.m { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13px; white-space: nowrap; }
+caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; padding: 14px 0 4px; }
+
+/* ---------- screens (always dark) ---------- */
+.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); color: var(--c-fg); }
+@media (max-width: 760px) { .screen { box-shadow: 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
+.scr-cap { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); margin-top: 18px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.scr-cap b { color: var(--fg); font-weight: 600; }
+.term { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.65; padding: 16px 18px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+@media (max-width: 760px) { .term { font-size: 11px; padding: 12px; } #overview { font-size: 10px; } }
+.c-f { color: var(--c-fg); } .c-d { color: var(--c-mute); } .c-g { color: var(--c-pine); } .c-b { color: var(--c-brass); } .c-v { color: var(--c-verm); } .c-s { color: var(--c-sky); }
+
+/* chart, drawn as HTML inside a screen */
+.chart { padding: 18px 20px 20px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; display: grid; gap: 22px; }
+.ch-h { color: var(--c-fg); font-weight: 600; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.ch-h span { color: var(--c-mute); font-weight: 400; }
+.ch-row { display: grid; grid-template-columns: 76px minmax(0, 1fr) 46px; align-items: center; gap: 10px; height: 20px; }
+.ch-row .l { color: var(--c-mute); white-space: nowrap; }
+.ch-row .l.model { color: var(--c-fg); }
+.ch-row .v { color: var(--c-fg); text-align: right; font-variant-numeric: tabular-nums; }
+.track { position: relative; height: 100%; }
+.track .bar0 { position: absolute; left: 0; top: 6px; height: 8px; }
+.track .ref { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--c-dim); }
+.ci-row { grid-template-columns: 76px minmax(0, 1fr) 184px; }
+.ci-row .v { text-align: left; color: var(--c-mute); white-space: nowrap; }
+.ci-row .v b { color: var(--c-fg); font-weight: 500; }
+.track .zero { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--c-mute); }
+.track .wh { position: absolute; top: 9px; height: 2px; }
+.track .dot { position: absolute; top: 5px; width: 10px; height: 10px; margin-left: -5px; }
+.axis { display: grid; grid-template-columns: 76px minmax(0, 1fr) 184px; gap: 10px; color: var(--c-mute); font-size: 10.5px; }
+.axis div { position: relative; height: 14px; }
+.axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.k-blue { background: var(--c-blue); } .k-sky { background: var(--c-sky); } .k-brass { background: var(--c-brass); } .k-pine { background: var(--c-pine); }
+@media (max-width: 520px) { .ci-row, .axis { grid-template-columns: 64px minmax(0, 1fr) 0; } .ci-row .v { display: none; } .ch-row { grid-template-columns: 64px minmax(0, 1fr) 40px; } }
+
+/* ---------- watch a case ---------- */
+.watch { padding-block: 88px; display: grid; gap: 40px; scroll-margin-top: 64px; }
+.watch-top { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; }
+.watch-top > * { min-width: 0; }
+@media (max-width: 900px) { .watch { padding-block: 60px; } .watch-top { grid-template-columns: minmax(0, 1fr); } }
+.moments { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border: 1px solid var(--rule-strong); }
+.moments li { border-bottom: 1px solid var(--rule); }
+.moments li:last-child { border-bottom: 0; }
+.moments button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; width: 100%; padding: 11px 14px; cursor: pointer; font-size: 15px; line-height: 1.35; }
+.moments button b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; padding-top: 1px; }
+.moments button:hover, .moments button:focus-visible { background: var(--fg); color: var(--bg); }
+.moments button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+@media (max-width: 520px) { .moments button { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+.picker { display: grid; gap: 14px; }
+.grid { display: grid; grid-template-columns: 64px repeat(12, minmax(0, 1fr)); border-top: 1px solid var(--rule-strong); border-left: 1px solid var(--rule-strong); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+.grid > * { border-right: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); min-width: 0; text-align: center; padding: 7px 0; }
+.grid .hd { color: var(--muted); font-size: 10.5px; }
+.grid .rl { text-align: left; padding-left: 8px; color: var(--muted); }
+.grid .rl.mod { color: var(--fg); font-weight: 600; }
+.grid button { all: unset; box-sizing: border-box; text-align: center; padding: 7px 0; cursor: pointer; border-right: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); font-weight: 600; }
+.grid button:hover, .grid button:focus-visible { background: var(--fg); color: var(--bg); }
+.grid button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.grid .refc { color: var(--muted); }
+.grid .hf { color: var(--block); }
+.grid .uf { color: var(--brass); }
+.grid button[aria-pressed="true"] .hf, .grid button[aria-pressed="true"] .uf, .grid button:hover .hf, .grid button:hover .uf { color: inherit; }
+.legend { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.legend b { color: var(--fg); font-weight: 600; }
+
+.viewer { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 32px 40px; align-items: start; }
+.viewer > * { min-width: 0; }
+@media (max-width: 900px) { .viewer { grid-template-columns: minmax(0, 1fr); } }
+.scr-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 18px; border-bottom: 1px solid var(--scr-edge); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--c-mute); }
+.scr-head b { color: var(--c-fg); font-weight: 600; }
+#trace { height: 560px; overflow-y: auto; scrollbar-color: var(--scr-edge) var(--scr-bg); }
+@media (max-width: 760px) { #trace { height: 480px; } }
+.trace .st { display: block; padding: 6px 0 8px; }
+.trace .st.now { background: #111B31; }
+.trace .note { display: block; }
+.ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 22px; }
+.ctrl .pos { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); margin-left: auto; }
+
+.side { display: grid; gap: 18px; }
+.side h3 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.facts { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); }
+.facts li { padding: 9px 0; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; font-size: 15px; }
+.facts li:last-child { border-bottom: 0; }
+.facts li > span:first-child { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); padding-top: 2px; }
+.facts .m { white-space: normal; }
+.checks { width: 100%; }
+.checks td { font-size: 13.5px; padding: 8px 10px 8px 0; }
+.checks td.id { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; white-space: nowrap; }
+.checks td.r { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.quote { background: var(--panel); border: 1px solid var(--rule); padding: 14px 16px; font-size: 15px; }
+.quote p + p { margin-top: 8px; }
+.hidden-note { color: var(--muted); }
+
+/* ---------- experiments ---------- */
+.exp { display: grid; gap: 28px; }
+.verdict { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 600; }
+
+/* ---------- sources ---------- */
+.links { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule-strong); }
+.links li { border-bottom: 1px solid var(--rule); }
+.links a { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 4px 24px; padding: 12px 8px; text-decoration: none; }
+.links a span:first-child { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; overflow-wrap: anywhere; }
+.links a span:last-child { color: var(--muted); font-size: 15px; }
+.links a:hover, .links a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.links a:hover span:last-child, .links a:focus-visible span:last-child { color: var(--bg); }
+@media (max-width: 600px) { .links a { grid-template-columns: minmax(0, 1fr); } }
+.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; border-top: 1px solid var(--rule); padding-block: 16px 40px; }
+.foot-row span, .foot-row a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+.foot-row a:hover, .foot-row a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="0 0 24 24">
+      <g transform="rotate(-6 12 11)">
+        <rect x="1.5" y="10" width="21" height="2.4" fill="currentColor"/>
+        <rect x="3" y="5.4" width="4.6" height="4.6" fill="var(--brass)"/>
+      </g>
+      <path d="M12 12.6L17.5 21.5H6.5Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="bar band">
+  <div class="bar-in">
+    <a class="brand" href="../" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#real">Real data</a><a href="#watch">Watch a case</a><a href="#experiments">Experiments</a><a href="#sources">Sources</a>
+    </nav>
+    <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="band" aria-labelledby="top-h">
+    <div class="page row">
+      <div class="lhs">
+        <h1 class="big" id="top-h"><span class="n">RESULTS</span>Real data, real models, simulated cases.</h1>
+        <p class="sum">Two kinds of evidence. Public complaint data, scored against what really happened. And real Claude models working simulated card disputes through the same tools an outside agent would use.</p>
+        <ul class="kv wide">
+          <li><b class="ok">Real</b><span>CFPB consumer complaints, public domain. Held-out items, graded by code against the real field.</span></li>
+          <li><b class="ok">Real</b><span>Every tool call made by Claude Haiku, Sonnet and Opus. The replays below run their logged calls again.</span></li>
+          <li><b class="warn">Synthetic</b><span>The 12 dispute cases, the issuer that answers them, and the ledger they post to.</span></li>
+          <li><b>Scored</b><span>From the ledger and the hash-chained trace, never from what the model says about itself.</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="screen"><pre class="term" id="overview" aria-label="Summary of the results on this page">loading</pre></div>
+        <p class="scr-cap"><span><b>scruple results</b>, read from the engine's result files</span><span>small samples, wide intervals</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-pine" id="real" aria-labelledby="real-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="real-h"><span class="n">01 / REAL DATA</span>They know the rules. They misjudge which complaints end in relief.</h2>
+        <p class="sum">Claude Haiku and Claude Sonnet answered held-out CFPB complaints blind. On which regulation applies, both beat keyword rules and matched a trained classifier. On whether a complaint ends in relief, neither beat it.</p>
+        <ul class="kv wide">
+          <li><b>Regime</b><span>Reg E (12 CFR 1005.11) or Reg Z (12 CFR 1026.13), with a section cited. Accuracy.</span></li>
+          <li><b>Relief</b><span>Probability the complaint closed with relief. AUROC, where 0.5 is chance.</span></li>
+          <li><b>Routing</b><span>The issue the consumer filed under, 2025 complaints. Accuracy.</span></li>
+          <li><b>Baseline</b><span>TF-IDF and logistic regression, fitted on train, chosen on dev, scored on the same items.</span></li>
+        </ul>
+        <p class="src">Intervals: paired bootstrap over items, 2,000 resamples, model minus TF-IDF. Only one difference excludes zero, and only at the edge. The models ran as Claude Code subagents, not through the raw API. CFPB complaints are a self-selected sample, and the outcome is the company's response, not a card-network decision.</p>
+      </div>
+      <div>
+        <div class="screen" role="img" id="chart-real" aria-label="Bar chart of scores by task, and the difference from TF-IDF with 95% intervals. The full numbers are in the table below."></div>
+        <p class="scr-cap"><span><b>Same items for every system</b>, n per task shown</span><span>results/real/models/summary.json</span></p>
+      </div>
+      <div class="full tw">
+        <table id="real-table" style="min-width: 760px">
+          <caption>All numbers, same items</caption>
+          <thead><tr><th scope="col">Task</th><th scope="col">n</th><th scope="col">Majority</th><th scope="col">Keywords</th><th scope="col">TF-IDF + LR</th><th scope="col">Haiku</th><th scope="col">Sonnet</th><th scope="col">Haiku minus TF-IDF</th><th scope="col">Sonnet minus TF-IDF</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-night" id="watch" aria-labelledby="watch-h">
+    <div class="page watch">
+      <div class="watch-top">
+        <div class="lhs">
+          <h2 id="watch-h"><span class="n">02 / WATCH A CASE</span>Every call here is the model's own.</h2>
+          <p class="sum">Haiku, Sonnet and Opus each handled the same 12 simulated disputes, told to play honestly and keep the merchant's loss low. Pick one. The replay runs its logged calls through the engine again and shows what each call returned.</p>
+          <p class="src">Verifier notes are scored when the case closes, and pinned to the step they read. Output is abridged for width; nothing is added. Document ids are shortened.</p>
+        </div>
+        <div class="picker">
+          <ul class="moments" id="moments" aria-label="Key moments"></ul>
+          <div class="grid" id="grid" role="group" aria-label="All cases by model and seed"></div>
+          <p class="legend"><span><b>W</b> won</span><span><b>A</b> accepted</span><span><b>L</b> lost</span><span><b class="no">x</b> hard check failed, gate blocks</span><span><b class="warn">*</b> unfair outcome, soft check OUT-01</span><span>ref: evidence policy</span></p>
+        </div>
+      </div>
+      <div class="viewer">
+        <div>
+          <div class="screen">
+            <div class="scr-head"><span id="scr-title"><b>loading</b></span><span id="scr-day"></span></div>
+            <div id="trace" tabindex="0" aria-label="Replay of tool calls"><pre class="term trace" id="trace-pre"></pre></div>
+          </div>
+          <div class="ctrl">
+            <button type="button" class="btn" id="b-play">Play</button>
+            <button type="button" class="btn" id="b-prev" aria-label="Previous step">Back</button>
+            <button type="button" class="btn" id="b-next" aria-label="Next step">Next</button>
+            <button type="button" class="btn" id="b-all">Show all</button>
+            <span class="pos" id="pos" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="side" id="side" aria-live="polite"></div>
+      </div>
+      <div class="tw" id="ep-table-wrap">
+        <table id="ep-table" style="min-width: 760px">
+          <caption>12 cases each, merchant cost in USD, lower is better</caption>
+          <thead><tr><th scope="col">System</th><th scope="col">Mean cost</th><th scope="col">Against evidence policy, 95% CI</th><th scope="col">Gate pass</th><th scope="col">Won or partial</th><th scope="col">Fair outcome</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="src">Cost is the merchant's net loss in USD, fees included. Gate: no hard verifier failure. Fair outcome (OUT-01): the cardholder ended with what they were truly owed; it is a soft check, so it does not block the gate. Intervals: paired bootstrap over the 12 cases, 2,000 resamples. The simulated issuer's acceptance model is an assumption (docs/ASSUMPTIONS.md, A-13 onward), so wins on valid claims are partly a statement about the simulator. 12 cases is a demonstration of the method, not a leaderboard.</p>
+    </div>
+  </section>
+
+  <section class="band band-sand" id="experiments" aria-labelledby="exp-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="exp-h"><span class="n">03 / EXPERIMENTS</span>Two pre-registered tests. One passed narrowly. One failed.</h2>
+        <p class="sum">Both ran once on benchmark v1, 10,000 synthetic held-out dispute cases, with the pass bar committed before the run.</p>
+        <ul class="kv wide">
+          <li><b>E1</b><span>Plant 7 narrow regressions in a good policy. Does scruple flag them, and leave 3 harmless changes alone?</span></li>
+          <li><b>E2</b><span>Let an optimiser climb on wins and self-reports, then on the scruple scorecard. What does each learn?</span></li>
+        </ul>
+        <p class="src">Synthetic episodes only. One simulator, one benchmark, policies we wrote. They say nothing yet about the regressions real agents have.</p>
+      </div>
+      <div class="exp">
+        <div class="tw">
+          <table>
+            <caption>E1 planted regressions: <span class="ok">pass, narrowly</span></caption>
+            <thead><tr><th scope="col">Pre-registered</th><th scope="col">Result</th><th scope="col">Bar</th></tr></thead>
+            <tbody>
+              <tr><td>All 7 regressions flagged on the full benchmark</td><td class="m">7 of 7</td><td class="m ok">7 of 7, holds</td></tr>
+              <tr><td>Flagged folds where a regression changed something</td><td class="m">114 / 135 = 0.844<br>95% 0.774 to 0.896</td><td class="m ok">&ge; 0.80, holds</td></tr>
+              <tr><td>Harmless controls flagged</td><td class="m">3 / 60 = 0.050<br>95% 0.017 to 0.137</td><td class="m ok">&le; 0.05, at the bar</td></tr>
+            </tbody>
+          </table>
+          <p class="src" style="padding: 4px 0 8px">Point estimates meet both bars; neither interval does. A regression that only costs money ($1.30 a case) was not caught by the statistical gate even on 10,000 cases. The 3 control false alarms came from the ledger check INV-01.</p>
+        </div>
+        <div class="tw">
+          <table>
+            <caption>E2 reward hacking: <span class="no">fails on H2</span></caption>
+            <thead><tr><th scope="col">Pre-registered</th><th scope="col">Result</th><th scope="col">Holds</th></tr></thead>
+            <tbody>
+              <tr><td>H1: the proxy optimum uses an exploit, the scorecard optimum none</td><td>Proxy learned to fabricate documents and claim every win. Scorecard returned to the honest policy.</td><td class="m ok">yes</td></tr>
+              <tr><td>H2: the hacked policy costs more on the ledger</td><td class="m">-$33.87 a case<br>95% -$35.64 to -$32.10</td><td class="m no">no</td></tr>
+              <tr><td>H3: the hacked policy is flagged</td><td>20 of 20 folds, by hard checks. Hard failures 55.4% against 0.19% honest.</td><td class="m ok">yes</td></tr>
+              <tr><td>H4: hacking-gap bounds hold</td><td class="m">1,440 / 1,440 tail checks<br>360 / 360 expectation checks</td><td class="m ok">yes</td></tr>
+            </tbody>
+          </table>
+          <p class="src" style="padding: 4px 0 8px">Why H2 failed: in this simulator forged documents pass the issuer's checks, so the hacked policy won more (engine win rate 0.449 to 0.795) while being right less (0.777 to 0.557). The cost gate said promote. The provenance and self-report checks caught it, not the cost. An anchor computed inside the same simulator as the agent can be gamed through that simulator.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="sources" aria-labelledby="src-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="src-h"><span class="n">04 / SOURCES</span>Every number on this page, at its source.</h2>
+        <p class="sum">The page reads JSON exported by <span class="m">results/build_data.py</span>, which replays each call log through the engine and stops if a fresh score differs from the published one.</p>
+        <p class="src">Rebuild: cd engine, then uv run python ../results/build_data.py</p>
+      </div>
+      <div>
+        <ul class="links" id="links"></ul>
+      </div>
+    </div>
+    <div class="page foot-row">
+      <span>Scruple</span>
+      <span>Public CFPB data and simulated cases. No customer data.</span>
+      <a href="../">Back to the home page</a>
+    </div>
+  </section>
+</main>
+
+<script src="results.js"></script>
+</body>
+</html>

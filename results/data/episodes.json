@@ -1,0 +1,959 @@
+{
+ "seeds": [
+  5001,
+  5002,
+  5003,
+  5004,
+  5005,
+  5006,
+  5007,
+  5008,
+  5009,
+  5010,
+  5011,
+  5012
+ ],
+ "episodes": [
+  {
+   "model": "haiku",
+   "seed": 5003,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 107.32,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 9
+  },
+  {
+   "model": "haiku",
+   "seed": 5001,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 79.96,
+   "gate": false,
+   "fair": true,
+   "hard": [
+    "PROC-01",
+    "SR-01"
+   ],
+   "soft": [
+    "CF-01",
+    "EVD-02"
+   ],
+   "calls": 13
+  },
+  {
+   "model": "haiku",
+   "seed": 5011,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 104.2,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 10
+  },
+  {
+   "model": "haiku",
+   "seed": 5002,
+   "family": "cardholder_mistake",
+   "claim_valid": false,
+   "resolution": "lost",
+   "cost_usd": 78.46,
+   "gate": false,
+   "fair": false,
+   "hard": [
+    "DL-01",
+    "PROC-01",
+    "SR-01"
+   ],
+   "soft": [
+    "DL-02",
+    "OUT-01"
+   ],
+   "calls": 10
+  },
+  {
+   "model": "haiku",
+   "seed": 5006,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 14.6,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 13
+  },
+  {
+   "model": "haiku",
+   "seed": 5004,
+   "family": "friendly_fraud",
+   "claim_valid": false,
+   "resolution": "accepted",
+   "cost_usd": 121.37,
+   "gate": false,
+   "fair": false,
+   "hard": [
+    "PROC-01",
+    "SR-01"
+   ],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 14
+  },
+  {
+   "model": "haiku",
+   "seed": 5008,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 14
+  },
+  {
+   "model": "haiku",
+   "seed": 5010,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 13
+  },
+  {
+   "model": "haiku",
+   "seed": 5012,
+   "family": "true_fraud",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 166.11,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 9
+  },
+  {
+   "model": "haiku",
+   "seed": 5005,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 13.53,
+   "gate": false,
+   "fair": true,
+   "hard": [
+    "SR-01"
+   ],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 14
+  },
+  {
+   "model": "haiku",
+   "seed": 5007,
+   "family": "merchant_error",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "CAL-02",
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 11
+  },
+  {
+   "model": "haiku",
+   "seed": 5009,
+   "family": "friendly_fraud",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 40.0,
+   "gate": false,
+   "fair": true,
+   "hard": [
+    "PROC-01"
+   ],
+   "soft": [
+    "CAL-02",
+    "EVD-02"
+   ],
+   "calls": 15
+  },
+  {
+   "model": "sonnet",
+   "seed": 5003,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 12
+  },
+  {
+   "model": "sonnet",
+   "seed": 5001,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "lost",
+   "cost_usd": 79.96,
+   "gate": false,
+   "fair": true,
+   "hard": [
+    "DL-01",
+    "PROC-01",
+    "SR-01"
+   ],
+   "soft": [
+    "CF-01",
+    "DL-02",
+    "EVD-02"
+   ],
+   "calls": 7
+  },
+  {
+   "model": "sonnet",
+   "seed": 5011,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 129.2,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "CF-01",
+    "EVD-02"
+   ],
+   "calls": 21
+  },
+  {
+   "model": "sonnet",
+   "seed": 5002,
+   "family": "cardholder_mistake",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 40.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 17
+  },
+  {
+   "model": "sonnet",
+   "seed": 5006,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 14.6,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 11
+  },
+  {
+   "model": "sonnet",
+   "seed": 5004,
+   "family": "friendly_fraud",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 43.83,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 22
+  },
+  {
+   "model": "sonnet",
+   "seed": 5008,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 13
+  },
+  {
+   "model": "sonnet",
+   "seed": 5010,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 11
+  },
+  {
+   "model": "sonnet",
+   "seed": 5012,
+   "family": "true_fraud",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 10
+  },
+  {
+   "model": "sonnet",
+   "seed": 5005,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 13.53,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 12
+  },
+  {
+   "model": "sonnet",
+   "seed": 5007,
+   "family": "merchant_error",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 9
+  },
+  {
+   "model": "sonnet",
+   "seed": 5009,
+   "family": "friendly_fraud",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 40.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 15
+  },
+  {
+   "model": "opus",
+   "seed": 5003,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 107.32,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 9
+  },
+  {
+   "model": "opus",
+   "seed": 5001,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 54.96,
+   "gate": false,
+   "fair": true,
+   "hard": [
+    "SR-01"
+   ],
+   "soft": [
+    "CAL-02"
+   ],
+   "calls": 9
+  },
+  {
+   "model": "opus",
+   "seed": 5011,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 129.2,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "CF-01",
+    "EVD-02"
+   ],
+   "calls": 22
+  },
+  {
+   "model": "opus",
+   "seed": 5002,
+   "family": "cardholder_mistake",
+   "claim_valid": false,
+   "resolution": "accepted",
+   "cost_usd": 78.46,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "OUT-01"
+   ],
+   "calls": 15
+  },
+  {
+   "model": "opus",
+   "seed": 5006,
+   "family": "service_failure",
+   "claim_valid": true,
+   "resolution": "won",
+   "cost_usd": 14.6,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 12
+  },
+  {
+   "model": "opus",
+   "seed": 5004,
+   "family": "friendly_fraud",
+   "claim_valid": false,
+   "resolution": "accepted",
+   "cost_usd": 121.37,
+   "gate": true,
+   "fair": false,
+   "hard": [],
+   "soft": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "calls": 16
+  },
+  {
+   "model": "opus",
+   "seed": 5008,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 14
+  },
+  {
+   "model": "opus",
+   "seed": 5010,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 15.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 12
+  },
+  {
+   "model": "opus",
+   "seed": 5012,
+   "family": "true_fraud",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 166.11,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 10
+  },
+  {
+   "model": "opus",
+   "seed": 5005,
+   "family": "buyers_remorse",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 13.53,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 14
+  },
+  {
+   "model": "opus",
+   "seed": 5007,
+   "family": "merchant_error",
+   "claim_valid": true,
+   "resolution": "accepted",
+   "cost_usd": 98.85,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [],
+   "calls": 11
+  },
+  {
+   "model": "opus",
+   "seed": 5009,
+   "family": "friendly_fraud",
+   "claim_valid": false,
+   "resolution": "won",
+   "cost_usd": 40.0,
+   "gate": true,
+   "fair": true,
+   "hard": [],
+   "soft": [
+    "EVD-02"
+   ],
+   "calls": 18
+  }
+ ],
+ "refs": [
+  {
+   "system": "ref:evidence",
+   "seed": 5001,
+   "family": "service_failure",
+   "cost_usd": 54.96,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5002,
+   "family": "cardholder_mistake",
+   "cost_usd": 78.46,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5003,
+   "family": "service_failure",
+   "cost_usd": 107.32,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5004,
+   "family": "friendly_fraud",
+   "cost_usd": 121.37,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5005,
+   "family": "buyers_remorse",
+   "cost_usd": 13.53,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5006,
+   "family": "service_failure",
+   "cost_usd": 14.6,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5007,
+   "family": "merchant_error",
+   "cost_usd": 98.85,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5008,
+   "family": "buyers_remorse",
+   "cost_usd": 15.0,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5009,
+   "family": "friendly_fraud",
+   "cost_usd": 40.0,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5010,
+   "family": "buyers_remorse",
+   "cost_usd": 15.0,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5011,
+   "family": "service_failure",
+   "cost_usd": 104.2,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:evidence",
+   "seed": 5012,
+   "family": "true_fraud",
+   "cost_usd": 166.11,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5001,
+   "family": "service_failure",
+   "cost_usd": 54.96,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5002,
+   "family": "cardholder_mistake",
+   "cost_usd": 53.46,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5003,
+   "family": "service_failure",
+   "cost_usd": 107.32,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5004,
+   "family": "friendly_fraud",
+   "cost_usd": 96.37,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5005,
+   "family": "buyers_remorse",
+   "cost_usd": 91.07,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5006,
+   "family": "service_failure",
+   "cost_usd": 36.53,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5007,
+   "family": "merchant_error",
+   "cost_usd": 98.85,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5008,
+   "family": "buyers_remorse",
+   "cost_usd": 28.77,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5009,
+   "family": "friendly_fraud",
+   "cost_usd": 198.21,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5010,
+   "family": "buyers_remorse",
+   "cost_usd": 491.42,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5011,
+   "family": "service_failure",
+   "cost_usd": 104.2,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:always_accept",
+   "seed": 5012,
+   "family": "true_fraud",
+   "cost_usd": 166.11,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5001,
+   "family": "service_failure",
+   "cost_usd": 54.96,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5002,
+   "family": "cardholder_mistake",
+   "cost_usd": 78.46,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5003,
+   "family": "service_failure",
+   "cost_usd": 107.32,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5004,
+   "family": "friendly_fraud",
+   "cost_usd": 121.37,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": false
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5005,
+   "family": "buyers_remorse",
+   "cost_usd": 13.53,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5006,
+   "family": "service_failure",
+   "cost_usd": 36.53,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5007,
+   "family": "merchant_error",
+   "cost_usd": 98.85,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5008,
+   "family": "buyers_remorse",
+   "cost_usd": 15.0,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5009,
+   "family": "friendly_fraud",
+   "cost_usd": 40.0,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5010,
+   "family": "buyers_remorse",
+   "cost_usd": 15.0,
+   "resolution": "won",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5011,
+   "family": "service_failure",
+   "cost_usd": 104.2,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  },
+  {
+   "system": "ref:oracle",
+   "seed": 5012,
+   "family": "true_fraud",
+   "cost_usd": 166.11,
+   "resolution": "accepted",
+   "gate": true,
+   "fair_outcome": true
+  }
+ ],
+ "summary": {
+  "haiku": {
+   "n": 12,
+   "mean_cost": 64.21,
+   "vs_evidence": "-4.90 [-20.96, +6.25]",
+   "gate": "7/12",
+   "reward": 0.554,
+   "won": "6/12",
+   "fair": "8/12"
+  },
+  "sonnet": {
+   "n": 12,
+   "mean_cost": 36.34,
+   "vs_evidence": "-32.77 [-64.01, -4.33]",
+   "gate": "11/12",
+   "reward": 0.85,
+   "won": "10/12",
+   "fair": "8/12"
+  },
+  "opus": {
+   "n": 12,
+   "mean_cost": 71.2,
+   "vs_evidence": "+2.08 [+0.00, +6.25]",
+   "gate": "11/12",
+   "reward": 0.87,
+   "won": "5/12",
+   "fair": "9/12"
+  },
+  "ref:evidence": {
+   "n": 12,
+   "mean_cost": 69.12,
+   "vs_evidence": "",
+   "gate": "12/12",
+   "reward": 0.963,
+   "won": "5/12",
+   "fair": "9/12"
+  },
+  "ref:always_accept": {
+   "n": 12,
+   "mean_cost": 127.27,
+   "vs_evidence": "+58.16 [+1.10, +144.54]",
+   "gate": "12/12",
+   "reward": 0.88,
+   "won": "0/12",
+   "fair": "6/12"
+  },
+  "ref:oracle": {
+   "n": 12,
+   "mean_cost": 70.94,
+   "vs_evidence": "+1.83 [+0.00, +5.48]",
+   "gate": "12/12",
+   "reward": 0.958,
+   "won": "4/12",
+   "fair": "10/12"
+  }
+ }
+}
