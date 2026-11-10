@@ -1,0 +1,3390 @@
+{
+  "components": {
+    "schemas": {
+      "Action": {
+        "enum": [
+          "accept",
+          "contest",
+          "escalate"
+        ],
+        "title": "Action",
+        "type": "string"
+      },
+      "ArmStats": {
+        "properties": {
+          "accuracy": {
+            "title": "Accuracy",
+            "type": "number"
+          },
+          "escalation_rate": {
+            "title": "Escalation Rate",
+            "type": "number"
+          },
+          "ledger_findings": {
+            "title": "Ledger Findings",
+            "type": "integer"
+          },
+          "mean_regret_usd_minor": {
+            "title": "Mean Regret Usd Minor",
+            "type": "number"
+          },
+          "policy_findings": {
+            "title": "Policy Findings",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "mean_regret_usd_minor",
+          "accuracy",
+          "escalation_rate",
+          "ledger_findings",
+          "policy_findings"
+        ],
+        "title": "ArmStats",
+        "type": "object"
+      },
+      "BatchResult": {
+        "properties": {
+          "agree": {
+            "title": "Agree",
+            "type": "integer"
+          },
+          "candidate_hard_findings": {
+            "title": "Candidate Hard Findings",
+            "type": "integer"
+          },
+          "recorded": {
+            "title": "Recorded",
+            "type": "integer"
+          },
+          "total_recorded": {
+            "title": "Total Recorded",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "recorded",
+          "agree",
+          "candidate_hard_findings",
+          "total_recorded"
+        ],
+        "title": "BatchResult",
+        "type": "object"
+      },
+      "BuildInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "build_date": {
+            "title": "Build Date",
+            "type": "string"
+          },
+          "commit": {
+            "title": "Commit",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "python": {
+            "title": "Python",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "commit",
+          "build_date",
+          "python"
+        ],
+        "title": "BuildInfo",
+        "type": "object"
+      },
+      "CanaryMetrics": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "CanaryTypeEvidence": {
+        "properties": {
+          "benefit_e_value": {
+            "title": "Benefit E Value",
+            "type": "number"
+          },
+          "cap": {
+            "title": "Cap",
+            "type": "number"
+          },
+          "case_type": {
+            "title": "Case Type",
+            "type": "string"
+          },
+          "ci_high": {
+            "title": "Ci High",
+            "type": "number"
+          },
+          "ci_low": {
+            "title": "Ci Low",
+            "type": "number"
+          },
+          "effect_estimate": {
+            "title": "Effect Estimate",
+            "type": "number"
+          },
+          "harm_e_value": {
+            "title": "Harm E Value",
+            "type": "number"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "scale": {
+            "title": "Scale",
+            "type": "number"
+          },
+          "treated": {
+            "title": "Treated",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "case_type",
+          "n",
+          "treated",
+          "cap",
+          "scale",
+          "effect_estimate",
+          "ci_low",
+          "ci_high",
+          "harm_e_value",
+          "benefit_e_value"
+        ],
+        "title": "CanaryTypeEvidence",
+        "type": "object"
+      },
+      "CaseState": {
+        "description": "Where an external case stands. Mapped per adapter; see docs/INTEGRATIONS.md.",
+        "enum": [
+          "open",
+          "won",
+          "lost",
+          "accepted",
+          "prevented",
+          "closed"
+        ],
+        "title": "CaseState",
+        "type": "string"
+      },
+      "CaseTypeStats": {
+        "properties": {
+          "agree": {
+            "title": "Agree",
+            "type": "integer"
+          },
+          "candidate_decided": {
+            "title": "Candidate Decided",
+            "type": "integer"
+          },
+          "candidate_hard_findings": {
+            "title": "Candidate Hard Findings",
+            "type": "integer"
+          },
+          "candidate_mean_cost_usd_minor": {
+            "title": "Candidate Mean Cost Usd Minor",
+            "type": "number"
+          },
+          "candidate_mean_regret_usd_minor": {
+            "title": "Candidate Mean Regret Usd Minor",
+            "type": "number"
+          },
+          "case_type": {
+            "title": "Case Type",
+            "type": "string"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "production_hard_findings": {
+            "title": "Production Hard Findings",
+            "type": "integer"
+          },
+          "production_mean_cost_usd_minor": {
+            "title": "Production Mean Cost Usd Minor",
+            "type": "number"
+          },
+          "production_mean_regret_usd_minor": {
+            "title": "Production Mean Regret Usd Minor",
+            "type": "number"
+          }
+        },
+        "required": [
+          "case_type",
+          "n",
+          "agree",
+          "candidate_decided",
+          "production_mean_cost_usd_minor",
+          "candidate_mean_cost_usd_minor",
+          "production_mean_regret_usd_minor",
+          "candidate_mean_regret_usd_minor",
+          "production_hard_findings",
+          "candidate_hard_findings"
+        ],
+        "title": "CaseTypeStats",
+        "type": "object"
+      },
+      "CheckResult": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "hard",
+              "evidence",
+              "info"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "passed",
+          "detail"
+        ],
+        "title": "CheckResult",
+        "type": "object"
+      },
+      "Condition": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "enum": [
+              "mcc",
+              "reason_code",
+              "amount_usd_minor",
+              "delivery_confirmed",
+              "three_ds",
+              "evidence_on_time",
+              "prior_dispute_on_txn",
+              "has_prior_refund",
+              "currency_mismatch"
+            ],
+            "title": "Field",
+            "type": "string"
+          },
+          "op": {
+            "enum": [
+              "eq",
+              "ne",
+              "lt",
+              "le",
+              "gt",
+              "ge"
+            ],
+            "title": "Op",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "field",
+          "op",
+          "value"
+        ],
+        "title": "Condition",
+        "type": "object"
+      },
+      "ConflictStat": {
+        "properties": {
+          "cases": {
+            "title": "Cases",
+            "type": "integer"
+          },
+          "overridden_action": {
+            "title": "Overridden Action",
+            "type": "string"
+          },
+          "overridden_rule": {
+            "title": "Overridden Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "overridden_rule",
+          "overridden_action",
+          "cases"
+        ],
+        "title": "ConflictStat",
+        "type": "object"
+      },
+      "Decision": {
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "agent_id": {
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "approvers": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Approvers",
+            "type": "array"
+          },
+          "canary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CanaryMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decision_id": {
+            "title": "Decision Id",
+            "type": "string"
+          },
+          "episodes": {
+            "title": "Episodes",
+            "type": "integer"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "rule_description": {
+            "title": "Rule Description",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_logic": {
+            "title": "Rule Logic",
+            "type": "string"
+          },
+          "shadow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ShadowMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage-Output"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "decision_id",
+          "stage",
+          "outcome",
+          "rule_id",
+          "version",
+          "content_hash",
+          "rule_description",
+          "rule_logic",
+          "owner",
+          "agent_id",
+          "episodes",
+          "actor",
+          "created_at",
+          "summary",
+          "reasons"
+        ],
+        "title": "Decision",
+        "type": "object"
+      },
+      "DecisionOut": {
+        "properties": {
+          "decision_id": {
+            "title": "Decision Id",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "report_url": {
+            "title": "Report Url",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage-Output"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "decision_id",
+          "stage",
+          "outcome",
+          "rule_id",
+          "version",
+          "summary",
+          "reasons",
+          "report_url"
+        ],
+        "title": "DecisionOut",
+        "type": "object"
+      },
+      "DisputeCase": {
+        "additionalProperties": false,
+        "properties": {
+          "amount_minor": {
+            "exclusiveMinimum": 0.0,
+            "title": "Amount Minor",
+            "type": "integer"
+          },
+          "captured_minor": {
+            "exclusiveMinimum": 0.0,
+            "title": "Captured Minor",
+            "type": "integer"
+          },
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "claim_valid": {
+            "title": "Claim Valid",
+            "type": "boolean"
+          },
+          "delivery_confirmed": {
+            "title": "Delivery Confirmed",
+            "type": "boolean"
+          },
+          "dispute_currency": {
+            "title": "Dispute Currency",
+            "type": "string"
+          },
+          "evidence_ready_day": {
+            "title": "Evidence Ready Day",
+            "type": "integer"
+          },
+          "mcc": {
+            "title": "Mcc",
+            "type": "string"
+          },
+          "merchant_id": {
+            "title": "Merchant Id",
+            "type": "string"
+          },
+          "prior_dispute_on_txn": {
+            "title": "Prior Dispute On Txn",
+            "type": "boolean"
+          },
+          "reason_code": {
+            "$ref": "#/components/schemas/ReasonCode"
+          },
+          "refunded_minor": {
+            "minimum": 0.0,
+            "title": "Refunded Minor",
+            "type": "integer"
+          },
+          "response_deadline_day": {
+            "title": "Response Deadline Day",
+            "type": "integer"
+          },
+          "scenario": {
+            "$ref": "#/components/schemas/Scenario"
+          },
+          "three_ds": {
+            "title": "Three Ds",
+            "type": "boolean"
+          },
+          "txn_currency": {
+            "title": "Txn Currency",
+            "type": "string"
+          },
+          "txn_id": {
+            "title": "Txn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "txn_id",
+          "merchant_id",
+          "mcc",
+          "reason_code",
+          "amount_minor",
+          "dispute_currency",
+          "txn_currency",
+          "captured_minor",
+          "refunded_minor",
+          "delivery_confirmed",
+          "three_ds",
+          "evidence_ready_day",
+          "response_deadline_day",
+          "prior_dispute_on_txn",
+          "scenario",
+          "claim_valid"
+        ],
+        "title": "DisputeCase",
+        "type": "object"
+      },
+      "EValueEvidence": {
+        "description": "Everything the e-value gate decided on. Stored with the decision.",
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "alpha_certify": {
+            "title": "Alpha Certify",
+            "type": "number"
+          },
+          "beta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beta"
+          },
+          "family": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Family",
+            "type": "array"
+          },
+          "improved": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Improved",
+            "type": "array"
+          },
+          "insufficient": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Insufficient",
+            "type": "array"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "n_cases": {
+            "title": "N Cases",
+            "type": "integer"
+          },
+          "plan_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Method"
+          },
+          "pooled_certify_e_value": {
+            "title": "Pooled Certify E Value",
+            "type": "number"
+          },
+          "pooled_ci_high": {
+            "title": "Pooled Ci High",
+            "type": "number"
+          },
+          "pooled_ci_low": {
+            "title": "Pooled Ci Low",
+            "type": "number"
+          },
+          "pooled_mean_diff": {
+            "title": "Pooled Mean Diff",
+            "type": "number"
+          },
+          "pooled_regression_e_value": {
+            "title": "Pooled Regression E Value",
+            "type": "number"
+          },
+          "regressed": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Regressed",
+            "type": "array"
+          },
+          "regressed_fwer": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Regressed Fwer",
+            "type": "array"
+          },
+          "required_total_cases": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Total Cases"
+          },
+          "sufficient": {
+            "default": true,
+            "title": "Sufficient",
+            "type": "boolean"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/TypeEvidence"
+            },
+            "title": "Types",
+            "type": "array"
+          },
+          "untouched_types": {
+            "title": "Untouched Types",
+            "type": "integer"
+          },
+          "violations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Violations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "method",
+          "alpha",
+          "alpha_certify",
+          "n_cases",
+          "family",
+          "untouched_types",
+          "types",
+          "regressed",
+          "improved",
+          "regressed_fwer",
+          "pooled_mean_diff",
+          "pooled_ci_low",
+          "pooled_ci_high",
+          "pooled_certify_e_value",
+          "pooled_regression_e_value",
+          "violations"
+        ],
+        "title": "EValueEvidence",
+        "type": "object"
+      },
+      "ExternalCase": {
+        "additionalProperties": false,
+        "description": "One dispute (or inquiry) as reported by an external system.",
+        "properties": {
+          "amount_minor": {
+            "minimum": 0.0,
+            "title": "Amount Minor",
+            "type": "integer"
+          },
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "evidence_due_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Due At"
+          },
+          "evidence_fields": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Fields",
+            "type": "array"
+          },
+          "evidence_past_due": {
+            "default": false,
+            "title": "Evidence Past Due",
+            "type": "boolean"
+          },
+          "evidence_submitted": {
+            "default": false,
+            "title": "Evidence Submitted",
+            "type": "boolean"
+          },
+          "external_id": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "External Id",
+            "type": "string"
+          },
+          "facts": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentFacts"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "livemode": {
+            "default": false,
+            "title": "Livemode",
+            "type": "boolean"
+          },
+          "merchant_ref": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merchant Ref"
+          },
+          "network": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Network"
+          },
+          "network_reason_code": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Network Reason Code"
+          },
+          "opened_at": {
+            "format": "date-time",
+            "title": "Opened At",
+            "type": "string"
+          },
+          "payment_ref": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Payment Ref",
+            "type": "string"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReasonCode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "pattern": "^[a-z][a-z0-9_]{0,31}$",
+            "title": "Source",
+            "type": "string"
+          },
+          "source_reason": {
+            "maxLength": 255,
+            "title": "Source Reason",
+            "type": "string"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/Stage-Input"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CaseState"
+          }
+        },
+        "required": [
+          "source",
+          "external_id",
+          "payment_ref",
+          "stage",
+          "state",
+          "reason_code",
+          "source_reason",
+          "amount_minor",
+          "currency",
+          "opened_at"
+        ],
+        "title": "ExternalCase",
+        "type": "object"
+      },
+      "Finding": {
+        "properties": {
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "kind",
+          "detail"
+        ],
+        "title": "Finding",
+        "type": "object"
+      },
+      "FindingCount": {
+        "properties": {
+          "basis": {
+            "default": "observed",
+            "enum": [
+              "observed",
+              "estimated"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
+          "candidate": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate"
+          },
+          "check": {
+            "title": "Check",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "process",
+              "deadline",
+              "evidence",
+              "ledger",
+              "partner"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "production": {
+            "title": "Production",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "check",
+          "kind",
+          "production",
+          "candidate"
+        ],
+        "title": "FindingCount",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImportedBatchResult": {
+        "properties": {
+          "agree": {
+            "title": "Agree",
+            "type": "integer"
+          },
+          "candidate_findings": {
+            "title": "Candidate Findings",
+            "type": "integer"
+          },
+          "recorded": {
+            "title": "Recorded",
+            "type": "integer"
+          },
+          "total_recorded": {
+            "title": "Total Recorded",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "recorded",
+          "agree",
+          "candidate_findings",
+          "total_recorded"
+        ],
+        "title": "ImportedBatchResult",
+        "type": "object"
+      },
+      "ImportedDecision": {
+        "additionalProperties": false,
+        "description": "One decision production made on a real (imported) case. Input only.",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "agent_id": {
+            "default": "production",
+            "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "case": {
+            "$ref": "#/components/schemas/ExternalCase"
+          },
+          "decided_at": {
+            "format": "date-time",
+            "title": "Decided At",
+            "type": "string"
+          },
+          "movements": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LedgerMovement"
+            },
+            "maxItems": 64,
+            "title": "Movements",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case",
+          "action",
+          "decided_at"
+        ],
+        "title": "ImportedDecision",
+        "type": "object"
+      },
+      "ImportedDecisionBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/ImportedDecision"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Decisions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "decisions"
+        ],
+        "title": "ImportedDecisionBatch",
+        "type": "object"
+      },
+      "ImportedObserveResult": {
+        "properties": {
+          "resolved": {
+            "title": "Resolved",
+            "type": "integer"
+          },
+          "unknown": {
+            "title": "Unknown",
+            "type": "integer"
+          },
+          "updated": {
+            "title": "Updated",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "updated",
+          "resolved",
+          "unknown"
+        ],
+        "title": "ImportedObserveResult",
+        "type": "object"
+      },
+      "ImportedOutcome": {
+        "additionalProperties": false,
+        "description": "A later version of a recorded case (re-exported once it resolved). Input only.",
+        "properties": {
+          "case": {
+            "$ref": "#/components/schemas/ExternalCase"
+          },
+          "movements": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LedgerMovement"
+            },
+            "maxItems": 64,
+            "title": "Movements",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case"
+        ],
+        "title": "ImportedOutcome",
+        "type": "object"
+      },
+      "ImportedOutcomeBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/ImportedOutcome"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Outcomes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "outcomes"
+        ],
+        "title": "ImportedOutcomeBatch",
+        "type": "object"
+      },
+      "ImportedShadowSummary": {
+        "properties": {
+          "by_reason": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "title": "By Reason",
+            "type": "object"
+          },
+          "candidate": {
+            "title": "Candidate",
+            "type": "string"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "data": {
+            "title": "Data",
+            "type": "string"
+          },
+          "decisions": {
+            "title": "Decisions",
+            "type": "integer"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/FindingCount"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/Metric"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          },
+          "resolved": {
+            "title": "Resolved",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data",
+          "candidate",
+          "profile",
+          "decisions",
+          "resolved",
+          "open",
+          "currency",
+          "metrics",
+          "findings",
+          "by_reason"
+        ],
+        "title": "ImportedShadowSummary",
+        "type": "object"
+      },
+      "IntegrityReport": {
+        "properties": {
+          "chain": {
+            "$ref": "#/components/schemas/VerifyResult"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "problems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Problems",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok",
+          "chain",
+          "problems"
+        ],
+        "title": "IntegrityReport",
+        "type": "object"
+      },
+      "Interval": {
+        "additionalProperties": false,
+        "description": "A point estimate with a two-sided interval at `confidence`.",
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "high": {
+            "title": "High",
+            "type": "number"
+          },
+          "low": {
+            "title": "Low",
+            "type": "number"
+          },
+          "mean": {
+            "title": "Mean",
+            "type": "number"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "mean",
+          "low",
+          "high",
+          "confidence",
+          "n",
+          "method"
+        ],
+        "title": "Interval",
+        "type": "object"
+      },
+      "LedgerMovement": {
+        "additionalProperties": false,
+        "description": "A balance change tied to a case, from the merchant's point of view.\n\n`amount_minor` is gross (negative = withdrawn), `fee_minor` is a fee charged\n(positive when assessed), and `net_minor == amount_minor - fee_minor`.",
+        "properties": {
+          "amount_minor": {
+            "title": "Amount Minor",
+            "type": "integer"
+          },
+          "case_external_id": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Case External Id",
+            "type": "string"
+          },
+          "category": {
+            "maxLength": 255,
+            "title": "Category",
+            "type": "string"
+          },
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "external_id": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "External Id",
+            "type": "string"
+          },
+          "fee_minor": {
+            "minimum": 0.0,
+            "title": "Fee Minor",
+            "type": "integer"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/MovementKind"
+          },
+          "net_minor": {
+            "title": "Net Minor",
+            "type": "integer"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "payment_ref": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Payment Ref",
+            "type": "string"
+          },
+          "source": {
+            "pattern": "^[a-z][a-z0-9_]{0,31}$",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "external_id",
+          "case_external_id",
+          "payment_ref",
+          "kind",
+          "amount_minor",
+          "fee_minor",
+          "net_minor",
+          "currency",
+          "occurred_at",
+          "category"
+        ],
+        "title": "LedgerMovement",
+        "type": "object"
+      },
+      "LiveDecision": {
+        "additionalProperties": false,
+        "description": "One decision the production agent already made. Input only.",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "agent_id": {
+            "default": "production",
+            "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "case": {
+            "$ref": "#/components/schemas/DisputeCase"
+          }
+        },
+        "required": [
+          "case",
+          "action"
+        ],
+        "title": "LiveDecision",
+        "type": "object"
+      },
+      "LiveDecisionBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/LiveDecision"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Decisions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "decisions"
+        ],
+        "title": "LiveDecisionBatch",
+        "type": "object"
+      },
+      "Metric": {
+        "properties": {
+          "basis": {
+            "enum": [
+              "observed",
+              "estimated"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
+          "high": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High"
+          },
+          "low": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "default": "",
+            "title": "Note",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "name",
+          "basis",
+          "value",
+          "n"
+        ],
+        "title": "Metric",
+        "type": "object"
+      },
+      "MovementKind": {
+        "enum": [
+          "dispute_debit",
+          "dispute_credit",
+          "other"
+        ],
+        "title": "MovementKind",
+        "type": "string"
+      },
+      "Outcome": {
+        "enum": [
+          "promote",
+          "hold",
+          "block",
+          "canary_passed",
+          "rollback",
+          "activated",
+          "rolled_back",
+          "healthy"
+        ],
+        "title": "Outcome",
+        "type": "string"
+      },
+      "PaymentFacts": {
+        "additionalProperties": false,
+        "description": "Facts about the disputed payment that rules and the backtest read.\n\nEvery field is None when the export does not carry it: unknown is never guessed\nand never defaulted here (defaults for rules live in `scruple.backtest.view`, and\nevery report counts how often one was used). Values from the source are kept\nverbatim where they are short enumerations (3-D Secure result, AVS/CVC check\nresults, card brand and funding). Personal data is never kept: of a shipping\naddress only whether one was present, of a tracking number only whether one was\npresent; the carrier name is kept after redaction.\n\nWhich of these were known when the dispute opened (and so may be shown to a\ncandidate deciding it) is decided in `scruple.backtest.view`, not here.",
+        "properties": {
+          "amount_refunded_minor": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Refunded Minor"
+          },
+          "auto_defended": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auto Defended"
+          },
+          "avs_line1_check": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avs Line1 Check"
+          },
+          "avs_postal_code_check": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avs Postal Code Check"
+          },
+          "card_brand": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Card Brand"
+          },
+          "card_country": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Card Country"
+          },
+          "card_funding": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Card Funding"
+          },
+          "cvc_check": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cvc Check"
+          },
+          "defendable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Defendable"
+          },
+          "delivery_confirmed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Confirmed"
+          },
+          "enhanced_eligibility_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 255,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enhanced Eligibility Types"
+          },
+          "evidence_has_evidence": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Has Evidence"
+          },
+          "evidence_submission_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Submission Count"
+          },
+          "is_charge_refundable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Charge Refundable"
+          },
+          "mcc": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mcc"
+          },
+          "payment_method_variant": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Method Variant"
+          },
+          "refund_state": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "partial",
+                  "full"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refund State"
+          },
+          "refunded_before_dispute": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refunded Before Dispute"
+          },
+          "shipping_address_present": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Address Present"
+          },
+          "shipping_carrier": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Carrier"
+          },
+          "shipping_tracking_present": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Tracking Present"
+          },
+          "three_ds_authenticated": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Three Ds Authenticated"
+          },
+          "three_ds_result": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Three Ds Result"
+          },
+          "three_ds_version": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Three Ds Version"
+          }
+        },
+        "title": "PaymentFacts",
+        "type": "object"
+      },
+      "Provenance": {
+        "additionalProperties": false,
+        "description": "Where a learned rule came from. Recorded, never trusted for scoring.",
+        "properties": {
+          "agent_id": {
+            "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+            "title": "Agent Id",
+            "type": "string"
+          },
+          "claimed_metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "maxProperties": 50,
+            "title": "Claimed Metrics",
+            "type": "object"
+          },
+          "episode_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "title": "Episode Ids",
+            "type": "array"
+          },
+          "notes": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Notes",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "title": "Provenance",
+        "type": "object"
+      },
+      "ReasonCode": {
+        "description": "Synthetic reason codes, loosely modelled on card-network categories.",
+        "enum": [
+          "fraud",
+          "not_received",
+          "not_as_described"
+        ],
+        "title": "ReasonCode",
+        "type": "string"
+      },
+      "RegisterIn": {
+        "additionalProperties": false,
+        "properties": {
+          "owner": {
+            "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+            "title": "Owner",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "rule_id": {
+            "pattern": "^[a-z0-9][a-z0-9-]{2,63}$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RuleSpec"
+          }
+        },
+        "required": [
+          "rule_id",
+          "spec",
+          "owner",
+          "provenance"
+        ],
+        "title": "RegisterIn",
+        "type": "object"
+      },
+      "RollbackIn": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RollbackIn",
+        "type": "object"
+      },
+      "RuleSpec": {
+        "additionalProperties": false,
+        "description": "The executable content of a learned rule. Its hash is the rule's identity.",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Conditions",
+            "type": "array"
+          },
+          "description": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Priority",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description",
+          "conditions",
+          "action",
+          "priority"
+        ],
+        "title": "RuleSpec",
+        "type": "object"
+      },
+      "RuleStatus": {
+        "enum": [
+          "candidate",
+          "shadow",
+          "canary",
+          "active",
+          "retired",
+          "rejected"
+        ],
+        "title": "RuleStatus",
+        "type": "string"
+      },
+      "RuleVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "content_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "owner": {
+            "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+            "title": "Owner",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "rollback_to": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rollback To"
+          },
+          "rule_id": {
+            "pattern": "^[a-z0-9][a-z0-9-]{2,63}$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RuleSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RuleStatus"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rule_id",
+          "version",
+          "content_hash",
+          "spec",
+          "owner",
+          "provenance",
+          "status",
+          "created_at"
+        ],
+        "title": "RuleVersion",
+        "type": "object"
+      },
+      "Scenario": {
+        "description": "Hidden slice label used for per-slice scoring. Rules can never see it.",
+        "enum": [
+          "fraud",
+          "not_received",
+          "not_as_described",
+          "partial_refund",
+          "late_evidence",
+          "duplicate_dispute",
+          "currency_mismatch",
+          "high_value"
+        ],
+        "title": "Scenario",
+        "type": "string"
+      },
+      "SequentialCanaryResult": {
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "assignment_probability": {
+            "title": "Assignment Probability",
+            "type": "number"
+          },
+          "benefit": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Benefit",
+            "type": "array"
+          },
+          "decision": {
+            "enum": [
+              "harm",
+              "benefit",
+              "no_decision"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "e_threshold": {
+            "title": "E Threshold",
+            "type": "number"
+          },
+          "harm": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Harm",
+            "type": "array"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "n_matched": {
+            "title": "N Matched",
+            "type": "integer"
+          },
+          "stopped_at": {
+            "title": "Stopped At",
+            "type": "integer"
+          },
+          "tolerance_usd_minor": {
+            "title": "Tolerance Usd Minor",
+            "type": "number"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/CanaryTypeEvidence"
+            },
+            "title": "Types",
+            "type": "array"
+          }
+        },
+        "required": [
+          "method",
+          "alpha",
+          "tolerance_usd_minor",
+          "assignment_probability",
+          "decision",
+          "stopped_at",
+          "n_matched",
+          "e_threshold",
+          "harm",
+          "benefit",
+          "types"
+        ],
+        "title": "SequentialCanaryResult",
+        "type": "object"
+      },
+      "ShadowMetrics": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ShadowSummary": {
+        "properties": {
+          "agree": {
+            "title": "Agree",
+            "type": "integer"
+          },
+          "by_case_type": {
+            "items": {
+              "$ref": "#/components/schemas/CaseTypeStats"
+            },
+            "title": "By Case Type",
+            "type": "array"
+          },
+          "candidate_hard_findings": {
+            "title": "Candidate Hard Findings",
+            "type": "integer"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "data": {
+            "default": "synthetic",
+            "title": "Data",
+            "type": "string"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "production_hard_findings": {
+            "title": "Production Hard Findings",
+            "type": "integer"
+          },
+          "regret_improvement": {
+            "$ref": "#/components/schemas/Interval"
+          },
+          "rule_ref": {
+            "title": "Rule Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_ref",
+          "content_hash",
+          "n",
+          "agree",
+          "production_hard_findings",
+          "candidate_hard_findings",
+          "regret_improvement",
+          "by_case_type"
+        ],
+        "title": "ShadowSummary",
+        "type": "object"
+      },
+      "SliceStat": {
+        "properties": {
+          "baseline_mean_regret": {
+            "title": "Baseline Mean Regret",
+            "type": "number"
+          },
+          "candidate_mean_regret": {
+            "title": "Candidate Mean Regret",
+            "type": "number"
+          },
+          "changed_cases": {
+            "title": "Changed Cases",
+            "type": "integer"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "scenario": {
+            "title": "Scenario",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scenario",
+          "n",
+          "baseline_mean_regret",
+          "candidate_mean_regret",
+          "changed_cases"
+        ],
+        "title": "SliceStat",
+        "type": "object"
+      },
+      "Stage-Input": {
+        "enum": [
+          "inquiry",
+          "chargeback",
+          "representment",
+          "pre_arbitration",
+          "arbitration",
+          "resolved"
+        ],
+        "title": "Stage",
+        "type": "string"
+      },
+      "Stage-Output": {
+        "enum": [
+          "shadow",
+          "canary",
+          "activation",
+          "rollback",
+          "assurance"
+        ],
+        "title": "Stage",
+        "type": "string"
+      },
+      "TypeEvidence": {
+        "description": "One case type. Money in USD minor units; diff = candidate minus baseline\nloss (positive = worse).",
+        "properties": {
+          "alpha_share": {
+            "title": "Alpha Share",
+            "type": "number"
+          },
+          "cap": {
+            "title": "Cap",
+            "type": "number"
+          },
+          "case_type": {
+            "title": "Case Type",
+            "type": "string"
+          },
+          "changed": {
+            "title": "Changed",
+            "type": "integer"
+          },
+          "ci_high": {
+            "title": "Ci High",
+            "type": "number"
+          },
+          "ci_low": {
+            "title": "Ci Low",
+            "type": "number"
+          },
+          "e_threshold": {
+            "title": "E Threshold",
+            "type": "number"
+          },
+          "improved": {
+            "title": "Improved",
+            "type": "boolean"
+          },
+          "improvement_e_value": {
+            "title": "Improvement E Value",
+            "type": "number"
+          },
+          "mean_diff": {
+            "title": "Mean Diff",
+            "type": "number"
+          },
+          "min_detectable_regression": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Detectable Regression"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "planning_sd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Planning Sd"
+          },
+          "regressed": {
+            "title": "Regressed",
+            "type": "boolean"
+          },
+          "regression_e_value": {
+            "title": "Regression E Value",
+            "type": "number"
+          },
+          "regression_max_e_value": {
+            "title": "Regression Max E Value",
+            "type": "number"
+          },
+          "required_n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required N"
+          },
+          "sd": {
+            "title": "Sd",
+            "type": "number"
+          },
+          "sd_within_assumption": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sd Within Assumption"
+          },
+          "tolerance": {
+            "title": "Tolerance",
+            "type": "number"
+          }
+        },
+        "required": [
+          "case_type",
+          "n",
+          "changed",
+          "cap",
+          "tolerance",
+          "mean_diff",
+          "sd",
+          "regression_e_value",
+          "regression_max_e_value",
+          "improvement_e_value",
+          "ci_low",
+          "ci_high",
+          "alpha_share",
+          "e_threshold",
+          "regressed",
+          "improved"
+        ],
+        "title": "TypeEvidence",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyResult": {
+        "properties": {
+          "entries": {
+            "title": "Entries",
+            "type": "integer"
+          },
+          "first_bad_seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Bad Seq"
+          },
+          "head_hash": {
+            "title": "Head Hash",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "problem": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem"
+          }
+        },
+        "required": [
+          "ok",
+          "entries",
+          "head_hash"
+        ],
+        "title": "VerifyResult",
+        "type": "object"
+      },
+      "WebhookAck": {
+        "properties": {
+          "cases": {
+            "title": "Cases",
+            "type": "integer"
+          },
+          "duplicate": {
+            "title": "Duplicate",
+            "type": "boolean"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "movements": {
+            "title": "Movements",
+            "type": "integer"
+          },
+          "received": {
+            "title": "Received",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "received",
+          "event_id",
+          "duplicate",
+          "cases",
+          "movements"
+        ],
+        "title": "WebhookAck",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Change control for agent learning (synthetic demo).",
+    "title": "agent-gate",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/audit/verify": {
+      "get": {
+        "operationId": "verify_audit_verify_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "expected_head",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Expected Head"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrityReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify"
+      }
+    },
+    "/decisions": {
+      "get": {
+        "operationId": "decisions_decisions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "rule_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rule Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 1000,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 9223372036854775807,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DecisionOut"
+                  },
+                  "title": "Response Decisions Decisions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decisions"
+      }
+    },
+    "/decisions/{decision_id}": {
+      "get": {
+        "operationId": "decision_decisions__decision_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Decision"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decision"
+      }
+    },
+    "/decisions/{decision_id}/report": {
+      "get": {
+        "operationId": "report_decisions__decision_id__report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "decision_id",
+            "required": true,
+            "schema": {
+              "title": "Decision Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report"
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/ingest/stripe/webhook": {
+      "post": {
+        "operationId": "stripe_webhook_ingest_stripe_webhook_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookAck"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Stripe Webhook",
+        "tags": [
+          "ingest"
+        ],
+        "x-scruple-raw-body": true
+      }
+    },
+    "/rules": {
+      "get": {
+        "operationId": "list_rules_rules_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 1000,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 9223372036854775807,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RuleVersion"
+                  },
+                  "title": "Response List Rules Rules Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Rules"
+      },
+      "post": {
+        "operationId": "register_rules_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleVersion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register"
+      }
+    },
+    "/rules/{rule_id}": {
+      "get": {
+        "operationId": "rule_versions_rules__rule_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RuleVersion"
+                  },
+                  "title": "Response Rule Versions Rules  Rule Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rule Versions"
+      }
+    },
+    "/rules/{rule_id}/rollback": {
+      "post": {
+        "operationId": "rollback_rules__rule_id__rollback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RollbackIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rollback"
+      }
+    },
+    "/rules/{rule_id}/versions/{version}/approve": {
+      "post": {
+        "operationId": "approve_rules__rule_id__versions__version__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve"
+      }
+    },
+    "/rules/{rule_id}/versions/{version}/evaluate": {
+      "post": {
+        "operationId": "evaluate_rules__rule_id__versions__version__evaluate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DecisionOut"
+                  },
+                  "title": "Response Evaluate Rules  Rule Id  Versions  Version  Evaluate Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate"
+      }
+    },
+    "/shadow/rules/{rule_id}/versions/{version}": {
+      "get": {
+        "operationId": "shadow_summary_shadow_rules__rule_id__versions__version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShadowSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shadow Summary"
+      }
+    },
+    "/shadow/rules/{rule_id}/versions/{version}/decisions": {
+      "post": {
+        "operationId": "shadow_record_shadow_rules__rule_id__versions__version__decisions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "maximum": 9223372036854775807,
+              "minimum": 1,
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveDecisionBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shadow Record"
+      }
+    },
+    "/shadow/rules/{rule_id}/versions/{version}/imported": {
+      "get": {
+        "operationId": "shadow_summary_imported_shadow_rules__rule_id__versions__version__imported_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportedShadowSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shadow Summary Imported"
+      }
+    },
+    "/shadow/rules/{rule_id}/versions/{version}/imported/decisions": {
+      "post": {
+        "operationId": "shadow_record_imported_shadow_rules__rule_id__versions__version__imported_decisions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportedDecisionBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportedBatchResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shadow Record Imported"
+      }
+    },
+    "/shadow/rules/{rule_id}/versions/{version}/imported/outcomes": {
+      "post": {
+        "operationId": "shadow_observe_imported_shadow_rules__rule_id__versions__version__imported_outcomes_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-actor",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
+              "title": "X-Actor",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportedOutcomeBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportedObserveResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shadow Observe Imported"
+      }
+    },
+    "/version": {
+      "get": {
+        "operationId": "version_version_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Version"
+      }
+    }
+  }
+}
