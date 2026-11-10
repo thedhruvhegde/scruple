@@ -237,6 +237,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.bench.cli import add_bench_parser
 
     add_bench_parser(sub)
+    from scruple.console.cli import add_console_parser
+
+    add_console_parser(sub, DEFAULT_DB)
     return p
 
 

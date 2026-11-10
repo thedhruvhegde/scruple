@@ -1,0 +1,9 @@
+{# The full hash-chained trace on a dark screen. Needs `v` (CaseView) and `tid` (anchor prefix). #}
+<div class="screen">
+  <div class="screen-head"><span><b>trace</b> / {{ v.trace | length }} events, environment-written</span><span>{% if v.trace_broken %}<span class="bad">chain broken at {{ v.trace_broken | join(", ") }}</span>{% else %}<span class="good">chain intact</span>{% endif %} / head {{ v.record.trace_head | short(16) }}{% if not v.trace_head_ok %} <span class="bad">(does not match)</span>{% endif %}</span></div>
+  <ol>
+  {% for e in v.trace %}
+    <li id="{{ tid }}ev-{{ e.seq }}"><span class="s">{{ e.seq }}</span><span class="d">{{ e.day.isoformat() }}</span><span class="a-{{ e.actor.value }}">{{ e.actor.value }}</span><span class="{{ '' if e.ok else 'bad' }}">{{ e.kind.value }}{% if e.tool %} {{ e.tool }}{% endif %}</span><span class="x">{% if e.args %}args {{ e.args | tojson }} {% endif %}{% if e.error %}<span class="bad">error {{ e.error }}</span> {% endif %}{{ e.data | tojson }}</span></li>
+  {% endfor %}
+  </ol>
+</div>

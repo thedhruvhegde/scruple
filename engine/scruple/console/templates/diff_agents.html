@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "diff-agents" %}
+{% block title %}diff {{ d.a.name }} / {{ d.b.name }}{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>agent diff</span></p>
+<h1>{{ d.a.name }} against {{ d.b.name }}</h1>
+<p class="lede">The same seeds, so the same cases, played by two agent versions. A is the reference; a positive delta means B costs the merchant more.</p>
+<p class="meta"><span><b>{{ d.paired }}</b> paired episodes</span>{% if d.unpaired %}<span><b>{{ d.unpaired }}</b> without a pair (left out)</span>{% endif %}<span>total A <b>{{ d.total_a | usd }}</b></span><span>total B <b>{{ d.total_b | usd }}</b></span><span>outcome changed <b>{{ d.changed | length }}</b></span></p>
+{% endblock %}
+{% block body %}
+<div class="sec">
+  <form class="picker" method="get" action="{{ P }}/diff/agents">
+    <label>Version A<select name="a">{% for n in names %}<option value="{{ n }}"{% if n == d.a.name %} selected{% endif %}>{{ n }}</option>{% endfor %}</select></label>
+    <label>Version B<select name="b">{% for n in names %}<option value="{{ n }}"{% if n == d.b.name %} selected{% endif %}>{{ n }}</option>{% endfor %}</select></label>
+    <button class="btn" type="submit">Compare</button>
+  </form>
+</div>
+<div class="sec" id="types">
+  <h2><span class="n">01 / BY CASE TYPE</span>Where the versions differ</h2>
+  {% set la, lb, corr = "A", "B", "Correct" %}{% include "_deltas.html" %}
+</div>
+<div class="sec" id="changed">
+  <h2><span class="n">02 / CHANGED</span>Cases with a different outcome</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Episode</th><th>Case type</th><th>A: action / resolution</th><th>B: action / resolution</th><th class="r">Cost A</th><th class="r">Cost B</th><th class="r">Delta</th></tr></thead>
+    <tbody>{% for c in d.changed %}
+      <tr{% if c.key == pick %} class="on"{% endif %}><td class="m"><a href="{{ P }}/diff/agents?a={{ d.a.name }}&amp;b={{ d.b.name }}&amp;case={{ c.key }}#side">{{ c.key }}</a></td><td class="m">{{ c.case_type }}</td><td class="m">{{ c.a }}</td><td class="m">{{ c.b }}</td><td class="m r">{{ c.cost_a | usd }}</td><td class="m r">{{ c.cost_b | usd }}</td><td class="m r {{ 'no' if c.delta > 0 else 'ok' }}">{{ c.delta | signed_usd }}</td></tr>
+    {% else %}<tr><td colspan="7" class="dim">No case changed outcome.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% if side %}{% set va, vb = side %}
+<div class="sec" id="side">
+  <h2><span class="n">03 / SIDE BY SIDE</span>{{ pick }}: {{ va.record.case.case_id }}</h2>
+  <p class="meta"><span>{{ va.record.case.network.value }} {{ va.record.case.reason_code }}</span><span>case type <b>{{ va.record.case.truth.family.value }}</b></span><span><a href="{{ P }}/agents/{{ d.a.name }}/episodes/{{ pick }}">open A</a></span><span><a href="{{ P }}/agents/{{ d.b.name }}/episodes/{{ pick }}">open B</a></span></p>
+  <div class="grid2">
+    {% for name, v in [(d.a.name, va), (d.b.name, vb)] %}
+    <div>
+      <h3>{{ "A" if loop.first else "B" }}: {{ name }}</h3>
+      <dl class="kv">
+        <dt>resolution</dt><dd>{{ v.record.resolution or "none" }}</dd>
+        <dt>merchant cost</dt><dd>{{ v.record.cost_usd_minor | usd }}</dd>
+        <dt>gate / reward</dt><dd>{{ m.yes(v.scorecard.gate) }} {{ v.scorecard.reward | num(3) }}</dd>
+        <dt>failed checks</dt><dd>{{ v.scorecard.failed | join(", ") if v.scorecard.failed else "none" }}</dd>
+        <dt>explanation</dt><dd>{{ v.record.report.explanation }}</dd>
+      </dl>
+      <div class="screen side">
+        <div class="screen-head"><span><b>{{ name }}</b> / {{ v.trace | length }} events</span><span>{% if v.trace_broken %}<span class="bad">chain broken</span>{% else %}<span class="good">chain intact</span>{% endif %}</span></div>
+        <ol>{% for e in v.trace %}{% if e.kind.value in ("tool_call", "transition", "posting", "close") %}<li><span class="s">{{ e.seq }}</span><span class="x"><span class="a-{{ e.actor.value }}">{{ e.kind.value }}{% if e.tool %} {{ e.tool }}{% endif %}</span>{% if not e.ok %} <span class="bad">refused</span>{% endif %} <span class="d">{{ e.day.isoformat() }}</span>{% if e.kind.value == "transition" %} {{ e.data.from_stage }} -&gt; {{ e.data.to_stage }}{% elif e.kind.value == "posting" %} {{ e.data.kind }}{% elif e.args %} {{ e.args | tojson }}{% endif %}</span></li>{% endif %}{% endfor %}</ol>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

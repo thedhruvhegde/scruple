@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "backtests" %}
+{% block title %}backtests{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>backtests</span></p>
+<h1>Backtest reports</h1>
+<p class="lede">A candidate replayed on a dispute history, decided from decision-time views only. Each report says whether its data is synthetic.</p>
+{% endblock %}
+{% block body %}
+<div class="sec">
+  <div class="tw"><table>
+    <thead><tr><th>Report</th><th>Data</th><th>Candidate</th><th>Verdict</th><th class="r">Cases</th><th class="r">Observed</th><th class="r">Estimated</th><th class="r">History cost</th><th class="r">Candidate cost</th></tr></thead>
+    <tbody>{% for e, r in reports %}
+      <tr><td class="m"><a href="{{ P }}/backtests/{{ e.name }}">{{ e.name }}</a></td><td class="wrap">{% if r.synthetic %}<span class="tag hold">synthetic</span>{% else %}<span class="tag pass">real</span>{% endif %} {{ r.dataset }}</td><td class="m">{{ r.candidate }}</td><td class="m">{{ r.verdict }}</td><td class="m r">{{ r.n_included }}</td><td class="m r">{{ r.n_observed }}</td><td class="m r">{{ r.n_estimated }}</td><td class="m r">{{ r.baseline_cost | num(0) }}</td><td class="m r">{{ r.candidate_cost | num(0) }}</td></tr>
+    {% else %}<tr><td colspan="9" class="dim">No reports. Start the console with <code>--reports DIR</code> pointing at <code>scruple backtest run</code> output.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

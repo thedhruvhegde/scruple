@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "diff-rules" %}
+{% block title %}diff {{ d.a.ref }} / {{ d.b.ref }}{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>rule diff</span></p>
+<h1>{{ d.a.ref }} against {{ d.b.ref }}</h1>
+<p class="lede">The live policy replayed twice on one synthetic set: once with A in place, once with B. A positive delta means B costs the merchant more.</p>
+<p class="meta"><span>replay set seed <b>{{ d.seed }}</b>, <b>{{ d.n | num }}</b> cases (public, not the held-out set)</span><span>total A <b>{{ d.total_a | usd }}</b></span><span>total B <b>{{ d.total_b | usd }}</b></span><span>outcome changed <b>{{ d.changed | length }}</b></span></p>
+{% endblock %}
+{% block body %}
+<div class="sec">
+  <form class="picker" method="get" action="{{ P }}/diff/rules">
+    <label>Version A<select name="a">{% for r in refs %}<option value="{{ r }}"{% if r == d.a.ref %} selected{% endif %}>{{ r }}</option>{% endfor %}</select></label>
+    <label>Version B<select name="b">{% for r in refs %}<option value="{{ r }}"{% if r == d.b.ref %} selected{% endif %}>{{ r }}</option>{% endfor %}</select></label>
+    <button class="btn" type="submit">Compare</button>
+  </form>
+  <dl class="kv">
+    <dt>A</dt><dd><a href="{{ P }}/rules/{{ d.a.rule_id }}/versions/{{ d.a.version }}">{{ d.a.ref }}</a> {{ m.status(d.a.status) }} <code>{{ d.a.spec.describe() }}</code></dd>
+    <dt>B</dt><dd><a href="{{ P }}/rules/{{ d.b.rule_id }}/versions/{{ d.b.version }}">{{ d.b.ref }}</a> {{ m.status(d.b.status) }} <code>{{ d.b.spec.describe() }}</code></dd>
+  </dl>
+</div>
+<div class="sec" id="types">
+  <h2><span class="n">01 / BY CASE TYPE</span>Where the versions differ</h2>
+  <p class="note">Optimal: the action matched the hindsight-optimal one (zero regret). Case type is the generator's hidden scenario label, which no rule can read.</p>
+  {% set la, lb, corr = "A", "B", "Optimal" %}{% include "_deltas.html" %}
+</div>
+<div class="sec" id="changed">
+  <h2><span class="n">02 / CHANGED</span>Cases with a different outcome ({{ d.changed | length }}{% if d.changed | length > 200 %}, largest 200 shown{% endif %})</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Case</th><th>Case type</th><th>A: action / resolution</th><th>B: action / resolution</th><th class="r">Cost A</th><th class="r">Cost B</th><th class="r">Delta</th></tr></thead>
+    <tbody>{% for c in d.changed[:200] %}
+      <tr{% if c.key == pick %} class="on"{% endif %}><td class="m"><a href="{{ P }}/diff/rules?a={{ d.a.ref }}&amp;b={{ d.b.ref }}&amp;case={{ c.key }}#side">{{ c.key }}</a></td><td class="m">{{ c.case_type }}</td><td class="m">{{ c.a }}</td><td class="m">{{ c.b }}</td><td class="m r">{{ c.cost_a | usd }}</td><td class="m r">{{ c.cost_b | usd }}</td><td class="m r {{ 'no' if c.delta > 0 else 'ok' }}">{{ c.delta | signed_usd }}</td></tr>
+    {% else %}<tr><td colspan="7" class="dim">No case changed outcome.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% if side and case %}{% set ta, tb = side %}
+<div class="sec" id="side">
+  <h2><span class="n">03 / SIDE BY SIDE</span>{{ case.case_id }}</h2>
+  <dl class="kv">
+    {% for k, val in case.view().items() %}<dt>{{ k }}</dt><dd>{{ val }}</dd>{% endfor %}
+    <dt>hidden truth</dt><dd>{{ case.scenario.value }}, claim {{ "valid" if case.claim_valid else "not valid" }}</dd>
+  </dl>
+  <div class="grid2">
+    {% for name, t in [(d.a.ref, ta), (d.b.ref, tb)] %}
+    <div>
+      <h3>{{ "A" if loop.first else "B" }}: {{ name }}</h3>
+      <div class="screen side">
+        <div class="screen-head"><span><b>policy</b> / first match wins</span><span>decided by {{ t.result.decided_by }}</span></div>
+        <ol>{% for s in t.steps %}<li><span class="s">{{ loop.index }}</span><span class="x"><span class="{{ 'good' if s.chosen else ('' if s.matched else 'd') }}">{{ "CHOSEN" if s.chosen else ("match" if s.matched else "no") }}</span> {{ s.ref }}: {{ s.logic }}</span></li>{% endfor %}
+        <li><span class="s">-</span><span class="x">{{ "default accept" if t.result.decided_by == "default" else "" }} action <b>{{ t.result.action.value }}</b>, stages {{ t.result.stages | map(attribute="value") | join(" -> ") }}, <b>{{ t.result.resolution.value }}</b></span></li>
+        {% for e in t.journal %}<li><span class="s">je</span><span class="x">{{ e.kind }} {% for p in e.postings %}{{ p.account }} {{ p.amount_minor | minor(e.currency) }}{% if not loop.last %}; {% endif %}{% endfor %}</span></li>{% endfor %}
+        </ol>
+      </div>
+      <dl class="kv"><dt>cost</dt><dd>{{ t.result.cost_usd_minor | usd }}</dd><dt>optimal cost</dt><dd>{{ t.result.oracle_cost_usd_minor | usd }}</dd><dt>regret</dt><dd>{{ t.result.regret_usd_minor | usd }}</dd></dl>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

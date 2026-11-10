@@ -1,0 +1,7 @@
+{# Per case-type deltas. Needs `d` (with .types, .changed) and labels `la`, `lb`, `corr` (column title). #}
+<div class="tw"><table>
+  <thead><tr><th>Case type</th><th class="r">n</th><th class="r">Mean cost {{ la }}</th><th class="r">Mean cost {{ lb }}</th><th class="r">Delta (B - A)</th><th class="r">{{ corr }} A</th><th class="r">{{ corr }} B</th><th class="r">Outcome changed</th></tr></thead>
+  <tbody>{% for t in d.types %}
+    <tr><td class="m">{{ t.case_type }}</td><td class="m r">{{ t.n }}</td><td class="m r">{{ t.mean_a | usd }}</td><td class="m r">{{ t.mean_b | usd }}</td><td class="m r {{ 'no' if t.delta > 0 else ('ok' if t.delta < 0 else '') }}">{{ t.delta | signed_usd }}</td><td class="m r">{{ t.correct_a | ratio(t.n) }}</td><td class="m r">{{ t.correct_b | ratio(t.n) }}</td><td class="m r">{{ t.changed }}</td></tr>
+  {% else %}<tr><td colspan="8" class="dim">No paired cases.</td></tr>{% endfor %}</tbody>
+</table></div>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "approvals" %}
+{% block title %}approvals{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>approvals</span></p>
+<h1>Approvals inbox</h1>
+<p class="lede">Versions that passed canary and wait for a person. The service decides who may approve: named approvers only, and never the proposer, the rule's owner or the agent that learned it.</p>
+<p class="meta"><span><b>{{ box.pending | length }}</b> waiting</span>{% if box.policy %}<span>policy <b>{{ box.policy.required }} of {{ box.policy.approvers | length }}</b> named approvers{% if box.policy.required_role %}, role <b>{{ box.policy.required_role }}</b> required{% endif %}</span>{% else %}<span>no approval policy: one approver from <b>{{ box.single_approvers | join(", ") }}</b></span>{% endif %}</p>
+{% endblock %}
+{% block body %}
+{% if message %}<div class="sec"><p class="flash" role="status"><b>DONE</b>{{ message }}</p></div>{% endif %}
+{% if problem %}<div class="sec"><p class="flash bad" role="alert"><b>REFUSED</b>{{ problem }}</p></div>{% endif %}
+
+{% if box.policy %}
+<div class="sec" id="policy">
+  <h2><span class="n">POLICY</span>Named approvers</h2>
+  <div class="tw"><table><thead><tr><th>Approver</th><th>Roles</th></tr></thead><tbody>{% for a in box.policy.approvers %}<tr><td class="m">{{ a.name }}</td><td class="k">{{ a.roles | join(", ") or "none" }}</td></tr>{% endfor %}</tbody></table></div>
+  <p class="note">A grant counts for {{ (box.policy.grant_ttl_seconds / 3600) | num(0) }} hours; a request stays open for {{ (box.policy.request_ttl_seconds / 3600) | num(0) }} hours.</p>
+</div>
+{% endif %}
+
+{% for p in box.pending %}{% set rv = p.rv %}{% set base = P ~ "/approvals/" ~ rv.rule_id ~ "/" ~ rv.version %}
+<div class="sec" id="pending-{{ rv.rule_id }}-v{{ rv.version }}">
+  <h2><span class="n">{{ "%02d" | format(loop.index) }} / WAITING</span><a href="{{ P }}/rules/{{ rv.rule_id }}/versions/{{ rv.version }}">{{ rv.ref }}</a></h2>
+  <p>{{ rv.spec.description }}</p>
+  <dl class="kv">
+    <dt>logic</dt><dd><code>{{ rv.spec.describe() }}</code></dd>
+    <dt>owner / agent</dt><dd>{{ rv.owner }} / {{ rv.provenance.agent_id }}</dd>
+    <dt>canary</dt><dd><a href="{{ P }}/rules/{{ rv.rule_id }}/versions/{{ rv.version }}#{{ p.canary_decision.decision.decision_id }}">{{ p.canary_decision.decision.decision_id }}</a> {{ m.outcome(p.canary_decision.decision.outcome) }} {{ p.canary_decision.decision.summary }}</dd>
+    <dt>ramp</dt><dd>{% if p.ramp %}{{ p.ramp.status }} at stage {{ p.ramp.stage_index + 1 }}{% else %}none (one-shot canary){% endif %}</dd>
+    <dt>content hash</dt><dd><code>{{ rv.content_hash }}</code></dd>
+    {% if box.policy %}
+    <dt>request</dt><dd>{% if p.request %}by <b>{{ p.request.proposer }}</b> at {{ p.request.requested_at | when }}, {% if p.status and p.status.request_open %}expires{% else %}<span class="warn">expired</span>{% endif %} {{ p.request.expires_at | when }}{% else %}none open{% endif %}</dd>
+    <dt>approvals</dt><dd>{% if p.status %}{{ p.status.counted | length }} of {{ box.policy.required }}{% if p.status.counted %} ({{ p.status.counted | join(", ") }}){% endif %}{% if p.status.reasons %}; {{ p.status.reasons | join("; ") }}{% endif %}{% endif %}</dd>
+    {% endif %}
+  </dl>
+  {% if not p.actionable %}
+  <p class="note warn">Not actionable yet: {{ p.blocker }}.</p>
+  {% else %}
+  <div class="grid2">
+    <div>
+      {% if box.policy and not (p.status and p.status.request_open) %}
+      <form class="act" method="post" action="{{ base }}/request">
+        {{ m.csrf_field() }}
+        <h3>Request approval</h3>
+        <p class="note">Whoever requests can no longer approve this request.</p>
+        {% if not principal.authenticated %}<label>Acting as<input type="text" name="actor" required maxlength="128" autocomplete="username"></label>{% endif %}
+        <button class="btn" type="submit">Request approval</button>
+      </form>
+      {% endif %}
+      <form class="act" method="post" action="{{ base }}/approve">
+        {{ m.csrf_field() }}
+        <h3>Approve</h3>
+        {% if not principal.authenticated %}<label>Acting as<input type="text" name="actor" required maxlength="128" autocomplete="username"></label>{% endif %}
+        <label>Reason<textarea name="reason" required minlength="3" maxlength="500"></textarea></label>
+        <button class="btn primary" type="submit">Approve {{ rv.ref }}</button>
+      </form>
+    </div>
+    <div>
+      <form class="act" method="post" action="{{ base }}/reject">
+        {{ m.csrf_field() }}
+        <h3>Reject</h3>
+        <p class="note">Rejection is final: the version moves to rejected and cannot be activated.</p>
+        {% if not principal.authenticated %}<label>Acting as<input type="text" name="actor" required maxlength="128" autocomplete="username"></label>{% endif %}
+        <label>Reason<textarea name="reason" required minlength="3" maxlength="500"></textarea></label>
+        <button class="btn danger" type="submit">Reject {{ rv.ref }}</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<div class="sec"><p class="note">Nothing is waiting for approval.</p></div>
+{% endfor %}
+
+<div class="sec" id="history">
+  <h2><span class="n">HISTORY</span>Approval events, newest first</h2>
+  <div class="tw"><table class="stack">
+    <thead><tr><th class="r">Seq</th><th>Event</th><th>Actor</th><th>When</th><th>Detail</th></tr></thead>
+    <tbody>{% for e in box.history %}
+      <tr><td data-label="Seq" class="m r">{{ e.seq }}</td><td data-label="Event" class="m">{{ e.event_type }}</td><td data-label="Actor" class="k">{{ e.actor }}</td><td data-label="When" class="m dim">{{ e.at | when }}</td><td data-label="Detail" class="wrap">{{ payload(e) }}</td></tr>
+    {% else %}<tr><td colspan="5" class="dim">No approval events yet.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="same-origin">
+<meta name="robots" content="noindex">
+<title>{% block title %}console{% endblock %} / scruple console</title>
+<link rel="stylesheet" href="{{ P }}/static/console.css">
+<script src="{{ P }}/static/console.js"></script>
+</head>
+<body>
+{% set nav = [
+  (P ~ "/", "Runs", "runs"),
+  (P ~ "/diff/agents", "Agent diff", "diff-agents"),
+  (P ~ "/diff/rules", "Rule diff", "diff-rules"),
+  (P ~ "/approvals", "Approvals", "approvals"),
+  (P ~ "/backtests", "Backtests", "backtests"),
+] %}
+{% set current = section | default("") %}
+<header class="bar band">
+  <div class="bar-in">
+    <a class="brand" href="{{ P }}/" aria-label="scruple console, runs and scores">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g transform="rotate(-6 12 11)"><rect class="mk-a" x="1.5" y="10" width="21" height="2.4"/><rect class="mk-b" x="3" y="5.4" width="4.6" height="4.6"/></g>
+        <path class="mk-a" d="M12 12.6L17.5 21.5H6.5Z"/>
+      </svg>
+      <span>scruple</span><small>console</small>
+    </a>
+    <nav class="nav" aria-label="Console">
+      {% for href, label, key in nav %}<a href="{{ href }}"{% if key == current %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+    </nav>
+    <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" data-theme-set="light" aria-pressed="false">LIGHT</button>|<button type="button" data-theme-set="dark" aria-pressed="false">DARK</button> ]</div>
+  </div>
+</header>
+<main>
+  <section class="band band-pine">
+    <div class="page head">
+      {% block head %}{% endblock %}
+    </div>
+  </section>
+  <section class="band">
+    <div class="page">
+      {% block body %}{% endblock %}
+    </div>
+  </section>
+</main>
+<footer class="band band-sand">
+  <div class="page foot">
+    <span>All data synthetic unless a page names a real dataset.</span>
+    <span>{% if principal.authenticated %}acting as {{ principal.name }}{% else %}not signed in (identity stub){% endif %}</span>
+  </div>
+</footer>
+</body>
+</html>
