@@ -49,6 +49,12 @@ class Settings(BaseModel):
     log_format: Literal["json", "text"] = "json"
     api_host: str = "127.0.0.1"
     api_port: int = Field(default=8000, ge=1, le=65535)
+    # Production server (gunicorn + uvicorn workers, deploy/docker/gunicorn.conf.py).
+    web_workers: int = Field(default=1, ge=1, le=64)
+    web_timeout: int = Field(default=60, ge=1, le=3600)
+    web_graceful_timeout: int = Field(default=30, ge=0, le=3600)
+    web_keepalive: int = Field(default=5, ge=0, le=3600)
+    web_max_requests: int = Field(default=0, ge=0)
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""

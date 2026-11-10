@@ -17,6 +17,8 @@ dependencies = [
     "sqlalchemy>=2.0",
     "uvicorn>=0.30",
     "pyyaml>=6.0.3",
+    "gunicorn>=25.1",
+    "uvicorn-worker>=0.3",
 ]
 
 [project.scripts]

@@ -23,13 +23,15 @@ def _final_stage(dockerfile: str) -> str:
 
 def test_final_image_is_slim_and_runs_as_non_root() -> None:
     final = _final_stage(DOCKERFILE)
-    assert re.search(r"^FROM python:\$\{PYTHON_VERSION\}-slim$", final, re.M)
+    assert re.search(r"^FROM \$\{PYTHON_IMAGE\}$", final, re.M)
+    assert re.search(r"^ARG PYTHON_IMAGE=python:3\.12-slim@sha256:", DOCKERFILE, re.M)
     users = re.findall(r"^USER (\S+)", final, re.M)
     assert users and users[-1].split(":")[0] not in {"root", "0"}
 
 
 def test_uv_image_is_pinned_and_lockfile_is_frozen() -> None:
-    assert re.search(r"^FROM ghcr\.io/astral-sh/uv:\d+\.\d+\.\d+ AS uv$", DOCKERFILE, re.M)
+    assert re.search(r"^ARG UV_IMAGE=ghcr\.io/astral-sh/uv:\d+\.\d+\.\d+@sha256:", DOCKERFILE, re.M)
+    assert re.search(r"^FROM \$\{UV_IMAGE\} AS uv$", DOCKERFILE, re.M)
     assert DOCKERFILE.count("--frozen") == 2 and "--no-dev" in DOCKERFILE
 
 
