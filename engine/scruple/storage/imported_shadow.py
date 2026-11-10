@@ -154,6 +154,8 @@ class ImportedShadowRepository(Protocol):
         self, tenant_id: str, rule_id: str, version: int, after_seq: int
     ) -> list[ShadowEvent]: ...
     def last_seq(self, tenant_id: str, rule_id: str, version: int) -> int: ...
+    def first_seq(self, tenant_id: str, rule_id: str, version: int) -> int: ...
+    def last_snapshot_seq(self, tenant_id: str, rule_id: str, version: int) -> int: ...
     def append_snapshot(self, snap: ShadowSnapshot) -> None: ...
     def snapshots(self, tenant_id: str, rule_id: str, version: int) -> list[ShadowSnapshot]: ...
 
@@ -202,6 +204,24 @@ class SQLImportedShadow:
     def last_seq(self, tenant_id: str, rule_id: str, version: int) -> int:
         rows = self._c.query(
             "SELECT COALESCE(MAX(seq), 0) AS n FROM imported_shadow_events "
+            "WHERE tenant_id=? AND rule_id=? AND version=?",
+            (tenant_id, rule_id, version),
+        )
+        return int(rows[0]["n"])
+
+    def first_seq(self, tenant_id: str, rule_id: str, version: int) -> int:
+        """The oldest stored event (0 if none). Rises when retention purges events."""
+        rows = self._c.query(
+            "SELECT COALESCE(MIN(seq), 0) AS n FROM imported_shadow_events "
+            "WHERE tenant_id=? AND rule_id=? AND version=?",
+            (tenant_id, rule_id, version),
+        )
+        return int(rows[0]["n"])
+
+    def last_snapshot_seq(self, tenant_id: str, rule_id: str, version: int) -> int:
+        """Summaries are never purged, so this is the highest seq ever used."""
+        rows = self._c.query(
+            "SELECT COALESCE(MAX(seq), 0) AS n FROM imported_shadow_summaries "
             "WHERE tenant_id=? AND rule_id=? AND version=?",
             (tenant_id, rule_id, version),
         )
@@ -261,14 +281,18 @@ class DurableImportedShadow:
         self._clock = clock or SystemClock()
         self._rec: ImportedShadowRecorder | None = None
         self._seq = 0
+        self._first = 0  # oldest stored event when the recorder was built
         self._dirty = False
         self._lock = threading.RLock()
 
     # --- replay ----------------------------------------------------------------------
 
     def _catch_up(self) -> ImportedShadowRecorder:
+        first = self._repo.first_seq(self.tenant_id, self.rule_id, self.version)
+        if self._rec is not None and first > self._first:
+            self._rec = None  # retention purged events this recorder still holds
         if self._rec is None:
-            self._rec, self._seq = self._factory(), 0
+            self._rec, self._seq, self._first = self._factory(), 0, first
         rec = self._rec
         try:
             for ev in self._repo.events_after(
@@ -283,7 +307,10 @@ class DurableImportedShadow:
 
     def _append(self, kind: EventKind, actor: str, body: str) -> None:
         assert self._rec is not None
-        seq = self._seq + 1
+        # Inside the write transaction, after catching up: any summary numbered past
+        # what this recorder applied belongs to a purged event. Never reuse a number.
+        used = self._repo.last_snapshot_seq(self.tenant_id, self.rule_id, self.version)
+        seq = max(self._seq, used) + 1
         at = self._clock.now()
         self._repo.append_event(
             ShadowEvent(
@@ -309,6 +336,8 @@ class DurableImportedShadow:
             )
         )
         self._seq = seq
+        if self._first == 0:
+            self._first = seq
 
     # --- the recorder's API, durable -----------------------------------------------
 
@@ -416,6 +445,12 @@ class MemoryImportedShadow:
 
     def last_seq(self, tenant_id: str, rule_id: str, version: int) -> int:
         return max((e.seq for e in self.events_after(tenant_id, rule_id, version, 0)), default=0)
+
+    def first_seq(self, tenant_id: str, rule_id: str, version: int) -> int:
+        return min((e.seq for e in self.events_after(tenant_id, rule_id, version, 0)), default=0)
+
+    def last_snapshot_seq(self, tenant_id: str, rule_id: str, version: int) -> int:
+        return max((s.seq for s in self.snapshots(tenant_id, rule_id, version)), default=0)
 
     def append_snapshot(self, snap: ShadowSnapshot) -> None:
         self._snaps.append(snap)

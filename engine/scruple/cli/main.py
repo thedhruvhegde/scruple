@@ -240,6 +240,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.jobs.cli import add_worker_parser
 
     add_worker_parser(sub, DEFAULT_DB)
+    from scruple.storage.retention import add_retention_parser
+
+    add_retention_parser(sub, DEFAULT_DB)
     return p
 
 

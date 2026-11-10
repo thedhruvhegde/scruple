@@ -26,6 +26,15 @@ of order), so every case an event carries is kept in `webhook_case_events` with 
 event's own timestamp, and becomes the case's current version only if no webhook event
 already applied to that case is newer. A late, older event is kept (`applied = 0`)
 but never overwrites a newer state. Equal timestamps: the later arrival wins.
+
+Retention (`purge`). The one sanctioned delete: a tenant's retention policy
+(`scruple.storage.retention`) removes every version of each case opened before a
+cutoff, its movements and the webhook bodies that carried it. Run reports, webhook
+event ids and payload hashes stay (they hold counts and hashes, no case content, and
+keep refusing redeliveries). Each purge appends a `purge:<n>` meta row with the row
+counts and a digest of what went, and the caller records the same in the gate's
+audit log. The DELETE triggers are dropped and recreated inside the purge's own
+transaction, so every other path still finds them.
 """
 
 from __future__ import annotations
@@ -439,6 +448,99 @@ class CaseStore:
         return WebhookWrite(
             duplicate=False, run_id=run_id, applied=len(applied), stale=len(stale), counts=counts
         )
+
+    # --- retention ---------------------------------------------------------------
+
+    PURGED_TABLES = ("cases", "movements", "webhook_case_events")
+
+    def purge(
+        self, cutoff: datetime, *, tenant_id: str = DEFAULT_TENANT
+    ) -> dict[str, tuple[int, str]]:
+        """Delete row-level data of cases opened before `cutoff`. Returns, per table,
+        (rows deleted, SHA-256 digest of their keys and body hashes)."""
+        import hashlib
+
+        if cutoff.tzinfo is None:
+            raise StoreError("retention cutoff needs a UTC offset")
+
+        def sha(text: str) -> str:
+            return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+        def digest(keys: list[str]) -> str:
+            return sha("\n".join(sorted(keys)))
+
+        out: dict[str, tuple[int, str]] = {}
+        with self._tx():
+            old: set[str] = set()
+            for r in self._db.execute("SELECT case_id, body_json FROM cases"):
+                opened = datetime.fromisoformat(json.loads(r["body_json"])["case"]["opened_at"])
+                if opened < cutoff:
+                    old.add(str(r["case_id"]))
+            ids = sorted(old)
+            marks = ",".join("?" * len(ids))
+            plan = {
+                "cases": (
+                    f"SELECT case_id || '|' || version AS k, body_json FROM cases "  # noqa: S608
+                    f"WHERE case_id IN ({marks})",
+                    f"DELETE FROM cases WHERE case_id IN ({marks})",  # noqa: S608
+                    tuple(ids),
+                ),
+                "movements": (
+                    f"SELECT movement_id AS k, body_json FROM movements "  # noqa: S608
+                    f"WHERE case_id IN ({marks})",
+                    f"DELETE FROM movements WHERE case_id IN ({marks})",  # noqa: S608
+                    tuple(ids),
+                ),
+                "webhook_case_events": (
+                    "SELECT case_id || '|' || source || '|' || event_id AS k, body_json "  # noqa: S608
+                    f"FROM webhook_case_events WHERE tenant_id = ? AND case_id IN ({marks})",
+                    f"DELETE FROM webhook_case_events WHERE tenant_id = ? "  # noqa: S608
+                    f"AND case_id IN ({marks})",
+                    (tenant_id, *ids),
+                ),
+            }
+            for table, (select, delete, args) in plan.items():
+                if not ids:
+                    out[table] = (0, digest([]))
+                    continue
+                rows = self._db.execute(select, args).fetchall()
+                keys = [f"{r['k']}|{sha(r['body_json'])}" for r in rows]
+                self._db.execute(f"DROP TRIGGER IF EXISTS {table}_no_delete")
+                self._db.execute(delete, args)
+                self._db.execute(
+                    f"CREATE TRIGGER {table}_no_delete BEFORE DELETE ON {table} "
+                    f"BEGIN SELECT RAISE(ABORT, '{table} is append-only'); END"
+                )
+                out[table] = (len(rows), digest(keys))
+            n = self._db.execute(
+                "SELECT COUNT(*) FROM store_meta WHERE key LIKE 'purge:%'"
+            ).fetchone()[0]
+            self._db.execute(
+                "INSERT INTO store_meta(key, value) VALUES (?, ?)",
+                (
+                    f"purge:{int(n) + 1}",
+                    json.dumps(
+                        {
+                            "tenant_id": tenant_id,
+                            "cutoff": _utc(cutoff),
+                            "tables": {
+                                t: {"rows": c, "digest_sha256": d} for t, (c, d) in out.items()
+                            },
+                        },
+                        sort_keys=True,
+                    ),
+                ),
+            )
+        return out
+
+    def purges(self) -> list[dict[str, Any]]:
+        rows = self._db.execute(
+            "SELECT key, value FROM store_meta WHERE key LIKE 'purge:%'"
+        ).fetchall()
+        return [
+            json.loads(r["value"])
+            for r in sorted(rows, key=lambda r: int(str(r["key"]).split(":")[1]))
+        ]
 
     # --- reads -------------------------------------------------------------------
 

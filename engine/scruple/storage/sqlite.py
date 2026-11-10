@@ -11,7 +11,7 @@ import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from scruple.storage import episodes, imported_shadow, jobs
+from scruple.storage import episodes, imported_shadow, jobs, retention
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -69,7 +69,13 @@ BEFORE DELETE ON decisions
 BEGIN SELECT RAISE(ABORT, 'decisions are append-only'); END;
 """
 
-SCHEMA = BASE_SCHEMA + imported_shadow.SQLITE_DDL + episodes.SQLITE_DDL + jobs.SQLITE_DDL
+SCHEMA = (
+    BASE_SCHEMA
+    + imported_shadow.SQLITE_DDL
+    + episodes.SQLITE_DDL
+    + jobs.SQLITE_DDL
+    + retention.SQLITE_DDL
+)
 
 _HISTORY_MESSAGES = ("append-only", "immutable")
 
@@ -141,3 +147,4 @@ class SQLiteStorage(SQLStorage):
     def __init__(self, path: str) -> None:
         self.path = path
         super().__init__(SQLiteConnection(path))
+        self.retention = retention.SQLRetention(self.connection, "sqlite")
