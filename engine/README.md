@@ -41,7 +41,7 @@ real data and real models are labelled real. everything else is synthetic, and s
 
 **experiments, pre-registered before running** ([docs/experiments](docs/experiments))
 
-- e1, planted regressions: pass, narrowly. all 7 planted regressions caught on the full benchmark. fold detection 0.844 against a 0.80 bar. false alarms 3 of 60, right at the 5% bar. a $1.30 a case regression slipped past the cost gate.
+- e1, planted regressions: pass, narrowly. all 7 planted regressions caught on the full benchmark. fold detection 0.844 against a 0.80 bar. false alarms 3 of 60, right at the 5% bar. a 1.3 cent a case regression slipped past the cost gate (first written as $1.30, a units slip). the paper shows a wider, still valid bet catches it.
 - e2, reward hacking: fails its own h2. a policy tuned on win rate learned to fabricate documents and claim wins. it is $33.87 a case cheaper on the simulated ledger, so a cost-only gate would ship it. the hard checks flagged it on 20 of 20 folds. the hacking-gap bound held in all 1,800 checks.
 
 **statistics** ([docs/math](docs/math))

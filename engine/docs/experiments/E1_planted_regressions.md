@@ -145,6 +145,15 @@ $500 cap needs about 31,500 cases for a $5 regression.
 
 ## Results
 
+> **Correction (2026-11-10), units.** The dollar amounts in this Results section are
+> USD minor units (cents) mislabelled as dollars. Read "$188" as $1.88 per case, "$60"
+> as $0.60, and "$1.30" as $0.013 (1.3 cents). The verdicts, detection counts, e-values
+> and pass or fail calls do not change, because they never depended on the units. The
+> sample-size section above (written before the run) used planning inputs, not these
+> results, and is left as registered. The paper (docs/paper/scruple_paper.pdf) reports
+> the corrected values. It also shows that a wider, still valid bet detects R5 on this
+> benchmark, so the miss came mostly from the betting cap, not from a power limit.
+
 Run on 2026-11-09, one run as planned, no deviations:
 `scripts/exp_planted.py run --jobs 4` with the v1 salt (956 s on a shared 4-core
 container). Raw output: `results/experiments/E1_planted_regressions.json`.
