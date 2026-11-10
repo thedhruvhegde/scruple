@@ -22,6 +22,7 @@ from hypothesis import strategies as st
 from scruple.api.app import create_app
 from scruple.api.strict import takes_body
 from scruple.auth.authn import Authenticator
+from scruple.audit.models import genesis_hash
 from scruple.auth.deps import iter_routes
 from scruple.auth.keys import ApiKeyService, ScryptParams
 from scruple.auth.limits import Limits
@@ -221,7 +222,7 @@ def test_each_tenant_has_its_own_chain_and_numbering(world: World) -> None:
         assert v["ok"] is True
     b = w.gate(B)
     first = b.audit.entries()[0]
-    assert first.seq == 1 and first.prev_hash == "0" * 64
+    assert first.seq == 1 and first.prev_hash == genesis_hash(B) != "0" * 64
 
 
 def test_keys_are_listed_per_tenant(world: World) -> None:
