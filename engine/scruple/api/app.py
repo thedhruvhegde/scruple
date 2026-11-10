@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.api.strict import reject_unknown_inputs
+from scruple.console import console_router
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
@@ -117,6 +118,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
     app.include_router(ingest_router())
+    app.include_router(console_router(g))  # HTML console at /console (scruple/console)
 
     @app.get("/health")
     def health() -> dict[str, str]:

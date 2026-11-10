@@ -1,0 +1,31 @@
+{% macro verdict(v) -%}
+{%- if v is none %}<span class="tag dim">none</span>{% else %}<span class="tag {{ v }}">{{ v }}</span>{% endif -%}
+{%- endmacro %}
+
+{% macro outcome(o) -%}
+{%- set cls = {"promote": "pass", "canary_passed": "pass", "activated": "pass", "healthy": "pass", "hold": "hold", "block": "block", "rollback": "block", "rolled_back": "hold"} -%}
+<span class="tag {{ cls.get(o.value if o.value is defined else o, 'dim') }}">{{ o.value if o.value is defined else o }}</span>
+{%- endmacro %}
+
+{% macro status(s) -%}
+{%- set cls = {"active": "pass", "canary": "hold", "shadow": "hold", "candidate": "dim", "retired": "dim", "rejected": "block"} -%}
+<span class="tag {{ cls.get(s.value, 'dim') }}">{{ s.value }}</span>
+{%- endmacro %}
+
+{% macro yes(b, t="pass", f="fail") -%}
+{%- if b %}<span class="tag pass">{{ t }}</span>{% else %}<span class="tag fail">{{ f }}</span>{% endif -%}
+{%- endmacro %}
+
+{% macro interval(lo, hi, lo_bound, hi_bound, bad_if_above_zero=false) -%}
+{#- A confidence interval drawn against zero. Bounds pick the axis range. -#}
+{%- set span = [hi_bound - lo_bound, 1e-9] | max -%}
+{%- set x1 = 4 + 132 * ((lo - lo_bound) / span) -%}
+{%- set x2 = 4 + 132 * ((hi - lo_bound) / span) -%}
+{%- set z = 4 + 132 * ((0 - lo_bound) / span) -%}
+{%- set cls = ("bad" if lo > 0 else ("good" if hi < 0 else "")) if bad_if_above_zero else ("good" if lo > 0 else ("bad" if hi < 0 else "")) -%}
+<svg class="ci" viewBox="0 0 140 14" role="img" aria-label="interval {{ lo | num(0) }} to {{ hi | num(0) }}"><line class="axis" x1="4" y1="7" x2="136" y2="7"/>{% if 4 <= z <= 136 %}<line class="zero" x1="{{ z | round(1) }}" y1="1" x2="{{ z | round(1) }}" y2="13"/>{% endif %}<line class="span {{ cls }}" x1="{{ [x1, 4] | max | round(1) }}" y1="7" x2="{{ [[x2, x1 + 1] | max, 136] | min | round(1) }}" y2="7"/></svg>
+{%- endmacro %}
+
+{% macro csrf_field() -%}
+<input type="hidden" name="csrf" value="{{ csrf_token }}">
+{%- endmacro %}

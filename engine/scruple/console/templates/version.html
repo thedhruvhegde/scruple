@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "runs" %}
+{% set rv = d.rv %}
+{% block title %}{{ rv.ref }}{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>rule versions</span><span>/</span><span>{{ rv.ref }}</span></p>
+<h1>{{ rv.ref }}</h1>
+<p class="lede">{{ rv.spec.description }}</p>
+<p class="meta"><span>status {{ m.status(rv.status) }}</span><span>verdict {{ m.verdict(d.verdict) }}</span><span>owner <b>{{ rv.owner }}</b></span><span>learned by <b>{{ rv.provenance.agent_id }}</b> from {{ rv.provenance.episode_ids | length }} episodes</span><span>content <b>{{ rv.content_hash | short(16) }}</b></span></p>
+{% endblock %}
+{% block body %}
+<div class="sec" id="logic">
+  <h2><span class="n">01 / RULE</span>What it does</h2>
+  <dl class="kv">
+    <dt>logic</dt><dd><code>{{ rv.spec.describe() }}</code></dd>
+    <dt>content hash</dt><dd><code>{{ rv.content_hash }}</code></dd>
+    <dt>created</dt><dd>{{ rv.created_at | when }}</dd>
+    <dt>rollback to</dt><dd>{% if rv.rollback_to %}v{{ rv.rollback_to }}{% else %}none{% endif %}</dd>
+  </dl>
+  <div class="actions">
+    {% if d.pack_available %}
+    <a class="btn" href="{{ P }}/rules/{{ rv.rule_id }}/versions/{{ rv.version }}/evidence.json" download>Evidence pack (JSON)</a>
+    <a class="btn" href="{{ P }}/rules/{{ rv.rule_id }}/versions/{{ rv.version }}/evidence.pdf" download>Evidence pack (PDF)</a>
+    {% endif %}
+    {% for s in siblings %}<a class="btn" href="{{ P }}/diff/rules?a={{ s.ref }}&amp;b={{ rv.ref }}">Diff against v{{ s.version }}</a>{% endfor %}
+  </div>
+</div>
+
+{% for rec in d.decisions %}{% set dec = rec.decision %}
+<div class="sec" id="{{ dec.decision_id }}">
+  <h2><span class="n">{{ "%02d" | format(loop.index + 1) }} / {{ dec.stage.value | upper }}</span>{{ dec.decision_id }} {{ m.outcome(dec.outcome) }}</h2>
+  <p>{{ dec.summary }}</p>
+  <p class="meta"><span>by <b>{{ dec.actor }}</b></span><span>{{ dec.created_at | when }}</span><span>audit seq <b>{{ rec.audit_seq }}</b></span><span>decision sha256 <b>{{ rec.decision_sha256 | short(16) }}</b></span><span><a href="{{ P }}/decisions/{{ dec.decision_id }}/report.md" download>report (markdown)</a></span></p>
+  {% if dec.reasons %}<ul class="note">{% for r in dec.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+
+  {% if dec.checks %}
+  <h3>Checks</h3>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Check</th><th>Kind</th><th>Result</th><th>Detail</th></tr></thead>
+    <tbody>{% for c in dec.checks %}<tr><td data-label="Check" class="m">{{ c.name }}</td><td data-label="Kind" class="k">{{ c.kind }}</td><td data-label="Result">{{ m.yes(c.passed) }}</td><td data-label="Detail" class="wrap">{{ c.detail }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% endif %}
+
+  {% if dec.shadow %}{% set s = dec.shadow %}
+  <h3>Shadow replay</h3>
+  <div class="stats">
+    <div class="stat"><span>cases (held out)</span><b>{{ s.n_cases | num }}</b></div>
+    <div class="stat"><span>decisions changed</span><b>{{ s.affected_cases | num }}</b></div>
+    <div class="stat"><span>mean improvement / case</span><b>{{ s.mean_improvement_usd_minor | signed_usd }}</b></div>
+    <div class="stat"><span>{{ s.confidence | pct(0) }} interval</span><b>{{ s.ci_low | usd }} to {{ s.ci_high | usd }}</b></div>
+    <div class="stat"><span>golden regressions</span><b>{{ s.golden_regressions | length }} of {{ s.golden_cases }}</b></div>
+    <div class="stat"><span>new hard findings</span><b>{{ s.new_ledger_findings | length + s.new_policy_findings | length }}</b></div>
+  </div>
+  <p class="note">Seed commitment <code>{{ s.eval_seed_commitment | short(24) }}</code> (the held-out seed itself is operator-held and never shown). Profile {{ s.profile }}.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Arm</th><th class="r">Mean regret</th><th class="r">Accuracy</th><th class="r">Escalation</th><th class="r">Ledger findings</th><th class="r">Policy findings</th></tr></thead>
+    <tbody>
+      {% for name, a in [("baseline", s.baseline), ("candidate", s.candidate)] %}
+      <tr><td class="m">{{ name }}</td><td class="m r">{{ a.mean_regret_usd_minor | usd }}</td><td class="m r">{{ a.accuracy | pct }}</td><td class="m r">{{ a.escalation_rate | pct }}</td><td class="m r">{{ a.ledger_findings }}</td><td class="m r">{{ a.policy_findings }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  {% if s.slices %}
+  <div class="tw"><table>
+    <thead><tr><th>Case type</th><th class="r">n</th><th class="r">Changed</th><th class="r">Baseline regret</th><th class="r">Candidate regret</th><th class="r">Delta</th></tr></thead>
+    <tbody>{% for sl in s.slices %}
+      <tr><td class="m">{{ sl.scenario }}</td><td class="m r">{{ sl.n }}</td><td class="m r">{{ sl.changed_cases }}</td><td class="m r">{{ sl.baseline_mean_regret | usd }}</td><td class="m r">{{ sl.candidate_mean_regret | usd }}</td><td class="m r {{ 'no' if sl.delta > 0 else ('ok' if sl.delta < 0 else '') }}">{{ sl.delta | signed_usd }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% endif %}
+
+  {% if s.evalue %}{% set ev = s.evalue %}
+  <h3>E-values per case type</h3>
+  <p class="note">{{ ev.method }}. Alpha {{ ev.alpha }} for regression (block), {{ ev.alpha_certify }} for improvement. A type regresses when its e-value passes e-BH; the interval is a time-uniform confidence sequence for the mean cost difference (candidate minus baseline, US cents per case; below zero is better). Required n is the planned sample for power {{ (1 - ev.beta) | pct(0) if ev.beta is not none else "n/a" }}{% if ev.required_total_cases %}; the plan asks for <b>{{ ev.required_total_cases | num }}</b> held-out cases in total{% endif %}.</p>
+  <div class="stats">
+    <div class="stat"><span>tested types</span><b>{{ ev.family | length }} ({{ ev.untouched_types }} untouched)</b></div>
+    <div class="stat"><span>pooled mean difference</span><b>{{ ev.pooled_mean_diff | signed_usd }}</b></div>
+    <div class="stat"><span>pooled interval</span><b>{{ ev.pooled_ci_low | usd }} to {{ ev.pooled_ci_high | usd }}</b></div>
+    <div class="stat"><span>pooled certify e-value</span><b>{{ ev.pooled_certify_e_value | evalue }}</b></div>
+    <div class="stat"><span>pooled regression e-value</span><b>{{ ev.pooled_regression_e_value | evalue }}</b></div>
+    <div class="stat"><span>sample sufficient</span><b>{{ m.yes(ev.sufficient, "yes", "no") }}</b></div>
+  </div>
+  {% set lo_b = (ev.types | map(attribute="ci_low") | list + [0]) | min %}{% set hi_b = (ev.types | map(attribute="ci_high") | list + [0]) | max %}
+  <div class="tw"><table>
+    <thead><tr><th>Case type</th><th class="r">n</th><th class="r">Required n</th><th class="r">Changed</th><th class="r">Mean diff</th><th>Confidence sequence</th><th class="r">Low</th><th class="r">High</th><th class="r">Regression e</th><th class="r">Max e</th><th class="r">Improvement e</th><th class="r">Threshold</th><th class="r">Alpha share</th><th>Flag</th></tr></thead>
+    <tbody>{% for t in ev.types %}
+      <tr>
+        <td class="m">{{ t.case_type }}</td><td class="m r">{{ t.n | num }}</td>
+        <td class="m r {{ 'no' if t.required_n is not none and t.n < t.required_n else '' }}">{{ t.required_n | num if t.required_n is not none else "n/a" }}</td>
+        <td class="m r">{{ t.changed }}</td>
+        <td class="m r">{{ t.mean_diff | signed_usd }}</td>
+        <td>{{ m.interval(t.ci_low, t.ci_high, lo_b, hi_b, true) }}</td>
+        <td class="m r">{{ t.ci_low | usd }}</td><td class="m r">{{ t.ci_high | usd }}</td>
+        <td class="m r">{{ t.regression_e_value | evalue }}</td><td class="m r">{{ t.regression_max_e_value | evalue }}</td>
+        <td class="m r">{{ t.improvement_e_value | evalue }}</td>
+        <td class="m r">{{ t.e_threshold | evalue }}</td><td class="m r">{{ t.alpha_share | evalue }}</td>
+        <td>{% if t.regressed %}<span class="tag block">regressed</span>{% elif t.improved %}<span class="tag pass">improved</span>{% else %}<span class="tag dim">neither</span>{% endif %}</td>
+      </tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% if ev.insufficient %}<p class="note warn">Below the planned sample: {{ ev.insufficient | join(", ") }}.</p>{% endif %}
+  {% if ev.violations %}<p class="note no">Violations: {{ ev.violations | join("; ") }}</p>{% endif %}
+  {% endif %}
+  {% if s.conflicts %}<p class="note">Overrides: {% for c in s.conflicts %}{{ c.overridden_rule }} ({{ c.overridden_action }}, {{ c.cases }} cases){% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+  {% endif %}
+
+  {% if dec.canary %}{% set c = dec.canary %}
+  <h3>Canary</h3>
+  <div class="stats">
+    <div class="stat"><span>live cases (simulated)</span><b>{{ c.live_cases | num }}</b></div>
+    <div class="stat"><span>traffic share</span><b>{{ c.fraction | pct }}</b></div>
+    <div class="stat"><span>matched treatment / control</span><b>{{ c.matched_treatment }} / {{ c.matched_control }}</b></div>
+    <div class="stat"><span>treatment mean cost</span><b>{{ c.treatment_mean_cost_usd_minor | usd }}</b></div>
+    <div class="stat"><span>control mean cost</span><b>{{ c.control_mean_cost_usd_minor | usd }}</b></div>
+    <div class="stat"><span>new hard findings</span><b>{{ c.new_hard_findings | length }}</b></div>
+  </div>
+  {% if c.sequential %}{% set q = c.sequential %}
+  <p class="note">{{ q.method }}. Decision <b>{{ q.decision }}</b> after {{ q.stopped_at }} of {{ q.n_matched }} matched cases; a type stops the canary when its running e-value passes {{ q.e_threshold | evalue }} (alpha {{ q.alpha }}, tolerance {{ q.tolerance_usd_minor | usd }}, assignment p {{ q.assignment_probability }}).</p>
+  {% set lo_c = (q.types | map(attribute="ci_low") | list + [0]) | min %}{% set hi_c = (q.types | map(attribute="ci_high") | list + [0]) | max %}
+  <div class="tw"><table>
+    <thead><tr><th>Case type</th><th class="r">n</th><th class="r">Treated</th><th class="r">Effect</th><th>Confidence sequence</th><th class="r">Low</th><th class="r">High</th><th class="r">Harm e</th><th class="r">Benefit e</th></tr></thead>
+    <tbody>{% for t in q.types %}
+      <tr><td class="m">{{ t.case_type }}</td><td class="m r">{{ t.n }}</td><td class="m r">{{ t.treated }}</td><td class="m r">{{ t.effect_estimate | signed_usd }}</td><td>{{ m.interval(t.ci_low, t.ci_high, lo_c, hi_c, true) }}</td><td class="m r">{{ t.ci_low | usd }}</td><td class="m r">{{ t.ci_high | usd }}</td><td class="m r {{ 'no' if t.case_type in q.harm else '' }}">{{ t.harm_e_value | evalue }}</td><td class="m r {{ 'ok' if t.case_type in q.benefit else '' }}">{{ t.benefit_e_value | evalue }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% endif %}
+  {% endif %}
+</div>
+{% else %}
+<div class="sec"><p class="note">No decisions for this version yet. Run <code>scruple evaluate {{ rv.rule_id }} {{ rv.version }}</code>.</p></div>
+{% endfor %}
+
+{% if d.canary %}
+<div class="sec" id="ramp">
+  <h2><span class="n">RAMP</span>Staged canary</h2>
+  <dl class="kv"><dt>status</dt><dd>{{ d.canary.status }}</dd><dt>stage</dt><dd>{{ d.canary.stage_index + 1 }} of {{ d.canary.schedule.stages | length }} ({{ d.canary.schedule.stages | join("%, ") }}%)</dd></dl>
+</div>
+{% endif %}
+
+<div class="sec" id="history">
+  <h2><span class="n">AUDIT</span>Every chained event for this version</h2>
+  <div class="tw"><table>
+    <thead><tr><th class="r">Seq</th><th>Event</th><th>Actor</th><th>When</th><th>Detail</th><th>Entry hash</th></tr></thead>
+    <tbody>{% for e in d.history %}
+      <tr><td class="m r">{{ e.seq }}</td><td class="m">{{ e.event_type }}</td><td class="k">{{ e.actor }}</td><td class="m dim">{{ e.at | when }}</td><td class="wrap">{{ payload(e) }}{% if e.payload.to_status is defined %} {{ e.payload.from_status | default("") }} -&gt; {{ e.payload.to_status }}{% endif %}</td><td class="m dim">{{ e.entry_hash | short }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

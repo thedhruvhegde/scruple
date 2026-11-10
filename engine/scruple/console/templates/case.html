@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "runs" %}
+{% set r = v.record %}{% set sc = v.scorecard %}
+{% block title %}{{ r.case.case_id }}{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><a href="{{ P }}/agents/{{ run.name }}">{{ run.name }}</a><span>/</span><span>{{ r.episode_id }}</span></p>
+<h1>Case {{ r.case.case_id }}</h1>
+<p class="lede">{{ r.case.network.value }} reason code {{ r.case.reason_code }}, {{ r.case.amount_minor | minor(r.case.currency) }}. Played by {{ run.name }} (seed {{ r.seed }}). Synthetic.</p>
+<p class="meta"><span>gate {{ m.yes(sc.gate) }}</span><span>quality <b>{{ sc.quality | num(3) }}</b></span><span>reward <b>{{ sc.reward | num(3) }}</b></span><span>resolution <b>{{ r.resolution or ("lapsed" if r.lapsed else "open") }}</b></span><span>merchant cost <b>{{ r.cost_usd_minor | usd }}</b></span>{% if r.baseline %}<span>baseline ({{ r.baseline.policy }}) <b>{{ r.baseline.cost_usd_minor | usd }}</b></span>{% endif %}</p>
+{% endblock %}
+{% block body %}
+<div class="sec" id="case">
+  <h2><span class="n">01 / CASE</span>What the agent was given</h2>
+  <div class="grid2">
+    <div>
+      <dl class="kv">{% for k, val in v.case_fields %}<dt>{{ k }}</dt><dd>{{ val }}</dd>{% endfor %}</dl>
+    </div>
+    <div>
+      <h3>Hidden truth (verifiers only, never shown to the agent)</h3>
+      <dl class="kv">
+        <dt>case type</dt><dd>{{ r.case.truth.family.value }}</dd>
+        <dt>claim valid</dt><dd>{{ "yes" if r.case.truth.claim_valid else "no" }}</dd>
+        <dt>merchant liability</dt><dd>{{ r.case.truth.liability_minor | minor(r.case.currency) }}</dd>
+        <dt>forged documents</dt><dd>{{ r.case.truth.forged | length }}</dd>
+        <dt>outcome correct</dt><dd>{% if r.outcome %}{{ m.yes(r.outcome.correct, "yes", "no") }}{% else %}no outcome{% endif %}</dd>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="timeline">
+  <h2><span class="n">02 / TIMELINE</span>Stage transitions and deadlines</h2>
+  <div class="tw"><table>
+    <thead><tr><th class="r">Trace</th><th>Day</th><th>By</th><th>What</th><th>Detail</th><th>Response due</th></tr></thead>
+    <tbody>{% for t in v.timeline %}
+      <tr><td class="m r"><a href="#ev-{{ t.seq }}">#{{ t.seq }}</a></td><td class="m">{{ t.day }}</td><td class="k">{{ t.actor }}</td><td class="m">{{ t.what }}</td><td class="wrap">{{ t.detail }}</td><td class="m">{{ t.deadline or "" }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="ledger">
+  <h2><span class="n">03 / LEDGER</span>Journal entries for this transaction</h2>
+  <p class="note">Double entry: every entry sums to zero in its currency. Merchant cost is every merchant posting after the capture, negated.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="r">Entry</th><th>Kind</th><th>Account</th><th class="r">Amount</th><th>Balanced</th></tr></thead>
+    <tbody>{% for e in v.journal %}{% set bal = v.journal_balanced[loop.index0] %}
+      {% for p in e.postings %}
+      <tr{% if loop.first %} id="je-{{ e.entry_id }}"{% endif %}><td class="m r">{% if loop.first %}{{ e.entry_id }}{% endif %}</td><td class="m">{% if loop.first %}{{ e.kind }}{% endif %}</td><td class="m">{{ p.account }}</td><td class="m r">{{ p.amount_minor | minor(e.currency) }}</td><td>{% if loop.first %}{{ m.yes(bal, "yes", "no") }}{% endif %}</td></tr>
+      {% endfor %}
+    {% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="evidence">
+  <h2><span class="n">04 / EVIDENCE</span>Documents: metadata and hash</h2>
+  <p class="note">Field values are not shown; the hash identifies the exact content. Changed: differs from the document the generator made. Forged: hidden truth.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Document</th><th>Kind</th><th>Issued</th><th>Source</th><th>Fields</th><th>Content sha256</th><th>Changed</th><th>Forged</th></tr></thead>
+    <tbody>{% for doc in v.documents %}
+      <tr id="doc-{{ doc.doc_id }}"><td class="m">{{ doc.doc_id }}</td><td class="m">{{ doc.kind }}</td><td class="m">{{ doc.issued_on }}</td><td class="k">{{ doc.source }}</td><td class="k wrap">{{ doc.field_names | join(", ") }}</td><td class="m"><code>{{ doc.content_hash | short(24) }}</code></td><td>{{ m.yes(not doc.changed, "no", "yes") }}</td><td>{% if doc.forged %}<span class="tag block">{{ doc.forged }}</span>{% else %}<span class="dim">no</span>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="8" class="dim">No documents.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="calls">
+  <h2><span class="n">05 / AGENT</span>Tool calls and explanation</h2>
+  <div class="tw"><table class="stack">
+    <thead><tr><th class="r">Trace</th><th>Day</th><th>Tool</th><th>Arguments</th><th>Result</th><th>Ok</th></tr></thead>
+    <tbody>{% for c in v.calls %}
+      <tr><td data-label="Trace" class="m r"><a href="#ev-{{ c.seq }}">#{{ c.seq }}</a></td><td data-label="Day" class="m">{{ c.day }}</td><td data-label="Tool" class="m">{{ c.tool }}</td><td data-label="Arguments" class="m wrap"><code>{{ c.args }}</code></td><td data-label="Result" class="m wrap"><code>{{ c.result }}</code></td><td data-label="Ok">{% if c.ok %}<span class="tag pass">ok</span>{% else %}<span class="tag fail">refused</span> <span class="k">{{ c.error }}</span>{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  <div class="grid2" id="explanation">
+    <div>
+      <h3>Explanation (the agent's own words, not trusted as fact)</h3>
+      <div class="screen"><pre>{{ r.report.explanation }}</pre></div>
+    </div>
+    <div>
+      <h3>Claims</h3>
+      <dl class="kv">
+        <dt>stated confidence</dt><dd>{{ r.report.confidence | pct if r.report.confidence is not none else "none" }}</dd>
+        {% for k, val in r.report.claims.model_dump(mode="json").items() %}<dt>{{ k }}</dt><dd>{% if val is none %}<span class="dim">none</span>{% elif val is string or val is number or val is boolean %}{{ val }}{% else %}{{ val | join(", ") if val else "none" }}{% endif %}</dd>{% endfor %}
+      </dl>
+    </div>
+  </div>
+  {% if r.baseline %}<p class="note" id="baseline">Counterfactual: the same case under the {{ r.baseline.policy }} policy cost {{ r.baseline.cost_usd_minor | usd }}, resolution {{ r.baseline.resolution or "none" }}, {{ "correct" if r.baseline.correct else "not correct" }}.</p>{% endif %}
+</div>
+
+<div class="sec" id="checks">
+  <h2><span class="n">06 / VERIFIERS</span>Every check, with its evidence</h2>
+  <p class="note">reward = gate x quality. A failed hard check zeroes the reward. Evidence links jump to the trace event, journal entry or document a check read.</p>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Check</th><th>Name</th><th>Kind</th><th>Result</th><th class="r">Score</th><th class="r">Weight</th><th>Explanation</th><th>Evidence</th><th>Guards</th></tr></thead>
+    <tbody>{% for row in v.checks %}{% set c = row.check %}
+      <tr id="check-{{ c.id }}"><td data-label="Check" class="m">{{ c.id }}</td><td data-label="Name" class="wrap">{{ c.name }}</td><td data-label="Kind" class="k">{{ "hard" if c.hard else "soft" }}</td><td data-label="Result">{{ m.yes(c.passed) }}</td><td data-label="Score" class="m r">{{ c.score | num(2) }}</td><td data-label="Weight" class="m r">{{ c.weight | num(1) }}</td><td data-label="Explanation" class="wrap">{{ c.explanation }}</td>
+        <td data-label="Evidence" class="k wrap">{% for label, href, note in row.links %}{% if href %}<a href="{{ href }}">{{ label }}</a>{% else %}{{ label }}{% endif %}{% if note %} ({{ note }}){% endif %}{% if not loop.last %}, {% endif %}{% else %}none{% endfor %}</td>
+        <td data-label="Guards" class="k">{{ c.guards | join(", ") }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="trace">
+  <h2><span class="n">07 / TRACE</span>Every event, hash chained</h2>
+  {% set tid = "" %}{% include "_trace.html" %}
+</div>
+{% endblock %}

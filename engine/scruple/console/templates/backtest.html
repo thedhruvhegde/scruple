@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% set section = "backtests" %}
+{% block title %}{{ entry.name }}{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><a href="{{ P }}/backtests">backtests</a><span>/</span><span>{{ entry.name }}</span></p>
+<h1>Backtest: {{ r.candidate }}</h1>
+{% if r.synthetic %}<p class="lede"><b>Synthetic data.</b> Not a customer history; nothing here is evidence about real disputes.</p>{% else %}<p class="lede">Data: {{ r.dataset }}.</p>{% endif %}
+<p class="meta"><span>data <b>{{ r.dataset }}</b></span><span>format <b>{{ r.format }}</b></span><span>currency <b>{{ r.currency }}</b> (minor units)</span><span>latest case <b>{{ r.as_of | when }}</b></span></p>
+{% endblock %}
+{% block body %}
+<div class="sec">
+  <h2><span class="n">01 / VERDICT</span>{{ r.verdict }}{% if r.verdict != "no change" %} <span class="dim">({{ "holds at both ends of the estimate bands" if r.robust else "moves within the estimate bands" }})</span>{% endif %}</h2>
+  <ul class="note">{% for t in r.reasons_text %}<li>{{ t }}</li>{% endfor %}</ul>
+  <div class="stats">
+    <div class="stat"><span>cases included</span><b>{{ r.n_included }} of {{ r.n_input }}</b></div>
+    <div class="stat"><span>observed / estimated</span><b>{{ r.n_observed }} / {{ r.n_estimated }}</b></div>
+    <div class="stat"><span>history cost</span><b>{{ r.baseline_cost | num(0) }}</b></div>
+    <div class="stat"><span>candidate cost</span><b>{{ r.candidate_cost | num(0) }}</b></div>
+    <div class="stat"><span>candidate band</span><b>{{ r.candidate_cost_low | num(0) }} to {{ r.candidate_cost_high | num(0) }}</b></div>
+    <div class="stat"><span>ledger reconciled</span><b>{{ m.yes(r.ledger_reconciled, "yes", "no") }}</b></div>
+  </div>
+  {% if r.stats %}<p class="note">Mean difference per case (candidate minus history) <b>{{ r.stats.mean_diff | num(0) }}</b>, time-uniform interval {{ r.stats.ci_low | num(0) }} to {{ r.stats.ci_high | num(0) }} (alpha {{ r.config.alpha_certify }}); certificate e-value {{ r.stats.certify_e_value | evalue }}, pooled regression e-value {{ r.stats.pooled_regression_e_value | evalue }}.</p>{% endif %}
+  <p class="actions"><a class="btn" href="{{ P }}/backtests/{{ entry.name }}/report.json" download>Report (JSON)</a></p>
+</div>
+<div class="sec">
+  <h2><span class="n">02 / BY REASON</span>Per dispute reason</h2>
+  {% set lo_b = (r.by_reason | map(attribute="ci_low") | list + [0]) | min %}{% set hi_b = (r.by_reason | map(attribute="ci_high") | list + [0]) | max %}
+  <div class="tw"><table>
+    <thead><tr><th>Reason</th><th class="r">n</th><th class="r">Observed</th><th class="r">Estimated</th><th class="r">Mean diff</th><th>Interval</th><th class="r">Low</th><th class="r">High</th><th class="r">Regression e</th><th class="r">Improvement e</th><th class="r">Needed n</th><th>Verdict</th></tr></thead>
+    <tbody>{% for x in r.by_reason %}
+      <tr><td class="m">{{ x.reason }}</td><td class="m r">{{ x.n }}</td><td class="m r">{{ x.n_observed }}</td><td class="m r">{{ x.n_estimated }}</td><td class="m r">{{ x.mean_diff | num(0) }}</td><td>{{ m.interval(x.ci_low, x.ci_high, lo_b, hi_b, true) }}</td><td class="m r">{{ x.ci_low | num(0) }}</td><td class="m r">{{ x.ci_high | num(0) }}</td><td class="m r">{{ x.regression_e_value | evalue }}</td><td class="m r">{{ x.improvement_e_value | evalue }}</td><td class="m r {{ '' if x.plan.sufficient else 'no' }}">{{ x.plan.cases_needed if x.plan.cases_needed is not none else "n/a" }}</td><td class="m">{{ x.verdict }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% if r.planning_note %}<p class="note">{{ r.planning_note }}</p>{% endif %}
+</div>
+<div class="sec">
+  <h2><span class="n">03 / ASSUMPTIONS</span>What the estimates rest on</h2>
+  <ul class="note">{% for a in r.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>
+  {% if r.excluded %}<p class="note">Excluded: {% for k, n in r.excluded | dictsort %}{{ k }} {{ n }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+  {% if r.rule_fields_defaulted %}<p class="note">Rule fields filled with a default: {% for k, n in r.rule_fields_defaulted | dictsort %}{{ k }} ({{ n }} cases){% if not loop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+</div>
+{% endblock %}
