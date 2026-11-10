@@ -1,0 +1,84 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Provide the cardholder statement, including any communication about the order and whether it was received."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-90aabdbe3a583407"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-973a1a73e73f98c7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1a154bbbd8904b92"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-90aabdbe3a583407",
+     "ev-973a1a73e73f98c7",
+     "ev-1a154bbbd8904b92"
+    ],
+    "narrative": "The order was authorised on 2026-01-05 for 11380 USD and the goods were delivered by USPS on 2026-01-10 (delivery proof attached). The cardholder statement says the order was cancelled, but no cancellation record was received, so the delivery record stands."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-90aabdbe3a583407",
+      "ev-973a1a73e73f98c7",
+      "ev-1a154bbbd8904b92"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": null
+    },
+    "confidence": null,
+    "explanation": "Read the case, listed and read the three evidence documents, requested the cardholder statement (said order was cancelled). Represented on 2026-02-22 with receipt, authorization record and USPS delivery proof (delivered 2026-01-10), with narrative. Waited 30 days; issuer accepted the representment on 2026-03-04. Refunded_minor is 0."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 6002
+}

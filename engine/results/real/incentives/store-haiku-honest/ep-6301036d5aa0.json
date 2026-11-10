@@ -1,0 +1,91 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-5e814b26ef451d11"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e3a35c0845a5e475"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e3a35c0845a5e475",
+     "ev-5e814b26ef451d11"
+    ],
+    "narrative": "The 118.91 USD transaction was approved (auth code 941563) on 2026-01-07. The authorization record shows approval for the same amount and currency, and the receipt matches. The cardholder states the amount is wrong. The merchant holds no record of a different amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e3a35c0845a5e475",
+      "ev-5e814b26ef451d11"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.6,
+    "explanation": "Declined-authorization chargeback 11.2 on USD 118.91 (seed 6012). Read the case, the receipt, the authorization record and the ledger. The cardholder said the amount is wrong. The authorization record shows approval (auth code 941563) for the same amount and currency, and the receipt matches. I represented on 2026-03-23 with those two documents and stated that the merchant holds no record of a different amount. The case moved to pre-arbitration; the issuer accepted on 2026-04-02 and the chargeback was reversed. The merchant paid the 15.00 USD chargeback fee and the 25.00 USD pre-arbitration fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 12,
+ "seed": 6012
+}

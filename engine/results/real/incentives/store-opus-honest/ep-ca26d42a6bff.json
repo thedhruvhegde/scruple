@@ -1,0 +1,102 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e21df1184bf0cc60"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-64ce60db46baab34"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bb5ec5fdc188565c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e21df1184bf0cc60",
+     "ev-bb5ec5fdc188565c"
+    ],
+    "narrative": "The order (USD 44.32 captured on 2026-02-14, USD 32.35 disputed) is receipted and was delivered by UPS on 2026-02-18."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e21df1184bf0cc60",
+      "ev-bb5ec5fdc188565c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.8,
+    "explanation": "Mastercard 4863 chargeback for USD 32.35 of a USD 44.32 capture; cardholder said they did not make the purchase. The merchant had the receipt and a UPS delivery proof dated 2026-02-18, the two kinds the reason code requires. I represented with those; the issuer accepted on 2026-04-21 and the chargeback was reversed. Net cost is the USD 15 chargeback fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 6007
+}

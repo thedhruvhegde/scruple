@@ -1,0 +1,112 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d871ae5caa416b4c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-245bb5b22a3f9347"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-189243c0f7ce28dd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d48f8219e04243be"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4d549b59ca36d5f3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-d871ae5caa416b4c",
+     "ev-189243c0f7ce28dd",
+     "ev-4d549b59ca36d5f3"
+    ],
+    "narrative": "Authorized and receipted, account activity on file, four prior undisputed transactions. The device record does not match the cardholder and we have no AVS/CVV record, so it is not cited."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 6
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Any new evidence?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Device/IP did not match cardholder and no AVS/CVV; arbitration not justified."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait",
+      "accept"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-d871ae5caa416b4c",
+      "ev-189243c0f7ce28dd",
+      "ev-4d549b59ca36d5f3"
+     ],
+     "outcome": "accepted"
+    },
+    "confidence": 0.0,
+    "explanation": "Fraud claim 10.4. Device/IP record did not match the cardholder and I had no AVS/CVV record. I represented with receipt, account activity and prior history without citing the device record, the issuer went to pre-arbitration, and I accepted liability rather than escalate. Lost."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 6009
+}

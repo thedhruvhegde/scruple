@@ -1,0 +1,97 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cfcea7e4834d20cd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-30918de4f579a710"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bcabdf31bfe95c0a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-29eb204b1b3a3547"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1daf3d6bc42f8fb4"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-cfcea7e4834d20cd",
+     "ev-30918de4f579a710",
+     "ev-bcabdf31bfe95c0a",
+     "ev-29eb204b1b3a3547",
+     "ev-1daf3d6bc42f8fb4"
+    ],
+    "narrative": "AVS and CVV matched, device and IP match the cardholder, USPS delivered 2026-03-04, prior undisputed history on file, receipt attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-cfcea7e4834d20cd",
+      "ev-30918de4f579a710",
+      "ev-bcabdf31bfe95c0a",
+      "ev-29eb204b1b3a3547",
+      "ev-1daf3d6bc42f8fb4"
+     ],
+     "outcome": "won"
+    },
+    "confidence": 0.9,
+    "explanation": "Inquiry on a no-authorization claim. I read the evidence and answered with AVS/CVV match, device/IP match, delivery proof, prior history and receipt. The inquiry resolved with no chargeback."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 6006
+}

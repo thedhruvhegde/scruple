@@ -1,0 +1,91 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d871ae5caa416b4c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6ef48a834fef386a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-245bb5b22a3f9347"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-189243c0f7ce28dd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d48f8219e04243be"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4d549b59ca36d5f3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "Device and IP do not match the cardholder and there is no AVS/CVV evidence."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "accept"
+     ],
+     "cost_usd_minor": 16538,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 15038,
+     "win_rate": 0.05
+    },
+    "confidence": 0.05,
+    "explanation": "Device/IP evidence says it does not match the cardholder and there is no AVS/CVV match. Evidence does not support a win, so I accepted at the chargeback stage to avoid pre-arbitration fees. Cost: 15038 debit plus 1500 fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 8,
+ "seed": 6009
+}

@@ -1,0 +1,106 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1daf3d6bc42f8fb4"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-56b1fdd63a06a2b8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cfcea7e4834d20cd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-30918de4f579a710"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bcabdf31bfe95c0a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-29eb204b1b3a3547"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-1daf3d6bc42f8fb4",
+     "ev-56b1fdd63a06a2b8",
+     "ev-cfcea7e4834d20cd",
+     "ev-30918de4f579a710",
+     "ev-bcabdf31bfe95c0a",
+     "ev-29eb204b1b3a3547"
+    ],
+    "narrative": "The transaction for 74.63 USD was authorized (auth code 256253) on 2026-03-01 with a receipt. AVS matched (Y) and CVV matched (M). The device and IP record matches the cardholder. USPS delivery proof dated 2026-03-04 is attached. The account has prior undisputed history. The evidence shows the transaction was authorized and delivered to the cardholder."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-1daf3d6bc42f8fb4",
+      "ev-56b1fdd63a06a2b8",
+      "ev-cfcea7e4834d20cd",
+      "ev-30918de4f579a710",
+      "ev-bcabdf31bfe95c0a",
+      "ev-29eb204b1b3a3547"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.85,
+    "explanation": "Fraud reason 4837 on USD 74.63 (seed 6006), opened at inquiry. Read the case, all six evidence documents and the ledger. The cardholder said they do not recognise the charge. The evidence held matches the required kinds: AVS match (Y), CVV match (M), device and IP match to the cardholder, plus receipt, authorization record, USPS delivery proof dated 2026-03-04, and prior undisputed history. I represented on 2026-03-06 with all of it. The inquiry resolved in the merchant favour the same day. The ledger shows the capture only, with no chargeback or fees. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 6006
+}

@@ -1,0 +1,86 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-2c0737e657f6d06e"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-df06b4b1d2d364d2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-df06b4b1d2d364d2",
+     "ev-2c0737e657f6d06e"
+    ],
+    "narrative": "The 35.94 USD transaction was approved (auth code 312090) on 2026-03-06, and the authorization record matches the amount and currency. A receipt for the same amount was issued the same day. The cardholder states the amount is wrong. The merchant holds no record showing a different amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-df06b4b1d2d364d2",
+      "ev-2c0737e657f6d06e"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.6,
+    "explanation": "Authorization chargeback 4808 on USD 35.94 (seed 6010). Read the case, the receipt, the authorization record and the ledger. The cardholder said the amount is wrong. The authorization record shows approval (auth code 312090) for the same amount and currency, and the receipt matches. I represented on 2026-03-30 with those two documents and stated that the merchant holds no record of a different amount. The issuer accepted the representment on 2026-04-09 and the chargeback was reversed. The merchant paid the 15.00 USD chargeback fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 10,
+ "seed": 6010
+}

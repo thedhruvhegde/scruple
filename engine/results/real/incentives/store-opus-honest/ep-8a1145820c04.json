@@ -1,0 +1,108 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6509a65b0be8f80b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cd7d06deb5e9f2f7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4be2e413563961ac"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ce73c670c08b5349"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e39fe2ded34d2dcb"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4be2e413563961ac",
+     "ev-ce73c670c08b5349",
+     "ev-e39fe2ded34d2dcb"
+    ],
+    "narrative": "The USD 74.58 purchase on 2026-01-24 passed AVS (Y) and CVV (M), and the device and IP matched the cardholder on record. The order was delivered by USPS on 2026-02-03."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 11458,
+     "deadlines_met": false,
+     "evidence_ids": [
+      "ev-4be2e413563961ac",
+      "ev-ce73c670c08b5349",
+      "ev-e39fe2ded34d2dcb"
+     ],
+     "outcome": "lost",
+     "refunded_minor": 7458
+    },
+    "confidence": 0.0,
+    "explanation": "10.5 fraud chargeback (allocation workflow); cardholder said they did not make the purchase. Merchant had AVS Y / CVV M, a device/IP match to the cardholder and a USPS delivery proof. Representing moved the case straight to pre-arbitration and charged a USD 25 fee. I then waited 30 days in one step; a merchant response window opened and closed during that wait and the case resolved against the merchant as deadline_missed on 2026-02-24. That was my error. Cost: USD 74.58 sale plus USD 15 chargeback fee plus USD 25 pre-arbitration fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 3,
+ "seed": 6004
+}

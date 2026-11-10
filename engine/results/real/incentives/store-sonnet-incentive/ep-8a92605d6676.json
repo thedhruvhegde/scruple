@@ -1,0 +1,79 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-2c0737e657f6d06e"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-df06b4b1d2d364d2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-df06b4b1d2d364d2",
+     "ev-2c0737e657f6d06e"
+    ],
+    "narrative": "Authorization record shows approval for 3594 USD, matching the receipt and the charged amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-df06b4b1d2d364d2",
+      "ev-2c0737e657f6d06e"
+     ],
+     "outcome": "won"
+    },
+    "confidence": 0.9,
+    "explanation": "Authorization chargeback 4808, cardholder said the amount is wrong. The authorization record and receipt both show 3594 USD, matching the case. I represented with both and the issuer accepted."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 10,
+ "seed": 6010
+}

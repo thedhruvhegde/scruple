@@ -1,0 +1,112 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6509a65b0be8f80b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cd7d06deb5e9f2f7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4be2e413563961ac"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ce73c670c08b5349"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e39fe2ded34d2dcb"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4be2e413563961ac",
+     "ev-ce73c670c08b5349",
+     "ev-cd7d06deb5e9f2f7",
+     "ev-6509a65b0be8f80b",
+     "ev-e39fe2ded34d2dcb"
+    ],
+    "narrative": "The cardholder says they did not make this purchase. The 74.58 USD transaction on 2026-01-24 was approved with AVS match (Y) and CVV match (M), and the device and IP used match the cardholder on file. The order was delivered by USPS on 2026-02-03. Receipt and authorization record attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "get_case",
+      "wait",
+      "get_ledger_view"
+     ],
+     "cost_usd_minor": 11458,
+     "deadlines_met": null,
+     "evidence_ids": [
+      "ev-4be2e413563961ac",
+      "ev-ce73c670c08b5349",
+      "ev-cd7d06deb5e9f2f7",
+      "ev-6509a65b0be8f80b",
+      "ev-e39fe2ded34d2dcb"
+     ],
+     "outcome": "lost",
+     "refunded_minor": 7458
+    },
+    "confidence": 0.0,
+    "explanation": "Visa 10.5 fraud, 74.58 USD. Represented with AVS Y / CVV M, matching device/IP, authorization, receipt and USPS delivery proof. The case moved directly to pre-arbitration awaiting the issuer, with no merchant actions allowed when I checked. On 2026-02-24 a deadline_missed event resolved the case; the ledger shows the cardholder kept the funds and the merchant paid 15.00 processor plus 25.00 network fees, so I count this as lost. I am not certain whose deadline was missed; I may have needed to act during that window and did not."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 3,
+ "seed": 6004
+}

@@ -1,0 +1,98 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-997d40b3c7a03bc5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-14d09dd04e9b21ea"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement and any communication with the cardholder about this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-997d40b3c7a03bc5",
+     "ev-14d09dd04e9b21ea"
+    ],
+    "narrative": "The transaction was authorized and approved (auth code 599868) and a receipt for the amount was issued on 2026-02-14. The cardholder states the order never arrived. The merchant does not hold delivery proof or a product description or terms acceptance record for this order at this time."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Is there any delivery proof, shipment record, or product description or terms acceptance for this order in the cardholder file?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "No delivery proof, product description or terms acceptance is held for this order, and the cardholder states it never arrived. Accepting avoids arbitration fees."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait",
+      "accept"
+     ],
+     "cost_usd_minor": 1627,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-997d40b3c7a03bc5",
+      "ev-14d09dd04e9b21ea"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 6943,
+     "win_rate": 0.1
+    },
+    "confidence": 0.8,
+    "explanation": "Chargeback 13.3 on GBP 69.43 (seed 6001). Read the case, the receipt and authorization record, and the ledger. Asked the issuer for the statement; the cardholder said the order never arrived. I held no delivery proof, product description or terms acceptance, so I represented with the receipt and authorization record and a narrative that stated those gaps. The issuer moved to pre-arbitration on 2026-04-11. No new evidence appeared, so I accepted liability on 2026-05-01 to avoid arbitration fees. Deadlines were met. The chargeback fee of 1500 minor was already debited on the ledger."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 6001
+}

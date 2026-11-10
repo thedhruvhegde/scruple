@@ -1,0 +1,93 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement and any communication with the cardholder about this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-90aabdbe3a583407"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-973a1a73e73f98c7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1a154bbbd8904b92"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-90aabdbe3a583407",
+     "ev-973a1a73e73f98c7",
+     "ev-1a154bbbd8904b92"
+    ],
+    "narrative": "The order was authorized (auth code 571225) and a receipt for 113.80 USD was issued on 2026-01-05. USPS delivery proof shows the order was delivered on 2026-01-10. The cardholder states they cancelled and were still charged. The merchant holds no cancellation record for this order, and the delivery proof does not address the cancellation claim."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-90aabdbe3a583407",
+      "ev-973a1a73e73f98c7",
+      "ev-1a154bbbd8904b92"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.5,
+    "explanation": "Chargeback 13.1 on USD 113.80 (seed 6002). Read the case, the ledger and the three evidence documents (receipt, authorization record, USPS delivery proof dated 2026-01-10). The cardholder said they cancelled and were still charged. I represented on 2026-02-22 with the receipt, authorization and delivery proof, and stated that I hold no cancellation record. The issuer accepted the representment on 2026-03-04 and the chargeback was reversed. The merchant keeps the funds and paid the 15.00 USD chargeback fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 6002
+}

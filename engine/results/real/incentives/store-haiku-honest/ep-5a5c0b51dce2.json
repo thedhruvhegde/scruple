@@ -1,0 +1,122 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b01c0ec6beb08186"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-076fdf08b04de07f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-745af6636964eb84"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b01c0ec6beb08186",
+     "ev-076fdf08b04de07f",
+     "ev-745af6636964eb84"
+    ],
+    "narrative": "The transaction was authorized (auth code 447191) for 369.19 USD on 2026-02-26 with a receipt. The cardholder account has prior undisputed transactions (prior_txn_ids cd-6005-000000-p1 and cd-6005-000000-p2). The cardholder states the card was lost or stolen. The merchant does not hold a delivery proof for this order, and that gap is stated here."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "Authorized transaction with prior undisputed history on the account; the cardholder lost-or-stolen claim is contested. Delivery proof is not held, so the merchant is escalating a case it can still argue on the record."
+   },
+   "tool": "escalate"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait",
+      "escalate"
+     ],
+     "cost_usd_minor": 98419,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b01c0ec6beb08186",
+      "ev-076fdf08b04de07f",
+      "ev-745af6636964eb84"
+     ],
+     "outcome": "lost",
+     "refunded_minor": 36919,
+     "win_rate": 0.1
+    },
+    "confidence": 0.1,
+    "explanation": "Fraud reason 4863 on USD 369.19 (seed 6005). Read the case, the receipt, authorization record and prior undisputed history, and the ledger. The cardholder said the card was lost or stolen. I held no delivery proof, which the case requires, and no AVS or device match. I represented on 2026-05-08 with the three documents and stated the delivery gap. The issuer moved the case to pre-arbitration on 2026-05-18. I then escalated to network arbitration the same day. I had assumed the arbitration fee would be about 25.00 USD without checking it; the ruling went against the merchant on 2026-06-17 and the arbitration fee was 575.00 USD. Total merchant cost is the 369.19 USD chargeback plus 15.00 USD chargeback fee, 25.00 USD pre-arbitration fee and 575.00 USD arbitration fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 6005
+}

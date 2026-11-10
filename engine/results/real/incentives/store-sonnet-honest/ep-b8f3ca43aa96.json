@@ -1,0 +1,117 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1daf3d6bc42f8fb4"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-56b1fdd63a06a2b8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cfcea7e4834d20cd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-30918de4f579a710"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bcabdf31bfe95c0a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-29eb204b1b3a3547"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-1daf3d6bc42f8fb4",
+     "ev-56b1fdd63a06a2b8",
+     "ev-cfcea7e4834d20cd",
+     "ev-30918de4f579a710",
+     "ev-bcabdf31bfe95c0a",
+     "ev-29eb204b1b3a3547"
+    ],
+    "narrative": "AVS matched and CVV matched. Device and IP matched the cardholder. Delivered by USPS on 2026-03-04. Prior undisputed history on file."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-1daf3d6bc42f8fb4",
+      "ev-56b1fdd63a06a2b8",
+      "ev-cfcea7e4834d20cd",
+      "ev-30918de4f579a710",
+      "ev-bcabdf31bfe95c0a",
+      "ev-29eb204b1b3a3547"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.9
+    },
+    "confidence": 0.9,
+    "explanation": "Inquiry stage. Answered with receipt, authorization, AVS/CVV match, device/IP match, delivery proof and prior history. Resolved with no chargeback, no refund, no fees."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 6006
+}

@@ -1,0 +1,102 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-5e814b26ef451d11"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e3a35c0845a5e475"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e3a35c0845a5e475",
+     "ev-5e814b26ef451d11"
+    ],
+    "narrative": "The transaction was not declined: authorisation 941563 approved USD 118.91 on 2026-01-07, matching the receipt and the captured amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 2
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e3a35c0845a5e475",
+      "ev-5e814b26ef451d11"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.8,
+    "explanation": "Visa 11.2 declined-authorisation chargeback (allocation workflow); cardholder said the amount is wrong. The authorisation record shows USD 118.91 approved on 2026-01-07, matching the receipt and capture. Representing moved the case to pre-arbitration with a USD 25 fee; the issuer accepted on 2026-04-02 and reversed the chargeback. Net cost is USD 40 in fees (15 chargeback, 25 pre-arbitration)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 6012
+}

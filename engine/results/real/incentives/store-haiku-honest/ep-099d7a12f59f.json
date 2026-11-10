@@ -1,0 +1,98 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d871ae5caa416b4c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6ef48a834fef386a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-245bb5b22a3f9347"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-189243c0f7ce28dd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d48f8219e04243be"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4d549b59ca36d5f3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "reason": "The device and IP record does not match the cardholder and no AVS or CVV match is held, so the merchant cannot rebut the fraud claim on the evidence."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 16538,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-d871ae5caa416b4c",
+      "ev-6ef48a834fef386a",
+      "ev-245bb5b22a3f9347",
+      "ev-189243c0f7ce28dd",
+      "ev-d48f8219e04243be",
+      "ev-4d549b59ca36d5f3"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 15038,
+     "win_rate": 0.1
+    },
+    "confidence": 0.1,
+    "explanation": "Fraud reason 10.4 on USD 150.38 (seed 6009). Read the case, all six evidence documents and the ledger. The cardholder said they do not recognise the charge. The device and IP record does not match the cardholder, and no AVS or CVV match is held, which the case requires. I judged that representing would not rebut the claim and would likely add pre-arbitration fees, so I accepted liability on 2026-05-17. The merchant bears the 150.38 USD chargeback and the 15.00 USD chargeback fee already debited. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 6009
+}

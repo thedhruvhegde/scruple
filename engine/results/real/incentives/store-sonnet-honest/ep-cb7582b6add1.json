@@ -1,0 +1,89 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-5e814b26ef451d11"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e3a35c0845a5e475"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-5e814b26ef451d11",
+     "ev-e3a35c0845a5e475"
+    ],
+    "narrative": "The authorization record shows the transaction was approved (code 941563) for 11891 USD, matching the receipt and the captured amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-5e814b26ef451d11",
+      "ev-e3a35c0845a5e475"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Represented with receipt and approved authorization record. Issuer moved to pre-arbitration then accepted; chargeback reversed. Merchant bears 1500 chargeback fee and 2500 pre-arbitration fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 6012
+}

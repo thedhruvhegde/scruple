@@ -1,0 +1,93 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-2c0737e657f6d06e"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-df06b4b1d2d364d2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-2c0737e657f6d06e",
+     "ev-df06b4b1d2d364d2"
+    ],
+    "narrative": "Authorization approved for 3594 USD and the receipt shows 3594 USD, the same amount captured."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-2c0737e657f6d06e",
+      "ev-df06b4b1d2d364d2"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Represented with receipt and authorization record, both showing the captured amount of 3594. Issuer accepted and the chargeback was reversed. Merchant bears the 1500 chargeback fee only."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 6010
+}

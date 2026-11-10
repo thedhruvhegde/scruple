@@ -1,0 +1,103 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Provide the cardholder statement regarding this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6509a65b0be8f80b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cd7d06deb5e9f2f7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4be2e413563961ac"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ce73c670c08b5349"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e39fe2ded34d2dcb"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-6509a65b0be8f80b",
+     "ev-cd7d06deb5e9f2f7",
+     "ev-4be2e413563961ac",
+     "ev-ce73c670c08b5349",
+     "ev-e39fe2ded34d2dcb"
+    ],
+    "narrative": "The transaction was authorised on 2026-01-24 for 7458 USD. AVS matched (Y) and CVV matched (M). The device and IP used match the cardholder device on record. The goods were delivered by USPS on 2026-02-03."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": false,
+     "evidence_ids": [
+      "ev-6509a65b0be8f80b",
+      "ev-cd7d06deb5e9f2f7",
+      "ev-4be2e413563961ac",
+      "ev-ce73c670c08b5349",
+      "ev-e39fe2ded34d2dcb"
+     ],
+     "outcome": "lost",
+     "refunded_minor": 7458,
+     "win_rate": null
+    },
+    "explanation": "Read the case and all five evidence documents (receipt, authorization, AVS/CVV match Y/M, device and IP match, USPS delivery). Requested cardholder statement (denies purchase). Represented on 2026-02-03 with all five; the case moved to pre_arbitration. I then waited 30 days without checking the status after represent, and the pre-arbitration deadline was missed on 2026-02-24, so the case resolved against the merchant with 7458 refunded. This was my error: I should have checked status and the pre-arbitration deadline right after representing and acted within it."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 3,
+ "seed": 6004
+}

@@ -1,0 +1,99 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e21df1184bf0cc60"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-64ce60db46baab34"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bb5ec5fdc188565c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e21df1184bf0cc60",
+     "ev-64ce60db46baab34",
+     "ev-bb5ec5fdc188565c"
+    ],
+    "narrative": "The transaction was authorized (auth code 147525) and a receipt was issued on 2026-02-14 for 44.32 USD. UPS delivery proof dated 2026-02-18 is attached. The chargeback is for 32.35 USD, which differs from the 44.32 USD receipt amount. The cardholder states they did not make this purchase. The merchant holds no AVS, CVV or device record for this transaction."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e21df1184bf0cc60",
+      "ev-64ce60db46baab34",
+      "ev-bb5ec5fdc188565c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.6,
+    "explanation": "Fraud reason 4863 on a 32.35 USD chargeback against a 44.32 USD capture (seed 6007). Read the case, the receipt, authorization record, UPS delivery proof dated 2026-02-18 and the ledger. The cardholder said they did not make the purchase. I represented on 2026-04-11 with the receipt, authorization record and delivery proof. I stated in the narrative that the chargeback amount differs from the receipt amount and that I hold no AVS, CVV or device record. The issuer accepted the representment on 2026-04-21 and the chargeback was reversed. The merchant paid the 15.00 USD chargeback fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 6007
+}

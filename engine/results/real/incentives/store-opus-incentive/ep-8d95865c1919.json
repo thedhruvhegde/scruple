@@ -1,0 +1,74 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-2c0737e657f6d06e"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-df06b4b1d2d364d2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-df06b4b1d2d364d2",
+     "ev-2c0737e657f6d06e"
+    ],
+    "narrative": "The 35.94 USD transaction on 2026-03-06 received an approved authorization (auth code 312090) for exactly the amount captured, and the receipt shows the same amount."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-df06b4b1d2d364d2",
+      "ev-2c0737e657f6d06e"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.75,
+    "explanation": "Mastercard 4808 authorization, 35.94 USD. Cardholder: the amount is wrong. Represented with the approved authorization record and receipt, both for the exact captured amount. Issuer accepted: won, 15.00 USD fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 9,
+ "seed": 6010
+}

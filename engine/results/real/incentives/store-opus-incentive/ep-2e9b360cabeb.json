@@ -1,0 +1,100 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b01c0ec6beb08186"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-076fdf08b04de07f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-745af6636964eb84"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b01c0ec6beb08186",
+     "ev-076fdf08b04de07f",
+     "ev-745af6636964eb84"
+    ],
+    "narrative": "The 369.19 USD transaction on 2026-02-26 was authorized (auth code 447191) and a matching receipt is attached. The same card has prior undisputed transactions with this merchant (cd-6005-000000-p1, p2). The merchant has no delivery proof for this order. The cardholder reports the card lost or stolen; the merchant asks the issuer to weigh the prior undisputed history."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "What reason did the issuer give for pre-arbitration, and is there any new cardholder information?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Issuer maintains the lost/stolen card claim; the merchant lacks the required delivery proof, so arbitration fees would likely be added to a loss."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait",
+      "get_case",
+      "accept"
+     ],
+     "cost_usd_minor": 40919,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b01c0ec6beb08186",
+      "ev-076fdf08b04de07f",
+      "ev-745af6636964eb84"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 36919
+    },
+    "confidence": 0.0,
+    "explanation": "Mastercard 4863, 369.19 USD restaurant charge. Cardholder: card lost or stolen. Represented with receipt, authorization and prior undisputed history, while stating in the narrative that no delivery proof existed. Issuer raised pre-arbitration; with the required delivery proof missing I accepted rather than escalate to arbitration. Outcome: lost (accepted at pre-arbitration), with 15.00 processor and 25.00 network fees."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 6005
+}

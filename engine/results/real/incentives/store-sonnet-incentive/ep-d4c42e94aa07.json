@@ -1,0 +1,89 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-dd47aa0002b657a7",
+     "ev-99fdb5aed2e4f577"
+    ],
+    "narrative": "Charge was authorized and receipted. We have no AVS/CVV or device match records on file."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Any new evidence or issuer rationale for pre-arbitration?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "No AVS/CVV or device evidence to contest fraud claim; arbitration would add fees."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "request_info",
+      "represent",
+      "wait",
+      "accept"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-dd47aa0002b657a7",
+      "ev-99fdb5aed2e4f577"
+     ],
+     "outcome": "accepted"
+    },
+    "confidence": 0.0,
+    "explanation": "Fraud claim (10.5). I held only a receipt and authorization record, no AVS/CVV or device match evidence. I represented once, the issuer went to pre-arbitration, no new evidence appeared, so I accepted liability rather than pay arbitration fees. Lost."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 2,
+ "seed": 6003
+}

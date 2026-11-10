@@ -1,0 +1,87 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Provide the cardholder statement regarding this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4ebdf7ff0ca5ce5f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4e8d20498f4ac463"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f46a04dfd6f608f9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4ebdf7ff0ca5ce5f",
+     "ev-4e8d20498f4ac463",
+     "ev-f46a04dfd6f608f9"
+    ],
+    "narrative": "Authorised 2026-02-09 for 5450 EUR (approved). Goods were delivered by USPS on 2026-02-13, per the delivery proof attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-4ebdf7ff0ca5ce5f",
+      "ev-4e8d20498f4ac463",
+      "ev-f46a04dfd6f608f9"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": null
+    },
+    "explanation": "Read the case (fraud 4863, chargeback, 45 days left, required receipt and delivery_proof). Listed evidence, read receipt, authorization record (approved Y, 5450 EUR) and USPS delivery proof (2026-02-13). Requested cardholder statement (did not make the purchase). Represented on 2026-03-21 with the three documents; issuer accepted the representment on 2026-03-31, refunded_minor 0."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 6011
+}

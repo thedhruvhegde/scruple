@@ -1,0 +1,99 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Provide the cardholder statement regarding this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc4fb45a99c87e38"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-082c9195d4344c95"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc6da2b9ffaa3b7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-94e26059abf9dbaf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-a0cec80fd743d7de",
+     "ev-d082a5d5ff7bc1cf",
+     "ev-cc4fb45a99c87e38",
+     "ev-082c9195d4344c95",
+     "ev-cc6da2b9ffaa3b7c",
+     "ev-94e26059abf9dbaf"
+    ],
+    "narrative": "Authorised 2026-01-19 for 5364 USD. AVS matched (Y) and CVV matched (M). The device and IP match the cardholder device on record. Goods were delivered on 2026-01-29. The account has four prior undisputed transactions. The merchant has no evidence the transaction was made by someone other than the cardholder device."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-a0cec80fd743d7de",
+      "ev-d082a5d5ff7bc1cf",
+      "ev-cc4fb45a99c87e38",
+      "ev-082c9195d4344c95",
+      "ev-cc6da2b9ffaa3b7c",
+      "ev-94e26059abf9dbaf"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": null
+    },
+    "explanation": "Read the case (fraud 10.5, chargeback, 30 days left). Listed and read AVS/CVV match (Y/M), device and IP match (matches cardholder), delivery proof (2026-01-29) and prior undisputed history (four transactions). Requested cardholder statement (someone in household used the card). Represented on 2026-03-17 with all six documents, including receipt and authorization record. Issuer accepted the representment on 2026-03-27; refunded_minor 0."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 8,
+ "seed": 6008
+}

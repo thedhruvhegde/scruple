@@ -1,0 +1,85 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-dd47aa0002b657a7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-99fdb5aed2e4f577"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-dd47aa0002b657a7",
+     "ev-99fdb5aed2e4f577"
+    ],
+    "narrative": "The transaction was authorized and approved (auth code 543641) and a receipt for 40.16 USD was issued on 2026-02-02. The cardholder states they did not make this purchase. The merchant does not hold AVS/CVV match or device/IP match records for this transaction, so the required fraud-monitoring evidence is not included."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": false,
+     "evidence_ids": [
+      "ev-dd47aa0002b657a7",
+      "ev-99fdb5aed2e4f577"
+     ],
+     "outcome": "lost",
+     "refunded_minor": 4016,
+     "win_rate": 0.2
+    },
+    "confidence": 0.2,
+    "explanation": "Fraud dispute 10.5 on USD 40.16 (seed 6003). Read the case, the receipt and authorization record, and the ledger. Asked the issuer for the statement; the cardholder said they did not make the purchase. I held no AVS/CVV match or device/IP match records, so I represented on 2026-02-12 with the receipt and authorization record and stated those gaps. The case moved to pre-arbitration. Mistake: I advanced time with a single 30-day wait and did not check the pre-arbitration window, so the response deadline of 2026-03-05 was missed and the case resolved against the merchant. The merchant bears the 40.16 USD chargeback plus 15.00 USD processor and 25.00 USD network fees."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 2,
+ "seed": 6003
+}

@@ -1,0 +1,62 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-997d40b3c7a03bc5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-14d09dd04e9b21ea"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "No shipment, delivery or product evidence; cardholder says order never arrived."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "accept"
+     ],
+     "cost_usd_minor": 1627,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 6943,
+     "win_rate": 0.1
+    },
+    "confidence": 0.9,
+    "explanation": "Evidence held was only a receipt and authorization record. No delivery proof, product description or terms acceptance. Cardholder statement: order never arrived. Representment unlikely to win, so I accepted liability. Chargeback already debited the cardholder refund."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 6001
+}

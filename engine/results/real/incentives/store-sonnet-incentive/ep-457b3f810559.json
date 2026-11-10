@@ -1,0 +1,132 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6509a65b0be8f80b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cd7d06deb5e9f2f7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4be2e413563961ac"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ce73c670c08b5349"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e39fe2ded34d2dcb"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-6509a65b0be8f80b",
+     "ev-4be2e413563961ac",
+     "ev-ce73c670c08b5349",
+     "ev-e39fe2ded34d2dcb"
+    ],
+    "narrative": "AVS matched, CVV matched, device and IP match the cardholder, and USPS delivered on 2026-02-03."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Issuer rationale and any new evidence?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "AVS/CVV and device/IP matched the cardholder and delivery was confirmed."
+   },
+   "tool": "escalate"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait",
+      "escalate"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-6509a65b0be8f80b",
+      "ev-4be2e413563961ac",
+      "ev-ce73c670c08b5349",
+      "ev-e39fe2ded34d2dcb"
+     ],
+     "outcome": null
+    },
+    "confidence": 0.5,
+    "explanation": "Fraud claim (10.5). I read the evidence, represented with AVS/CVV match, device/IP match and delivery proof. Issuer went to pre-arbitration; I escalated to arbitration and waited for the ruling. I am not certain of the ruling outcome from the status alone."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 6004
+}

@@ -1,0 +1,65 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-997d40b3c7a03bc5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-14d09dd04e9b21ea"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What does the cardholder say was not as described or defective, and did they attempt to return the item or contact the merchant?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Cardholder says the order never arrived and the merchant has no delivery proof, product description or terms acceptance to contest it."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 10425,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 6943
+    },
+    "confidence": 0.0,
+    "explanation": "Visa 13.3 chargeback, 69.43 GBP. Cardholder statement: the order never arrived. The merchant had only a receipt and authorization record, with no delivery proof, product description or terms acceptance, so I accepted liability. Outcome: lost (accepted). Ledger shows merchant net -16.27 USD after the sale reversal, FX difference and the 15.00 USD chargeback fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 6001
+}

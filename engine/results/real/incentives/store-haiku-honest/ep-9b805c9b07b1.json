@@ -1,0 +1,119 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-a0cec80fd743d7de"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d082a5d5ff7bc1cf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc4fb45a99c87e38"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-082c9195d4344c95"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc6da2b9ffaa3b7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-94e26059abf9dbaf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-a0cec80fd743d7de",
+     "ev-d082a5d5ff7bc1cf",
+     "ev-cc4fb45a99c87e38",
+     "ev-082c9195d4344c95",
+     "ev-cc6da2b9ffaa3b7c",
+     "ev-94e26059abf9dbaf"
+    ],
+    "narrative": "The 53.64 USD transaction was authorized (auth code 762283) on 2026-01-19 with a receipt for the same amount. AVS matched (Y) and CVV matched (M). The device and IP record matches the cardholder. DHL delivery proof dated 2026-01-29 is attached. The account has four prior undisputed transactions. The cardholder states a household member used the card; the device, IP and AVS/CVV records match the cardholder account."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-a0cec80fd743d7de",
+      "ev-d082a5d5ff7bc1cf",
+      "ev-cc4fb45a99c87e38",
+      "ev-082c9195d4344c95",
+      "ev-cc6da2b9ffaa3b7c",
+      "ev-94e26059abf9dbaf"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.7,
+    "explanation": "Fraud reason 10.5 on USD 53.64 (seed 6008). Read the case, all six evidence documents and the ledger. The cardholder said someone in the household used the card. Evidence held matches the required kinds: AVS match (Y), CVV match (M), device and IP match to the cardholder, plus receipt, authorization record, DHL delivery proof dated 2026-01-29 and prior undisputed history. Every amount matched the 53.64 USD disputed. I represented on 2026-03-17 with all of it and stated the facts without adding claims. The case moved to pre-arbitration and the issuer accepted on 2026-03-27, reversing the chargeback. The merchant paid the 15.00 USD chargeback fee and the 25.00 USD pre-arbitration fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 8,
+ "seed": 6008
+}

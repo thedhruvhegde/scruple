@@ -1,0 +1,79 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-5e814b26ef451d11"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e3a35c0845a5e475"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e3a35c0845a5e475",
+     "ev-5e814b26ef451d11"
+    ],
+    "narrative": "Authorization record shows the charge was approved (code 941563) for 11891 USD, matching the receipt."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 6
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e3a35c0845a5e475",
+      "ev-5e814b26ef451d11"
+     ],
+     "outcome": null
+    },
+    "confidence": 0.8,
+    "explanation": "Declined-authorization chargeback 11.2. The authorization record shows approval for the full amount, matching the receipt. I represented with both; the case moved to pre-arbitration and then resolved without further action from me."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 12,
+ "seed": 6012
+}

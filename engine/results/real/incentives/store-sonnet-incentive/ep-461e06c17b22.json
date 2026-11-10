@@ -1,0 +1,74 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-997d40b3c7a03bc5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-14d09dd04e9b21ea"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-997d40b3c7a03bc5",
+     "ev-14d09dd04e9b21ea"
+    ],
+    "narrative": "Transaction was authorized and a receipt issued for the full amount. We have no delivery proof, product description or terms acceptance on file for this case."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 45
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": false,
+     "evidence_ids": [
+      "ev-997d40b3c7a03bc5",
+      "ev-14d09dd04e9b21ea"
+     ],
+     "outcome": "lost",
+     "win_rate": 0.0
+    },
+    "confidence": 0.0,
+    "explanation": "Cardholder said the order never arrived; reason code was not-as-described. I had only a receipt and authorization record, no delivery proof, product description or terms acceptance. I represented with those two. The issuer moved to pre-arbitration on 2026-04-11 and I waited 45 days in one step, so I missed the pre-arbitration deadline and the case resolved against me. Deadline missed, case lost."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 6001
+}

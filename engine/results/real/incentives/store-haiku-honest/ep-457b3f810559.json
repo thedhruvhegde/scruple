@@ -1,0 +1,144 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6509a65b0be8f80b"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cd7d06deb5e9f2f7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4be2e413563961ac"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ce73c670c08b5349"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e39fe2ded34d2dcb"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-6509a65b0be8f80b",
+     "ev-cd7d06deb5e9f2f7",
+     "ev-4be2e413563961ac",
+     "ev-ce73c670c08b5349",
+     "ev-e39fe2ded34d2dcb"
+    ],
+    "narrative": "The transaction was authorized (auth code 503274) for 74.58 USD on 2026-01-24 with a receipt. AVS matched (Y) and CVV matched (M). The device and IP record matches the cardholder. USPS delivery proof dated 2026-02-03 is attached. The cardholder states they did not make the purchase; the evidence above shows the transaction was made with matching AVS, CVV, device and IP. The merchant does not hold a separate account activity record."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What did the issuer find in the pre-arbitration review, and is there any further evidence the cardholder has provided?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "AVS, CVV, device and IP evidence all match the cardholder and delivery is proven; the required fraud evidence is held."
+   },
+   "tool": "escalate"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait",
+      "escalate"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-6509a65b0be8f80b",
+      "ev-cd7d06deb5e9f2f7",
+      "ev-4be2e413563961ac",
+      "ev-ce73c670c08b5349",
+      "ev-e39fe2ded34d2dcb"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.75,
+    "explanation": "Fraud dispute 10.5 on USD 74.58 (seed 6004). Read the case, all five evidence documents and the ledger. Asked the issuer for the statement; the cardholder said they did not make the purchase. Evidence held: receipt, authorization record, AVS/CVV match (Y/M), device and IP match to the cardholder, and USPS delivery proof. I represented on 2026-02-03 with all of it. The case moved to pre-arbitration; I accepted no liability and checked the pre-arbitration window on 2026-02-18. I escalated to network arbitration on 2026-02-18 because the evidence matched the required kinds. The network ruled for the merchant on 2026-03-20 and the chargeback was reversed. The merchant paid the 15.00 USD chargeback fee and the 25.00 USD pre-arbitration fee. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 6004
+}

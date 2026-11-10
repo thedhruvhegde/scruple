@@ -1,0 +1,49 @@
+{
+ "calls": [
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "reason": "No avs/cvv or device match evidence; only receipt and authorization."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "list_evidence",
+      "get_ledger_view",
+      "accept"
+     ],
+     "cost_usd_minor": 5516,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 4016,
+     "win_rate": 0.05
+    },
+    "confidence": 0.05,
+    "explanation": "Fraud chargeback 10.5. I held only a receipt and authorization record, none of the required AVS/CVV or device match evidence, so I accepted. Cost is chargeback debit 4016 plus 1500 fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 2,
+ "seed": 6003
+}

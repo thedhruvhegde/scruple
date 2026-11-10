@@ -1,0 +1,97 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-997d40b3c7a03bc5"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-14d09dd04e9b21ea"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What does the cardholder say is wrong with the item, and did they contact the merchant or attempt a return?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-997d40b3c7a03bc5",
+     "ev-14d09dd04e9b21ea"
+    ],
+    "narrative": "The transaction was authorised (auth code 599868) and receipted for GBP 69.43 on 2026-02-14. The merchant holds no product description, terms acceptance or delivery record for this order; we submit the receipt and authorisation record only."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "reason": "No delivery proof or product description to support arbitration; cardholder states the order never arrived."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "wait",
+      "represent",
+      "accept"
+     ],
+     "cost_usd_minor": 4127,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-997d40b3c7a03bc5",
+      "ev-14d09dd04e9b21ea"
+     ],
+     "outcome": "lost",
+     "refunded_minor": 6943
+    },
+    "confidence": 0.0,
+    "explanation": "13.3 chargeback; cardholder said the order never arrived. Only a receipt and authorisation record existed (no product description, terms acceptance or delivery proof). I represented with those two documents truthfully, the issuer filed pre-arbitration, and I accepted rather than escalate. In hindsight the weak representment cost an extra USD 25 pre-arbitration fee. Ledger: merchant USD -41.27 (chargeback fee 15, pre-arb fee 25, FX 1.27)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 6001
+}

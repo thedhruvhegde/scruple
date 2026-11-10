@@ -1,0 +1,70 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-dd47aa0002b657a7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-99fdb5aed2e4f577"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "Fraud claim with no AVS/CVV or device evidence to rebut it."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "accept"
+     ],
+     "cost_usd_minor": 5516,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 4016
+    },
+    "confidence": 0.0,
+    "explanation": "10.5 fraud chargeback; cardholder said they did not make the purchase. The merchant had only a receipt and authorisation record, none of the required AVS/CVV or device/IP evidence, so I accepted the chargeback at the first stage. Cost is the USD 40.16 sale plus the USD 15 chargeback fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 2,
+ "seed": 6003
+}

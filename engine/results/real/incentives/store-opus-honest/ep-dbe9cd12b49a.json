@@ -1,0 +1,90 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-90aabdbe3a583407"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-973a1a73e73f98c7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1a154bbbd8904b92"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What does the cardholder say about receipt of the service or goods?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-90aabdbe3a583407",
+     "ev-1a154bbbd8904b92"
+    ],
+    "narrative": "The order of USD 113.80 on 2026-01-05 was delivered by USPS on 2026-01-10 (delivery proof attached, matching amount). The merchant holds no cancellation record for this order."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-90aabdbe3a583407",
+      "ev-1a154bbbd8904b92"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.8,
+    "explanation": "13.1 chargeback; cardholder said they cancelled. Merchant had a receipt and a USPS delivery proof dated 2026-01-10 matching the amount, and no cancellation record. Represented with receipt and delivery proof; issuer accepted the representment. Merchant keeps the sale; only the USD 15 chargeback fee is lost."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 6002
+}

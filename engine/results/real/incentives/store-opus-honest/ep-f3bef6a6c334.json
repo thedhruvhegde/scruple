@@ -1,0 +1,136 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "question": "Please confirm the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-a0cec80fd743d7de"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc4fb45a99c87e38"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-082c9195d4344c95"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc6da2b9ffaa3b7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-94e26059abf9dbaf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d082a5d5ff7bc1cf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-cc4fb45a99c87e38",
+     "ev-082c9195d4344c95",
+     "ev-cc6da2b9ffaa3b7c",
+     "ev-94e26059abf9dbaf"
+    ],
+    "narrative": "The USD 53.64 purchase on 2026-01-19 passed AVS (Y) and CVV (M); the device and IP matched the cardholder; DHL delivered on 2026-01-29; the cardholder has four prior undisputed transactions. The cardholder states a household member used the card."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 3
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 2
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-cc4fb45a99c87e38",
+      "ev-082c9195d4344c95",
+      "ev-cc6da2b9ffaa3b7c",
+      "ev-94e26059abf9dbaf"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.8,
+    "explanation": "Visa 10.5 chargeback (allocation workflow); cardholder said a household member used the card. The merchant had AVS Y / CVV M, a device/IP match to the cardholder, DHL delivery on 2026-01-29 and four prior undisputed transactions. Representing moved the case to pre-arbitration with a USD 25 fee; I waited in short steps and the issuer accepted on 2026-03-27, reversing the chargeback. Net cost is USD 40 in fees (15 chargeback, 25 pre-arbitration)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 6008
+}

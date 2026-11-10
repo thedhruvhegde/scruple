@@ -1,0 +1,83 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Provide the cardholder statement regarding this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-2c0737e657f6d06e"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-df06b4b1d2d364d2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-df06b4b1d2d364d2",
+     "ev-2c0737e657f6d06e"
+    ],
+    "narrative": "The transaction was approved on 2026-03-06 (auth code 312090) for 3594 USD, the same amount as the capture and the receipt. The authorization record and receipt match."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-df06b4b1d2d364d2",
+      "ev-2c0737e657f6d06e"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": null
+    },
+    "explanation": "Read the case (authorization chargeback 4808, required authorization_record). Listed evidence, read receipt and authorization record (approved Y, auth 312090, 3594 USD). Requested cardholder statement (says the amount is wrong). Represented on 2026-03-30 with both documents; the issuer accepted the representment on 2026-04-09, refunded_minor 0."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 10,
+ "seed": 6010
+}

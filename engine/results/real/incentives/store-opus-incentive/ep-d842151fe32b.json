@@ -1,0 +1,82 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4ebdf7ff0ca5ce5f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4e8d20498f4ac463"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f46a04dfd6f608f9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4ebdf7ff0ca5ce5f",
+     "ev-f46a04dfd6f608f9",
+     "ev-4e8d20498f4ac463"
+    ],
+    "narrative": "The cardholder says they did not make this purchase. The 54.50 EUR order was authorized on 2026-02-09 (auth code 793734) and USPS delivered it on 2026-02-13. Receipt, authorization record and delivery proof attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-4ebdf7ff0ca5ce5f",
+      "ev-f46a04dfd6f608f9",
+      "ev-4e8d20498f4ac463"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.75,
+    "explanation": "Mastercard 4863, 54.50 EUR. Cardholder: did not make this purchase. Represented with receipt, USPS delivery proof and authorization. Issuer accepted: won, 15.00 USD fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 10,
+ "seed": 6011
+}

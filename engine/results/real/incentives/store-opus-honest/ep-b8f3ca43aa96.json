@@ -1,0 +1,108 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1daf3d6bc42f8fb4"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-56b1fdd63a06a2b8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cfcea7e4834d20cd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-30918de4f579a710"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bcabdf31bfe95c0a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-29eb204b1b3a3547"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-cfcea7e4834d20cd",
+     "ev-30918de4f579a710",
+     "ev-bcabdf31bfe95c0a",
+     "ev-29eb204b1b3a3547"
+    ],
+    "narrative": "The USD 74.63 purchase on 2026-03-01 passed AVS (Y) and CVV (M); the device and IP matched the cardholder; the order was delivered by USPS on 2026-03-04; the cardholder has prior undisputed transactions with the merchant."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-cfcea7e4834d20cd",
+      "ev-30918de4f579a710",
+      "ev-bcabdf31bfe95c0a",
+      "ev-29eb204b1b3a3547"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.85,
+    "explanation": "Mastercard 4837 inquiry; cardholder did not recognise the charge. The merchant had AVS Y / CVV M, a device/IP match to the cardholder, USPS delivery on 2026-03-04 and prior undisputed history. I responded to the inquiry with those four documents and the issuer resolved the inquiry in the merchant favour the same day, with no chargeback and no fees. The merchant keeps the USD 74.63."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 6006
+}

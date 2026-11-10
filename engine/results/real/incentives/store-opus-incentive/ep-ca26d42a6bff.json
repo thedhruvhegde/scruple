@@ -1,0 +1,82 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e21df1184bf0cc60"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-64ce60db46baab34"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bb5ec5fdc188565c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e21df1184bf0cc60",
+     "ev-bb5ec5fdc188565c",
+     "ev-64ce60db46baab34"
+    ],
+    "narrative": "The cardholder says they did not make this purchase. The order of 44.32 USD (32.35 USD disputed) was authorized on 2026-02-14 (auth code 147525) and UPS delivered it on 2026-02-18. Receipt, authorization record and delivery proof attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e21df1184bf0cc60",
+      "ev-bb5ec5fdc188565c",
+      "ev-64ce60db46baab34"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.75,
+    "explanation": "Mastercard 4863, 32.35 USD disputed of 44.32 captured. Cardholder: did not make this purchase. Represented with receipt, UPS delivery proof and authorization. Issuer accepted: won, 15.00 USD chargeback fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 6007
+}

@@ -1,0 +1,93 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e21df1184bf0cc60"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-64ce60db46baab34"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bb5ec5fdc188565c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e21df1184bf0cc60",
+     "ev-64ce60db46baab34",
+     "ev-bb5ec5fdc188565c"
+    ],
+    "narrative": "Authorized sale with receipt. UPS delivery proof shows delivery on 2026-02-18."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e21df1184bf0cc60",
+      "ev-64ce60db46baab34",
+      "ev-bb5ec5fdc188565c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Represented with receipt, authorization and UPS delivery proof. Chargeback reversed. Merchant bears the 1500 chargeback fee only."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 6,
+ "seed": 6007
+}

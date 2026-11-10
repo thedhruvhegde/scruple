@@ -1,0 +1,99 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement for this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4ebdf7ff0ca5ce5f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4e8d20498f4ac463"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f46a04dfd6f608f9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4ebdf7ff0ca5ce5f",
+     "ev-4e8d20498f4ac463",
+     "ev-f46a04dfd6f608f9"
+    ],
+    "narrative": "The 54.50 EUR transaction was approved (auth code 793734) on 2026-02-09 with a receipt for the same amount. USPS delivery proof dated 2026-02-13 is attached. The cardholder states they did not make this purchase. The merchant holds no AVS, CVV or device record for this transaction."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1733,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-4ebdf7ff0ca5ce5f",
+      "ev-4e8d20498f4ac463",
+      "ev-f46a04dfd6f608f9"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1.0
+    },
+    "confidence": 0.6,
+    "explanation": "Fraud reason 4863 on EUR 54.50 (seed 6011). Read the case, the receipt, authorization record, USPS delivery proof dated 2026-02-13 and the ledger. The cardholder said they did not make the purchase. I represented on 2026-03-21 with those three documents and stated that I hold no AVS, CVV or device record. The issuer accepted on 2026-03-31 and the chargeback was reversed. The reversal (57.14 USD) was 2.33 USD less than the original debit (59.47 USD) because of currency conversion, so the merchant keeps that difference. The merchant also paid the 15.00 USD chargeback fee. Net merchant cost is 17.33 USD. Deadlines were met."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 6011
+}

@@ -1,0 +1,112 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b01c0ec6beb08186"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-076fdf08b04de07f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-745af6636964eb84"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b01c0ec6beb08186",
+     "ev-076fdf08b04de07f",
+     "ev-745af6636964eb84"
+    ],
+    "narrative": "Transaction was authorized (approved). The cardholder has prior undisputed transactions with us. We have no delivery proof for this one."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "reason": "Required delivery proof is missing; arbitration unlikely to succeed."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait",
+      "accept"
+     ],
+     "cost_usd_minor": 40919,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b01c0ec6beb08186",
+      "ev-076fdf08b04de07f",
+      "ev-745af6636964eb84"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 36919,
+     "win_rate": 0.1
+    },
+    "confidence": 0.1,
+    "explanation": "Represented with receipt, authorization and prior undisputed history; no delivery proof held. Issuer moved to pre-arbitration. I judged arbitration unlikely to win and accepted. Cost: 36919 debit, 1500 chargeback fee, 2500 pre-arbitration fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 6005
+}

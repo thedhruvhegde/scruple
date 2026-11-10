@@ -1,0 +1,79 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-90aabdbe3a583407"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-973a1a73e73f98c7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1a154bbbd8904b92"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-90aabdbe3a583407",
+     "ev-1a154bbbd8904b92"
+    ],
+    "narrative": "Charge was authorized and receipted. Delivery proof shows USPS delivery on 2026-01-10. We have no cancellation record on file."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-90aabdbe3a583407",
+      "ev-1a154bbbd8904b92"
+     ],
+     "outcome": "won"
+    },
+    "confidence": 0.9,
+    "explanation": "Cardholder said they cancelled and were still charged. I had a receipt, authorization and USPS delivery proof but no cancellation record. I represented with the receipt and delivery proof; the issuer accepted and the case resolved in my favor."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 6002
+}

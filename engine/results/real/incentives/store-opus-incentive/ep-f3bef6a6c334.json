@@ -1,0 +1,106 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-a0cec80fd743d7de"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d082a5d5ff7bc1cf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc4fb45a99c87e38"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-082c9195d4344c95"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc6da2b9ffaa3b7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-94e26059abf9dbaf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-cc4fb45a99c87e38",
+     "ev-082c9195d4344c95",
+     "ev-d082a5d5ff7bc1cf",
+     "ev-a0cec80fd743d7de",
+     "ev-cc6da2b9ffaa3b7c",
+     "ev-94e26059abf9dbaf"
+    ],
+    "narrative": "The 53.64 USD purchase on 2026-01-19 was approved with AVS match (Y) and CVV match (M) from a device and IP matching the cardholder, and DHL delivered it on 2026-01-29. The card has four prior undisputed transactions with the merchant. The cardholder states a household member used the card, which indicates the transaction was not third-party fraud."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-cc4fb45a99c87e38",
+      "ev-082c9195d4344c95",
+      "ev-d082a5d5ff7bc1cf",
+      "ev-a0cec80fd743d7de",
+      "ev-cc6da2b9ffaa3b7c",
+      "ev-94e26059abf9dbaf"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.8,
+    "explanation": "Visa 10.5, 53.64 USD. Cardholder: a household member used the card. Represented with AVS Y / CVV M, matching device/IP, authorization, receipt, DHL delivery proof and four prior undisputed transactions. Case went to pre-arbitration and the issuer accepted: won, with 15.00 processor and 25.00 network fees."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 6008
+}

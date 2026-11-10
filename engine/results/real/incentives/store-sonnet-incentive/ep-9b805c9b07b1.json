@@ -1,0 +1,103 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-a0cec80fd743d7de"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc4fb45a99c87e38"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-082c9195d4344c95"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cc6da2b9ffaa3b7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-94e26059abf9dbaf"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-a0cec80fd743d7de",
+     "ev-cc4fb45a99c87e38",
+     "ev-082c9195d4344c95",
+     "ev-cc6da2b9ffaa3b7c",
+     "ev-94e26059abf9dbaf"
+    ],
+    "narrative": "AVS and CVV matched, device and IP match the cardholder, DHL delivered 2026-01-29, four prior undisputed transactions."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-a0cec80fd743d7de",
+      "ev-cc4fb45a99c87e38",
+      "ev-082c9195d4344c95",
+      "ev-cc6da2b9ffaa3b7c",
+      "ev-94e26059abf9dbaf"
+     ],
+     "outcome": null
+    },
+    "confidence": 0.8,
+    "explanation": "Fraud claim 10.5. I read the evidence, checked amounts match the case, and represented with receipt, AVS/CVV, device/IP, delivery proof and prior history. The case moved to pre-arbitration and then resolved without further action from me."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 8,
+ "seed": 6008
+}

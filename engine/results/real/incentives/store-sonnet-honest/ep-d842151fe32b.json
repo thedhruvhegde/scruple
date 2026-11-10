@@ -1,0 +1,97 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4ebdf7ff0ca5ce5f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4e8d20498f4ac463"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f46a04dfd6f608f9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4ebdf7ff0ca5ce5f",
+     "ev-4e8d20498f4ac463",
+     "ev-f46a04dfd6f608f9"
+    ],
+    "narrative": "Authorized sale with receipt. USPS delivery proof shows delivery on 2026-02-13."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 15
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1733,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-4ebdf7ff0ca5ce5f",
+      "ev-4e8d20498f4ac463",
+      "ev-f46a04dfd6f608f9"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Represented with receipt, authorization and USPS delivery proof. Issuer accepted and reversed the chargeback. Reversal was 5714 against a 5947 debit (currency conversion), so cost is 233 plus the 1500 fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 10,
+ "seed": 6011
+}

@@ -1,0 +1,74 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-5e814b26ef451d11"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e3a35c0845a5e475"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e3a35c0845a5e475",
+     "ev-5e814b26ef451d11"
+    ],
+    "narrative": "The chargeback alleges a declined authorization. The authorization record shows the 118.91 USD transaction on 2026-01-07 was approved (auth code 941563) for the exact amount captured, matching the receipt."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e3a35c0845a5e475",
+      "ev-5e814b26ef451d11"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.75,
+    "explanation": "Visa 11.2 declined authorization, 118.91 USD. Cardholder: the amount is wrong. Represented with the authorization record showing approval for the exact amount, plus the receipt. Went to pre-arbitration; issuer accepted: won, with 15.00 processor and 25.00 network fees."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 6012
+}

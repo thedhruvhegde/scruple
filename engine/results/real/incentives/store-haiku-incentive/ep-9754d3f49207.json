@@ -1,0 +1,91 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Provide the cardholder statement regarding this transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e21df1184bf0cc60"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-64ce60db46baab34"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bb5ec5fdc188565c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-e21df1184bf0cc60",
+     "ev-64ce60db46baab34",
+     "ev-bb5ec5fdc188565c"
+    ],
+    "narrative": "The transaction was captured for 4432 USD on 2026-02-14 with approval 147525. The order was delivered by UPS on 2026-02-18 (delivery proof attached). The disputed amount is 3235 USD of this capture."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-e21df1184bf0cc60",
+      "ev-64ce60db46baab34",
+      "ev-bb5ec5fdc188565c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": null
+    },
+    "explanation": "Read the case (fraud 4863, chargeback, 45 days left) and the receipt, authorization record and UPS delivery proof. Requested cardholder statement (did not make the purchase). Represented on 2026-02-22 with the three documents, citing the 4432 capture and delivery on 2026-02-18. Waited 10 days; the issuer accepted the representment, so the disputed 3235 was not refunded to the cardholder by the merchant."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 7,
+ "seed": 6007
+}

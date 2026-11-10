@@ -1,0 +1,94 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d871ae5caa416b4c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-6ef48a834fef386a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-245bb5b22a3f9347"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-189243c0f7ce28dd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-d48f8219e04243be"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4d549b59ca36d5f3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "Device/IP record does not match the cardholder and there is no AVS/CVV match; the fraud claim cannot be rebutted."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "accept"
+     ],
+     "cost_usd_minor": 16538,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 15038
+    },
+    "confidence": 0.0,
+    "explanation": "Visa 10.4 card-absent fraud chargeback; cardholder did not recognise the charge. The device/IP record shows matches_cardholder N and there is no AVS/CVV record, so the required evidence does not support the merchant. I accepted the chargeback at the first stage. Cost is the USD 150.38 sale plus the USD 15 chargeback fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 8,
+ "seed": 6009
+}

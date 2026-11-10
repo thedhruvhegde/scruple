@@ -1,0 +1,84 @@
+{
+ "calls": [
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-90aabdbe3a583407"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1a154bbbd8904b92"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-90aabdbe3a583407",
+     "ev-1a154bbbd8904b92"
+    ],
+    "narrative": "Order was delivered via USPS on 2026-01-10 (delivery proof attached) and a receipt is attached. We hold no cancellation record."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-90aabdbe3a583407",
+      "ev-1a154bbbd8904b92"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.8
+    },
+    "confidence": 0.8,
+    "explanation": "Represented with receipt and USPS delivery proof (delivered 2026-01-10) against a 13.1 chargeback; cardholder said they cancelled but I hold no cancellation record. Chargeback was reversed. Merchant bears the 1500 cent chargeback fee only."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 1,
+ "seed": 6002
+}

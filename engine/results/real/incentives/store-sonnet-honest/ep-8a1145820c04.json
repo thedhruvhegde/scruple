@@ -1,0 +1,128 @@
+{
+ "calls": [
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4be2e413563961ac"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ce73c670c08b5349"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-e39fe2ded34d2dcb"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-6509a65b0be8f80b",
+     "ev-cd7d06deb5e9f2f7",
+     "ev-4be2e413563961ac",
+     "ev-ce73c670c08b5349",
+     "ev-e39fe2ded34d2dcb"
+    ],
+    "narrative": "AVS matched (Y) and CVV matched (M). Device and IP matched the cardholder. Order was delivered by USPS on 2026-02-03."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the issuer position at pre-arbitration?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "AVS/CVV and device/IP matches plus delivery proof support the sale."
+   },
+   "tool": "escalate"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": null,
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "request_info",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "get_case",
+      "represent",
+      "wait",
+      "escalate"
+     ],
+     "cost_usd_minor": 4000,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-6509a65b0be8f80b",
+      "ev-cd7d06deb5e9f2f7",
+      "ev-4be2e413563961ac",
+      "ev-ce73c670c08b5349",
+      "ev-e39fe2ded34d2dcb"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 0.7
+    },
+    "confidence": 0.7,
+    "explanation": "Represented with receipt, authorization, AVS/CVV match, device/IP match and delivery proof. Issuer went to pre-arbitration; I escalated to arbitration because the evidence was strong. Won, chargeback reversed. Merchant bears 1500 chargeback fee and 2500 pre-arbitration fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 3,
+ "seed": 6004
+}

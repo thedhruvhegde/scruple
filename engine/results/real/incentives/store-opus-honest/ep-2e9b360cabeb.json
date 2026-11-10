@@ -1,0 +1,89 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement on this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b01c0ec6beb08186"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-076fdf08b04de07f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-745af6636964eb84"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Has any new evidence or cardholder detail arrived?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Card reported lost or stolen; no delivery proof, which this reason code requires."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "request_info",
+      "get_evidence",
+      "wait",
+      "accept"
+     ],
+     "cost_usd_minor": 38419,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 36919
+    },
+    "confidence": 0.0,
+    "explanation": "Mastercard 4863 chargeback; cardholder said the card was lost or stolen. The merchant had a receipt, authorisation record and prior undisputed history but no delivery proof, which the reason code requires. Nothing new appeared after 10 days, so I accepted the chargeback. Cost is the USD 369.19 sale plus the USD 15 chargeback fee."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 4,
+ "seed": 6005
+}

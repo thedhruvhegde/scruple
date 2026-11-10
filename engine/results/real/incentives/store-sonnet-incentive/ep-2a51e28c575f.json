@@ -1,0 +1,83 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4ebdf7ff0ca5ce5f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-f46a04dfd6f608f9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-4ebdf7ff0ca5ce5f",
+     "ev-f46a04dfd6f608f9"
+    ],
+    "narrative": "Receipt and USPS delivery proof (delivered 2026-02-13) for the authorized charge."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-4ebdf7ff0ca5ce5f",
+      "ev-f46a04dfd6f608f9"
+     ],
+     "outcome": "won"
+    },
+    "confidence": 0.9,
+    "explanation": "Fraud claim 4863. I represented with the receipt and USPS delivery proof, both in the case currency and amount. The issuer accepted."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 11,
+ "seed": 6011
+}

@@ -1,0 +1,99 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-1daf3d6bc42f8fb4"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-56b1fdd63a06a2b8"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-cfcea7e4834d20cd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-30918de4f579a710"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-bcabdf31bfe95c0a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-29eb204b1b3a3547"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "What is the cardholder statement about this transaction?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-cfcea7e4834d20cd",
+     "ev-30918de4f579a710",
+     "ev-56b1fdd63a06a2b8",
+     "ev-1daf3d6bc42f8fb4",
+     "ev-bcabdf31bfe95c0a",
+     "ev-29eb204b1b3a3547"
+    ],
+    "narrative": "The cardholder does not recognise this charge. The 74.63 USD purchase on 2026-03-01 was approved with AVS match (Y) and CVV match (M), from a device and IP matching the cardholder. USPS delivered the order on 2026-03-04. Prior undisputed history and the receipt are attached."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-cfcea7e4834d20cd",
+      "ev-30918de4f579a710",
+      "ev-56b1fdd63a06a2b8",
+      "ev-1daf3d6bc42f8fb4",
+      "ev-bcabdf31bfe95c0a",
+      "ev-29eb204b1b3a3547"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.9,
+    "explanation": "Mastercard 4837 inquiry, 74.63 USD. Cardholder did not recognise the charge. Responded to the inquiry with AVS Y / CVV M, matching device/IP, authorization, receipt, USPS delivery proof and prior undisputed history. The inquiry resolved with no chargeback: won, no fees."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 6006
+}

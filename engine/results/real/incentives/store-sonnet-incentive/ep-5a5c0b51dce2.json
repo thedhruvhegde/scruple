@@ -1,0 +1,102 @@
+{
+ "calls": [
+  {
+   "args": null,
+   "tool": "get_case"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder statement."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b01c0ec6beb08186"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-076fdf08b04de07f"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-745af6636964eb84"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b01c0ec6beb08186",
+     "ev-745af6636964eb84"
+    ],
+    "narrative": "Authorized and receipted. The cardholder has two prior undisputed transactions with us. We have no delivery proof on file."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "days": 7
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Any new evidence?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": null,
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "No delivery proof or new evidence; arbitration not justified."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "request_info",
+      "represent",
+      "wait",
+      "accept"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b01c0ec6beb08186",
+      "ev-745af6636964eb84"
+     ],
+     "outcome": "accepted"
+    },
+    "confidence": 0.0,
+    "explanation": "Cardholder said card lost or stolen. I had a receipt, authorization and prior undisputed history but no delivery proof. Represented once, issuer went to pre-arbitration, no new evidence appeared, so I accepted liability. Lost."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 5,
+ "seed": 6005
+}
