@@ -2,11 +2,17 @@
 
 Usage:
     uv run python scripts/model_episodes_report.py OUT_DIR LABEL=STORE [LABEL=STORE ...]
+    uv run python scripts/model_episodes_report.py --profile all LABEL=STORE [...]
 
 Each STORE is an episode store written by `scruple episode` (one episode per seed,
 played by an external agent through the CLI). The same seeds are replayed in-process
 by the reference policies (evidence, always_accept, oracle). Writes OUT_DIR/episodes.json
 (per-episode rows) and OUT_DIR/SUMMARY.md. Synthetic cases; real model behaviour.
+
+`--profile P` (merchant, balanced, compliance, or `all`; repeatable) instead re-scores
+the same episodes under each verifier profile (`scruple.verifiers.profiles`) and prints
+one markdown table: gate passes, mean reward and FAIR-01 failures per system and
+profile. It writes nothing.
 """
 
 from __future__ import annotations
@@ -26,6 +32,8 @@ from scruple.agents.dispute_baselines import (
 )
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.store import EpisodeStore
+from scruple.verifiers.profiles import VerifierProfile, score_profile, won_against_valid_claim
+from scruple.verifiers.record import EpisodeRecord
 
 N_BOOT = 2000
 
@@ -72,6 +80,56 @@ def _policy_rows(seeds: list[int]) -> list[dict[str, Any]]:
             assert ep.score is not None
             rows.append(_row(name, json.loads(ep.score.model_dump_json())))
     return rows
+
+
+def _store_records(store: str) -> list[EpisodeRecord]:
+    st = EpisodeStore(Path(store))
+    out = []
+    for meta in sorted(Path(store).glob("ep-*.json")):
+        ep = st.load(meta.stem)
+        if isinstance(ep, DisputeEpisode) and ep.score is not None:
+            out.append(ep.record())
+    return out
+
+
+def _policy_records(seeds: list[int]) -> list[tuple[str, EpisodeRecord]]:
+    out = []
+    for name, pol, ref in (
+        ("ref:evidence", evidence_policy, False),
+        ("ref:always_accept", always_accept, False),
+        ("ref:oracle", oracle_policy, True),
+    ):
+        out += [(name, run_policy(pol, s, None, reference=ref).record()) for s in seeds]
+    return out
+
+
+def profile_table(pairs: list[str], profiles: list[VerifierProfile]) -> str:
+    """Gate passes, mean reward and FAIR-01 failures per system under each profile."""
+    recs: list[tuple[str, EpisodeRecord]] = []
+    for p in pairs:
+        label, store = p.split("=", 1)
+        recs += [(label, r) for r in _store_records(store)]
+    seeds = sorted({r.seed for _, r in recs})
+    recs += _policy_records(seeds)
+    systems = list(dict.fromkeys(label for label, _ in recs))
+    head = "| system | n | valid-claim wins (true fraud) |" + "".join(
+        f" {p.value}: gate | {p.value}: reward |" for p in profiles
+    )
+    lines = [head, "|---|---|---|" + "---|---|" * len(profiles)]
+    for s in systems:
+        rs = [r for label, r in recs if label == s]
+        wins = [r for r in rs if won_against_valid_claim(r)]
+        fraud = sum(r.case.truth.family.value == "true_fraud" for r in wins)
+        row = f"| {s} | {len(rs)} | {len(wins)} ({fraud}) |"
+        for p in profiles:
+            cards = [score_profile(r, p) for r in rs]
+            gate = sum(c.gate for c in cards)
+            fair = sum("FAIR-01" in c.hard_failures for c in cards)
+            reward = sum(c.reward for c in cards) / len(cards)
+            note = f" (FAIR-01 x{fair})" if fair else ""
+            row += f" {gate}/{len(rs)}{note} | {reward:.3f} |"
+        lines.append(row)
+    return "\n".join(lines)
 
 
 def _paired_cost(a: dict[int, float], b: dict[int, float]) -> tuple[float, float, float]:
@@ -131,5 +189,21 @@ def main(out_dir: str, pairs: list[str]) -> None:
     print("\n".join(lines))
 
 
+def _cli(argv: list[str]) -> None:
+    profiles: list[VerifierProfile] = []
+    rest: list[str] = []
+    it = iter(argv)
+    for a in it:
+        if a == "--profile":
+            v = next(it)
+            profiles += list(VerifierProfile) if v == "all" else [VerifierProfile(v)]
+        else:
+            rest.append(a)
+    if profiles:
+        print(profile_table(rest, list(dict.fromkeys(profiles))))
+    else:
+        main(rest[0], rest[1:])
+
+
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2:])
+    _cli(sys.argv[1:])

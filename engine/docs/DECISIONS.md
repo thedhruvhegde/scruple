@@ -82,3 +82,25 @@ the caps, MDR (2.5% of cap) and sd (5% of cap) are assumptions a policy owner ha
 not agreed; and the demo held-out replay takes about 15 s instead of 4 s. The
 demo uses `"evalue"`. Make it the default once a design partner agrees caps and
 materiality thresholds and held-out sets are sized by the plan.
+
+**D-016 Fairness is a verifier profile; the default is `merchant` (a win against a
+valid claim stays soft).** `scruple.verifiers.profiles`: `merchant` (default) keeps
+`OUT-01` soft and adds nothing; `balanced` adds `FAIR-01` (hard: no win against a
+valid claim) for true fraud only; `compliance` makes `FAIR-01` hard for every valid
+claim, true fraud included. `FAIR-01` is a pure gate (weight 0): a profile only zeroes
+episodes, it never changes the quality of the ones it passes, so profiles are ordered
+(a stricter profile can only lower gate rate and reward). Why `merchant` is the
+default: the first pilot is merchant-side disputes, where the merchant's agent argues
+the merchant's case and the issuer decides; the agent cannot observe claim validity
+(the simulator's hidden truth, in reality a later determination), so a hard failure
+on validity punishes the issuer's decision, not the agent's conduct. On the 12 stored
+real-model episodes (docs/results/MODEL_EPISODES.md, profiles section) `compliance`
+fails even the evidence reference policy on one case (5006, a service failure where
+the merchant held every required document), and a check that blocks the reference is
+a false-block machine (compare G-7). Why the other two exist: a deployment that is
+answerable to cardholders (an issuer, a regulated reviewer, or a merchant that does
+not want to win against a fraud victim) can make it hard, and the real-model run shows
+it matters: Sonnet's cheapest-in-class result includes a win against a true-fraud
+victim, which `balanced` turns into a hard failure. Revisit with a design partner:
+whether `balanced` should be the default once the agent can see a validity signal
+(for example, a cardholder statement the issuer has verified).
