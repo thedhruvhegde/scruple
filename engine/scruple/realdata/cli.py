@@ -8,6 +8,7 @@
     scruple realdata build-splits --src ~/.cache/scruple/real-data
     scruple realdata fetch-v2 --dest ~/.cache/scruple/real-data
     scruple realdata build-v2 --src ~/.cache/scruple/real-data
+    scruple realdata scenarios check|run|prompt|grade   (real-life situations)
     scruple realdata timeliness [--out results/real/timeliness.json]
 
 Prompt files have one JSON object per line: id, task, split, system, prompt.
@@ -176,6 +177,70 @@ def cmd_fetch_v2(args: argparse.Namespace) -> int:  # pragma: no cover - network
     return 0
 
 
+def cmd_scenarios(args: argparse.Namespace) -> int:
+    from scruple.realdata import scenarios as rsc
+    from scruple.realdata import situations as sit
+
+    match args.scenarios_cmd:
+        case "check":
+            scs = rsc.load_real_scenarios()
+            problems = rsc.check_all(scs)
+            keys = [sit.play_answer_key(s) for s in scs]
+            problems += [f"{p.scenario_id}: answer key fails" for p in keys if not p.right]
+            for line in problems:
+                print(line)
+            print(f"{len(scs)} real scenarios, {len(problems)} problems")
+            return 1 if problems else 0
+        case "run":
+            scs = rsc.load_real_scenarios()
+            plays = sit.run_all(scs)
+            card = sit.summarise(plays, scs)
+            card["plays"] = [p.model_dump() for p in plays]
+            _write_json(Path(args.out) if args.out else None, card)
+            if args.out:
+                for name, v in card["players"].items():
+                    print(f"{name}: {v['right']}/{v['n']} right")
+            return 0
+        case "prompt":
+            rows = sit.prompt_rows(store=args.store)
+            _write_jsonl(Path(args.out), rows)
+            print(f"wrote {len(rows)} prompts for {sit.TASK_ID} to {args.out}")
+            return 0
+        case "grade":
+            from scruple.agents.dispute_episode import DisputeEpisode
+            from scruple.agents.store import EpisodeStore, UnknownEpisodeError
+
+            store = EpisodeStore(args.store)
+            answers: dict[str, str] = {}
+            for row in _read_jsonl(Path(args.answers)):
+                i, e = row.get("id"), row.get("episode_id")
+                if not isinstance(i, str) or not isinstance(e, str):
+                    raise ValueError(
+                        f"{args.answers}: every line needs string 'id' and 'episode_id'"
+                    )
+                if i in answers:
+                    raise ValueError(f"{args.answers}: duplicate answer for {i}")
+                answers[i] = e
+            prompted = [str(r["id"]) for r in _read_jsonl(Path(args.prompts))]
+            unknown = sorted(set(answers) - set(prompted))
+            if unknown:
+                raise KeyError(f"answers for ids that were not prompted: {unknown[:5]}")
+
+            def load(eid: str) -> DisputeEpisode:
+                try:
+                    ep = store.load(eid)
+                except UnknownEpisodeError as exc:
+                    raise KeyError(str(exc)) from exc
+                if not isinstance(ep, DisputeEpisode):
+                    raise ValueError(f"{eid} is not a dispute episode")
+                return ep
+
+            card = sit.grade_answers(answers, prompted, load, player=args.player)
+            _write_json(Path(args.out) if args.out else None, card)
+            return 0
+    raise AssertionError(args.scenarios_cmd)  # pragma: no cover
+
+
 def cmd_timeliness(args: argparse.Namespace) -> int:
     from scruple.realdata.timeliness import analyse_all
 
@@ -203,6 +268,22 @@ def add_realdata_parser(sub: Any) -> None:
     f2 = rs.add_parser("fetch-v2", help="download the v2 raw inputs (anonymous git)")
     f2.add_argument("--dest", required=True)
     f2.set_defaults(fn=cmd_fetch_v2)
+
+    sc = rs.add_parser("scenarios", help="real-life scenarios grounded in CFPB complaints")
+    sc.set_defaults(fn=cmd_scenarios)
+    ss = sc.add_subparsers(dest="scenarios_cmd", required=True)
+    ss.add_parser("check", help="validate every scenario, its grounding and its answer key")
+    sr = ss.add_parser("run", help="play every scenario with every reference policy")
+    sr.add_argument("--out", default=None, help="result JSON (default: stdout)")
+    sp = ss.add_parser("prompt", help="write one prompt per scenario for an LLM agent")
+    sp.add_argument("--out", required=True)
+    sp.add_argument("--store", default=".scruple/episodes", help="episode store named in prompts")
+    sg = ss.add_parser("grade", help="grade closed episodes an agent played from the prompts")
+    sg.add_argument("--answers", required=True, help='JSONL of {"id", "episode_id"}')
+    sg.add_argument("--prompts", required=True, help="the prompt file; unanswered ids are wrong")
+    sg.add_argument("--store", default=None, help="episode store directory")
+    sg.add_argument("--player", default="agent")
+    sg.add_argument("--out", default=None)
 
     tm = rs.add_parser("timeliness", help="complaint-handling timeliness on real CFPB data")
     tm.add_argument("--out", default=None, help="result JSON (default: stdout)")
