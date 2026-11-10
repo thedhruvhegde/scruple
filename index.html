@@ -681,6 +681,8 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   function typingEl(right) { const d = document.createElement("div"); d.className = "typing" + (right ? " right" : ""); d.textContent = "."; return d; }
   function finishIntro() {
     if (I.done) return; I.done = true; root.classList.remove("intro"); cv.style.zIndex = "";
+    // a link straight to a section (#proof) lands settled once the field is live
+    if (location.hash) requestAnimationFrame(() => settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))));
   }
   if (introOn) {
     chatStruck.style.backgroundSize = "0% 0.09em"; chatStruck.style.color = "inherit";
@@ -759,8 +761,8 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   }
 
   /* ---------- scroll position, anchored so the last screen always completes ---------- */
-  function progress() {
-    const sy = scrollY, max = Math.max(0, document.documentElement.scrollHeight - H), anchors = [];
+  function anchorsAt(sy) {
+    const max = Math.max(0, document.documentElement.scrollHeight - H), anchors = [];
     for (const s of screens) {
       let a = s.rect.top + sy + s.rect.height / 2 - H / 2;
       a = Math.max(0, Math.min(max, a));
@@ -770,11 +772,40 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
     const last = screens.length - 1;
     // if clamping pushed the last anchor past the end of the page, pull it back
     for (let j = last; j > 0 && anchors[j] > max; j--) anchors[j] = Math.max(anchors[j - 1] + 1, max - (last - j));
+    return anchors;
+  }
+  function progress() {
+    const sy = scrollY, anchors = anchorsAt(sy), last = screens.length - 1;
     if (sy >= anchors[last]) return [last, 0];
     if (sy <= anchors[0]) return [0, 0];
     let i = 0; while (i < last - 1 && sy >= anchors[i + 1]) i++;
     return [i, clamp01((sy - anchors[i]) / (anchors[i + 1] - anchors[i]))];
   }
+
+  /* ---------- nav jumps land where the target screen has fully settled ---------- */
+  // A plain anchor jump stops the scroll between two screens, mid-flight. Land at the
+  // point nearest the section's natural position inside the target's settled band.
+  function settleTo(target) {
+    if (!I.done || !target) return false;
+    for (const s of screens) s.rect = s.el.getBoundingClientRect();
+    const j = screens.findIndex((s) => target.contains(s.el));
+    if (j < 0) return false;
+    const sy = scrollY, a = anchorsAt(sy), last = screens.length - 1;
+    const bar = document.querySelector(".bar")?.offsetHeight || 0;
+    const natural = target.getBoundingClientRect().top + sy - bar;
+    const lo = j > 0 ? a[j] - 0.09 * (a[j] - a[j - 1]) : 0;
+    const hi = j < last ? a[j] + 0.09 * (a[j + 1] - a[j]) : a[j];
+    scrollTo({ top: Math.round(Math.max(lo, Math.min(hi, natural))), behavior: "instant" });
+    force = true;
+    return true;
+  }
+  addEventListener("click", (e) => {
+    const link = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const id = decodeURIComponent(link.getAttribute("href").slice(1));
+    if (id && settleTo(document.getElementById(id))) { e.preventDefault(); history.pushState(null, "", "#" + id); }
+  });
+  addEventListener("popstate", () => { if (location.hash) settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))); });
 
   /* ---------- per-frame ---------- */
   const T0 = performance.now();
@@ -790,6 +821,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
     if (!I.done) { flush(); requestAnimationFrame(frame); return; }
     let [i, p] = progress();
     p = clamp01((p - 0.1) / 0.8);
+    if (p >= 1) { i++; p = 0; }   // fully arrived: draw the next screen itself, not the flight
     if (reduce) { if (p >= 0.5) i++; p = 0; }
     if (i >= screens.length) i = screens.length - 1;
     for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (visible(s.rect) && !(j === i || (p > 0 && j === i + 1))) idleDots(s); }
@@ -842,6 +874,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   /* ---------- boot ---------- */
   const go = () => {
     layout(); I.t0 = performance.now(); requestAnimationFrame(frame);
+    if (I.done && location.hash) requestAnimationFrame(() => settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))));
     let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { layout(); I.fg = null; I.frozen = false; force = true; }, 120); });
     onTheme.push(() => { force = true; });
   };
