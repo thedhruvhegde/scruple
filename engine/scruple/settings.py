@@ -61,6 +61,16 @@ class Settings(BaseModel):
     auth_key_cache_seconds: float = Field(
         default=300.0, ge=0, le=86_400, description="how long a checked key skips scrypt"
     )
+    # OIDC bearer tokens: on when issuer, audience and jwks_url are all set.
+    oidc_issuer: str | None = Field(default=None, description="expected `iss` claim")
+    oidc_audience: str | None = Field(default=None, description="expected `aud` claim")
+    oidc_jwks_url: str | None = Field(default=None, description="the issuer's JWKS URL")
+    oidc_algorithms: str = Field(default="RS256,ES256", description="comma separated")
+    oidc_leeway_seconds: int = Field(default=60, ge=0, le=600, description="clock skew")
+    oidc_tenant_claim: str = "scruple_tenant"
+    oidc_default_tenant: str | None = None
+    oidc_roles_claim: str = "scruple_roles"
+    oidc_subject_claim: str = "sub"
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""
