@@ -240,6 +240,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.console.cli import add_console_parser
 
     add_console_parser(sub, DEFAULT_DB)
+    from scruple.agents.strategies.cli import add_strategies_parser
+
+    add_strategies_parser(sub)
     return p
 
 
