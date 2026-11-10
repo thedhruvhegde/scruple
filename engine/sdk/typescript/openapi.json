@@ -10,6 +10,44 @@
         "title": "Action",
         "type": "string"
       },
+      "AdyenAck": {
+        "properties": {
+          "cases": {
+            "title": "Cases",
+            "type": "integer"
+          },
+          "duplicates": {
+            "title": "Duplicates",
+            "type": "integer"
+          },
+          "received": {
+            "title": "Received",
+            "type": "boolean"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "integer"
+          },
+          "stored": {
+            "title": "Stored",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "received",
+          "cases",
+          "skipped",
+          "duplicates",
+          "stale",
+          "stored"
+        ],
+        "title": "AdyenAck",
+        "type": "object"
+      },
       "ArmStats": {
         "properties": {
           "accuracy": {
@@ -236,6 +274,24 @@
           "candidate_hard_findings"
         ],
         "title": "CaseTypeStats",
+        "type": "object"
+      },
+      "Check": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "detail"
+        ],
+        "title": "Check",
         "type": "object"
       },
       "CheckResult": {
@@ -613,156 +669,7 @@
         "type": "object"
       },
       "EValueEvidence": {
-        "description": "Everything the e-value gate decided on. Stored with the decision.",
-        "properties": {
-          "alpha": {
-            "title": "Alpha",
-            "type": "number"
-          },
-          "alpha_certify": {
-            "title": "Alpha Certify",
-            "type": "number"
-          },
-          "beta": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Beta"
-          },
-          "family": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Family",
-            "type": "array"
-          },
-          "improved": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Improved",
-            "type": "array"
-          },
-          "insufficient": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Insufficient",
-            "type": "array"
-          },
-          "method": {
-            "title": "Method",
-            "type": "string"
-          },
-          "n_cases": {
-            "title": "N Cases",
-            "type": "integer"
-          },
-          "plan_method": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Plan Method"
-          },
-          "pooled_certify_e_value": {
-            "title": "Pooled Certify E Value",
-            "type": "number"
-          },
-          "pooled_ci_high": {
-            "title": "Pooled Ci High",
-            "type": "number"
-          },
-          "pooled_ci_low": {
-            "title": "Pooled Ci Low",
-            "type": "number"
-          },
-          "pooled_mean_diff": {
-            "title": "Pooled Mean Diff",
-            "type": "number"
-          },
-          "pooled_regression_e_value": {
-            "title": "Pooled Regression E Value",
-            "type": "number"
-          },
-          "regressed": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Regressed",
-            "type": "array"
-          },
-          "regressed_fwer": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Regressed Fwer",
-            "type": "array"
-          },
-          "required_total_cases": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Required Total Cases"
-          },
-          "sufficient": {
-            "default": true,
-            "title": "Sufficient",
-            "type": "boolean"
-          },
-          "types": {
-            "items": {
-              "$ref": "#/components/schemas/TypeEvidence"
-            },
-            "title": "Types",
-            "type": "array"
-          },
-          "untouched_types": {
-            "title": "Untouched Types",
-            "type": "integer"
-          },
-          "violations": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Violations",
-            "type": "array"
-          }
-        },
-        "required": [
-          "method",
-          "alpha",
-          "alpha_certify",
-          "n_cases",
-          "family",
-          "untouched_types",
-          "types",
-          "regressed",
-          "improved",
-          "regressed_fwer",
-          "pooled_mean_diff",
-          "pooled_ci_low",
-          "pooled_ci_high",
-          "pooled_certify_e_value",
-          "pooled_regression_e_value",
-          "violations"
-        ],
-        "title": "EValueEvidence",
+        "additionalProperties": true,
         "type": "object"
       },
       "ExternalCase": {
@@ -1296,6 +1203,318 @@
           "method"
         ],
         "title": "Interval",
+        "type": "object"
+      },
+      "Job": {
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "cancel_requested": {
+            "title": "Cancel Requested",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "lease_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Expires At"
+          },
+          "lease_owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Owner"
+          },
+          "max_attempts": {
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "result_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Sha256"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "run_after": {
+            "format": "date-time",
+            "title": "Run After",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "timeout_s": {
+            "title": "Timeout S",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "job_id",
+          "tenant_id",
+          "kind",
+          "params",
+          "idempotency_key",
+          "status",
+          "attempts",
+          "max_attempts",
+          "timeout_s",
+          "run_after",
+          "lease_owner",
+          "lease_expires_at",
+          "cancel_requested",
+          "created_at",
+          "updated_at",
+          "finished_at",
+          "result",
+          "result_sha256",
+          "error",
+          "rule_id",
+          "version"
+        ],
+        "title": "Job",
+        "type": "object"
+      },
+      "JobEvent": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "event": {
+            "title": "Event",
+            "type": "string"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "worker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Worker"
+          }
+        },
+        "required": [
+          "job_id",
+          "at",
+          "event",
+          "worker",
+          "detail"
+        ],
+        "title": "JobEvent",
+        "type": "object"
+      },
+      "JobKind": {
+        "enum": [
+          "gate_evaluation",
+          "backtest",
+          "bench_score"
+        ],
+        "title": "JobKind",
+        "type": "string"
+      },
+      "JobOut": {
+        "properties": {
+          "created": {
+            "title": "Created",
+            "type": "boolean"
+          },
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          },
+          "poll_url": {
+            "title": "Poll Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job",
+          "poll_url",
+          "created"
+        ],
+        "title": "JobOut",
+        "type": "object"
+      },
+      "JobStatus": {
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "cancelled"
+        ],
+        "title": "JobStatus",
+        "type": "string"
+      },
+      "JobSubmit": {
+        "additionalProperties": false,
+        "description": "What a client submits. `idempotency_key` makes a retry of the same submission\nreturn the first job instead of queueing a second one.",
+        "properties": {
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/JobKind"
+          },
+          "max_attempts": {
+            "default": 3,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "timeout_s": {
+            "default": 3600,
+            "maximum": 86400.0,
+            "minimum": 1.0,
+            "title": "Timeout S",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "params"
+        ],
+        "title": "JobSubmit",
         "type": "object"
       },
       "LedgerMovement": {
@@ -1837,6 +2056,27 @@
         "title": "Provenance",
         "type": "object"
       },
+      "Readiness": {
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Check"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "Readiness",
+        "type": "object"
+      },
       "ReasonCode": {
         "description": "Synthetic reason codes, loosely modelled on card-network categories.",
         "enum": [
@@ -2211,6 +2451,48 @@
         "title": "Stage",
         "type": "string"
       },
+      "StratifiedEvidence": {
+        "description": "The stratified betting e-process over the tested family (``evalue_vr`` only).",
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "contributions": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Contributions",
+            "type": "object"
+          },
+          "e_value": {
+            "title": "E Value",
+            "type": "number"
+          },
+          "rejected": {
+            "title": "Rejected",
+            "type": "boolean"
+          },
+          "share": {
+            "title": "Share",
+            "type": "number"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "share",
+          "alpha",
+          "e_value",
+          "threshold",
+          "rejected",
+          "contributions"
+        ],
+        "title": "StratifiedEvidence",
+        "type": "object"
+      },
       "TypeEvidence": {
         "description": "One case type. Money in USD minor units; diff = candidate minus baseline\nloss (positive = worse).",
         "properties": {
@@ -2450,6 +2732,16 @@
           "received": {
             "title": "Received",
             "type": "boolean"
+          },
+          "stale": {
+            "default": 0,
+            "title": "Stale",
+            "type": "integer"
+          },
+          "stored": {
+            "default": false,
+            "title": "Stored",
+            "type": "boolean"
           }
         },
         "required": [
@@ -2460,6 +2752,50 @@
           "movements"
         ],
         "title": "WebhookAck",
+        "type": "object"
+      },
+      "WhoAmI": {
+        "properties": {
+          "credential_id": {
+            "title": "Credential Id",
+            "type": "string"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Permissions",
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Roles",
+            "type": "array"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "tenant": {
+            "title": "Tenant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "tenant",
+          "method",
+          "credential_id",
+          "roles",
+          "permissions"
+        ],
+        "title": "WhoAmI",
         "type": "object"
       }
     }
@@ -2515,6 +2851,48 @@
           }
         },
         "summary": "Verify"
+      }
+    },
+    "/auth/keys": {
+      "get": {
+        "description": "The caller's tenant's API keys, without their hashes.",
+        "operationId": "list_keys_auth_keys_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Keys Auth Keys Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Keys"
+      }
+    },
+    "/auth/whoami": {
+      "get": {
+        "operationId": "whoami_auth_whoami_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhoAmI"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Whoami"
       }
     },
     "/decisions": {
@@ -2694,7 +3072,32 @@
             "description": "Successful Response"
           }
         },
-        "summary": "Health"
+        "summary": "Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/ingest/adyen/webhook": {
+      "post": {
+        "operationId": "adyen_webhook_ingest_adyen_webhook_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdyenAck"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Adyen Webhook",
+        "tags": [
+          "ingest"
+        ],
+        "x-scruple-raw-body": true
       }
     },
     "/ingest/stripe/webhook": {
@@ -2717,6 +3120,314 @@
           "ingest"
         ],
         "x-scruple-raw-body": true
+      }
+    },
+    "/jobs": {
+      "get": {
+        "operationId": "list_jobs_jobs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/JobStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rule_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rule Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 2147483647,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "title": "Response List Jobs Jobs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Jobs",
+        "tags": [
+          "jobs"
+        ]
+      },
+      "post": {
+        "operationId": "submit_jobs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "idempotency-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobSubmit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/jobs/{job_id}": {
+      "get": {
+        "operationId": "get_job_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Job",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "cancel_jobs__job_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/jobs/{job_id}/events": {
+      "get": {
+        "operationId": "job_events_jobs__job_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/JobEvent"
+                  },
+                  "title": "Response Job Events Jobs  Job Id  Events Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Job Events",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "ready_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Readiness"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Readiness"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Ready",
+        "tags": [
+          "health"
+        ]
       }
     },
     "/rules": {
@@ -2784,19 +3495,6 @@
       },
       "post": {
         "operationId": "register_rules_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2887,17 +3585,6 @@
               "title": "Rule Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -2958,17 +3645,6 @@
               "title": "Version",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -3018,17 +3694,6 @@
               "minimum": 1,
               "title": "Version",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
             }
           }
         ],
@@ -3133,17 +3798,6 @@
               "minimum": 1,
               "title": "Version",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
             }
           }
         ],
@@ -3251,17 +3905,6 @@
               "title": "Version",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -3299,6 +3942,59 @@
         "summary": "Shadow Record Imported"
       }
     },
+    "/shadow/rules/{rule_id}/versions/{version}/imported/history": {
+      "get": {
+        "description": "Every stored summary, oldest first (aggregates; kept by retention).",
+        "operationId": "shadow_history_imported_shadow_rules__rule_id__versions__version__imported_history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rule_id",
+            "required": true,
+            "schema": {
+              "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ImportedShadowSummary"
+                  },
+                  "title": "Response Shadow History Imported Shadow Rules  Rule Id  Versions  Version  Imported History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Shadow History Imported"
+      }
+    },
     "/shadow/rules/{rule_id}/versions/{version}/imported/outcomes": {
       "post": {
         "operationId": "shadow_observe_imported_shadow_rules__rule_id__versions__version__imported_outcomes_post",
@@ -3319,17 +4015,6 @@
             "schema": {
               "title": "Version",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-actor",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9._@:-]{1,128}$",
-              "title": "X-Actor",
-              "type": "string"
             }
           }
         ],

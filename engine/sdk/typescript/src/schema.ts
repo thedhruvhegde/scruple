@@ -21,6 +21,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Keys
+         * @description The caller's tenant's API keys, without their hashes.
+         */
+        get: operations["list_keys_auth_keys_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/whoami": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whoami */
+        get: operations["whoami_auth_whoami_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/decisions": {
         parameters: {
             query?: never;
@@ -89,6 +126,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ingest/adyen/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Adyen Webhook */
+        post: operations["adyen_webhook_ingest_adyen_webhook_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ingest/stripe/webhook": {
         parameters: {
             query?: never;
@@ -100,6 +154,92 @@ export interface paths {
         put?: never;
         /** Stripe Webhook */
         post: operations["stripe_webhook_ingest_stripe_webhook_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Jobs */
+        get: operations["list_jobs_jobs_get"];
+        put?: never;
+        /** Submit */
+        post: operations["submit_jobs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Job */
+        get: operations["get_job_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_jobs__job_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Job Events */
+        get: operations["job_events_jobs__job_id__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ready */
+        get: operations["ready_ready_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -260,6 +400,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/shadow/rules/{rule_id}/versions/{version}/imported/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Shadow History Imported
+         * @description Every stored summary, oldest first (aggregates; kept by retention).
+         */
+        get: operations["shadow_history_imported_shadow_rules__rule_id__versions__version__imported_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/shadow/rules/{rule_id}/versions/{version}/imported/outcomes": {
         parameters: {
             query?: never;
@@ -303,6 +463,21 @@ export interface components {
          * @enum {string}
          */
         Action: "accept" | "contest" | "escalate";
+        /** AdyenAck */
+        AdyenAck: {
+            /** Cases */
+            cases: number;
+            /** Duplicates */
+            duplicates: number;
+            /** Received */
+            received: boolean;
+            /** Skipped */
+            skipped: number;
+            /** Stale */
+            stale: number;
+            /** Stored */
+            stored: boolean;
+        };
         /** ArmStats */
         ArmStats: {
             /** Accuracy */
@@ -394,6 +569,13 @@ export interface components {
             production_mean_cost_usd_minor: number;
             /** Production Mean Regret Usd Minor */
             production_mean_regret_usd_minor: number;
+        };
+        /** Check */
+        Check: {
+            /** Detail */
+            detail: string;
+            /** Ok */
+            ok: boolean;
         };
         /** CheckResult */
         CheckResult: {
@@ -531,59 +713,8 @@ export interface components {
             /** Txn Id */
             txn_id: string;
         };
-        /**
-         * EValueEvidence
-         * @description Everything the e-value gate decided on. Stored with the decision.
-         */
         EValueEvidence: {
-            /** Alpha */
-            alpha: number;
-            /** Alpha Certify */
-            alpha_certify: number;
-            /** Beta */
-            beta?: number | null;
-            /** Family */
-            family: string[];
-            /** Improved */
-            improved: string[];
-            /**
-             * Insufficient
-             * @default []
-             */
-            insufficient?: string[];
-            /** Method */
-            method: string;
-            /** N Cases */
-            n_cases: number;
-            /** Plan Method */
-            plan_method?: string | null;
-            /** Pooled Certify E Value */
-            pooled_certify_e_value: number;
-            /** Pooled Ci High */
-            pooled_ci_high: number;
-            /** Pooled Ci Low */
-            pooled_ci_low: number;
-            /** Pooled Mean Diff */
-            pooled_mean_diff: number;
-            /** Pooled Regression E Value */
-            pooled_regression_e_value: number;
-            /** Regressed */
-            regressed: string[];
-            /** Regressed Fwer */
-            regressed_fwer: string[];
-            /** Required Total Cases */
-            required_total_cases?: number | null;
-            /**
-             * Sufficient
-             * @default true
-             */
-            sufficient?: boolean;
-            /** Types */
-            types: components["schemas"]["TypeEvidence"][];
-            /** Untouched Types */
-            untouched_types: number;
-            /** Violations */
-            violations: string[];
+            [key: string]: unknown;
         };
         /**
          * ExternalCase
@@ -792,6 +923,123 @@ export interface components {
             /** N */
             n: number;
         };
+        /** Job */
+        Job: {
+            /** Attempts */
+            attempts: number;
+            /** Cancel Requested */
+            cancel_requested: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /** Idempotency Key */
+            idempotency_key: string | null;
+            /** Job Id */
+            job_id: string;
+            /** Kind */
+            kind: string;
+            /** Lease Expires At */
+            lease_expires_at: string | null;
+            /** Lease Owner */
+            lease_owner: string | null;
+            /** Max Attempts */
+            max_attempts: number;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Result */
+            result: {
+                [key: string]: unknown;
+            } | null;
+            /** Result Sha256 */
+            result_sha256: string | null;
+            /** Rule Id */
+            rule_id: string | null;
+            /**
+             * Run After
+             * Format: date-time
+             */
+            run_after: string;
+            status: components["schemas"]["JobStatus"];
+            /** Tenant Id */
+            tenant_id: string;
+            /** Timeout S */
+            timeout_s: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Version */
+            version: number | null;
+        };
+        /** JobEvent */
+        JobEvent: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            };
+            /** Event */
+            event: string;
+            /** Job Id */
+            job_id: string;
+            /** Worker */
+            worker: string | null;
+        };
+        /**
+         * JobKind
+         * @enum {string}
+         */
+        JobKind: "gate_evaluation" | "backtest" | "bench_score";
+        /** JobOut */
+        JobOut: {
+            /** Created */
+            created: boolean;
+            job: components["schemas"]["Job"];
+            /** Poll Url */
+            poll_url: string;
+        };
+        /**
+         * JobStatus
+         * @enum {string}
+         */
+        JobStatus: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+        /**
+         * JobSubmit
+         * @description What a client submits. `idempotency_key` makes a retry of the same submission
+         *     return the first job instead of queueing a second one.
+         */
+        JobSubmit: {
+            /** Idempotency Key */
+            idempotency_key?: string | null;
+            kind: components["schemas"]["JobKind"];
+            /**
+             * Max Attempts
+             * @default 3
+             */
+            max_attempts?: number;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Timeout S
+             * @default 3600
+             */
+            timeout_s?: number;
+        };
         /**
          * LedgerMovement
          * @description A balance change tied to a case, from the merchant's point of view.
@@ -963,6 +1211,15 @@ export interface components {
              */
             notes?: string;
         };
+        /** Readiness */
+        Readiness: {
+            /** Checks */
+            checks: {
+                [key: string]: components["schemas"]["Check"];
+            };
+            /** Status */
+            status: string;
+        };
         /**
          * ReasonCode
          * @description Synthetic reason codes, loosely modelled on card-network categories.
@@ -1106,6 +1363,26 @@ export interface components {
          */
         "Stage-Output": "shadow" | "canary" | "activation" | "rollback" | "assurance";
         /**
+         * StratifiedEvidence
+         * @description The stratified betting e-process over the tested family (``evalue_vr`` only).
+         */
+        StratifiedEvidence: {
+            /** Alpha */
+            alpha: number;
+            /** Contributions */
+            contributions: {
+                [key: string]: number;
+            };
+            /** E Value */
+            e_value: number;
+            /** Rejected */
+            rejected: boolean;
+            /** Share */
+            share: number;
+            /** Threshold */
+            threshold: number;
+        };
+        /**
          * TypeEvidence
          * @description One case type. Money in USD minor units; diff = candidate minus baseline
          *     loss (positive = worse).
@@ -1190,6 +1467,31 @@ export interface components {
             movements: number;
             /** Received */
             received: boolean;
+            /**
+             * Stale
+             * @default 0
+             */
+            stale?: number;
+            /**
+             * Stored
+             * @default false
+             */
+            stored?: boolean;
+        };
+        /** WhoAmI */
+        WhoAmI: {
+            /** Credential Id */
+            credential_id: string;
+            /** Method */
+            method: string;
+            /** Permissions */
+            permissions: string[];
+            /** Roles */
+            roles: string[];
+            /** Subject */
+            subject: string;
+            /** Tenant */
+            tenant: string;
         };
     };
     responses: never;
@@ -1227,6 +1529,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_keys_auth_keys_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    whoami_auth_whoami_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WhoAmI"];
                 };
             };
         };
@@ -1348,6 +1692,26 @@ export interface operations {
             };
         };
     };
+    adyen_webhook_ingest_adyen_webhook_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdyenAck"];
+                };
+            };
+        };
+    };
     stripe_webhook_ingest_stripe_webhook_post: {
         parameters: {
             query?: never;
@@ -1364,6 +1728,196 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebhookAck"];
+                };
+            };
+        };
+    };
+    list_jobs_jobs_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["JobStatus"] | null;
+                rule_id?: string | null;
+                version?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_jobs_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "idempotency-key"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JobSubmit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_job_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_jobs__job_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    job_events_jobs__job_id__events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobEvent"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ready_ready_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Readiness"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Readiness"];
                 };
             };
         };
@@ -1403,9 +1957,7 @@ export interface operations {
     register_rules_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -1469,9 +2021,7 @@ export interface operations {
     rollback_rules__rule_id__rollback_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path: {
                 rule_id: string;
             };
@@ -1506,9 +2056,7 @@ export interface operations {
     approve_rules__rule_id__versions__version__approve_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path: {
                 rule_id: string;
                 version: number;
@@ -1540,9 +2088,7 @@ export interface operations {
     evaluate_rules__rule_id__versions__version__evaluate_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path: {
                 rule_id: string;
                 version: number;
@@ -1606,9 +2152,7 @@ export interface operations {
     shadow_record_shadow_rules__rule_id__versions__version__decisions_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path: {
                 rule_id: string;
                 version: number;
@@ -1676,9 +2220,7 @@ export interface operations {
     shadow_record_imported_shadow_rules__rule_id__versions__version__imported_decisions_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path: {
                 rule_id: string;
                 version: number;
@@ -1711,12 +2253,42 @@ export interface operations {
             };
         };
     };
+    shadow_history_imported_shadow_rules__rule_id__versions__version__imported_history_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rule_id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportedShadowSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     shadow_observe_imported_shadow_rules__rule_id__versions__version__imported_outcomes_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-actor": string;
-            };
+            header?: never;
             path: {
                 rule_id: string;
                 version: number;
