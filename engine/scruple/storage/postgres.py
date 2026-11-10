@@ -27,7 +27,7 @@ from psycopg import errors
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
-from scruple.storage import episodes, imported_shadow, jobs
+from scruple.storage import episodes, imported_shadow, jobs, retention
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -204,7 +204,13 @@ END
 $$;
 """
 
-SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL + episodes.POSTGRES_DDL + jobs.POSTGRES_DDL
+SCHEMA = (
+    BASE_SCHEMA
+    + imported_shadow.POSTGRES_DDL
+    + episodes.POSTGRES_DDL
+    + jobs.POSTGRES_DDL
+    + retention.POSTGRES_DDL
+)
 
 
 def translate(exc: psycopg.Error) -> StorageError:
@@ -307,6 +313,7 @@ class PostgresStorage(SQLStorage):
         self.dsn = dsn
         self.schema = schema
         super().__init__(PostgresConnection(dsn, schema, create_schema))
+        self.retention = retention.SQLRetention(self.connection, "postgres")
 
 
 def app_role_grants(role: str, schema: str = "public") -> str:
@@ -332,4 +339,5 @@ GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shado
     {schema}.episodes, {schema}.episode_calls, {schema}.job_events TO {role};
 GRANT SELECT, INSERT, UPDATE ON {schema}.jobs TO {role};
 GRANT USAGE ON SEQUENCE {schema}.jobs_id_seq, {schema}.job_events_id_seq TO {role};
+GRANT SELECT, INSERT ON {schema}.retention_policies, {schema}.retention_purges TO {role};
 """
