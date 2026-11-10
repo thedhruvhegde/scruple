@@ -167,7 +167,7 @@ v2 adds files next to v1 and changes nothing in it. About 3.7 MB committed.
 | `cfpb_cc2024/narratives.jsonl.gz` | 3,000 | narratives of a deterministic sample of the rows above (first 3,000 by sha256(`2026:<complaint id>`)) | same |
 | `timeliness/cfpb2015_payments.csv.gz` | 135,313 | dates and response fields of every 2012-2015 payments row (with or without narrative) | v1 `payments_subset.csv` |
 | `timeliness/cfpb2025_checking.csv.gz` | 8,000 | dates and response fields of the 2025-2026 checking sample | v1 `checking_complaints_sample.csv` |
-| `enforcement/cfpb_enforcement_orders.csv` | 359 | CFPB enforcement orders 2012-2023: caption, forum, docket, order dates, ordered and suspended amounts (penalty, redress, disgorgement, other relief) | `Disp.csv` |
+| `enforcement/cfpb_enforcement_orders.csv.gz` | 359 | CFPB enforcement orders 2012-2023: caption, forum, docket, order dates, ordered and suspended amounts (penalty, redress, disgorgement, other relief) | `Disp.csv` |
 
 Meta columns: complaint id, date received, date sent to company (ISO dates),
 product, sub-product, issue, sub-issue, company, state, submitted via, company
@@ -213,3 +213,14 @@ Known limits of the v2 files:
 
 No new card-network reason-code reference with a licence was found beyond the CC
 BY 4.0 table already pinned (S1 in docs/SOURCES.md).
+
+## Uses of v2 and of the narratives beyond the v1 tasks
+
+- Real-life scenarios (`scruple/sim/scenarios/real/`, 64 files): each cites one
+  committed complaint (v1 train/dev or the v2 card-dispute sample, never the sealed
+  test split) and paraphrases it; amounts, product, issue and company response are
+  checked against the data. Results: docs/results/REAL_SITUATIONS.md section 1.
+- Complaint-handling timeliness (`scruple/realdata/timeliness.py`) on the three meta
+  tables: the CFPB 15-day flag and routing days, by product and company volume. Not
+  Reg E or Reg Z investigation timeliness. Results: docs/results/REAL_SITUATIONS.md
+  section 2.
