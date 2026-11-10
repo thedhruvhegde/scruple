@@ -10,6 +10,7 @@ from __future__ import annotations
 # base must be imported first: registry imports `Storage` from this package while
 # sqlite (below) is still importing the registry models.
 from scruple.storage.base import (
+    ApiKeyRepository,
     AuditRepository,
     DecisionRepository,
     DuplicateKeyError,
@@ -45,6 +46,7 @@ def open_storage(location: str) -> Storage:
 
 __all__ = [
     "SCHEMA",
+    "ApiKeyRepository",
     "AuditRepository",
     "DecisionRepository",
     "DuplicateKeyError",

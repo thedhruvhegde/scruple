@@ -16,11 +16,14 @@ import json
 from collections.abc import Mapping, Sequence
 from contextlib import AbstractContextManager
 from datetime import datetime
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from scruple.audit.models import AuditEntry
 from scruple.domain import RuleSpec
 from scruple.registry.models import Provenance, RuleStatus, RuleVersion
+
+if TYPE_CHECKING:  # scruple.auth.models -> registry -> storage: import late
+    from scruple.auth.models import ApiKeyRecord
 
 Row = Mapping[str, Any]
 Params = Sequence[object]
@@ -87,6 +90,56 @@ def decode_audit(row: Row) -> AuditEntry:
         payload=json.loads(row["payload_json"]),
         prev_hash=row["prev_hash"],
         entry_hash=row["entry_hash"],
+    )
+
+
+def _ts(d: datetime | None) -> str | None:
+    return d.isoformat() if d is not None else None
+
+
+def _dt(s: str | None) -> datetime | None:
+    return datetime.fromisoformat(s) if s is not None else None
+
+
+def encode_key(rec: ApiKeyRecord) -> tuple[object, ...]:
+    return (
+        rec.key_id,
+        rec.tenant,
+        rec.subject,
+        json.dumps(list(rec.roles)),
+        json.dumps([s.value for s in rec.scopes]),
+        rec.secret_hash,
+        rec.created_at.isoformat(),
+        rec.created_by,
+        rec.description,
+        _ts(rec.expires_at),
+        _ts(rec.revoked_at),
+        _ts(rec.last_used_at),
+        rec.rate_per_minute,
+        rec.burst,
+        rec.max_body_bytes,
+    )
+
+
+def decode_key(row: Row) -> ApiKeyRecord:
+    from scruple.auth.models import ApiKeyRecord, Permission
+
+    return ApiKeyRecord(
+        key_id=row["key_id"],
+        tenant=row["tenant_id"],
+        subject=row["subject"],
+        roles=tuple(json.loads(row["roles_json"])),
+        scopes=tuple(Permission(s) for s in json.loads(row["scopes_json"])),
+        secret_hash=row["secret_hash"],
+        created_at=datetime.fromisoformat(row["created_at"]),
+        created_by=row["created_by"],
+        description=row["description"],
+        expires_at=_dt(row["expires_at"]),
+        revoked_at=_dt(row["revoked_at"]),
+        last_used_at=_dt(row["last_used_at"]),
+        rate_per_minute=row["rate_per_minute"],
+        burst=row["burst"],
+        max_body_bytes=row["max_body_bytes"],
     )
 
 
@@ -191,6 +244,50 @@ class SQLDecisions:
         return int(rows[0]["n"])
 
 
+_KEY_COLS = (
+    "key_id, tenant_id, subject, roles_json, scopes_json, secret_hash, created_at, "
+    "created_by, description, expires_at, revoked_at, last_used_at, rate_per_minute, "
+    "burst, max_body_bytes"
+)
+
+
+class SQLApiKeys:
+    def __init__(self, conn: Connection) -> None:
+        self._c = conn
+
+    def insert_api_key(self, rec: ApiKeyRecord) -> None:
+        self._c.execute(
+            f"INSERT INTO api_keys ({_KEY_COLS}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",  # noqa: S608
+            encode_key(rec),
+        )
+
+    def get_api_key(self, key_id: str) -> ApiKeyRecord | None:
+        rows = self._c.query(
+            f"SELECT {_KEY_COLS} FROM api_keys WHERE key_id=?",  # noqa: S608
+            (key_id,),
+        )
+        return decode_key(rows[0]) if rows else None
+
+    def list_api_keys(self, tenant: str) -> list[ApiKeyRecord]:
+        rows = self._c.query(
+            f"SELECT {_KEY_COLS} FROM api_keys WHERE tenant_id=? "  # noqa: S608
+            "ORDER BY created_at, key_id",
+            (tenant,),
+        )
+        return [decode_key(r) for r in rows]
+
+    def revoke_api_key(self, key_id: str, at: datetime) -> None:
+        self._c.execute(
+            "UPDATE api_keys SET revoked_at=? WHERE key_id=? AND revoked_at IS NULL",
+            (at.isoformat(), key_id),
+        )
+
+    def touch_api_key(self, key_id: str, at: datetime) -> None:
+        self._c.execute(
+            "UPDATE api_keys SET last_used_at=? WHERE key_id=?", (at.isoformat(), key_id)
+        )
+
+
 # --- facade ---------------------------------------------------------------------
 
 
@@ -206,6 +303,7 @@ class SQLStorage:
         self.rules = SQLRuleVersions(conn)
         self.audit = SQLAudit(conn)
         self.decisions = SQLDecisions(conn)
+        self.api_keys = SQLApiKeys(conn)
 
     def close(self) -> None:
         self._conn.close()
@@ -260,3 +358,22 @@ class SQLStorage:
 
     def count_decisions(self) -> int:
         return self.decisions.count_decisions()
+
+    # api keys
+    def insert_api_key(self, rec: ApiKeyRecord) -> None:
+        with self.transaction():
+            self.api_keys.insert_api_key(rec)
+
+    def get_api_key(self, key_id: str) -> ApiKeyRecord | None:
+        return self.api_keys.get_api_key(key_id)
+
+    def list_api_keys(self, tenant: str) -> list[ApiKeyRecord]:
+        return self.api_keys.list_api_keys(tenant)
+
+    def revoke_api_key(self, key_id: str, at: datetime) -> None:
+        with self.transaction():
+            self.api_keys.revoke_api_key(key_id, at)
+
+    def touch_api_key(self, key_id: str, at: datetime) -> None:
+        with self.transaction():
+            self.api_keys.touch_api_key(key_id, at)

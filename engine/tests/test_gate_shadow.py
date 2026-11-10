@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from scruple.api.app import create_app
 from scruple.audit.log import AuditLog
+from scruple.auth.authn import Authenticator
 from scruple.clock import SteppingClock
 from scruple.domain import Action
 from scruple.gate import shadow as shadow_mod
@@ -23,6 +24,11 @@ from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID, 
 from scruple.sim.models import DisputeCase
 from scruple.storage import SQLiteStorage
 from tests.ci_support import PROV
+
+# These tests exercise the gate through the API, so they use the development-only
+# X-Actor trust; tests/test_auth_*.py cover real authentication.
+DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
 
 CFG = GateConfig(n_cases=2_000, bootstrap_resamples=300)
 WRITE_METHODS = (
@@ -247,7 +253,7 @@ def test_recorder_direct_construction_is_pure() -> None:
 
 def test_api_shadow_routes_have_no_side_effects() -> None:
     g, st = _gate()
-    client = TestClient(create_app(g))
+    client = TestClient(create_app(g, auth=DEV_AUTH), headers=READER)
     head = g.audit.head()
     st.writes.clear()
     body = {

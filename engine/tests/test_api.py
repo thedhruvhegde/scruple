@@ -4,11 +4,17 @@ import pytest
 from fastapi.testclient import TestClient
 
 from scruple.api.app import create_app
+from scruple.auth.authn import Authenticator
 from scruple.clock import SteppingClock
 from scruple.gate import GateConfig
 from scruple.service import AgentGate
 from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
 from scruple.storage import SQLiteStorage
+
+# These tests exercise the gate through the API, so they use the development-only
+# X-Actor trust; tests/test_auth_*.py cover real authentication.
+DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
 
 AGENT = {"X-Actor": "dispute-agent-01"}
 RISK = {"X-Actor": "model-risk@demo.bank"}
@@ -22,7 +28,7 @@ def client() -> TestClient:
         GateConfig(n_cases=1_500, bootstrap_resamples=300),
     )
     g.bootstrap_baseline()
-    return TestClient(create_app(g))
+    return TestClient(create_app(g, auth=DEV_AUTH), headers=READER)
 
 
 def _body(rule_id: str, spec: object) -> dict[str, object]:
@@ -80,8 +86,9 @@ def test_invalid_input_is_rejected(client: TestClient, mutate: object) -> None:
 
 def test_actor_header_required_and_validated(client: TestClient) -> None:
     body = _body("some-rule", GOOD_RULE.model_dump(mode="json"))
-    assert client.post("/rules", json=body).status_code == 422
-    assert client.post("/rules", json=body, headers={"X-Actor": "bad actor!"}).status_code == 422
+    del client.headers["X-Actor"]
+    assert client.post("/rules", json=body).status_code == 401
+    assert client.post("/rules", json=body, headers={"X-Actor": "bad actor!"}).status_code == 401
     assert client.post("/rules", json=body, headers={"X-Actor": "someone-else"}).status_code == 403
 
 

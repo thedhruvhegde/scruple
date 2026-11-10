@@ -1,7 +1,11 @@
 """HTTP API. Every input is validated by Pydantic (extra fields forbidden).
 
-Authentication is a STUB: the caller's identity is the `X-Actor` header, which is
-trusted as-is. Replace it with real authn (mTLS/OIDC) before any non-demo use.
+Every request is authenticated by `scruple.auth.middleware.AuthMiddleware` (API
+key or OIDC bearer token) and every route declares the permission it needs with
+`require(Permission.X)` (or `public()` / `signed(...)`). The caller's identity,
+recorded as the actor in the audit log, comes from the credential, never from a
+header the caller chooses. The `X-Actor` header is trusted only when the
+development-only `auth_dev_actor_header` setting is on (off by default).
 """
 
 from __future__ import annotations
@@ -9,11 +13,14 @@ from __future__ import annotations
 import os
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
+from fastapi import Depends, FastAPI, HTTPException, Path, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.api.strict import reject_unknown_inputs
+from scruple.auth import CurrentPrincipal, Permission, Principal, public, require, signed
+from scruple.auth.authn import Authenticator
+from scruple.auth.middleware import AuthMiddleware
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
@@ -77,20 +84,47 @@ class DecisionOut(BaseModel):
         )
 
 
-def actor_header(
-    x_actor: Annotated[str, Header(pattern=ACTOR_PATTERN, max_length=128)],
-) -> str:
-    return x_actor
+def actor_of(principal: CurrentPrincipal) -> str:
+    """The audit actor: the authenticated subject, never a caller-chosen header."""
+    return principal.subject
 
 
-Actor = Annotated[str, Depends(actor_header)]
+Actor = Annotated[str, Depends(actor_of)]
+READ = require(Permission.READ)
+PROPOSE = require(Permission.PROPOSE)
+SHADOW = require(Permission.SHADOW)
+APPROVE = require(Permission.APPROVE)
+ADMIN = require(Permission.ADMIN)
+
+
+class WhoAmI(BaseModel):
+    subject: str
+    tenant: str
+    method: str
+    credential_id: str
+    roles: tuple[str, ...]
+    permissions: tuple[str, ...]
+
+    @classmethod
+    def of(cls, p: Principal) -> WhoAmI:
+        return cls(
+            subject=p.subject,
+            tenant=p.tenant,
+            method=p.method,
+            credential_id=p.credential_id,
+            roles=p.roles,
+            permissions=tuple(sorted(x.value for x in p.permissions)),
+        )
+
 
 # Versions are 1-based and must fit a 64-bit SQL integer (an unbounded int reached
 # the driver and came back as a 500).
 VersionPath = Annotated[int, Path(ge=1, le=2**63 - 1)]
 
 
-def create_app(gate: AgentGate | None = None) -> FastAPI:
+def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = None) -> FastAPI:
+    """The API over `gate`. `auth` defaults to one built from settings (API keys in
+    the gate's database; `X-Actor` trust only if `auth_dev_actor_header` is on)."""
     app = FastAPI(
         title="agent-gate",
         version=package_version(),
@@ -104,6 +138,12 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or load_settings().database_dsn())
         gate.bootstrap_baseline()
     g = gate
+    if auth is None:
+        from scruple.auth.config import build_authenticator
+        from scruple.settings import load_settings
+
+        auth = build_authenticator(load_settings(), g.storage)
+    app.add_middleware(AuthMiddleware, authenticator=auth)
     app.add_middleware(RequestIDMiddleware)
 
     def _err(status: int):  # type: ignore[no-untyped-def]
@@ -116,57 +156,63 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
     app.add_exception_handler(DuplicateContentError, _err(409))
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
-    app.include_router(ingest_router())
+    app.include_router(ingest_router(), dependencies=[signed("stripe-signature")])
 
-    @app.get("/health")
+    @app.get("/health", dependencies=[public()])
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    @app.get("/version")
+    @app.get("/version", dependencies=[public()])
     def version() -> BuildInfo:
         return build_info()
 
-    @app.post("/rules", status_code=201)
+    @app.get("/auth/whoami", dependencies=[READ])
+    def whoami(principal: CurrentPrincipal) -> WhoAmI:
+        return WhoAmI.of(principal)
+
+    @app.post("/rules", status_code=201, dependencies=[PROPOSE])
     def register(body: RegisterIn, actor: Actor) -> RuleVersion:
         if actor != body.provenance.agent_id:
-            raise HTTPException(403, "X-Actor must match provenance.agent_id")
+            raise HTTPException(403, "the authenticated caller must be provenance.agent_id")
         return g.propose(body.rule_id, body.spec, body.owner, body.provenance)
 
-    @app.get("/rules")
+    @app.get("/rules", dependencies=[READ])
     def list_rules() -> list[RuleVersion]:
         return g.registry.all_versions()
 
-    @app.get("/rules/{rule_id}")
+    @app.get("/rules/{rule_id}", dependencies=[READ])
     def rule_versions(rule_id: str) -> list[RuleVersion]:
         versions = g.registry.versions(rule_id)
         if not versions:
             raise HTTPException(404, f"unknown rule {rule_id}")
         return versions
 
-    @app.post("/rules/{rule_id}/versions/{version}/evaluate")
+    @app.post("/rules/{rule_id}/versions/{version}/evaluate", dependencies=[PROPOSE])
     def evaluate(rule_id: str, version: VersionPath, actor: Actor) -> list[DecisionOut]:
         return [DecisionOut.of(r.decision) for r in g.evaluate(rule_id, version, actor)]
 
-    @app.post("/rules/{rule_id}/versions/{version}/approve")
+    @app.post("/rules/{rule_id}/versions/{version}/approve", dependencies=[APPROVE])
     def approve(rule_id: str, version: VersionPath, actor: Actor) -> DecisionOut:
         return DecisionOut.of(g.approve(rule_id, version, actor).decision)
 
-    @app.post("/rules/{rule_id}/rollback")
+    @app.post("/rules/{rule_id}/rollback", dependencies=[APPROVE])
     def rollback(rule_id: str, body: RollbackIn, actor: Actor) -> DecisionOut:
         return DecisionOut.of(g.rollback(rule_id, actor, body.reason).decision)
 
-    @app.get("/decisions")
+    @app.get("/decisions", dependencies=[READ])
     def decisions(rule_id: str | None = None) -> list[DecisionOut]:
         return [DecisionOut.of(r.decision) for r in g.decisions(rule_id)]
 
-    @app.get("/decisions/{decision_id}")
+    @app.get("/decisions/{decision_id}", dependencies=[READ])
     def decision(decision_id: str) -> Decision:
         rec = g.decision(decision_id)
         if rec is None:
             raise HTTPException(404, "unknown decision")
         return rec.decision
 
-    @app.get("/decisions/{decision_id}/report", response_class=PlainTextResponse)
+    @app.get(
+        "/decisions/{decision_id}/report", response_class=PlainTextResponse, dependencies=[READ]
+    )
     def report(decision_id: str) -> PlainTextResponse:
         md = g.report(decision_id)
         if md is None:
@@ -182,34 +228,36 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
             shadow[key] = g.shadow_recorder(rule_id, version)
         return shadow[key]
 
-    @app.post("/shadow/rules/{rule_id}/versions/{version}/decisions")
+    @app.post("/shadow/rules/{rule_id}/versions/{version}/decisions", dependencies=[SHADOW])
     def shadow_record(
         rule_id: str, version: VersionPath, body: LiveDecisionBatch, actor: Actor
     ) -> BatchResult:
         if any(d.agent_id != actor for d in body.decisions):
-            raise HTTPException(403, "X-Actor must match every decision's agent_id")
+            raise HTTPException(403, "the caller must be every decision's agent_id")
         try:
             return _recorder(rule_id, version).record(body.decisions)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
-    @app.get("/shadow/rules/{rule_id}/versions/{version}")
+    @app.get("/shadow/rules/{rule_id}/versions/{version}", dependencies=[READ])
     def shadow_summary(rule_id: str, version: VersionPath) -> ShadowSummary:
         return _recorder(rule_id, version).summary()
 
     # Imported (real) cases: no ground truth; metrics are labelled observed or estimated.
-    @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/decisions")
+    @app.post(
+        "/shadow/rules/{rule_id}/versions/{version}/imported/decisions", dependencies=[SHADOW]
+    )
     def shadow_record_imported(
         rule_id: str, version: int, body: ImportedDecisionBatch, actor: Actor
     ) -> ImportedBatchResult:
         if any(d.agent_id != actor for d in body.decisions):
-            raise HTTPException(403, "X-Actor must match every decision's agent_id")
+            raise HTTPException(403, "the caller must be every decision's agent_id")
         try:
             return _recorder(rule_id, version).record_imported(body.decisions)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
-    @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/outcomes")
+    @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/outcomes", dependencies=[SHADOW])
     def shadow_observe_imported(
         rule_id: str, version: int, body: ImportedOutcomeBatch, actor: Actor
     ) -> ImportedObserveResult:
@@ -218,12 +266,20 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
-    @app.get("/shadow/rules/{rule_id}/versions/{version}/imported")
+    @app.get("/shadow/rules/{rule_id}/versions/{version}/imported", dependencies=[READ])
     def shadow_summary_imported(rule_id: str, version: int) -> ImportedShadowSummary:
         return _recorder(rule_id, version).summary_imported()
 
-    @app.get("/audit/verify")
+    @app.get("/audit/verify", dependencies=[READ])
     def verify(expected_head: str | None = None) -> IntegrityReport:
         return g.verify_integrity(expected_head)
+
+    @app.get("/auth/keys", dependencies=[ADMIN])
+    def list_keys(principal: CurrentPrincipal) -> list[dict[str, object]]:
+        """The caller's tenant's API keys, without their hashes."""
+        assert auth is not None
+        if auth.keys is None:
+            return []
+        return [k.public() for k in auth.keys.list(principal.tenant)]
 
     return app

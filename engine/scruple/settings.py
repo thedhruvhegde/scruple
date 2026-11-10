@@ -49,6 +49,18 @@ class Settings(BaseModel):
     log_format: Literal["json", "text"] = "json"
     api_host: str = "127.0.0.1"
     api_port: int = Field(default=8000, ge=1, le=65535)
+    # --- authentication (scruple.auth) ---
+    auth_dev_actor_header: bool = Field(
+        default=False,
+        description="DEVELOPMENT ONLY: trust the X-Actor header as the caller, with every "
+        "permission. Off by default; logs a warning and flags every response when on.",
+    )
+    auth_scrypt_n: int = Field(
+        default=2**14, ge=2**10, le=2**20, description="scrypt cost for new API keys"
+    )
+    auth_key_cache_seconds: float = Field(
+        default=300.0, ge=0, le=86_400, description="how long a checked key skips scrypt"
+    )
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""

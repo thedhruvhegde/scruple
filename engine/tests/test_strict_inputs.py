@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from scruple.api.app import create_app
 from scruple.api.strict import body_models, declared_query, takes_body
+from scruple.auth.authn import Authenticator
 from scruple.cli.main import main
 from scruple.clock import SteppingClock
 from scruple.gate import GateConfig
@@ -21,9 +22,14 @@ from scruple.service import AgentGate
 from scruple.sim.library import GOOD_RULE, GOOD_RULE_ID
 from scruple.storage import SQLiteStorage
 
+# These tests exercise the gate through the API, so they use the development-only
+# X-Actor trust; tests/test_auth_*.py cover real authentication.
+DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
+
 AGENT = {"X-Actor": "dispute-agent-01"}
 RISK = {"X-Actor": "model-risk@demo.bank"}
-APP = create_app(AgentGate(SQLiteStorage(":memory:")))
+APP = create_app(AgentGate(SQLiteStorage(":memory:")), auth=DEV_AUTH)
 
 
 @pytest.fixture
@@ -32,7 +38,7 @@ def client() -> TestClient:
         SQLiteStorage(":memory:"), SteppingClock(), GateConfig(n_cases=800, bootstrap_resamples=100)
     )
     g.bootstrap_baseline()
-    return TestClient(create_app(g))
+    return TestClient(create_app(g, auth=DEV_AUTH), headers=READER)
 
 
 def _body() -> dict[str, Any]:

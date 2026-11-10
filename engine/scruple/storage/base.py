@@ -1,14 +1,17 @@
 """Storage interfaces: one repository per aggregate, plus the `Storage` facade.
 
-There are three aggregates, each with its own repository protocol:
+There are three history aggregates, each with its own repository protocol:
 
 - `RuleVersionRepository`: versioned rules. Content is immutable; only `status` and
   the `rollback_to` pointer may change, and nothing is ever deleted.
 - `AuditRepository`: the hash-chained audit log. Append-only.
 - `DecisionRepository`: gate decisions (stored as JSON bodies). Append-only.
 
+`ApiKeyRepository` holds API keys (scruple.auth): mutable only in `revoked_at` and
+`last_used_at`, never deleted.
+
 `Transactional` is the unit of work. Every backend (SQLite, Postgres) implements all
-four in one object, `Storage`, because a promotion step must write a status change,
+of them in one object, `Storage`, because a promotion step must write a status change,
 a decision and its audit entries atomically. Callers that need only one aggregate
 should depend on that narrower protocol.
 
@@ -24,8 +27,10 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:  # runtime imports would cycle: registry -> storage -> registry
     from contextlib import AbstractContextManager
+    from datetime import datetime
 
     from scruple.audit.models import AuditEntry
+    from scruple.auth.models import ApiKeyRecord
     from scruple.registry.models import RuleStatus, RuleVersion
 
 
@@ -68,7 +73,30 @@ class DecisionRepository(Protocol):
 
 
 @runtime_checkable
-class Storage(Transactional, RuleVersionRepository, AuditRepository, DecisionRepository, Protocol):
+class ApiKeyRepository(Protocol):
+    """API keys (scruple.auth). Not history, but never deleted: only `revoked_at`
+    (once) and `last_used_at` change. Lookup by id spans tenants, because the key
+    id is all a request carries; the record says which tenant it belongs to."""
+
+    def insert_api_key(self, rec: ApiKeyRecord) -> None: ...
+    def get_api_key(self, key_id: str) -> ApiKeyRecord | None: ...
+    def list_api_keys(self, tenant: str) -> list[ApiKeyRecord]:
+        """One tenant's keys ordered by created_at, key_id."""
+        ...
+
+    def revoke_api_key(self, key_id: str, at: datetime) -> None: ...
+    def touch_api_key(self, key_id: str, at: datetime) -> None: ...
+
+
+@runtime_checkable
+class Storage(
+    Transactional,
+    RuleVersionRepository,
+    AuditRepository,
+    DecisionRepository,
+    ApiKeyRepository,
+    Protocol,
+):
     """Everything the service needs from a backend, in one transactional object."""
 
     def close(self) -> None: ...

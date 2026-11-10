@@ -31,6 +31,7 @@ from schemathesis.checks import CheckContext
 from schemathesis.core.failures import Failure
 
 from scruple.api.app import create_app
+from scruple.auth.authn import Authenticator
 from scruple.clock import SteppingClock
 from scruple.gate.config import GateConfig
 from scruple.service import AgentGate
@@ -52,7 +53,9 @@ def _app() -> Any:
     old = os.environ.get(SECRETS_ENV)
     os.environ[SECRETS_ENV] = "whsec_fuzzing-secret-0123456789"  # read once, at creation
     try:
-        return create_app(gate)
+        # Development-only X-Actor trust: the fuzzer explores the gate's inputs, not
+        # credentials (tests/test_auth_*.py).
+        return create_app(gate, auth=Authenticator(dev_actor_header=True))
     finally:
         if old is None:
             del os.environ[SECRETS_ENV]
@@ -61,6 +64,7 @@ def _app() -> Any:
 
 
 APP = _app()
+ACTOR = {"X-Actor": "model-risk@demo.bank"}
 # Bodies whose validity the schema cannot express: a raw signed webhook, rules
 # whose condition value type depends on the field (`mcc` needs a string, ...), and
 # imported cases, whose currency must be a listed ISO 4217 code and whose state must
@@ -94,7 +98,7 @@ def client_errors_are_well_formed(ctx: CheckContext, response: Any, case: Any) -
 @schema.parametrize()
 @settings(max_examples=30, deadline=None, suppress_health_check=list(HealthCheck))
 def test_every_route_survives_schema_fuzzing(case: Any) -> None:
-    response = case.call()
+    response = case.call(headers=ACTOR)
     excluded = [
         schemathesis.checks.status_code_conformance,
         schemathesis.checks.allow_header_conformance,
@@ -108,7 +112,6 @@ def test_every_route_survives_schema_fuzzing(case: Any) -> None:
 
 # --- regressions and explicit error contracts ---------------------------------------
 client = TestClient(APP)
-ACTOR = {"X-Actor": "model-risk@demo.bank"}
 
 
 @pytest.mark.parametrize(

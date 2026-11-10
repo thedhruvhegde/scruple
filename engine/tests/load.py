@@ -126,6 +126,8 @@ def _hammer(
 
 def http_requests_per_second(seconds: float = 4.0, clients: int = 4) -> dict[str, Any]:
     """Requests per second against one uvicorn worker, per endpoint."""
+    from scruple.auth.keys import ApiKeyService
+    from scruple.auth.models import Permission
     from scruple.clock import SteppingClock
     from scruple.service import AgentGate
     from scruple.sim.library import GOOD_RULE, GOOD_RULE_ID
@@ -137,13 +139,22 @@ def http_requests_per_second(seconds: float = 4.0, clients: int = 4) -> dict[str
         g = AgentGate(SQLiteStorage(str(db)), SteppingClock())
         g.bootstrap_baseline()
         g.propose(GOOD_RULE_ID, GOOD_RULE, "ops-team", PROV)
+        # Real API keys at the production scrypt cost; the server's verification
+        # cache is what keeps steady traffic cheap, so it is part of the measurement.
+        keys = ApiKeyService(g.storage)
+        read_key = keys.create("load-reader", [Permission.READ], "local")[1]
+        agent_key = keys.create(PROV.agent_id, [Permission.PROPOSE], "local")[1]
+        reader = {"X-API-Key": read_key.get_secret_value()}
+        agent = {"X-API-Key": agent_key.get_secret_value()}
         g.storage.close()
         out: dict[str, Any] = {"clients": clients, "seconds": seconds}
         with serving(db) as base:
             out["GET /health"] = _hammer(base, lambda c: c.get("/health"), seconds, clients)
-            out["GET /rules"] = _hammer(base, lambda c: c.get("/rules"), seconds, clients)
+            out["GET /rules"] = _hammer(
+                base, lambda c: c.get("/rules", headers=reader), seconds, clients
+            )
             out["GET /audit/verify"] = _hammer(
-                base, lambda c: c.get("/audit/verify"), seconds, clients
+                base, lambda c: c.get("/audit/verify", headers=reader), seconds, clients
             )
             n = [0]
 
@@ -162,7 +173,7 @@ def http_requests_per_second(seconds: float = 4.0, clients: int = 4) -> dict[str
                     "owner": "ops-team",
                     "provenance": {"agent_id": PROV.agent_id},
                 }
-                return c.post("/rules", json=body, headers={"X-Actor": PROV.agent_id})
+                return c.post("/rules", json=body, headers=agent)
 
             out["POST /rules"] = _hammer(base, register, seconds, 1)
     return out
