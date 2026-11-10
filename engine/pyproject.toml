@@ -106,6 +106,7 @@ include = [
     "/scruple",
     "/agent_gate",
     "/README.md",
+    "/CHANGELOG.md",
     "/LICENSE-PENDING.md",
     "/pyproject.toml",
 ]

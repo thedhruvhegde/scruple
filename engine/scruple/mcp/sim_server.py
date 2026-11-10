@@ -29,6 +29,7 @@ from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironmen
 from scruple.agents.episode import Episode, EpisodeError
 from scruple.agents.models import TASK
 from scruple.agents.tools import TOOL_BY_NAME
+from scruple.version import package_version
 
 MAX_EPISODES = 10_000
 
@@ -105,7 +106,7 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
         instructions=TASK
         + " Start with start_episode, pass the episode_id to every other tool, and finish "
         "with submit_decision.",
-        version="0.1.0",
+        version=package_version(),
     )
 
     @server.tool(description="List the synthetic case types the simulator can generate.")
