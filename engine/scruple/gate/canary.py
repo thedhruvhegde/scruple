@@ -212,12 +212,13 @@ def evaluate_stage(
     within = t_mean <= c_mean + schedule.tolerance_usd_minor
     seq: SequentialCanaryResult | None = None
     cost_checks: tuple[CheckResult, ...]
-    if config is not None and config.stats == "evalue":
+    if config is not None and config.stats in ("evalue", "evalue_vr"):
         cost_checks, seq = sequential_checks(
             observations(cases, matches, treat, costs, config),
             basis_points(percent) / BUCKETS,
             config.evalue_alpha / len(schedule.stages),
             schedule.tolerance_usd_minor,
+            centred=config.stats == "evalue_vr",
         )
     else:
         cost_checks = (

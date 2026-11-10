@@ -608,6 +608,10 @@ class VRGateConfig(BaseModel):
     base: StatsGateConfig
     stratified_share: float = Field(default=0.8, gt=0.0, lt=1.0)  # w: share of alpha_block
     shares: dict[str, float] | None = None  # known type shares (post-stratified certificate)
+    # Types that must each be certified non-inferior (H0_k: mean_k >= t_k rejected at
+    # alpha_certify) before promoting; an intersection-union test, so no split of alpha.
+    certify_types: tuple[str, ...] = ()
+    max_bet: float = Field(default=0.5, gt=0.0, lt=1.0)  # stratified process's bet cap
 
     @model_validator(mode="after")
     def _shares(self) -> VRGateConfig:
@@ -630,6 +634,7 @@ class VRVerdict(BaseModel):
     stratified_rejected: bool
     contributions: dict[str, float]  # log-wealth by case type (sums to the final log-wealth)
     post_stratified_e_value: float | None  # running maximum, H0: mean >= tolerance
+    type_certificates: dict[str, float]  # running maxima for certify_types
     certified: bool
 
     @property
@@ -665,7 +670,12 @@ def evaluate_pairs_vr(pairs: Sequence[LossPair], cfg: VRGateConfig) -> VRVerdict
         null_means={
             t: b.type_tolerances.get(t, 0.0) / cap(t) for t in {p.case_type for p in order}
         },
+        max_bet=cfg.max_bet,
     )
+    type_cert = {
+        t: BettingEProcess(b.type_tolerances.get(t, 0.0) / cap(t), "less")
+        for t in cfg.certify_types
+    }
     post: PostStratifiedEProcess | None = None
     if cfg.shares is not None:
         missing = {p.case_type for p in order} - set(cfg.shares)
@@ -676,13 +686,19 @@ def evaluate_pairs_vr(pairs: Sequence[LossPair], cfg: VRGateConfig) -> VRVerdict
         strat.update(p.case_type, max(-1.0, min(1.0, p.diff / cap(p.case_type))))
         if post is not None:
             post.update(p.case_type, max(-1.0, min(1.0, p.diff / b.cost_cap)))
+        if p.case_type in type_cert:
+            type_cert[p.case_type].update(max(-1.0, min(1.0, p.diff / cap(p.case_type))))
     level = w * b.alpha_block
     s_rej = strat.rejected(level)
     bayes_ok = base.decision is None or base.decision.bayes_promote
     certified = (
         post.rejected(b.alpha_certify) if post is not None else base.certified
     ) and bayes_ok
+    uncertified = [t for t, e in type_cert.items() if not e.rejected(b.alpha_certify)]
+    certified = certified and not uncertified
     reasons = list(base.reasons)
+    if uncertified:
+        reasons.append(f"not certified non-inferior per type: {', '.join(uncertified)}")
     if s_rej:
         reasons.insert(
             0,
@@ -706,6 +722,7 @@ def evaluate_pairs_vr(pairs: Sequence[LossPair], cfg: VRGateConfig) -> VRVerdict
         stratified_rejected=s_rej,
         contributions=dict(sorted(strat.contributions.items())),
         post_stratified_e_value=None if post is None else post.max_e_value,
+        type_certificates={t: e.max_e_value for t, e in type_cert.items()},
         certified=certified,
     )
 

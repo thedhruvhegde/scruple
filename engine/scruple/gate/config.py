@@ -5,7 +5,14 @@ from __future__ import annotations
 from itertools import pairwise
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SerializerFunctionWrapHandler,
+    field_validator,
+    model_serializer,
+)
 
 from scruple.sim.generator import DEFAULT_PROFILE, Profile
 from scruple.sim.models import (
@@ -17,6 +24,7 @@ from scruple.sim.models import (
 
 # ASSUMPTION: a policy change can move a case's cost by at most its amount plus
 # every fee and the escalation cost (synthetic fee schedule in scruple.sim.models).
+VR_SHARE_DEFAULT = 0.8  # evalue_vr: stratified share of the false-block budget
 EVALUE_FEES_USD_MINOR = ARBITRATION_FEE_USD + REPRESENTMENT_LOSS_FEE_USD + ESCALATION_COST_USD
 
 
@@ -40,7 +48,13 @@ class GateConfig(BaseModel):
     # zero-tolerance slice check (default). "evalue": anytime-valid betting
     # e-processes (scruple.stats) with per-case-type e-BH, sample-size planning and a
     # sequential canary. See docs/DESIGN.md "Statistics" and docs/DECISIONS.md.
-    stats: Literal["bootstrap", "evalue"] = "bootstrap"
+    # "evalue_vr": "evalue" plus variance reduction (scruple.stats.variance,
+    # docs/math/07): a stratified betting e-process over the tested case types at
+    # `evalue_vr_stratified_share` of the false-block budget (e-BH gets the rest), a
+    # plan at that level, and a canary whose inverse-propensity terms are centred on a
+    # predictable cost prediction. Same false-block guarantee (alpha); more power.
+    stats: Literal["bootstrap", "evalue", "evalue_vr"] = "bootstrap"
+    evalue_vr_stratified_share: float = Field(default=VR_SHARE_DEFAULT, gt=0.0, lt=1.0)
     # Declared bound on |candidate - baseline| loss per case for the e-value provider
     # when no per-case-type cap applies (USD minor). ASSUMPTION: the largest synthetic
     # amount ($50,000) plus every fee and the escalation cost. Must be set before
@@ -89,6 +103,15 @@ class GateConfig(BaseModel):
 
     # Who may approve activation or roll back (segregation of duties enforced too).
     approvers: tuple[str, ...] = ("model-risk@demo.bank",)
+
+    @model_serializer(mode="wrap")
+    def _stable_dump(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
+        """Leave the evalue_vr setting out at its default, so the content hash of every
+        configuration that existed before it (audit, CI evidence) does not change."""
+        out: dict[str, object] = handler(self)
+        if out.get("evalue_vr_stratified_share") == VR_SHARE_DEFAULT:
+            out.pop("evalue_vr_stratified_share", None)
+        return out
 
     @field_validator("evalue_band_edges_usd_minor")
     @classmethod

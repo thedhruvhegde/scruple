@@ -55,7 +55,15 @@ Assumptions (also in docs/DESIGN.md)
 * ``p`` is known exactly: ``basis_points(percent) / 10,000``.
 * Costs lie in ``[0, cap]`` for the case's type; a cost outside fails closed.
 * The price of validity is variance: ``Z`` scales with ``1/p``, so at a 10%
-  canary the test needs many matched cases to see small effects. When it neither
+  canary the test needs many matched cases to see small effects. With
+  ``centred=True`` (``GateConfig.stats = "evalue_vr"``) the term is
+  ``(Y_i - f_i) (T_i/p - (1-T_i)/(1-p))`` for a predictable prediction ``f_i`` in
+  ``[0, c]`` (the running mean cost of earlier matched cases of the type, both
+  arms). Because ``T_i`` is independent of ``f_i`` and of the potential costs with a
+  known ``p``, the mean is still ``tau_i`` (the ``f_i`` terms cancel in expectation),
+  ``|Y_i - f_i| <= c`` keeps the same scale ``M``, and the second moment falls from
+  ``E[Y^2]`` to ``E[(Y - f)^2]`` (a control variate with an exactly known mean;
+  docs/math/07, Proposition 7.5). When it neither
   rolls back nor certifies benefit, the canary passes on "no evidence of harm",
   which is the same standard as the bootstrap path, now with error control on the
   rollback side only.
@@ -125,9 +133,11 @@ def scale(cap: float, p: float) -> float:
     return cap * max(1.0 / p, 1.0 / (1.0 - p))
 
 
-def ipw_term(cost: float, treated: bool, p: float) -> float:
-    """``Z = Y (T/p - (1-T)/(1-p))``: unbiased for the per-case effect."""
-    return cost / p if treated else -cost / (1.0 - p)
+def ipw_term(cost: float, treated: bool, p: float, prediction: float = 0.0) -> float:
+    """``Z = (Y - f) (T/p - (1-T)/(1-p))``: unbiased for the per-case effect for any
+    prediction ``f`` fixed before the assignment (``f = 0`` is plain IPW)."""
+    r = cost - prediction
+    return r / p if treated else -r / (1.0 - p)
 
 
 def sequential_canary(
@@ -137,6 +147,7 @@ def sequential_canary(
     tolerance: float = 0.0,
     *,
     stop_early: bool = True,
+    centred: bool = False,
 ) -> SequentialCanaryResult:
     """Monitor matched cases in order; stop at the first harm or benefit crossing.
 
@@ -164,13 +175,18 @@ def sequential_canary(
     css = {t: BettingConfidenceSequence(alpha) for t in types}
     sums: dict[str, float] = defaultdict(float)
     treated: dict[str, int] = defaultdict(int)
+    cost_sum: dict[str, float] = defaultdict(float)  # predictable prediction (centred)
+    cost_n: dict[str, int] = defaultdict(int)
     k = len(types)
     decision: Literal["harm", "benefit", "no_decision"] = "no_decision"
     flagged_harm: tuple[str, ...] = ()
     flagged_benefit: tuple[str, ...] = ()
     used = 0
     for o in obs:
-        z = ipw_term(o.cost, o.treated, p)
+        f = cost_sum[o.case_type] / cost_n[o.case_type] if centred and cost_n[o.case_type] else 0.0
+        z = ipw_term(o.cost, o.treated, p, f)
+        cost_sum[o.case_type] += o.cost
+        cost_n[o.case_type] += 1
         x = max(-1.0, min(1.0, z / scales[o.case_type]))
         harm[o.case_type].update(x)
         benefit[o.case_type].update(x)
@@ -209,7 +225,7 @@ def sequential_canary(
             )
         )
     return SequentialCanaryResult(
-        method=METHOD,
+        method=METHOD + (", centred on a predictable cost prediction" if centred else ""),
         alpha=alpha,
         tolerance_usd_minor=tolerance,
         assignment_probability=p,
@@ -275,7 +291,12 @@ def describe(res: SequentialCanaryResult) -> str:
 
 
 def sequential_checks(
-    obs: Sequence[Observation], p: float, alpha: float, tolerance: float
+    obs: Sequence[Observation],
+    p: float,
+    alpha: float,
+    tolerance: float,
+    *,
+    centred: bool = False,
 ) -> tuple[tuple[CheckResult, ...], SequentialCanaryResult | None]:
     """The checks that replace the point-estimate tolerance rule in a canary."""
     from .models import CheckResult  # models imports this module's result types
@@ -290,7 +311,7 @@ def sequential_checks(
                 detail=f"{len(bad)} violation(s): {bad[0]}",
             ),
         ), None
-    res = sequential_canary(obs, p, alpha, tolerance)
+    res = sequential_canary(obs, p, alpha, tolerance, centred=centred)
     return (
         CheckResult(
             name="canary_sequential_no_harm",

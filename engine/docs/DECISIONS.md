@@ -82,3 +82,27 @@ the caps, MDR (2.5% of cap) and sd (5% of cap) are assumptions a policy owner ha
 not agreed; and the demo held-out replay takes about 15 s instead of 4 s. The
 demo uses `"evalue"`. Make it the default once a design partner agrees caps and
 materiality thresholds and held-out sets are sized by the plan.
+
+**D-016 Variance-reduced e-value gate is opt-in (`stats = "evalue_vr"`); not the
+default, and `"evalue"` stays as it is.** What it adds (docs/math/07): a stratified
+betting e-process over the tested case types at 0.8 of the false-block budget (e-BH
+keeps 0.2 and still names types), a plan at that level, and a canary whose
+inverse-propensity terms are centred on a predictable cost prediction. The
+false-block guarantee is unchanged (alpha). Evidence, all synthetic: worst null
+rate 0.026 at alpha 0.05 under optional stopping (Monte Carlo, docs/math/07); power
+on a rare-type regression 0.17 -> 0.40 and 0.57 -> 0.74; the centred canary detects
+an effect of 20 on costs near 600 (cap 1000, synthetic) 0.93 of the time against 0.03 for the plain one, with no
+false rollbacks. On E1's regressions (experiment E3, pre-registered) it did **not**
+detect R5 on benchmark v1 (e-value 14.9, needs 25; FAIL on H1), held every control,
+and raised R5's resampled detection from 0 to 0.32. Why not the default yet: (1) E3
+failed its primary hypothesis; (2) post hoc, the bet cap matters as much as the
+stratification (cap 0.95 instead of 0.5: R5 resampled detection 0.86 with both, 0.53
+with the wide cap alone), so the next step is a pre-registered experiment with
+`max_bet = 0.95` as the primary before choosing a default; (3) the promote rule of
+`evaluate_pairs` certifies only the pooled mean, so `VRGateConfig.certify_types`
+(per-type non-inferiority certificates, an intersection-union test with no split of
+alpha) should be required for rare, expensive types once a policy owner names them;
+(4) caps, tolerances and the 0.8 share are still assumptions nobody has agreed.
+Control variates for promotion (`ControlVariateEProcess`, `PostStratifiedEProcess`)
+are library only: they need a covariate mean known from design or a long pre-period,
+and with the mean learned from the same stream they lose power (docs/math/07, 7.4).
