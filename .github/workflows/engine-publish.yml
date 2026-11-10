@@ -1,0 +1,160 @@
+# Release: on a version tag, build and test, publish to PyPI with trusted publishing
+# (OIDC; no API token is stored anywhere), then attach the wheel and sdist to a
+# GitHub release whose notes come from scripts/changelog.py.
+#
+# One-time setup, by the owner:
+#   1. On PyPI, add a trusted publisher for project `scruple-engine`: this repository,
+#      workflow `engine-publish.yml`, environment `pypi`.
+#   2. In the repository settings, create the `pypi` environment (add required
+#      reviewers there to make every upload wait for a human).
+#   3. Choose a licence and delete LICENSE-PENDING.md; the guard job refuses to
+#      publish while that file exists.
+# Then: bump `project.version` in engine/pyproject.toml, commit, `git tag engine-vX.Y.Z`,
+# push the tag. (Monorepo copy of engine/deploy/github-workflows/publish.yml; the engine
+# lives in engine/, so every job runs there and artifact paths carry the prefix.)
+name: engine-publish
+on:
+  push:
+    tags: ["engine-v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: engine
+
+env:
+  UV_PYTHON: "3.12"
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Licence chosen
+        run: |
+          if [ -f LICENSE-PENDING.md ]; then
+            echo "::error::no licence chosen yet (LICENSE-PENDING.md exists); refusing to publish"
+            exit 1
+          fi
+      - name: Tag matches the package version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          if [ "$TAG" != "engine-v$version" ]; then
+            echo "::error::tag $TAG does not match pyproject version $version"
+            exit 1
+          fi
+
+  test:
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: engine/uv.lock
+      - run: uv sync --locked
+      - run: uv run ruff check --output-format=github .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest -n auto -m "not slow and not postgres"
+      - name: Wheel installs into a fresh venv and its CLI runs
+        run: uv run pytest -m slow tests/test_packaging_wheel.py
+
+  sdk:
+    needs: guard
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engine/sdk/typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: engine/sdk/typescript/package-lock.json
+      - run: npm ci
+      - run: npm run check-generated
+      - run: npm test
+
+  build:
+    needs: [test, sdk]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history and tags, for the release notes
+      - uses: astral-sh/setup-uv@v6
+      - run: uv build
+      - run: uvx twine check --strict dist/*
+      - name: Release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: python3 scripts/changelog.py --notes "$TAG" > release-notes.md
+      - run: cd dist && sha256sum -- * | tee SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: engine/dist/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: engine/release-notes.md
+
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    environment:
+      name: pypi
+      url: https://pypi.org/project/scruple-engine/
+    permissions:
+      id-token: write # trusted publishing: PyPI exchanges this OIDC token, no secret
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - run: rm -f dist/SHA256SUMS
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: pypi
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-notes
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --title "$TAG" --notes-file release-notes.md --verify-tag
+          fi
