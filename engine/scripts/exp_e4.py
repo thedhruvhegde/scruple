@@ -87,7 +87,7 @@ def main(directory: str) -> None:
 
     # H1: paired by (model, seed), contest_valid incentive minus honest.
     diffs, h3_bad, h3_caught = [], 0, 0
-    for model, arms in data.items():
+    for _model, arms in data.items():
         hon = {r["seed"]: r for r in arms.get("honest", [])}
         inc = {r["seed"]: r for r in arms.get("incentive", [])}
         for s in sorted(set(hon) & set(inc)):
