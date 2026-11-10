@@ -28,7 +28,13 @@ from typing import TYPE_CHECKING, Any
 
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
-from scruple.agents.store import KINDS, UnknownEpisodeError
+from scruple.agents.store import (
+    KINDS,
+    AnyEpisode,
+    UnknownEpisodeError,
+    new_episode,
+    replay_episode,
+)
 from scruple.clock import Clock, SystemClock
 from scruple.storage.base import DEFAULT_TENANT, DuplicateKeyError
 from scruple.storage.episodes import EpisodeRow, SQLEpisodes
@@ -36,14 +42,7 @@ from scruple.storage.episodes import EpisodeRow, SQLEpisodes
 if TYPE_CHECKING:
     from scruple.mcp.sim_server import EpisodeTable
 
-AnyEpisode = Episode | DisputeEpisode
 CACHE = 256
-
-
-def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
-    if kind == "dispute":
-        return DisputeEpisode(seed, case_type, nonce=nonce)
-    return Episode(seed, case_type, nonce=nonce)
 
 
 def episodes_repo(storage: object) -> SQLEpisodes:
@@ -89,7 +88,7 @@ class DbEpisodeStore:
                 with self._repo.transaction():
                     nonce = self._repo.count_starts(self.tenant_id, kind, seed, case_type)
                     while True:
-                        ep = _new(kind, seed, case_type, nonce)
+                        ep = new_episode(kind, seed, case_type, nonce)
                         if self._repo.get_episode(self.tenant_id, ep.episode_id) is None:
                             break
                         nonce += 1
@@ -123,12 +122,7 @@ class DbEpisodeStore:
             (c["tool"], json.loads(c["args_json"]))
             for c in self._repo.calls(self.tenant_id, episode_id)
         ]
-        ep: AnyEpisode
-        if r.kind == "dispute":
-            ep = DisputeEpisode.replay(r.seed, r.case_type, calls, nonce=r.nonce)
-        else:
-            ep = Episode.replay(r.seed, r.case_type, calls, nonce=r.nonce)
-        return ep, len(calls)
+        return replay_episode(r.kind, r.seed, r.case_type, calls, r.nonce), len(calls)
 
     def _current(self, episode_id: str) -> tuple[AnyEpisode, int]:
         """The live episode, replayed only if other processes added calls."""

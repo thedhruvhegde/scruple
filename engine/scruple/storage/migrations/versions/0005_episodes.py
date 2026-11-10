@@ -20,7 +20,7 @@ UPGRADE = """
 CREATE TABLE IF NOT EXISTS episodes (
     tenant_id TEXT NOT NULL DEFAULT 'default',
     episode_id TEXT NOT NULL,
-    kind TEXT NOT NULL CHECK (kind IN ('simple', 'dispute')),
+    kind TEXT NOT NULL CHECK (kind IN ('simple', 'dispute', 'scenario', 'ach', 'recon')),
     seed BIGINT NOT NULL,
     case_type TEXT,
     nonce INTEGER NOT NULL,

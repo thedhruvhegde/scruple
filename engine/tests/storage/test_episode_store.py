@@ -158,3 +158,31 @@ def test_a_failed_append_does_not_leave_the_cache_ahead() -> None:
     storage.episodes.append_call = real  # type: ignore[method-assign]
     assert s.log(ep.episode_id) == []
     s.call(ep.episode_id, "represent", {"evidence_ids": ["ev-01"]})  # not "already taken"
+
+
+@pytest.mark.parametrize(
+    ("kind", "case_type"),
+    [
+        ("simple", None),
+        ("dispute", None),
+        ("ach", None),
+        ("recon", None),
+        ("scenario", "real-cc-15328101-gas-charged-twice"),
+    ],
+)
+def test_every_episode_kind_round_trips_like_the_file_store(
+    store: RawStorage, tmp_path: Path, kind: str, case_type: str | None
+) -> None:
+    """Every kind the file store knows (`KINDS`) is stored and replayed the same way."""
+    db = DbEpisodeStore.on(store, clock=SteppingClock())
+    files = EpisodeStore(tmp_path / "eps")
+    a, b = db.start(3, case_type, kind), files.start(3, case_type, kind)
+    assert type(a) is type(b) and a.episode_id == b.episode_id
+    for target, eid in ((db, a.episode_id), (files, b.episode_id)):
+        with contextlib.suppress(EpisodeError):
+            target.call(eid, "no_such_tool", {})  # refused, and logged as a tool error
+    assert db.log(a.episode_id) == files.log(b.episode_id)
+    again = DbEpisodeStore.on(store).load(a.episode_id)  # a fresh process replays it
+    assert type(again) is type(b)
+    loaded = files.load(b.episode_id)
+    assert (again.closed, again.score) == (loaded.closed, loaded.score)

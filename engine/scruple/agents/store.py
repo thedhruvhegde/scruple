@@ -1,13 +1,9 @@
 """A local file store so an episode can span several processes (the CLI).
 
-Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, or
-`scenario` for a real-life scenario whose case type is the scenario id),
-seed, case type (the case family for `dispute`), nonce and call log. An
-Each episode is one JSON file holding its kind (`simple`, the default, `dispute` or
-`ach`), seed, case type (the case family for `dispute`), nonce and call log. An
-Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, `ach`
-or `recon`), seed, case type (the case family for `dispute`), nonce and call log. An
-episode is rebuilt by replaying the log, which is exact because episodes are
+Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, `ach`,
+`recon`, or `scenario` for a real-life scenario whose case type is the scenario id),
+seed, case type (the case family for `dispute`), nonce and call log. An episode is
+rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
 assumed (a terminal session); concurrent writers to the same episode are not locked.
 """
@@ -45,7 +41,7 @@ WORKFLOW_KINDS: dict[str, type[AchEpisode] | type[ReconEpisode]] = {
 }
 
 
-def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
+def new_episode(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
     if kind in WORKFLOW_KINDS:
         return WORKFLOW_KINDS[kind](seed, case_type, nonce=nonce)
     if kind == "dispute":
@@ -55,6 +51,22 @@ def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
 
         return ScenarioEpisode(seed, case_type, nonce=nonce)
     return Episode(seed, case_type, nonce=nonce)
+
+
+def replay_episode(
+    kind: str, seed: int, case_type: str | None, calls: list[tuple[str, Any]], nonce: int
+) -> AnyEpisode:
+    """Rebuild an episode of any kind from its call log (exact: episodes are
+    deterministic). Shared by the file store and the database store."""
+    if kind in WORKFLOW_KINDS:
+        return WORKFLOW_KINDS[kind].replay(seed, case_type, calls, nonce=nonce)
+    if kind == "dispute":
+        return DisputeEpisode.replay(seed, case_type, calls, nonce=nonce)
+    if kind == "scenario":
+        from scruple.realdata.situations import ScenarioEpisode
+
+        return ScenarioEpisode.replay(seed, case_type, calls, nonce=nonce)
+    return Episode.replay(seed, case_type, calls, nonce=nonce)
 
 
 class EpisodeStore:
@@ -84,10 +96,10 @@ class EpisodeStore:
         if kind not in KINDS:
             raise ValueError(f"unknown episode kind {kind!r}; choose from {', '.join(KINDS)}")
         nonce = len(list(self.root.glob("ep-*.json"))) if self.root.exists() else 0
-        ep = _new(kind, seed, case_type, nonce)
+        ep = new_episode(kind, seed, case_type, nonce)
         while self._path(ep.episode_id).exists():  # pragma: no cover - only on races
             nonce += 1
-            ep = _new(kind, seed, case_type, nonce)
+            ep = new_episode(kind, seed, case_type, nonce)
         record: dict[str, Any] = {"seed": seed, "case_type": case_type, "nonce": nonce, "calls": []}
         if kind != "simple":
             record["kind"] = kind
@@ -97,16 +109,7 @@ class EpisodeStore:
     def load(self, episode_id: str) -> AnyEpisode:
         r = self._read(episode_id)
         calls = [(c["tool"], c["args"]) for c in r["calls"]]
-        if r.get("kind") in WORKFLOW_KINDS:
-            cls = WORKFLOW_KINDS[r["kind"]]
-            return cls.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
-        if r.get("kind", "simple") == "dispute":
-            return DisputeEpisode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
-        if r.get("kind") == "scenario":
-            from scruple.realdata.situations import ScenarioEpisode
-
-            return ScenarioEpisode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
-        return Episode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
+        return replay_episode(r.get("kind", "simple"), r["seed"], r["case_type"], calls, r["nonce"])
 
     def call(self, episode_id: str, tool: str, args: Any) -> dict[str, Any]:
         """Run one tool and persist it. Refused calls are persisted too (they count
@@ -126,4 +129,13 @@ class EpisodeStore:
         return calls
 
 
-__all__ = ["KINDS", "EpisodeError", "EpisodeStore", "UnknownEpisodeError", "default_store"]
+__all__ = [
+    "KINDS",
+    "AnyEpisode",
+    "EpisodeError",
+    "EpisodeStore",
+    "UnknownEpisodeError",
+    "default_store",
+    "new_episode",
+    "replay_episode",
+]
