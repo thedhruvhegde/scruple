@@ -7,6 +7,10 @@ hand: rerun the script. Keys: `[+]` added, `[!]` fixed, `[~]` changed, `[#]` doc
 
 ### Added
 
+- add typescript sdk with generated types and mcp example (1ef5d77)
+- add typed python client with paging and retries (72733fe)
+- add tag release workflow with pypi trusted publishing (d2516cc)
+- single-source version and generate changelog from keyed commits (66db57a)
 - package as scruple-engine with extras, py.typed and wheel test (a108520)
 - add e4 scoring exactly as pre-registered (804e914)
 - add tests killing surviving verifier mutants (3d70fca)
