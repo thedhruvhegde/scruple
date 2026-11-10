@@ -39,6 +39,7 @@ from scruple.storage import SQLiteStorage
 from tests.ci_support import PROV
 
 SECRETS_ENV = "SCRUPLE_STRIPE_WEBHOOK_SECRETS"
+ADYEN_ENV = "SCRUPLE_ADYEN_HMAC_KEYS"
 
 
 def _app() -> Any:
@@ -49,15 +50,17 @@ def _app() -> Any:
     )
     gate.bootstrap_baseline()
     gate.propose(GOOD_RULE_ID, GOOD_RULE, "ops-team", PROV)
-    old = os.environ.get(SECRETS_ENV)
-    os.environ[SECRETS_ENV] = "whsec_fuzzing-secret-0123456789"  # read once, at creation
+    fuzz_env = {SECRETS_ENV: "whsec_fuzzing-secret-0123456789", ADYEN_ENV: "00" * 32}
+    old = {k: os.environ.get(k) for k in fuzz_env}
+    os.environ.update(fuzz_env)  # read once, at creation
     try:
         return create_app(gate)
     finally:
-        if old is None:
-            del os.environ[SECRETS_ENV]
-        else:
-            os.environ[SECRETS_ENV] = old
+        for k, v in old.items():
+            if v is None:
+                del os.environ[k]
+            else:
+                os.environ[k] = v
 
 
 APP = _app()
@@ -68,6 +71,7 @@ APP = _app()
 IMPORTED = "/shadow/rules/{rule_id}/versions/{version}/imported"
 CROSS_FIELD_OR_RAW = {
     "/ingest/stripe/webhook",
+    "/ingest/adyen/webhook",
     "/rules",
     f"{IMPORTED}/decisions",
     f"{IMPORTED}/outcomes",

@@ -17,6 +17,15 @@ DELETE. A case imported again with different content (a later export where the
 dispute has since been won) is stored as a new version; readers take the latest
 version. An identical re-import is a no-op. Deleting pilot data means deleting the
 file (DATA_CHECKLIST.md "Deletion at the end").
+
+Webhooks (`write_webhook`). Each accepted Stripe or Adyen delivery is one ingest run,
+recorded in `webhook_events` under its event id, so a redelivery (the provider's own
+retries, or a replay after a restart) is recognised and stored nothing. Providers do
+not promise delivery order (Stripe's webhook documentation says events may arrive out
+of order), so every case an event carries is kept in `webhook_case_events` with the
+event's own timestamp, and becomes the case's current version only if no webhook event
+already applied to that case is newer. A late, older event is kept (`applied = 0`)
+but never overwrites a newer state. Equal timestamps: the later arrival wins.
 """
 
 from __future__ import annotations
@@ -24,15 +33,17 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import threading
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.ingest.errors import IngestError
-from scruple.ingest.models import ExternalCase, LedgerMovement
+from scruple.ingest.models import ExternalCase, IngestBatch, LedgerMovement
 from scruple.security.crypto import is_envelope
 from scruple.security.pan import DIGIT_RUN, FORMAT_CHARS, CardToken, looks_like_pan
 
@@ -73,8 +84,38 @@ CREATE TABLE IF NOT EXISTS row_errors (
     message TEXT NOT NULL,
     PRIMARY KEY (run_id, seq)
 );
+CREATE TABLE IF NOT EXISTS webhook_events (
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    source TEXT NOT NULL,
+    event_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    event_at TEXT NOT NULL,
+    received_seq INTEGER NOT NULL,
+    run_id INTEGER REFERENCES ingest_runs(run_id),
+    payload_sha256 TEXT NOT NULL,
+    PRIMARY KEY (tenant_id, source, event_id)
+);
+CREATE TABLE IF NOT EXISTS webhook_case_events (
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    case_id TEXT NOT NULL,
+    source TEXT NOT NULL,
+    event_id TEXT NOT NULL,
+    event_at TEXT NOT NULL,
+    applied INTEGER NOT NULL,
+    body_json TEXT NOT NULL,
+    PRIMARY KEY (tenant_id, case_id, source, event_id)
+);
 """
-_TABLES = ("store_meta", "ingest_runs", "cases", "movements", "row_errors")
+_TABLES = (
+    "store_meta",
+    "ingest_runs",
+    "cases",
+    "movements",
+    "row_errors",
+    "webhook_events",
+    "webhook_case_events",
+)
+DEFAULT_TENANT = "default"
 _TRIGGERS = "\n".join(
     f"""
 CREATE TRIGGER IF NOT EXISTS {t}_no_update BEFORE UPDATE ON {t}
@@ -151,15 +192,34 @@ class RunCounts(BaseModel):
     movements_unchanged: int = 0
 
 
+class WebhookWrite(BaseModel):
+    """What storing one webhook event did."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    duplicate: bool  # this event id was stored before: nothing was written
+    run_id: int | None
+    applied: int  # cases that became (or confirmed) the current version
+    stale: int  # cases kept but not applied: a newer event was already applied
+    counts: RunCounts = RunCounts()
+
+
+def _utc(at: datetime) -> str:
+    """Event time as text that orders lexicographically (UTC, microseconds)."""
+    return at.astimezone(UTC).isoformat(timespec="microseconds")
+
+
 class CaseStore:
-    """Open (and create if needed) a case store file."""
+    """Open (and create if needed) a case store file. Safe to share across threads
+    (the API's request handlers): every transaction holds one lock."""
 
     def __init__(self, path: str | Path, *, create: bool = True) -> None:
         loc = str(path)
         if loc != ":memory:" and not create and not Path(loc).is_file():
             raise StoreError(f"no case store at {loc}")
         self.path = loc
-        self._db = sqlite3.connect(loc, isolation_level=None)
+        self._db = sqlite3.connect(loc, isolation_level=None, check_same_thread=False)
+        self._lock = threading.RLock()
         self._db.row_factory = sqlite3.Row
         self._db.execute("PRAGMA foreign_keys = ON")
         try:
@@ -190,13 +250,14 @@ class CaseStore:
 
     @contextmanager
     def _tx(self) -> Iterator[None]:
-        self._db.execute("BEGIN IMMEDIATE")
-        try:
-            yield
-        except BaseException:
-            self._db.execute("ROLLBACK")
-            raise
-        self._db.execute("COMMIT")
+        with self._lock:
+            self._db.execute("BEGIN IMMEDIATE")
+            try:
+                yield
+            except BaseException:
+                self._db.execute("ROLLBACK")
+                raise
+            self._db.execute("COMMIT")
 
     # --- writes ------------------------------------------------------------------
 
@@ -216,74 +277,187 @@ class CaseStore:
 
         A store holds either synthetic or real data, never both: the first run sets
         which, and a run of the other kind is refused."""
-        for sc in cases:
-            assert_no_raw_pan(sc)
-        for m in movements:
-            if find_pans(m.model_dump_json()):
-                raise RawPanRefusedError(f"movement {m.external_id[:64]!r} contains a card number")
-        counts = {k: 0 for k in RunCounts.model_fields}
+        _check_pans(cases, movements)
         with self._tx():
-            kind = "synthetic" if synthetic else "real"
-            have = self.kind()
-            if have is None:
-                self._db.execute("INSERT INTO store_meta(key, value) VALUES ('data', ?)", (kind,))
-            elif have != kind:
-                raise StoreError(f"this store holds {have} data; refusing to add {kind} data to it")
-            row = self._db.execute("SELECT COALESCE(MAX(run_id), 0) + 1 FROM ingest_runs")
-            run_id = int(row.fetchone()[0])
-            self._db.execute(
-                "INSERT INTO ingest_runs(run_id, source, input_sha256, label, report_json) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (run_id, source, input_sha256, label, "{}"),
+            return self._write_run(
+                source=source,
+                input_sha256=input_sha256,
+                label=label,
+                cases=cases,
+                movements=movements,
+                errors=errors,
+                report=report,
+                synthetic=synthetic,
             )
-            for sc in cases:
-                body = _encode(sc)
-                last = self._db.execute(
-                    "SELECT version, body_json FROM cases WHERE case_id = ? "
-                    "ORDER BY version DESC LIMIT 1",
-                    (sc.case.case_id,),
-                ).fetchone()
-                if last is not None and _same_case(last["body_json"], body):
-                    counts["cases_unchanged"] += 1
-                    continue
-                version = 1 if last is None else int(last["version"]) + 1
-                counts["cases_new" if last is None else "cases_updated"] += 1
-                self._db.execute(
-                    "INSERT INTO cases(case_id, version, run_id, source, row, body_json) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (sc.case.case_id, version, run_id, sc.case.source, sc.row, body),
-                )
-            for m in movements:
-                mid = f"{m.source}:{m.external_id}"
-                body = m.model_dump_json()
-                prev = self._db.execute(
-                    "SELECT body_json FROM movements WHERE movement_id = ?", (mid,)
-                ).fetchone()
-                if prev is not None:
-                    if prev["body_json"] != body:
-                        raise StoreError(f"movement {mid[:80]} is stored with different content")
-                    counts["movements_unchanged"] += 1
-                    continue
-                counts["movements_new"] += 1
-                self._db.execute(
-                    "INSERT INTO movements(movement_id, case_id, run_id, body_json) "
-                    "VALUES (?, ?, ?, ?)",
-                    (mid, f"{m.source}:{m.case_external_id}", run_id, body),
-                )
-            for seq, (r, col, msg) in enumerate(errors):
-                self._db.execute(
-                    "INSERT INTO row_errors(run_id, seq, row, col, message) VALUES (?, ?, ?, ?, ?)",
-                    (run_id, seq, r, col, msg),
-                )
-            # The run row is append-only, so the report is attached as its own meta row.
-            full = dict(report, run_id=run_id, **counts)
+
+    def _write_run(
+        self,
+        *,
+        source: str,
+        input_sha256: str,
+        label: str,
+        cases: Sequence[StoredCase],
+        movements: Sequence[LedgerMovement],
+        errors: Sequence[tuple[int, str | None, str]],
+        report: dict[str, Any],
+        synthetic: bool,
+    ) -> tuple[int, RunCounts]:
+        """`write_run` inside the caller's transaction (inputs already PAN-checked)."""
+        counts = {k: 0 for k in RunCounts.model_fields}
+        kind = "synthetic" if synthetic else "real"
+        have = self.kind()
+        if have is None:
+            self._db.execute("INSERT INTO store_meta(key, value) VALUES ('data', ?)", (kind,))
+        elif have != kind:
+            raise StoreError(f"this store holds {have} data; refusing to add {kind} data to it")
+        row = self._db.execute("SELECT COALESCE(MAX(run_id), 0) + 1 FROM ingest_runs")
+        run_id = int(row.fetchone()[0])
+        self._db.execute(
+            "INSERT INTO ingest_runs(run_id, source, input_sha256, label, report_json) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (run_id, source, input_sha256, label, "{}"),
+        )
+        for sc in cases:
+            body = _encode(sc)
+            last = self._db.execute(
+                "SELECT version, body_json FROM cases WHERE case_id = ? "
+                "ORDER BY version DESC LIMIT 1",
+                (sc.case.case_id,),
+            ).fetchone()
+            if last is not None and _same_case(last["body_json"], body):
+                counts["cases_unchanged"] += 1
+                continue
+            version = 1 if last is None else int(last["version"]) + 1
+            counts["cases_new" if last is None else "cases_updated"] += 1
             self._db.execute(
-                "INSERT INTO store_meta(key, value) VALUES (?, ?)",
-                (f"run:{run_id}:report", json.dumps(full, sort_keys=True)),
+                "INSERT INTO cases(case_id, version, run_id, source, row, body_json) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (sc.case.case_id, version, run_id, sc.case.source, sc.row, body),
             )
+        for m in movements:
+            mid = f"{m.source}:{m.external_id}"
+            body = m.model_dump_json()
+            prev = self._db.execute(
+                "SELECT body_json FROM movements WHERE movement_id = ?", (mid,)
+            ).fetchone()
+            if prev is not None:
+                if prev["body_json"] != body:
+                    raise StoreError(f"movement {mid[:80]} is stored with different content")
+                counts["movements_unchanged"] += 1
+                continue
+            counts["movements_new"] += 1
+            self._db.execute(
+                "INSERT INTO movements(movement_id, case_id, run_id, body_json) "
+                "VALUES (?, ?, ?, ?)",
+                (mid, f"{m.source}:{m.case_external_id}", run_id, body),
+            )
+        for seq, (r, col, msg) in enumerate(errors):
+            self._db.execute(
+                "INSERT INTO row_errors(run_id, seq, row, col, message) VALUES (?, ?, ?, ?, ?)",
+                (run_id, seq, r, col, msg),
+            )
+        # The run row is append-only, so the report is attached as its own meta row.
+        full = dict(report, run_id=run_id, **counts)
+        self._db.execute(
+            "INSERT INTO store_meta(key, value) VALUES (?, ?)",
+            (f"run:{run_id}:report", json.dumps(full, sort_keys=True)),
+        )
         return run_id, RunCounts(**counts)
 
+    def write_webhook(
+        self,
+        *,
+        source: str,
+        event_id: str,
+        event_type: str,
+        event_at: datetime,
+        payload_sha256: str,
+        batch: IngestBatch,
+        tenant_id: str = DEFAULT_TENANT,
+        synthetic: bool = False,
+    ) -> WebhookWrite:
+        """Store one accepted webhook event. Idempotent by (tenant, source, event id);
+        safe against out-of-order delivery (see the module docstring)."""
+        if event_at.tzinfo is None:
+            raise StoreError("webhook event time needs a UTC offset")
+        cases = [StoredCase(case=c) for c in batch.cases]
+        _check_pans(cases, batch.movements)
+        at = _utc(event_at)
+        with self._tx():
+            seen = self._db.execute(
+                "SELECT 1 FROM webhook_events WHERE tenant_id=? AND source=? AND event_id=?",
+                (tenant_id, source, event_id),
+            ).fetchone()
+            if seen is not None:
+                return WebhookWrite(duplicate=True, run_id=None, applied=0, stale=0)
+            applied: list[StoredCase] = []
+            stale: list[StoredCase] = []
+            for sc in cases:
+                newest = self._db.execute(
+                    "SELECT MAX(event_at) FROM webhook_case_events "
+                    "WHERE tenant_id=? AND case_id=? AND applied=1",
+                    (tenant_id, sc.case.case_id),
+                ).fetchone()[0]
+                (applied if newest is None or at >= newest else stale).append(sc)
+            run_id, counts = self._write_run(
+                source=f"{source}-webhook",
+                input_sha256=payload_sha256,
+                label=f"{source} webhook {event_id[:80]}",
+                cases=applied,
+                movements=batch.movements,
+                errors=(),
+                report={
+                    "event_id": event_id,
+                    "event_type": event_type,
+                    "event_at": at,
+                    "stale_cases": len(stale),
+                },
+                synthetic=synthetic,
+            )
+            seq = self._db.execute(
+                "SELECT COALESCE(MAX(received_seq), 0) + 1 FROM webhook_events"
+            ).fetchone()[0]
+            self._db.execute(
+                "INSERT INTO webhook_events(tenant_id, source, event_id, event_type, event_at, "
+                "received_seq, run_id, payload_sha256) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (tenant_id, source, event_id, event_type, at, int(seq), run_id, payload_sha256),
+            )
+            for sc in cases:
+                self._db.execute(
+                    "INSERT INTO webhook_case_events(tenant_id, case_id, source, event_id, "
+                    "event_at, applied, body_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        tenant_id,
+                        sc.case.case_id,
+                        source,
+                        event_id,
+                        at,
+                        int(sc in applied),
+                        _encode(sc),
+                    ),
+                )
+        return WebhookWrite(
+            duplicate=False, run_id=run_id, applied=len(applied), stale=len(stale), counts=counts
+        )
+
     # --- reads -------------------------------------------------------------------
+
+    def webhook_events(self) -> list[dict[str, Any]]:
+        """Every stored webhook event (ids, times, hashes; no case content), in arrival
+        order."""
+        rows = self._db.execute(
+            "SELECT tenant_id, source, event_id, event_type, event_at, received_seq, run_id, "
+            "payload_sha256 FROM webhook_events ORDER BY received_seq"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def webhook_case_events(self) -> list[dict[str, Any]]:
+        """Every case an event carried, whether it was applied, in event time order."""
+        rows = self._db.execute(
+            "SELECT tenant_id, case_id, source, event_id, event_at, applied "
+            "FROM webhook_case_events ORDER BY case_id, event_at, event_id"
+        ).fetchall()
+        return [dict(r, applied=bool(r["applied"])) for r in rows]
 
     def kind(self) -> str | None:
         """ "synthetic" or "real" once a run is stored, else None."""
@@ -334,6 +508,14 @@ class CaseStore:
                         yield v
 
 
+def _check_pans(cases: Sequence[StoredCase], movements: Sequence[LedgerMovement]) -> None:
+    for sc in cases:
+        assert_no_raw_pan(sc)
+    for m in movements:
+        if find_pans(m.model_dump_json()):
+            raise RawPanRefusedError(f"movement {m.external_id[:64]!r} contains a card number")
+
+
 def _same_case(stored: str, new: str) -> bool:
     """Same content, ignoring the input row number and the envelopes' random nonces."""
     a, b = json.loads(stored), json.loads(new)
@@ -349,6 +531,7 @@ __all__ = [
     "RunCounts",
     "StoreError",
     "StoredCase",
+    "WebhookWrite",
     "assert_no_raw_pan",
     "encryption_context",
     "find_pans",
