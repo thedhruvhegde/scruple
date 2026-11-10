@@ -1,4 +1,4 @@
-"""Pilot sizing before and after variance reduction (docs/math/07, section 7.6).
+"""Pilot sizing before and after variance reduction (docs/math/09, section 9.6).
 
 The same question as scripts/pilot_plan.py (H5 in docs/pilot/SUCCESS_CRITERIA.md: an
 improvement of at least the MDI in every reason code, family-wise alpha), planned
@@ -11,7 +11,7 @@ three ways:
   (``ratio`` = variance with common draws over variance with independent draws; E3
   measured 0.0049 on synthetic episodes for R5, an input here, not a fact about a
   partner);
-- paired plus control variates with a known covariate mean (Proposition 7.3): residual
+- paired plus control variates with a known covariate mean (Proposition 9.3): residual
   sd ``sd sqrt(1 - R^2)`` and the cap widened to ``cap (1 + 2 theta_max)`` for the
   larger bet range. ``R^2`` is an ASSUMPTION the partner's history would have to
   support, fixed before any shadow outcome.

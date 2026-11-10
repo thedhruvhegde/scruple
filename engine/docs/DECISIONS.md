@@ -106,12 +106,12 @@ whether `balanced` should be the default once the agent can see a validity signa
 (for example, a cardholder statement the issuer has verified).
 
 **D-016 Variance-reduced e-value gate is opt-in (`stats = "evalue_vr"`); not the
-default, and `"evalue"` stays as it is.** What it adds (docs/math/07): a stratified
+default, and `"evalue"` stays as it is.** What it adds (docs/math/09): a stratified
 betting e-process over the tested case types at 0.8 of the false-block budget (e-BH
 keeps 0.2 and still names types), a plan at that level, and a canary whose
 inverse-propensity terms are centred on a predictable cost prediction. The
 false-block guarantee is unchanged (alpha). Evidence, all synthetic: worst null
-rate 0.026 at alpha 0.05 under optional stopping (Monte Carlo, docs/math/07); power
+rate 0.026 at alpha 0.05 under optional stopping (Monte Carlo, docs/math/09); power
 on a rare-type regression 0.17 -> 0.40 and 0.57 -> 0.74; the centred canary detects
 an effect of 20 on costs near 600 (cap 1000, synthetic) 0.93 of the time against 0.03 for the plain one, with no
 false rollbacks. On E1's regressions (experiment E3, pre-registered) it did **not**
@@ -127,4 +127,4 @@ alpha) should be required for rare, expensive types once a policy owner names th
 (4) caps, tolerances and the 0.8 share are still assumptions nobody has agreed.
 Control variates for promotion (`ControlVariateEProcess`, `PostStratifiedEProcess`)
 are library only: they need a covariate mean known from design or a long pre-period,
-and with the mean learned from the same stream they lose power (docs/math/07, 7.4).
+and with the mean learned from the same stream they lose power (docs/math/09, 9.4).

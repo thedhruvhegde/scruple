@@ -10,7 +10,7 @@ Public API:
 * hacking: ``AuditModel``, ``Incentive``, ``gap_tail_bound``, ``expected_gap_bound``,
   ``minimal_audit_rate``, ``best_response``
 * gate adapter: ``LossPair``, ``StatsGateConfig``, ``StatsVerdict``, ``evaluate_pairs``
-* variance reduction (docs/math/07): ``StratifiedBettingEProcess``,
+* variance reduction (docs/math/09): ``StratifiedBettingEProcess``,
   ``ControlVariateEProcess``, ``PostStratifiedEProcess``, ``crn_report``,
   ``stratified_cases_needed``, ``cv_cases_needed``, ``VRGateConfig``, ``evaluate_pairs_vr``
 """

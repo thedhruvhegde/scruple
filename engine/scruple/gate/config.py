@@ -49,7 +49,7 @@ class GateConfig(BaseModel):
     # e-processes (scruple.stats) with per-case-type e-BH, sample-size planning and a
     # sequential canary. See docs/DESIGN.md "Statistics" and docs/DECISIONS.md.
     # "evalue_vr": "evalue" plus variance reduction (scruple.stats.variance,
-    # docs/math/07): a stratified betting e-process over the tested case types at
+    # docs/math/09): a stratified betting e-process over the tested case types at
     # `evalue_vr_stratified_share` of the false-block budget (e-BH gets the rest), a
     # plan at that level, and a canary whose inverse-propensity terms are centred on a
     # predictable cost prediction. Same false-block guarantee (alpha); more power.

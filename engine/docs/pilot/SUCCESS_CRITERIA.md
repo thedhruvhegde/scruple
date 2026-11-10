@@ -173,7 +173,7 @@ pilot:
 
 ## Sample size with variance reduction (appended; synthetic evidence, illustrative inputs)
 
-docs/math/07 adds variance reduction to the statistics. What it changes for H5,
+docs/math/09 adds variance reduction to the statistics. What it changes for H5,
 with the same illustrative inputs as the worked example above (not a partner's).
 Pasted from real runs of `scripts/exp_e3_pilot.py` (same planner, Bernstein,
 optimised alpha):
@@ -222,7 +222,7 @@ Reading:
   honest choice for these inputs. `R^2` and the covariate mean must come from
   history before the shadow window and be written into an amendment; they are
   ASSUMPTIONS here.
-- Stratified betting (the other tool in docs/math/07) does not shorten H5: H5 asks
+- Stratified betting (the other tool in docs/math/09) does not shorten H5: H5 asks
   for an improvement in *every* reason code, which needs one certificate per code. It
   shortens the opposite question ("did any reason code get worse?"), used for
   blocking.

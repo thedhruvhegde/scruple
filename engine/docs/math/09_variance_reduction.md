@@ -1,4 +1,4 @@
-# 7. variance reduction that keeps anytime validity
+# 9. variance reduction that keeps anytime validity
 
 Labels, per result: **standard** (common random numbers, control variates with a known
 mean, augmented inverse-propensity terms), **adaptation** (stratified betting on one
@@ -27,8 +27,8 @@ difficulty tier, network), revealed before `X_i`. The baseline's own loss `B_i` 
 
 | decision | null | what reduces variance validly | where |
 |---|---|---|---|
-| block (a regression exists) | conditional: `E[X_i | F_{i-1}, Z_i] <= m(Z_i)` for every case ("no subgroup regressed") | bets that depend on `Z_i` (stratified betting, 7.1) | `StratifiedBettingEProcess` |
-| promote (certificate) | marginal: `E[X_i | F_{i-1}] >= m` | control variates with a known (or bounded) covariate mean (7.3, 7.4) | `ControlVariateEProcess`, `PostStratifiedEProcess` |
+| block (a regression exists) | conditional: `E[X_i | F_{i-1}, Z_i] <= m(Z_i)` for every case ("no subgroup regressed") | bets that depend on `Z_i` (stratified betting, 9.1) | `StratifiedBettingEProcess` |
+| promote (certificate) | marginal: `E[X_i | F_{i-1}] >= m` | control variates with a known (or bounded) covariate mean (9.3, 9.4) | `ControlVariateEProcess`, `PostStratifiedEProcess` |
 
 A bet that depends on `Z_i` is predictable, but under the *marginal* null it is not
 valid: `E[lambda(Z) (X - m)]` can be positive when `E[X] <= m` (bet big where `X` is
@@ -38,7 +38,7 @@ of case" is a reason to block even if it is better on average. For promotion it 
 the wrong one (rejecting "every type is worse" only shows one type is better), so the
 certificate keeps the marginal null and needs a covariate whose mean is known.
 
-## 7.0 Common random numbers (standard, measured)
+## 9.0 Common random numbers (standard, measured)
 
 The paired design already is the strongest control variate: the baseline loss `B_i` on
 the same case is a covariate with coefficient 1 whose "mean" is matched exactly,
@@ -60,14 +60,14 @@ independent samples), the correlation, and the share of exactly-zero differences
 E3 also replays the baseline with independent issuer draws to separate "same case"
 from "same draws".
 
-## 7.1 and 7.2 Stratified betting on one wealth process (adaptation)
+## 9.1 and 9.2 Stratified betting on one wealth process (adaptation)
 
 Types `k_i` (any pre-treatment covariate with finitely many values), null means `m_k`,
 and per-type predictable bets `lambda_{k,i}` in `[0, b/(1 + s m_k)]`, `b < 1`. Let
 
     K_t = prod_{i<=t} (1 + lambda_{k_i, i} s (X_i - m_{k_i})).
 
-**Proposition 7.1.** Under `H0^cap: E[X_i | F_{i-1}, k_i] <= m_{k_i}` for every `i` (for
+**Proposition 9.1.** Under `H0^cap: E[X_i | F_{i-1}, k_i] <= m_{k_i}` for every `i` (for
 `s = +1`), `K` is a non-negative supermartingale with respect to the filtration that
 reveals `k_i` before `X_i`. So `P(sup_t K_t >= 1/alpha) <= alpha` and `K_tau` is an
 e-value at every stopping time.
@@ -89,7 +89,7 @@ thinly over every type, which the pooled member of the base family covers. The
 default (1 standard error) and the share `w = 0.8` below were fixed from synthetic
 Monte Carlo before experiment E3 ran. `contributions` splits `log K_t` by type.
 
-**Proposition 7.2 (why it is more powerful).** (a) With constant bets, the best growth
+**Proposition 9.2 (why it is more powerful).** (a) With constant bets, the best growth
 rate of the stratified process, `sup_{lambda_1..lambda_K} sum_k pi_k E_k log(1 + lambda_k Y)`,
 is at least the pooled one, `sup_lambda E log(1 + lambda Y)` (take all `lambda_k`
 equal). (b) To second order (01, Lemma 3.1 of 03) the two are
@@ -126,7 +126,7 @@ intersection hypotheses in stratified election audits (Spertus and Stark 2022,
 "Sweeter than SUITE", arXiv 2207.03379); there the strata are sampled separately,
 here they arrive interleaved on one stream. A literature check is required.
 
-## 7.3 Control variates with a predictable coefficient (standard idea, adaptation)
+## 9.3 Control variates with a predictable coefficient (standard idea, adaptation)
 
 Covariates `Z_i in [-1, 1]^p` with a **known** conditional mean `nu = E[Z_i | F_{i-1}]`
 (i.i.d. cases from a population whose covariate mean is known: stratum shares fixed by
@@ -136,7 +136,7 @@ least squares of `X` on `Z` from cases `1..i-1`), scaled so `||theta_i||_1 <= th
     R_i = X_i - theta_i . (Z_i - nu),   K_t = prod (1 + lambda_i s (R_i - m)),
     0 <= lambda_i <= b / (1 + s m + 2 theta_max).
 
-**Proposition 7.3.** Under the marginal null `E[X_i | F_{i-1}] <= m` (for `s = +1`), `K`
+**Proposition 9.3.** Under the marginal null `E[X_i | F_{i-1}] <= m` (for `s = +1`), `K`
 is a non-negative supermartingale. The bet sees a second moment of about
 `Var(X)(1 - rho^2)` instead of `Var(X)` for the oracle linear coefficient.
 
@@ -155,7 +155,7 @@ nonparametric for bounded data and for a paired design. **Post-stratification**
 (`PostStratifiedEProcess`) is the special case `Z = one-hot(type) - shares` with
 `theta_k` the running mean of type `k`: `R_i = X_i - theta_{k_i} + sum_j pi_j theta_j`.
 
-## 7.4 Estimated covariate mean: the drift penalty (candidate novel, minor)
+## 9.4 Estimated covariate mean: the drift penalty (candidate novel, minor)
 
 If `nu` is only known to lie within `r_j` of a centre `c_{i,j}` (an interval at level
 `a` from an independent pre-period, or a time-uniform interval from the stream itself,
@@ -163,7 +163,7 @@ If `nu` is only known to lie within `r_j` of a centre `c_{i,j}` (an interval at 
 
     Y_i = s (X_i - theta_i . (Z_i - c_i) - m) - sum_j |theta_{ij}| r_{ij}.
 
-**Proposition 7.4.** Let `A` be the event that `|nu_j - c_{i,j}| <= r_{i,j}` for all `i, j`,
+**Proposition 9.4.** Let `A` be the event that `|nu_j - c_{i,j}| <= r_{i,j}` for all `i, j`,
 with `P(A^c) <= a`. Then `P(sup_t K_t >= 1/alpha) <= alpha + a`.
 
 **Proof.** On `A_{i-1}` (the event up to case `i`), `E[Y_i | F_{i-1}] <= s(mu_i - m) + sum_j |theta_ij| |nu_j - c_ij| - sum_j |theta_ij| r_ij <= 0`.
@@ -182,7 +182,7 @@ boundary the penalty eats about a share `rho` of the drift while the variance fa
 A control variate helps only when its mean comes from elsewhere (a design, or a
 pre-period much longer than the test). This matches the Monte Carlo below.
 
-## 7.5 Centred inverse-propensity canary terms (standard, applied)
+## 9.5 Centred inverse-propensity canary terms (standard, applied)
 
 In the canary (06, `scruple/gate/sequential.py`) each matched case is treated with a
 known probability `p`. With a prediction `f_i in [0, c]` fixed before the assignment,
@@ -195,11 +195,11 @@ augmented inverse-propensity form (Robins, Rotnitzky and Zhao 1994) with a predi
 outcome model, as used for anytime-valid off-policy inference by Waudby-Smith, Wu,
 Ramdas, Karampatziakis and Mineiro (2022, arXiv 2210.10768). The assignment
 indicator is a control variate whose mean `p` is known exactly by design, which is the
-setting where 7.3 needs no extra assumption. `evalue_vr` uses `f_i` = the running mean
+setting where 9.3 needs no extra assumption. `evalue_vr` uses `f_i` = the running mean
 cost of earlier matched cases of the type (both arms). The second moment falls from
 `E[Y^2]` to `E[(Y - f)^2]`, a large gain when costs sit far from zero.
 
-## 7.6 Planning with the variance reduction (adaptation)
+## 9.6 Planning with the variance reduction (adaptation)
 
 - Stratified (block): a regression of `Delta_k` in type `k` alone is flagged with power
   `1 - beta` by the fixed-bet version that bets only on type `k` once `n_k` reaches
@@ -214,9 +214,9 @@ cost of earlier matched cases of the type (both arms). The second moment falls f
   outcomes; the plan uses the oracle coefficient, which the predictable estimate
   approaches.
 
-## 7.7 The cap tax survives variance reduction (candidate novel framing; standard pieces)
+## 9.7 The cap tax survives variance reduction (candidate novel framing; standard pieces)
 
-**Proposition 7.7.** Let case `i` have a declared cap `c_i`, and let the null be the
+**Proposition 9.7.** Let case `i` have a declared cap `c_i`, and let the null be the
 conditional one (every law on `[-c_i, c_i]` with conditional mean `<= 0`). For any
 alternative under which case `i` has conditional mean `mu_i`, every e-value `E` for that
 null satisfies
@@ -328,7 +328,7 @@ Reading:
   to 0.81 at an improvement of 0.03, by removing the between-type variance.
 - Control variates: with a known covariate mean power rises from 0.385 to 1.000 at
   correlation 0.95; with the centre learned from the same stream it falls to 0, as
-  the Section 7.4 heuristic says (the drift penalty dominates).
+  the Section 9.4 heuristic says (the drift penalty dominates).
 - Planning: the stratified plan needs 591 rare-type cases against 781 for e-Bonferroni
   over 7 processes. A control variate pays for its wider bet range
   (`theta_max = 1` triples the range): in this plan it does not beat the plain test
@@ -337,7 +337,7 @@ Reading:
   when the covariate is strong; plan with it only when `R^2` and a coefficient bound
   are known from history, and otherwise plan without it.
 
-### Canary: centred inverse-propensity terms (7.5)
+### Canary: centred inverse-propensity terms (9.5)
 
 `uv run python scripts/exp_e3_mc.py --canary`: one case type, cap 1000, costs
 600 +- 100 (USD minor, synthetic), canary share `p = 0.3`, 1,500 matched cases,

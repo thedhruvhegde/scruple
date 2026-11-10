@@ -150,7 +150,7 @@ def test_running_centre_control_variate_holds_alpha_plus_covariate_level() -> No
 
 
 def test_known_mean_cv_beats_plain_but_running_centre_does_not() -> None:
-    """Section 7.4 heuristic: learning the centre from the stream costs more than the
+    """Section 9.4 heuristic: learning the centre from the stream costs more than the
     variance reduction gains near the detection boundary (synthetic, seeded)."""
     rng = random.Random(19)
     reps, n, mu = 60, 2000, 0.02

@@ -71,7 +71,7 @@ def test_stratified_factor_is_a_supermartingale_step(
     data: list[tuple[str, float]], k: str, mean: float, spread: float
 ) -> None:
     """For any history, a two-point law with mean <= m in the next case's type gives an
-    expected factor of at most 1 (the step of Proposition 7.1)."""
+    expected factor of at most 1 (the step of Proposition 9.1)."""
     sp = StratifiedBettingEProcess("greater")
     for kk, x in data:
         sp.update(kk, x)
@@ -181,7 +181,7 @@ def test_known_mean_control_variate_step_has_mean_at_most_one(
     hist: list[tuple[float, float]], zs: list[float], ws: list[float], target: float
 ) -> None:
     """Exact expectation of the next factor under a joint law of (X, Z) with E[Z] = nu
-    and E[X] <= 0, X correlated with Z: at most 1 (Proposition 7.3)."""
+    and E[X] <= 0, X correlated with Z: at most 1 (Proposition 9.3)."""
     probs = [w / sum(ws[: len(zs)]) for w in ws[: len(zs)]]
     nu = math.fsum(p * z for p, z in zip(probs, zs, strict=True))
     xs = [target + 0.3 * (z - nu) for z in zs]  # in [-1, 0.6], mean = target

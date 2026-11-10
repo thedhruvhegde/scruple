@@ -1,4 +1,4 @@
-"""Seeded Monte Carlo for docs/math/07_variance_reduction.md (synthetic, deterministic).
+"""Seeded Monte Carlo for docs/math/09_variance_reduction.md (synthetic, deterministic).
 
     uv run python scripts/exp_e3_mc.py            # full tables (several minutes)
     uv run python scripts/exp_e3_mc.py --quick    # small version

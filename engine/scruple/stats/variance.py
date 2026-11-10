@@ -1,6 +1,6 @@
 """Variance reduction for paired loss differences that keeps anytime validity.
 
-Write-up with proofs: docs/math/07_variance_reduction.md. Everything below is about
+Write-up with proofs: docs/math/09_variance_reduction.md. Everything below is about
 ``X_i = (C_i - B_i) / c in [-1, 1]`` (candidate minus baseline loss over a declared cap,
 positive = worse), as in ``sequential.py``. Four tools:
 
@@ -27,7 +27,7 @@ positive = worse), as in ``sequential.py``. Four tools:
    so betting on ``R_i`` is an exact e-process. With ``nu`` only known to within a
    radius (from independent history) or learned from the stream itself, a drift
    penalty ``sum_j |theta_ij| r_ij`` keeps the test valid at level ``alpha`` plus the
-   covariate interval's level (Proposition 7.4). ``PostStratifiedEProcess`` is the
+   covariate interval's level (Proposition 9.4). ``PostStratifiedEProcess`` is the
    special case of stratum indicators with known shares.
 
 4. Planning, ``stratified_cases_needed`` and ``cv_cases_needed``: the Bernstein plan of
@@ -162,7 +162,7 @@ class StratifiedBettingEProcess:
     their null then cost almost nothing (a plug-in bet at the null loses about
     ``log(n_k) / 2`` over ``n_k`` cases, which adds up over many types), at the price of
     a later start on a type that regresses. The default 1.0 is fixed from synthetic
-    Monte Carlo before E3 (docs/math/07); 0 is plain per-type aGRAPA. Validity does
+    Monte Carlo before E3 (docs/math/09); 0 is plain per-type aGRAPA. Validity does
     not depend on it (the bet stays predictable).
     """
 
@@ -288,10 +288,10 @@ class ControlVariateEProcess:
     Centre ``c_i`` and validity:
 
     * ``centre="known"``: ``c_i = covariate_mean``. If ``covariate_radius`` is 0 this is
-      ``E[Z_i | F_{i-1}]`` exactly and the wealth is an e-process (Proposition 7.3).
+      ``E[Z_i | F_{i-1}]`` exactly and the wealth is an e-process (Proposition 9.3).
       A positive radius ``r_j`` (from an independent pre-period at level ``a``) adds
       the drift penalty ``sum_j |theta_j| r_j``; the test is then valid at
-      ``alpha + a`` (Proposition 7.4), and the wealth is an e-process only on the
+      ``alpha + a`` (Proposition 9.4), and the wealth is an e-process only on the
       event that the true mean is within the radius.
     * ``centre="running"``: ``c_i`` is the mean of ``Z_1..Z_{i-1}`` and the radius is
       the time-uniform ``mixture_radius`` at ``alpha_covariate / dim`` per coordinate.
@@ -445,7 +445,7 @@ class ControlVariateEProcess:
 
     def rejected(self, alpha: float) -> bool:
         """Wealth ever reached ``1/alpha``. Total level: ``alpha`` if ``exact``, else
-        ``alpha`` plus the covariate interval's level (Proposition 7.4)."""
+        ``alpha`` plus the covariate interval's level (Proposition 9.4)."""
         _check_alpha(alpha)
         return self.max_log_wealth >= math.log(1.0 / alpha) - 1e-12
 
@@ -554,7 +554,7 @@ def stratified_cases_needed(
     The stratified process rejects the intersection null at ``share_of_alpha * alpha``
     with no division by the number of types. The plan is the fixed-bet guarantee of
     docs/math/03 for the regressing type, with the other types' bets set to zero
-    (Proposition 7.6): the adaptive bets in the other types pay a lower-order cost
+    (Proposition 9.6): the adaptive bets in the other types pay a lower-order cost
     that the Monte Carlo in tests/test_stats_variance_mc.py measures.
     """
     if not 0.0 < share_of_alpha <= 1.0:
@@ -577,7 +577,7 @@ def cv_cases_needed(
     ASSUMPTION fixed before outcomes (estimated from history, never from the run).
     The residual sd is ``sd sqrt(1 - r2)`` (the oracle linear coefficient; the
     predictable estimate converges to it). The adjusted observation lies in
-    ``[-(1 + 2 theta_max), 1 + 2 theta_max]`` (Proposition 7.3), so the plan is the
+    ``[-(1 + 2 theta_max), 1 + 2 theta_max]`` (Proposition 9.3), so the plan is the
     docs/math/03 plan on the cap ``c (1 + 2 theta_max)`` with the gap, tolerance and
     residual sd unchanged in money.
     """

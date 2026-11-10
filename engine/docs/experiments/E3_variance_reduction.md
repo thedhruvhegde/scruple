@@ -13,7 +13,7 @@ are reused and not changed.
 ## Question and hypothesis
 
 E1's statistical gate held on R5 ("concede every dispute under $25") even on all
-10,000 cases. Does the variance-reduced gate (docs/math/07, `scruple.stats.evaluate_pairs_vr`)
+10,000 cases. Does the variance-reduced gate (docs/math/09, `scruple.stats.evaluate_pairs_vr`)
 detect it, while keeping the false-block rate on the controls at most 5%?
 
 A unit note before anything else. E1's results text calls R5 "$1.30 per case". The
@@ -55,7 +55,7 @@ Secondary (reported, no pass bar):
 - S1 the new test with case type = family x amount band (band edges $80 and $10,000
   of the dispute amount in minor units, the shadow gate's defaults), full benchmark;
 - S2 the new test against E1's gate for every regression, full and per fold;
-- S3 the cap-tax budget `B = sum_k n_k (mean_k)^+ / cap` per policy (Proposition 7.7)
+- S3 the cap-tax budget `B = sum_k n_k (mean_k)^+ / cap` per policy (Proposition 9.7)
   for family and family x band strata, computed from the realised data, next to the
   stratified e-value;
 - S4 common random numbers: for each policy, the variance of the paired difference
@@ -65,14 +65,14 @@ Secondary (reported, no pass bar):
 
 ## Prediction written down before the run (and why)
 
-Proposition 7.7 (docs/math/07) bounds what *any* valid test can do: with one cap `c`,
+Proposition 9.7 (docs/math/09) bounds what *any* valid test can do: with one cap `c`,
 the expected log e-value is at most `B = sum_i mu_i^+ / c`, and power 0.5 at level
 0.04 needs `B >= 0.94` (power 0.8 needs 2.08). From E1's published means
 (`uv run python scripts/exp_e3_variance.py plan`):
 
 ```
 E1 (published): n=10000, cap=20000 USD minor, gate alpha 0.05
-Proposition 7.7 budget B = n mu+ / cap (pooled, no improving subgroup):
+Proposition 9.7 budget B = n mu+ / cap (pooled, no improving subgroup):
   R1 late on 5% of processing errors           mean    11.3 minor/case -> B = 5.658
   R2 late on 2% of all cases                   mean    59.8 minor/case -> B = 29.920
   R3 wrong documents cited on visa 13.1        mean   187.7 minor/case -> B = 93.859
@@ -130,7 +130,7 @@ Disclosure: before this pre-registration, policies C1, R1, R3, R4, R5 and C3 wer
 played on 4,000 cases from a throwaway salt (not benchmark v1) to check the script
 and the size of R5's effect; that run informed the prediction above and changed
 nothing in the test. The defaults `w = 0.8` and `activation = 1` were chosen from the
-synthetic Monte Carlo in docs/math/07 (plain per-type bets lost to e-Bonferroni when
+synthetic Monte Carlo in docs/math/09 (plain per-type bets lost to e-Bonferroni when
 several types improved slightly).
 
 ## Correction (2026-11-10, added after the run, before the results)
@@ -256,6 +256,6 @@ Reading, honestly:
 - These are resamples of the benchmark's own paired costs, chosen after seeing the
   pre-registered result; they are evidence for a next pre-registered experiment
   (stratified test with a 0.95 bet cap as the primary), not a pass for E3.
-- Proposition 7.7 still holds: no valid pooled test can see R5 at this size (budget
+- Proposition 9.7 still holds: no valid pooled test can see R5 at this size (budget
   0.67); every detection above comes from a family where R5's cost is concentrated
   and not cancelled by families where it saves money.

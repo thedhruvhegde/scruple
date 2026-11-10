@@ -63,7 +63,7 @@ Assumptions (also in docs/DESIGN.md)
   known ``p``, the mean is still ``tau_i`` (the ``f_i`` terms cancel in expectation),
   ``|Y_i - f_i| <= c`` keeps the same scale ``M``, and the second moment falls from
   ``E[Y^2]`` to ``E[(Y - f)^2]`` (a control variate with an exactly known mean;
-  docs/math/07, Proposition 7.5). When it neither
+  docs/math/09, Proposition 9.5). When it neither
   rolls back nor certifies benefit, the canary passes on "no evidence of harm",
   which is the same standard as the bootstrap path, now with error control on the
   rollback side only.

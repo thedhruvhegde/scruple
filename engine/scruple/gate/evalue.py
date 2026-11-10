@@ -40,7 +40,7 @@ never passes silently. The sd assumption is checked after the run and reported.
 Reported for information: the adapter's pooled certificate and confidence
 sequence, and its time-uniform e-Bonferroni flags (scruple.stats.evaluate_pairs).
 
-Variance reduction (``GateConfig.stats = "evalue_vr"``, docs/math/07). A share ``w``
+Variance reduction (``GateConfig.stats = "evalue_vr"``, docs/math/09). A share ``w``
 of the false-block budget goes to one stratified betting e-process over the family
 (``scruple.stats.StratifiedBettingEProcess``: one wealth, one adaptive bet per case
 type, for the intersection null "no tested type regressed beyond its tolerance");
@@ -77,7 +77,7 @@ from scruple.verifiers.outcome import OutcomeScores
 from .config import GateConfig
 
 METHOD = "betting e-process per case type, e-BH (Wang and Ramdas 2022)"
-METHOD_VR = METHOD + ", plus a stratified betting e-process over the family (docs/math/07)"
+METHOD_VR = METHOD + ", plus a stratified betting e-process over the family (docs/math/09)"
 
 
 def _dollars(minor: int) -> str:

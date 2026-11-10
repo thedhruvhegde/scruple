@@ -76,7 +76,7 @@ def cmd_plan(_: argparse.Namespace) -> int:
     n = e1["n_cases"]
     cap = e1["cap"]
     print(f"E1 (published): n={n}, cap={cap} USD minor, gate alpha {ALPHA}")
-    print("Proposition 7.7 budget B = n mu+ / cap (pooled, no improving subgroup):")
+    print("Proposition 9.7 budget B = n mu+ / cap (pooled, no improving subgroup):")
     for name, v in e1["policies"].items():
         if v["role"] != "regression":
             continue
