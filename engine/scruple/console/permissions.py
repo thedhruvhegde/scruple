@@ -1,83 +1,89 @@
-"""Permission placeholder for the console. A STUB, to be swapped at merge.
+"""Console permissions, enforced by the engine's real authentication and RBAC.
 
 Every console route declares the permission it needs with one dependency::
 
     @router.get("/approvals")
     def inbox(principal: Annotated[Principal, requires("read")]) -> HTMLResponse: ...
 
-`requires` is the single swap point. Real authentication (API keys, OIDC) and RBAC are
-being added elsewhere; at merge, replace the body of `requires` (or `_resolve`) with
-the real check so that it raises 401/403 and returns the authenticated principal. The
-route code does not change.
+`requires` wraps `scruple.auth.require`: the request has already been authenticated by
+`scruple.auth.middleware.AuthMiddleware` (API key, OIDC bearer token, or the
+development-only `X-Actor` trust), and the route answers 401 without credentials and
+403 without the permission, exactly like the JSON API. Because the auth requirement is
+a sub-dependency, the app-wide fail-closed guard and the route-enumeration test see
+each console route's declared permission.
 
-What the stub does today, and nothing more:
+The console's three permissions map onto the engine's (`scruple.auth.Permission`):
 
-- it never refuses a request (every principal holds every permission);
-- identity is the `X-Actor` header, trusted as-is, exactly like the HTTP API stub
-  (`scruple.api.app.actor_header`). A request without the header is anonymous
-  (`authenticated=False`); the console then asks the person to type who they are
-  acting as on approval forms, and the service, not the console, decides whether that
-  name may approve (named approvers, separation of duties).
+    console   engine     why
+    read      read       every page
+    approve   approve    approve, reject and request approval
+    export    read       evidence packs and report downloads: the same data the
+                         read-only JSON API returns (`/decisions/{id}/report`), so an
+                         auditor (read only) can take evidence away
 
-Permissions used by the console: `read` (every page), `approve` (approve, reject and
-request approval) and `export` (evidence pack and report downloads).
+The principal is always authenticated and names its tenant; the console serves that
+tenant's gate only. The service, not the console, still decides whether that subject
+may approve (named approvers, separation of duties).
 """
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends
 
-from scruple.registry.models import ACTOR_PATTERN
+from scruple.auth import Permission as AuthPermission
+from scruple.auth import Principal as AuthPrincipal
+from scruple.auth import require
 
 Permission = Literal["read", "approve", "export"]
 PERMISSIONS: tuple[Permission, ...] = ("read", "approve", "export")
 PERMISSION_ATTR = "__scruple_permission__"
-_ACTOR = re.compile(ACTOR_PATTERN)
+ENGINE_PERMISSION: dict[Permission, AuthPermission] = {
+    "read": AuthPermission.READ,
+    "approve": AuthPermission.APPROVE,
+    "export": AuthPermission.READ,
+}
 
 
 @dataclass(frozen=True)
 class Principal:
-    """Who is asking. `name` is None for an anonymous request."""
+    """Who is asking, as the console sees it. Built only from an authenticated
+    `scruple.auth.Principal`."""
 
-    name: str | None
+    name: str
+    tenant: str
     permissions: frozenset[str]
-    authenticated: bool
 
 
-def _resolve(request: Request, permission: Permission) -> Principal:
-    """STUB: trust X-Actor, grant everything. Replace with the real check at merge."""
-    raw = request.headers.get("x-actor")
-    if raw is None:
-        return Principal(name=None, permissions=frozenset(PERMISSIONS), authenticated=False)
-    if len(raw) > 128 or not _ACTOR.match(raw):
-        raise HTTPException(400, "malformed X-Actor header")
-    return Principal(name=raw, permissions=frozenset(PERMISSIONS), authenticated=True)
+def _console_permissions(p: AuthPrincipal) -> frozenset[str]:
+    return frozenset(c for c in PERMISSIONS if p.can(ENGINE_PERMISSION[c]))
 
 
 def requires(permission: Permission) -> Any:
     """A FastAPI dependency that checks `permission` and returns the `Principal`."""
     if permission not in PERMISSIONS:
         raise ValueError(f"unknown permission {permission!r}")
+    # A default, not `Annotated[...]`: string annotations cannot see this closure.
+    check = require(ENGINE_PERMISSION[permission])
 
-    def dependency(request: Request) -> Principal:
-        return _resolve(request, permission)
+    def dependency(p: AuthPrincipal = check) -> Principal:
+        return Principal(name=p.subject, tenant=p.tenant, permissions=_console_permissions(p))
 
     setattr(dependency, PERMISSION_ATTR, permission)
     return Depends(dependency)
 
 
 def declared_permission(fn: Callable[..., Any]) -> str | None:
-    """The permission a dependency created by `requires` checks (for tests)."""
+    """The console permission a dependency created by `requires` checks (for tests)."""
     value = getattr(fn, PERMISSION_ATTR, None)
     return value if isinstance(value, str) else None
 
 
 __all__ = [
+    "ENGINE_PERMISSION",
     "PERMISSIONS",
     "Permission",
     "Principal",

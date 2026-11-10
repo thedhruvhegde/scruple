@@ -20,7 +20,9 @@ from scruple.service import AgentGate
 from scruple.sim.library import BAD_RULE_ID, GOOD_RULE_ID
 from tests.test_console_support import (
     CANARY_SEED,
+    DEV_AUTH,
     EVAL_SEED,
+    READER,
     SECRET,
     client,
     ready_gate,
@@ -303,7 +305,7 @@ def test_every_console_route_declares_a_permission(gate: AgentGate) -> None:
 
 
 def test_mounted_under_the_api_and_hidden_from_the_schema(gate: AgentGate) -> None:
-    api = TestClient(create_app(gate))
+    api = TestClient(create_app(gate, auth=DEV_AUTH), headers={"X-Actor": READER})
     assert api.get("/console/").status_code == 200
     assert api.get("/console/approvals").status_code == 200
     schema = api.get("/openapi.json").json()
@@ -314,4 +316,4 @@ def test_mounted_under_the_api_and_hidden_from_the_schema(gate: AgentGate) -> No
 def test_x_actor_header_is_shown_and_malformed_one_refused(web: TestClient) -> None:
     r = web.get("/console/", headers={"X-Actor": "alice@demo.bank"})
     assert "acting as alice@demo.bank" in r.text
-    assert web.get("/console/", headers={"X-Actor": "bad actor <x>"}).status_code == 400
+    assert web.get("/console/", headers={"X-Actor": "bad actor <x>"}).status_code == 401

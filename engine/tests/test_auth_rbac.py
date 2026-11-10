@@ -36,7 +36,7 @@ from tests.ci_support import PROV
 
 P = Permission
 FAST = ScryptParams(n=1024)
-PUBLIC = {"/health", "/version"}
+PUBLIC = {"/health", "/version", "/console/static/{name:path}"}
 SIGNED = {"/ingest/stripe/webhook"}
 
 
@@ -76,7 +76,13 @@ def _method(route: Any) -> str:
 
 
 def _concrete(path: str) -> str:
-    values = {"rule_id": "baseline-x", "version": "1", "decision_id": "dec-00001"}
+    values = {
+        "rule_id": "baseline-x",
+        "version": "1",
+        "decision_id": "dec-00001",
+        "episode_id": "ep-000000000000",
+        "job_id": "job-00000001",
+    }
     return re.sub(r"\{(\w+)\}", lambda m: values.get(m.group(1), "x"), path)
 
 
@@ -131,7 +137,7 @@ def test_each_protected_route_refuses_without_its_permission(
 def test_public_routes_answer_anonymously(env: tuple[TestClient, ApiKeyService, AgentGate]) -> None:
     c, _, _ = env
     for path in PUBLIC:
-        assert c.get(path).status_code == 200
+        assert c.get(path.replace("{name:path}", "console.css")).status_code == 200
 
 
 def test_the_openapi_schema_needs_a_reader(

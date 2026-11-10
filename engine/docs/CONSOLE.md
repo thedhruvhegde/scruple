@@ -53,7 +53,7 @@ the service's message (403), and a refused attempt writes nothing.
 - Every approve and reject carries a reason (3 to 500 characters). Approval reasons go
   into the `approval.granted` payload or the activation decision's reasons.
 
-## Permissions (stub, swap at merge)
+## Permissions (the engine's RBAC)
 
 Every route declares what it needs with one dependency from
 `scruple/console/permissions.py`:
@@ -62,12 +62,25 @@ Every route declares what it needs with one dependency from
 principal: Annotated[Principal, requires("read")]  # "read" | "approve" | "export"
 ```
 
-GET pages need `read`, downloads `export`, POSTs `approve`. Static files are public.
-Today `requires` is a pass-through stub: it grants everything, and identity is the
-`X-Actor` header, trusted as-is like the API's stub. Without the header the forms ask
-who the person is acting as; with it, the form's name is ignored. Replace the body of
-`requires` (or `_resolve`) with the real authentication and RBAC check; route code does
-not change. A test checks that every route declares exactly one permission.
+GET pages need `read`, downloads `export`, POSTs `approve`. Static files are
+`public()`. `requires` wraps `scruple.auth.require`, so the console uses the same
+authentication as the JSON API (API key, OIDC bearer token, or the development-only
+`X-Actor` trust) and the same fail-closed route guard; no credentials answers 401, a
+missing permission 403. The console permissions map onto the engine's:
+
+| console | engine | |
+|---|---|---|
+| `read` | `read` | every page |
+| `approve` | `approve` | approve, reject, request approval |
+| `export` | `read` | evidence packs and report downloads: the same data the read-only JSON API returns, so an auditor can take evidence away |
+
+Who acts is always the authenticated subject: the forms have no name field, and a
+posted `actor` field is refused (422). Each caller sees only their own tenant's gate
+(mounted under the API) or, run on its own (`scruple console`), the one tenant of the
+database it opened; another tenant's caller gets 404. The service still decides
+whether that subject may approve (named approvers, separation of duties). Tests check
+that every route declares exactly one permission and that the API-wide route
+enumeration covers the console.
 
 ## Security
 

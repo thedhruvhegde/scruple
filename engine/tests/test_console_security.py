@@ -112,8 +112,8 @@ def test_backtest_dataset_name_is_escaped(gate: AgentGate, tmp_path: Path) -> No
 def test_refused_reason_with_markup_is_escaped(gate: AgentGate) -> None:
     c = client(gate)
     token = csrf_token(c)
-    r = c.post(APPROVE, data={"csrf": token, "actor": SCRIPT, "reason": "fine by me"})
-    assert r.status_code == 422  # actor fails its pattern; the message must not echo markup
+    r = c.post(APPROVE, data={"csrf": token, SCRIPT: "x", "reason": "fine by me"})
+    assert r.status_code == 422  # unknown field; the message must not echo markup
     assert_escaped(r.text)
 
 
@@ -230,7 +230,7 @@ def test_oversized_form_is_refused(gate: AgentGate) -> None:
         ({"reason": "no"}, 422),  # too short
         ({"reason": "y" * 501}, 422),
         ({"approved": "true"}, 422),  # unknown field
-        ({"actor": "x y"}, 422),
+        ({"actor": "x y"}, 401),  # a malformed identity fails authentication
     ],
 )
 def test_invalid_forms_change_nothing(gate: AgentGate, extra: dict[str, str], status: int) -> None:
@@ -250,12 +250,14 @@ def test_repeated_field_is_refused(gate: AgentGate) -> None:
     assert r.status_code == 422
 
 
-def test_anonymous_post_needs_a_name(gate: AgentGate) -> None:
+def test_anonymous_post_is_refused(gate: AgentGate) -> None:
     c = client(gate)
     token = csrf_token(c)
+    del c.headers["X-Actor"]
     n = len(gate.audit.entries())
-    r = c.post(APPROVE, data={"csrf": token, "reason": "looks right", "actor": ""})
-    assert r.status_code == 422 and "acting as" in r.text
+    r = c.post(APPROVE, data={"csrf": token, "reason": "looks right"})
+    assert r.status_code == 401
+    assert c.get("/console/approvals").status_code == 401
     _untouched(gate, n)
 
 

@@ -239,7 +239,8 @@ def create_app(
     app.add_exception_handler(ApprovalError, _err(403))
     app.include_router(ingest_router(), dependencies=[signed("stripe-signature")])
     app.include_router(health_router(root, settings))
-    app.include_router(console_router(root))  # HTML console at /console (scruple/console)
+    # HTML console at /console (scruple/console): the caller's tenant only, like the API.
+    app.include_router(console_router(app.state.gates.get))
     with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
         app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
 

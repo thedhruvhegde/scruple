@@ -8,12 +8,14 @@ import re
 from collections.abc import Callable
 from html.parser import HTMLParser
 from pathlib import Path
+from typing import Any
 
 from fastapi.testclient import TestClient
 
 from scruple.agents.dispute_baselines import BASELINES, read_all, run_policy
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.errors import EpisodeError
+from scruple.auth.authn import Authenticator
 from scruple.backtest import BacktestConfig, load_stripe, rule_candidate, run_backtest, to_json
 from scruple.calibration import DEFAULT_PROFILE, stripe_disputes
 from scruple.clock import SteppingClock
@@ -123,8 +125,30 @@ def sources(
     return ConsoleSources(agents, report_entries(reports), replay_seed=11, replay_cases=300)
 
 
+# The console tests use the development-only X-Actor trust (every permission) so a
+# test can act as any named person; test_console_auth.py uses real API keys.
+DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = "reviewer@demo.bank"  # who browses when a test names nobody
+
+
+class ActorClient(TestClient):
+    """Signs each request in as a person, the way a browser session would.
+
+    A form's `actor` names who posts it: it is sent as the (dev) credential, not as a
+    form field, since the console takes identity only from authentication. A request
+    that sets its own `X-Actor` header sends the form untouched."""
+
+    def post(self, url: Any, *, data: Any = None, headers: Any = None, **kw: Any) -> Any:
+        hdrs = dict(headers or {})
+        if isinstance(data, dict) and "actor" in data and "X-Actor" not in hdrs:
+            data = dict(data)
+            hdrs["X-Actor"] = data.pop("actor")
+        return super().post(url, data=data, headers=hdrs, **kw)
+
+
 def client(gate: AgentGate, src: ConsoleSources | None = None) -> TestClient:
-    return TestClient(create_console_app(gate, src or sources(), secret=SECRET))
+    app = create_console_app(gate, src or sources(), secret=SECRET, auth=DEV_AUTH)
+    return ActorClient(app, headers={"X-Actor": READER})
 
 
 _TOKEN = re.compile(r'name="csrf" value="([0-9a-f]{64})"')

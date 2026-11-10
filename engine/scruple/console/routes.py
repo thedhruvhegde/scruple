@@ -1,11 +1,13 @@
 """The console router: server-rendered pages over `AgentGate`, plus downloads.
 
-Mount it under the HTTP API (`app.include_router(console_router(gate))`) or run it on
-its own (`scruple console`, see `scruple.console.app`). Every route declares the
-permission it needs with `requires(...)` (scruple/console/permissions.py, a stub
-until real authn lands). Every POST carries a CSRF token; every response carries a
-strict CSP. Approvals go through the service, which enforces named approvers and
-separation of duties; the console only relays its refusals.
+Mount it under the HTTP API (`app.include_router(console_router(gates))`) or run it
+on its own (`scruple console`, see `scruple.console.app`). Every route declares the
+permission it needs with `requires(...)` (scruple/console/permissions.py, the
+engine's RBAC); the static files are `public()`. Each request sees only its caller's
+tenant: `gate` is either one gate or a function from tenant id to that tenant's gate.
+Every POST carries a CSRF token; every response carries a strict CSP. Approvals go
+through the service, which enforces named approvers and separation of duties; the
+console only relays its refusals.
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescap
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from scruple.api.strict import RAW_BODY
+from scruple.auth import public
 from scruple.console import fmt
 from scruple.console.permissions import Principal, requires
 from scruple.console.security import Csrf, apply_headers, load_secret, read_form
@@ -40,7 +43,7 @@ from scruple.console.views import (
 )
 from scruple.gate.approval import ApprovalError
 from scruple.registry import InvalidTransitionError, RuleNotFoundError, RuleVersion
-from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
+from scruple.registry.models import RULE_ID_PATTERN
 from scruple.service import AgentGate
 
 PREFIX = "/console"
@@ -75,7 +78,7 @@ class _Form(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     csrf: str = Field(min_length=64, max_length=64)
-    actor: str | None = Field(default=None, pattern=ACTOR_PATTERN, max_length=128)
+    # No `actor` field: who acts is the authenticated caller, never a typed-in name.
 
 
 class DecisionForm(_Form):
@@ -98,9 +101,28 @@ def environment() -> Environment:
     return env
 
 
+def _single(only: AgentGate) -> Callable[[str], AgentGate]:
+    """One gate serves one tenant; a caller from any other tenant sees nothing."""
+
+    def gates(tenant: str) -> AgentGate:
+        if tenant != getattr(only.storage, "tenant", tenant):
+            raise HTTPException(404, "not found")
+        return only
+
+    return gates
+
+
 def console_router(
-    gate: AgentGate, sources: ConsoleSources | None = None, *, secret: bytes | None = None
+    gate: AgentGate | Callable[[str], AgentGate],
+    sources: ConsoleSources | None = None,
+    *,
+    secret: bytes | None = None,
 ) -> APIRouter:
+    gates: Callable[[str], AgentGate] = _single(gate) if isinstance(gate, AgentGate) else gate
+
+    def gate_of(principal: Principal) -> AgentGate:
+        return gates(principal.tenant)
+
     src = sources if sources is not None else ConsoleSources()
     csrf = Csrf(secret if secret is not None else load_secret())
     env = environment()
@@ -139,19 +161,19 @@ def console_router(
     def agent_or_none(name: str) -> AgentRun | None:
         return src.agents.get(name)
 
-    def version_or_none(rule_id: str, version: int) -> RuleVersion | None:
+    def version_or_none(gate: AgentGate, rule_id: str, version: int) -> RuleVersion | None:
         try:
             return gate.registry.get(rule_id, version)
         except RuleNotFoundError:
             return None
 
-    def parse_ref(ref: str | None) -> RuleVersion | None:
+    def parse_ref(gate: AgentGate, ref: str | None) -> RuleVersion | None:
         m = REF.match(ref or "")
-        return version_or_none(m["rule"], int(m["v"])) if m else None
+        return version_or_none(gate, m["rule"], int(m["v"])) if m else None
 
     # --- static files (public: stylesheet, script, fonts) --------------------------
 
-    @router.get("/static/{name:path}")
+    @router.get("/static/{name:path}", dependencies=[public()])
     def static(name: str) -> Response:
         if name not in STATIC:
             raise HTTPException(404, "not found")
@@ -164,6 +186,7 @@ def console_router(
     def overview(
         request: Request, principal: Annotated[Principal, requires("read")]
     ) -> HTMLResponse:
+        gate = gate_of(principal)
         rows = version_rows(gate)
         return render(
             request,
@@ -201,7 +224,8 @@ def console_router(
         version: Version,
         principal: Annotated[Principal, requires("read")],
     ) -> HTMLResponse:
-        if version_or_none(rule_id, version) is None:
+        gate = gate_of(principal)
+        if version_or_none(gate, rule_id, version) is None:
             return error(request, principal, 404, f"unknown rule version {rule_id}@v{version}")
         detail = version_detail(gate, rule_id, version)
         siblings = [v for v in gate.registry.versions(rule_id) if v.version != version]
@@ -260,6 +284,7 @@ def console_router(
         b: Ref = None,
         case: Annotated[str | None, Query(max_length=40, pattern=r"^[a-z0-9-]+$")] = None,
     ) -> HTMLResponse:
+        gate = gate_of(principal)
         versions = gate.registry.all_versions()
         refs = [v.ref for v in versions]
         if a is None and b is None and versions:
@@ -268,11 +293,11 @@ def console_router(
             active = [v for v in gate.registry.active_rules() if v.ref != newest.ref]
             base = same[-1] if same else (active[0] if active else newest)
             a, b = base.ref, newest.ref
-        va, vb = parse_ref(a), parse_ref(b)
+        va, vb = parse_ref(gate, a), parse_ref(gate, b)
         if va is None or vb is None:
             return error(request, principal, 404, "pick two known rule versions (rule@vN)")
         active_refs = tuple(sorted(v.ref for v in gate.registry.active_rules()))
-        key = (va.ref, va.content_hash, vb.ref, vb.content_hash, *active_refs)
+        key = (principal.tenant, va.ref, va.content_hash, vb.ref, vb.content_hash, *active_refs)
         d = diffs.get(key)
         if d is None:
             d = rule_diff(gate, va, vb, src.replay_seed, src.replay_cases)
@@ -303,6 +328,7 @@ def console_router(
         message: str | None = None,
         problem: str | None = None,
     ) -> HTMLResponse:
+        gate = gate_of(principal)
         box = inbox(gate, gate.clock.now())
         return render(
             request,
@@ -333,16 +359,11 @@ def console_router(
         except HTTPException as exc:
             status, detail = exc.status_code, str(exc.detail)
             return lambda p: error(request, p, status, detail)
-        if raw.get("actor", None) == "":
-            raw.pop("actor")
         try:
             return model.model_validate(raw)
         except ValidationError as exc:
             why = "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())
             return lambda p: inbox_page(request, p, 422, problem=why)
-
-    def actor_of(principal: Principal, form: _Form) -> str | None:
-        return principal.name if principal.authenticated else form.actor
 
     async def act(
         request: Request,
@@ -353,11 +374,8 @@ def console_router(
         form = await form_of(request, model)
         if not isinstance(form, _Form):
             return form(principal)
-        actor = actor_of(principal, form)
-        if actor is None:
-            return inbox_page(request, principal, 422, problem="say who you are acting as")
         try:
-            msg = fn(form, actor)
+            msg = fn(form, principal.name)
         except ApprovalError as exc:
             return inbox_page(request, principal, 403, problem=str(exc))
         except RuleNotFoundError as exc:
@@ -376,6 +394,8 @@ def console_router(
         version: Version,
         principal: Annotated[Principal, requires("approve")],
     ) -> Response:
+        gate = gate_of(principal)
+
         def run(form: _Form, actor: str) -> str:
             assert isinstance(form, DecisionForm)
             if gate.approval_policy() is not None:
@@ -393,6 +413,8 @@ def console_router(
         version: Version,
         principal: Annotated[Principal, requires("approve")],
     ) -> Response:
+        gate = gate_of(principal)
+
         def run(form: _Form, actor: str) -> str:
             assert isinstance(form, DecisionForm)
             gate.reject_approval(rule_id, version, actor, form.reason)
@@ -407,6 +429,8 @@ def console_router(
         version: Version,
         principal: Annotated[Principal, requires("approve")],
     ) -> Response:
+        gate = gate_of(principal)
+
         def run(_form: _Form, actor: str) -> str:
             gate.request_approval(rule_id, version, actor)
             return "requested"
@@ -424,7 +448,8 @@ def console_router(
     ) -> Response:
         from scruple.ci.evidence import build_evidence_pack
 
-        if version_or_none(rule_id, version) is None:
+        gate = gate_of(principal)
+        if version_or_none(gate, rule_id, version) is None:
             return error(request, principal, 404, f"unknown rule version {rule_id}@v{version}")
         try:
             pack = build_evidence_pack(gate, rule_id, version)
@@ -442,7 +467,8 @@ def console_router(
         from scruple.ci.evidence import build_evidence_pack
         from scruple.ci.evidence_pdf import render_pdf
 
-        if version_or_none(rule_id, version) is None:
+        gate = gate_of(principal)
+        if version_or_none(gate, rule_id, version) is None:
             return error(request, principal, 404, f"unknown rule version {rule_id}@v{version}")
         try:
             pack = build_evidence_pack(gate, rule_id, version)
@@ -456,7 +482,7 @@ def console_router(
         decision_id: DecisionId,
         principal: Annotated[Principal, requires("export")],
     ) -> Response:
-        md = gate.report(decision_id)
+        md = gate_of(principal).report(decision_id)
         if md is None:
             return error(request, principal, 404, f"unknown decision {decision_id}")
         return download(md, "text/markdown; charset=utf-8", f"{decision_id}.md")

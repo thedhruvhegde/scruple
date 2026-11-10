@@ -45,14 +45,12 @@
         {{ m.csrf_field() }}
         <h3>Request approval</h3>
         <p class="note">Whoever requests can no longer approve this request.</p>
-        {% if not principal.authenticated %}<label>Acting as<input type="text" name="actor" required maxlength="128" autocomplete="username"></label>{% endif %}
         <button class="btn" type="submit">Request approval</button>
       </form>
       {% endif %}
       <form class="act" method="post" action="{{ base }}/approve">
         {{ m.csrf_field() }}
         <h3>Approve</h3>
-        {% if not principal.authenticated %}<label>Acting as<input type="text" name="actor" required maxlength="128" autocomplete="username"></label>{% endif %}
         <label>Reason<textarea name="reason" required minlength="3" maxlength="500"></textarea></label>
         <button class="btn primary" type="submit">Approve {{ rv.ref }}</button>
       </form>
@@ -62,7 +60,6 @@
         {{ m.csrf_field() }}
         <h3>Reject</h3>
         <p class="note">Rejection is final: the version moves to rejected and cannot be activated.</p>
-        {% if not principal.authenticated %}<label>Acting as<input type="text" name="actor" required maxlength="128" autocomplete="username"></label>{% endif %}
         <label>Reason<textarea name="reason" required minlength="3" maxlength="500"></textarea></label>
         <button class="btn danger" type="submit">Reject {{ rv.ref }}</button>
       </form>

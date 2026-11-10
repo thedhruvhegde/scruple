@@ -148,8 +148,8 @@ def test_reject_under_a_policy_needs_a_named_approver(gate: AgentGate) -> None:
     assert code == 303 and status(gate) is RuleStatus.REJECTED
 
 
-def test_authenticated_principal_wins_over_the_form(gate: AgentGate) -> None:
-    """With an identity from the (stub) auth layer, the form's name is ignored."""
+def test_identity_comes_from_the_credential_never_the_form(gate: AgentGate) -> None:
+    """The caller is who authenticated; a form naming someone else is refused."""
     c = client(gate)
     token = csrf_token(c)
     r = c.post(
@@ -157,10 +157,17 @@ def test_authenticated_principal_wins_over_the_form(gate: AgentGate) -> None:
         data={"csrf": token, "actor": OPERATOR, "reason": "spoofing the operator"},
         headers={"X-Actor": "ops-team"},
     )
-    assert r.status_code == 403  # acted as ops-team (the owner), not as the form said
+    assert r.status_code == 422  # no `actor` field exists to spoof
+    assert status(gate) is RuleStatus.CANARY
+    r = c.post(
+        f"{BASE}/approve",
+        data={"csrf": token, "reason": "I own it, trust me"},
+        headers={"X-Actor": "ops-team"},
+    )
+    assert r.status_code == 403  # acted as ops-team (the owner): refused by the service
     assert status(gate) is RuleStatus.CANARY
     page = c.get("/console/approvals", headers={"X-Actor": OPERATOR}).text
-    assert 'name="actor"' not in page  # no name field when the principal is known
+    assert 'name="actor"' not in page and f"acting as {OPERATOR}" in page
 
 
 def test_unknown_or_unready_versions(gate: AgentGate) -> None:
