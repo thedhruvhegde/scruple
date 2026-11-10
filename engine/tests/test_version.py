@@ -8,6 +8,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from scruple.api.app import create_app
+from scruple.auth.authn import Authenticator
+from scruple.auth.keys import ApiKeyService, ScryptParams
+from scruple.auth.models import Permission
 from scruple.cli.main import main
 from scruple.service import AgentGate
 from scruple.storage import SQLiteStorage
@@ -49,4 +52,10 @@ def test_api_version() -> None:
     r = client.get("/version")
     assert r.status_code == 200
     assert r.json()["version"] == package_version()
-    assert client.get("/openapi.json").json()["info"]["version"] == package_version()
+    assert client.get("/openapi.json").status_code == 401  # the schema needs a reader
+    store = SQLiteStorage(":memory:")
+    keys = ApiKeyService(store, params=ScryptParams(n=1024))
+    _, token = keys.create("reader", [Permission.READ], "local-admin")
+    authed = TestClient(create_app(AgentGate(store), auth=Authenticator(keys)))
+    schema = authed.get("/openapi.json", headers={"X-API-Key": token.get_secret_value()})
+    assert schema.json()["info"]["version"] == package_version()

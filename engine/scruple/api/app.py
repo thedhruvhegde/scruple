@@ -18,7 +18,15 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.api.strict import reject_unknown_inputs
-from scruple.auth import CurrentPrincipal, Permission, Principal, public, require, signed
+from scruple.auth import (
+    CurrentPrincipal,
+    Permission,
+    Principal,
+    guard_route,
+    public,
+    require,
+    signed,
+)
 from scruple.auth.authn import Authenticator
 from scruple.auth.middleware import AuthMiddleware
 from scruple.domain import RuleSpec
@@ -129,7 +137,11 @@ def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = No
         title="agent-gate",
         version=package_version(),
         description="Change control for agent learning (synthetic demo).",
-        dependencies=[Depends(reject_unknown_inputs)],
+        dependencies=[Depends(guard_route), Depends(reject_unknown_inputs)],
+        # The schema lists every route: served below to authenticated readers only.
+        openapi_url=None,
+        docs_url=None,
+        redoc_url=None,
     )
     if gate is None:
         from scruple.settings import load_settings
@@ -165,6 +177,10 @@ def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = No
     @app.get("/version", dependencies=[public()])
     def version() -> BuildInfo:
         return build_info()
+
+    @app.get("/openapi.json", dependencies=[READ], include_in_schema=False)
+    def openapi() -> JSONResponse:
+        return JSONResponse(app.openapi())
 
     @app.get("/auth/whoami", dependencies=[READ])
     def whoami(principal: CurrentPrincipal) -> WhoAmI:

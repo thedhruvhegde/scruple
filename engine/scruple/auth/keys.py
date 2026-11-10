@@ -257,7 +257,10 @@ class ApiKeyService:
         now = self._clock.now()
         if not rec.active(now):
             raise InvalidKeyError
-        permissions = self._permissions_for(rec)
+        try:
+            permissions = self._permissions_for(rec)
+        except ValueError:  # e.g. separation of duties: refuse, never widen
+            raise InvalidKeyError from None
         if not permissions:
             raise InvalidKeyError
         self._touch(rec, now)

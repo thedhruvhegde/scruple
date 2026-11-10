@@ -76,7 +76,7 @@ CROSS_FIELD_OR_RAW = {
     f"{IMPORTED}/decisions",
     f"{IMPORTED}/outcomes",
 }
-schema = schemathesis.openapi.from_asgi("/openapi.json", APP)
+schema = schemathesis.openapi.from_asgi("/openapi.json", APP, headers=ACTOR)
 
 
 def client_errors_are_well_formed(ctx: CheckContext, response: Any, case: Any) -> bool | None:

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from scruple.auth.authn import Authenticator
 from scruple.auth.keys import ApiKeyService, ScryptParams
 from scruple.auth.oidc import OIDCConfig, OIDCVerifier
+from scruple.auth.rbac import key_permissions
 from scruple.clock import Clock
 
 if TYPE_CHECKING:
@@ -20,6 +21,7 @@ def key_service(settings: Settings, storage: Storage, clock: Clock | None = None
         clock,
         ScryptParams(n=settings.auth_scrypt_n),
         cache_seconds=settings.auth_key_cache_seconds,
+        permissions_for=key_permissions,
     )
 
 
