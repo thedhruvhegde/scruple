@@ -32,6 +32,10 @@ from scruple.storage import SQLiteStorage
 
 ROOT = Path(__file__).resolve().parent.parent
 AGENT = {"X-Actor": "dispute-agent-01"}
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
+# The API is exercised with the development-only X-Actor trust; /metrics checks its own
+# scrape token whatever the auth mode (tests/test_auth_*.py cover real authentication).
+DEV = {"auth_dev_actor_header": True}
 LATENCY = "scruple_http_request_duration_seconds_count"
 
 
@@ -46,7 +50,8 @@ def _gate() -> AgentGate:
 
 
 def _client(**settings_kw: object) -> TestClient:
-    return TestClient(create_app(_gate(), settings=Settings.model_validate(settings_kw)))
+    settings = Settings.model_validate({**DEV, **settings_kw})
+    return TestClient(create_app(_gate(), settings=settings), headers=READER)
 
 
 def _sample(name: str, **labels: str) -> float:
@@ -172,7 +177,9 @@ def test_decisions_from_other_replicas_are_counted(tmp_path: Path) -> None:
     reader = AgentGate.open(db)
     scraper = TestClient(create_app(reader, settings=Settings(metrics_public=True)))
     before = scraper.get("/metrics").text
-    _register_and_evaluate(TestClient(create_app(writer, settings=Settings())))
+    _register_and_evaluate(
+        TestClient(create_app(writer, settings=Settings.model_validate(DEV)), headers=READER)
+    )
     after = scraper.get("/metrics").text
     name = "scruple_gate_decisions_total"
     assert _metric(before, name, stage="canary", outcome="canary_passed") == 0

@@ -9,11 +9,23 @@ subject, tenant and credential id are attached to the request scope.
 With `limits` (`scruple.auth.limits`), it also answers 429 with `Retry-After` when
 the caller's token bucket is empty, and 413 when the body is over the caller's
 size limit.
+
+`self_authenticating` names exact paths whose route checks a credential of its own
+in the `Authorization` header (`GET /metrics` and its scrape token, declared
+`signed("metrics-token")`). Those requests are not authenticated here, so a scrape
+token is never mistaken for an API key or OIDC token; they count as anonymous for
+rate limits.
+
+`unlimited` names exact paths that are never rate limited: the liveness and
+readiness probes (`/health`, `/ready`), which an orchestrator calls from one address
+on a fixed schedule and must never see 429 (it would restart a healthy pod or take it
+out of service). Both are public and cheap (`/ready` caches its audit verification).
 """
 
 from __future__ import annotations
 
 import json
+from collections.abc import Collection
 
 import anyio
 from fastapi import HTTPException
@@ -57,11 +69,18 @@ async def _too_many(send: Send, taken: Taken, what: str) -> None:
 
 class AuthMiddleware:
     def __init__(
-        self, app: ASGIApp, authenticator: Authenticator, limits: Limits | None = None
+        self,
+        app: ASGIApp,
+        authenticator: Authenticator,
+        limits: Limits | None = None,
+        self_authenticating: Collection[str] = (),
+        unlimited: Collection[str] = (),
     ) -> None:
         self.app = app
         self.authn = authenticator
         self.limits = limits
+        self.self_authenticating = frozenset(self_authenticating)
+        self.unlimited = frozenset(unlimited)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -73,7 +92,8 @@ class AuthMiddleware:
         lim = self.limits
         address = (scope.get("client") or ("unknown", 0))[0]
         failures_key = f"auth-failures:{address}"
-        presents = "authorization" in headers or "x-api-key" in headers
+        own = scope.get("path") in self.self_authenticating
+        presents = not own and ("authorization" in headers or "x-api-key" in headers)
         if lim is not None and presents:
             peek = lim.backend.peek(failures_key, lim.auth_failures)
             if not peek.allowed:
@@ -81,7 +101,7 @@ class AuthMiddleware:
                 return
         try:
             # Off the event loop: a key check costs one scrypt and a database read.
-            who = await anyio.to_thread.run_sync(self.authn.authenticate, headers)
+            who = None if own else await anyio.to_thread.run_sync(self.authn.authenticate, headers)
         except AuthError as e:
             if lim is not None:
                 lim.backend.take(failures_key, lim.auth_failures)
@@ -93,7 +113,7 @@ class AuthMiddleware:
             state = scope.setdefault("state", {})
             state[STATE_KEY] = who.principal
             state[STATE_KEY + "_auth"] = who
-        if lim is not None:
+        if lim is not None and scope.get("path") not in self.unlimited:
             if who is None or who.principal.method != "dev_header":
                 bucket, limit = self._bucket(who, address, lim)
                 taken = lim.backend.take(bucket, limit)

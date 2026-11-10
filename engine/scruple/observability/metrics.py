@@ -51,6 +51,7 @@ from prometheus_client import (
 )
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Metric
 
+from scruple.auth import signed
 from scruple.service import AgentGate
 from scruple.settings import Settings
 from scruple.storage.sql import SQLStorage
@@ -191,6 +192,9 @@ def render(gate_metrics: GateCollector) -> bytes:
     return generate_latest(_registry()) + generate_latest(per_scrape)
 
 
+METRICS_PATH = "/metrics"
+
+
 def _authorized(request: Request, token: str) -> bool:
     header = request.headers.get("authorization", "")
     scheme, _, value = header.partition(" ")
@@ -204,7 +208,9 @@ def metrics_router(gate: AgentGate, settings: Settings) -> APIRouter:
     token = settings.metrics_token.get_secret_value() if settings.metrics_token else None
     gate_metrics = GateCollector(gate)
 
-    @router.get("/metrics", include_in_schema=False)
+    # `signed`: the route checks its own scrape token (not an API key), and the auth
+    # middleware leaves this path's Authorization header to it.
+    @router.get(METRICS_PATH, include_in_schema=False, dependencies=[signed("metrics-token")])
     def metrics(request: Request) -> Response:
         if token is not None:
             if not _authorized(request, token):

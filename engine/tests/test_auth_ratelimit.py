@@ -159,7 +159,14 @@ def test_anonymous_requests_share_an_address_bucket(
     setup: tuple[TestClient, ApiKeyService, Mono],
 ) -> None:
     c, _, _ = setup
-    assert [c.get("/health").status_code for _ in range(4)] == [200, 200, 200, 429]
+    assert [c.get("/version").status_code for _ in range(4)] == [200, 200, 200, 429]
+
+
+def test_probes_are_never_rate_limited(setup: tuple[TestClient, ApiKeyService, Mono]) -> None:
+    """An orchestrator's liveness and readiness probes must never see 429."""
+    c, _, _ = setup
+    assert {c.get(p).status_code for _ in range(10) for p in ("/health", "/ready")} == {200}
+    assert c.get("/version").status_code == 200  # and they spent none of the bucket
 
 
 def test_failed_credentials_are_throttled_before_any_hash(

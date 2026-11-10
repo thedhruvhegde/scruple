@@ -20,7 +20,7 @@ from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request, Respo
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from scruple.api.health import health_router
+from scruple.api.health import PROBE_PATHS, health_router
 from scruple.api.strict import reject_unknown_inputs
 from scruple.auth import (
     CurrentPrincipal,
@@ -29,7 +29,6 @@ from scruple.auth import (
     guard_route,
     public,
     require,
-    signed,
 )
 from scruple.auth.authn import Authenticator
 from scruple.auth.limits import Limits
@@ -50,6 +49,7 @@ from scruple.jobs.api import jobs_router
 from scruple.jobs.queue import JobError, queue_for
 from scruple.logging import RequestIDMiddleware
 from scruple.observability import install_observability
+from scruple.observability.metrics import METRICS_PATH
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
@@ -223,7 +223,13 @@ def create_app(
         auth = build_authenticator(settings, root.storage)
     if limits is None:
         limits = Limits.from_settings(settings)
-    app.add_middleware(AuthMiddleware, authenticator=auth, limits=limits)
+    app.add_middleware(
+        AuthMiddleware,
+        authenticator=auth,
+        limits=limits,
+        self_authenticating=(METRICS_PATH,),  # checks its own scrape token
+        unlimited=PROBE_PATHS,  # orchestrator probes are never rate limited
+    )
     app.add_middleware(RequestIDMiddleware)
     install_observability(app, root, settings)
 
@@ -237,7 +243,8 @@ def create_app(
     app.add_exception_handler(DuplicateContentError, _err(409))
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
-    app.include_router(ingest_router(), dependencies=[signed("stripe-signature")])
+    # Webhooks declare `signed(...)` per route; health and readiness are public.
+    app.include_router(ingest_router())
     app.include_router(health_router(root, settings))
     # HTML console at /console (scruple/console): the caller's tenant only, like the API.
     app.include_router(console_router(app.state.gates.get))

@@ -114,13 +114,30 @@ def _free_port() -> int:
         return int(s.getsockname()[1])
 
 
-def _get(url: str) -> tuple[int, bytes]:
-    with urllib.request.urlopen(url, timeout=2) as r:
+def _get(url: str, headers: dict[str, str] | None = None) -> tuple[int, bytes]:
+    req = urllib.request.Request(url, headers=headers or {})
+    with urllib.request.urlopen(req, timeout=2) as r:
         return int(r.status), r.read()
+
+
+def _reader_key(db: Path) -> dict[str, str]:
+    """A real auditor API key in `db`, made before the server starts."""
+    from scruple.auth.keys import ApiKeyService, ScryptParams
+    from scruple.auth.rbac import Role, key_permissions
+    from scruple.storage import SQLiteStorage
+
+    storage = SQLiteStorage(str(db))
+    try:
+        keys = ApiKeyService(storage, params=ScryptParams(n=1024), permissions_for=key_permissions)
+        _, token = keys.create("auditor", (), "local-admin", roles=[Role.AUDITOR])
+    finally:
+        storage.close()
+    return {"X-API-Key": token.get_secret_value()}
 
 
 def test_gunicorn_serves_with_two_workers_and_stops_gracefully(tmp_path: Path) -> None:
     port = _free_port()
+    reader = _reader_key(tmp_path / "g.db")
     env = {k: v for k, v in os.environ.items() if not k.startswith("SCRUPLE_")}
     env |= {
         "SCRUPLE_DATABASE_URL": f"sqlite:///{tmp_path / 'g.db'}",
@@ -156,7 +173,7 @@ def test_gunicorn_serves_with_two_workers_and_stops_gracefully(tmp_path: Path) -
         assert b'"ok"' in body
         # Baseline imported once by the master; both workers see the same rules.
         for _ in range(6):
-            assert _get(f"http://127.0.0.1:{port}/rules")[0] == 200
+            assert _get(f"http://127.0.0.1:{port}/rules", reader)[0] == 200
         proc.send_signal(signal.SIGTERM)
         assert proc.wait(timeout=30) == 0
     finally:

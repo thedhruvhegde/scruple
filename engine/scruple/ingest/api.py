@@ -32,6 +32,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from scruple.api.strict import RAW_BODY
+from scruple.auth import signed
 from scruple.ingest.adyen import ingest_notification
 from scruple.ingest.errors import IngestError, InputTooLargeError, SignatureError
 from scruple.ingest.limits import MAX_JSON_BYTES
@@ -102,7 +103,9 @@ def ingest_router(
     cases = store if store is not None else _store_from_env()
     keys = adyen_keys if adyen_keys is not None else _split(ADYEN_KEYS_ENV)
 
-    @router.post("/stripe/webhook", openapi_extra={RAW_BODY: True})
+    @router.post(
+        "/stripe/webhook", openapi_extra={RAW_BODY: True}, dependencies=[signed("stripe-signature")]
+    )
     async def stripe_webhook(request: Request) -> WebhookAck:
         if receiver is None:
             raise HTTPException(503, "Stripe webhook secret is not configured")
@@ -144,7 +147,9 @@ def ingest_router(
             stale=stale,
         )
 
-    @router.post("/adyen/webhook", openapi_extra={RAW_BODY: True})
+    @router.post(
+        "/adyen/webhook", openapi_extra={RAW_BODY: True}, dependencies=[signed("adyen-hmac")]
+    )
     async def adyen_webhook(request: Request) -> AdyenAck:
         if not keys:
             raise HTTPException(503, "Adyen HMAC key is not configured")

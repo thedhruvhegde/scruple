@@ -40,9 +40,10 @@ def _gate() -> AgentGate:
 def traced() -> tuple[TestClient, InMemorySpanExporter]:
     exporter = InMemorySpanExporter()
     provider = configure_tracing(Settings(otel_enabled=True), exporter, set_global=False)
-    app = create_app(_gate(), settings=Settings())
+    # Development-only X-Actor trust, so a protected route can be traced.
+    app = create_app(_gate(), settings=Settings(auth_dev_actor_header=True))
     app.add_middleware(TracingMiddleware, tracer_provider=provider)
-    return TestClient(app), exporter
+    return TestClient(app, headers={"X-Actor": "auditor"}), exporter
 
 
 def _middleware(app: FastAPI) -> list[Any]:

@@ -36,8 +36,9 @@ from tests.ci_support import PROV
 
 P = Permission
 FAST = ScryptParams(n=1024)
-PUBLIC = {"/health", "/version", "/console/static/{name:path}"}
-SIGNED = {"/ingest/stripe/webhook"}
+PUBLIC = {"/health", "/ready", "/version", "/console/static/{name:path}"}
+# Routes that check a credential of their own: webhook signatures, the metrics token.
+SIGNED = {"/ingest/stripe/webhook", "/ingest/adyen/webhook", "/metrics"}
 
 
 @pytest.fixture

@@ -26,10 +26,14 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from scruple.auth import public
 from scruple.service import AgentGate
 from scruple.settings import Settings
 
 log = logging.getLogger("scruple.api.health")
+
+# Public, and exempt from rate limits (`AuthMiddleware(unlimited=...)`).
+PROBE_PATHS = ("/health", "/ready")
 
 
 class Check(BaseModel):
@@ -111,11 +115,16 @@ def health_router(
     router = APIRouter(tags=["health"])
     audit_chain = AuditChainCheck(gate, settings.ready_audit_ttl_seconds, clock)
 
-    @router.get("/health")
+    @router.get("/health", dependencies=[public()])
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    @router.get("/ready", response_model=Readiness, responses={503: {"model": Readiness}})
+    @router.get(
+        "/ready",
+        response_model=Readiness,
+        responses={503: {"model": Readiness}},
+        dependencies=[public()],
+    )
     def ready() -> JSONResponse:
         checks = {"database": check_database(gate)}
         if checks["database"].ok:
