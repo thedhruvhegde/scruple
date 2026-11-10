@@ -12,10 +12,10 @@
       "sha256": "405f5fcf93db08f750b4c05f722867a69964b26b5d424acdaa8d09c86e66078e",
       "sha256_content": "b978961cacfa9b0a90d1e86abfea2e92b07c95c0064a5562ecf3920911c83d3d"
     },
-    "enforcement/cfpb_enforcement_orders.csv": {
+    "enforcement/cfpb_enforcement_orders.csv.gz": {
       "derived_from": "cfpb_enforcement/Disp.csv",
       "rows": 359,
-      "sha256": "47ff0f70ee510e08a1f3e098f8f8a0a9fa95c5dd969743a20bacd4aee530225b",
+      "sha256": "5990cdb90640558c11b142647f06eff101615f0a61e3e85f4e96545bdf0b9fc5",
       "sha256_content": "47ff0f70ee510e08a1f3e098f8f8a0a9fa95c5dd969743a20bacd4aee530225b"
     },
     "timeliness/cfpb2015_payments.csv.gz": {

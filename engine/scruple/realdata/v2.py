@@ -11,7 +11,7 @@ v1 (`splits.py`) holds narratives for the four 2012-2015 payments products and a
 - `timeliness/cfpb2015_payments.csv.gz`, `timeliness/cfpb2025_checking.csv.gz`:
   the date and response fields of every row of the two v1 source CSVs (135,313 and
   8,000 rows), for the complaint-handling timeliness study (`timeliness.py`).
-- `enforcement/cfpb_enforcement_orders.csv`: CFPB enforcement orders with ordered
+- `enforcement/cfpb_enforcement_orders.csv.gz`: CFPB enforcement orders with ordered
   amounts (civil money penalties, redress, disgorgement), from CFPB records released
   under FOIA to the Data Liberation Project. 359 rows, 2012-2023.
 
@@ -165,7 +165,7 @@ META_PATHS: dict[MetaSet, str] = {
     "cfpb_cc2024": "cfpb_cc2024/meta.csv.gz",
 }
 NARRATIVES_PATH = "cfpb_cc2024/narratives.jsonl.gz"
-ENFORCEMENT_PATH = "enforcement/cfpb_enforcement_orders.csv"
+ENFORCEMENT_PATH = "enforcement/cfpb_enforcement_orders.csv.gz"  # no raw .csv is committed
 
 
 class MetaRow(BaseModel):

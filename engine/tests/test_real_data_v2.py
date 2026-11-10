@@ -116,8 +116,9 @@ def test_tampered_content_is_refused(tmp_path: Path) -> None:
     base = tmp_path / "real"
     (base / "v2" / "enforcement").mkdir(parents=True)
     (base / "v2" / "manifest.json").write_bytes((V2 / "manifest.json").read_bytes())
-    raw = (V2 / v2.ENFORCEMENT_PATH).read_bytes()
-    (base / "v2" / v2.ENFORCEMENT_PATH).write_bytes(raw.replace(b"Regions", b"Regionz", 1))
+    raw = gzip.decompress((V2 / v2.ENFORCEMENT_PATH).read_bytes())
+    tampered = v2.gzip_bytes(raw.replace(b"Regions", b"Regionz", 1))
+    (base / "v2" / v2.ENFORCEMENT_PATH).write_bytes(tampered)
     with pytest.raises(ChecksumError):
         v2.read_file(v2.ENFORCEMENT_PATH, base)
 
