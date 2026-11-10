@@ -35,11 +35,11 @@ WORKDIR /app
 # Dependencies first, so editing the source does not re-download them.
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+    uv sync --frozen --no-dev --extra otel --no-install-project
 COPY scruple ./scruple
 COPY agent_gate ./agent_gate
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-editable
+    uv sync --frozen --no-dev --extra otel --no-editable
 
 FROM ${PYTHON_IMAGE}
 ARG BUILD_COMMIT=unknown
@@ -53,12 +53,14 @@ COPY --from=build /app/.venv /app/.venv
 COPY --from=tini /tini /usr/bin/tini
 COPY docker/entrypoint.sh /usr/local/bin/scruple-entrypoint
 COPY deploy/docker/gunicorn.conf.py /app/gunicorn.conf.py
-# Nothing writes outside /data and /tmp: bytecode is compiled at build time and
-# gunicorn's worker heartbeat files go to TMPDIR. Mount /tmp as tmpfs/emptyDir.
+# Nothing writes outside /data and /tmp: bytecode is compiled at build time,
+# gunicorn's worker heartbeat files go to TMPDIR and per-worker metric samples to
+# PROMETHEUS_MULTIPROC_DIR. Mount /tmp as tmpfs/emptyDir.
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     TMPDIR=/tmp \
+    PROMETHEUS_MULTIPROC_DIR=/tmp/metrics \
     SCRUPLE_BUILD_COMMIT=${BUILD_COMMIT} \
     SCRUPLE_BUILD_DATE=${BUILD_DATE} \
     SCRUPLE_DATABASE_URL=/data/scruple.db \

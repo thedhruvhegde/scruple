@@ -26,6 +26,7 @@ from scruple.gate.shadow_imported import (
 )
 from scruple.ingest.api import ingest_router
 from scruple.logging import RequestIDMiddleware
+from scruple.observability import install_observability
 from scruple.registry import (
     DuplicateContentError,
     InvalidTransitionError,
@@ -35,6 +36,7 @@ from scruple.registry import (
 )
 from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
 from scruple.service import AgentGate, ApprovalError, IntegrityReport
+from scruple.settings import Settings
 from scruple.version import BuildInfo, build_info, package_version
 
 
@@ -90,21 +92,24 @@ Actor = Annotated[str, Depends(actor_header)]
 VersionPath = Annotated[int, Path(ge=1, le=2**63 - 1)]
 
 
-def create_app(gate: AgentGate | None = None) -> FastAPI:
+def create_app(gate: AgentGate | None = None, settings: Settings | None = None) -> FastAPI:
     app = FastAPI(
         title="agent-gate",
         version=package_version(),
         description="Change control for agent learning (synthetic demo).",
         dependencies=[Depends(reject_unknown_inputs)],
     )
-    if gate is None:
+    if settings is None:
         from scruple.settings import load_settings
 
+        settings = load_settings()
+    if gate is None:
         # AGENT_GATE_DB is the pre-rename variable; SCRUPLE_DATABASE_URL replaces it.
-        gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or load_settings().database_dsn())
+        gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or settings.database_dsn())
         gate.bootstrap_baseline()
     g = gate
     app.add_middleware(RequestIDMiddleware)
+    install_observability(app, g, settings)
 
     def _err(status: int):  # type: ignore[no-untyped-def]
         async def handler(_r: Request, exc: Exception) -> JSONResponse:
