@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Path, Query, Request, Response
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -90,6 +90,19 @@ Actor = Annotated[str, Depends(actor_header)]
 # the driver and came back as a 500).
 VersionPath = Annotated[int, Path(ge=1, le=2**63 - 1)]
 
+# Optional paging for list routes. Without `limit` a list route returns everything, as
+# before. Lists are in insertion order and history is append-only, so offset paging
+# is stable. `X-Total-Count` carries the full length either way.
+MAX_PAGE = 1_000
+Limit = Annotated[int | None, Query(ge=1, le=MAX_PAGE)]
+Offset = Annotated[int, Query(ge=0, le=2**63 - 1)]
+TOTAL_COUNT = "X-Total-Count"
+
+
+def _page[T](items: list[T], response: Response, limit: int | None, offset: int) -> list[T]:
+    response.headers[TOTAL_COUNT] = str(len(items))
+    return items[offset:] if limit is None else items[offset : offset + limit]
+
 
 def create_app(gate: AgentGate | None = None) -> FastAPI:
     app = FastAPI(
@@ -135,8 +148,10 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         return g.propose(body.rule_id, body.spec, body.owner, body.provenance)
 
     @app.get("/rules")
-    def list_rules() -> list[RuleVersion]:
-        return g.registry.all_versions()
+    def list_rules(
+        response: Response, limit: Limit = None, offset: Offset = 0
+    ) -> list[RuleVersion]:
+        return _page(g.registry.all_versions(), response, limit, offset)
 
     @app.get("/rules/{rule_id}")
     def rule_versions(rule_id: str) -> list[RuleVersion]:
@@ -158,8 +173,11 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         return DecisionOut.of(g.rollback(rule_id, actor, body.reason).decision)
 
     @app.get("/decisions")
-    def decisions(rule_id: str | None = None) -> list[DecisionOut]:
-        return [DecisionOut.of(r.decision) for r in g.decisions(rule_id)]
+    def decisions(
+        response: Response, rule_id: str | None = None, limit: Limit = None, offset: Offset = 0
+    ) -> list[DecisionOut]:
+        page = _page(g.decisions(rule_id), response, limit, offset)
+        return [DecisionOut.of(r.decision) for r in page]
 
     @app.get("/decisions/{decision_id}")
     def decision(decision_id: str) -> Decision:
