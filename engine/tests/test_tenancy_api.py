@@ -24,6 +24,8 @@ from scruple.api.strict import takes_body
 from scruple.auth.authn import Authenticator
 from scruple.auth.deps import iter_routes
 from scruple.auth.keys import ApiKeyService, ScryptParams
+from scruple.auth.limits import Limits
+from scruple.auth.ratelimit import Limit
 from scruple.auth.rbac import Role, key_permissions
 from scruple.clock import SteppingClock
 from scruple.domain import Action, RuleSpec
@@ -49,7 +51,10 @@ class World:
         root = AgentGate(self.db, SteppingClock(), CFG)
         root.bootstrap_baseline()
         self.keys = ApiKeyService(self.db, params=FAST, permissions_for=key_permissions)
-        self.client = TestClient(create_app(root, auth=Authenticator(self.keys)))
+        # Rate limits out of the way: this test sends hundreds of requests per key.
+        many = Limit(per_minute=1_000_000, burst=1_000_000)
+        limits = Limits(default=many, anonymous=many, auth_failures=many)
+        self.client = TestClient(create_app(root, auth=Authenticator(self.keys), limits=limits))
         self.headers: dict[str, dict[str, dict[str, str]]] = {}
         for tenant in (A, B):
             for role in Role:

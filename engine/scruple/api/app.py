@@ -29,6 +29,7 @@ from scruple.auth import (
     signed,
 )
 from scruple.auth.authn import Authenticator
+from scruple.auth.limits import Limits
 from scruple.auth.middleware import AuthMiddleware
 from scruple.console import console_router
 from scruple.domain import RuleSpec
@@ -175,6 +176,7 @@ def create_app(
     gate: AgentGate | None = None,
     *,
     auth: Authenticator | None = None,
+    limits: Limits | None = None,
 ) -> FastAPI:
     """The API over `gate`. `auth` defaults to one built from settings (API keys in
     the gate's database; `X-Actor` trust only if `auth_dev_actor_header` is on).
@@ -183,7 +185,9 @@ def create_app(
     tenant is served by a gate over `gate.storage.for_tenant(tenant)`, with the same
     clock and config, created on first use with the synthetic baseline policy. Every
     route reads and writes only the caller's tenant: another tenant's rules,
-    decisions, reports and shadow state answer 404 as if they did not exist."""
+    decisions, reports and shadow state answer 404 as if they did not exist.
+
+    `limits` (rate and body size per caller) defaults to the settings' values."""
     app = FastAPI(
         title="agent-gate",
         version=package_version(),
@@ -207,7 +211,11 @@ def create_app(
         from scruple.settings import load_settings
 
         auth = build_authenticator(load_settings(), root.storage)
-    app.add_middleware(AuthMiddleware, authenticator=auth)
+    if limits is None:
+        from scruple.settings import load_settings
+
+        limits = Limits.from_settings(load_settings())
+    app.add_middleware(AuthMiddleware, authenticator=auth, limits=limits)
     app.add_middleware(RequestIDMiddleware)
 
     def _err(status: int):  # type: ignore[no-untyped-def]
