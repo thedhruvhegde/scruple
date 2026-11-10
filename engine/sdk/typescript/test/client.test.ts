@@ -12,6 +12,7 @@ import {
   RateLimitedError,
   ServerError,
   TransportError,
+  UnauthorizedError,
   ValidationError,
   retryDelay,
   DEFAULT_RETRY,
@@ -49,7 +50,7 @@ function scripted(steps: Step[]): { fetch: typeof fetch; seen: Seen[] } {
 const json = (status: number, body: unknown, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...headers } });
 
-function client(steps: Step[], opts: { attempts?: number; actor?: string } = {}) {
+function client(steps: Step[], opts: { attempts?: number; actor?: string; apiKey?: string } = {}) {
   const { fetch, seen } = scripted(steps);
   const slept: number[] = [];
   const c = new Client({
@@ -60,6 +61,7 @@ function client(steps: Step[], opts: { attempts?: number; actor?: string } = {})
     },
     retry: { attempts: opts.attempts ?? 3 },
     ...(opts.actor ? { actor: opts.actor } : {}),
+    ...(opts.apiKey ? { apiKey: opts.apiKey } : {}),
   });
   return { c, seen, slept };
 }
@@ -108,6 +110,29 @@ describe("requests", () => {
     const { c, seen } = client([json(200, DECISION)], { actor: "a" });
     await c.approve("r", 1, { actor: "b" });
     assert.equal(seen[0]!.headers.get("x-actor"), "b");
+  });
+
+  it("sends the api key on every request and no actor", async () => {
+    const { c, seen } = client([json(200, []), json(200, DECISION), json(201, {})], { apiKey: "scr_k", actor: "x" });
+    await c.rules();
+    await c.approve("r", 1);
+    const spec = { description: "x", conditions: [], action: "accept_liability" } as unknown as RuleSpec;
+    await c.propose("rule-1", spec, { agent_id: "agent-7" });
+    for (const s of seen) {
+      assert.equal(s.headers.get("x-api-key"), "scr_k");
+      assert.equal(s.headers.get("x-actor"), null);
+    }
+  });
+
+  it("sends the default actor on reads too (development-only servers)", async () => {
+    const { c, seen } = client([json(200, [])], { actor: "auditor" });
+    await c.rules();
+    assert.equal(seen[0]!.headers.get("x-actor"), "auditor");
+  });
+
+  it("maps 401 to UnauthorizedError", async () => {
+    const { c } = client([json(401, { detail: "invalid API key" })], { attempts: 1, apiKey: "bad" });
+    await assert.rejects(c.rules(), UnauthorizedError);
   });
 
   it("refuses state changes without an actor", async () => {

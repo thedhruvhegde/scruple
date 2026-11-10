@@ -41,10 +41,14 @@ describe("http, against `scruple serve`", { skip: !enabled }, () => {
   before(async () => {
     dir = mkdtempSync(join(tmpdir(), "scruple-sdk-"));
     const port = await freePort();
+    // The gate flow acts as two people (the agent, then the approver), so the server
+    // runs in the development-only mode that trusts X-Actor; reads go as "auditor".
+    // test/client.test.ts covers API keys.
     server = spawn(UV[0]!, [...UV.slice(1), "serve", "--db", join(dir, "t.db"), "--port", String(port)], {
       stdio: "ignore",
+      env: { ...process.env, SCRUPLE_AUTH_DEV_ACTOR_HEADER: "true" },
     });
-    c = new Client({ baseUrl: `http://127.0.0.1:${port}`, retry: { attempts: 1 } });
+    c = new Client({ baseUrl: `http://127.0.0.1:${port}`, actor: "auditor", retry: { attempts: 1 } });
     for (let i = 0; i < 300; i++) {
       try {
         if (await c.health()) return;

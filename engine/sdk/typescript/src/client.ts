@@ -1,7 +1,7 @@
 /**
  * Fetch-based client for the scruple HTTP API.
  *
- *   const c = new Client({ baseUrl: "http://127.0.0.1:8000", actor: "agent-7" });
+ *   const c = new Client({ baseUrl: "http://127.0.0.1:8000", apiKey: process.env.SCRUPLE_API_KEY });
  *   console.log((await c.version()).version);
  *   for await (const rule of c.iterRules()) console.log(rule.rule_id, rule.status);
  *
@@ -63,7 +63,15 @@ export function retryDelay(policy: RetryPolicy, attempt: number, retryAfter?: st
 
 export interface ClientOptions {
   baseUrl?: string;
-  /** Sent as X-Actor on calls that change state. */
+  /**
+   * A scruple API key (`scruple keys create`), sent as X-API-Key on every request.
+   * The server takes the caller's identity from it; no X-Actor is sent.
+   */
+  apiKey?: string;
+  /**
+   * For a server in the development-only mode that trusts X-Actor
+   * (SCRUPLE_AUTH_DEV_ACTOR_HEADER=true): sent on every request. Ignored with apiKey.
+   */
   actor?: string;
   retry?: Partial<RetryPolicy>;
   /** Per-try timeout in milliseconds. */
@@ -88,6 +96,7 @@ export class Client {
   readonly baseUrl: string;
   readonly actor: string | undefined;
   readonly retry: RetryPolicy;
+  readonly #apiKey: string | undefined;
   private readonly timeoutMs: number;
   private readonly fetchImpl: typeof fetch;
   private readonly sleep: (ms: number) => Promise<void>;
@@ -96,6 +105,7 @@ export class Client {
   constructor(options: ClientOptions = {}) {
     this.baseUrl = (options.baseUrl ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
     this.actor = options.actor;
+    this.#apiKey = options.apiKey;
     this.retry = { ...DEFAULT_RETRY, ...options.retry };
     if (!Number.isInteger(this.retry.attempts) || this.retry.attempts < 1) {
       throw new RangeError("retry.attempts must be an integer of at least 1");
@@ -116,6 +126,11 @@ export class Client {
       if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
     }
     const headers: Record<string, string> = { accept: "application/json", ...this.extraHeaders, ...options.headers };
+    if (this.#apiKey !== undefined) {
+      headers["x-api-key"] = this.#apiKey;
+    } else if (this.actor !== undefined && headers["x-actor"] === undefined) {
+      headers["x-actor"] = this.actor; // a development-only server authenticates by it
+    }
     let body: string | undefined;
     if (options.json !== undefined) {
       headers["content-type"] = "application/json";
@@ -153,6 +168,7 @@ export class Client {
   }
 
   private actorHeaders(actor: string | undefined): Record<string, string> {
+    if (this.#apiKey !== undefined) return {}; // the key is the identity
     const who = actor ?? this.actor;
     if (!who) throw new TypeError("this call needs an actor: pass { actor } here or to new Client()");
     return { "x-actor": who };
@@ -188,13 +204,18 @@ export class Client {
     return this.json("GET", "/version");
   }
 
+  /** Who the server says the caller is: subject, tenant, method, permissions. */
+  whoami(): Promise<Record<string, unknown>> {
+    return this.json("GET", "/auth/whoami");
+  }
+
   openapi(): Promise<Record<string, unknown>> {
     return this.json("GET", "/openapi.json");
   }
 
   // --- rules ----------------------------------------------------------------------
 
-  /** Register a candidate rule version. The actor is `provenance.agent_id`. */
+  /** Register a candidate rule version. The caller (the key's subject) must be `provenance.agent_id`. */
   propose(
     ruleId: string,
     spec: RuleSpec,
@@ -202,7 +223,8 @@ export class Client {
     options: { owner?: string } = {},
   ): Promise<RuleVersion> {
     const body: RegisterIn = { rule_id: ruleId, spec, owner: options.owner ?? provenance.agent_id, provenance };
-    return this.json("POST", "/rules", { json: body, headers: { "x-actor": provenance.agent_id } });
+    const headers: Record<string, string> = this.#apiKey === undefined ? { "x-actor": provenance.agent_id } : {};
+    return this.json("POST", "/rules", { json: body, headers });
   }
 
   rules(page: Page = {}): Promise<RuleVersion[]> {

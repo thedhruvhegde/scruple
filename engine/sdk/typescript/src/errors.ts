@@ -29,7 +29,11 @@ export class ApiError extends ScrupleError {
 export class BadRequestError extends ApiError {
   override name = "BadRequestError";
 }
-/** 403: the actor may not do this (e.g. approving its own rule). */
+/** 401: no credential, or one the server refused (unknown, revoked or expired key). */
+export class UnauthorizedError extends ApiError {
+  override name = "UnauthorizedError";
+}
+/** 403: the caller may not do this (a missing permission, or approving its own rule). */
 export class ForbiddenError extends ApiError {
   override name = "ForbiddenError";
 }
@@ -63,6 +67,7 @@ type ApiErrorClass = new (
 
 const BY_STATUS: Record<number, ApiErrorClass> = {
   400: BadRequestError,
+  401: UnauthorizedError,
   403: ForbiddenError,
   404: NotFoundError,
   409: ConflictError,

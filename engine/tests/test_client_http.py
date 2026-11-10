@@ -10,12 +10,16 @@ from fastapi.testclient import TestClient
 
 import scruple
 from scruple.api.app import create_app
+from scruple.auth.authn import Authenticator
+from scruple.auth.keys import ApiKeyService, ScryptParams
+from scruple.auth.rbac import Role, key_permissions
 from scruple.client import (
     NO_RETRY,
     Client,
     ConflictError,
     ForbiddenError,
     NotFoundError,
+    UnauthorizedError,
     ValidationError,
 )
 from scruple.client.models import DecisionOut, Outcome, Provenance, RuleStatus, RuleVersion
@@ -28,6 +32,15 @@ from scruple.version import package_version
 
 AGENT = "dispute-agent-01"
 RISK = "model-risk@demo.bank"
+# Most tests run the server in the development-only X-Actor mode, so one client can
+# act as several people; the TestClient reads as "auditor" by default.
+# test_api_keys_end_to_end uses real API keys.
+DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}
+
+
+def _dev(gate: AgentGate) -> TestClient:
+    return TestClient(create_app(gate, auth=DEV_AUTH), headers=READER)
 
 
 def _borrow(test_client: TestClient) -> httpx.Client:
@@ -49,7 +62,7 @@ def gate() -> AgentGate:
 
 @pytest.fixture
 def client(gate: AgentGate) -> Client:
-    return Client(http_client=_borrow(TestClient(create_app(gate))), retry=NO_RETRY)
+    return Client(http_client=_borrow(_dev(gate)), retry=NO_RETRY)
 
 
 def _prov() -> Provenance:
@@ -131,7 +144,7 @@ def test_state_changing_calls_need_an_actor(client: Client) -> None:
 
 
 def test_default_actor(gate: AgentGate) -> None:
-    c = Client(http_client=_borrow(TestClient(create_app(gate))), actor=AGENT, retry=NO_RETRY)
+    c = Client(http_client=_borrow(_dev(gate)), actor=AGENT, retry=NO_RETRY)
     c.propose(GOOD_RULE_ID, GOOD_RULE, _prov())
     assert len(c.evaluate(GOOD_RULE_ID, 1)) == 2
 
@@ -149,7 +162,45 @@ def test_segments_are_percent_encoded(client: Client) -> None:
 
 
 def test_context_manager_does_not_close_a_borrowed_client(gate: AgentGate) -> None:
-    http = TestClient(create_app(gate))
+    http = _dev(gate)
     with Client(http_client=_borrow(http)) as c:
         assert c.health()
     assert http.get("/health").status_code == 200
+
+
+def test_api_keys_end_to_end(gate: AgentGate) -> None:
+    """Against a server with real authentication: the key is the identity."""
+    keys = ApiKeyService(gate.storage, params=ScryptParams(n=1024), permissions_for=key_permissions)
+
+    def key(subject: str, role: Role) -> str:
+        return keys.create(subject, (), "local-admin", roles=[role])[1].get_secret_value()
+
+    http = _borrow(TestClient(create_app(gate, auth=Authenticator(keys))))
+    agent = Client(http_client=http, api_key=key(AGENT, Role.PROPOSER), retry=NO_RETRY)
+    risk = Client(http_client=http, api_key=key(RISK, Role.APPROVER), retry=NO_RETRY)
+    auditor = Client(http_client=http, api_key=key("auditor", Role.AUDITOR), retry=NO_RETRY)
+    assert agent.whoami()["subject"] == AGENT and agent.whoami()["method"] == "api_key"
+    agent.propose(GOOD_RULE_ID, GOOD_RULE, _prov())
+    assert [d.outcome for d in agent.evaluate(GOOD_RULE_ID, 1)] == [
+        Outcome.PROMOTE,
+        Outcome.CANARY_PASSED,
+    ]
+    with pytest.raises(ForbiddenError):
+        auditor.approve(GOOD_RULE_ID, 1)  # no `approve` permission
+    with pytest.raises(ForbiddenError):
+        agent.approve(GOOD_RULE_ID, 1)
+    assert risk.approve(GOOD_RULE_ID, 1).outcome is Outcome.ACTIVATED
+    assert gate.decisions(GOOD_RULE_ID)[-1].decision.actor == RISK
+    assert auditor.verify_integrity().ok
+    with pytest.raises(UnauthorizedError):
+        Client(http_client=http, api_key="scr_0123456789abcdef_" + "a" * 43).rules()
+    with pytest.raises(UnauthorizedError):
+        Client(http_client=http, retry=NO_RETRY).rules()  # no credential at all
+
+
+def test_dev_mode_actor_is_sent_on_reads_too(gate: AgentGate) -> None:
+    """A development-only server authenticates reads by X-Actor as well."""
+    http = _borrow(TestClient(create_app(gate, auth=DEV_AUTH)))  # no default header
+    assert Client(http_client=http, actor="auditor", retry=NO_RETRY).rules()
+    with pytest.raises(UnauthorizedError):
+        Client(http_client=http, retry=NO_RETRY).rules()

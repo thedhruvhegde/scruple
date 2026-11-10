@@ -2,10 +2,16 @@
 
     from scruple import Client
 
-    with Client("http://127.0.0.1:8000", actor="agent-7") as c:
-        print(c.version().line())
+    with Client("http://127.0.0.1:8000", api_key=os.environ["SCRUPLE_API_KEY"]) as c:
+        print(c.whoami()["subject"])
         for rule in c.iter_rules():
             print(rule.ref, rule.status)
+
+Authentication: `api_key` (a key from `scruple keys create`) goes out as `X-API-Key`
+on every request, and the server takes the caller's identity from it. `actor` is
+for a server in the development-only mode that trusts `X-Actor`
+(`SCRUPLE_AUTH_DEV_ACTOR_HEADER=true`): sent on every request (a per-call `actor`
+overrides it on calls that change state); with an API key it is not sent.
 
 Responses are parsed into the server's own Pydantic models (`RuleVersion`,
 `Decision`, `BuildInfo`, ...), so a field the server adds or renames shows up as a
@@ -92,19 +98,23 @@ class Client:
         self,
         base_url: str = "http://127.0.0.1:8000",
         *,
+        api_key: str | None = None,
         actor: str | None = None,
         timeout: float = DEFAULT_TIMEOUT,
         retry: RetryPolicy | None = None,
         http_client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
-        """`actor` is sent as `X-Actor` on calls that change state.
+        """`api_key` is sent as `X-API-Key` on every request; it is the caller's
+        identity. Without one, `actor` is sent as `X-Actor` on every request
+        (development-only servers).
 
         Pass `http_client` to reuse a configured `httpx.Client` (or a Starlette
         `TestClient` for an in-process app); its base URL is then used as is and the
         client is not closed by `close()`.
         """
         self.actor = actor
+        self._api_key = api_key  # never in repr, logs or errors
         self.retry = retry or RetryPolicy()
         self._sleep = sleep
         self._owns_http = http_client is None
@@ -130,6 +140,8 @@ class Client:
     # --- transport --------------------------------------------------------------------
 
     def _headers(self, actor: str | None, needs_actor: bool) -> dict[str, str]:
+        if self._api_key is not None:
+            return {}  # the key is the identity (sent by `request`)
         who = actor or self.actor
         if needs_actor and not who:
             raise ValueError("this call needs an actor: pass actor= here or to Client()")
@@ -147,6 +159,11 @@ class Client:
         """Send one request with the retry policy; raise `APIError` on non-2xx."""
         method = method.upper()
         clean = {k: v for k, v in (params or {}).items() if v is not None}
+        if self._api_key is not None:
+            headers = {**(headers or {}), "X-API-Key": self._api_key}
+        elif self.actor is not None and not any(k.lower() == "x-actor" for k in headers or {}):
+            # A development-only server authenticates every request by X-Actor.
+            headers = {**(headers or {}), "X-Actor": self.actor}
         attempt = 0
         while True:
             attempt += 1
@@ -205,6 +222,11 @@ class Client:
     def version(self) -> BuildInfo:
         return self._get("/version", BuildInfo)
 
+    def whoami(self) -> dict[str, Any]:
+        """Who the server says the caller is: subject, tenant, method, permissions."""
+        who: dict[str, Any] = self.request("GET", "/auth/whoami").json()
+        return who
+
     def openapi(self) -> dict[str, Any]:
         schema: dict[str, Any] = self.request("GET", "/openapi.json").json()
         return schema
@@ -220,7 +242,8 @@ class Client:
         owner: str | None = None,
         actor: str | None = None,
     ) -> RuleVersion:
-        """Register a candidate rule version. The actor must be `provenance.agent_id`."""
+        """Register a candidate rule version. The caller (the API key's subject, or the
+        actor) must be `provenance.agent_id`."""
         body = RegisterIn(
             rule_id=rule_id, spec=spec, owner=owner or provenance.agent_id, provenance=provenance
         )

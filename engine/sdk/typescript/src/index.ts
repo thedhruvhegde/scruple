@@ -10,6 +10,7 @@ export {
   ScrupleError,
   ServerError,
   TransportError,
+  UnauthorizedError,
   ValidationError,
   errorFor,
 } from "./errors.js";

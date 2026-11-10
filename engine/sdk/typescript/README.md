@@ -26,13 +26,17 @@ npm run check-generated                  # src/schema.ts matches openapi.json
 ```ts
 import { Client, ForbiddenError } from "@scruple/client";
 
-const c = new Client({ baseUrl: "http://127.0.0.1:8000", actor: "agent-7" });
+// an API key from `scruple keys create`; the server takes the caller's identity from it
+const c = new Client({ baseUrl: "http://127.0.0.1:8000", apiKey: process.env.SCRUPLE_API_KEY });
 await c.version();
 for await (const rule of c.iterRules(100)) console.log(rule.rule_id, rule.status);
 ```
 
+- auth: `apiKey` goes out as `X-API-Key` on every request. `actor` (sent as `X-Actor`)
+  only works against a server in the development-only mode
+  (`SCRUPLE_AUTH_DEV_ACTOR_HEADER=true`).
 - errors: `ApiError` with `status`, `detail`, `requestId`; subclasses `BadRequestError`,
-  `ForbiddenError`, `NotFoundError`, `ConflictError`, `ValidationError`, `RateLimitedError`,
+  `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `ValidationError`, `RateLimitedError`,
   `ServerError`. no response at all: `TransportError`.
 - retries: GET only, on network errors and 429/502/503/504, backoff 250 ms doubling to 8 s,
   `Retry-After` honoured. POST is never retried, so an evaluation or approval cannot run twice.
@@ -50,7 +54,7 @@ const { episode_id } = await sim.callTool("start_dispute_episode", { seed: 7 });
 
 ## examples
 
-- `examples/gate-flow.ts`: propose, evaluate, approve, report, verify. `npm run example:http`
-  with `uv run scruple serve` running.
+- `examples/gate-flow.ts`: propose, evaluate, approve, report, verify. it acts as two
+  people, so `npm run example:http` needs `SCRUPLE_AUTH_DEV_ACTOR_HEADER=true uv run scruple serve`.
 - `examples/dispute-episode.ts`: one synthetic dispute through the mcp simulator with an
   evidence policy. `npm run example:mcp`.

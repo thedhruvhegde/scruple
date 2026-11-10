@@ -13,6 +13,7 @@ from scruple.client.errors import (
     ScrupleError,
     ServerError,
     TransportError,
+    UnauthorizedError,
     ValidationError,
 )
 
@@ -29,5 +30,6 @@ __all__ = [
     "ScrupleError",
     "ServerError",
     "TransportError",
+    "UnauthorizedError",
     "ValidationError",
 ]

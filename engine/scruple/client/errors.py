@@ -31,8 +31,13 @@ class BadRequestError(APIError):
     """400."""
 
 
+class UnauthorizedError(APIError):
+    """401: no credential, or one the server refused (unknown, revoked, expired key)."""
+
+
 class ForbiddenError(APIError):
-    """403: the actor may not do this (e.g. approving its own rule)."""
+    """403: the caller may not do this (a missing permission, or approving its own
+    rule)."""
 
 
 class NotFoundError(APIError):
@@ -57,6 +62,7 @@ class ServerError(APIError):
 
 _BY_STATUS: dict[int, type[APIError]] = {
     400: BadRequestError,
+    401: UnauthorizedError,
     403: ForbiddenError,
     404: NotFoundError,
     409: ConflictError,

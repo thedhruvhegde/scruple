@@ -11,6 +11,7 @@ from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from scruple.api.app import MAX_PAGE, TOTAL_COUNT, create_app
+from scruple.auth.authn import Authenticator
 from scruple.client import NO_RETRY, Client, ValidationError
 from scruple.clock import SteppingClock
 from scruple.gate import GateConfig
@@ -18,6 +19,8 @@ from scruple.registry import Provenance
 from scruple.service import AgentGate
 from scruple.sim.library import BAD_RULE, BAD_RULE_ID, GOOD_RULE, GOOD_RULE_ID
 from scruple.storage import SQLiteStorage
+
+READER = {"X-Actor": "auditor"}
 
 
 def _borrow(test_client: TestClient) -> httpx.Client:
@@ -38,7 +41,8 @@ def http() -> TestClient:
     for rule_id, spec in ((GOOD_RULE_ID, GOOD_RULE), (BAD_RULE_ID, BAD_RULE)):
         g.propose(rule_id, spec, "ops", prov)
         g.evaluate(rule_id, 1, "agent-1")
-    return TestClient(create_app(g))
+    # Development-only X-Actor trust; tests/test_client_http.py covers real keys.
+    return TestClient(create_app(g, auth=Authenticator(dev_actor_header=True)), headers=READER)
 
 
 @pytest.fixture(scope="module")

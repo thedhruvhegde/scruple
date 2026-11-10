@@ -3,7 +3,11 @@
  * it (shadow then canary, synthetic cases), approve as a human reviewer, read the
  * evidence report, then verify the audit chain.
  *
- *   uv run scruple serve &              # http://127.0.0.1:8000
+ * It acts as two people (the agent, then a human approver), so it needs a server in
+ * the development-only mode that trusts X-Actor; against a real deployment, use one
+ * API key per identity (`new Client({ apiKey })`).
+ *
+ *   SCRUPLE_AUTH_DEV_ACTOR_HEADER=true uv run scruple serve &   # http://127.0.0.1:8000
  *   npm run example:http
  *   SCRUPLE_URL=http://host:8000 node dist/examples/gate-flow.js
  */
@@ -47,5 +51,5 @@ export async function runFlow(c: Client, log: (line: string) => void = console.l
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  await runFlow(new Client({ baseUrl: process.env.SCRUPLE_URL ?? "http://127.0.0.1:8000" }));
+  await runFlow(new Client({ baseUrl: process.env.SCRUPLE_URL ?? "http://127.0.0.1:8000", actor: "auditor" }));
 }
