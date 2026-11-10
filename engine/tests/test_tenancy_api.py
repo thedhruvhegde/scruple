@@ -21,9 +21,9 @@ from hypothesis import strategies as st
 
 from scruple.api.app import create_app
 from scruple.api.strict import takes_body
-from scruple.auth.authn import Authenticator
 from scruple.audit.models import genesis_hash
-from scruple.auth.deps import iter_routes
+from scruple.auth.authn import Authenticator
+from scruple.auth.deps import iter_routes, protection_of
 from scruple.auth.keys import ApiKeyService, ScryptParams
 from scruple.auth.limits import Limits
 from scruple.auth.ratelimit import Limit
@@ -32,6 +32,8 @@ from scruple.clock import SteppingClock
 from scruple.domain import Action, RuleSpec
 from scruple.gate import GateConfig
 from scruple.gate.shadow import LiveDecision
+from scruple.jobs import JobKind, JobSubmit
+from scruple.jobs.queue import queue_for
 from scruple.registry import Provenance
 from scruple.service import AgentGate
 from scruple.sim.generator import generate_cases
@@ -42,7 +44,23 @@ from tests.test_gate_shadow_imported import synthetic
 
 FAST = ScryptParams(n=1024)
 A, B = "bank-a", "bank-b"
-LISTS = {"/rules", "/decisions", "/audit/verify", "/auth/whoami", "/auth/keys", "/openapi.json"}
+LISTS = {
+    "/rules",
+    "/decisions",
+    "/audit/verify",
+    "/auth/whoami",
+    "/auth/keys",
+    "/openapi.json",
+    "/jobs",
+    # console pages that list the caller's own tenant (or the shared synthetic runs)
+    "/console/",
+    "/console/approvals",
+    "/console/diff/rules",
+    "/console/diff/agents",
+    "/console/backtests",
+}
+# Routes that create in the caller's own tenant.
+CREATES = {"/rules", "/jobs"}
 CFG = GateConfig(n_cases=1_000, bootstrap_resamples=100, canary_n_cases=1_000)
 
 
@@ -56,6 +74,7 @@ class World:
         many = Limit(per_minute=1_000_000, burst=1_000_000)
         limits = Limits(default=many, anonymous=many, auth_failures=many)
         self.client = TestClient(create_app(root, auth=Authenticator(self.keys), limits=limits))
+        self.queue = queue_for(self.db)
         self.headers: dict[str, dict[str, dict[str, str]]] = {}
         for tenant in (A, B):
             for role in Role:
@@ -87,8 +106,15 @@ def _routes(w: World) -> list[Any]:
     return list(iter_routes(cast(FastAPI, w.client.app)))
 
 
-def _fill(path: str, rule_id: str, decision_id: str) -> str:
-    values = {"rule_id": rule_id, "version": "1", "decision_id": decision_id}
+def _fill(path: str, rule_id: str, decision_id: str, job_id: str = "job-00000001") -> str:
+    values = {
+        "rule_id": rule_id,
+        "version": "1",
+        "decision_id": decision_id,
+        "job_id": job_id,
+        "name": "x",
+        "episode_id": "ep-000000000000",
+    }
     return re.sub(r"\{(\w+)\}", lambda m: values[m.group(1)], path)
 
 
@@ -105,6 +131,8 @@ def _bodies(agent: str) -> dict[str, dict[str, Any]]:
     ]
     return {
         "/rules/{rule_id}/rollback": {"reason": "cross-tenant probe"},
+        # B's own (made-up) rule: a job is created in B's tenant and names nothing of A's
+        "/jobs": {"kind": "gate_evaluation", "params": {"rule_id": "b-probe", "version": 1}},
         "/shadow/rules/{rule_id}/versions/{version}/decisions": {"decisions": live},
         "/shadow/rules/{rule_id}/versions/{version}/imported/decisions": {"decisions": imported},
         "/shadow/rules/{rule_id}/versions/{version}/imported/outcomes": {
@@ -167,13 +195,22 @@ def test_no_route_reaches_another_tenants_data(
     ]
     target_decision = a_decisions[-1].decision_id if a_decisions else "dec-00001"
     b_decisions = {d.decision.decision_id for d in w.gate(B).decisions()}
+    a_job, _ = w.queue.submit(
+        JobSubmit(
+            kind=JobKind.GATE_EVALUATION,
+            params={"rule_id": target_rule, "version": 1, "actor": "proposer-bank-a"},
+        ),
+        tenant_id=A,
+        actor="proposer-bank-a",
+    )
+    markers.append(f'"job_id":"{a_job.job_id}"')
 
     for route in _routes(w):
-        if route.path in {"/health", "/version", "/ingest/stripe/webhook"}:
-            continue
+        if {p.kind for p in protection_of(route)} != {"permission"}:
+            continue  # public or self-authenticating: reveals no tenant data
         method = sorted(route.methods or {"GET"})[0].lower()
         for role, hdr in w.headers[B].items():
-            path = _fill(route.path, target_rule, target_decision)
+            path = _fill(route.path, target_rule, target_decision, a_job.job_id)
             body = _body(route, f"{role}-{B}")
             kw: dict[str, Any] = {"headers": hdr}
             if body is not None:
@@ -182,11 +219,15 @@ def test_no_route_reaches_another_tenants_data(
             text = r.text
             leaked = [m for m in markers if m and m in text]
             assert not leaked, (route.path, role, r.status_code, leaked)
-            if route.path == "/rules" and method == "post":
-                # creates in B's own tenant (here refused: empty body or no permission)
-                assert r.status_code in (403, 422), (role, r.status_code, text)
+            if route.path in CREATES and method == "post":
+                # creates in B's own tenant, or refused (empty body, no permission)
+                assert r.status_code in (202, 403, 422), (role, r.status_code, text)
             elif route.path in LISTS:
                 assert r.status_code in (200, 403), (route.path, role, r.status_code, text)
+            elif route.path.startswith("/console/") and method == "post":
+                # a console form without its CSRF token is refused before any lookup;
+                # the cross-tenant approve with a valid token is in test_console_auth.py
+                assert r.status_code in (403, 404, 415), (route.path, role, r.status_code)
             elif "{decision_id}" in route.path and target_decision in b_decisions:
                 # B has its own decision with this number: B's, never A's (checked above)
                 assert r.status_code in (200, 403, 404), (route.path, role, text)

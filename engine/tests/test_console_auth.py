@@ -111,3 +111,19 @@ def test_another_tenant_sees_none_of_this_tenants_rules(
     else:  # standalone: one database, one tenant; nobody else gets in
         assert r.status_code == 404
     assert c.get(f"{VERSION}/evidence.json").status_code == 404
+
+
+def test_another_tenants_approver_cannot_approve_this_tenants_rule(
+    setup: tuple[AgentGate, ApiKeyService], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A valid CSRF token, a valid approver key and the same name, in another tenant."""
+    g, keys = setup
+    monkeypatch.setenv("SCRUPLE_CONSOLE_SECRET", SECRET.decode())  # the token is computable
+    app = create_app(g, auth=Authenticator(keys))
+    c = _client(app, _key(keys, OPERATOR, Role.APPROVER, tenant="other-bank"))
+    token = csrf_token(c)
+    n = len(g.audit.entries())
+    r = c.post(f"{BASE}/approve", data={"csrf": token, "reason": "same name, other bank"})
+    assert r.status_code == 404
+    assert g.registry.get(GOOD_RULE_ID, 1).status is RuleStatus.CANARY
+    assert len(g.audit.entries()) == n
