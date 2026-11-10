@@ -1,0 +1,56 @@
+{
+ "allocation": {
+  "collected_minor": 0,
+  "open_minor": 0,
+  "voided_minor": 0,
+  "written_off_minor": 69625
+ },
+ "events": [
+  {
+   "on": "2026-06-14",
+   "type": "invoiced"
+  },
+  {
+   "attempt": 0,
+   "on": "2026-06-19",
+   "type": "debit_settled"
+  },
+  {
+   "addenda_info": "RECEIVER CONTACTED RDFI",
+   "attempt": 0,
+   "code": "R03",
+   "on": "2026-06-19",
+   "return_id": "RET-1",
+   "settles_on": "2026-06-24",
+   "trace_number": "142501280322615",
+   "type": "return_scheduled"
+  },
+  {
+   "on": "2026-06-24",
+   "return_id": "RET-1",
+   "type": "return_settled"
+  },
+  {
+   "action": "write_off",
+   "args": {},
+   "on": "2026-06-30",
+   "type": "action_applied"
+  },
+  {
+   "amount_minor": 69625,
+   "on": "2026-06-30",
+   "type": "written_off"
+  }
+ ],
+ "family": "account_closed",
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 1,
+ "synthetic": true,
+ "trace_head": "98d509caf0333fe9d7d15550327c1e562472e1fc7d7ba2a7c67a8c159c28757f"
+}

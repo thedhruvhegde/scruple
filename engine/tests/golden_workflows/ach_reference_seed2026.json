@@ -1,0 +1,97 @@
+{
+ "allocation": {
+  "collected_minor": 0,
+  "open_minor": 0,
+  "voided_minor": 0,
+  "written_off_minor": 208800
+ },
+ "events": [
+  {
+   "on": "2026-01-13",
+   "type": "invoiced"
+  },
+  {
+   "attempt": 0,
+   "on": "2026-02-02",
+   "type": "debit_settled"
+  },
+  {
+   "addenda_info": "",
+   "attempt": 0,
+   "code": "R04",
+   "on": "2026-02-02",
+   "return_id": "RET-1",
+   "settles_on": "2026-02-05",
+   "trace_number": "692590574577677",
+   "type": "return_scheduled"
+  },
+  {
+   "addenda_info": "",
+   "attempt": 0,
+   "code": "R04",
+   "on": "2026-02-02",
+   "return_id": "RET-2",
+   "settles_on": "2026-02-10",
+   "trace_number": "049009865084279",
+   "type": "return_scheduled"
+  },
+  {
+   "on": "2026-02-05",
+   "return_id": "RET-1",
+   "type": "return_settled"
+  },
+  {
+   "on": "2026-02-10",
+   "return_id": "RET-2",
+   "type": "return_settled"
+  },
+  {
+   "action": "dishonor",
+   "args": {
+    "code": "R67",
+    "return_id": "RET-2"
+   },
+   "on": "2026-02-10",
+   "type": "action_applied"
+  },
+  {
+   "code": "R67",
+   "on": "2026-02-10",
+   "return_id": "RET-2",
+   "settles_on": "2026-02-11",
+   "type": "dishonor_submitted"
+  },
+  {
+   "on": "2026-02-11",
+   "return_id": "RET-2",
+   "type": "dishonor_settled"
+  },
+  {
+   "on": "2026-02-13",
+   "return_id": "RET-2",
+   "type": "dishonor_final"
+  },
+  {
+   "action": "write_off",
+   "args": {},
+   "on": "2026-02-13",
+   "type": "action_applied"
+  },
+  {
+   "amount_minor": 208800,
+   "on": "2026-02-13",
+   "type": "written_off"
+  }
+ ],
+ "family": "duplicate_return",
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 2026,
+ "synthetic": true,
+ "trace_head": "fc32f5493ef646d231abbff24ddce27b32bd3b01501d5a21145492d7d240bc4d"
+}

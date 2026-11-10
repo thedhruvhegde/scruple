@@ -14,12 +14,14 @@ import argparse
 import json
 from typing import Any
 
+from scruple.agents.ach_tools import ACH_TOOL_NAMES, ach_anthropic_tools
 from scruple.agents.dispute_tools import DISPUTE_TOOL_NAMES, dispute_anthropic_tools
 from scruple.agents.episode import EpisodeError
 from scruple.agents.store import KINDS, EpisodeStore, UnknownEpisodeError
 from scruple.agents.tools import TOOL_NAMES, anthropic_tools
 
-ALL_TOOL_NAMES = tuple(dict.fromkeys((*TOOL_NAMES, *DISPUTE_TOOL_NAMES)))
+ALL_TOOL_NAMES = tuple(dict.fromkeys((*TOOL_NAMES, *DISPUTE_TOOL_NAMES, *ACH_TOOL_NAMES)))
+KIND_TOOLS = {"dispute": dispute_anthropic_tools, "ach": ach_anthropic_tools}
 
 
 def _print(obj: Any) -> None:
@@ -70,6 +72,7 @@ def cmd_episode(args: argparse.Namespace) -> int:
                 if args.kind in ("dispute", "scenario")
                 else anthropic_tools()
             )
+            _print(KIND_TOOLS.get(args.kind, anthropic_tools)())
             return 0
         case "call":
             return _call(store, args.episode_id, args.tool, args.json)
