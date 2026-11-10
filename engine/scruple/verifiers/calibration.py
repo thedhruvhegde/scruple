@@ -55,15 +55,26 @@ def brier_ref(ps: Sequence[tuple[float, int]]) -> float:
 
 
 def ece(ps: Sequence[tuple[float, int]], bins: int = BINS) -> float:
-    ordered = sorted(ps)
+    """Expected calibration error over equal-mass bins by stated probability.
+
+    Statements with the same probability always share a bin (the bin of the first of
+    them in rank order). Sorting the (p, y) pairs and cutting at fixed ranks, as an
+    earlier version did, ordered tied statements by outcome and split them into an
+    all-loss and an all-win bin, so a calibrated agent that states few distinct values
+    showed a large ECE (0.5 for a constant 0.5 on a 50% base rate)."""
+    ordered = sorted(p for p, _ in ps)
     n = len(ordered)
+    first: dict[float, int] = {}
+    for i, p in enumerate(ordered):
+        first.setdefault(p, i)
+    groups: dict[int, list[tuple[float, int]]] = {}
+    for p, y in ps:
+        groups.setdefault(first[p] * bins // n, []).append((p, y))
     total = 0.0
-    for b in range(bins):
-        chunk = ordered[b * n // bins : (b + 1) * n // bins]
-        if chunk:
-            conf = sum(p for p, _ in chunk) / len(chunk)
-            acc = sum(y for _, y in chunk) / len(chunk)
-            total += len(chunk) / n * abs(acc - conf)
+    for chunk in groups.values():
+        conf = sum(p for p, _ in chunk) / len(chunk)
+        acc = sum(y for _, y in chunk) / len(chunk)
+        total += len(chunk) / n * abs(acc - conf)
     return total
 
 
