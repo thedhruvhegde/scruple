@@ -32,6 +32,7 @@ from schemathesis.core.failures import Failure
 
 from scruple.api.app import create_app
 from scruple.auth.authn import Authenticator
+from scruple.auth.limits import Limits
 from scruple.clock import SteppingClock
 from scruple.gate.config import GateConfig
 from scruple.service import AgentGate
@@ -55,7 +56,13 @@ def _app() -> Any:
     try:
         # Development-only X-Actor trust: the fuzzer explores the gate's inputs, not
         # credentials (tests/test_auth_*.py).
-        return create_app(gate, auth=Authenticator(dev_actor_header=True))
+        # Body size limits off too: the schema cannot express them, and generated
+        # bodies exceed 2 MiB (tests/test_auth_ratelimit.py covers the 413).
+        return create_app(
+            gate,
+            auth=Authenticator(dev_actor_header=True),
+            limits=Limits(max_body_bytes=2**40),
+        )
     finally:
         if old is None:
             del os.environ[SECRETS_ENV]

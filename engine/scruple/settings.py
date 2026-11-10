@@ -76,6 +76,14 @@ class Settings(BaseModel):
     oidc_default_tenant: str | None = None
     oidc_roles_claim: str = "scruple_roles"
     oidc_subject_claim: str = "sub"
+    # --- request limits (scruple.auth.limits), per API key unless the key says otherwise ---
+    rate_limit_per_minute: int = Field(default=600, ge=1, le=1_000_000)
+    rate_limit_burst: int = Field(default=100, ge=1, le=1_000_000)
+    rate_limit_anonymous_per_minute: int = Field(default=120, ge=1, le=1_000_000)
+    rate_limit_anonymous_burst: int = Field(default=30, ge=1, le=1_000_000)
+    rate_limit_auth_failures_per_minute: int = Field(default=30, ge=1, le=1_000_000)
+    rate_limit_auth_failures_burst: int = Field(default=10, ge=1, le=1_000_000)
+    max_body_bytes: int = Field(default=2 * 1024 * 1024, ge=1024, le=64 * 1024 * 1024)
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""

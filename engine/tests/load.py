@@ -75,7 +75,15 @@ def serving(db: Path) -> Iterator[str]:
         cwd=ROOT,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        env={**os.environ, "SCRUPLE_LOG_LEVEL": "WARNING"},
+        # Rate limits off the measurement path: this measures throughput, not throttling.
+        env={
+            **os.environ,
+            "SCRUPLE_LOG_LEVEL": "WARNING",
+            "SCRUPLE_RATE_LIMIT_PER_MINUTE": "1000000",
+            "SCRUPLE_RATE_LIMIT_BURST": "1000000",
+            "SCRUPLE_RATE_LIMIT_ANONYMOUS_PER_MINUTE": "1000000",
+            "SCRUPLE_RATE_LIMIT_ANONYMOUS_BURST": "1000000",
+        },
     )
     base = f"http://127.0.0.1:{port}"
     try:
