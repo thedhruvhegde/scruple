@@ -1,0 +1,160 @@
+# Default values for the scruple chart. Secrets are only ever REFERENCED here
+# (name + key of a Secret you create out of band); the chart never holds values.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/thedhruvhegde/scruple-engine
+  # Prefer a digest (from the release workflow summary); it wins over tag.
+  digest: ""
+  tag: ""  # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Non-secret engine settings (rendered into the ConfigMap as SCRUPLE_* env vars).
+config:
+  logLevel: INFO
+  logFormat: json
+  webWorkers: 1          # keep 1 if you use the in-memory shadow endpoints
+  webTimeout: 60
+  webGracefulTimeout: 25
+  webKeepalive: 75       # above the load balancer idle timeout (ALB default 60)
+  webMaxRequests: 0
+  readyAuditTtlSeconds: 30
+  metricsPublic: false   # true only if the NetworkPolicy alone guards /metrics
+  otelEnabled: false
+  otelServiceName: scruple-engine
+  otelExporterEndpoint: ""  # e.g. http://otel-collector.observability:4318
+  extraEnv: {}           # more SCRUPLE_* (non-secret) keys
+
+database:
+  # libpq URL WITHOUT a password. The password comes from passwordSecret.
+  url: "postgresql://scruple@postgres.example.internal:5432/scruple"
+  passwordSecret:
+    name: ""   # required: an existing Secret
+    key: password
+
+metrics:
+  # Bearer token for /metrics. Leave name empty to serve /metrics only if
+  # config.metricsPublic is true.
+  tokenSecret:
+    name: ""
+    key: token
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+
+heldoutSalt:
+  secret:
+    name: ""
+    key: salt
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}  # e.g. eks.amazonaws.com/role-arn for IRSA
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  privileged: false
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: scruple.example.internal
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  # Who may reach the API port. Empty selectors mean "pods in this namespace".
+  ingressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+  metricsFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+  # Where the pods may connect (DNS is always allowed).
+  postgres:
+    cidr: 10.0.0.0/8
+    port: 5432
+  extraEgress: []
+
+migrations:
+  enabled: true
+  backoffLimit: 1
+  activeDeadlineSeconds: 600
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+probes:
+  liveness:
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  startup:
+    periodSeconds: 2
+    failureThreshold: 30
+
+terminationGracePeriodSeconds: 40
+preStopSleepSeconds: 5
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpread:
+  enabled: true
+  maxSkew: 1

@@ -1,0 +1,10 @@
+apiVersion: v2
+name: scruple
+description: Scruple engine API (verifiers and change control for agents that move money). Postgres is external.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.25.0-0"
+home: https://github.com/thedhruvhegde/scruple
+sources:
+  - https://github.com/thedhruvhegde/scruple/tree/main/engine

@@ -1,0 +1,59 @@
+{{- if .Values.migrations.enabled }}
+{{- include "scruple.validate" . }}
+# alembic upgrade head before the new pods start, then import the synthetic
+# baseline once (idempotent), so replicas never race to do either.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "scruple.fullname" . }}-migrate
+  labels:
+    {{- include "scruple.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migrations.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migrations.activeDeadlineSeconds }}
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        {{- include "scruple.instanceLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "scruple.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: migrate
+          image: {{ include "scruple.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          # tini stays PID 1; the entrypoint is skipped so the steps are explicit.
+          command: ["/usr/bin/tini", "--", "sh", "-c"]
+          args:
+            - python -m scruple.storage.migrate && scruple rules > /dev/null
+          env:
+            {{- range $k, $v := (include "scruple.configData" . | fromYaml) }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+            {{- include "scruple.secretEnv" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.migrations.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 16Mi
+{{- end }}
