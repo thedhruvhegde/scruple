@@ -1,0 +1,412 @@
+{
+  "agents": {
+    "bandit_linucb": {
+      "claim_win": false,
+      "config": {
+        "alpha": 1.0
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "alpha": 0.2
+          },
+          "dev_value": 0.9651
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "alpha": 1.0
+          },
+          "dev_value": 0.9727
+        }
+      ],
+      "dev_seconds": 180.7,
+      "dev_value": 0.9727,
+      "kind": "bandit",
+      "name": "bandit_linucb",
+      "objective": "scorecard",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 748.3
+    },
+    "bandit_linucb_proxy": {
+      "claim_win": true,
+      "config": {
+        "alpha": 1.0
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "alpha": 0.2
+          },
+          "dev_value": 0.99
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "alpha": 1.0
+          },
+          "dev_value": 0.9912
+        }
+      ],
+      "dev_seconds": 116.7,
+      "dev_value": 0.9912,
+      "kind": "bandit",
+      "name": "bandit_linucb_proxy",
+      "objective": "proxy",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 643.3
+    },
+    "expert_rules": {
+      "claim_win": false,
+      "config": {
+        "escalate_min": 7500
+      },
+      "dev_episodes": 1200,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "escalate_min": 7500
+          },
+          "dev_value": 0.9685
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "escalate_min": 20000
+          },
+          "dev_value": 0.9655
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "escalate_min": 1000000000000
+          },
+          "dev_value": 0.9655
+        }
+      ],
+      "dev_seconds": 273.5,
+      "dev_value": 0.9685,
+      "kind": "rule",
+      "name": "expert_rules",
+      "objective": "scorecard",
+      "shared_data": [],
+      "train_episodes": 0,
+      "train_seconds": 0.0
+    },
+    "gbm": {
+      "claim_win": false,
+      "config": {
+        "max_depth": 3,
+        "n_estimators": 200
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "max_depth": 2,
+            "n_estimators": 100
+          },
+          "dev_value": 0.9746
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "max_depth": 3,
+            "n_estimators": 200
+          },
+          "dev_value": 0.9762
+        }
+      ],
+      "dev_seconds": 198.8,
+      "dev_value": 0.9762,
+      "kind": "supervised",
+      "name": "gbm",
+      "objective": "scorecard",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 160.5
+    },
+    "gbm_proxy": {
+      "claim_win": true,
+      "config": {
+        "max_depth": 2,
+        "n_estimators": 100
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "max_depth": 2,
+            "n_estimators": 100
+          },
+          "dev_value": 0.8712
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "max_depth": 3,
+            "n_estimators": 200
+          },
+          "dev_value": 0.8712
+        }
+      ],
+      "dev_seconds": 140.0,
+      "dev_value": 0.8712,
+      "kind": "supervised",
+      "name": "gbm_proxy",
+      "objective": "proxy",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 138.3
+    },
+    "logreg": {
+      "claim_win": false,
+      "config": {
+        "C": 1.0
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "C": 0.1
+          },
+          "dev_value": 0.9611
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "C": 1.0
+          },
+          "dev_value": 0.9724
+        }
+      ],
+      "dev_seconds": 197.8,
+      "dev_value": 0.9724,
+      "kind": "supervised",
+      "name": "logreg",
+      "objective": "scorecard",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 156.8
+    },
+    "logreg_proxy": {
+      "claim_win": true,
+      "config": {
+        "C": 0.1
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "C": 0.1
+          },
+          "dev_value": 0.8712
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "C": 1.0
+          },
+          "dev_value": 0.8712
+        }
+      ],
+      "dev_seconds": 178.1,
+      "dev_value": 0.8712,
+      "kind": "supervised",
+      "name": "logreg_proxy",
+      "objective": "proxy",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 157.2
+    },
+    "mc_planner": {
+      "claim_win": false,
+      "config": {
+        "min_count": 3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "min_count": 3
+          },
+          "dev_value": 0.9727
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "min_count": 15
+          },
+          "dev_value": 0.9702
+        }
+      ],
+      "dev_seconds": 198.6,
+      "dev_value": 0.9727,
+      "kind": "planner",
+      "name": "mc_planner",
+      "objective": "scorecard",
+      "shared_data": [
+        "explore"
+      ],
+      "train_episodes": 1500,
+      "train_seconds": 89.9
+    },
+    "mc_planner_proxy": {
+      "claim_win": true,
+      "config": {
+        "min_count": 3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "min_count": 3
+          },
+          "dev_value": 0.9862
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "min_count": 15
+          },
+          "dev_value": 0.9862
+        }
+      ],
+      "dev_seconds": 160.0,
+      "dev_value": 0.9862,
+      "kind": "planner",
+      "name": "mc_planner_proxy",
+      "objective": "proxy",
+      "shared_data": [
+        "explore"
+      ],
+      "train_episodes": 1500,
+      "train_seconds": 89.7
+    },
+    "q_learning": {
+      "claim_win": false,
+      "config": {
+        "epsilon": 0.3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "epsilon": 0.1
+          },
+          "dev_value": 0.9505
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "epsilon": 0.3
+          },
+          "dev_value": 0.9601
+        }
+      ],
+      "dev_seconds": 127.9,
+      "dev_value": 0.9601,
+      "kind": "q_learning",
+      "name": "q_learning",
+      "objective": "scorecard",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 716.8
+    },
+    "q_learning_proxy": {
+      "claim_win": true,
+      "config": {
+        "epsilon": 0.3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "epsilon": 0.1
+          },
+          "dev_value": 0.895
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "epsilon": 0.3
+          },
+          "dev_value": 0.96
+        }
+      ],
+      "dev_seconds": 93.5,
+      "dev_value": 0.96,
+      "kind": "q_learning",
+      "name": "q_learning_proxy",
+      "objective": "proxy",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 546.5
+    },
+    "random": {
+      "claim_win": false,
+      "config": {
+        "seed": 0
+      },
+      "dev_episodes": 400,
+      "dev_grid": [],
+      "dev_seconds": 26.7,
+      "dev_value": 0.7332,
+      "kind": "random",
+      "name": "random",
+      "objective": null,
+      "shared_data": [],
+      "train_episodes": 0,
+      "train_seconds": 0.0
+    }
+  },
+  "config": {
+    "dev_split": "dev",
+    "n_dev": 400,
+    "n_train": 1500,
+    "rollouts": 32,
+    "seed": 0,
+    "train_split": "train"
+  },
+  "note": "Synthetic. Every case comes from the scruple dispute simulator; the issuer is its assumed acceptance model (docs/ASSUMPTIONS.md A-21). Agents trained on the public train namespace, tuned on dev, scored once on the frozen held-out benchmark.",
+  "shared": {
+    "branch_episodes": 3069,
+    "branch_rows": 1569,
+    "branch_seconds": 138.1,
+    "confidence": {
+      "ce3": 0.99,
+      "covered": 0.8525,
+      "exploit": 0.7373,
+      "moot": 0.99,
+      "none": 0.01,
+      "partial": 0.4829
+    },
+    "explore_episodes": 1500,
+    "explore_seconds": 88.8
+  },
+  "synthetic": true,
+  "wall_seconds": 1508.7
+}

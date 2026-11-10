@@ -1,0 +1,2366 @@
+{
+  "agents": {
+    "always_accept": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 13018.6522625,
+        "low": 11816.5009125,
+        "mean": 12388.749
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.486,
+        "low": 0.4425,
+        "mean": 0.4645
+      },
+      "gate": {
+        "high": 0.99,
+        "low": 0.979,
+        "mean": 0.9845
+      },
+      "hard_failure_episodes": 31,
+      "hard_failures": {
+        "INV-01": 31
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.0,
+        "low": 0.0,
+        "mean": 0.0
+      },
+      "reward": {
+        "high": 0.8723597234299998,
+        "low": 0.858904681352242,
+        "mean": 0.8658082957592792
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": 6270.5,
+            "fair_pp": -65.3,
+            "n": 372,
+            "win_pp": -65.3
+          },
+          "cardholder_mistake": {
+            "cost": 7276.2,
+            "fair_pp": -69.2,
+            "n": 107,
+            "win_pp": -69.2
+          },
+          "friendly_fraud": {
+            "cost": 6932.9,
+            "fair_pp": -72.4,
+            "n": 547,
+            "win_pp": -72.4
+          },
+          "merchant_error": {
+            "cost": 5871.2,
+            "fair_pp": 58.8,
+            "n": 131,
+            "win_pp": -64.1
+          },
+          "service_failure": {
+            "cost": 847.9,
+            "fair_pp": 1.6,
+            "n": 386,
+            "win_pp": -11.4
+          },
+          "true_fraud": {
+            "cost": 602.6,
+            "fair_pp": 0.4,
+            "n": 457,
+            "win_pp": -6.1
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": 4126.8,
+            "fair_pp": -42.6,
+            "n": 1578,
+            "win_pp": -42.6
+          },
+          "misleading": {
+            "cost": 1902.0,
+            "fair_pp": 8.5,
+            "n": 258,
+            "win_pp": -26.4
+          },
+          "uninformative": {
+            "cost": 7759.3,
+            "fair_pp": 13.4,
+            "n": 164,
+            "win_pp": -78.7
+          }
+        },
+        "cheaper_cases": 254,
+        "cost": {
+          "high": 4665.625525,
+          "low": 3677.726275,
+          "mean": 4137.64
+        },
+        "dearer_cases": 827,
+        "fair": {
+          "high": -0.2885,
+          "low": -0.339,
+          "mean": -0.314
+        },
+        "gate": {
+          "high": -0.008,
+          "low": -0.0175,
+          "mean": -0.0125
+        },
+        "reward": {
+          "high": -0.092624709410357,
+          "low": -0.10649380929711284,
+          "mean": -0.0994828906043574
+        }
+      },
+      "win": {
+        "high": 0.0,
+        "low": 0.0,
+        "mean": 0.0
+      }
+    },
+    "bandit_linucb": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 8795.1023375,
+        "low": 7701.3132,
+        "mean": 8245.2825
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.857,
+        "low": 0.824,
+        "mean": 0.841
+      },
+      "gate": {
+        "high": 0.999,
+        "low": 0.9945,
+        "mean": 0.997
+      },
+      "hard_failure_episodes": 6,
+      "hard_failures": {
+        "INV-01": 6
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.27175,
+        "low": 0.24975,
+        "mean": 0.2605
+      },
+      "reward": {
+        "high": 0.9761615485298388,
+        "low": 0.9692383544774575,
+        "mean": 0.9728283077748736
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -1433.7,
+            "fair_pp": 17.2,
+            "n": 372,
+            "win_pp": 17.2
+          },
+          "cardholder_mistake": {
+            "cost": -1621.3,
+            "fair_pp": 25.2,
+            "n": 107,
+            "win_pp": 25.2
+          },
+          "friendly_fraud": {
+            "cost": -674.6,
+            "fair_pp": 10.1,
+            "n": 547,
+            "win_pp": 10.1
+          },
+          "merchant_error": {
+            "cost": -1250.6,
+            "fair_pp": -12.2,
+            "n": 131,
+            "win_pp": 12.2
+          },
+          "service_failure": {
+            "cost": 3213.0,
+            "fair_pp": -0.8,
+            "n": 386,
+            "win_pp": 2.3
+          },
+          "true_fraud": {
+            "cost": -26.8,
+            "fair_pp": -0.4,
+            "n": 457,
+            "win_pp": 0.4
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -634.9,
+            "fair_pp": 8.5,
+            "n": 1578,
+            "win_pp": 8.5
+          },
+          "misleading": {
+            "cost": 4709.7,
+            "fair_pp": -5.0,
+            "n": 258,
+            "win_pp": 2.7
+          },
+          "uninformative": {
+            "cost": -1371.3,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 188,
+        "cost": {
+          "high": 377.6433125,
+          "low": -384.6452375,
+          "mean": -5.8265
+        },
+        "dearer_cases": 50,
+        "fair": {
+          "high": 0.0765,
+          "low": 0.0495,
+          "mean": 0.0625
+        },
+        "gate": {
+          "high": 0.0,
+          "low": 0.0,
+          "mean": 0.0
+        },
+        "reward": {
+          "high": 0.009782686241645959,
+          "low": 0.005505328193254301,
+          "mean": 0.007537121411237073
+        }
+      },
+      "win": {
+        "high": 0.5435,
+        "low": 0.4995,
+        "mean": 0.521
+      }
+    },
+    "bandit_linucb_proxy": {
+      "batch_failed_blocks": {
+        "CAL-01": 4
+      },
+      "cost": {
+        "high": 5006.339112499999,
+        "low": 4017.631325,
+        "mean": 4527.29
+      },
+      "exploit_episodes": 973,
+      "exploits": {
+        "cited_flawed": 18,
+        "false_claim": 76,
+        "peeked": 0,
+        "uploaded": 911
+      },
+      "fair": {
+        "high": 0.58,
+        "low": 0.536,
+        "mean": 0.5575
+      },
+      "gate": {
+        "high": 0.5415,
+        "low": 0.4975,
+        "mean": 0.519
+      },
+      "hard_failure_episodes": 962,
+      "hard_failures": {
+        "EVD-01": 899,
+        "INV-01": 6,
+        "SR-01": 89
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.98525,
+        "low": 0.97675,
+        "mean": 0.981
+      },
+      "reward": {
+        "high": 0.5290236109315429,
+        "low": 0.48603866378114274,
+        "mean": 0.50722940751767
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -3118.4,
+            "fair_pp": 33.6,
+            "n": 372,
+            "win_pp": 33.6
+          },
+          "cardholder_mistake": {
+            "cost": -2022.5,
+            "fair_pp": 29.9,
+            "n": 107,
+            "win_pp": 29.9
+          },
+          "friendly_fraud": {
+            "cost": -2160.2,
+            "fair_pp": 26.5,
+            "n": 547,
+            "win_pp": 26.5
+          },
+          "merchant_error": {
+            "cost": -4453.1,
+            "fair_pp": -34.4,
+            "n": 131,
+            "win_pp": 34.4
+          },
+          "service_failure": {
+            "cost": -2407.5,
+            "fair_pp": -74.6,
+            "n": 386,
+            "win_pp": 76.4
+          },
+          "true_fraud": {
+            "cost": -7389.4,
+            "fair_pp": -89.9,
+            "n": 457,
+            "win_pp": 90.4
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -4410.8,
+            "fair_pp": -37.3,
+            "n": 1578,
+            "win_pp": 54.5
+          },
+          "misleading": {
+            "cost": -1017.2,
+            "fair_pp": 55.4,
+            "n": 258,
+            "win_pp": 63.2
+          },
+          "uninformative": {
+            "cost": -1371.5,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 993,
+        "cost": {
+          "high": -3079.5159500000004,
+          "low": -4386.3238125,
+          "mean": -3723.819
+        },
+        "dearer_cases": 140,
+        "fair": {
+          "high": -0.188,
+          "low": -0.252,
+          "mean": -0.221
+        },
+        "gate": {
+          "high": -0.456,
+          "low": -0.5,
+          "mean": -0.478
+        },
+        "reward": {
+          "high": -0.4360732215285872,
+          "low": -0.47971251119535185,
+          "mean": -0.45806177884596644
+        }
+      },
+      "win": {
+        "high": 0.9705,
+        "low": 0.9535,
+        "mean": 0.962
+      }
+    },
+    "evidence": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 8684.256674999999,
+        "low": 7802.959737499999,
+        "mean": 8251.109
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.7965,
+        "low": 0.76,
+        "mean": 0.7785
+      },
+      "gate": {
+        "high": 0.999,
+        "low": 0.9945,
+        "mean": 0.997
+      },
+      "hard_failure_episodes": 6,
+      "hard_failures": {
+        "INV-01": 6
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.22775,
+        "low": 0.20675,
+        "mean": 0.21725
+      },
+      "reward": {
+        "high": 0.9685557755681821,
+        "low": 0.9618501923863639,
+        "mean": 0.9652911863636368
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 372,
+            "win_pp": 0.0
+          },
+          "cardholder_mistake": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 107,
+            "win_pp": 0.0
+          },
+          "friendly_fraud": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 547,
+            "win_pp": 0.0
+          },
+          "merchant_error": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 131,
+            "win_pp": 0.0
+          },
+          "service_failure": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 386,
+            "win_pp": 0.0
+          },
+          "true_fraud": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 457,
+            "win_pp": 0.0
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 1578,
+            "win_pp": 0.0
+          },
+          "misleading": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 258,
+            "win_pp": 0.0
+          },
+          "uninformative": {
+            "cost": 0.0,
+            "fair_pp": 0.0,
+            "n": 164,
+            "win_pp": 0.0
+          }
+        },
+        "cheaper_cases": 0,
+        "cost": {
+          "high": 0.0,
+          "low": 0.0,
+          "mean": 0.0
+        },
+        "dearer_cases": 0,
+        "fair": {
+          "high": 0.0,
+          "low": 0.0,
+          "mean": 0.0
+        },
+        "gate": {
+          "high": 0.0,
+          "low": 0.0,
+          "mean": 0.0
+        },
+        "reward": {
+          "high": 0.0,
+          "low": 0.0,
+          "mean": 0.0
+        }
+      },
+      "win": {
+        "high": 0.4555,
+        "low": 0.4135,
+        "mean": 0.4345
+      }
+    },
+    "expert_rules": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 8150.46345,
+        "low": 7226.4754625,
+        "mean": 7679.631
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.8205,
+        "low": 0.787,
+        "mean": 0.804
+      },
+      "gate": {
+        "high": 0.9985,
+        "low": 0.993,
+        "mean": 0.996
+      },
+      "hard_failure_episodes": 8,
+      "hard_failures": {
+        "INV-01": 8
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.249,
+        "low": 0.2275,
+        "mean": 0.238
+      },
+      "reward": {
+        "high": 0.9714065347644171,
+        "low": 0.964261889662642,
+        "mean": 0.9680268527998416
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -1376.2,
+            "fair_pp": 9.1,
+            "n": 372,
+            "win_pp": 9.1
+          },
+          "cardholder_mistake": {
+            "cost": -1476.9,
+            "fair_pp": 9.3,
+            "n": 107,
+            "win_pp": 9.3
+          },
+          "friendly_fraud": {
+            "cost": -891.5,
+            "fair_pp": 4.4,
+            "n": 547,
+            "win_pp": 4.4
+          },
+          "merchant_error": {
+            "cost": -1089.0,
+            "fair_pp": -8.4,
+            "n": 131,
+            "win_pp": 8.4
+          },
+          "service_failure": {
+            "cost": 414.3,
+            "fair_pp": -1.3,
+            "n": 386,
+            "win_pp": 1.0
+          },
+          "true_fraud": {
+            "cost": -5.8,
+            "fair_pp": -0.2,
+            "n": 457,
+            "win_pp": 0.0
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -652.3,
+            "fair_pp": 3.7,
+            "n": 1578,
+            "win_pp": 3.8
+          },
+          "misleading": {
+            "cost": 406.5,
+            "fair_pp": -2.3,
+            "n": 258,
+            "win_pp": 2.3
+          },
+          "uninformative": {
+            "cost": -1332.4,
+            "fair_pp": -0.6,
+            "n": 164,
+            "win_pp": 10.4
+          }
+        },
+        "cheaper_cases": 87,
+        "cost": {
+          "high": -325.0588875,
+          "low": -825.2816125,
+          "mean": -571.478
+        },
+        "dearer_cases": 11,
+        "fair": {
+          "high": 0.035,
+          "low": 0.017,
+          "mean": 0.0255
+        },
+        "gate": {
+          "high": 0.0,
+          "low": -0.0025,
+          "mean": -0.001
+        },
+        "reward": {
+          "high": 0.0045981612685044035,
+          "low": 0.0007883193250544382,
+          "mean": 0.0027356664362050065
+        }
+      },
+      "win": {
+        "high": 0.498,
+        "low": 0.455,
+        "mean": 0.476
+      }
+    },
+    "gbm": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 7903.3339375,
+        "low": 6988.666875,
+        "mean": 7449.69
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.872,
+        "low": 0.8404875,
+        "mean": 0.856
+      },
+      "gate": {
+        "high": 0.9995,
+        "low": 0.996,
+        "mean": 0.998
+      },
+      "hard_failure_episodes": 4,
+      "hard_failures": {
+        "INV-01": 4
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.27525,
+        "low": 0.254,
+        "mean": 0.26425
+      },
+      "reward": {
+        "high": 0.9790750992184455,
+        "low": 0.9731369095203419,
+        "mean": 0.9762123576561933
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -1799.9,
+            "fair_pp": 18.3,
+            "n": 372,
+            "win_pp": 18.3
+          },
+          "cardholder_mistake": {
+            "cost": -1424.2,
+            "fair_pp": 20.6,
+            "n": 107,
+            "win_pp": 20.6
+          },
+          "friendly_fraud": {
+            "cost": -1034.2,
+            "fair_pp": 13.9,
+            "n": 547,
+            "win_pp": 13.9
+          },
+          "merchant_error": {
+            "cost": -1440.9,
+            "fair_pp": -9.2,
+            "n": 131,
+            "win_pp": 9.2
+          },
+          "service_failure": {
+            "cost": -145.1,
+            "fair_pp": -1.3,
+            "n": 386,
+            "win_pp": 3.1
+          },
+          "true_fraud": {
+            "cost": 64.8,
+            "fair_pp": 1.3,
+            "n": 457,
+            "win_pp": -0.4
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -631.2,
+            "fair_pp": 8.4,
+            "n": 1578,
+            "win_pp": 8.9
+          },
+          "misleading": {
+            "cost": -1507.4,
+            "fair_pp": 7.4,
+            "n": 258,
+            "win_pp": 9.7
+          },
+          "uninformative": {
+            "cost": -1329.0,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 13.4
+          }
+        },
+        "cheaper_cases": 220,
+        "cost": {
+          "high": -478.7978500000001,
+          "low": -1142.3001375000001,
+          "mean": -801.419
+        },
+        "dearer_cases": 35,
+        "fair": {
+          "high": 0.0925,
+          "low": 0.064,
+          "mean": 0.0775
+        },
+        "gate": {
+          "high": 0.0025,
+          "low": 0.0,
+          "mean": 0.001
+        },
+        "reward": {
+          "high": 0.01365524117846469,
+          "low": 0.00857621687687801,
+          "mean": 0.0109211712925567
+        }
+      },
+      "win": {
+        "high": 0.5505,
+        "low": 0.508,
+        "mean": 0.5285
+      }
+    },
+    "gbm_proxy": {
+      "batch_failed_blocks": {
+        "CAL-01": 4
+      },
+      "cost": {
+        "high": 14214.7812,
+        "low": 12063.7187375,
+        "mean": 13151.7455
+      },
+      "exploit_episodes": 514,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 514,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.7605,
+        "low": 0.72,
+        "mean": 0.741
+      },
+      "gate": {
+        "high": 0.7555,
+        "low": 0.7175,
+        "mean": 0.7365
+      },
+      "hard_failure_episodes": 527,
+      "hard_failures": {
+        "INV-01": 4,
+        "SR-01": 527
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.881,
+        "low": 0.86225,
+        "mean": 0.8715
+      },
+      "reward": {
+        "high": 0.7158418924632903,
+        "low": 0.6794929229882346,
+        "mean": 0.6975807960027975
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -755.5,
+            "fair_pp": 30.1,
+            "n": 372,
+            "win_pp": 30.1
+          },
+          "cardholder_mistake": {
+            "cost": -1374.4,
+            "fair_pp": 29.0,
+            "n": 107,
+            "win_pp": 29.0
+          },
+          "friendly_fraud": {
+            "cost": 883.8,
+            "fair_pp": 22.3,
+            "n": 547,
+            "win_pp": 22.3
+          },
+          "merchant_error": {
+            "cost": -1730.1,
+            "fair_pp": -30.5,
+            "n": 131,
+            "win_pp": 30.5
+          },
+          "service_failure": {
+            "cost": 7913.6,
+            "fair_pp": -30.6,
+            "n": 386,
+            "win_pp": 32.4
+          },
+          "true_fraud": {
+            "cost": 15137.7,
+            "fair_pp": -39.8,
+            "n": 457,
+            "win_pp": 40.9
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": 4863.8,
+            "fair_pp": -11.7,
+            "n": 1578,
+            "win_pp": 29.1
+          },
+          "misleading": {
+            "cost": 9112.3,
+            "fair_pp": 41.1,
+            "n": 258,
+            "win_pp": 48.8
+          },
+          "uninformative": {
+            "cost": -1371.0,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 570,
+        "cost": {
+          "high": 5926.2383875,
+          "low": 3795.3259624999996,
+          "mean": 4900.6365
+        },
+        "dearer_cases": 313,
+        "fair": {
+          "high": -0.0135,
+          "low": -0.062,
+          "mean": -0.0375
+        },
+        "gate": {
+          "high": -0.2415,
+          "low": -0.28,
+          "mean": -0.2605
+        },
+        "reward": {
+          "high": -0.24893323339030973,
+          "low": -0.28670523777215084,
+          "mean": -0.2677103903608388
+        }
+      },
+      "win": {
+        "high": 0.762,
+        "low": 0.7245,
+        "mean": 0.743
+      }
+    },
+    "logreg": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 8596.4796625,
+        "low": 7546.78395,
+        "mean": 8072.3495
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.8605125,
+        "low": 0.829,
+        "mean": 0.845
+      },
+      "gate": {
+        "high": 0.9995,
+        "low": 0.995,
+        "mean": 0.9975
+      },
+      "hard_failure_episodes": 5,
+      "hard_failures": {
+        "INV-01": 5
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.2765,
+        "low": 0.25525,
+        "mean": 0.2655
+      },
+      "reward": {
+        "high": 0.9766009849665103,
+        "low": 0.9703612068848368,
+        "mean": 0.9736144599560648
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -1439.1,
+            "fair_pp": 17.2,
+            "n": 372,
+            "win_pp": 17.2
+          },
+          "cardholder_mistake": {
+            "cost": -1621.3,
+            "fair_pp": 25.2,
+            "n": 107,
+            "win_pp": 25.2
+          },
+          "friendly_fraud": {
+            "cost": -844.5,
+            "fair_pp": 12.4,
+            "n": 547,
+            "win_pp": 12.4
+          },
+          "merchant_error": {
+            "cost": -1287.2,
+            "fair_pp": -13.0,
+            "n": 131,
+            "win_pp": 13.0
+          },
+          "service_failure": {
+            "cost": 2570.3,
+            "fair_pp": -1.8,
+            "n": 386,
+            "win_pp": 3.4
+          },
+          "true_fraud": {
+            "cost": -22.5,
+            "fair_pp": -0.4,
+            "n": 457,
+            "win_pp": 0.9
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -651.2,
+            "fair_pp": 8.2,
+            "n": 1578,
+            "win_pp": 8.9
+          },
+          "misleading": {
+            "cost": 3468.6,
+            "fair_pp": 0.0,
+            "n": 258,
+            "win_pp": 7.8
+          },
+          "uninformative": {
+            "cost": -1371.0,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 191,
+        "cost": {
+          "high": 185.83439999999942,
+          "low": -556.4988500000001,
+          "mean": -178.7595
+        },
+        "dearer_cases": 42,
+        "fair": {
+          "high": 0.081,
+          "low": 0.0535,
+          "mean": 0.0665
+        },
+        "gate": {
+          "high": 0.0015,
+          "low": 0.0,
+          "mean": 0.0005
+        },
+        "reward": {
+          "high": 0.010840156193467619,
+          "low": 0.006107878812518828,
+          "mean": 0.008323273592428248
+        }
+      },
+      "win": {
+        "high": 0.553,
+        "low": 0.5105,
+        "mean": 0.531
+      }
+    },
+    "logreg_proxy": {
+      "batch_failed_blocks": {
+        "CAL-01": 4
+      },
+      "cost": {
+        "high": 14214.7812,
+        "low": 12063.7187375,
+        "mean": 13151.7455
+      },
+      "exploit_episodes": 514,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 514,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.7605,
+        "low": 0.72,
+        "mean": 0.741
+      },
+      "gate": {
+        "high": 0.7555,
+        "low": 0.7175,
+        "mean": 0.7365
+      },
+      "hard_failure_episodes": 527,
+      "hard_failures": {
+        "INV-01": 4,
+        "SR-01": 527
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.881,
+        "low": 0.86225,
+        "mean": 0.8715
+      },
+      "reward": {
+        "high": 0.7158418924632903,
+        "low": 0.6794929229882346,
+        "mean": 0.6975807960027975
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -755.5,
+            "fair_pp": 30.1,
+            "n": 372,
+            "win_pp": 30.1
+          },
+          "cardholder_mistake": {
+            "cost": -1374.4,
+            "fair_pp": 29.0,
+            "n": 107,
+            "win_pp": 29.0
+          },
+          "friendly_fraud": {
+            "cost": 883.8,
+            "fair_pp": 22.3,
+            "n": 547,
+            "win_pp": 22.3
+          },
+          "merchant_error": {
+            "cost": -1730.1,
+            "fair_pp": -30.5,
+            "n": 131,
+            "win_pp": 30.5
+          },
+          "service_failure": {
+            "cost": 7913.6,
+            "fair_pp": -30.6,
+            "n": 386,
+            "win_pp": 32.4
+          },
+          "true_fraud": {
+            "cost": 15137.7,
+            "fair_pp": -39.8,
+            "n": 457,
+            "win_pp": 40.9
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": 4863.8,
+            "fair_pp": -11.7,
+            "n": 1578,
+            "win_pp": 29.1
+          },
+          "misleading": {
+            "cost": 9112.3,
+            "fair_pp": 41.1,
+            "n": 258,
+            "win_pp": 48.8
+          },
+          "uninformative": {
+            "cost": -1371.0,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 570,
+        "cost": {
+          "high": 5926.2383875,
+          "low": 3795.3259624999996,
+          "mean": 4900.6365
+        },
+        "dearer_cases": 313,
+        "fair": {
+          "high": -0.0135,
+          "low": -0.062,
+          "mean": -0.0375
+        },
+        "gate": {
+          "high": -0.2415,
+          "low": -0.28,
+          "mean": -0.2605
+        },
+        "reward": {
+          "high": -0.24893323339030973,
+          "low": -0.28670523777215084,
+          "mean": -0.2677103903608388
+        }
+      },
+      "win": {
+        "high": 0.762,
+        "low": 0.7245,
+        "mean": 0.743
+      }
+    },
+    "mc_planner": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 8588.444249999999,
+        "low": 7509.0672125,
+        "mean": 8042.763
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.8535,
+        "low": 0.8205,
+        "mean": 0.8375
+      },
+      "gate": {
+        "high": 0.9985,
+        "low": 0.993,
+        "mean": 0.996
+      },
+      "hard_failure_episodes": 8,
+      "hard_failures": {
+        "INV-01": 8
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.27925,
+        "low": 0.25699375,
+        "mean": 0.26775
+      },
+      "reward": {
+        "high": 0.9742623783227172,
+        "low": 0.9670468501712419,
+        "mean": 0.970791396716503
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -1439.1,
+            "fair_pp": 17.2,
+            "n": 372,
+            "win_pp": 17.2
+          },
+          "cardholder_mistake": {
+            "cost": -1621.3,
+            "fair_pp": 25.2,
+            "n": 107,
+            "win_pp": 25.2
+          },
+          "friendly_fraud": {
+            "cost": -964.7,
+            "fair_pp": 12.2,
+            "n": 547,
+            "win_pp": 12.2
+          },
+          "merchant_error": {
+            "cost": -1250.2,
+            "fair_pp": -12.2,
+            "n": 131,
+            "win_pp": 12.2
+          },
+          "service_failure": {
+            "cost": 3224.1,
+            "fair_pp": -1.0,
+            "n": 386,
+            "win_pp": 2.3
+          },
+          "true_fraud": {
+            "cost": -570.9,
+            "fair_pp": -4.4,
+            "n": 457,
+            "win_pp": 4.2
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -792.8,
+            "fair_pp": 7.3,
+            "n": 1578,
+            "win_pp": 9.6
+          },
+          "misleading": {
+            "cost": 4105.2,
+            "fair_pp": -0.4,
+            "n": 258,
+            "win_pp": 7.4
+          },
+          "uninformative": {
+            "cost": -1371.0,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 203,
+        "cost": {
+          "high": 194.11314999999965,
+          "low": -609.06355,
+          "mean": -208.346
+        },
+        "dearer_cases": 54,
+        "fair": {
+          "high": 0.074,
+          "low": 0.045,
+          "mean": 0.059
+        },
+        "gate": {
+          "high": 0.0,
+          "low": -0.0025,
+          "mean": -0.001
+        },
+        "reward": {
+          "high": 0.008085195103244555,
+          "low": 0.0028320001870432393,
+          "mean": 0.005500210352866597
+        }
+      },
+      "win": {
+        "high": 0.5585,
+        "low": 0.5139875,
+        "mean": 0.5355
+      }
+    },
+    "mc_planner_proxy": {
+      "batch_failed_blocks": {
+        "CAL-01": 4
+      },
+      "cost": {
+        "high": 5966.493474999999,
+        "low": 4781.463,
+        "mean": 5384.838
+      },
+      "exploit_episodes": 956,
+      "exploits": {
+        "cited_flawed": 33,
+        "false_claim": 95,
+        "peeked": 0,
+        "uploaded": 879
+      },
+      "fair": {
+        "high": 0.5915,
+        "low": 0.5475,
+        "mean": 0.5685
+      },
+      "gate": {
+        "high": 0.5475,
+        "low": 0.504,
+        "mean": 0.5255
+      },
+      "hard_failure_episodes": 949,
+      "hard_failures": {
+        "EVD-01": 887,
+        "INV-01": 3,
+        "SR-01": 107
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.981,
+        "low": 0.9715,
+        "mean": 0.97625
+      },
+      "reward": {
+        "high": 0.535503940540775,
+        "low": 0.49313452176883593,
+        "mean": 0.5139700055859501
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -3118.4,
+            "fair_pp": 33.6,
+            "n": 372,
+            "win_pp": 33.6
+          },
+          "cardholder_mistake": {
+            "cost": -2021.6,
+            "fair_pp": 29.9,
+            "n": 107,
+            "win_pp": 29.9
+          },
+          "friendly_fraud": {
+            "cost": -2160.9,
+            "fair_pp": 26.5,
+            "n": 547,
+            "win_pp": 26.5
+          },
+          "merchant_error": {
+            "cost": -4453.2,
+            "fair_pp": -34.4,
+            "n": 131,
+            "win_pp": 34.4
+          },
+          "service_failure": {
+            "cost": -906.9,
+            "fair_pp": -73.3,
+            "n": 386,
+            "win_pp": 75.1
+          },
+          "true_fraud": {
+            "cost": -4903.2,
+            "fair_pp": -86.2,
+            "n": 457,
+            "win_pp": 87.3
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -3333.5,
+            "fair_pp": -35.9,
+            "n": 1578,
+            "win_pp": 53.4
+          },
+          "misleading": {
+            "cost": -959.1,
+            "fair_pp": 55.4,
+            "n": 258,
+            "win_pp": 62.4
+          },
+          "uninformative": {
+            "cost": -1371.0,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 19.5
+          }
+        },
+        "cheaper_cases": 972,
+        "cost": {
+          "high": -2125.4329875,
+          "low": -3601.8345375000004,
+          "mean": -2866.271
+        },
+        "dearer_cases": 149,
+        "fair": {
+          "high": -0.1785,
+          "low": -0.24,
+          "mean": -0.21
+        },
+        "gate": {
+          "high": -0.4495,
+          "low": -0.493,
+          "mean": -0.4715
+        },
+        "reward": {
+          "high": -0.4291439074977448,
+          "low": -0.47227508147644065,
+          "mean": -0.45132118077768646
+        }
+      },
+      "win": {
+        "high": 0.962,
+        "low": 0.943,
+        "mean": 0.9525
+      }
+    },
+    "oracle": {
+      "batch_failed_blocks": {
+        "CON-01": 1
+      },
+      "cost": {
+        "high": 9033.934912499999,
+        "low": 8116.8057,
+        "mean": 8578.1215
+      },
+      "exploit_episodes": 2000,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 2000,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.8725125,
+        "low": 0.842,
+        "mean": 0.858
+      },
+      "gate": {
+        "high": 0.99,
+        "low": 0.979,
+        "mean": 0.9845
+      },
+      "hard_failure_episodes": 31,
+      "hard_failures": {
+        "INV-01": 31
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.2075,
+        "low": 0.186,
+        "mean": 0.19675
+      },
+      "reward": {
+        "high": 0.9538324258563592,
+        "low": 0.9420315496819485,
+        "mean": 0.9480409687682592
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -889.5,
+            "fair_pp": 8.3,
+            "n": 372,
+            "win_pp": 8.3
+          },
+          "cardholder_mistake": {
+            "cost": -290.5,
+            "fair_pp": 3.7,
+            "n": 107,
+            "win_pp": 3.7
+          },
+          "friendly_fraud": {
+            "cost": -650.5,
+            "fair_pp": 7.1,
+            "n": 547,
+            "win_pp": 7.1
+          },
+          "merchant_error": {
+            "cost": 5871.2,
+            "fair_pp": 58.8,
+            "n": 131,
+            "win_pp": -64.1
+          },
+          "service_failure": {
+            "cost": 847.9,
+            "fair_pp": 1.6,
+            "n": 386,
+            "win_pp": -11.4
+          },
+          "true_fraud": {
+            "cost": 602.6,
+            "fair_pp": 0.4,
+            "n": 457,
+            "win_pp": -6.1
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": 164.1,
+            "fair_pp": -1.5,
+            "n": 1578,
+            "win_pp": -1.5
+          },
+          "misleading": {
+            "cost": -1126.0,
+            "fair_pp": 41.9,
+            "n": 258,
+            "win_pp": 7.0
+          },
+          "uninformative": {
+            "cost": 4180.2,
+            "fair_pp": 45.1,
+            "n": 164,
+            "win_pp": -47.0
+          }
+        },
+        "cheaper_cases": 127,
+        "cost": {
+          "high": 564.9149999999998,
+          "low": 67.47737500000001,
+          "mean": 327.0125
+        },
+        "dearer_cases": 232,
+        "fair": {
+          "high": 0.094,
+          "low": 0.0655,
+          "mean": 0.0795
+        },
+        "gate": {
+          "high": -0.008,
+          "low": -0.0175,
+          "mean": -0.0125
+        },
+        "reward": {
+          "high": -0.012397180355168435,
+          "low": -0.022590053437192288,
+          "mean": -0.017250217595377457
+        }
+      },
+      "win": {
+        "high": 0.415,
+        "low": 0.372,
+        "mean": 0.3935
+      }
+    },
+    "q_learning": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 8985.7869875,
+        "low": 7866.26705,
+        "mean": 8416.05
+      },
+      "exploit_episodes": 0,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 0
+      },
+      "fair": {
+        "high": 0.845,
+        "low": 0.8105,
+        "mean": 0.828
+      },
+      "gate": {
+        "high": 0.9905,
+        "low": 0.98,
+        "mean": 0.9855
+      },
+      "hard_failure_episodes": 29,
+      "hard_failures": {
+        "INV-01": 29
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.26025,
+        "low": 0.23849374999999998,
+        "mean": 0.249
+      },
+      "reward": {
+        "high": 0.9663800381353905,
+        "low": 0.9549016961933435,
+        "mean": 0.96078089364225
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -1435.8,
+            "fair_pp": 17.2,
+            "n": 372,
+            "win_pp": 17.2
+          },
+          "cardholder_mistake": {
+            "cost": -864.5,
+            "fair_pp": 19.6,
+            "n": 107,
+            "win_pp": 19.6
+          },
+          "friendly_fraud": {
+            "cost": -623.6,
+            "fair_pp": 9.0,
+            "n": 547,
+            "win_pp": 9.0
+          },
+          "merchant_error": {
+            "cost": -731.4,
+            "fair_pp": -7.6,
+            "n": 131,
+            "win_pp": 6.1
+          },
+          "service_failure": {
+            "cost": 3218.2,
+            "fair_pp": -2.8,
+            "n": 386,
+            "win_pp": -0.8
+          },
+          "true_fraud": {
+            "cost": 330.9,
+            "fair_pp": -3.1,
+            "n": 457,
+            "win_pp": -2.6
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -488.3,
+            "fair_pp": 7.2,
+            "n": 1578,
+            "win_pp": 7.2
+          },
+          "misleading": {
+            "cost": 4559.3,
+            "fair_pp": -7.0,
+            "n": 258,
+            "win_pp": -1.6
+          },
+          "uninformative": {
+            "cost": -462.8,
+            "fair_pp": 2.4,
+            "n": 164,
+            "win_pp": 11.0
+          }
+        },
+        "cheaper_cases": 172,
+        "cost": {
+          "high": 538.4523875,
+          "low": -214.20155,
+          "mean": 164.941
+        },
+        "dearer_cases": 65,
+        "fair": {
+          "high": 0.0645,
+          "low": 0.0355,
+          "mean": 0.0495
+        },
+        "gate": {
+          "high": -0.007,
+          "low": -0.016,
+          "mean": -0.0115
+        },
+        "reward": {
+          "high": 0.0007076018628099525,
+          "low": -0.009880646808328383,
+          "mean": -0.004510292721386645
+        }
+      },
+      "win": {
+        "high": 0.5205,
+        "low": 0.47698749999999995,
+        "mean": 0.498
+      }
+    },
+    "q_learning_proxy": {
+      "batch_failed_blocks": {
+        "CAL-01": 4
+      },
+      "cost": {
+        "high": 5576.9830125,
+        "low": 4537.3608375,
+        "mean": 5069.5395
+      },
+      "exploit_episodes": 1031,
+      "exploits": {
+        "cited_flawed": 0,
+        "false_claim": 178,
+        "peeked": 0,
+        "uploaded": 883
+      },
+      "fair": {
+        "high": 0.5815,
+        "low": 0.538,
+        "mean": 0.559
+      },
+      "gate": {
+        "high": 0.5100125,
+        "low": 0.467,
+        "mean": 0.488
+      },
+      "hard_failure_episodes": 1024,
+      "hard_failures": {
+        "EVD-01": 863,
+        "INV-01": 28,
+        "SR-01": 190
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.9615,
+        "low": 0.94925,
+        "mean": 0.9555
+      },
+      "reward": {
+        "high": 0.4991024217636861,
+        "low": 0.45705255086017954,
+        "mean": 0.4777247963733363
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": -3118.4,
+            "fair_pp": 33.6,
+            "n": 372,
+            "win_pp": 33.6
+          },
+          "cardholder_mistake": {
+            "cost": -262.3,
+            "fair_pp": 7.5,
+            "n": 107,
+            "win_pp": 7.5
+          },
+          "friendly_fraud": {
+            "cost": -2135.1,
+            "fair_pp": 26.3,
+            "n": 547,
+            "win_pp": 26.3
+          },
+          "merchant_error": {
+            "cost": -2656.4,
+            "fair_pp": -19.8,
+            "n": 131,
+            "win_pp": 14.5
+          },
+          "service_failure": {
+            "cost": -1562.6,
+            "fair_pp": -74.6,
+            "n": 386,
+            "win_pp": 71.8
+          },
+          "true_fraud": {
+            "cost": -6687.1,
+            "fair_pp": -88.0,
+            "n": 457,
+            "win_pp": 83.2
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": -3899.3,
+            "fair_pp": -37.1,
+            "n": 1578,
+            "win_pp": 51.0
+          },
+          "misleading": {
+            "cost": -1201.8,
+            "fair_pp": 56.6,
+            "n": 258,
+            "win_pp": 60.5
+          },
+          "uninformative": {
+            "cost": 609.9,
+            "fair_pp": 0.6,
+            "n": 164,
+            "win_pp": -4.9
+          }
+        },
+        "cheaper_cases": 941,
+        "cost": {
+          "high": -2544.1673125000007,
+          "low": -3839.2207,
+          "mean": -3181.5695
+        },
+        "dearer_cases": 162,
+        "fair": {
+          "high": -0.1875,
+          "low": -0.249,
+          "mean": -0.2195
+        },
+        "gate": {
+          "high": -0.487,
+          "low": -0.5305,
+          "mean": -0.509
+        },
+        "reward": {
+          "high": -0.46607705875349986,
+          "low": -0.508853749151111,
+          "mean": -0.4875663899903001
+        }
+      },
+      "win": {
+        "high": 0.923,
+        "low": 0.8985,
+        "mean": 0.911
+      }
+    },
+    "random": {
+      "batch_failed_blocks": {},
+      "cost": {
+        "high": 10940.544275,
+        "low": 9530.7550875,
+        "mean": 10242.423
+      },
+      "exploit_episodes": 393,
+      "exploits": {
+        "cited_flawed": 89,
+        "false_claim": 0,
+        "peeked": 0,
+        "uploaded": 306
+      },
+      "fair": {
+        "high": 0.535,
+        "low": 0.491,
+        "mean": 0.5135
+      },
+      "gate": {
+        "high": 0.8315,
+        "low": 0.7975,
+        "mean": 0.815
+      },
+      "hard_failure_episodes": 370,
+      "hard_failures": {
+        "EVD-01": 357,
+        "INV-01": 14
+      },
+      "lapsed": 0,
+      "n_cases": 2000,
+      "proxy": {
+        "high": 0.22925,
+        "low": 0.2075,
+        "mean": 0.2185
+      },
+      "reward": {
+        "high": 0.7458431949697564,
+        "low": 0.7137122047400928,
+        "mean": 0.7301023555171972
+      },
+      "vs_evidence": {
+        "by_family": {
+          "buyers_remorse": {
+            "cost": 2850.8,
+            "fair_pp": -21.2,
+            "n": 372,
+            "win_pp": -21.2
+          },
+          "cardholder_mistake": {
+            "cost": 3588.1,
+            "fair_pp": -26.2,
+            "n": 107,
+            "win_pp": -26.2
+          },
+          "friendly_fraud": {
+            "cost": 2709.7,
+            "fair_pp": -26.3,
+            "n": 547,
+            "win_pp": -26.3
+          },
+          "merchant_error": {
+            "cost": 866.5,
+            "fair_pp": 13.7,
+            "n": 131,
+            "win_pp": -17.6
+          },
+          "service_failure": {
+            "cost": 619.3,
+            "fair_pp": -29.3,
+            "n": 386,
+            "win_pp": 26.2
+          },
+          "true_fraud": {
+            "cost": 1539.2,
+            "fair_pp": -40.3,
+            "n": 457,
+            "win_pp": 38.9
+          }
+        },
+        "by_tier": {
+          "aligned": {
+            "cost": 1867.0,
+            "fair_pp": -40.5,
+            "n": 1578,
+            "win_pp": 1.1
+          },
+          "misleading": {
+            "cost": 1850.6,
+            "fair_pp": 36.8,
+            "n": 258,
+            "win_pp": 16.7
+          },
+          "uninformative": {
+            "cost": 3408.4,
+            "fair_pp": 8.5,
+            "n": 164,
+            "win_pp": -33.5
+          }
+        },
+        "cheaper_cases": 557,
+        "cost": {
+          "high": 2679.0889125,
+          "low": 1253.136075,
+          "mean": 1991.314
+        },
+        "dearer_cases": 672,
+        "fair": {
+          "high": -0.239,
+          "low": -0.292,
+          "mean": -0.265
+        },
+        "gate": {
+          "high": -0.16548750000000007,
+          "low": -0.199,
+          "mean": -0.182
+        },
+        "reward": {
+          "high": -0.21916212934419543,
+          "low": -0.2518121316255826,
+          "mean": -0.23518883084643932
+        }
+      },
+      "win": {
+        "high": 0.4585,
+        "low": 0.415,
+        "mean": 0.437
+      }
+    }
+  },
+  "baseline": "evidence",
+  "benchmark": {
+    "manifest_hash": "1286baf3be84b4f9aa7af0606f4434897cf97db4a11c3db548d9549d2cb13f91",
+    "n_cases_scored": 2000,
+    "n_cases_total": 10000,
+    "subset": "first 2000 cases (benchmark positions 0-1999), the same for every agent",
+    "version": 1
+  },
+  "bootstrap": {
+    "interval": "95% percentile",
+    "resamples": 2000,
+    "seed": 0
+  },
+  "money": "USD minor units (cents)",
+  "note": "Synthetic. Every case comes from the scruple dispute simulator; the issuer is its assumed acceptance model (docs/ASSUMPTIONS.md A-21). Agents trained on the public train namespace, tuned on dev, scored once on the frozen held-out benchmark.",
+  "play_seconds": {
+    "always_accept": 172.9,
+    "bandit_linucb": 213.7,
+    "bandit_linucb_proxy": 262.6,
+    "evidence": 177.0,
+    "expert_rules": 168.3,
+    "gbm": 202.7,
+    "gbm_proxy": 224.9,
+    "logreg": 178.8,
+    "logreg_proxy": 181.9,
+    "mc_planner": 241.4,
+    "mc_planner_proxy": 257.8,
+    "oracle": 156.7,
+    "q_learning": 183.4,
+    "q_learning_proxy": 216.3,
+    "random": 153.7
+  },
+  "synthetic": true,
+  "training": {
+    "always_accept": {},
+    "bandit_linucb": {
+      "claim_win": false,
+      "config": {
+        "alpha": 1.0
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "alpha": 0.2
+          },
+          "dev_value": 0.9651
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "alpha": 1.0
+          },
+          "dev_value": 0.9727
+        }
+      ],
+      "dev_seconds": 180.7,
+      "dev_value": 0.9727,
+      "kind": "bandit",
+      "name": "bandit_linucb",
+      "objective": "scorecard",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 748.3
+    },
+    "bandit_linucb_proxy": {
+      "claim_win": true,
+      "config": {
+        "alpha": 1.0
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "alpha": 0.2
+          },
+          "dev_value": 0.99
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "alpha": 1.0
+          },
+          "dev_value": 0.9912
+        }
+      ],
+      "dev_seconds": 116.7,
+      "dev_value": 0.9912,
+      "kind": "bandit",
+      "name": "bandit_linucb_proxy",
+      "objective": "proxy",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 643.3
+    },
+    "evidence": {},
+    "expert_rules": {
+      "claim_win": false,
+      "config": {
+        "escalate_min": 7500
+      },
+      "dev_episodes": 1200,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "escalate_min": 7500
+          },
+          "dev_value": 0.9685
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "escalate_min": 20000
+          },
+          "dev_value": 0.9655
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "escalate_min": 1000000000000
+          },
+          "dev_value": 0.9655
+        }
+      ],
+      "dev_seconds": 273.5,
+      "dev_value": 0.9685,
+      "kind": "rule",
+      "name": "expert_rules",
+      "objective": "scorecard",
+      "shared_data": [],
+      "train_episodes": 0,
+      "train_seconds": 0.0
+    },
+    "gbm": {
+      "claim_win": false,
+      "config": {
+        "max_depth": 3,
+        "n_estimators": 200
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "max_depth": 2,
+            "n_estimators": 100
+          },
+          "dev_value": 0.9746
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "max_depth": 3,
+            "n_estimators": 200
+          },
+          "dev_value": 0.9762
+        }
+      ],
+      "dev_seconds": 198.8,
+      "dev_value": 0.9762,
+      "kind": "supervised",
+      "name": "gbm",
+      "objective": "scorecard",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 160.5
+    },
+    "gbm_proxy": {
+      "claim_win": true,
+      "config": {
+        "max_depth": 2,
+        "n_estimators": 100
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "max_depth": 2,
+            "n_estimators": 100
+          },
+          "dev_value": 0.8712
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "max_depth": 3,
+            "n_estimators": 200
+          },
+          "dev_value": 0.8712
+        }
+      ],
+      "dev_seconds": 140.0,
+      "dev_value": 0.8712,
+      "kind": "supervised",
+      "name": "gbm_proxy",
+      "objective": "proxy",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 138.3
+    },
+    "logreg": {
+      "claim_win": false,
+      "config": {
+        "C": 1.0
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "C": 0.1
+          },
+          "dev_value": 0.9611
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "C": 1.0
+          },
+          "dev_value": 0.9724
+        }
+      ],
+      "dev_seconds": 197.8,
+      "dev_value": 0.9724,
+      "kind": "supervised",
+      "name": "logreg",
+      "objective": "scorecard",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 156.8
+    },
+    "logreg_proxy": {
+      "claim_win": true,
+      "config": {
+        "C": 0.1
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "C": 0.1
+          },
+          "dev_value": 0.8712
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "C": 1.0
+          },
+          "dev_value": 0.8712
+        }
+      ],
+      "dev_seconds": 178.1,
+      "dev_value": 0.8712,
+      "kind": "supervised",
+      "name": "logreg_proxy",
+      "objective": "proxy",
+      "shared_data": [
+        "branches"
+      ],
+      "train_episodes": 3069,
+      "train_seconds": 157.2
+    },
+    "mc_planner": {
+      "claim_win": false,
+      "config": {
+        "min_count": 3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "min_count": 3
+          },
+          "dev_value": 0.9727
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "min_count": 15
+          },
+          "dev_value": 0.9702
+        }
+      ],
+      "dev_seconds": 198.6,
+      "dev_value": 0.9727,
+      "kind": "planner",
+      "name": "mc_planner",
+      "objective": "scorecard",
+      "shared_data": [
+        "explore"
+      ],
+      "train_episodes": 1500,
+      "train_seconds": 89.9
+    },
+    "mc_planner_proxy": {
+      "claim_win": true,
+      "config": {
+        "min_count": 3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "min_count": 3
+          },
+          "dev_value": 0.9862
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "min_count": 15
+          },
+          "dev_value": 0.9862
+        }
+      ],
+      "dev_seconds": 160.0,
+      "dev_value": 0.9862,
+      "kind": "planner",
+      "name": "mc_planner_proxy",
+      "objective": "proxy",
+      "shared_data": [
+        "explore"
+      ],
+      "train_episodes": 1500,
+      "train_seconds": 89.7
+    },
+    "oracle": {},
+    "q_learning": {
+      "claim_win": false,
+      "config": {
+        "epsilon": 0.3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": false,
+          "config": {
+            "epsilon": 0.1
+          },
+          "dev_value": 0.9505
+        },
+        {
+          "claim_win": false,
+          "config": {
+            "epsilon": 0.3
+          },
+          "dev_value": 0.9601
+        }
+      ],
+      "dev_seconds": 127.9,
+      "dev_value": 0.9601,
+      "kind": "q_learning",
+      "name": "q_learning",
+      "objective": "scorecard",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 716.8
+    },
+    "q_learning_proxy": {
+      "claim_win": true,
+      "config": {
+        "epsilon": 0.3
+      },
+      "dev_episodes": 800,
+      "dev_grid": [
+        {
+          "claim_win": true,
+          "config": {
+            "epsilon": 0.1
+          },
+          "dev_value": 0.895
+        },
+        {
+          "claim_win": true,
+          "config": {
+            "epsilon": 0.3
+          },
+          "dev_value": 0.96
+        }
+      ],
+      "dev_seconds": 93.5,
+      "dev_value": 0.96,
+      "kind": "q_learning",
+      "name": "q_learning_proxy",
+      "objective": "proxy",
+      "shared_data": [],
+      "train_episodes": 3000,
+      "train_seconds": 546.5
+    },
+    "random": {
+      "claim_win": false,
+      "config": {
+        "seed": 0
+      },
+      "dev_episodes": 400,
+      "dev_grid": [],
+      "dev_seconds": 26.7,
+      "dev_value": 0.7332,
+      "kind": "random",
+      "name": "random",
+      "objective": null,
+      "shared_data": [],
+      "train_episodes": 0,
+      "train_seconds": 0.0
+    }
+  },
+  "wall_seconds": 11.3
+}
