@@ -140,7 +140,7 @@ def test_cli_brief_and_api_runs_mix_with_a_warning(tmp_path: Path, dirs: dict[st
     board = build_leaderboard([dirs["good"], tmp_path / "cli"], n_boot=200)
     cli = next(e for e in board.entries if e.path == "cli-brief")
     assert cli.real_model and not any("fake model" in w for w in cli.warnings)
-    assert any("API and CLI-brief runs are mixed" in w for w in board.warnings)
+    assert any("different paths are mixed (api, cli-brief)" in w for w in board.warnings)
     assert "a mix of real and FAKE models" in board.markdown()
 
 

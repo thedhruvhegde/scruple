@@ -272,8 +272,8 @@ def build_leaderboard(dirs: Sequence[Path], *, n_boot: int = N_BOOT) -> Leaderbo
     paths = {e.path for e in entries}
     if len(paths) > 1:
         warnings.append(
-            "API and CLI-brief runs are mixed; the harnesses differ (tool sandboxing, "
-            "turn limits), so differences may come from the harness"
+            f"runs from different paths are mixed ({', '.join(sorted(paths))}); the harnesses "
+            "differ (tool sandboxing, turn limits), so differences may come from the harness"
         )
     return Leaderboard(
         entries=tuple(entries),
