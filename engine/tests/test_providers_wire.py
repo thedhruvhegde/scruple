@@ -454,3 +454,16 @@ def test_fake_history_reads_back_what_providers_write(wire: str) -> None:
 def test_fake_rejects_unknown_wire() -> None:
     with pytest.raises(ValueError, match="unknown wire"):
         FakeModel("smoke-signals")
+
+
+def test_fake_replies_do_not_depend_on_other_conversations() -> None:
+    """Parallel batch runs share one FakeModel; its replies must be per conversation."""
+    p = AnthropicProvider(base_url="u", api_key="k")
+    body = json.dumps(p.body("m", "s", [p.user_message("hi")], TOOLS, GEN)).encode()
+    fresh = FakeModel("anthropic-messages")
+    busy = FakeModel("anthropic-messages")
+    for _ in range(5):  # other conversations went first
+        busy(httpx.Request("POST", "http://x/y", content=body))
+    a = fresh(httpx.Request("POST", "http://x/y", content=body)).json()
+    b = busy(httpx.Request("POST", "http://x/y", content=body)).json()
+    assert a == b

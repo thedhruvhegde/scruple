@@ -167,11 +167,13 @@ class FakeModel:
         with self._lock:
             self.requests.append(body)
             self.paths.append(request.url.path)
-            n = len(self.requests)
         tin = len(request.content) // 4
         if not has_tools(self.wire, body):
             return httpx.Response(200, json=self._text(PLAN, tin))
         calls = self.policy(history(self.wire, body))
+        # ids come from the conversation, not a global counter, so replies are the
+        # same whatever other conversations run in parallel
+        n = len(body.get("messages") or body.get("contents") or [])
         return httpx.Response(200, json=self._calls(calls, tin, n))
 
     # --- replies in each wire format --------------------------------------------------
