@@ -147,3 +147,60 @@ Known important survivors still open (examples, not exhaustive):
   mostly tested through the gate suites, which were not in the selected subset.
 
 These are listed so the next round can target them; they are not claimed as fixed.
+
+## Second round (2026-11-10)
+
+New targeted tests: `tests/test_verifiers_ledger.py` (the run-level ledger verifier and
+realized costs: every finding kind, its case attribution, metrics, fee and debit
+accounting), `tests/test_verifiers_windows.py` (deadline windows against an independent
+reading of the trace, the due-day boundary, refused calls, DL-02 weights; PROC-01 order,
+refused steps, per-citation score) and `tests/test_verifiers_boundaries.py` (CAL-01/02
+thresholds and the constant-outcome branch, CF-01 scale, CON-01 limit, tier minimum and
+stratum loop). Writing the calibration boundaries found a real bug: ECE split tied
+statements by outcome (F-12 in docs/VERIFIER_FINDINGS.md, fixed).
+
+How it was run, and what it does not cover:
+
+- Same mutmut 3.8.1 configuration as above, with the new test files added to the
+  selection and four slow exploit-running tests deselected (`-k`).
+- A full rerun of all 2,559 mutants (the 2,173 above plus new code) was started and
+  stopped: on the shared container it ran at about 8 mutants a minute, over five hours.
+- Instead the **604 survivors of the first run in unchanged code** were rerun by name
+  (`mutmut run <names>`): every survivor except `self_report` (rewritten since, so its
+  old mutants no longer exist) and `calibration.ece` (changed by the F-12 fix).
+- 453 of the 604 were rerun; 151 were not reached in the time available
+  (`ledger_invariants` 78, `scope` 47, `evidence_check` 12, `checks` 8, `trace` 4,
+  `record` 2).
+- Not mutated at all yet: the rewritten `self_report` text parser and the new
+  `memorisation`, `escalation` and `profiles` modules.
+
+Result of the rerun (killed / still surviving / not rerun):
+
+| module | killed | survived | not rerun |
+|---|---|---|---|
+| base | 1 | 0 | 0 |
+| calibration | 23 | 11 | 0 |
+| checks | 20 | 73 | 8 |
+| consistency | 16 | 11 | 0 |
+| costs | 13 | 2 | 0 |
+| counterfactual | 12 | 7 | 0 |
+| deadlines_check | 32 | 43 | 0 |
+| evidence_check | 1 | 58 | 12 |
+| ledger | 66 | 4 | 0 |
+| ledger_invariants | 0 | 0 | 78 |
+| outcome | 0 | 10 | 0 |
+| policy_constraints | 0 | 5 | 0 |
+| process | 20 | 22 | 0 |
+| record | 0 | 0 | 2 |
+| scope | 2 | 1 | 47 |
+| trace | 0 | 0 | 4 |
+| **total** | **206** | **247** | **151** |
+
+Of the 206 newly killed, about 135 change logic, a threshold, an account or finding
+kind, or which case a finding is attributed to; about 71 change only a message or an
+evidence pointer (the same regular-expression heuristic as above, approximate).
+
+**Score.** On the first run's 2,173 mutants, counting the earlier 1,406 killed or timed
+out as still killed (their code is unchanged) and every mutant not rerun, including the
+154 stale `self_report` survivors, as surviving: (1,406 + 206) / 2,173 = **74.2%**, up
+from 64.7%. That is an estimate under those two assumptions, not a fresh full run.
