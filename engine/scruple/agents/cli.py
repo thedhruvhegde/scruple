@@ -26,6 +26,7 @@ ALL_TOOL_NAMES = tuple(
 )
 KIND_TOOLS = {
     "dispute": dispute_anthropic_tools,
+    "scenario": dispute_anthropic_tools,  # real-life scenarios play the dispute tools
     "ach": ach_anthropic_tools,
     "recon": recon_anthropic_tools,
 }
@@ -74,11 +75,6 @@ def cmd_episode(args: argparse.Namespace) -> int:
             )
             return 0
         case "tools":
-            _print(
-                dispute_anthropic_tools()
-                if args.kind in ("dispute", "scenario")
-                else anthropic_tools()
-            )
             _print(KIND_TOOLS.get(args.kind, anthropic_tools)())
             return 0
         case "call":

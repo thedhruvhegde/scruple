@@ -37,11 +37,7 @@ class UnknownEpisodeError(KeyError):
     pass
 
 
-KINDS = ("simple", "dispute", "scenario")
-KINDS = ("simple", "dispute", "ach")
-AnyEpisode = Episode | DisputeEpisode | AchEpisode
-WORKFLOW_KINDS: dict[str, type[AchEpisode]] = {"ach": AchEpisode}
-KINDS = ("simple", "dispute", "ach", "recon")
+KINDS = ("simple", "dispute", "scenario", "ach", "recon")
 AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode
 WORKFLOW_KINDS: dict[str, type[AchEpisode] | type[ReconEpisode]] = {
     "ach": AchEpisode,

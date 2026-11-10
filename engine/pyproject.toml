@@ -13,10 +13,16 @@ keywords = ["agents", "verifiers", "simulation", "chargebacks", "disputes", "eva
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
     "Framework :: FastAPI",
+    "Framework :: Pydantic :: 2",
     "Topic :: Office/Business :: Financial",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
     "Typing :: Typed",
 ]
 dependencies = [
