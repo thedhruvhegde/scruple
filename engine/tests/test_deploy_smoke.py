@@ -14,6 +14,8 @@ import pytest
 import uvicorn
 
 from scruple.api.app import create_app
+from scruple.auth.keys import ApiKeyService, ScryptParams
+from scruple.auth.rbac import Role, key_permissions
 from scruple.clock import SteppingClock
 from scruple.gate.config import GateConfig
 from scruple.service import AgentGate
@@ -87,14 +89,40 @@ def test_read_only_smoke_passes_and_writes_nothing(server: tuple[str, AgentGate]
     assert len(g.audit.entries()) == before
 
 
+def _key(g: AgentGate, subject: str, role: Role) -> str:
+    keys = ApiKeyService(g.storage, params=ScryptParams(n=1024), permissions_for=key_permissions)
+    _, token = keys.create(subject, (), "local-admin", roles=[role])
+    return token.get_secret_value()
+
+
 def test_keyed_smoke_registers_and_evaluates(server: tuple[str, AgentGate]) -> None:
     url, g = server
-    r = _smoke(url, SCRUPLE_SMOKE_API_KEY="staging-key", SCRUPLE_SMOKE_ACTOR="smoke-bot")
+    r = _smoke(url, SCRUPLE_SMOKE_API_KEY=_key(g, "smoke-bot", Role.PROPOSER))
     assert r.returncode == 0, r.stdout + r.stderr
+    assert "ok    whoami smoke-bot (tenant default, propose,read)" in r.stdout
     assert "ok    register smoke-" in r.stdout
     assert "ok    evaluate smoke-" in r.stdout and "shadow=" in r.stdout
     smoke_rules = [v for v in g.registry.all_versions() if v.rule_id.startswith("smoke-")]
     assert len(smoke_rules) == 1 and smoke_rules[0].owner == "smoke-bot"
+    assert smoke_rules[0].provenance.agent_id == "smoke-bot"  # from the key, not a header
+
+
+@pytest.mark.parametrize("bad", ["not-a-key", "scr_0123456789abcdef_" + "a" * 43])
+def test_keyed_smoke_with_a_bad_key_fails_before_writing(
+    server: tuple[str, AgentGate], bad: str
+) -> None:
+    url, g = server
+    before = len(g.audit.entries())
+    r = _smoke(url, SCRUPLE_SMOKE_API_KEY=bad)
+    assert r.returncode == 1 and "FAIL  whoami: HTTP 401" in r.stderr
+    assert "register" not in r.stdout + r.stderr
+    assert len(g.audit.entries()) == before
+
+
+def test_keyed_smoke_with_a_read_only_key_cannot_register(server: tuple[str, AgentGate]) -> None:
+    url, g = server
+    r = _smoke(url, SCRUPLE_SMOKE_API_KEY=_key(g, "auditor", Role.AUDITOR))
+    assert r.returncode == 1 and "FAIL  register: HTTP 403" in r.stderr
 
 
 def test_expected_commit_mismatch_fails(server: tuple[str, AgentGate]) -> None:

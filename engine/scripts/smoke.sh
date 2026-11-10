@@ -11,8 +11,12 @@
 # With SCRUPLE_SMOKE_API_KEY set it also WRITES: it registers a throwaway rule
 # smoke-<unix time> (escalate, matches nothing real) and evaluates it, which records
 # decisions in the append-only audit log. Run that part against staging, not prod.
-# The key is sent as `Authorization: Bearer <key>`; SCRUPLE_SMOKE_ACTOR (default
-# smoke-test) is the X-Actor header.
+# The key is a scruple API key with the `proposer` role (`scruple keys create
+# --subject smoke-test --role proposer`), sent as `Authorization: Bearer <key>`.
+# Identity comes from the key: /auth/whoami names its subject, which the script uses
+# as the rule's owner and provenance agent (the API requires the caller to be the
+# provenance agent). No X-Actor header is sent; the server ignores it outside the
+# development-only mode.
 #
 # Optional: SCRUPLE_SMOKE_EXPECT_COMMIT=<sha prefix> fails unless /version matches.
 # Exit status: 0 all passed, 1 a check failed, 2 usage. Needs curl and python3.
@@ -31,7 +35,6 @@ case "$BASE" in
 esac
 
 KEY="${SCRUPLE_SMOKE_API_KEY:-}"
-ACTOR="${SCRUPLE_SMOKE_ACTOR:-smoke-test}"
 TIMEOUT="${SCRUPLE_SMOKE_TIMEOUT:-10}"
 EVAL_TIMEOUT="${SCRUPLE_SMOKE_EVAL_TIMEOUT:-180}"
 WORK="$(mktemp -d)"
@@ -90,6 +93,17 @@ fi
 
 # 5. authenticated write path (staging only)
 if [ -n "$KEY" ]; then
+  auth=(-H "Authorization: Bearer $KEY")
+  request GET /auth/whoami "${auth[@]}"
+  ACTOR=""
+  if [ "$status" = 200 ]; then
+    ACTOR="$(json 'd["subject"]')"
+    pass "whoami $ACTOR (tenant $(json 'd["tenant"]'), $(json '",".join(d["permissions"])'))"
+  else
+    fail "whoami: HTTP $status $(head -c 300 "$WORK/body")"
+  fi
+fi
+if [ -n "$KEY" ] && [ -n "$ACTOR" ]; then
   rule_id="smoke-$(date +%s)"
   cat >"$WORK/rule.json" <<JSON
 {"rule_id": "$rule_id", "owner": "$ACTOR",
@@ -98,7 +112,6 @@ if [ -n "$KEY" ]; then
           "conditions": [{"field": "amount_usd_minor", "op": "gt", "value": 999999999999}],
           "action": "escalate", "priority": 1000}}
 JSON
-  auth=(-H "Authorization: Bearer $KEY" -H "X-Actor: $ACTOR")
   request POST /rules "${auth[@]}" -H 'Content-Type: application/json' --data @"$WORK/rule.json"
   if [ "$status" = 201 ]; then
     pass "register $rule_id"
@@ -111,7 +124,7 @@ JSON
   else
     fail "register: HTTP $status $(head -c 300 "$WORK/body")"
   fi
-else
+elif [ -z "$KEY" ]; then
   echo "skip  evaluate (set SCRUPLE_SMOKE_API_KEY to run the write path)"
 fi
 

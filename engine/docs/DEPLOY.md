@@ -165,9 +165,13 @@ image without a digest.
 `SCRUPLE_SMOKE_API_KEY` it also registers a throwaway rule `smoke-<unix time>`
 (escalate, matches nothing real) and evaluates it, which writes to the append-only
 audit log: staging only. `SCRUPLE_SMOKE_EXPECT_COMMIT` fails it unless `/version`
-reports that commit. The key goes out as `Authorization: Bearer`, with
-`SCRUPLE_SMOKE_ACTOR` (default `smoke-test`) as `X-Actor`; adjust once the
-authentication work lands if it uses another scheme.
+reports that commit. The key is a scruple API key with the `proposer` role, made in
+the staging database with `scruple keys create --subject smoke-test --role proposer`
+and sent as `Authorization: Bearer <key>`. The script asks `/auth/whoami` who the key
+is and registers the rule with that subject as owner and provenance agent; no
+`X-Actor` header is sent (the server ignores it outside the development-only mode).
+A bad key fails at `whoami` before anything is written; a key without `propose`
+fails at `register` (403).
 
 ## Migrations
 
