@@ -8,6 +8,7 @@
     scruple realdata build-splits --src ~/.cache/scruple/real-data
     scruple realdata fetch-v2 --dest ~/.cache/scruple/real-data
     scruple realdata build-v2 --src ~/.cache/scruple/real-data
+    scruple realdata timeliness [--out results/real/timeliness.json]
 
 Prompt files have one JSON object per line: id, task, split, system, prompt.
 Answer files: id, answer (the raw model reply). Missing answers for prompted ids
@@ -175,6 +176,13 @@ def cmd_fetch_v2(args: argparse.Namespace) -> int:  # pragma: no cover - network
     return 0
 
 
+def cmd_timeliness(args: argparse.Namespace) -> int:
+    from scruple.realdata.timeliness import analyse_all
+
+    _write_json(Path(args.out) if args.out else None, analyse_all())
+    return 0
+
+
 def add_realdata_parser(sub: Any) -> None:
     p = sub.add_parser("realdata", help="real-data evals on public CFPB complaints")
     rs = p.add_subparsers(dest="realdata_cmd", required=True)
@@ -195,6 +203,10 @@ def add_realdata_parser(sub: Any) -> None:
     f2 = rs.add_parser("fetch-v2", help="download the v2 raw inputs (anonymous git)")
     f2.add_argument("--dest", required=True)
     f2.set_defaults(fn=cmd_fetch_v2)
+
+    tm = rs.add_parser("timeliness", help="complaint-handling timeliness on real CFPB data")
+    tm.add_argument("--out", default=None, help="result JSON (default: stdout)")
+    tm.set_defaults(fn=cmd_timeliness)
 
     pr = rs.add_parser("prompt", help="write a JSONL of prompts for a model")
     pr.add_argument("--task", required=True, choices=sorted(TASKS))
