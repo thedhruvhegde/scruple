@@ -275,6 +275,8 @@ def test_route_accepts_signed_dispute_event() -> None:
         "duplicate": False,
         "cases": 1,
         "movements": 0,
+        "stored": False,  # no case store configured
+        "stale": 0,
     }
     assert post(c, body, sign_header(SECRET, T0, body)).json()["duplicate"] is True
 

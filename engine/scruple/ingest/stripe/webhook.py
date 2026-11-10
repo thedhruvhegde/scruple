@@ -132,6 +132,7 @@ class WebhookResult(BaseModel):
     event_type: str
     duplicate: bool
     batch: IngestBatch | None  # None for event types scruple does not ingest
+    created: int | None = None  # the event's `created` (unix seconds), for ordering
 
 
 class StripeWebhookReceiver:
@@ -184,12 +185,22 @@ class StripeWebhookReceiver:
         if len(self._seen) > self._remember:
             self._seen.popitem(last=False)
         result = WebhookResult(
-            event_id=event.id, event_type=event.type, duplicate=False, batch=batch
+            event_id=event.id,
+            event_type=event.type,
+            duplicate=False,
+            batch=batch,
+            created=event.created,
         )
         if batch is not None:
             self.received.append(result)
             del self.received[: -self._remember]
         return result
+
+    def forget(self, event_id: str) -> None:
+        """Drop an id from the duplicate cache (its batch could not be persisted, so the
+        provider's redelivery must be processed again)."""
+        self._seen.pop(event_id, None)
+        self.received = [r for r in self.received if r.event_id != event_id]
 
 
 __all__ = [
