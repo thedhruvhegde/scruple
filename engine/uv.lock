@@ -1423,7 +1423,7 @@ wheels = [
 ]
 
 [[package]]
-name = "scruple"
+name = "scruple-engine"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -1443,11 +1443,31 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+agents = [
+    { name = "claude-agent-sdk" },
+    { name = "langgraph" },
+    { name = "mcp" },
+]
 claude = [
     { name = "claude-agent-sdk" },
 ]
+dev = [
+    { name = "hypothesis" },
+    { name = "jsonschema" },
+    { name = "mypy" },
+    { name = "pypdf" },
+    { name = "pytest" },
+    { name = "pytest-xdist" },
+    { name = "ruff" },
+]
 langgraph = [
     { name = "langgraph" },
+]
+pdf = [
+    { name = "fpdf2" },
+]
+postgres = [
+    { name = "psycopg", extra = ["binary"] },
 ]
 
 [package.dev-dependencies]
@@ -1474,22 +1494,34 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.13" },
+    { name = "claude-agent-sdk", marker = "extra == 'agents'", specifier = ">=0.2" },
     { name = "claude-agent-sdk", marker = "extra == 'claude'", specifier = ">=0.2" },
     { name = "cryptography", specifier = ">=50.0.2" },
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "fpdf2", specifier = ">=2.9.0" },
+    { name = "fpdf2", marker = "extra == 'pdf'", specifier = ">=2.9.0" },
     { name = "httpx", specifier = ">=0.27" },
+    { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.170.15" },
     { name = "jinja2", specifier = ">=3.1" },
+    { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.26.0" },
+    { name = "langgraph", marker = "extra == 'agents'", specifier = ">=1.0" },
     { name = "langgraph", marker = "extra == 'langgraph'", specifier = ">=1.0" },
     { name = "mcp", specifier = ">=2.3" },
+    { name = "mcp", marker = "extra == 'agents'", specifier = ">=2.3" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
+    { name = "psycopg", extras = ["binary"], marker = "extra == 'postgres'", specifier = ">=3.2" },
     { name = "pydantic", specifier = ">=2.9" },
+    { name = "pypdf", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
+    { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.8.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.7" },
     { name = "sqlalchemy", specifier = ">=2.0" },
     { name = "uvicorn", specifier = ">=0.30" },
 ]
-provides-extras = ["claude", "langgraph"]
+provides-extras = ["postgres", "pdf", "agents", "claude", "langgraph", "dev"]
 
 [package.metadata.requires-dev]
 dev = [

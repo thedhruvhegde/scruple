@@ -39,11 +39,18 @@ class BuildInfo(BaseModel):
         )
 
 
+# Published as `scruple-engine`; `scruple` is the distribution name before the rename,
+# still found in environments synced before it.
+DISTRIBUTIONS = ("scruple-engine", "scruple")
+
+
 def package_version() -> str:
-    try:
-        return metadata.version("scruple")
-    except metadata.PackageNotFoundError:  # pragma: no cover - only when run from a raw tree
-        return "0.0.0+unknown"
+    for dist in DISTRIBUTIONS:
+        try:
+            return metadata.version(dist)
+        except metadata.PackageNotFoundError:
+            continue
+    return "0.0.0+unknown"  # pragma: no cover - only when run from a raw tree
 
 
 @cache
