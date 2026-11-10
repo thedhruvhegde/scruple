@@ -1,0 +1,181 @@
+# Container release for the scruple engine.
+#
+# This file lives at engine/deploy/github-workflows/release.yml in the monorepo
+# (thedhruvhegde/scruple). GitHub only runs workflows from the repository ROOT, so it
+# is copied to .github/workflows/engine-release.yml there; every path below is
+# relative to the repo root and every run step works inside engine/.
+#
+# Triggers:
+#   - tag engine-vX.Y.Z  -> image tags X.Y.Z, X.Y and sha-<full sha>
+#   - push to main touching engine/** -> image tags edge and sha-<full sha>
+#   - manual dispatch     -> sha-<full sha> only
+#
+# Order: build amd64 locally, scan it (HIGH/CRITICAL with a fix fails the run),
+# then build and push both architectures (from the warm cache) with an SBOM and
+# max provenance, then sign the pushed digest with cosign keyless (GitHub OIDC).
+name: engine-release
+
+on:
+  push:
+    branches: [main]
+    tags: ["engine-v*.*.*"]
+    paths:
+      - "engine/**"
+      - ".github/workflows/engine-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engine-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: ghcr.io/thedhruvhegde/scruple-engine
+
+defaults:
+  run:
+    working-directory: engine
+    shell: bash
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write # push to ghcr.io with GITHUB_TOKEN
+      id-token: write # cosign keyless signing (Fulcio certificate from GitHub OIDC)
+      attestations: write
+      security-events: write # upload the scan as SARIF
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: build metadata
+        id: build
+        run: |
+          echo "commit=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=match,pattern=engine-v(\d+\.\d+\.\d+.*),group=1
+            type=match,pattern=engine-v(\d+\.\d+)\.\d+$,group=1
+            type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=long
+          labels: |
+            org.opencontainers.image.title=scruple-engine
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: build amd64 for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: engine
+          file: engine/Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: scruple-engine:scan
+          build-args: |
+            BUILD_COMMIT=${{ steps.build.outputs.commit }}
+            BUILD_DATE=${{ steps.build.outputs.date }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: vulnerability scan (table, fails on fixable HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: scruple-engine:scan
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          vuln-type: os,library
+          exit-code: "1"
+
+      - name: vulnerability scan (SARIF for code scanning)
+        if: always()
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: scruple-engine:scan
+          format: sarif
+          output: trivy.sarif
+          severity: MEDIUM,HIGH,CRITICAL
+          exit-code: "0"
+
+      - name: upload scan
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: engine-image
+
+      - name: build and push (amd64 + arm64, SBOM, provenance)
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: engine
+          file: engine/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          sbom: true
+          provenance: mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_COMMIT=${{ steps.build.outputs.commit }}
+            BUILD_DATE=${{ steps.build.outputs.date }}
+          cache-from: type=gha
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: sign the digest (keyless)
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: cosign sign --yes "${IMAGE}@${DIGEST}"
+
+      - name: verify the signature
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+          IDENTITY: ${{ github.server_url }}/${{ github.workflow_ref }}
+        run: >-
+          cosign verify "${IMAGE}@${DIGEST}"
+          --certificate-identity "${IDENTITY}"
+          --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          > /dev/null
+
+      - name: summary
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          {
+            echo "### scruple-engine image"
+            echo
+            echo "digest: \`${IMAGE}@${DIGEST}\`"
+            echo
+            echo "tags:"
+            echo '```'
+            echo "${TAGS}"
+            echo '```'
+            echo
+            echo "verify: \`cosign verify ${IMAGE}@${DIGEST} --certificate-identity-regexp '^https://github.com/thedhruvhegde/scruple/' --certificate-oidc-issuer https://token.actions.githubusercontent.com\`"
+          } >> "$GITHUB_STEP_SUMMARY"
