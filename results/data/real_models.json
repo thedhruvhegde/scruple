@@ -1,0 +1,135 @@
+{
+ "note": "Real CFPB data; models answered blind; see SUMMARY.md",
+ "outcome-2015": {
+  "entries": {
+   "haiku": {
+    "auroc": 0.5504908835904628,
+    "kind": "model",
+    "valid_format": 100,
+    "vs_tfidf_lr": {
+     "ci95": [
+      -0.317959,
+      0.007915
+     ],
+     "diff": -0.150304,
+     "n_boot": 2000
+    }
+   },
+   "keywords": {
+    "auroc": 0.5680224403927069,
+    "kind": "baseline"
+   },
+   "majority": {
+    "auroc": 0.5,
+    "kind": "baseline"
+   },
+   "sonnet": {
+    "auroc": 0.605890603085554,
+    "kind": "model",
+    "valid_format": 100,
+    "vs_tfidf_lr": {
+     "ci95": [
+      -0.212716,
+      0.025055
+     ],
+     "diff": -0.094904,
+     "n_boot": 2000
+    }
+   },
+   "tfidf_lr": {
+    "auroc": 0.7007947639083684,
+    "kind": "baseline"
+   }
+  },
+  "metric": "auroc",
+  "n": 100
+ },
+ "regime-2015": {
+  "entries": {
+   "haiku": {
+    "accuracy": 0.9,
+    "kind": "model",
+    "valid_format": 100,
+    "vs_tfidf_lr": {
+     "ci95": [
+      -0.03,
+      0.09
+     ],
+     "diff": 0.03,
+     "n_boot": 2000
+    }
+   },
+   "keywords": {
+    "accuracy": 0.8,
+    "kind": "baseline"
+   },
+   "majority": {
+    "accuracy": 0.63,
+    "kind": "baseline"
+   },
+   "sonnet": {
+    "accuracy": 0.93,
+    "kind": "model",
+    "valid_format": 100,
+    "vs_tfidf_lr": {
+     "ci95": [
+      0.0,
+      0.12
+     ],
+     "diff": 0.06,
+     "n_boot": 2000
+    }
+   },
+   "tfidf_lr": {
+    "accuracy": 0.87,
+    "kind": "baseline"
+   }
+  },
+  "metric": "accuracy",
+  "n": 100
+ },
+ "routing-2025": {
+  "entries": {
+   "haiku": {
+    "accuracy": 0.56,
+    "kind": "model",
+    "valid_format": 50,
+    "vs_tfidf_lr": {
+     "ci95": [
+      -0.16,
+      0.12
+     ],
+     "diff": -0.02,
+     "n_boot": 2000
+    }
+   },
+   "keywords": {
+    "accuracy": 0.22,
+    "kind": "baseline"
+   },
+   "majority": {
+    "accuracy": 0.48,
+    "kind": "baseline"
+   },
+   "sonnet": {
+    "accuracy": 0.54,
+    "kind": "model",
+    "valid_format": 50,
+    "vs_tfidf_lr": {
+     "ci95": [
+      -0.18,
+      0.1
+     ],
+     "diff": -0.04,
+     "n_boot": 2000
+    }
+   },
+   "tfidf_lr": {
+    "accuracy": 0.58,
+    "kind": "baseline"
+   }
+  },
+  "metric": "accuracy",
+  "n": 50
+ }
+}
