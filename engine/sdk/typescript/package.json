@@ -1,0 +1,40 @@
+{
+  "name": "@scruple/client",
+  "version": "0.1.0",
+  "description": "Typed fetch client for the scruple HTTP API and its MCP dispute simulator.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/src/mcp.d.ts",
+      "import": "./dist/src/mcp.js"
+    }
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "scripts": {
+    "generate": "openapi-typescript openapi.json --default-non-nullable false --output src/schema.ts",
+    "check-generated": "openapi-typescript openapi.json --default-non-nullable false --output src/schema.ts --check",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.json && node --test \"dist/test/**/*.test.js\"",
+    "example:http": "npm run build && node dist/examples/gate-flow.js",
+    "example:mcp": "npm run build && node dist/examples/dispute-episode.js"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}
