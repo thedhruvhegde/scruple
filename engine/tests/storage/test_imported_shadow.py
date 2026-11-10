@@ -47,6 +47,7 @@ OUTCOMES = [ImportedOutcome(case=c, movements=mv) for c, mv in ROWS]
 # The API tests use the development-only X-Actor trust; tests/test_auth_*.py cover
 # real authentication.
 DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
 
 
 def _durable(repo: ImportedShadowRepository, tenant: str = "default") -> DurableImportedShadow:
@@ -240,13 +241,15 @@ def test_api_imported_shadow_survives_a_restart(reopen: Any) -> None:
     hdr = {"X-Actor": "production"}
     body = {"decisions": [json.loads(d.model_dump_json()) for d in BATCH]}
     out = {"outcomes": [{"case": json.loads(o.case.model_dump_json())} for o in OUTCOMES[:25]]}
-    c1 = TestClient(create_app(g1, auth=DEV_AUTH))
+    c1 = TestClient(create_app(g1, auth=DEV_AUTH), headers=READER)
     assert c1.post(f"{url}/decisions", json=body, headers=hdr).status_code == 200
     assert c1.post(f"{url}/outcomes", json=out, headers=hdr).json()["updated"] == 25
     before = c1.get(url).json()
     g1.storage.close()
 
-    c2 = TestClient(create_app(_gate(reopen()), auth=DEV_AUTH))  # a fresh app on the same database
+    c2 = TestClient(
+        create_app(_gate(reopen()), auth=DEV_AUTH), headers=READER
+    )  # a fresh app on the same database
     assert c2.get(url).json() == before
     assert ImportedShadowSummary.model_validate(before).resolved > 0
     assert c2.post(f"{url}/decisions", json=body, headers=hdr).status_code == 409
@@ -255,5 +258,7 @@ def test_api_imported_shadow_survives_a_restart(reopen: Any) -> None:
 
 
 def test_api_imported_shadow_unknown_rule_is_404(tmp_path: Path) -> None:
-    c = TestClient(create_app(_gate(SQLiteStorage(str(tmp_path / "g.db"))), auth=DEV_AUTH))
+    c = TestClient(
+        create_app(_gate(SQLiteStorage(str(tmp_path / "g.db"))), auth=DEV_AUTH), headers=READER
+    )
     assert c.get("/shadow/rules/nope/versions/1/imported").status_code == 404
