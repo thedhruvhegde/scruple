@@ -21,6 +21,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from scruple.api.app import create_app
+from scruple.auth.authn import Authenticator
 from scruple.backtest import rule_candidate
 from scruple.backtest.candidate import CandidateDecision
 from scruple.backtest.view import DecisionView
@@ -39,6 +40,11 @@ from scruple.ingest.stripe.mapping import ingest_dispute
 from scruple.sim.library import GOOD_RULE_ID
 from scruple.sim.models import Stage
 from tests.test_gate_shadow import _gate
+
+# These tests exercise the gate through the API, so they use the development-only
+# X-Actor trust; tests/test_auth_*.py cover real authentication.
+DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
 
 FIX = Path(__file__).parent / "fixtures" / "stripe"
 REAL: dict[str, Any] = json.loads((FIX / "fixtures3.subset.json").read_text())["resources"]
@@ -371,7 +377,7 @@ def test_property_accounting(actions: list[Action], cand: Action | None) -> None
 
 def test_api_imported_routes(tmp_path: Path) -> None:
     g, st_ = _gate()
-    client = TestClient(create_app(g))
+    client = TestClient(create_app(g, auth=DEV_AUTH), headers=READER)
     url = f"/shadow/rules/{GOOD_RULE_ID}/versions/1/imported"
     rows = synthetic(20)
     body = {"decisions": [json.loads(d.model_dump_json()) for d in decisions(rows, as_opened=True)]}

@@ -66,6 +66,39 @@ BEGIN SELECT RAISE(ABORT, 'decisions are append-only'); END;
 CREATE TRIGGER IF NOT EXISTS decisions_no_delete
 BEFORE DELETE ON decisions
 BEGIN SELECT RAISE(ABORT, 'decisions are append-only'); END;
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    key_id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    roles_json TEXT NOT NULL,
+    scopes_json TEXT NOT NULL,
+    secret_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    description TEXT NOT NULL,
+    expires_at TEXT,
+    revoked_at TEXT,
+    last_used_at TEXT,
+    rate_per_minute INTEGER,
+    burst INTEGER,
+    max_body_bytes INTEGER
+);
+CREATE INDEX IF NOT EXISTS api_keys_tenant ON api_keys (tenant_id, created_at);
+CREATE TRIGGER IF NOT EXISTS api_keys_immutable
+BEFORE UPDATE ON api_keys
+WHEN NEW.key_id IS NOT OLD.key_id OR NEW.tenant_id IS NOT OLD.tenant_id
+  OR NEW.subject IS NOT OLD.subject OR NEW.roles_json IS NOT OLD.roles_json
+  OR NEW.scopes_json IS NOT OLD.scopes_json OR NEW.secret_hash IS NOT OLD.secret_hash
+  OR NEW.created_at IS NOT OLD.created_at OR NEW.created_by IS NOT OLD.created_by
+  OR NEW.description IS NOT OLD.description OR NEW.expires_at IS NOT OLD.expires_at
+  OR NEW.rate_per_minute IS NOT OLD.rate_per_minute OR NEW.burst IS NOT OLD.burst
+  OR NEW.max_body_bytes IS NOT OLD.max_body_bytes
+  OR (OLD.revoked_at IS NOT NULL AND NEW.revoked_at IS NOT OLD.revoked_at)
+BEGIN SELECT RAISE(ABORT, 'api key is immutable except last use and one revocation'); END;
+CREATE TRIGGER IF NOT EXISTS api_keys_no_delete
+BEFORE DELETE ON api_keys
+BEGIN SELECT RAISE(ABORT, 'api keys are append-only; revoke instead'); END;
 """
 
 _HISTORY_MESSAGES = ("append-only", "immutable")

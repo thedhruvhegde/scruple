@@ -38,8 +38,8 @@ from scruple.storage import SQLiteStorage
 from tests.ci_support import PROV, write_repo
 
 ROOT = Path(__file__).resolve().parents[1]
-APPROVER = {"X-Actor": "model-risk@demo.bank"}
-OWNER = {"X-Actor": "ops-team"}
+# Fast scrypt for test keys; the server process reads the same setting.
+ENV = {**os.environ, "PYTHONHASHSEED": "random", "SCRUPLE_AUTH_SCRYPT_N": "1024"}
 
 
 def scruple(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -49,7 +49,7 @@ def scruple(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         text=True,
         timeout=600,
-        env={**os.environ, "PYTHONHASHSEED": "random"},
+        env=ENV,
     )
     if check:
         assert proc.returncode == 0, f"scruple {' '.join(args)}:\n{proc.stdout}\n{proc.stderr}"
@@ -60,6 +60,13 @@ def _free_port() -> int:
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
         return int(s.getsockname()[1])
+
+
+def key(db: Path, subject: str, *scopes: str) -> dict[str, str]:
+    """A real API key made by `scruple keys create`, as request headers."""
+    flags = [f"--scope={s}" for s in scopes]
+    out = scruple("keys", "create", "--db", str(db), "--subject", subject, *flags)
+    return {"X-API-Key": out.stdout.strip()}
 
 
 @pytest.fixture
@@ -88,6 +95,7 @@ def server(tmp_path: Path) -> Iterator[tuple[str, Path]]:
         cwd=ROOT,
         stdout=log,
         stderr=subprocess.STDOUT,
+        env=ENV,
     )
     base = f"http://127.0.0.1:{port}"
     try:
@@ -112,15 +120,19 @@ def test_pull_request_to_canary_to_rollback_across_processes(
     server: tuple[str, Path], tmp_path: Path
 ) -> None:
     base, db = server
-    with httpx.Client(base_url=base, timeout=30) as http:
+    approver = key(db, "model-risk@demo.bank", "read", "approve")
+    owner = key(db, "ops-team", "read", "approve")  # holds approve, yet owns the rule
+    reader = key(db, "auditor", "read")
+    with httpx.Client(base_url=base, timeout=30, headers=reader) as http:
+        assert http.get("/rules", headers={"X-API-Key": ""}).status_code == 401
         versions = {(r["rule_id"], r["version"]): r["status"] for r in http.get("/rules").json()}
         assert versions[(BAD_RULE_ID, 1)] == "rejected"
         assert versions[(GOOD_RULE_ID, 1)] == "canary"
 
         # the owner may not approve their own rule; the approver may
-        r = http.post(f"/rules/{GOOD_RULE_ID}/versions/1/approve", headers=OWNER)
+        r = http.post(f"/rules/{GOOD_RULE_ID}/versions/1/approve", headers=owner)
         assert r.status_code == 403, r.text
-        r = http.post(f"/rules/{GOOD_RULE_ID}/versions/1/approve", headers=APPROVER)
+        r = http.post(f"/rules/{GOOD_RULE_ID}/versions/1/approve", headers=approver)
         assert r.status_code == 200, r.text
         activation = r.json()
         assert activation["outcome"] == "activated"

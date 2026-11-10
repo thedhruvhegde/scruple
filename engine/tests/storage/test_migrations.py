@@ -69,7 +69,7 @@ def _tables(url: str) -> set[str]:
 
 
 def test_single_linear_head() -> None:
-    assert m.head() == "0001"
+    assert m.head() == "0002"
 
 
 @pytest.mark.parametrize(
@@ -101,7 +101,7 @@ def test_upgrade_head_on_empty_db_matches_the_backend(postgres_url: str, empty_d
         row = c.execute("SELECT version_num FROM alembic_version").fetchone()
     assert row is not None and row[0] == m.head()
     migrated = _catalog(empty_db)
-    assert len(migrated["triggers"]) == 9 and len(migrated["functions"]) == 2
+    assert len(migrated["triggers"]) == 12 and len(migrated["functions"]) == 3
 
     name = f"m_{uuid.uuid4().hex[:16]}"
     with psycopg.connect(postgres_url, autocommit=True) as c:
@@ -134,7 +134,13 @@ def test_backend_runs_on_a_migrated_db(empty_db: str) -> None:
 def test_upgrade_is_idempotent_and_downgrade_removes_everything(empty_db: str) -> None:
     m.upgrade(empty_db)
     m.upgrade(empty_db)
-    assert _tables(empty_db) == {"alembic_version", "rule_versions", "audit_events", "decisions"}
+    assert _tables(empty_db) == {
+        "alembic_version",
+        "rule_versions",
+        "audit_events",
+        "decisions",
+        "api_keys",
+    }
     m.downgrade(empty_db)
     assert _tables(empty_db) == {"alembic_version"}
     assert _catalog(empty_db)["functions"] == []

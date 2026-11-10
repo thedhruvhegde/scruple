@@ -110,6 +110,55 @@ CREATE OR REPLACE TRIGGER decisions_no_delete BEFORE DELETE ON decisions
     FOR EACH ROW EXECUTE FUNCTION scruple_refuse('decisions are append-only');
 CREATE OR REPLACE TRIGGER decisions_no_truncate BEFORE TRUNCATE ON decisions
     FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse('decisions are append-only');
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    key_id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    roles_json TEXT NOT NULL,
+    scopes_json TEXT NOT NULL,
+    secret_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    description TEXT NOT NULL,
+    expires_at TEXT,
+    revoked_at TEXT,
+    last_used_at TEXT,
+    rate_per_minute INTEGER,
+    burst INTEGER,
+    max_body_bytes INTEGER
+);
+CREATE INDEX IF NOT EXISTS api_keys_tenant ON api_keys (tenant_id, created_at);
+
+CREATE OR REPLACE FUNCTION scruple_api_key_immutable() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF NEW.key_id IS DISTINCT FROM OLD.key_id
+       OR NEW.tenant_id IS DISTINCT FROM OLD.tenant_id
+       OR NEW.subject IS DISTINCT FROM OLD.subject
+       OR NEW.roles_json IS DISTINCT FROM OLD.roles_json
+       OR NEW.scopes_json IS DISTINCT FROM OLD.scopes_json
+       OR NEW.secret_hash IS DISTINCT FROM OLD.secret_hash
+       OR NEW.created_at IS DISTINCT FROM OLD.created_at
+       OR NEW.created_by IS DISTINCT FROM OLD.created_by
+       OR NEW.description IS DISTINCT FROM OLD.description
+       OR NEW.expires_at IS DISTINCT FROM OLD.expires_at
+       OR NEW.rate_per_minute IS DISTINCT FROM OLD.rate_per_minute
+       OR NEW.burst IS DISTINCT FROM OLD.burst
+       OR NEW.max_body_bytes IS DISTINCT FROM OLD.max_body_bytes
+       OR (OLD.revoked_at IS NOT NULL AND NEW.revoked_at IS DISTINCT FROM OLD.revoked_at) THEN
+        RAISE EXCEPTION 'api key is immutable except last use and one revocation';
+    END IF;
+    RETURN NEW;
+END
+$$;
+
+CREATE OR REPLACE TRIGGER api_keys_immutable BEFORE UPDATE ON api_keys
+    FOR EACH ROW EXECUTE FUNCTION scruple_api_key_immutable();
+CREATE OR REPLACE TRIGGER api_keys_no_delete BEFORE DELETE ON api_keys
+    FOR EACH ROW EXECUTE FUNCTION scruple_refuse('api keys are append-only; revoke instead');
+CREATE OR REPLACE TRIGGER api_keys_no_truncate BEFORE TRUNCATE ON api_keys
+    FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse('api keys are append-only; revoke instead');
 """
 
 
@@ -206,15 +255,18 @@ def app_role_grants(role: str, schema: str = "public") -> str:
 
     A non-owner cannot drop or disable the append-only triggers, and the grants
     themselves are a second guard: INSERT and SELECT on history, and UPDATE only on
-    the two mutable rule columns. Run it as the table owner after migrating.
+    the two mutable rule columns and the two mutable api key columns. Run it as the
+    table owner after migrating.
     """
     for name in (role, schema):
         if not SCHEMA_NAME.match(name):
             raise ValueError(f"invalid identifier {name!r}")
     return f"""
 GRANT USAGE ON SCHEMA {schema} TO {role};
-REVOKE ALL ON {schema}.rule_versions, {schema}.audit_events, {schema}.decisions FROM {role};
-GRANT SELECT, INSERT ON {schema}.rule_versions, {schema}.audit_events, {schema}.decisions
-    TO {role};
+REVOKE ALL ON {schema}.rule_versions, {schema}.audit_events, {schema}.decisions,
+    {schema}.api_keys FROM {role};
+GRANT SELECT, INSERT ON {schema}.rule_versions, {schema}.audit_events, {schema}.decisions,
+    {schema}.api_keys TO {role};
 GRANT UPDATE (status, rollback_to) ON {schema}.rule_versions TO {role};
+GRANT UPDATE (revoked_at, last_used_at) ON {schema}.api_keys TO {role};
 """

@@ -247,6 +247,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_eval_parser(sub)
     __import__("scruple.zoo.cli", fromlist=["add_zoo_parser"]).add_zoo_parser(sub)
+    from scruple.auth.cli import add_keys_parser
+
+    add_keys_parser(sub, DEFAULT_DB)
     return p
 
 
