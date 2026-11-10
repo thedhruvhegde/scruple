@@ -14,6 +14,7 @@ known versus new, and simulation evidence pasted from a seeded script in `script
 | 3 | [03_sample_size.md](03_sample_size.md) | sufficient sample size (growth bound plus Bernstein, exact binomial counts, optimised alpha allocation); a KL lower bound showing every valid test pays for a loose cap | adaptation; standard |
 | 4 | [04_asymmetric_decision.md](04_asymmetric_decision.md) | Bayes promote/block threshold under asymmetric costs; composition with the certificate keeps the frequentist guarantee and is Bayes-optimal among certified rules | standard; adaptation |
 | 5 | [05_hacking_gap.md](05_hacking_gap.md) | hacking gap (proxy minus ledger-anchored mean); tail and expected bounds for accepted changes under spot-check audits; minimal audit rate; free resubmission defeats spot checks; 5.5-5.8: adaptive agents with leaky audits (supermartingale proof), minimal audit rate with verifier false negatives and false alarms | candidate novel contribution (framing), literature check required; 5.5-5.6 adaptation |
+| 7 | [07_variance_aware_betting.md](07_variance_aware_betting.md) | variance-adaptive bets (grid mixture within log J of the best constant bet; WSR plug-in; wider aGRAPA cap); the best constant-bet growth is a KL distance to the null, giving a sample-size floor from observed costs; re-analysis of E1 | adaptation |
 | 8 | [08_composition.md](08_composition.md) | composition: the promote decision carries the smallest level among conjuncts covering a harm (intersection-union), false blocks add up, alpha spending for resubmission, per-type certificates; what is not covered | standard, applied; adaptation |
 | 6 | [06_gate_adapter.md](06_gate_adapter.md) | pure adapter `evaluate_pairs` and how to wire it into the gate; results on the demo's held-out set | engineering |
 
@@ -39,6 +40,9 @@ a claim of novelty: a proper literature review is required before any paper says
 - Leaky audits (05, 5.5-5.6): on the 120 E2 batches the leak-adjusted bound is attained
   (ratio 1.000), the naive bound is broken (0.251 vs 0.052 at `q = 0.05`, `beta = 0.3`,
   likelihood-ratio floor 0.2). With verifier errors `q* = g/((1-beta)(K+g) - phi K)`.
+- Betting (07): on E1's paired costs the default bet's cap binds; a wider valid bet lifts
+  R2's resampled power at 5,000 cases from 0.37 to 0.91 and blocks R5 (about one cent
+  per case pooled, $0.64 per case in buyer's remorse) on the benchmark itself.
 - Composition (08): a pooled certificate promotes a rare-type regression in 64% of runs
   at 20,000 cases; per-type certificates in 0%. Twenty resubmissions at fixed alpha
   0.05: 40% chance one harmful version ships; with spending, 1.7%.
@@ -57,6 +61,7 @@ uv run python scripts/math_hacking.py      # under 1 min
 uv run python scripts/math_hacking_general.py   # seconds
 uv run python scripts/math_gate_demo.py    # seconds
 uv run python scripts/math_composition.py  # a few minutes
+uv run python scripts/math_betting.py analyse   # about 10 minutes
 make test        # fast property and Monte Carlo tests
 make test-slow   # long seeded Monte Carlo runs (@pytest.mark.slow)
 ```
