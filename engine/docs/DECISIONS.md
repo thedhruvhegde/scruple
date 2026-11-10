@@ -105,7 +105,7 @@ victim, which `balanced` turns into a hard failure. Revisit with a design partne
 whether `balanced` should be the default once the agent can see a validity signal
 (for example, a cardholder statement the issuer has verified).
 
-**D-016 Variance-reduced e-value gate is opt-in (`stats = "evalue_vr"`); not the
+**D-017 Variance-reduced e-value gate is opt-in (`stats = "evalue_vr"`); not the
 default, and `"evalue"` stays as it is.** What it adds (docs/math/09): a stratified
 betting e-process over the tested case types at 0.8 of the false-block budget (e-BH
 keeps 0.2 and still names types), a plan at that level, and a canary whose
