@@ -1,4 +1,4 @@
-"""`scruple eval providers | run | import-store | import-calls | summary`."""
+"""`scruple eval providers | run | import-store | import-calls | summary | leaderboard`."""
 
 from __future__ import annotations
 
@@ -93,6 +93,19 @@ def cmd_eval(args: argparse.Namespace) -> int:
             write_summary(out)
             print((out / "SUMMARY.md").read_text(), end="")
             return 0
+        case "leaderboard":
+            from scruple.eval.leaderboard import build_leaderboard
+
+            board = build_leaderboard([Path(d) for d in args.dirs], n_boot=args.n_boot)
+            out = Path(args.out)
+            out.mkdir(parents=True, exist_ok=True)
+            (out / "leaderboard.json").write_text(
+                json.dumps(board.model_dump(mode="json"), indent=1, sort_keys=True) + "\n"
+            )
+            md = board.markdown()
+            (out / "LEADERBOARD.md").write_text(md)
+            print(md, end="")
+            return 0
     raise AssertionError(args.eval_cmd)  # pragma: no cover
 
 
@@ -140,6 +153,11 @@ def add_eval_parser(sub: Any) -> None:
 
     sm = es.add_parser("summary", help="re-score a run directory and print its summary")
     sm.add_argument("dir")
+
+    lb = es.add_parser("leaderboard", help="aggregate run directories into a leaderboard")
+    lb.add_argument("dirs", nargs="+", help="run directories")
+    lb.add_argument("--out", required=True)
+    lb.add_argument("--n-boot", type=int, default=2000, help="bootstrap resamples")
 
 
 __all__ = ["add_eval_parser", "cmd_eval"]
