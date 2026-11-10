@@ -74,7 +74,8 @@ def test_introspection_sees_the_real_inputs() -> None:
     by_path = {(r.path, sorted(r.methods or ())[0]): r for r in ROUTES}
     assert takes_body(by_path[("/rules", "POST")])
     assert not takes_body(by_path[("/rules/{rule_id}/versions/{version}/evaluate", "POST")])
-    assert declared_query(by_path[("/decisions", "GET")]) == {"rule_id"}
+    assert declared_query(by_path[("/decisions", "GET")]) == {"rule_id", "limit", "offset"}
+    assert declared_query(by_path[("/rules", "GET")]) == {"limit", "offset"}
     assert declared_query(by_path[("/audit/verify", "GET")]) == {"expected_head"}
     assert body_models(by_path[("/rules", "POST")])[0].__name__ == "RegisterIn"
 

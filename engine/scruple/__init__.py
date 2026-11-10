@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from scruple.agents.sdk import Scorecard, evaluate
+    from scruple.client import Client
 
-__all__ = ["Scorecard", "__version__", "evaluate"]
+__all__ = ["Client", "Scorecard", "__version__", "evaluate"]
 
 __version__: str
 
@@ -20,6 +21,10 @@ def __getattr__(name: str) -> Any:
         from scruple.version import package_version
 
         return package_version()
+    if name == "Client":
+        from scruple.client import Client
+
+        return Client
     if name in __all__:
         from scruple.agents import sdk
 
