@@ -1,0 +1,9 @@
+{{- include "scruple.validate" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "scruple.fullname" . }}
+  labels:
+    {{- include "scruple.labels" . | nindent 4 }}
+data:
+  {{- include "scruple.configData" . | nindent 2 }}

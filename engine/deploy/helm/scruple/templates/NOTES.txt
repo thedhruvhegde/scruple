@@ -1,0 +1,7 @@
+scruple {{ .Chart.AppVersion }} ({{ include "scruple.image" . }}) is deploying as {{ include "scruple.fullname" . }}.
+
+  kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "scruple.fullname" . }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "scruple.fullname" . }} 8000:{{ .Values.service.port }}
+  scripts/smoke.sh http://127.0.0.1:8000
+
+All data the engine reports is synthetic unless you import your own cases.
