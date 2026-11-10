@@ -64,6 +64,8 @@ from scruple.verifiers.policy_constraints import verify_policy
 SYSTEM_ACTOR = "agent-gate"
 
 
+EVENT_REJECTED = "approval.rejected"
+
 # ApprovalError now lives with the approval policy (scruple.gate.approval) and is
 # re-exported here unchanged, so `from scruple.service import ApprovalError` works.
 
@@ -170,7 +172,9 @@ class AgentGate:
                 )
         return records
 
-    def approve(self, rule_id: str, version: int, approver: str) -> DecisionRecord:
+    def approve(
+        self, rule_id: str, version: int, approver: str, *, reason: str | None = None
+    ) -> DecisionRecord:
         if self.approval_policy() is not None:
             raise ApprovalError("an approval policy is in force: use request/grant approval")
         rv = self.registry.get(rule_id, version)
@@ -183,7 +187,10 @@ class AgentGate:
         verdict = Verdict(
             Outcome.ACTIVATED,
             f"Activated by {approver}.",
-            (f"approved after canary decision {last.decision.decision_id}",),
+            (
+                f"approved after canary decision {last.decision.decision_id}",
+                *((f"reason: {reason}",) if reason else ()),
+            ),
             (),
         )
         with self.storage.transaction():  # the decision and the activation, or neither
@@ -323,7 +330,7 @@ class AgentGate:
         return self.approval_status(rule_id, version)
 
     def grant_approval(
-        self, rule_id: str, version: int, approver: str
+        self, rule_id: str, version: int, approver: str, *, reason: str | None = None
     ) -> tuple[ApprovalStatus, DecisionRecord | None]:
         """Record one approval. When the policy is satisfied, activate in the same
         transaction and return the activation decision."""
@@ -348,6 +355,7 @@ class AgentGate:
                     "granted_at": grant.granted_at.isoformat(),
                     "expires_at": grant.expires_at.isoformat(),
                     "request_seq": request.seq,
+                    **({"reason": reason} if reason else {}),
                 },
             )
             request, grants = project_approvals(self.audit.entries(), rule_id, version)
@@ -384,6 +392,54 @@ class AgentGate:
                 rule_id, version, approver, f"approved; decision {rec.decision.decision_id}"
             )
         return status, rec
+
+    def reject_approval(
+        self, rule_id: str, version: int, actor: str, reason: str
+    ) -> DecisionRecord:
+        """Refuse activation of a version waiting for approval, with a reason.
+
+        Only an approver may reject: a named approver of the policy in force, else one
+        of `GateConfig.approvers`. The version moves canary -> rejected (final) with a
+        BLOCK decision at the activation stage, and an `approval.rejected` event holds
+        the reason; all three commit together or not at all."""
+        policy = self.approval_policy()
+        if policy is not None:
+            if policy.approver(actor) is None:
+                raise ApprovalError(f"{actor} is not a named approver")
+        else:
+            self._require_approver(actor)
+        if not reason.strip():
+            raise ApprovalError("a rejection needs a reason")
+        rv = self.registry.get(rule_id, version)
+        self._require_ready_for_activation(rv)
+        verdict = Verdict(
+            Outcome.BLOCK,
+            f"Rejected at approval by {actor}: {reason}",
+            (f"rejected by {actor}", f"reason: {reason}"),
+            (),
+        )
+        with self.storage.transaction():
+            rec = self._record(Stage.ACTIVATION, rv, verdict, actor)
+            self.audit.append(
+                EVENT_REJECTED,
+                actor,
+                {
+                    "rule_id": rule_id,
+                    "version": version,
+                    "content_hash": rv.content_hash,
+                    "reason": reason,
+                    "decision_id": rec.decision.decision_id,
+                },
+            )
+            self.registry.transition(
+                rule_id,
+                version,
+                RuleStatus.REJECTED,
+                actor,
+                f"rejected at approval; decision {rec.decision.decision_id}",
+                {"decision_id": rec.decision.decision_id},
+            )
+        return rec
 
     def approval_status(self, rule_id: str, version: int) -> ApprovalStatus:
         policy = self._policy_or_raise()
