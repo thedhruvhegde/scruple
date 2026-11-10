@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any
 from scruple.agents.episode import Episode, EpisodeError
 from scruple.agents.models import TASK, EpisodeScore
 from scruple.agents.tools import TOOLS, ToolSpec
+from scruple.version import package_version
 
 if TYPE_CHECKING:
     from claude_agent_sdk import ClaudeAgentOptions, McpSdkServerConfig, SdkMcpTool
@@ -59,7 +60,7 @@ def episode_server(episode: Episode) -> McpSdkServerConfig:
     from claude_agent_sdk import create_sdk_mcp_server
 
     return create_sdk_mcp_server(
-        name=SERVER_NAME, version="0.1.0", tools=[_sdk_tool(t, episode) for t in TOOLS]
+        name=SERVER_NAME, version=package_version(), tools=[_sdk_tool(t, episode) for t in TOOLS]
     )
 
 

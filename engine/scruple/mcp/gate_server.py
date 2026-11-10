@@ -25,6 +25,7 @@ from scruple.domain import RuleSpec
 from scruple.gate.models import DecisionRecord
 from scruple.registry import InvalidTransitionError, Provenance
 from scruple.service import AgentGate
+from scruple.version import package_version
 
 RuleId = Annotated[str, Field(description="Rule id, lowercase with dashes, e.g. inr-contest.")]
 Version = Annotated[int, Field(description="Rule version number.", ge=1)]
@@ -48,7 +49,7 @@ def build_gate_server(gate: AgentGate) -> MCPServer:
         instructions="Change control for learned dispute rules. Submit a candidate, "
         "evaluate it, then read the status and evidence reports. Approval is done by a "
         "human outside this server. All data is synthetic.",
-        version="0.1.0",
+        version=package_version(),
     )
 
     def guarded[T](fn: Callable[[], T]) -> T:
