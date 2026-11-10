@@ -123,6 +123,26 @@ def test_unreadable_audit_chain_is_reported(monkeypatch: pytest.MonkeyPatch) -> 
     assert AuditChainCheck(g, ttl=0)().detail == "audit chain unreadable"
 
 
+def test_ready_verifies_every_tenants_chain_from_its_own_genesis() -> None:
+    g = _gate()
+    other = AgentGate(g.storage.for_tenant("bank-b"), SteppingClock(), GateConfig(n_cases=500))
+    other.bootstrap_baseline()
+    client = _client(g, ttl=0)
+    n = len(g.audit.entries()) + len(other.audit.entries())
+    check = client.get("/ready").json()["checks"]["audit_chain"]
+    assert check == {"ok": True, "detail": f"{n} entries verified across 2 tenant chains"}
+    # Copy the default chain into a third tenant: it does not start from that
+    # tenant's genesis, so readiness fails, and the answer names no tenant.
+    victim = g.storage.for_tenant("bank-c")
+    for e in g.audit.entries():
+        victim.append_audit(e)
+    r = client.get("/ready")
+    assert r.status_code == 503
+    detail = r.json()["checks"]["audit_chain"]["detail"]
+    assert detail == "broken at position 1 (1 of 3 tenant chains)"
+    assert "bank-" not in r.text
+
+
 @pytest.mark.parametrize("ttl", ["-1", "86401"])
 def test_ttl_is_bounded(ttl: str) -> None:
     from scruple.settings import SettingsError, load_settings

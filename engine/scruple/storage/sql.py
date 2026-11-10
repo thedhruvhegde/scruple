@@ -400,6 +400,14 @@ class SQLStorage:
     def list_audit(self) -> list[AuditEntry]:
         return self.audit.list_audit()
 
+    def audit_tenants(self) -> list[str]:
+        """Every tenant with an audit chain in this database (not only this view's):
+        for operator checks such as readiness, never for serving a tenant's data."""
+        rows = self._conn.query(
+            "SELECT DISTINCT tenant_id FROM audit_events ORDER BY tenant_id", ()
+        )
+        return [str(r["tenant_id"]) for r in rows]
+
     # decisions
     def insert_decision(self, decision_id: str, rule_id: str, version: int, body: str) -> None:
         with self.transaction():
