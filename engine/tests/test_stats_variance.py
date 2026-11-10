@@ -430,3 +430,23 @@ def test_vr_post_stratified_certificate() -> None:
         VRGateConfig(base=StatsGateConfig(cost_cap=1.0), shares={"a": 0.4})
     with pytest.raises(ValueError):
         VRGateConfig(base=StatsGateConfig(cost_cap=1.0), shares={"a": 0.0, "b": 1.0})
+
+
+def test_vr_per_type_certificate_blocks_promotion_of_a_rare_regression() -> None:
+    """Pooled mean clearly better, a rare type worse: the pooled certificate promotes,
+    a required per-type certificate for the rare type does not."""
+    rng = random.Random(9)
+    pairs = []
+    for i in range(6000):
+        k = "rare" if i % 50 == 0 else "common"
+        d = (40.0 if k == "rare" else -100.0) + rng.uniform(-20, 20)
+        pairs.append(
+            LossPair(case_id=str(i), case_type=k, baseline_loss=500.0, candidate_loss=500.0 + d)
+        )
+    base = StatsGateConfig(cost_cap=1_000.0)
+    pooled = evaluate_pairs_vr(pairs, VRGateConfig(base=base, stratified_share=0.5))
+    typed = evaluate_pairs_vr(pairs, VRGateConfig(base=base, certify_types=("rare",)))
+    assert pooled.base.certified
+    assert not typed.certified and typed.outcome != "promote"
+    assert typed.type_certificates["rare"] < 20
+    assert any("per type" in r for r in typed.reasons)

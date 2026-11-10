@@ -195,6 +195,6 @@ def default_provider(resamples: int = 2_000, seed: int = 7) -> StatsProvider:
 
 def provider_for(cfg: GateConfig) -> StatsProvider:
     """The provider `GateConfig.stats` selects ("bootstrap" by default)."""
-    if cfg.stats == "evalue":
+    if cfg.stats in ("evalue", "evalue_vr"):
         return EValueStatsProvider(cfg.evalue_cost_cap_usd_minor)
     return BootstrapProvider(cfg.bootstrap_resamples, cfg.stats_seed)

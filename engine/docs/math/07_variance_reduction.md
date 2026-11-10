@@ -111,6 +111,16 @@ processes in `evaluate_pairs`): `P(false block) <= w alpha + (1 - w) alpha = alp
 no type regressed.
 `contributions` shows which type carried the wealth (reported, not a guarantee).
 
+Two options of `VRGateConfig`, added after E3 (docs/experiments/E3): `max_bet` (the
+stratified process's bet cap; 0.5 by default as everywhere in `scruple.stats`, any
+value below 1 is valid, and 0.95 detected R5 where 0.5 did not), and `certify_types`,
+types that must each be certified non-inferior before a promotion. The latter is an
+intersection-union test: promote only if every listed type's own e-process for
+`H0_k: mean_k >= t_k` reaches `1/alpha_certify`; if any listed type is harmful its
+certificate is false with probability at most `alpha_certify`, so no split of alpha
+is needed (Berger 1982). It answers the pooled certificate's blind spot: a rare type
+can get worse while the pooled mean improves.
+
 Closest prior work we found: products of per-stratum test supermartingales for
 intersection hypotheses in stratified election audits (Spertus and Stark 2022,
 "Sweeter than SUITE", arXiv 2207.03379); there the strata are sampled separately,
@@ -327,6 +337,26 @@ Reading:
   when the covariate is strong; plan with it only when `R^2` and a coefficient bound
   are known from history, and otherwise plan without it.
 
+### Canary: centred inverse-propensity terms (7.5)
+
+`uv run python scripts/exp_e3_mc.py --canary`: one case type, cap 1000, costs
+600 +- 100 (USD minor, synthetic), canary share `p = 0.3`, 1,500 matched cases,
+100 paths; harm = the sequential rollback test of `scruple/gate/sequential.py`.
+
+```
+## canary, p = 0.3, costs 600 +- 100 of cap 1000: P(harm by n=1500), reps=100
+  effect    0: plain=0.030, centred=0.000
+  effect   20: plain=0.030, centred=0.930
+  effect   40: plain=0.100, centred=1.000
+  effect   60: plain=0.160, centred=1.000
+```
+
+Plain inverse-propensity terms scale the whole cost by `1/p`, so a cost level far
+from zero swamps a small effect; centring on the running mean cost removes that level
+(the false-rollback rate stays at or below `alpha`). The gain is this large because
+the synthetic costs sit far from zero with little spread; real costs with a long tail
+will gain less.
+
 ## References
 
 - J. Ville (1939). Étude critique de la notion de collectif. Gauthier-Villars.
@@ -334,6 +364,8 @@ Reading:
   Annals of Mathematical Statistics 41(5).
 - J. M. Robins, A. Rotnitzky, L. P. Zhao (1994). Estimation of regression coefficients
   when some regressors are not always observed. JASA 89(427).
+- R. L. Berger (1982). Multiparameter hypothesis testing and acceptance sampling.
+  Technometrics 24(4).
 - P. Glasserman, D. D. Yao (1992). Some guidelines and guarantees for common random
   numbers. Management Science 38(6).
 - S. Asmussen, P. W. Glynn (2007). Stochastic Simulation: Algorithms and Analysis. Springer.

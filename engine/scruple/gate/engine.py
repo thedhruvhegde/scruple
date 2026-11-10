@@ -83,7 +83,7 @@ def evaluate_shadow(
     affected = sum(1 for i in ids if b_out.action[i] is not c_out.action[i])
     matched = sum(1 for r in c_run.results if r.decided_by == candidate.ref)
     ev: EValueEvidence | None = None
-    if cfg.stats == "evalue":
+    if cfg.stats in ("evalue", "evalue_vr"):
         ev = evaluate_evalue(cases, b_out, c_out, cfg)
         # pooled time-uniform CS, flipped to "improvement" (positive = better)
         mean, lo, hi = -ev.pooled_mean_diff, -ev.pooled_ci_high, -ev.pooled_ci_low
@@ -197,6 +197,12 @@ def _evalue_checks(ev: EValueEvidence) -> tuple[CheckResult, ...]:
         )
     else:
         reg_detail = "no case type has a changed decision"
+    if ev.stratified is not None:
+        st = ev.stratified
+        reg_detail += (
+            f"; stratified betting over the family at {st.alpha:g}: e-value {st.e_value:.3g} "
+            f"(flags at {st.threshold:.3g})" + (", REGRESSED" if st.rejected else "")
+        )
     best = max(ev.types, key=lambda t: t.improvement_e_value, default=None)
     if ev.improved:
         imp_detail = "certified better: " + ", ".join(
@@ -241,8 +247,9 @@ def _evalue_checks(ev: EValueEvidence) -> tuple[CheckResult, ...]:
         _check(
             "evalue_no_type_regression",
             "hard",
-            not ev.regressed,
-            f"e-BH over {k} case type(s) at FDR {ev.alpha:g}: {reg_detail}",
+            not ev.blocks,
+            f"e-BH over {k} case type(s) at FDR "
+            f"{ev.alpha - (ev.stratified.alpha if ev.stratified else 0.0):g}: {reg_detail}",
         ),
         _check(
             "evalue_sample_size",
@@ -421,13 +428,14 @@ def evaluate_canary(
     within = t_mean <= c_mean + cfg.canary_tolerance_usd_minor
     seq: SequentialCanaryResult | None = None
     cost_checks: tuple[CheckResult, ...]
-    if cfg.stats == "evalue":
+    if cfg.stats in ("evalue", "evalue_vr"):
         p = int(cfg.canary_fraction * 10_000) / 10_000  # exactly what in_canary uses
         cost_checks, seq = sequential_checks(
             observations(cases, matches, treat, costs, cfg),
             p,
             cfg.evalue_alpha,
             cfg.canary_tolerance_usd_minor,
+            centred=cfg.stats == "evalue_vr",
         )
     else:
         cost_checks = (

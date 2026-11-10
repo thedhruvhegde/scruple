@@ -39,6 +39,16 @@ never passes silently. The sd assumption is checked after the run and reported.
 
 Reported for information: the adapter's pooled certificate and confidence
 sequence, and its time-uniform e-Bonferroni flags (scruple.stats.evaluate_pairs).
+
+Variance reduction (``GateConfig.stats = "evalue_vr"``, docs/math/07). A share ``w``
+of the false-block budget goes to one stratified betting e-process over the family
+(``scruple.stats.StratifiedBettingEProcess``: one wealth, one adaptive bet per case
+type, for the intersection null "no tested type regressed beyond its tolerance");
+e-BH runs at ``(1 - w) alpha``. A block needs either, so P(false block) <= alpha
+still. The stratified test pays no ``K``-fold threshold and adds up evidence that
+is spread over several types; e-BH still names the types. The plan takes, per type,
+the smaller of the two paths' requirements (``scruple.stats.stratified_cases_needed``
+at ``w alpha``, the Bernstein plan at ``(1 - w) alpha / K``).
 """
 
 from __future__ import annotations
@@ -47,23 +57,27 @@ import math
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, SerializerFunctionWrapHandler, model_serializer
 
 from scruple.sim.models import DisputeCase, to_usd
 from scruple.stats import (
     BettingEProcess,
     LossPair,
     StatsGateConfig,
+    StratifiedBettingEProcess,
     StratumSpec,
     e_bh,
     evaluate_pairs,
     plan,
+    stratified_cases_needed,
 )
+from scruple.stats.planning import total_cases_for_count
 from scruple.verifiers.outcome import OutcomeScores
 
 from .config import GateConfig
 
 METHOD = "betting e-process per case type, e-BH (Wang and Ramdas 2022)"
+METHOD_VR = METHOD + ", plus a stratified betting e-process over the family (docs/math/07)"
 
 
 def _dollars(minor: int) -> str:
@@ -118,6 +132,19 @@ class TypeEvidence(BaseModel):
     sd_within_assumption: bool | None = None  # observed sd <= planning sd
 
 
+class StratifiedEvidence(BaseModel):
+    """The stratified betting e-process over the tested family (``evalue_vr`` only)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    share: float  # w: its share of the false-block budget
+    alpha: float  # w * evalue_alpha
+    e_value: float  # running maximum
+    threshold: float  # 1 / (w alpha)
+    rejected: bool
+    contributions: dict[str, float]  # log-wealth by case type
+
+
 class EValueEvidence(BaseModel):
     """Everything the e-value gate decided on. Stored with the decision."""
 
@@ -145,6 +172,19 @@ class EValueEvidence(BaseModel):
     required_total_cases: int | None = None  # held-out size the plan asks for
     sufficient: bool = True  # every family type has n_k >= n_k*
     insufficient: tuple[str, ...] = ()
+    stratified: StratifiedEvidence | None = None  # set when GateConfig.stats = "evalue_vr"
+
+    @model_serializer(mode="wrap")
+    def _drop_unset_stratified(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
+        out: dict[str, object] = handler(self)
+        if out.get("stratified") is None:
+            out.pop("stratified", None)
+        return out
+
+    @property
+    def blocks(self) -> bool:
+        """A regression was found: a type flagged by e-BH, or the stratified test."""
+        return bool(self.regressed) or (self.stratified is not None and self.stratified.rejected)
 
 
 def stratified_test(
@@ -158,13 +198,19 @@ def stratified_test(
     confidence: float,
     cost_cap: float,
     changed: Mapping[str, int] | None = None,
+    stratified_share: float | None = None,
 ) -> EValueEvidence:
     """The pure statistical core: loss pairs in, per-type evidence out.
 
     ``family`` lists the case types to test (all others must have zero diffs).
-    Raises ``ValueError`` if a pair breaks its declared cap.
+    Raises ``ValueError`` if a pair breaks its declared cap. With
+    ``stratified_share = w`` e-BH runs at ``(1 - w) alpha`` and a stratified betting
+    e-process over the family at ``w alpha`` (``evalue_vr``).
     """
+    if stratified_share is not None and not 0.0 < stratified_share < 1.0:
+        raise ValueError("stratified_share must lie in (0, 1)")
     fam = sorted(set(family))
+    ebh_alpha = alpha if stratified_share is None else (1.0 - stratified_share) * alpha
     cap_all = max([cost_cap, *caps.values()])
     sv = evaluate_pairs(
         pairs,
@@ -185,7 +231,25 @@ def stratified_test(
             improve[p.case_type].update(max(-1.0, min(1.0, p.diff / caps[p.case_type])))
     present = [t for t in fam if t in by_type]
     k = len(present)
-    reg_flags = {present[i] for i in e_bh([by_type[t].e_value for t in present], alpha)}
+    reg_flags = {present[i] for i in e_bh([by_type[t].e_value for t in present], ebh_alpha)}
+    strat_ev: StratifiedEvidence | None = None
+    if stratified_share is not None:
+        sp = StratifiedBettingEProcess(
+            "greater", null_means={t: tolerances.get(t, 0.0) / caps[t] for t in present}
+        )
+        fam_set = set(present)
+        for p in pairs:  # arrival order, as the per-type processes saw them
+            if p.case_type in fam_set:
+                sp.update(p.case_type, max(-1.0, min(1.0, p.diff / caps[p.case_type])))
+        level = stratified_share * alpha
+        strat_ev = StratifiedEvidence(
+            share=stratified_share,
+            alpha=level,
+            e_value=sp.max_e_value,
+            threshold=1.0 / level,
+            rejected=sp.rejected(level),
+            contributions=dict(sorted(sp.contributions.items())),
+        )
     imp_flags = {present[i] for i in e_bh([improve[t].e_value for t in present], alpha_certify)}
     lines = []
     for t in present:
@@ -207,14 +271,14 @@ def stratified_test(
                 improvement_e_value=improve[t].e_value,
                 ci_low=tv.ci_low,
                 ci_high=tv.ci_high,
-                alpha_share=alpha / k,
-                e_threshold=k / alpha,
+                alpha_share=ebh_alpha / k,
+                e_threshold=k / ebh_alpha,
                 regressed=t in reg_flags,
                 improved=t in imp_flags,
             )
         )
     return EValueEvidence(
-        method=METHOD,
+        method=METHOD if stratified_share is None else METHOD_VR,
         alpha=alpha,
         alpha_certify=alpha_certify,
         n_cases=len(pairs),
@@ -230,6 +294,7 @@ def stratified_test(
         pooled_certify_e_value=sv.certify_e_value,
         pooled_regression_e_value=sv.pooled_regression_e_value,
         violations=(),
+        stratified=strat_ev,
     )
 
 
@@ -247,6 +312,12 @@ def summary_lines(ev: EValueEvidence) -> list[str]:
         + ("" if ev.sufficient else " (INSUFFICIENT EVIDENCE)")
     )
     out = [head]
+    if ev.stratified is not None:
+        st = ev.stratified
+        out.append(
+            f"stratified betting over the family at {st.alpha:g}: e-value {st.e_value:.3g} "
+            f"(flags at {st.threshold:.3g}), " + ("REGRESSED" if st.rejected else "no call")
+        )
     for t in ev.types:
         flag = "REGRESSED" if t.regressed else ("improved" if t.improved else "no call")
         out.append(
@@ -301,7 +372,14 @@ def plan_sample(
 ) -> SamplePlan:
     """Per-type required cases from counts, caps and configuration only."""
     total = sum(counts.values())
+    vr = cfg.stats == "evalue_vr"
     method = f"bernstein (scruple.stats.plan), alpha/K per type, power {1 - cfg.evalue_beta:g}"
+    if vr:
+        method = (
+            f"bernstein, per type the smaller of stratified at w alpha and e-BH at "
+            f"(1 - w) alpha / K (w = {cfg.evalue_vr_stratified_share:g}), "
+            f"power {1 - cfg.evalue_beta:g}"
+        )
     specs = []
     for t in sorted(family):
         cap, tol = caps[t], tolerances[t]
@@ -324,7 +402,18 @@ def plan_sample(
             required_total_cases=0,
             n_cases=total,
         )
-    p = plan(specs, alpha=cfg.evalue_alpha, beta=cfg.evalue_beta, method="bernstein")
+    w = cfg.evalue_vr_stratified_share
+    a_ebh = (1.0 - w) * cfg.evalue_alpha if vr else cfg.evalue_alpha
+    p = plan(specs, alpha=a_ebh, beta=cfg.evalue_beta, method="bernstein")
+    required = [sp.stratum_cases for sp in p.strata]
+    if vr:
+        required = [
+            min(
+                r,
+                stratified_cases_needed(s, cfg.evalue_alpha, cfg.evalue_beta, share_of_alpha=w)[0],
+            )
+            for s, r in zip(specs, required, strict=True)
+        ]
     return SamplePlan(
         method=method,
         alpha=cfg.evalue_alpha,
@@ -333,14 +422,20 @@ def plan_sample(
             TypePlan(
                 case_type=s.name,
                 n=counts[s.name],
-                required_n=sp.stratum_cases,
+                required_n=req,
                 min_detectable_regression=s.min_detectable_regression,
                 planning_sd=s.sd or 0.0,
             )
-            for s, sp in zip(specs, p.strata, strict=True)
+            for s, req in zip(specs, required, strict=True)
         ),
-        required_total_cases=p.total_cases,
+        required_total_cases=_total_for(specs, required, p.gamma) if vr else p.total_cases,
         n_cases=total,
+    )
+
+
+def _total_for(specs: Sequence[StratumSpec], required: Sequence[int], gamma: float) -> int:
+    return max(
+        total_cases_for_count(r, s.frequency, gamma) for s, r in zip(specs, required, strict=True)
     )
 
 
@@ -373,7 +468,7 @@ def with_plan(ev: EValueEvidence, sp: SamplePlan) -> EValueEvidence:
 
 def _empty(n: int, cfg: GateConfig, violations: list[str]) -> EValueEvidence:
     return EValueEvidence(
-        method=METHOD,
+        method=METHOD_VR if cfg.stats == "evalue_vr" else METHOD,
         alpha=cfg.evalue_alpha,
         alpha_certify=cfg.evalue_alpha_certify,
         n_cases=n,
@@ -433,5 +528,6 @@ def evaluate_evalue(
         confidence=cfg.confidence,
         cost_cap=cfg.evalue_cost_cap_usd_minor,
         changed=changed,
+        stratified_share=cfg.evalue_vr_stratified_share if cfg.stats == "evalue_vr" else None,
     )
     return with_plan(ev, sample)

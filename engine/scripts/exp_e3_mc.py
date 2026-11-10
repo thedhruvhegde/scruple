@@ -15,6 +15,7 @@ import math
 import random
 import sys
 
+from scruple.gate.sequential import Observation, sequential_canary
 from scruple.stats.planning import StratumSpec, stratum_cases_needed
 from scruple.stats.sequential import BettingEProcess
 from scruple.stats.simulate import (
@@ -140,6 +141,26 @@ def cv_heuristic(reps: int, n: int) -> None:
     print()
 
 
+def canary(reps: int, n: int) -> None:
+    print(f"## canary, p = 0.3, costs 600 +- 100 of cap 1000: P(harm by n={n}), reps={reps}")
+    for effect in (0.0, 20.0, 40.0, 60.0):
+        out = {}
+        for centred in (False, True):
+            rng = random.Random(505)
+            hits = 0
+            for _ in range(reps):
+                obs = []
+                for _ in range(n):
+                    treated = rng.random() < 0.3
+                    base = 600.0 + rng.uniform(-100, 100)
+                    cost = min(1000.0, base + (effect if treated else 0.0))
+                    obs.append(Observation("t", 1000.0, treated, cost))
+                hits += sequential_canary(obs, 0.3, ALPHA, centred=centred).decision == "harm"
+            out["centred" if centred else "plain"] = hits / reps
+        print(f"  effect {effect:>4.0f}: {fmt(out)}")
+    print()
+
+
 def planning() -> None:
     print("## planning: cases of one 6% type to flag its regression (bernstein, power 0.8)")
     spec = StratumSpec(
@@ -162,17 +183,23 @@ def planning() -> None:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--canary", action="store_true", help="only the canary table")
     a = ap.parse_args(argv)
+    if a.canary:
+        canary(30 if a.quick else 100, 1000 if a.quick else 1500)
+        return 0
     if a.quick:
         type_one(200, 800)
         power(100, 1500)
         certificates(100, 1000)
         cv_heuristic(50, 1500)
+        canary(30, 1000)
     else:
         type_one(1000, 3000)
         power(300, 2000)
         certificates(300, 2000)
         cv_heuristic(200, 2000)
+        canary(100, 1500)
     planning()
     return 0
 
