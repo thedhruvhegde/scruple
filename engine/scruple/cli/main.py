@@ -254,6 +254,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.auth.cli import add_keys_parser
 
     add_keys_parser(sub, DEFAULT_DB)
+    from scruple.jobs.cli import add_worker_parser
+
+    add_worker_parser(sub, DEFAULT_DB)
     return p
 
 

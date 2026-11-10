@@ -358,6 +358,11 @@ class SQLStorage:
     def close(self) -> None:
         self._conn.close()
 
+    @property
+    def connection(self) -> Connection:
+        """The backend connection (for repositories outside this facade: the job queue)."""
+        return self._conn
+
     def transaction(self) -> AbstractContextManager[None]:
         return self._conn.transaction()
 

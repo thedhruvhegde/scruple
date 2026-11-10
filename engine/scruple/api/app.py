@@ -10,6 +10,7 @@ development-only `auth_dev_actor_header` setting is on (off by default).
 
 from __future__ import annotations
 
+import contextlib
 import os
 import threading
 from collections.abc import Callable
@@ -44,6 +45,8 @@ from scruple.gate.shadow_imported import (
     ImportedShadowSummary,
 )
 from scruple.ingest.api import ingest_router
+from scruple.jobs.api import jobs_router
+from scruple.jobs.queue import JobError, queue_for
 from scruple.logging import RequestIDMiddleware
 from scruple.registry import (
     DuplicateContentError,
@@ -232,6 +235,8 @@ def create_app(
     app.add_exception_handler(ApprovalError, _err(403))
     app.include_router(ingest_router(), dependencies=[signed("stripe-signature")])
     app.include_router(console_router(root))  # HTML console at /console (scruple/console)
+    with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
+        app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
 
     @app.get("/health", dependencies=[public()])
     def health() -> dict[str, str]:
