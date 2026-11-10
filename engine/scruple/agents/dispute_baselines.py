@@ -30,8 +30,14 @@ def looks_genuine(doc: dict[str, Any], case: dict[str, Any]) -> bool:
     f: dict[str, str] = doc.get("fields", {})
     if "edited" in f or f.get("matches_cardholder") == "N":
         return False
-    if "amount_minor" in f and f["amount_minor"] != str(case["captured_minor"]):
-        return False
+    if "amount_minor" in f:
+        amt, captured = f["amount_minor"], case["captured_minor"]
+        if doc.get("kind") == "refund_record":
+            # a refund record carries the amount refunded: any part of the capture
+            if not (amt.isdigit() and 0 < int(amt) <= captured):
+                return False
+        elif amt != str(captured):
+            return False
     if "currency" in f and f["currency"] != case["currency"]:
         return False
     return str(doc.get("issued_on", "")) >= str(case["processed_on"])

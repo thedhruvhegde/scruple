@@ -82,6 +82,15 @@ def _settled_refund(doc: EvidenceDocument, amount: int) -> bool:
     )
 
 
+def moot(case: CardDispute, evidence: tuple[EvidenceDocument, ...]) -> bool:
+    """A submitted, genuine settled refund covers the disputed amount (A-23)."""
+    return any(
+        _settled_refund(d, case.amount_minor)
+        and not document_problems(d, case.captured_minor, case.currency, case.processed_on)
+        for d in evidence
+    )
+
+
 class SeededIssuer:
     def __init__(self, params: IssuerParams | None = None) -> None:
         self.params = params or IssuerParams()

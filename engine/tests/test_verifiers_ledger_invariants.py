@@ -94,3 +94,71 @@ def test_refund_on_top_of_a_chargeback_is_caught_mid_episode() -> None:
     assert "agent refund on top of the dispute" in res.explanation
     assert "over-credited at close" in res.explanation
     assert score_record(ep.record()).reward == 0.0
+
+
+# --- the honest policy's INV-01 alarms (benchmark v1: 19 of 10,000) -----------------------
+# Seeds 0-5999 where the evidence policy failed INV-01 before the engine fix. All had a
+# refund racing the dispute; three engine faults put the cardholder over-credited at close:
+#   partial dispute: the genuine refund record (the disputed amount) failed the amount
+#     check against the capture, so neither the policy nor the issuer used it;
+#   split shipment: a moot response won only the parcels proven delivered (none);
+#   partial dispute, refund settling after the chargeback debit: the ledger only
+#     checked headroom against the capture, so the dispute was paid twice.
+RACE_PARTIAL = (647, 2046, 2836, 3392, 4317, 4391, 4650)
+RACE_SPLIT = (950, 1277, 2725)
+RACE_AFTER_DEBIT = (2127, 5689)
+
+
+@pytest.mark.parametrize("seed", RACE_PARTIAL + RACE_SPLIT + RACE_AFTER_DEBIT)
+def test_refund_races_no_longer_fail_the_honest_policy(seed: int) -> None:
+    rec = run_policy(evidence_policy, seed).record()
+    assert rec.case.refund_in_flight is not None  # still the case that used to fail
+    res = LEDGER_INVARIANTS.run(rec)
+    assert res.passed, res.explanation
+    assert rec.outcome is not None
+    assert rec.outcome.cardholder_net_minor <= rec.case.amount_minor
+
+
+@pytest.mark.parametrize("seed", RACE_PARTIAL + RACE_SPLIT)
+def test_settled_refund_record_makes_the_dispute_moot(seed: int) -> None:
+    rec = run_policy(evidence_policy, seed).record()
+    cited = {i for e in rec.actions(["represent"]) for i in (e.args or {}).get("evidence_ids", [])}
+    kinds = {d.kind.value for d in rec.documents if d.doc_id in cited}
+    assert kinds == {"refund_record"}
+    assert rec.resolution == "won"
+    assert rec.outcome is not None and rec.outcome.cardholder_net_minor == rec.case.amount_minor
+
+
+@pytest.mark.parametrize("seed", RACE_AFTER_DEBIT)
+def test_race_refund_after_the_debit_is_refused(seed: int) -> None:
+    rec = run_policy(evidence_policy, seed).record()
+    assert rec.case.amount_minor < rec.case.captured_minor  # headroom was left
+    assert any(i.kind == "refund_blocked" for i in rec.incidents)
+    refunds = [e for e in rec.trace if e.kind is EventKind.POSTING and e.data["kind"] == "refund"]
+    assert refunds == []
+
+
+def test_partial_refund_record_is_genuine_but_not_above_the_capture() -> None:
+    from datetime import date
+
+    from scruple.sim.evidence import EvidenceKind, document_problems, make_document
+
+    day = date(2026, 3, 1)
+
+    def rec(amount: str, kind: EvidenceKind = EvidenceKind.REFUND_RECORD) -> tuple[str, ...]:
+        doc = make_document("c", kind, day, {"amount_minor": amount, "currency": "USD"}, 0)
+        return document_problems(doc, 1_000, "USD", day)
+
+    assert rec("1") == rec("400") == rec("1000") == ()
+    for bad in ("0", "1001", "-5", "4x"):
+        assert rec(bad) == ("amount_mismatch",)
+    assert rec("400", EvidenceKind.RECEIPT) == ("amount_mismatch",)  # other kinds: the capture
+
+
+def test_agent_double_credit_is_still_caught() -> None:
+    """The fix narrows only environment-caused over-credits; an agent that refunds on
+    top of a chargeback (X13) still fails INV-01."""
+    from scruple.verifiers.exploits import EXPLOIT_BY_ID, run_exploit
+
+    run = run_exploit(EXPLOIT_BY_ID["X13"], range(40))
+    assert run.status == "caught" and run.fired["INV-01"] == run.exercised > 0

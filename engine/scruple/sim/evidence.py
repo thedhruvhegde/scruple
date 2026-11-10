@@ -189,17 +189,26 @@ def forge(doc: EvidenceDocument, how: Forgery, processed_on: date) -> EvidenceDo
             return _reseal(doc, processed_on - timedelta(days=3), doc.fields)
 
 
+def _amount_fits(kind: EvidenceKind, amt: str, captured_minor: int) -> bool:
+    if kind is EvidenceKind.REFUND_RECORD:
+        return amt.isdigit() and 0 < int(amt) <= captured_minor
+    return amt == str(captured_minor)
+
+
 def document_problems(
     doc: EvidenceDocument, amount_minor: int, currency: str, processed_on: date
 ) -> tuple[str, ...]:
     """Checks anyone can run on a document. An empty tuple means it looks genuine.
 
-    `amount_minor` is the captured (order) amount, which receipts and records carry."""
+    `amount_minor` is the captured (order) amount, which receipts and records carry. A
+    refund record carries the amount refunded instead, which may be any part of the
+    capture (a partial dispute refunds only the disputed amount, A-23): it is a problem
+    only when it is not a positive amount within the capture."""
     out: list[str] = []
     if not doc.hash_ok:
         out.append("hash_mismatch")
     amt = doc.fields.get("amount_minor")
-    if amt is not None and amt != str(amount_minor):
+    if amt is not None and not _amount_fits(doc.kind, amt, amount_minor):
         out.append("amount_mismatch")
     ccy = doc.fields.get("currency")
     if ccy is not None and ccy != currency:

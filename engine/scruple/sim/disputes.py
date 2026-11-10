@@ -123,7 +123,7 @@ from scruple.sim.families import (
 )
 from scruple.sim.fees import DEFAULT_FEES, FeeSchedule
 from scruple.sim.fx import EXPONENT, FxTable
-from scruple.sim.issuer import SeededIssuer
+from scruple.sim.issuer import SeededIssuer, moot
 from scruple.sim.lifecycle import (
     OPENING_STAGES,
     Event,
@@ -1466,7 +1466,7 @@ class DisputeEngine:
                 nxt = self._next_due(st)
                 if nxt is None or rf.settles_on <= nxt:
                     self._emit(PendingRefundCleared(case_id=st.case.case_id))
-                    self._post_refund(st, rf.amount_minor, rf.settles_on)
+                    self._settle_race(st, rf.amount_minor, rf.settles_on)
                     continue
             if st.resolution is None and self._step_due(st, now):
                 continue
@@ -1558,6 +1558,27 @@ class DisputeEngine:
         self._enter(st, Stage.CHARGEBACK, st.life.entered_on)
         self._emit(AwaitingSet(case_id=c.case_id, awaiting="merchant", due=st.due))
 
+    def _settle_race(self, st: _CaseState, amount: int, day: date) -> None:
+        """A refund racing the dispute settles after it opened. If the chargeback debit
+        already returned the disputed amount the processor refuses it as a double
+        refund (A-23), whether or not the capture has headroom left (a partial dispute
+        leaves some): the cardholder is never paid twice for the same dispute."""
+        c = st.case
+        if self.ledger.returned(c.txn_id) >= c.amount_minor:
+            self._emit(
+                IncidentRecorded(
+                    case_id=c.case_id,
+                    incident=Incident(
+                        case_id=c.case_id,
+                        on=day,
+                        kind="refund_blocked",
+                        detail=f"refund of {amount} after the chargeback returned the dispute",
+                    ),
+                )
+            )
+            return
+        self._post_refund(st, amount, day)
+
     def _post_refund(self, st: _CaseState, amount: int, day: date) -> EvidenceDocument | None:
         """Post a merchant refund; the ledger refuses a double refund (an incident)."""
         c = st.case
@@ -1588,11 +1609,13 @@ class DisputeEngine:
         """How much of the disputed amount the merchant wins at this decision (0: lost).
 
         For a split order only disputed parcels proven delivered by a genuine, submitted
-        delivery document are won (A-26)."""
+        delivery document are won (A-26), unless a settled refund of the disputed amount
+        makes the dispute moot."""
         c = st.case
         if not self.issuer.merchant_prevails(c, stage, st.evidence):
             return 0
-        if not c.shipments:
+        if not c.shipments or moot(c, st.evidence):
+            # a settled refund of the disputed amount answers every parcel (A-23)
             return c.amount_minor
         proven = {
             d.fields.get("shipment_id")
