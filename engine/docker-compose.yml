@@ -33,6 +33,7 @@ services:
       SCRUPLE_DATABASE_URL: postgresql://scruple@postgres:5432/scruple
       SCRUPLE_DATABASE_PASSWORD: *password
       SCRUPLE_LOG_LEVEL: ${SCRUPLE_LOG_LEVEL:-INFO}
+      SCRUPLE_WEB_WORKERS: ${SCRUPLE_WEB_WORKERS:-1}
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,6 +42,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
 
