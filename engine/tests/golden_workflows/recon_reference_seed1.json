@@ -1,0 +1,243 @@
+{
+ "breaks": [
+  "missing_identified",
+  "missing_identified",
+  "fee_net",
+  "fx",
+  "missing_unidentified",
+  "fee_line"
+ ],
+ "difference_minor": 0,
+ "events": [
+  {
+   "ledger_line_ids": [
+    "B-001"
+   ],
+   "match_id": "M-1",
+   "statement_line_ids": [
+    "S-001"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-002"
+   ],
+   "match_id": "M-2",
+   "statement_line_ids": [
+    "S-002"
+   ],
+   "type": "matched"
+  },
+  {
+   "escalation_id": "ESC-1",
+   "ledger_line_ids": [],
+   "reason": "unknown payer",
+   "statement_line_ids": [
+    "S-003"
+   ],
+   "type": "escalated"
+  },
+  {
+   "ledger_line_ids": [
+    "B-003"
+   ],
+   "match_id": "M-3",
+   "statement_line_ids": [
+    "S-004"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-1",
+   "amount_minor": -4050,
+   "kind": "fee",
+   "ledger_line_ids": [],
+   "note": "bank charge",
+   "offset_account": "expense:bank_fees",
+   "statement_line_ids": [
+    "S-005"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-004"
+   ],
+   "match_id": "M-4",
+   "statement_line_ids": [
+    "S-006"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-005"
+   ],
+   "match_id": "M-5",
+   "statement_line_ids": [
+    "S-007"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-2",
+   "amount_minor": -35184,
+   "kind": "fee",
+   "ledger_line_ids": [],
+   "note": "settlement net of fees",
+   "offset_account": "expense:bank_fees",
+   "statement_line_ids": [
+    "S-007"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-006"
+   ],
+   "match_id": "M-6",
+   "statement_line_ids": [
+    "S-008"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-007"
+   ],
+   "match_id": "M-7",
+   "statement_line_ids": [
+    "S-009"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-008"
+   ],
+   "match_id": "M-8",
+   "statement_line_ids": [
+    "S-010"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-009"
+   ],
+   "match_id": "M-9",
+   "statement_line_ids": [
+    "S-011"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-010"
+   ],
+   "match_id": "M-10",
+   "statement_line_ids": [
+    "S-012"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-012"
+   ],
+   "match_id": "M-11",
+   "statement_line_ids": [
+    "S-013"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-3",
+   "amount_minor": 641799,
+   "kind": "missing",
+   "ledger_line_ids": [],
+   "note": "receipt for an open invoice, not booked",
+   "offset_account": "ar:INV-32818T",
+   "statement_line_ids": [
+    "S-014"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-011"
+   ],
+   "match_id": "M-12",
+   "statement_line_ids": [
+    "S-015"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-4",
+   "amount_minor": 36262,
+   "kind": "fx",
+   "ledger_line_ids": [],
+   "note": "settled at a different rate",
+   "offset_account": "fx:gain_loss",
+   "statement_line_ids": [
+    "S-015"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-013"
+   ],
+   "match_id": "M-13",
+   "statement_line_ids": [
+    "S-016"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-014"
+   ],
+   "match_id": "M-14",
+   "statement_line_ids": [
+    "S-017"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-015"
+   ],
+   "match_id": "M-15",
+   "statement_line_ids": [
+    "S-018"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-5",
+   "amount_minor": 648500,
+   "kind": "missing",
+   "ledger_line_ids": [],
+   "note": "receipt for an open invoice, not booked",
+   "offset_account": "ar:INV-71705P",
+   "statement_line_ids": [
+    "S-019"
+   ],
+   "type": "adjusted"
+  }
+ ],
+ "format": "bai2",
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 1,
+ "synthetic": true,
+ "trace_head": "516f63dca5736c76c4b3b7b26f3b99ec1a795ae39e6e3db5cd3accc170be44b2"
+}

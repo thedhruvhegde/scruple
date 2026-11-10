@@ -1,0 +1,272 @@
+{
+ "breaks": [
+  "fx",
+  "fee_line",
+  "fx",
+  "partial_short",
+  "missing_unidentified"
+ ],
+ "difference_minor": 0,
+ "events": [
+  {
+   "ledger_line_ids": [
+    "B-001"
+   ],
+   "match_id": "M-1",
+   "statement_line_ids": [
+    "S-001"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-1",
+   "amount_minor": -1750,
+   "kind": "fee",
+   "ledger_line_ids": [],
+   "note": "bank charge",
+   "offset_account": "expense:bank_fees",
+   "statement_line_ids": [
+    "S-002"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-002"
+   ],
+   "match_id": "M-2",
+   "statement_line_ids": [
+    "S-003"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-003"
+   ],
+   "match_id": "M-3",
+   "statement_line_ids": [
+    "S-004"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-004"
+   ],
+   "match_id": "M-4",
+   "statement_line_ids": [
+    "S-005"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-2",
+   "amount_minor": 13788,
+   "kind": "fx",
+   "ledger_line_ids": [],
+   "note": "settled at a different rate",
+   "offset_account": "fx:gain_loss",
+   "statement_line_ids": [
+    "S-005"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-005"
+   ],
+   "match_id": "M-5",
+   "statement_line_ids": [
+    "S-006"
+   ],
+   "type": "matched"
+  },
+  {
+   "escalation_id": "ESC-1",
+   "ledger_line_ids": [],
+   "reason": "unknown payer",
+   "statement_line_ids": [
+    "S-007"
+   ],
+   "type": "escalated"
+  },
+  {
+   "ledger_line_ids": [
+    "B-006"
+   ],
+   "match_id": "M-6",
+   "statement_line_ids": [
+    "S-008"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-008"
+   ],
+   "match_id": "M-7",
+   "statement_line_ids": [
+    "S-009"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-007"
+   ],
+   "match_id": "M-8",
+   "statement_line_ids": [
+    "S-010"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-010"
+   ],
+   "match_id": "M-9",
+   "statement_line_ids": [
+    "S-011"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-009"
+   ],
+   "match_id": "M-10",
+   "statement_line_ids": [
+    "S-012"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-3",
+   "amount_minor": -17796,
+   "kind": "partial",
+   "ledger_line_ids": [
+    "B-009"
+   ],
+   "note": "short payment",
+   "offset_account": "ar:INV-10544",
+   "statement_line_ids": [
+    "S-012"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-011"
+   ],
+   "match_id": "M-11",
+   "statement_line_ids": [
+    "S-013"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-012"
+   ],
+   "match_id": "M-12",
+   "statement_line_ids": [
+    "S-014"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-013"
+   ],
+   "match_id": "M-13",
+   "statement_line_ids": [
+    "S-015"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-015"
+   ],
+   "match_id": "M-14",
+   "statement_line_ids": [
+    "S-016"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-016"
+   ],
+   "match_id": "M-15",
+   "statement_line_ids": [
+    "S-017"
+   ],
+   "type": "matched"
+  },
+  {
+   "adjustment_id": "ADJ-4",
+   "amount_minor": -42079,
+   "kind": "fx",
+   "ledger_line_ids": [],
+   "note": "settled at a different rate",
+   "offset_account": "fx:gain_loss",
+   "statement_line_ids": [
+    "S-017"
+   ],
+   "type": "adjusted"
+  },
+  {
+   "ledger_line_ids": [
+    "B-014"
+   ],
+   "match_id": "M-16",
+   "statement_line_ids": [
+    "S-018"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-018"
+   ],
+   "match_id": "M-17",
+   "statement_line_ids": [
+    "S-019"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-019"
+   ],
+   "match_id": "M-18",
+   "statement_line_ids": [
+    "S-020"
+   ],
+   "type": "matched"
+  },
+  {
+   "ledger_line_ids": [
+    "B-017"
+   ],
+   "match_id": "M-19",
+   "statement_line_ids": [
+    "S-021"
+   ],
+   "type": "matched"
+  }
+ ],
+ "format": "camt053",
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 2026,
+ "synthetic": true,
+ "trace_head": "64f345804071b758641b5ddf543e4b340f59be3a17087bfcc47f85152cf587bb"
+}

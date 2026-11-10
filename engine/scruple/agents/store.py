@@ -1,7 +1,7 @@
 """A local file store so an episode can span several processes (the CLI).
 
-Each episode is one JSON file holding its kind (`simple`, the default, `dispute` or
-`ach`), seed, case type (the case family for `dispute`), nonce and call log. An
+Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, `ach`
+or `recon`), seed, case type (the case family for `dispute`), nonce and call log. An
 episode is rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
 assumed (a terminal session); concurrent writers to the same episode are not locked.
@@ -18,6 +18,7 @@ from typing import Any
 from scruple.agents.ach_episode import AchEpisode
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
+from scruple.agents.recon_episode import ReconEpisode
 
 DEFAULT_STORE = ".scruple/episodes"
 _ID = re.compile(r"^ep-[0-9a-f]{12}$")
@@ -31,9 +32,12 @@ class UnknownEpisodeError(KeyError):
     pass
 
 
-KINDS = ("simple", "dispute", "ach")
-AnyEpisode = Episode | DisputeEpisode | AchEpisode
-WORKFLOW_KINDS: dict[str, type[AchEpisode]] = {"ach": AchEpisode}
+KINDS = ("simple", "dispute", "ach", "recon")
+AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode
+WORKFLOW_KINDS: dict[str, type[AchEpisode] | type[ReconEpisode]] = {
+    "ach": AchEpisode,
+    "recon": ReconEpisode,
+}
 
 
 def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
