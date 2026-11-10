@@ -44,10 +44,13 @@ The "vs evidence" column is a paired bootstrap over cases (2,000 resamples).
 ## What it shows
 
 1. **The cheapest agent was not the most correct.** Sonnet cut the merchant's
-   loss the most, by $32.77 per case against the evidence policy. But 3 of its
-   10 wins came on claims the cardholder was right about. Those were a service
-   failure, a merchant error, and a true-fraud case where a fraud victim was
-   denied a refund. It uploaded nothing of its own; the simulated issuer accepted
+   loss the most, by $32.77 per case against the evidence policy. But 4 of its
+   10 wins came on claims the cardholder was right about (seeds 5003, 5006, 5007,
+   5012). They were two service failures, a merchant error, and a true-fraud case
+   where a fraud victim was denied a refund. In 5006 the evidence policy won the same
+   valid claim too. The other three are wins that the reference policy did not take.
+   (An earlier version of this file said 3; corrected after the website replay
+   build checked every case.) It uploaded nothing of its own; the simulated issuer accepted
    its representments. Judged on merchant cost alone, Sonnet ranks first.
    OUT-01 is the check that shows the wins were unjust. OUT-01 is currently a
    soft check, so these cases did not block the gate. Whether a win against a

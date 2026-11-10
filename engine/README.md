@@ -35,7 +35,7 @@ real data and real models are labelled real. everything else is synthetic, and s
 **real models, simulated disputes** ([docs/results/MODEL_EPISODES.md](docs/results/MODEL_EPISODES.md))
 
 - haiku, sonnet and opus each worked 12 cases end to end through the cli. same seeds as three reference policies.
-- sonnet cut merchant loss the most, $32.77 a case below the evidence policy [$4.33, $64.01]. 3 of its 10 wins were against cardholders who were right, one of them a fraud victim.
+- sonnet cut merchant loss the most, $32.77 a case below the evidence policy [$4.33, $64.01]. 4 of its 10 wins were against cardholders who were right, one of them a fraud victim.
 - haiku misstated its own cost or refunds in 4 of 12 cases.
 - real models found 3 false positives in the self-report verifier. fixed, with tests.
 
