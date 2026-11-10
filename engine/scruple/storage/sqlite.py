@@ -25,27 +25,30 @@ CREATE TABLE IF NOT EXISTS rule_versions (
     created_at TEXT NOT NULL,
     status TEXT NOT NULL,
     rollback_to INTEGER,
-    PRIMARY KEY (rule_id, version)
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    PRIMARY KEY (tenant_id, rule_id, version)
 );
 CREATE TRIGGER IF NOT EXISTS rule_versions_immutable
 BEFORE UPDATE ON rule_versions
 WHEN NEW.content_hash IS NOT OLD.content_hash OR NEW.spec_json IS NOT OLD.spec_json
   OR NEW.owner IS NOT OLD.owner OR NEW.provenance_json IS NOT OLD.provenance_json
   OR NEW.created_at IS NOT OLD.created_at OR NEW.rule_id IS NOT OLD.rule_id
-  OR NEW.version IS NOT OLD.version
+  OR NEW.version IS NOT OLD.version OR NEW.tenant_id IS NOT OLD.tenant_id
 BEGIN SELECT RAISE(ABORT, 'rule content is immutable'); END;
 CREATE TRIGGER IF NOT EXISTS rule_versions_no_delete
 BEFORE DELETE ON rule_versions
 BEGIN SELECT RAISE(ABORT, 'rule history is immutable'); END;
 
 CREATE TABLE IF NOT EXISTS audit_events (
-    seq INTEGER PRIMARY KEY,
+    seq INTEGER NOT NULL,
     at TEXT NOT NULL,
     event_type TEXT NOT NULL,
     actor TEXT NOT NULL,
     payload_json TEXT NOT NULL,
     prev_hash TEXT NOT NULL,
-    entry_hash TEXT NOT NULL
+    entry_hash TEXT NOT NULL,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    PRIMARY KEY (tenant_id, seq)
 );
 CREATE TRIGGER IF NOT EXISTS audit_no_update
 BEFORE UPDATE ON audit_events
@@ -55,10 +58,12 @@ BEFORE DELETE ON audit_events
 BEGIN SELECT RAISE(ABORT, 'audit log is append-only'); END;
 
 CREATE TABLE IF NOT EXISTS decisions (
-    decision_id TEXT PRIMARY KEY,
+    decision_id TEXT NOT NULL,
     rule_id TEXT NOT NULL,
     version INTEGER NOT NULL,
-    body_json TEXT NOT NULL
+    body_json TEXT NOT NULL,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    PRIMARY KEY (tenant_id, decision_id)
 );
 CREATE TRIGGER IF NOT EXISTS decisions_no_update
 BEFORE UPDATE ON decisions
@@ -103,6 +108,38 @@ BEGIN SELECT RAISE(ABORT, 'api keys are append-only; revoke instead'); END;
 
 _HISTORY_MESSAGES = ("append-only", "immutable")
 
+# Files written before tenancy have the three history tables without `tenant_id`.
+# They are rebuilt once, in one transaction, with every row in the default tenant:
+# the rows (and so every hash) are copied unchanged. Triggers are dropped first and
+# recreated by SCHEMA, so nothing is updated or deleted through them.
+_LEGACY_TABLES = ("rule_versions", "audit_events", "decisions")
+_LEGACY_TRIGGERS = (
+    "rule_versions_immutable",
+    "rule_versions_no_delete",
+    "audit_no_update",
+    "audit_no_delete",
+    "decisions_no_update",
+    "decisions_no_delete",
+)
+
+
+def _needs_tenancy_upgrade(conn: sqlite3.Connection) -> bool:
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(rule_versions)").fetchall()]
+    return bool(cols) and "tenant_id" not in cols
+
+
+def _tenancy_upgrade_script() -> str:
+    parts = ["BEGIN IMMEDIATE;"]
+    parts += [f"DROP TRIGGER IF EXISTS {t};" for t in _LEGACY_TRIGGERS]
+    parts += [f"ALTER TABLE {t} RENAME TO {t}_pre_tenancy;" for t in _LEGACY_TABLES]
+    parts.append(SCHEMA)
+    for t in _LEGACY_TABLES:
+        # table names are the constants above, never input
+        parts.append(f"INSERT INTO {t} SELECT *, 'default' FROM {t}_pre_tenancy;")  # noqa: S608
+        parts.append(f"DROP TABLE {t}_pre_tenancy;")
+    parts.append("COMMIT;")
+    return "\n".join(parts)
+
 
 def translate(exc: sqlite3.Error) -> StorageError:
     msg = str(exc)
@@ -122,6 +159,8 @@ class SQLiteConnection:
         self._conn.execute("PRAGMA busy_timeout = 5000")
         self._lock = threading.RLock()
         self._depth = 0
+        if _needs_tenancy_upgrade(self._conn):
+            self._conn.executescript(_tenancy_upgrade_script())
         self._conn.executescript(SCHEMA)
 
     def close(self) -> None:

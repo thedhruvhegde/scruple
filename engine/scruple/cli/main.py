@@ -18,7 +18,11 @@ def _gate(args: argparse.Namespace, bootstrap: bool = True) -> AgentGate:
     from scruple.settings import load_settings
 
     # --db wins; else SCRUPLE_DATABASE_URL (+ password) from settings; else DEFAULT_DB.
-    g = AgentGate.open(args.db or load_settings().database_dsn())
+    # The command line is the local admin of one tenant ($SCRUPLE_TENANT, "default").
+    settings = load_settings()
+    g = AgentGate.open(args.db or settings.database_dsn())
+    if settings.tenant != g.storage.tenant:
+        g = AgentGate(g.storage.for_tenant(settings.tenant), g.clock, g.config)
     if bootstrap:
         g.bootstrap_baseline()
     return g

@@ -12,15 +12,22 @@ text), so what was hashed is byte-for-byte what is read back.
 
 from __future__ import annotations
 
+import copy
 import json
+import re
 from collections.abc import Mapping, Sequence
 from contextlib import AbstractContextManager
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, Self
 
 from scruple.audit.models import AuditEntry
 from scruple.domain import RuleSpec
 from scruple.registry.models import Provenance, RuleStatus, RuleVersion
+
+# Kept in step with scruple.auth.models (a test checks): importing it here would
+# cycle through the registry.
+DEFAULT_TENANT = "default"
+TENANT_PATTERN = r"^[a-z0-9][a-z0-9-]{1,62}$"
 
 if TYPE_CHECKING:  # scruple.auth.models -> registry -> storage: import late
     from scruple.auth.models import ApiKeyRecord
@@ -152,95 +159,113 @@ _RULE_COLS = (
 _AUDIT_COLS = "seq, at, event_type, actor, payload_json, prev_hash, entry_hash"
 
 
-class SQLRuleVersions:
-    def __init__(self, conn: Connection) -> None:
-        self._c = conn
+class _Scoped:
+    """A repository bound to one tenant: every statement filters on `tenant_id`."""
 
+    def __init__(self, conn: Connection, tenant: str = DEFAULT_TENANT) -> None:
+        self._c = conn
+        self._t = tenant
+
+
+class SQLRuleVersions(_Scoped):
     def insert_rule_version(self, rv: RuleVersion) -> None:
         self._c.execute(
-            f"INSERT INTO rule_versions ({_RULE_COLS}) VALUES (?,?,?,?,?,?,?,?,?)",  # noqa: S608
-            encode_rule(rv),
+            f"INSERT INTO rule_versions (tenant_id, {_RULE_COLS}) "  # noqa: S608
+            "VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (self._t, *encode_rule(rv)),
         )
 
     def update_rule_status(self, rule_id: str, version: int, status: RuleStatus) -> None:
         self._c.execute(
-            "UPDATE rule_versions SET status=? WHERE rule_id=? AND version=?",
-            (status.value, rule_id, version),
+            "UPDATE rule_versions SET status=? WHERE tenant_id=? AND rule_id=? AND version=?",
+            (status.value, self._t, rule_id, version),
         )
 
     def set_rollback_to(self, rule_id: str, version: int, rollback_to: int | None) -> None:
         self._c.execute(
-            "UPDATE rule_versions SET rollback_to=? WHERE rule_id=? AND version=?",
-            (rollback_to, rule_id, version),
+            "UPDATE rule_versions SET rollback_to=? WHERE tenant_id=? AND rule_id=? AND version=?",
+            (rollback_to, self._t, rule_id, version),
         )
 
     def get_rule_version(self, rule_id: str, version: int) -> RuleVersion | None:
         rows = self._c.query(
-            f"SELECT {_RULE_COLS} FROM rule_versions WHERE rule_id=? AND version=?",  # noqa: S608
-            (rule_id, version),
+            f"SELECT {_RULE_COLS} FROM rule_versions "  # noqa: S608
+            "WHERE tenant_id=? AND rule_id=? AND version=?",
+            (self._t, rule_id, version),
         )
         return decode_rule(rows[0]) if rows else None
 
     def list_rule_versions(self, rule_id: str | None = None) -> list[RuleVersion]:
         if rule_id is None:
             rows = self._c.query(
-                f"SELECT {_RULE_COLS} FROM rule_versions ORDER BY rule_id, version"  # noqa: S608
+                f"SELECT {_RULE_COLS} FROM rule_versions WHERE tenant_id=? "  # noqa: S608
+                "ORDER BY rule_id, version",
+                (self._t,),
             )
         else:
             rows = self._c.query(
-                f"SELECT {_RULE_COLS} FROM rule_versions WHERE rule_id=? "  # noqa: S608
-                "ORDER BY version",
-                (rule_id,),
+                f"SELECT {_RULE_COLS} FROM rule_versions "  # noqa: S608
+                "WHERE tenant_id=? AND rule_id=? ORDER BY version",
+                (self._t, rule_id),
             )
         return [decode_rule(r) for r in rows]
 
 
-class SQLAudit:
-    def __init__(self, conn: Connection) -> None:
-        self._c = conn
-
+class SQLAudit(_Scoped):
     def append_audit(self, entry: AuditEntry) -> None:
         self._c.execute(
-            f"INSERT INTO audit_events ({_AUDIT_COLS}) VALUES (?,?,?,?,?,?,?)",  # noqa: S608
-            encode_audit(entry),
+            f"INSERT INTO audit_events (tenant_id, {_AUDIT_COLS}) "  # noqa: S608
+            "VALUES (?,?,?,?,?,?,?,?)",
+            (self._t, *encode_audit(entry)),
         )
 
     def last_audit(self) -> AuditEntry | None:
         rows = self._c.query(
-            f"SELECT {_AUDIT_COLS} FROM audit_events ORDER BY seq DESC LIMIT 1"  # noqa: S608
+            f"SELECT {_AUDIT_COLS} FROM audit_events WHERE tenant_id=? "  # noqa: S608
+            "ORDER BY seq DESC LIMIT 1",
+            (self._t,),
         )
         return decode_audit(rows[0]) if rows else None
 
     def list_audit(self) -> list[AuditEntry]:
-        rows = self._c.query(f"SELECT {_AUDIT_COLS} FROM audit_events ORDER BY seq")  # noqa: S608
+        rows = self._c.query(
+            f"SELECT {_AUDIT_COLS} FROM audit_events WHERE tenant_id=? ORDER BY seq",  # noqa: S608
+            (self._t,),
+        )
         return [decode_audit(r) for r in rows]
 
 
-class SQLDecisions:
-    def __init__(self, conn: Connection) -> None:
-        self._c = conn
-
+class SQLDecisions(_Scoped):
     def insert_decision(self, decision_id: str, rule_id: str, version: int, body: str) -> None:
         self._c.execute(
-            "INSERT INTO decisions (decision_id, rule_id, version, body_json) VALUES (?,?,?,?)",
-            (decision_id, rule_id, version, body),
+            "INSERT INTO decisions (tenant_id, decision_id, rule_id, version, body_json) "
+            "VALUES (?,?,?,?,?)",
+            (self._t, decision_id, rule_id, version, body),
         )
 
     def get_decision(self, decision_id: str) -> str | None:
-        rows = self._c.query("SELECT body_json FROM decisions WHERE decision_id=?", (decision_id,))
+        rows = self._c.query(
+            "SELECT body_json FROM decisions WHERE tenant_id=? AND decision_id=?",
+            (self._t, decision_id),
+        )
         return str(rows[0]["body_json"]) if rows else None
 
     def list_decisions(self, rule_id: str | None = None) -> list[str]:
         if rule_id is None:
-            rows = self._c.query("SELECT body_json FROM decisions ORDER BY decision_id")
+            rows = self._c.query(
+                "SELECT body_json FROM decisions WHERE tenant_id=? ORDER BY decision_id",
+                (self._t,),
+            )
         else:
             rows = self._c.query(
-                "SELECT body_json FROM decisions WHERE rule_id=? ORDER BY decision_id", (rule_id,)
+                "SELECT body_json FROM decisions WHERE tenant_id=? AND rule_id=? "
+                "ORDER BY decision_id",
+                (self._t, rule_id),
             )
         return [str(r["body_json"]) for r in rows]
 
     def count_decisions(self) -> int:
-        rows = self._c.query("SELECT COUNT(*) AS n FROM decisions")
+        rows = self._c.query("SELECT COUNT(*) AS n FROM decisions WHERE tenant_id=?", (self._t,))
         return int(rows[0]["n"])
 
 
@@ -292,18 +317,36 @@ class SQLApiKeys:
 
 
 class SQLStorage:
-    """The `Storage` facade: one connection, three repositories, one unit of work.
+    """The `Storage` facade: one connection, the repositories, one unit of work.
 
     Every write runs inside `transaction()`, so a single call is atomic on its own
     and several calls nest into one atomic unit.
+
+    A store is bound to one tenant (`tenant`, default "default"): rules, audit
+    entries and decisions are read and written for that tenant only, so each tenant
+    has its own registry, decision numbering and audit hash chain. `for_tenant(t)`
+    returns a view of the same connection bound to tenant `t`. API keys are the
+    exception: they are looked up by id across tenants (the record names its tenant).
     """
 
-    def __init__(self, conn: Connection) -> None:
+    def __init__(self, conn: Connection, tenant: str = DEFAULT_TENANT) -> None:
+        if not re.match(TENANT_PATTERN, tenant):
+            raise ValueError(f"invalid tenant id {tenant!r}")
         self._conn = conn
-        self.rules = SQLRuleVersions(conn)
-        self.audit = SQLAudit(conn)
-        self.decisions = SQLDecisions(conn)
+        self.tenant = tenant
+        self.rules = SQLRuleVersions(conn, tenant)
+        self.audit = SQLAudit(conn, tenant)
+        self.decisions = SQLDecisions(conn, tenant)
         self.api_keys = SQLApiKeys(conn)
+
+    def for_tenant(self, tenant: str) -> Self:
+        """The same connection and transaction, bound to `tenant`. Closing any
+        view closes the shared connection."""
+        if tenant == self.tenant:
+            return self
+        view = copy.copy(self)
+        SQLStorage.__init__(view, self._conn, tenant)
+        return view
 
     def close(self) -> None:
         self._conn.close()

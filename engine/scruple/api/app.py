@@ -11,6 +11,7 @@ development-only `auth_dev_actor_header` setting is on (off by default).
 from __future__ import annotations
 
 import os
+import threading
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Path, Request
@@ -125,14 +126,50 @@ class WhoAmI(BaseModel):
         )
 
 
+class TenantGates:
+    """One `AgentGate` per tenant over the same storage, made on first use."""
+
+    def __init__(self, root: AgentGate) -> None:
+        self._root = root
+        self._gates = {root.storage.tenant: root}
+        self._lock = threading.Lock()
+
+    def get(self, tenant: str) -> AgentGate:
+        with self._lock:
+            if tenant not in self._gates:
+                r = self._root
+                g = AgentGate(r.storage.for_tenant(tenant), r.clock, r.config)
+                g.bootstrap_baseline()
+                self._gates[tenant] = g
+            return self._gates[tenant]
+
+
+def tenant_gate(request: Request, principal: CurrentPrincipal) -> AgentGate:
+    """The caller's tenant's gate: the only one a route ever sees."""
+    gates: TenantGates = request.app.state.gates
+    return gates.get(principal.tenant)
+
+
+Gate = Annotated[AgentGate, Depends(tenant_gate)]
+
 # Versions are 1-based and must fit a 64-bit SQL integer (an unbounded int reached
 # the driver and came back as a 500).
 VersionPath = Annotated[int, Path(ge=1, le=2**63 - 1)]
 
 
-def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = None) -> FastAPI:
+def create_app(
+    gate: AgentGate | None = None,
+    *,
+    auth: Authenticator | None = None,
+) -> FastAPI:
     """The API over `gate`. `auth` defaults to one built from settings (API keys in
-    the gate's database; `X-Actor` trust only if `auth_dev_actor_header` is on)."""
+    the gate's database; `X-Actor` trust only if `auth_dev_actor_header` is on).
+
+    Tenancy: `gate` serves its own tenant (normally "default"). A caller from another
+    tenant is served by a gate over `gate.storage.for_tenant(tenant)`, with the same
+    clock and config, created on first use with the synthetic baseline policy. Every
+    route reads and writes only the caller's tenant: another tenant's rules,
+    decisions, reports and shadow state answer 404 as if they did not exist."""
     app = FastAPI(
         title="agent-gate",
         version=package_version(),
@@ -149,12 +186,13 @@ def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = No
         # AGENT_GATE_DB is the pre-rename variable; SCRUPLE_DATABASE_URL replaces it.
         gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or load_settings().database_dsn())
         gate.bootstrap_baseline()
-    g = gate
+    root = gate
+    app.state.gates = TenantGates(root)
     if auth is None:
         from scruple.auth.config import build_authenticator
         from scruple.settings import load_settings
 
-        auth = build_authenticator(load_settings(), g.storage)
+        auth = build_authenticator(load_settings(), root.storage)
     app.add_middleware(AuthMiddleware, authenticator=auth)
     app.add_middleware(RequestIDMiddleware)
 
@@ -187,40 +225,42 @@ def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = No
         return WhoAmI.of(principal)
 
     @app.post("/rules", status_code=201, dependencies=[PROPOSE])
-    def register(body: RegisterIn, actor: Actor) -> RuleVersion:
+    def register(body: RegisterIn, actor: Actor, g: Gate) -> RuleVersion:
         if actor != body.provenance.agent_id:
             raise HTTPException(403, "the authenticated caller must be provenance.agent_id")
         return g.propose(body.rule_id, body.spec, body.owner, body.provenance)
 
     @app.get("/rules", dependencies=[READ])
-    def list_rules() -> list[RuleVersion]:
+    def list_rules(g: Gate) -> list[RuleVersion]:
         return g.registry.all_versions()
 
     @app.get("/rules/{rule_id}", dependencies=[READ])
-    def rule_versions(rule_id: str) -> list[RuleVersion]:
+    def rule_versions(rule_id: str, g: Gate) -> list[RuleVersion]:
         versions = g.registry.versions(rule_id)
         if not versions:
             raise HTTPException(404, f"unknown rule {rule_id}")
         return versions
 
     @app.post("/rules/{rule_id}/versions/{version}/evaluate", dependencies=[PROPOSE])
-    def evaluate(rule_id: str, version: VersionPath, actor: Actor) -> list[DecisionOut]:
+    def evaluate(rule_id: str, version: VersionPath, actor: Actor, g: Gate) -> list[DecisionOut]:
         return [DecisionOut.of(r.decision) for r in g.evaluate(rule_id, version, actor)]
 
     @app.post("/rules/{rule_id}/versions/{version}/approve", dependencies=[APPROVE])
-    def approve(rule_id: str, version: VersionPath, actor: Actor) -> DecisionOut:
+    def approve(rule_id: str, version: VersionPath, actor: Actor, g: Gate) -> DecisionOut:
         return DecisionOut.of(g.approve(rule_id, version, actor).decision)
 
     @app.post("/rules/{rule_id}/rollback", dependencies=[APPROVE])
-    def rollback(rule_id: str, body: RollbackIn, actor: Actor) -> DecisionOut:
+    def rollback(rule_id: str, body: RollbackIn, actor: Actor, g: Gate) -> DecisionOut:
+        if not g.registry.versions(rule_id):
+            raise HTTPException(404, f"unknown rule {rule_id}")
         return DecisionOut.of(g.rollback(rule_id, actor, body.reason).decision)
 
     @app.get("/decisions", dependencies=[READ])
-    def decisions(rule_id: str | None = None) -> list[DecisionOut]:
+    def decisions(g: Gate, rule_id: str | None = None) -> list[DecisionOut]:
         return [DecisionOut.of(r.decision) for r in g.decisions(rule_id)]
 
     @app.get("/decisions/{decision_id}", dependencies=[READ])
-    def decision(decision_id: str) -> Decision:
+    def decision(decision_id: str, g: Gate) -> Decision:
         rec = g.decision(decision_id)
         if rec is None:
             raise HTTPException(404, "unknown decision")
@@ -229,65 +269,66 @@ def create_app(gate: AgentGate | None = None, *, auth: Authenticator | None = No
     @app.get(
         "/decisions/{decision_id}/report", response_class=PlainTextResponse, dependencies=[READ]
     )
-    def report(decision_id: str) -> PlainTextResponse:
+    def report(decision_id: str, g: Gate) -> PlainTextResponse:
         md = g.report(decision_id)
         if md is None:
             raise HTTPException(404, "unknown decision")
         return PlainTextResponse(md, media_type="text/markdown")
 
     # Shadow mode: live decisions are scored, never acted on and never stored.
-    shadow: dict[tuple[str, int], ShadowRecorder] = {}
+    # Keyed by tenant too: a recorder holds one tenant's live decisions.
+    shadow: dict[tuple[str, str, int], ShadowRecorder] = {}
 
-    def _recorder(rule_id: str, version: int) -> ShadowRecorder:
-        key = (rule_id, version)
+    def _recorder(g: AgentGate, rule_id: str, version: int) -> ShadowRecorder:
+        key = (g.storage.tenant, rule_id, version)
         if key not in shadow:
             shadow[key] = g.shadow_recorder(rule_id, version)
         return shadow[key]
 
     @app.post("/shadow/rules/{rule_id}/versions/{version}/decisions", dependencies=[SHADOW])
     def shadow_record(
-        rule_id: str, version: VersionPath, body: LiveDecisionBatch, actor: Actor
+        rule_id: str, version: VersionPath, body: LiveDecisionBatch, actor: Actor, g: Gate
     ) -> BatchResult:
         if any(d.agent_id != actor for d in body.decisions):
             raise HTTPException(403, "the caller must be every decision's agent_id")
         try:
-            return _recorder(rule_id, version).record(body.decisions)
+            return _recorder(g, rule_id, version).record(body.decisions)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
     @app.get("/shadow/rules/{rule_id}/versions/{version}", dependencies=[READ])
-    def shadow_summary(rule_id: str, version: VersionPath) -> ShadowSummary:
-        return _recorder(rule_id, version).summary()
+    def shadow_summary(rule_id: str, version: VersionPath, g: Gate) -> ShadowSummary:
+        return _recorder(g, rule_id, version).summary()
 
     # Imported (real) cases: no ground truth; metrics are labelled observed or estimated.
     @app.post(
         "/shadow/rules/{rule_id}/versions/{version}/imported/decisions", dependencies=[SHADOW]
     )
     def shadow_record_imported(
-        rule_id: str, version: int, body: ImportedDecisionBatch, actor: Actor
+        rule_id: str, version: int, body: ImportedDecisionBatch, actor: Actor, g: Gate
     ) -> ImportedBatchResult:
         if any(d.agent_id != actor for d in body.decisions):
             raise HTTPException(403, "the caller must be every decision's agent_id")
         try:
-            return _recorder(rule_id, version).record_imported(body.decisions)
+            return _recorder(g, rule_id, version).record_imported(body.decisions)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
     @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/outcomes", dependencies=[SHADOW])
     def shadow_observe_imported(
-        rule_id: str, version: int, body: ImportedOutcomeBatch, actor: Actor
+        rule_id: str, version: int, body: ImportedOutcomeBatch, actor: Actor, g: Gate
     ) -> ImportedObserveResult:
         try:
-            return _recorder(rule_id, version).observe_imported(body.outcomes)
+            return _recorder(g, rule_id, version).observe_imported(body.outcomes)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
     @app.get("/shadow/rules/{rule_id}/versions/{version}/imported", dependencies=[READ])
-    def shadow_summary_imported(rule_id: str, version: int) -> ImportedShadowSummary:
-        return _recorder(rule_id, version).summary_imported()
+    def shadow_summary_imported(rule_id: str, version: int, g: Gate) -> ImportedShadowSummary:
+        return _recorder(g, rule_id, version).summary_imported()
 
     @app.get("/audit/verify", dependencies=[READ])
-    def verify(expected_head: str | None = None) -> IntegrityReport:
+    def verify(g: Gate, expected_head: str | None = None) -> IntegrityReport:
         return g.verify_integrity(expected_head)
 
     @app.get("/auth/keys", dependencies=[ADMIN])

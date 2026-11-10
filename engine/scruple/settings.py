@@ -49,6 +49,11 @@ class Settings(BaseModel):
     log_format: Literal["json", "text"] = "json"
     api_host: str = "127.0.0.1"
     api_port: int = Field(default=8000, ge=1, le=65535)
+    tenant: str = Field(
+        default="default",
+        pattern=r"^[a-z0-9][a-z0-9-]{1,62}$",
+        description="the tenant the command line acts in (as the local admin)",
+    )
     # --- authentication (scruple.auth) ---
     auth_dev_actor_header: bool = Field(
         default=False,
