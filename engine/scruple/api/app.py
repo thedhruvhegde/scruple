@@ -20,6 +20,7 @@ from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request, Respo
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from scruple.api.health import health_router
 from scruple.api.strict import reject_unknown_inputs
 from scruple.auth import (
     CurrentPrincipal,
@@ -237,13 +238,10 @@ def create_app(
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
     app.include_router(ingest_router(), dependencies=[signed("stripe-signature")])
+    app.include_router(health_router(root, settings))
     app.include_router(console_router(root))  # HTML console at /console (scruple/console)
     with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
         app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
-
-    @app.get("/health", dependencies=[public()])
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
 
     @app.get("/version", dependencies=[public()])
     def version() -> BuildInfo:

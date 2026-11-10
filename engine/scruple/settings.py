@@ -99,6 +99,8 @@ class Settings(BaseModel):
     )
     otel_enabled: bool = False
     otel_service_name: str = Field(default="scruple-engine", min_length=1, max_length=128)
+    # Readiness (scruple.api.health): how long a passing audit-chain check is reused.
+    ready_audit_ttl_seconds: float = Field(default=30, ge=0, le=86_400)
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""
