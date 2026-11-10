@@ -6,6 +6,7 @@ trusted as-is. Replace it with real authn (mTLS/OIDC) before any non-demo use.
 
 from __future__ import annotations
 
+import contextlib
 import os
 from typing import Annotated
 
@@ -25,6 +26,8 @@ from scruple.gate.shadow_imported import (
     ImportedShadowSummary,
 )
 from scruple.ingest.api import ingest_router
+from scruple.jobs.api import jobs_router
+from scruple.jobs.queue import JobError, queue_for
 from scruple.logging import RequestIDMiddleware
 from scruple.registry import (
     DuplicateContentError,
@@ -118,6 +121,8 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
     app.include_router(ingest_router())
+    with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
+        app.include_router(jobs_router(queue_for(g.storage, clock=g.clock)))
 
     @app.get("/health")
     def health() -> dict[str, str]:

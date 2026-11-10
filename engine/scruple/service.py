@@ -582,6 +582,45 @@ class AgentGate:
             rv, active, provider or provider_for(self.config), self.config.confidence
         )
 
+    # --- runtime events (jobs, retention): audited, never a state change ---------
+
+    RUNTIME_EVENT_PREFIXES = ("job.", "retention.")
+
+    def record_runtime_event(self, event_type: str, actor: str, payload: dict[str, Any]) -> Any:
+        """Append an audit entry for work around the gate (a finished job, a retention
+        purge). Only these prefixes: rule and decision events stay the registry's."""
+        if not event_type.startswith(self.RUNTIME_EVENT_PREFIXES):
+            raise ValueError(f"{event_type!r} is not a runtime event")
+        return self.audit.append(event_type, actor, payload)
+
+    def record_job(
+        self,
+        job_id: str,
+        kind: str,
+        rule_id: str,
+        version: int,
+        result_sha256: str,
+        actor: str = SYSTEM_ACTOR,
+    ) -> Any:
+        """Link a finished job to a rule version in the audit log, once per job (a retry
+        after a crash finds the earlier link). Evidence packs carry it in their audit
+        segment."""
+        with self.storage.transaction():
+            for e in self.audit.entries():
+                if e.event_type == "job.succeeded" and e.payload.get("job_id") == job_id:
+                    return e
+            return self.record_runtime_event(
+                "job.succeeded",
+                actor,
+                {
+                    "job_id": job_id,
+                    "kind": kind,
+                    "rule_id": rule_id,
+                    "version": version,
+                    "result_sha256": result_sha256,
+                },
+            )
+
     # --- reads -----------------------------------------------------------------
 
     def decision(self, decision_id: str) -> DecisionRecord | None:

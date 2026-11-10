@@ -27,7 +27,7 @@ from psycopg import errors
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
-from scruple.storage import episodes, imported_shadow
+from scruple.storage import episodes, imported_shadow, jobs
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -113,7 +113,7 @@ CREATE OR REPLACE TRIGGER decisions_no_truncate BEFORE TRUNCATE ON decisions
     FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse('decisions are append-only');
 """
 
-SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL + episodes.POSTGRES_DDL
+SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL + episodes.POSTGRES_DDL + jobs.POSTGRES_DDL
 
 
 def translate(exc: psycopg.Error) -> StorageError:
@@ -128,7 +128,17 @@ def translate(exc: psycopg.Error) -> StorageError:
 class PostgresConnection:
     """One psycopg connection shared across threads behind a re-entrant lock."""
 
-    def __init__(self, dsn: str, schema: str | None = None, create_schema: bool = True) -> None:
+    def __init__(
+        self,
+        dsn: str,
+        schema: str | None = None,
+        create_schema: bool = True,
+        *,
+        serialise_writes: bool = True,
+    ) -> None:
+        # serialise_writes=False: no global advisory lock per transaction (the job
+        # queue, whose claims rely on row locks and SKIP LOCKED instead).
+        self._serialise = serialise_writes
         if schema is not None:
             if not SCHEMA_NAME.match(schema):
                 raise ValueError(f"invalid schema name {schema!r}")
@@ -143,6 +153,8 @@ class PostgresConnection:
         self._depth = 0
         if create_schema:
             with self.transaction():
+                if not self._serialise:  # DDL always serialises with other creators
+                    self._conn.execute("SELECT pg_advisory_xact_lock(%s)", (WRITE_LOCK_KEY,))
                 if schema is not None:
                     self.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
                 self.execute(SCHEMA)
@@ -164,7 +176,8 @@ class PostgresConnection:
             self._depth = 1
             try:
                 with self._conn.transaction():
-                    self._conn.execute("SELECT pg_advisory_xact_lock(%s)", (WRITE_LOCK_KEY,))
+                    if self._serialise:
+                        self._conn.execute("SELECT pg_advisory_xact_lock(%s)", (WRITE_LOCK_KEY,))
                     yield
             except psycopg.Error as exc:
                 raise translate(exc) from exc
@@ -200,6 +213,7 @@ class PostgresStorage(SQLStorage):
     """
 
     def __init__(self, dsn: str, *, schema: str | None = None, create_schema: bool = True) -> None:
+        self.dsn = dsn
         self.schema = schema
         super().__init__(PostgresConnection(dsn, schema, create_schema))
 
@@ -221,5 +235,7 @@ GRANT SELECT, INSERT ON {schema}.rule_versions, {schema}.audit_events, {schema}.
     TO {role};
 GRANT UPDATE (status, rollback_to) ON {schema}.rule_versions TO {role};
 GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shadow_summaries,
-    {schema}.episodes, {schema}.episode_calls TO {role};
+    {schema}.episodes, {schema}.episode_calls, {schema}.job_events TO {role};
+GRANT SELECT, INSERT, UPDATE ON {schema}.jobs TO {role};
+GRANT USAGE ON SEQUENCE {schema}.jobs_id_seq, {schema}.job_events_id_seq TO {role};
 """

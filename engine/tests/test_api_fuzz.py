@@ -75,6 +75,7 @@ CROSS_FIELD_OR_RAW = {
     "/rules",
     f"{IMPORTED}/decisions",
     f"{IMPORTED}/outcomes",
+    "/jobs",  # params are validated by the model of the job's kind
 }
 schema = schemathesis.openapi.from_asgi("/openapi.json", APP)
 
