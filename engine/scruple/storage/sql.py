@@ -202,6 +202,7 @@ class SQLStorage:
     """
 
     def __init__(self, conn: Connection) -> None:
+        from scruple.storage.episodes import SQLEpisodes
         from scruple.storage.imported_shadow import SQLImportedShadow
 
         self._conn = conn
@@ -210,6 +211,7 @@ class SQLStorage:
         self.decisions = SQLDecisions(conn)
         # Runtime state beyond the three history aggregates (each its own repository).
         self.imported_shadow = SQLImportedShadow(conn)
+        self.episodes = SQLEpisodes(conn)
 
     def close(self) -> None:
         self._conn.close()

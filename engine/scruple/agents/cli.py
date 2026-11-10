@@ -120,9 +120,16 @@ def add_episode_parser(sub: Any) -> None:
 
 def cmd_mcp(args: argparse.Namespace) -> int:  # pragma: no cover - blocks on stdio
     if args.server == "sim":
-        from scruple.mcp.sim_server import run_stdio
+        from scruple.mcp.sim_server import build_sim_server, run_stdio
 
-        run_stdio()
+        if args.episode_db:  # episodes survive a server restart
+            from scruple.agents.store_db import DbEpisodeStore, durable_table
+            from scruple.storage import open_storage
+
+            store = DbEpisodeStore.on(open_storage(args.episode_db))
+            build_sim_server(durable_table(store)).run("stdio")
+        else:
+            run_stdio()
     else:
         from scruple.mcp.gate_server import run_stdio as run_gate
 
@@ -135,6 +142,12 @@ def add_mcp_parser(sub: Any, default_db: str) -> None:
     p.set_defaults(fn=cmd_mcp)
     p.add_argument("server", choices=["sim", "gate"])
     p.add_argument("--db", default=default_db, help="SQLite database path (gate only)")
+    p.add_argument(
+        "--episode-db",
+        default=None,
+        help="sim only: keep episodes in this database (SQLite path or postgresql:// URL) "
+        "instead of server memory",
+    )
 
 
 __all__ = ["add_episode_parser", "add_mcp_parser", "cmd_episode", "cmd_mcp"]
