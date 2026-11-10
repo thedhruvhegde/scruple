@@ -1,6 +1,7 @@
 """A local file store so an episode can span several processes (the CLI).
 
-Each episode is one JSON file holding its kind (`simple`, the default, or `dispute`),
+Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, or
+`scenario` for a real-life scenario whose case type is the scenario id),
 seed, case type (the case family for `dispute`), nonce and call log. An
 episode is rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
@@ -30,12 +31,16 @@ class UnknownEpisodeError(KeyError):
     pass
 
 
-KINDS = ("simple", "dispute")
+KINDS = ("simple", "dispute", "scenario")
 
 
 def _new(kind: str, seed: int, case_type: str | None, nonce: int) -> Episode | DisputeEpisode:
     if kind == "dispute":
         return DisputeEpisode(seed, case_type, nonce=nonce)
+    if kind == "scenario":  # a real-life scenario; case_type is its id (scruple.realdata)
+        from scruple.realdata.situations import ScenarioEpisode
+
+        return ScenarioEpisode(seed, case_type, nonce=nonce)
     return Episode(seed, case_type, nonce=nonce)
 
 
@@ -83,6 +88,10 @@ class EpisodeStore:
         calls = [(c["tool"], c["args"]) for c in r["calls"]]
         if r.get("kind", "simple") == "dispute":
             return DisputeEpisode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
+        if r.get("kind") == "scenario":
+            from scruple.realdata.situations import ScenarioEpisode
+
+            return ScenarioEpisode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
         return Episode.replay(r["seed"], r["case_type"], calls, nonce=r["nonce"])
 
     def call(self, episode_id: str, tool: str, args: Any) -> dict[str, Any]:

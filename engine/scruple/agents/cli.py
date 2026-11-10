@@ -65,7 +65,11 @@ def cmd_episode(args: argparse.Namespace) -> int:
             )
             return 0
         case "tools":
-            _print(dispute_anthropic_tools() if args.kind == "dispute" else anthropic_tools())
+            _print(
+                dispute_anthropic_tools()
+                if args.kind in ("dispute", "scenario")
+                else anthropic_tools()
+            )
             return 0
         case "call":
             return _call(store, args.episode_id, args.tool, args.json)
