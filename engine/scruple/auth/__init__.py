@@ -10,7 +10,14 @@ See docs/ARCHITECTURE.md section 8 and docs/pilot/SECURITY.md.
 
 from __future__ import annotations
 
-from scruple.auth.deps import CurrentPrincipal, protection_of, public, require, signed
+from scruple.auth.deps import (
+    CurrentPrincipal,
+    guard_route,
+    protection_of,
+    public,
+    require,
+    signed,
+)
 from scruple.auth.models import (
     ALL_PERMISSIONS,
     DEFAULT_TENANT,
@@ -25,6 +32,7 @@ __all__ = [
     "CurrentPrincipal",
     "Permission",
     "Principal",
+    "guard_route",
     "local_admin",
     "protection_of",
     "public",

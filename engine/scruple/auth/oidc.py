@@ -18,9 +18,10 @@ is not in the cached set triggers one refetch, at most once per
 server hammer the issuer. Keys removed from the JWKS stop verifying after the
 next refresh.
 
-Permissions come from the token's space-separated `scope` claim and (with RBAC)
-its roles claim. The JWKS is fetched with an injectable `httpx` client, so tests
-use a local fake endpoint and make no network calls.
+Permissions come from the token's roles claim and its space-separated `scope`
+claim, combined as for API keys (`scruple.auth.rbac`). The JWKS is fetched with an
+injectable `httpx` client, so tests use a local fake endpoint and make no network
+calls.
 """
 
 from __future__ import annotations
@@ -37,6 +38,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from scruple.auth.authn import AuthError
 from scruple.auth.models import Permission, Principal
+from scruple.auth.rbac import SeparationOfDutiesError, check_separation, permissions_for
 
 log = logging.getLogger("scruple.auth.oidc")
 
@@ -68,10 +70,12 @@ class OIDCConfig(BaseModel):
 PermissionsFor = Callable[[Iterable[str], Iterable[str]], frozenset[Permission]]
 
 
-def scope_permissions(roles: Iterable[str], scopes: Iterable[str]) -> frozenset[Permission]:
-    """Permissions named in the scope claim; unknown scope strings are ignored."""
-    known = {p.value: p for p in Permission}
-    return frozenset(known[s] for s in scopes if s in known)
+def token_permissions(roles: Iterable[str], scopes: Iterable[str]) -> frozenset[Permission]:
+    """Roles claim and scope claim, combined as for API keys (`scruple.auth.rbac`):
+    unknown names grant nothing, scopes narrow roles, duties stay separated."""
+    granted = permissions_for(roles, scopes)
+    check_separation(granted)
+    return granted
 
 
 class JWKSCache:
@@ -148,7 +152,7 @@ class OIDCVerifier:
         config: OIDCConfig,
         jwks: JWKSCache | None = None,
         *,
-        permissions_for: PermissionsFor = scope_permissions,
+        permissions_for: PermissionsFor = token_permissions,
     ) -> None:
         self.config = config
         self.jwks = jwks or JWKSCache(
@@ -165,6 +169,10 @@ class OIDCVerifier:
         roles = _strings(claims.get(c.roles_claim))
         scope = claims.get(c.scope_claim)
         scopes = scope.split() if isinstance(scope, str) else _strings(scope)
+        try:
+            permissions = self._permissions_for(roles, scopes)
+        except SeparationOfDutiesError as exc:
+            raise AuthError(str(exc)) from None
         tenant = claims.get(c.tenant_claim, c.default_tenant)
         if not isinstance(tenant, str):
             raise AuthError("bearer token subject or tenant is not acceptable")
@@ -172,7 +180,7 @@ class OIDCVerifier:
             return Principal(
                 subject=claims[c.subject_claim],
                 tenant=tenant,
-                permissions=self._permissions_for(roles, scopes),
+                permissions=permissions,
                 roles=tuple(sorted(set(roles))),
                 method="oidc",
                 credential_id=f"{claims['iss']}#{claims['sub']}"[:512],

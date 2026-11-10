@@ -15,15 +15,18 @@
 `public()` marks a route that needs no credentials (health, version) and
 `signed("stripe")` one that authenticates the request itself (a webhook HMAC).
 `protection_of(route)` reads the declaration back, which is how the test that
-enumerates every route, and the app-wide guard, find routes that declare nothing.
+enumerates every route, and the app-wide guard `guard_route`, find routes
+that declare nothing: such a route answers 403 until it declares something.
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Annotated, Any, Literal
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import routing as fastapi_routing
 from fastapi.dependencies.models import Dependant
 from fastapi.routing import APIRoute
 
@@ -103,6 +106,48 @@ def _walk(dep: Dependant) -> list[Dependant]:
     return out
 
 
-def protection_of(route: APIRoute) -> list[Requirement]:
-    """Every protection the route declares (directly, on its router or on the app)."""
-    return [d.call for d in _walk(route.dependant) if isinstance(d.call, Requirement)]
+def protection_of(route: Any) -> list[Requirement]:
+    """Every protection a route declares, directly, on its router, on an
+    `include_router(..., dependencies=...)` or on the app. `route` is an `APIRoute`
+    or a FastAPI route context (anything with a `dependant`)."""
+    dependant = getattr(route, "dependant", None)
+    if not isinstance(dependant, Dependant):
+        return []
+    return [d.call for d in _walk(dependant) if isinstance(d.call, Requirement)]
+
+
+def iter_routes(app: FastAPI) -> Iterator[Any]:
+    """Every HTTP route of `app` with its effective dependencies, routers included.
+
+    FastAPI 0.16x resolves `include_router` lazily, so `app.routes` holds the
+    included router, not its routes; `iter_route_contexts` flattens them."""
+    contexts = getattr(fastapi_routing, "iter_route_contexts", None)
+    items = contexts(app.routes) if contexts is not None else app.routes
+    for item in items:
+        if isinstance(getattr(item, "dependant", None), Dependant):
+            yield item
+
+
+def _effective_route(request: Request) -> Any:
+    ctx = (request.scope.get("fastapi") or {}).get("effective_route_context")
+    if ctx is not None and isinstance(getattr(ctx, "dependant", None), Dependant):
+        return ctx
+    route = request.scope.get("route")
+    return route if isinstance(route, APIRoute) else None
+
+
+def guard_route(request: Request) -> None:
+    """App-wide dependency, first in line: enforce the route's declared protection
+    before anything else looks at the request (so an anonymous caller learns
+    nothing from input validation), and refuse a route that declares none (403).
+
+    Fail closed: a route added without `require(...)`, `public()` or `signed(...)`
+    is unreachable until it declares one, instead of being open by accident."""
+    route = _effective_route(request)
+    if route is None:  # pragma: no cover - mounts and plain routes
+        return
+    declared = protection_of(route)
+    if not declared:
+        raise HTTPException(403, "this route declares no permission and is closed")
+    for req in declared:
+        req(request)

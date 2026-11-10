@@ -14,6 +14,7 @@ from datetime import timedelta
 from typing import Any
 
 from scruple.auth.models import DEFAULT_TENANT, Permission, local_admin
+from scruple.auth.rbac import Role
 
 
 def _service(args: argparse.Namespace) -> Any:
@@ -38,6 +39,7 @@ def cmd_create(args: argparse.Namespace) -> int:
             [Permission(s) for s in args.scope or ()],
             admin.subject,
             tenant=args.tenant,
+            roles=args.role or (),
             description=args.description,
             expires_at=expires,
         )
@@ -109,7 +111,13 @@ def add_keys_parser(sub: Any, default_db: str) -> None:
         "--scope",
         action="append",
         choices=[p.value for p in Permission],
-        help="a permission the key holds (repeatable)",
+        help="a permission the key holds (repeatable); narrows --role",
+    )
+    c.add_argument(
+        "--role",
+        action="append",
+        choices=[r.value for r in Role],
+        help="a role (repeatable); with --scope too, the key gets the intersection",
     )
     c.add_argument("--description", default="")
     c.add_argument("--expires-days", type=int, default=None)
