@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from scruple.api.health import health_router
 from scruple.api.strict import reject_unknown_inputs
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
@@ -122,10 +123,7 @@ def create_app(gate: AgentGate | None = None, settings: Settings | None = None) 
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
     app.include_router(ingest_router())
-
-    @app.get("/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
+    app.include_router(health_router(g, settings))
 
     @app.get("/version")
     def version() -> BuildInfo:
