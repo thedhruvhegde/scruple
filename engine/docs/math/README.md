@@ -13,7 +13,7 @@ known versus new, and simulation evidence pasted from a seeded script in `script
 | 2 | [02_stratified_guarantees.md](02_stratified_guarantees.md) | per-case-type e-processes on one stream; time-uniform weighted e-Bonferroni, closed mean testing (FWER), weighted e-BH (FDR); pooled tests miss rare-type regressions | standard, applied; adaptation |
 | 3 | [03_sample_size.md](03_sample_size.md) | sufficient sample size (growth bound plus Bernstein, exact binomial counts, optimised alpha allocation); a KL lower bound showing every valid test pays for a loose cap | adaptation; standard |
 | 4 | [04_asymmetric_decision.md](04_asymmetric_decision.md) | Bayes promote/block threshold under asymmetric costs; composition with the certificate keeps the frequentist guarantee and is Bayes-optimal among certified rules | standard; adaptation |
-| 5 | [05_hacking_gap.md](05_hacking_gap.md) | hacking gap (proxy minus ledger-anchored mean); tail and expected bounds for accepted changes under spot-check audits; minimal audit rate; free resubmission defeats spot checks | candidate novel contribution (framing), literature check required |
+| 5 | [05_hacking_gap.md](05_hacking_gap.md) | hacking gap (proxy minus ledger-anchored mean); tail and expected bounds for accepted changes under spot-check audits; minimal audit rate; free resubmission defeats spot checks; 5.5-5.8: adaptive agents with leaky audits (supermartingale proof), minimal audit rate with verifier false negatives and false alarms | candidate novel contribution (framing), literature check required; 5.5-5.6 adaptation |
 | 6 | [06_gate_adapter.md](06_gate_adapter.md) | pure adapter `evaluate_pairs` and how to wire it into the gate; results on the demo's held-out set | engineering |
 
 "Candidate novel" means we did not find it stated this way in a short search. It is not
@@ -35,6 +35,9 @@ a claim of novelty: a proper literature review is required before any paper says
   with the certificate, **0.2%**.
 - Hacking: best adversarial policy's expected accepted gap 0.0323 vs bound **0.0359**
   (`n = 200, q = 0.05`); a learning optimiser stops hacking exactly at `q* = g/(V+C+g)`.
+- Leaky audits (05, 5.5-5.6): on the 120 E2 batches the leak-adjusted bound is attained
+  (ratio 1.000), the naive bound is broken (0.251 vs 0.052 at `q = 0.05`, `beta = 0.3`,
+  likelihood-ratio floor 0.2). With verifier errors `q* = g/((1-beta)(K+g) - phi K)`.
 - On the demo's 3,000 held-out cases the adapter **holds** both the good and the bad
   rule: with caps declared from amounts, no valid nonparametric test has the power
   (at least about 3,500 late-evidence cases needed; the demo has 178).
@@ -47,6 +50,7 @@ uv run python scripts/math_stratified.py   # about 2 min
 uv run python scripts/math_planning.py     # under 1 min
 uv run python scripts/math_decision.py     # about 1 min
 uv run python scripts/math_hacking.py      # under 1 min
+uv run python scripts/math_hacking_general.py   # seconds
 uv run python scripts/math_gate_demo.py    # seconds
 make test        # fast property and Monte Carlo tests
 make test-slow   # long seeded Monte Carlo runs (@pytest.mark.slow)
