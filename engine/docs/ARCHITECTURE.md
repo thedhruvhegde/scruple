@@ -237,6 +237,27 @@ so serve no data from a mount.
   this through migrations 0002 (keys) and 0003 (tenancy); a SQLite file written
   before tenancy is rebuilt once on open with every row in tenant `default`, rows
   and hashes unchanged.
+- Per-tenant audit genesis (`scruple.audit.models.genesis_hash`): a tenant's chain
+  starts from `SHA-256("scruple-audit-genesis" || 0x00 || tenant_id)`, so rows copied
+  into another tenant fail verification at the first entry (tests/test_audit_tenant_
+  genesis.py). Migration path: tenant `default` keeps the old all-zero genesis, so
+  every chain written before tenancy (all of which migration 0003 put in `default`)
+  verifies unchanged and nothing is rewritten. No other tenant could have a chain
+  before this change, since tenancy and the per-tenant genesis arrived together. The
+  cost: the default chain is bound by its anchored head, not by its genesis (a
+  default chain copied into another database's default tenant is not told apart).
+- What is per tenant, and what is not:
+
+  | table / state | tenant | why |
+  |---|---|---|
+  | rule_versions, audit_events, decisions | `tenant_id` in the key | each tenant's own registry and chain |
+  | imported_shadow_*, episodes, episode_calls, jobs, job_events | `tenant_id` column | every read and write filters on it; jobs run in their tenant (`JobContext.tenant`) |
+  | retention_policies, retention_purges | `tenant_id` column, read across tenants | `scruple retention apply` is an operator command over every tenant's policy; each purge is audited in the purged tenant's own chain |
+  | api_keys | `tenant_id` column, looked up across tenants | a key is found by its id before the tenant is known; the record names the tenant |
+  | case store (`CaseStore`, a separate SQLite file) | one tenant per file | webhooks authenticate by the provider's signature, not a key, so the tenant is configuration (`SCRUPLE_INGEST_TENANT`, worker `--case-store-tenant`); `cases` and `movements` carry no tenant column |
+  | console reference runs and backtest reports | shared | synthetic reference data loaded at start, not tenant data; rules, decisions and approvals in the console are the caller's tenant's |
+  | MCP simulator episodes | tenant `default` | the MCP server has no authentication; episodes are synthetic |
+  | live shadow recorders | in memory, keyed by tenant | not stored (see docs/DEPLOY.md, known gaps) |
 - Locations: `:memory:`, a path or `sqlite:///path` for SQLite;
   `postgresql://...` for Postgres. Postgres schema changes go through alembic
   (`scruple/storage/migrations`); a test checks that `upgrade head` builds the same

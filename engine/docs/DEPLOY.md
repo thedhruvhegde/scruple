@@ -321,11 +321,24 @@ continuing an incoming W3C `traceparent`, with `http.route`,
 - Each worker holds one database connection opened at start and never reconnects
   (`scruple.storage.postgres`); after a database restart pods stay not ready
   until restarted (see Incident response).
-- Shadow recorders live in worker memory: with more than one worker or replica,
-  shadow batches for one rule can land on different workers. Keep one worker
-  and one replica if you use `/shadow/...`, or move them to storage first.
-- Authentication is being added separately. `/health`, `/ready` and `/version`
-  must stay public; `/metrics` is guarded by its own token, not by user auth.
+- State that lives in one worker process, so it is per worker and per replica under
+  gunicorn (`SCRUPLE_WEB_WORKERS` > 1) or several pods:
+  - live shadow recorders (`/shadow/rules/.../decisions`): batches for one rule can
+    land on different workers, each with its own partial summary. Keep one worker
+    and one replica if you use live shadow mode. Imported shadow batches
+    (`.../imported/...`) are stored and replayed from the database, so they are safe.
+  - rate-limit buckets (`scruple.auth.ratelimit`, in memory): each worker counts on
+    its own, so a key's effective limit is about `SCRUPLE_RATE_LIMIT_PER_MINUTE`
+    times the number of workers and replicas. Set the per-key limits with that in
+    mind; there is no shared bucket store yet.
+  - the verified-key cache (5 minutes) and the per-tenant gate cache: harmless, since
+    a key's row is read on every request and gates hold no state of their own.
+- Probes: `/health`, `/ready` and `/version` are declared `public()` in the route
+  guard, and `/health` and `/ready` are never rate limited (an orchestrator probing
+  from one address must not get 429). `/metrics` is declared `signed("metrics-token")`:
+  the auth middleware leaves its `Authorization` header alone and the route checks
+  `SCRUPLE_METRICS_TOKEN` itself. `/ready` verifies every tenant's audit chain from
+  that tenant's own genesis and names no tenant in its answer.
 - Actions in the release workflow are pinned to version tags. Pin them to commit
   SHAs (with a bot to update them) before relying on the workflow.
 - The Helm chart's rendering tests and the Terraform format test skip when helm or

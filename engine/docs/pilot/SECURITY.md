@@ -53,7 +53,7 @@ penetration test.
 
 | question | answer |
 |---|---|
-| Audit log | Every state change is an audit entry `{seq, at, event_type, actor, payload, prev_hash}` hashed with SHA-256 over canonical JSON, chained to the previous entry (`scruple/audit/log.py`). |
+| Audit log | Every state change is an audit entry `{seq, at, event_type, actor, payload, prev_hash}` hashed with SHA-256 over canonical JSON, chained to the previous entry (`scruple/audit/log.py`). Each tenant has its own chain, starting from `SHA-256("scruple-audit-genesis" \|\| 0x00 \|\| tenant_id)`, so a chain copied into another tenant fails verification; tenant `default` keeps the all-zero genesis of chains written before tenancy (tests/test_audit_tenant_genesis.py). |
 | Append-only | Enforced in the database: triggers refuse UPDATE and DELETE on audit events and decisions, and content changes and DELETE on rule versions; on Postgres also TRUNCATE. On Postgres the service runs as a role that does not own the tables and cannot drop the triggers (docs/ARCHITECTURE.md section 9). |
 | Tamper detection | `scruple audit verify` recomputes the chain and replays it against the registry and stored decisions. Tests: edited payload, deleted entry, reordered entries, a re-hashed edited entry, raw SQLite file edits of the audit log, of a rule status and of a decision (tests/test_audit.py). The demo shows a rewritten BLOCK decision being detected. |
 | Truncation | Detected only against an externally anchored head (`--expected-head`). Anchoring is manual today. |
@@ -142,12 +142,12 @@ recorded in docs/DESIGN.md.
 | Penetration test | None yet, internal or external. |
 | SAML, mTLS | Not built. Authentication is API keys and OIDC bearer tokens. |
 | Shared rate limit store | Buckets are in memory per process; a Redis or database backend implements `RateLimitBackend` but none ships. |
-| Tenant administration | Tenants are created implicitly by the first key or token for them; there is no tenant list, quota or offboarding command. Stripe webhook batches are not tenant-scoped (they are not persisted either). |
-| Per-tenant genesis | Each tenant's audit chain starts from the same genesis hash. A copy of one tenant's rows into another tenant's id, by someone with raw database write access, would verify; anchor each tenant's head externally. |
+| Tenant administration | Tenants are created implicitly by the first key or token for them; there is no tenant list, quota or offboarding command. With `SCRUPLE_CASE_STORE` set, webhook batches are persisted to that case store, which is one tenant's file: the tenant is configuration (`SCRUPLE_INGEST_TENANT`), not taken from the request. |
+| Per-tenant genesis | Done: each tenant's chain starts from its own genesis, so a copy of one tenant's rows into another tenant fails verification. Tenant `default` keeps the old all-zero genesis (chains from before tenancy still verify), so a default chain copied into another database's default tenant is caught only by an anchored head. |
 | Key management | No KMS integration, no key-encryption keys, no per-tenant keys; keys are supplied by the operator. Nothing counts encryptions per key yet (NIST SP 800-38D limit noted in docs/INTEGRATIONS.md). |
-| Field encryption, redaction and tokenisation wired into storage and ingest | Done for imported cases (`scruple ingest`, case store; docs/INTEGRATIONS.md). Not applied to the gate database (rules, decisions, audit), which holds no partner case data. Webhook batches are not persisted. |
+| Field encryption, redaction and tokenisation wired into storage and ingest | Done for imported cases (`scruple ingest`, case store; docs/INTEGRATIONS.md). Not applied to the gate database (rules, decisions, audit), which holds no partner case data. |
 | External anchoring or signing of the audit head | Not built (ROADMAP 141; docs/DESIGN.md "Next" item 4). A consistent rewrite of the whole chain is not detected without an external anchor (docs/VERIFIER_FINDINGS.md G-6). |
-| Retention policies | Not built (ROADMAP 155). |
+| Retention policies | Built: per-tenant policies, audited purges in the purged tenant's chain (`scruple retention`, docs/ARCHITECTURE.md section 11). Nothing schedules `retention apply` yet. |
 | Persisting ingested webhook batches | Not built; accepted Stripe webhook batches stay in memory on the receiver (docs/INTEGRATIONS.md). |
 | Adyen HTTP endpoint | Not built; the adapter is a function. |
 | Secrets from a vault | Not built (ROADMAP 156); environment variables only. |
