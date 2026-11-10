@@ -1,9 +1,30 @@
 [project]
-name = "scruple"
+# Imported as `scruple`; published as `scruple-engine` (the `scruple` name on PyPI
+# belongs to an unrelated project).
+name = "scruple-engine"
 version = "0.1.0"
 description = "Simulation and hack-resistant verifiers for agents that move money."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
+authors = [{ name = "thedhruvhegde", email = "dhegde@umich.edu" }]
+# No licence yet: the founder has not chosen one (see LICENSE-PENDING.md). Until then
+# the package carries no licence field and no licence classifier.
+keywords = ["agents", "verifiers", "simulation", "chargebacks", "disputes", "evaluation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: FastAPI",
+    "Framework :: Pydantic :: 2",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
 dependencies = [
     "alembic>=1.13",
     "cryptography>=50.0.2",
@@ -23,12 +44,36 @@ dependencies = [
 agent-gate = "scruple.cli.main:main"
 scruple = "scruple.cli.main:main"
 
+# The core install already carries postgres, pdf and mcp support. These extras name
+# those capabilities so `pip install "scruple-engine[postgres]"` keeps working if the
+# core set is slimmed later; they add nothing today beyond the core pins.
 [project.optional-dependencies]
+postgres = [
+    "psycopg[binary]>=3.2",
+]
+pdf = [
+    "fpdf2>=2.9.0",
+]
+agents = [
+    "mcp>=2.3",
+    "claude-agent-sdk>=0.2",
+    "langgraph>=1.0",
+]
 claude = [
     "claude-agent-sdk>=0.2",
 ]
 langgraph = [
     "langgraph>=1.0",
+]
+# For `pip install "scruple-engine[dev]"` from an sdist; uv uses [dependency-groups].
+dev = [
+    "pytest>=8.3",
+    "pytest-xdist>=3.8.0",
+    "hypothesis>=6.170.15",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "pypdf>=7.0.0",
+    "jsonschema>=4.26.0",
 ]
 
 [dependency-groups]
@@ -58,6 +103,17 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["scruple", "agent_gate"]
+
+# The sdist is the source a wheel is built from. Tests, data, results, the site and
+# research notes stay in the repository (the tests read repository data).
+[tool.hatch.build.targets.sdist]
+include = [
+    "/scruple",
+    "/agent_gate",
+    "/README.md",
+    "/LICENSE-PENDING.md",
+    "/pyproject.toml",
+]
 
 [tool.ruff]
 line-length = 100
