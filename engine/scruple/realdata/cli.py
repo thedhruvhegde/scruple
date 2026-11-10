@@ -6,6 +6,8 @@
     scruple realdata run --task regime-2015 --prompts p.jsonl --provider anthropic --out a.jsonl
     scruple realdata baselines [--task T] [--out results/real]
     scruple realdata build-splits --src ~/.cache/scruple/real-data
+    scruple realdata fetch-v2 --dest ~/.cache/scruple/real-data
+    scruple realdata build-v2 --src ~/.cache/scruple/real-data
 
 Prompt files have one JSON object per line: id, task, split, system, prompt.
 Answer files: id, answer (the raw model reply). Missing answers for prompted ids
@@ -156,6 +158,23 @@ def cmd_baselines(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_build_v2(args: argparse.Namespace) -> int:
+    from scruple.realdata.v2 import build_v2
+
+    m = build_v2(Path(args.src), Path(args.out))
+    for rel, meta in m["files"].items():
+        print(f"v2/{rel}: {meta['rows']} rows, sha256 {meta['sha256'][:16]}")
+    return 0
+
+
+def cmd_fetch_v2(args: argparse.Namespace) -> int:  # pragma: no cover - network
+    from scruple.realdata.v2 import fetch_v2
+
+    for path in fetch_v2(Path(args.dest)):
+        print(f"fetched {path}, sha256 ok")
+    return 0
+
+
 def add_realdata_parser(sub: Any) -> None:
     p = sub.add_parser("realdata", help="real-data evals on public CFPB complaints")
     rs = p.add_subparsers(dest="realdata_cmd", required=True)
@@ -167,6 +186,15 @@ def add_realdata_parser(sub: Any) -> None:
     b.add_argument("--src", required=True, help="dir written by scripts/fetch_real_data.sh")
     b.add_argument("--out", default="data/real")
     b.set_defaults(fn=cmd_build)
+
+    b2 = rs.add_parser("build-v2", help="rebuild data/real/v2 from the fetched sources")
+    b2.add_argument("--src", required=True, help="dir with the v1 and v2 raw inputs")
+    b2.add_argument("--out", default="data/real")
+    b2.set_defaults(fn=cmd_build_v2)
+
+    f2 = rs.add_parser("fetch-v2", help="download the v2 raw inputs (anonymous git)")
+    f2.add_argument("--dest", required=True)
+    f2.set_defaults(fn=cmd_fetch_v2)
 
     pr = rs.add_parser("prompt", help="write a JSONL of prompts for a model")
     pr.add_argument("--task", required=True, choices=sorted(TASKS))

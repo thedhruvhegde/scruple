@@ -46,8 +46,9 @@ def test_manifest_hashes_match_committed_files() -> None:
 
 
 def test_committed_size_budget() -> None:
-    total = sum(p.stat().st_size for p in (ROOT / "data" / "real").rglob("*") if p.is_file())
-    assert total < 8_000_000
+    real = ROOT / "data" / "real"
+    v1 = [p for p in real.rglob("*") if p.is_file() and (real / "v2") not in p.parents]
+    assert sum(p.stat().st_size for p in v1) < 8_000_000  # v2 has its own budget
 
 
 def test_test_split_is_sealed() -> None:
