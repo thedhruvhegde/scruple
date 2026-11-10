@@ -1,0 +1,52 @@
+id: real-cc-9715152-tickets-from-my-ip
+title: Concert tickets bought from the cardholder's own IP address
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-9715152
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 620.0
+  consumer_says_refunded: 'no'
+  merchant_response: provided proof of purchase tied to the cardholder's IP
+  evidence_mentioned: []
+  facts:
+  - $620 of concert tickets were bought on the card
+  - the ticket seller provided proof of purchase
+  - the credit union denied the claim because the purchase came from the cardholder's IP address
+  - the cardholder says hackers took over the card, email, phone and IP
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.4 (the narrative names neither)'
+  - 'ASSUMPTION: family friendly_fraud: the transaction was made by the cardholder or someone
+    they allowed'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the IP and device match is genuine; the narrative''s hacking account is not taken
+    as fact, following the issuer''s finding'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(b)(1)(i)
+  - 12 CFR 1026.12(b)(2)
+  reg_note: Unauthorized use excludes a person with actual, implied or apparent authority and
+    use the cardholder benefits from (1026.12(b)(1)(i)); whether a household member had apparent
+    authority is a question of fact the text does not settle.
+case:
+  network: visa
+  reason_code: '10.4'
+  family: friendly_fraud
+  amount_minor: 62000
+  opened_after_days: 20
+  documents:
+  - kind: avs_cvv_match
+  - kind: device_ip_match
+expected:
+  action: represent
+  evidence:
+  - avs_cvv_match
+  - device_ip_match
+  resolution: won
+  why: The merchant's AVS and device records match the cardholder, the 10.4/4837 evidence (S1);
+    represent with both rather than refund a purchase the cardholder's side made.

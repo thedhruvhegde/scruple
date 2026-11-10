@@ -1,0 +1,44 @@
+id: real-cc-11023580-race-cancelled-no-refund
+title: A race was cancelled by the organiser and the entry fees never refunded
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-11023580
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 160.0
+  consumer_says_refunded: 'no'
+  merchant_response: cancelled the event, offered refunds, then did not answer
+  evidence_mentioned:
+  - the organiser's cancellation notice
+  - refund request emails
+  facts:
+  - four race entries cost $160
+  - the organiser cancelled the race for low registration and offered refunds by email
+  - refund requests by email and voicemail went unanswered
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.1 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: visa
+  reason_code: '13.1'
+  family: service_failure
+  amount_minor: 16000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: No delivery record exists for what was disputed, and delivery proof is the key evidence
+    for this code (S1); the claim stands, so accept and avoid later-stage fees.

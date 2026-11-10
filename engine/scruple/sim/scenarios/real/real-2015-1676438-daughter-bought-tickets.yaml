@@ -1,0 +1,50 @@
+id: real-2015-1676438-daughter-bought-tickets
+title: A teenage daughter used the card for $340 of concert tickets
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1676438
+  product: Credit card
+  issue: Transaction issue
+  company_response: Closed with explanation
+  amounts_usd:
+  - 340.0
+  consumer_says_refunded: 'no'
+  merchant_response: declined to cancel
+  evidence_mentioned: []
+  facts:
+  - the cardholder's daughter used the card without permission for $340 of concert tickets
+  - the cardholder saw the charges the same day
+  - the merchant would not help; the issuer re-billed
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.4 (the narrative names neither)'
+  - 'ASSUMPTION: family friendly_fraud: the transaction was made by the cardholder or someone
+    they allowed'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the order came from the household''s device and billing address'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(b)(1)(i)
+  - 12 CFR 1026.12(b)(2)
+  reg_note: Unauthorized use excludes a person with actual, implied or apparent authority and
+    use the cardholder benefits from (1026.12(b)(1)(i)); whether a household member had apparent
+    authority is a question of fact the text does not settle.
+case:
+  network: visa
+  reason_code: '10.4'
+  family: friendly_fraud
+  amount_minor: 34000
+  opened_after_days: 20
+  documents:
+  - kind: avs_cvv_match
+  - kind: device_ip_match
+expected:
+  action: represent
+  evidence:
+  - avs_cvv_match
+  - device_ip_match
+  resolution: won
+  why: The merchant's AVS and device records match the cardholder, the 10.4/4837 evidence (S1);
+    represent with both rather than refund a purchase the cardholder's side made.

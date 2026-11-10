@@ -1,0 +1,47 @@
+id: real-2015-1412428-card-number-used-at-grocery
+title: A debit card number used several times at a distant grocery store
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1412428
+  product: Bank account or service
+  issue: Using a debit or ATM card
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 61.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - the bank blocked the card for suspicious activity
+  - the card was used several times at a grocery store in a place the cardholder has never been,
+    for $61
+  - the bank would not return the money for 10 days
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.3 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the store holds no chip read for the sale'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.6(b)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: An unauthorized debit card transfer is an error under 1005.11(a)(1)(i); liability
+    is capped by 1005.6(b); the institution investigates within 10 business days or gives provisional
+    credit (1005.11(c)(1), (c)(2)).
+case:
+  network: visa
+  reason_code: '10.3'
+  family: true_fraud
+  amount_minor: 6100
+  opened_after_days: 20
+  mcc: '5411'
+expected:
+  action: accept
+  resolution: accepted
+  why: Card-present fraud is answered with a chip read (S1); the merchant holds none for this
+    sale, so liability is the merchant's and contesting only adds fees.

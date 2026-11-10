@@ -1,0 +1,53 @@
+id: real-cc-11549435-benefit-received-980
+title: The issuer found the cardholder benefited from $980 of disputed charges
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-11549435
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 980.0
+  consumer_says_refunded: partly
+  merchant_response: evidence led the issuer to find a benefit
+  evidence_mentioned: []
+  facts:
+  - the cardholder reported fraud on the card
+  - part of the claim was approved
+  - $980 was denied because the issuer found the cardholder received a benefit
+  - the cardholder says no benefit or merchandise was received
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.4 (the narrative names neither)'
+  - 'ASSUMPTION: family friendly_fraud: the transaction was made by the cardholder or someone
+    they allowed'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: following the issuer''s finding, the $980 order was delivered to the cardholder
+    and matches their device'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(b)(1)(i)
+  - 12 CFR 1026.12(b)(2)
+  reg_note: Unauthorized use excludes a person with actual, implied or apparent authority and
+    use the cardholder benefits from (1026.12(b)(1)(i)); whether a household member had apparent
+    authority is a question of fact the text does not settle.
+case:
+  network: visa
+  reason_code: '10.4'
+  family: friendly_fraud
+  amount_minor: 98000
+  opened_after_days: 20
+  documents:
+  - kind: avs_cvv_match
+  - kind: device_ip_match
+  - kind: delivery_proof
+expected:
+  action: represent
+  evidence:
+  - avs_cvv_match
+  - device_ip_match
+  resolution: won
+  why: The merchant's AVS and device records match the cardholder, the 10.4/4837 evidence (S1);
+    represent with both rather than refund a purchase the cardholder's side made.

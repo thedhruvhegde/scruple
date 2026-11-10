@@ -1,0 +1,43 @@
+id: real-cc-13883218-rental-charged-twice
+title: One car rental, charged $800 twice
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-13883218
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 800.0
+  consumer_says_refunded: 'no'
+  merchant_response: no response
+  evidence_mentioned:
+  - the two statement charges
+  facts:
+  - one car was rented and $800 was charged twice
+  - the rental company did not answer calls or texts
+  - the issuer cancelled the dispute without a reason
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 12.6.1 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.13(b)
+  reg_note: A second or inflated charge for one purchase is credit not extended to the consumer,
+    a billing error under 1026.13(a)(1) (our reading); notice is 1026.13(b).
+case:
+  network: visa
+  reason_code: 12.6.1
+  family: merchant_error
+  amount_minor: 80000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant has nothing showing two separate sales (S1 asks for the settlement record
+    of distinct transactions); the extra charge is owed back, so accept.

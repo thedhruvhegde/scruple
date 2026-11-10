@@ -1,0 +1,49 @@
+id: real-2025-16861992-gas-30-became-60
+title: A $30 gas sale settled as $60; the station's receipt shows $30
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2025-16861992
+  product: Checking or savings account
+  issue: Managing an account
+  company_response: Closed with explanation
+  amounts_usd:
+  - 30.0
+  - 60.0
+  consumer_says_refunded: 'no'
+  merchant_response: gave a receipt showing $30
+  evidence_mentioned:
+  - the station's receipt
+  facts:
+  - $30 of gas was bought with a prepaid debit card
+  - the charge later updated to $60
+  - the station gave a receipt showing one $30 transaction
+  - the card provider denied the appeal
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 12.5 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(ii)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: A duplicate or wrong-amount debit is an incorrect electronic fund transfer under 1005.11(a)(1)(ii);
+    investigation time limits are 1005.11(c).
+case:
+  network: visa
+  reason_code: '12.5'
+  family: merchant_error
+  amount_minor: 3000
+  opened_after_days: 20
+  captured_minor: 6000
+  mcc: '5541'
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant's own receipt shows $30 against a $60 capture, so the 12.5 claim is right;
+    the authorization and receipt cannot defend it (S1); accept the $30 difference.
+checks:
+  cardholder_net_minor: 3000

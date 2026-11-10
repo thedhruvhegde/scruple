@@ -1,0 +1,55 @@
+id: real-cc-11541817-cancelled-before-shipping-refunded
+title: An order cancelled before shipping; the merchant says it refunded $210
+sources:
+- S1
+- A-15
+- A-22
+- A-23
+grounding:
+  complaint: cfpbcc2024-11541817
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 210.0
+  consumer_says_refunded: 'no'
+  merchant_response: says the refund was sent with a refund id
+  evidence_mentioned:
+  - the merchant's refund id
+  facts:
+  - $210 was paid through PayPal for an order
+  - the order was cancelled before it shipped
+  - the merchant says the money went back to PayPal, refunded to the original payment method
+  - the cardholder never received it
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.6 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the merchant''s refund settled ten days before the dispute opened'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(e)(2)
+  - 12 CFR 1026.13(a)(4)
+  reg_note: When the merchant has issued a credit, the issuer must post it within 3 business days
+    of the credit statement (1026.12(e)(2)); not posting it is a billing error under 1026.13(a)(4).
+case:
+  network: visa
+  reason_code: '13.6'
+  family: service_failure
+  amount_minor: 21000
+  opened_after_days: 20
+  refund_in_flight:
+    settles_day: -10
+issuer:
+  representment: true
+expected:
+  action: represent
+  evidence:
+  - refund_record
+  resolution: won
+  why: A refund that settled before the dispute is answered with the refund confirmation (13.6,
+    S1); accepting would pay the cardholder twice.
+checks:
+  incidents: 1
+  cardholder_net_minor: 21000

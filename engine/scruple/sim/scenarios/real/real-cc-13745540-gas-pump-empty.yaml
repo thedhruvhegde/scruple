@@ -1,0 +1,45 @@
+id: real-cc-13745540-gas-pump-empty
+title: Gas cancelled at an empty pump, charged anyway; the station printed a cancellation
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-13745540
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 27.0
+  consumer_says_refunded: 'no'
+  merchant_response: printed a confirmation of the cancelled sale
+  evidence_mentioned:
+  - the station's cancellation receipt
+  facts:
+  - a Wells Fargo Visa card was charged $27 for gas
+  - the pump had no gas and the cardholder cancelled
+  - the station printed a cancellation confirmation
+  - the issuer rejected the dispute
+  assumptions:
+  - 'ASSUMPTION: reason code 13.1 (the narrative names the network only)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: visa
+  reason_code: '13.1'
+  family: service_failure
+  amount_minor: 2700
+  opened_after_days: 20
+  mcc: '5541'
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant's own receipt shows the sale was cancelled and no fuel was delivered; there
+    is no delivery evidence to offer (S1), so accept.

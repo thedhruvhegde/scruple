@@ -1,0 +1,44 @@
+id: real-cc-15328101-gas-charged-twice
+title: One fill-up at a gas station, charged twice for $45
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-15328101
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 45.0
+  consumer_says_refunded: 'no'
+  merchant_response: confirmed in writing it processed one transaction
+  evidence_mentioned:
+  - the station's written confirmation
+  facts:
+  - the cardholder fuelled once and saw two $45 charges with the same station id seconds apart
+  - the station confirmed in writing that it processed one transaction
+  - the issuer closed the dispute saying only one transaction occurred
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 12.6.1 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.13(b)
+  reg_note: A second or inflated charge for one purchase is credit not extended to the consumer,
+    a billing error under 1026.13(a)(1) (our reading); notice is 1026.13(b).
+case:
+  network: visa
+  reason_code: 12.6.1
+  family: merchant_error
+  amount_minor: 4500
+  opened_after_days: 20
+  mcc: '5541'
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant has nothing showing two separate sales (S1 asks for the settlement record
+    of distinct transactions); the extra charge is owed back, so accept.

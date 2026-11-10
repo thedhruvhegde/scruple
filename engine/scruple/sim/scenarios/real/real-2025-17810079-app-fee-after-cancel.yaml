@@ -1,0 +1,45 @@
+id: real-2025-17810079-app-fee-after-cancel
+title: A $6 monthly app fee after the user tried to cancel
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2025-17810079
+  product: Checking or savings account
+  issue: Problem caused by your funds being low
+  company_response: Closed with explanation
+  amounts_usd:
+  - 6.0
+  consumer_says_refunded: 'no'
+  merchant_response: refused to refund or remove the balance
+  evidence_mentioned: []
+  facts:
+  - the app kept charging monthly after the user tried to cancel
+  - a $6 withdrawal overdrew the account
+  - the app would not close the account until the $6 was repaid
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4841 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.11(b)(1)
+  reg_note: A debit after the consumer revoked the merchant's authority is, on our reading, an
+    unauthorized transfer (1005.11(a)(1)(i)); the notice rule is 1005.11(b)(1).
+case:
+  network: mastercard
+  reason_code: '4841'
+  family: service_failure
+  amount_minor: 600
+  opened_after_days: 20
+  documents:
+  - kind: terms_acceptance
+expected:
+  action: accept
+  resolution: accepted
+  why: The cardholder cancelled before these charges and the merchant holds no record of an uncancelled
+    plan, the 13.2/4841 evidence (S1); accept.

@@ -1,0 +1,43 @@
+id: real-2015-1639426-cancelled-order-billed
+title: An order cancelled and never received is still billed
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2015-1639426
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with explanation
+  amounts_usd: []
+  consumer_says_refunded: 'no'
+  merchant_response: did not answer the cardholder's letters
+  evidence_mentioned:
+  - correspondence with the merchant
+  facts:
+  - the cardholder is billed for an order that was cancelled and never received
+  - written requests for a full credit went unanswered
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4855 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the amount is masked; $250.00 is ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: mastercard
+  reason_code: '4855'
+  family: service_failure
+  amount_minor: 25000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: No delivery record exists for what was disputed, and delivery proof is the key evidence
+    for this code (S1); the claim stands, so accept and avoid later-stage fees.

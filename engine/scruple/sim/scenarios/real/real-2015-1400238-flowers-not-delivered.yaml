@@ -1,0 +1,45 @@
+id: real-2015-1400238-flowers-not-delivered
+title: Mother's Day flowers paid for and never delivered
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2015-1400238
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with explanation
+  amounts_usd:
+  - 52.0
+  consumer_says_refunded: 'no'
+  merchant_response: resubmitted the charge without proof of delivery to the recipient
+  evidence_mentioned:
+  - the issuer's forwarded merchant papers
+  facts:
+  - the cardholder ordered flowers for $52 to be delivered to their mother
+  - the mother says the flowers never arrived
+  - the issuer first refunded, then re-billed after the merchant resubmitted the charge
+  - papers the issuer forwarded did not show delivery to the recipient
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4855 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: mastercard
+  reason_code: '4855'
+  family: service_failure
+  amount_minor: 5200
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: No delivery record exists for what was disputed, and delivery proof is the key evidence
+    for this code (S1); the claim stands, so accept and avoid later-stage fees.

@@ -1,0 +1,46 @@
+id: real-cc-15329728-cutting-boards-returned
+title: Returned cutting boards confirmed delivered to the warehouse, no refund
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpbcc2024-15329728
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 76.0
+  consumer_says_refunded: 'no'
+  merchant_response: has not refunded although its policy says it will
+  evidence_mentioned:
+  - return tracking
+  - proof of delivery of the return
+  facts:
+  - a $76 cutting board set was returned through the seller's return process
+  - the carrier confirmed delivery of the return
+  - the seller's policy refunds once the return arrives, but no refund came
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4853 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.12(c)(1)
+  reg_note: Returned goods the merchant will not credit are property not accepted by the consumer
+    (1026.13(a)(3), our reading); the cardholder may also assert the claim against the issuer
+    under 1026.12(c)(1).
+case:
+  network: mastercard
+  reason_code: '4853'
+  family: service_failure
+  amount_minor: 7600
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant holds no product description or terms that answer a not-as-described claim
+    (S1), and the narrative says the goods failed; accept.

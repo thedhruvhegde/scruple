@@ -1,0 +1,50 @@
+id: real-cc-9982476-false-tracking-number
+title: Marketplace item never delivered; the tracking number was false
+sources:
+- S1
+- A-15
+- A-20
+- A-22
+grounding:
+  complaint: cfpbcc2024-9982476
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 450.0
+  consumer_says_refunded: 'no'
+  merchant_response: claimed delivery using a tracking number for another shipment
+  evidence_mentioned:
+  - the false tracking number
+  facts:
+  - an item bought for $450 was never delivered
+  - the seller supplied a tracking number the cardholder says was false
+  - the seller then claimed delivery and the cardholder lost the dispute
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.1 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the seller''s delivery record belongs to another order (forgery kind wrong_order)'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: visa
+  reason_code: '13.1'
+  family: service_failure
+  amount_minor: 45000
+  opened_after_days: 20
+  documents:
+  - kind: delivery_proof
+    forged: wrong_order
+expected:
+  action: accept
+  resolution: accepted
+  why: The only delivery record is for a different order amount, a detectable forgery; submitting
+    it risks a caught forgery and the claim is valid (S1), so accept.
+checks:
+  flawed_documents: 1

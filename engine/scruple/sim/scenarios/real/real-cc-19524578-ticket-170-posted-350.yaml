@@ -1,0 +1,46 @@
+id: real-cc-19524578-ticket-170-posted-350
+title: An airline ticket authorised at $170 posted at $350
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-19524578
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 170.0
+  - 350.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated; the issuer sent the cardholder to the airline
+  evidence_mentioned: []
+  facts:
+  - two airline tickets showed as pending at $130 and $170
+  - the $170 ticket posted at $350
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 12.5 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the $180 increase was not agreed by the cardholder'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.13(b)
+  reg_note: A second or inflated charge for one purchase is credit not extended to the consumer,
+    a billing error under 1026.13(a)(1) (our reading); notice is 1026.13(b).
+case:
+  network: visa
+  reason_code: '12.5'
+  family: merchant_error
+  amount_minor: 18000
+  opened_after_days: 20
+  captured_minor: 35000
+expected:
+  action: accept
+  resolution: accepted
+  why: The capture exceeds the authorised amount by $180 with nothing showing the cardholder agreed
+    (12.5, S1); the receipt would only confirm the higher figure, so accept the difference.
+checks:
+  cardholder_net_minor: 18000

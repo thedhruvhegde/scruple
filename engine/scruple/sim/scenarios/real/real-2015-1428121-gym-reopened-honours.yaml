@@ -1,0 +1,54 @@
+id: real-2015-1428121-gym-reopened-honours
+title: A gym closed and reopened under new owners who honour the membership
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1428121
+  product: Bank account or service
+  issue: Using a debit or ATM card
+  company_response: Closed with explanation
+  amounts_usd:
+  - 520.0
+  - 180.0
+  - 20.0
+  consumer_says_refunded: 'no'
+  merchant_response: the successor gym honours the memberships
+  evidence_mentioned: []
+  facts:
+  - a couple bought a gym membership and training sessions
+  - the gym closed without notice and reopened under a new name and owner
+  - the debit card dispute for $520 of membership was denied by Visa because the services are
+    available at the same location and the new gym honours them
+  assumptions:
+  - 'ASSUMPTION: reason code 13.1 (the narrative names the network only)'
+  - 'ASSUMPTION: family buyers_remorse: the consumer dispute is not valid under the network rules'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the merchant''s record of continued service counts as the delivery evidence for
+    services'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)
+  reg_note: 1005.11(a)(1) lists the Reg E error types; a dispute about goods or services bought
+    with a debit card is not one of them on the text's face (our reading; the official interpretations
+    are not shipped), so this one is settled under network rules.
+case:
+  network: visa
+  reason_code: '13.1'
+  family: buyers_remorse
+  amount_minor: 52000
+  opened_after_days: 20
+  documents:
+  - kind: delivery_proof
+    label: service-available
+    fields:
+      note: successor honours membership at same location
+expected:
+  action: represent
+  evidence:
+  - service-available
+  - receipt
+  resolution: won
+  why: The services are still available at the same location (the reason the narrative says Visa
+    gave); proof of availability and the receipt answer 13.1 (S1), so represent.
