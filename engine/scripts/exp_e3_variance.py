@@ -211,10 +211,11 @@ def _pairs(
     return out
 
 
-def _vr(pairs: list[LossPair]) -> dict[str, Any]:
+def _vr(pairs: list[LossPair], max_bet: float = 0.5) -> dict[str, Any]:
     cfg = VRGateConfig(
         base=StatsGateConfig(cost_cap=float(DEFAULT_CAP), alpha_block=ALPHA, shuffle_seed=0),
         stratified_share=SHARE,
+        max_bet=max_bet,
     )
     v = evaluate_pairs_vr(pairs, cfg)
     return {
@@ -327,6 +328,84 @@ def cmd_analyse(_: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_posthoc(_: argparse.Namespace) -> int:
+    """NOT pre-registered (added after the run): the stratified process with a bet cap
+    of 0.95 instead of 0.5, on the full benchmark and the folds, every policy."""
+    data = json.loads((OUT_DIR / "cases.json").read_text())
+    cases, n, base = data["cases"], data["n_cases"], data["baseline_cost"]
+    allidx = list(range(n))
+    folds = [list(range(s, min(s + FOLD, n))) for s in range(0, n, FOLD)]
+
+    def fam(i: int) -> str:
+        return str(cases[i]["family"])
+
+    out: dict[str, Any] = {"note": "post hoc, not pre-registered; max_bet 0.95", "policies": {}}
+    for name, v in data["policies"].items():
+        full = _vr(_pairs(allidx, base, v["cost"], fam), max_bet=0.95)
+        fb = sum(_vr(_pairs(f, base, v["cost"], fam), 0.95)["outcome"] == "block" for f in folds)
+        out["policies"][name] = {"full": full, "folds_blocked": fb}
+        print(
+            f"{name}: {full['outcome']} {full['blocked_by']} stratified e "
+            f"{full['stratified_e_value']:.3g} (vs {full['stratified_threshold']:.3g}); "
+            f"folds blocked {fb}/{len(folds)}"
+        )
+    (OUT_DIR / "posthoc_wide_bet.json").write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
+    return 0
+
+
+def _resampled_block(xs: list[tuple[str, float]], wide: bool) -> tuple[bool, bool]:
+    """(E1 block family, VR rule) on one stream of (family, X): default or 0.95 bets."""
+    from scruple.stats import BettingEProcess, StratifiedBettingEProcess
+
+    mb = 0.95 if wide else 0.5
+    fams = sorted({k for k, _ in xs})
+    per = {k: BettingEProcess(0.0, "greater", max_bet=mb) for k in fams}
+    pooled = BettingEProcess(0.0, "greater", max_bet=mb)
+    strat = StratifiedBettingEProcess("greater", max_bet=mb)
+    for k, x in xs:
+        per[k].update(x)
+        pooled.update(x)
+        strat.update(k, x)
+    top = max(max(p.max_log_wealth for p in per.values()), pooled.max_log_wealth)
+    k1 = len(fams) + 1
+    e1 = top >= math.log(k1 / ALPHA)
+    vr = top >= math.log(k1 / ((1 - SHARE) * ALPHA)) or strat.max_log_wealth >= math.log(
+        1 / (SHARE * ALPHA)
+    )
+    return e1, vr
+
+
+def cmd_resample(args: argparse.Namespace) -> int:
+    """NOT pre-registered: P(block) when 10,000 cases are resampled i.i.d. from a
+    policy's paired costs (seeded), E1's family and the VR rule, default and wide bets."""
+    import random
+
+    data = json.loads((OUT_DIR / "cases.json").read_text())
+    cases, n, base = data["cases"], data["n_cases"], data["baseline_cost"]
+    out: dict[str, Any] = {"note": "post hoc, not pre-registered", "reps": args.reps}
+    for name in args.policies:
+        v = next(p for k, p in data["policies"].items() if k.startswith(name))
+        pool = [
+            (str(cases[i]["family"]), max(-1.0, min(1.0, (v["cost"][i] - base[i]) / DEFAULT_CAP)))
+            for i in range(n)
+        ]
+        rng = random.Random(args.seed)
+        hits = {"e1_default": 0, "vr_default": 0, "e1_wide": 0, "vr_wide": 0}
+        for _ in range(args.reps):
+            xs = [pool[rng.randrange(n)] for _ in range(n)]
+            for wide in (False, True):
+                e1, vr = _resampled_block(xs, wide)
+                tag = "wide" if wide else "default"
+                hits[f"e1_{tag}"] += e1
+                hits[f"vr_{tag}"] += vr
+        out[name] = {k: h / args.reps for k, h in hits.items()}
+        print(name, out[name], flush=True)
+    (OUT_DIR / "posthoc_resampled.json").write_text(
+        json.dumps(out, indent=2, sort_keys=True) + "\n"
+    )
+    return 0
+
+
 def _print(out: dict[str, Any]) -> None:
     print(f"E3 on benchmark v1, n={out['n_cases']}, cap {out['cap']}, alpha {out['alpha']}")
     for name, v in out["policies"].items():
@@ -358,6 +437,12 @@ def main(argv: list[str] | None = None) -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("plan").set_defaults(fn=cmd_plan)
     sub.add_parser("analyse").set_defaults(fn=cmd_analyse)
+    sub.add_parser("posthoc").set_defaults(fn=cmd_posthoc)
+    rs = sub.add_parser("resample")
+    rs.set_defaults(fn=cmd_resample)
+    rs.add_argument("--reps", type=int, default=100)
+    rs.add_argument("--seed", type=int, default=0)
+    rs.add_argument("--policies", nargs="*", default=["R5", "R1", "R4", "C3"])
     r = sub.add_parser("run")
     r.set_defaults(fn=cmd_run)
     r.add_argument("--bench", default=str(DEFAULT_BENCH))

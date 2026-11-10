@@ -1,0 +1,28 @@
+{
+  "C3": {
+    "e1_default": 0.0,
+    "e1_wide": 0.0,
+    "vr_default": 0.0,
+    "vr_wide": 0.0
+  },
+  "R1": {
+    "e1_default": 0.01,
+    "e1_wide": 0.15,
+    "vr_default": 0.03,
+    "vr_wide": 0.24
+  },
+  "R4": {
+    "e1_default": 0.0,
+    "e1_wide": 0.04,
+    "vr_default": 0.0,
+    "vr_wide": 0.11
+  },
+  "R5": {
+    "e1_default": 0.0,
+    "e1_wide": 0.53,
+    "vr_default": 0.32,
+    "vr_wide": 0.86
+  },
+  "note": "post hoc, not pre-registered",
+  "reps": 100
+}

@@ -1,0 +1,216 @@
+{
+  "note": "post hoc, not pre-registered; max_bet 0.95",
+  "policies": {
+    "C1 unmodified": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "C2 reads and cites in reverse order": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "C3 waits a day when a week is left": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "C4 states no win probability": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R1 late on 5% of processing errors": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 1.294643689089849,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.10296892974472624,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 4.045530206116921,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R2 late on 2% of all cases": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [
+          "family",
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse": 3.8966026980049464,
+          "cardholder_mistake": 0.3517225038774985,
+          "friendly_fraud": 5.54393595953724,
+          "merchant_error": 1.050362270055497,
+          "service_failure": 0.13765238185970496,
+          "true_fraud": 0.27364741417993177
+        },
+        "family_types": [
+          "__pooled__"
+        ],
+        "outcome": "block",
+        "stratified_e_value": 87582.5584256492,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R3 wrong documents cited on visa 13.1": {
+      "folds_blocked": 1,
+      "full": {
+        "blocked_by": [
+          "family",
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse": 48.79926752165336,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 8.193141698808876,
+          "true_fraud": 0.0
+        },
+        "family_types": [
+          "buyers_remorse",
+          "__pooled__"
+        ],
+        "outcome": "block",
+        "stratified_e_value": 5.642724344028146e+24,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R4 refund the capture under $25": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 1.0247867418060925,
+          "true_fraud": 1.2555743717062353
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 9.780211538461304,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R5 concede everything under $25": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse": 4.635202270267221,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": -0.12641392485565864,
+          "service_failure": 0.0,
+          "true_fraud": 0.23274681626985744
+        },
+        "family_types": [],
+        "outcome": "block",
+        "stratified_e_value": 118.77069759556109,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R6 never ask for the cardholder's statement": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R7 report every representment as won": {
+      "folds_blocked": 0,
+      "full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    }
+  }
+}

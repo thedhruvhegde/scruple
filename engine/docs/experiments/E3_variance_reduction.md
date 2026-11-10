@@ -133,4 +133,129 @@ nothing in the test. The defaults `w = 0.8` and `activation = 1` were chosen fro
 synthetic Monte Carlo in docs/math/07 (plain per-type bets lost to e-Bonferroni when
 several types improved slightly).
 
+## Correction (2026-11-10, added after the run, before the results)
+
+The task that asked for E3 described R5 as "the $1.30/case regression", following
+E1's results text. That figure is in the wrong unit: E1's `mean_cost_diff` is in USD
+minor units, so R5 costs 1.3 cents per case ($0.013), R2 about $0.60 and R3 about
+$1.88 (also found independently by the paper workstream from E1's paired costs). The
+pre-registered text above already uses the real units; nothing above this note was
+changed. The target stays the regression R5 as it is, and its detection is reported
+for that real size.
+
 ## Results
+
+Run on 2026-11-10, one run as planned:
+`scripts/exp_e3_variance.py run --jobs 3 --cache <scratch dir>` with the v1 salt
+(5,037 s on a shared 4-core container; the cache only stores each policy's run
+outside the repository so a crash would lose one policy). No deviations in the
+pre-registered analysis. Raw output: `results/experiments/E3_variance_reduction/`
+(`cases.json` per case, `results.json` the analysis). Synthetic episodes only.
+
+The replay reproduces E1's gate exactly: E1's detector, recomputed on the replayed
+runs, blocks R2 (pooled) and R3 (buyers_remorse, service_failure, pooled) and holds
+everything else, with the same changed-episode counts (R1 27, R2 202, R3 235, R4 641,
+R5 717).
+
+**Verdict: FAIL** (H1 fails; H2 and H3 hold), as predicted.
+
+| pre-registered | result | bar | holds |
+|---|---|---|---|
+| H1 R5 blocked by the new test, full benchmark | hold; stratified e-value 14.9 (needs 25), family part not near its bar | block | **no** |
+| H2 no control blocked, full benchmark | C1 to C4 all hold (stratified e-value 1.0 for each) | none blocked | yes |
+| H3 control folds blocked | 0 / 60 (Wilson 95% 0 to 0.060) | <= 0.05 | yes (point estimate) |
+
+Printed by the run (per policy):
+
+```
+E3 on benchmark v1, n=10000, cap 20000, alpha 0.05
+C1 unmodified: mean 0.0 minor/case, changed 0, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 1 vs 25), folds 0/20 (exercised 0/0); family/band VR hold (e 1); budget family 0.000 (pooled 0.000), family/band 0.000
+R1 late on 5% of processing errors: mean 11.3 minor/case, changed 27, clipped 2; E1 gate hold [], folds 0/20; VR hold [] (stratified e 2.32 vs 25), folds 0/20 (exercised 0/15); family/band VR hold (e 2.05); budget family 5.113 (pooled 5.113), family/band 5.113
+    CRN: var paired (same draws) 1.956e+05, (independent draws) 4.842e+07, unpaired 2.283e+08; identical 0.998 vs 0.810
+R2 late on 2% of all cases: mean 59.8 minor/case, changed 202, clipped 11; E1 gate block ['__pooled__'], folds 0/20; VR block ['family', 'stratified'] (stratified e 939 vs 25), folds 0/20 (exercised 0/20); family/band VR block (e 75.4); budget family 23.476 (pooled 23.476), family/band 23.476
+    CRN: var paired (same draws) 1.666e+06, (independent draws) 4.963e+07, unpaired 2.293e+08; identical 0.988 vs 0.804
+R3 wrong documents cited on visa 13.1: mean 187.7 minor/case, changed 235, clipped 20; E1 gate block ['buyers_remorse', 'service_failure', '__pooled__'], folds 0/20; VR block ['family', 'stratified'] (stratified e 3.03e+14 vs 25), folds 0/20 (exercised 0/20); family/band VR block (e 1.1e+14); budget family 80.760 (pooled 80.760), family/band 80.760
+    CRN: var paired (same draws) 4.039e+06, (independent draws) 5.005e+07, unpaired 2.298e+08; identical 0.986 vs 0.805
+R4 refund the capture under $25: mean 8.6 minor/case, changed 641, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 3.47 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 3.47); budget family 4.284 (pooled 4.284), family/band 4.284
+    CRN: var paired (same draws) 3.04e+04, (independent draws) 4.861e+07, unpaired 2.282e+08; identical 0.996 vs 0.808
+R5 concede everything under $25: mean 1.3 minor/case, changed 717, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 14.9 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 14.9); budget family 8.125 (pooled 0.671), family/band 8.125
+    CRN: var paired (same draws) 2.397e+05, (independent draws) 4.852e+07, unpaired 2.281e+08; identical 0.928 vs 0.763
+R6 never ask for the cardholder's statement: mean 0.0 minor/case, changed 1997, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 1 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 1); budget family 0.000 (pooled 0.000), family/band 0.000
+    CRN: var paired (same draws) 0, (independent draws) 4.858e+07, unpaired 2.283e+08; identical 1.000 vs 0.811
+R7 report every representment as won: mean 0.0 minor/case, changed 1111, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 1 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 1); budget family 0.000 (pooled 0.000), family/band 0.000
+    CRN: var paired (same draws) 0, (independent draws) 4.858e+07, unpaired 2.283e+08; identical 1.000 vs 0.811
+C2 reads and cites in reverse order: mean 0.0 minor/case, changed 9966, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 1 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 1); budget family 0.000 (pooled 0.000), family/band 0.000
+    CRN: var paired (same draws) 0, (independent draws) 4.858e+07, unpaired 2.283e+08; identical 1.000 vs 0.811
+C3 waits a day when a week is left: mean 0.1 minor/case, changed 9966, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 1 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 1); budget family 0.541 (pooled 0.028), family/band 0.854
+    CRN: var paired (same draws) 2.017e+04, (independent draws) 4.857e+07, unpaired 2.282e+08; identical 0.906 vs 0.736
+C4 states no win probability: mean 0.0 minor/case, changed 9985, clipped 0; E1 gate hold [], folds 0/20; VR hold [] (stratified e 1 vs 25), folds 0/20 (exercised 0/20); family/band VR hold (e 1); budget family 0.000 (pooled 0.000), family/band 0.000
+    CRN: var paired (same draws) 0, (independent draws) 4.858e+07, unpaired 2.283e+08; identical 1.000 vs 0.811
+```
+
+Against the predictions written down before the run:
+
+- **H1 failed, but closer than predicted.** R5's family budget on v1 was 8.1
+  (pooled 0.67), not "about 2": its cost is concentrated in buyers_remorse, while
+  other families improve. The stratified e-value reached 14.9, five times E1's best
+  type e-value (the paper workstream reports E1's default bet at log E 2.91, e = 18
+  over seven hypotheses that need 140 each); it needed 25. Family x amount band
+  strata (S1) gave the same 14.9: every case R5 touches is under $80.
+- H2 and H3 held: no control was blocked, on the full benchmark or on any fold.
+- R2 and R3 stayed blocked (stratified e-values 939 and 3e14). R1 (2.3) and R4 (3.5)
+  held, as predicted with low confidence. R6, R7 change no cost.
+- No fold of any policy was blocked by either test: 500 cases are far below every
+  budget here.
+- S4, common random numbers (R5): the variance of the paired difference is 2.4e5
+  (USD minor squared) with the same issuer draws, 4.9e7 with independent issuer draws
+  on the same cases, and 2.3e8 unpaired. Same-draw pairing cuts the variance about
+  200-fold against same-case pairing alone and about 950-fold against two
+  independent samples; 92.8% of R5's differences are exactly zero with same draws,
+  76.3% with independent draws. For the unchanged controls (R6, R7, C2, C4) the
+  same-draw variance is exactly 0. This is the largest variance reduction in the
+  system, and it was already there; E3 makes it measured.
+
+### Post hoc (not pre-registered): the bet cap
+
+The paper workstream found that the shipped bet stops at half of the largest valid
+bet (`max_bet = 0.5`), and that a cap of 0.95, still valid, blocks R5 with E1's
+family on the real benchmark (log E 5.11 against 4.94). We compared the new test
+against that wider-bet baseline on the same saved costs (`posthoc`, `resample`
+subcommands; results in `posthoc_wide_bet.json`, `posthoc_resampled.json`):
+
+```
+$ uv run python scripts/exp_e3_variance.py posthoc   # full benchmark, max_bet 0.95
+C1 unmodified: hold [] stratified e 1 (vs 25); folds blocked 0/20
+R1 late on 5% of processing errors: hold [] stratified e 4.05 (vs 25); folds blocked 0/20
+R2 late on 2% of all cases: block ['family', 'stratified'] stratified e 8.76e+04 (vs 25); folds blocked 0/20
+R3 wrong documents cited on visa 13.1: block ['family', 'stratified'] stratified e 5.64e+24 (vs 25); folds blocked 1/20
+R4 refund the capture under $25: hold [] stratified e 9.78 (vs 25); folds blocked 0/20
+R5 concede everything under $25: block ['stratified'] stratified e 119 (vs 25); folds blocked 0/20
+R6 never ask for the cardholder's statement: hold [] stratified e 1 (vs 25); folds blocked 0/20
+R7 report every representment as won: hold [] stratified e 1 (vs 25); folds blocked 0/20
+C2 reads and cites in reverse order: hold [] stratified e 1 (vs 25); folds blocked 0/20
+C3 waits a day when a week is left: hold [] stratified e 1 (vs 25); folds blocked 0/20
+C4 states no win probability: hold [] stratified e 1 (vs 25); folds blocked 0/20
+
+$ uv run python scripts/exp_e3_variance.py resample  # 100 resamples of 10,000, seed 0
+R5 {'e1_default': 0.0, 'vr_default': 0.32, 'e1_wide': 0.53, 'vr_wide': 0.86}
+R1 {'e1_default': 0.01, 'vr_default': 0.03, 'e1_wide': 0.15, 'vr_wide': 0.24}
+R4 {'e1_default': 0.0, 'vr_default': 0.0, 'e1_wide': 0.04, 'vr_wide': 0.11}
+C3 {'e1_default': 0.0, 'vr_default': 0.0, 'e1_wide': 0.0, 'vr_wide': 0.0}
+```
+
+Reading, honestly:
+
+- At the default bet cap the new test raised R5's resampled detection from 0 to 0.32
+  and its realised e-value from about 18 to 14.9 against a threshold that fell from
+  140 to 25; it did not block R5 on the benchmark itself.
+- Widening the bet cap is worth about as much as the stratification: E1's family with
+  wide bets detects R5 in 0.53 of resamples, the new test with default bets in 0.32,
+  the two together in 0.86 (R1 0.24, R4 0.11). On the benchmark itself, the wide
+  stratified test blocks R5 with e = 119 against 25 (log margin 1.56), the wide E1
+  family with log E 5.11 against 4.94 (margin 0.17).
+- These are resamples of the benchmark's own paired costs, chosen after seeing the
+  pre-registered result; they are evidence for a next pre-registered experiment
+  (stratified test with a 0.95 bet cap as the primary), not a pass for E3.
+- Proposition 7.7 still holds: no valid pooled test can see R5 at this size (budget
+  0.67); every detection above comes from a family where R5's cost is concentrated
+  and not cancelled by families where it saves money.

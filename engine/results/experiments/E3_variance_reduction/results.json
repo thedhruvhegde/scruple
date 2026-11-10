@@ -1,0 +1,767 @@
+{
+  "alpha": 0.05,
+  "analysis": {
+    "P1_R5_blocked_full": false,
+    "P2_no_control_blocked_full": true,
+    "P3_control_fold_false_blocks": {
+      "bar": 0.05,
+      "blocked": 0,
+      "pass": true,
+      "rate": 0.0,
+      "trials": 60,
+      "wilson95": [
+        0.0,
+        0.06017185214208986
+      ]
+    },
+    "verdict": "FAIL"
+  },
+  "benchmark": {
+    "manifest_hash": "1286baf3be84b4f9aa7af0606f4434897cf97db4a11c3db548d9549d2cb13f91",
+    "version": 1
+  },
+  "cap": 20000,
+  "experiment": "E3 variance reduction",
+  "n_cases": 10000,
+  "policies": {
+    "C1 unmodified": {
+      "budget_family": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "budget_family_band": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "changed": 0,
+      "clipped": 0,
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 0,
+      "kind": "none",
+      "mean_cost_diff_minor": 0.0,
+      "role": "control",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "C2 reads and cites in reverse order": {
+      "budget_family": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "budget_family_band": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "changed": 9966,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 1.0,
+        "share_identical_independent_draws": 0.8114,
+        "share_identical_same_draws": 1.0,
+        "var_paired_independent_draws": 48581299.66633879,
+        "var_paired_same_draws": 0.0,
+        "var_unpaired": 228284438.50343034
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "reversed",
+      "mean_cost_diff_minor": 0.0,
+      "role": "control",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "C3 waits a day when a week is left": {
+      "budget_family": {
+        "pooled": 0.02835,
+        "stratified": 0.5414
+      },
+      "budget_family_band": {
+        "pooled": 0.02835,
+        "stratified": 0.85385
+      },
+      "changed": 9966,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 0.9999116779255485,
+        "share_identical_independent_draws": 0.7361,
+        "share_identical_same_draws": 0.9062,
+        "var_paired_independent_draws": 48572058.615304165,
+        "var_paired_same_draws": 20165.03748511,
+        "var_unpaired": 228225042.4387949
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "patient",
+      "mean_cost_diff_minor": 0.0567,
+      "role": "control",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "C4 states no win probability": {
+      "budget_family": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "budget_family_band": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "changed": 9985,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 1.0,
+        "share_identical_independent_draws": 0.8114,
+        "share_identical_same_draws": 1.0,
+        "var_paired_independent_draws": 48581299.66633879,
+        "var_paired_same_draws": 0.0,
+        "var_unpaired": 228284438.50343034
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "no_confidence",
+      "mean_cost_diff_minor": 0.0,
+      "role": "control",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R1 late on 5% of processing errors": {
+      "budget_family": {
+        "pooled": 5.11285,
+        "stratified": 5.11285
+      },
+      "budget_family_band": {
+        "pooled": 5.11285,
+        "stratified": 5.11285
+      },
+      "changed": 27,
+      "clipped": 2,
+      "crn": {
+        "corr_same_draws": 0.9991431666203842,
+        "share_identical_independent_draws": 0.8104,
+        "share_identical_same_draws": 0.9979,
+        "var_paired_independent_draws": 48418374.34509071,
+        "var_paired_same_draws": 195610.58481755998,
+        "var_unpaired": 228294516.99121916
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 15,
+      "kind": "late_rare",
+      "mean_cost_diff_minor": 11.3162,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.7874225774015664,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.05488190511472894,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 2.3217111594030304,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.7800479557693611,
+          "cardholder_mistake/<8000": -0.06453852113757118,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 2.0452283270507814,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R2 late on 2% of all cases": {
+      "budget_family": {
+        "pooled": 23.4758,
+        "stratified": 23.4758
+      },
+      "budget_family_band": {
+        "pooled": 23.4758,
+        "stratified": 23.4758
+      },
+      "changed": 202,
+      "clipped": 11,
+      "crn": {
+        "corr_same_draws": 0.9927428781548069,
+        "share_identical_independent_draws": 0.8038,
+        "share_identical_same_draws": 0.988,
+        "var_paired_independent_draws": 49628971.15438431,
+        "var_paired_same_draws": 1666280.5118639602,
+        "var_unpaired": 229299127.31717116
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "block",
+      "e1_gate_types": [
+        "__pooled__"
+      ],
+      "folds_exercised": 20,
+      "kind": "late_any",
+      "mean_cost_diff_minor": 59.8402,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [
+          "family",
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse": 2.3714027142908547,
+          "cardholder_mistake": 0.2639999589516692,
+          "friendly_fraud": 3.3007239045546672,
+          "merchant_error": 0.6236904853071233,
+          "service_failure": 0.07362794624543262,
+          "true_fraud": 0.14645251049094915
+        },
+        "family_types": [
+          "__pooled__"
+        ],
+        "outcome": "block",
+        "stratified_e_value": 938.6437750889868,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [
+          "family",
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse/<1000000": 1.289065642167128,
+          "buyers_remorse/<8000": 0.19986410645235156,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.027328236888993385,
+          "friendly_fraud/<1000000": 2.190048806258946,
+          "friendly_fraud/<8000": 0.43372588553578273,
+          "merchant_error/<1000000": 0.145650845869657,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": -0.02772454801485487,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [
+          "__pooled__"
+        ],
+        "outcome": "block",
+        "stratified_e_value": 75.37664630206355,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R3 wrong documents cited on visa 13.1": {
+      "budget_family": {
+        "pooled": 80.7604,
+        "stratified": 80.7604
+      },
+      "budget_family_band": {
+        "pooled": 80.7604,
+        "stratified": 80.7604
+      },
+      "changed": 235,
+      "clipped": 20,
+      "crn": {
+        "corr_same_draws": 0.9824430183954889,
+        "share_identical_independent_draws": 0.805,
+        "share_identical_same_draws": 0.9855,
+        "var_paired_independent_draws": 50049509.572819754,
+        "var_paired_same_draws": 4039265.0625014403,
+        "var_unpaired": 229790027.35185274
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "block",
+      "e1_gate_types": [
+        "buyers_remorse",
+        "service_failure",
+        "__pooled__"
+      ],
+      "folds_exercised": 20,
+      "kind": "wrong_evidence_code",
+      "mean_cost_diff_minor": 187.7184,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [
+          "family",
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse": 28.629395301608493,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 4.713823674009269,
+          "true_fraud": 0.0
+        },
+        "family_types": [
+          "buyers_remorse",
+          "__pooled__"
+        ],
+        "outcome": "block",
+        "stratified_e_value": 302535268176823.6,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [
+          "family",
+          "stratified"
+        ],
+        "contributions": {
+          "buyers_remorse/<1000000": 20.020608651782165,
+          "buyers_remorse/<8000": 8.163364327910593,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 2.311337612435087,
+          "service_failure/<8000": 1.8351147116229978,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [
+          "buyers_remorse/<1000000",
+          "buyers_remorse/<8000",
+          "__pooled__"
+        ],
+        "outcome": "block",
+        "stratified_e_value": 109881684099187.9,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R4 refund the capture under $25": {
+      "budget_family": {
+        "pooled": 4.2835,
+        "stratified": 4.2835
+      },
+      "budget_family_band": {
+        "pooled": 4.2835,
+        "stratified": 4.2835
+      },
+      "changed": 641,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 0.9998668491024374,
+        "share_identical_independent_draws": 0.8078,
+        "share_identical_same_draws": 0.9964,
+        "var_paired_independent_draws": 48611126.82185239,
+        "var_paired_same_draws": 30399.878311,
+        "var_unpaired": 228203383.39713615
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "over_refund_small",
+      "mean_cost_diff_minor": 8.567,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.5567732852215714,
+          "true_fraud": 0.6875146167474567
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 3.4704626096297027,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.5567732852215714,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.6875146167474567
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 3.4704626096297027,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R5 concede everything under $25": {
+      "budget_family": {
+        "pooled": 0.67065,
+        "stratified": 8.1247
+      },
+      "budget_family_band": {
+        "pooled": 0.67065,
+        "stratified": 8.1247
+      },
+      "changed": 717,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 0.9989493408904765,
+        "share_identical_independent_draws": 0.7631,
+        "share_identical_same_draws": 0.9283,
+        "var_paired_independent_draws": 48523893.529097244,
+        "var_paired_same_draws": 239723.68941431004,
+        "var_unpaired": 228060751.32951635
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "concede_small",
+      "mean_cost_diff_minor": 1.3413,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 2.628277434463298,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": -0.06453852113757118,
+          "service_failure": 0.0,
+          "true_fraud": 0.12478905640044365
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 14.943498565598514,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 2.628277434463298,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": -0.06453852113757118,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.12478905640044365
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 14.943498565598514,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R6 never ask for the cardholder's statement": {
+      "budget_family": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "budget_family_band": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "changed": 1997,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 1.0,
+        "share_identical_independent_draws": 0.8114,
+        "share_identical_same_draws": 1.0,
+        "var_paired_independent_draws": 48581299.66633879,
+        "var_paired_same_draws": 0.0,
+        "var_unpaired": 228284438.50343034
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "skip_info",
+      "mean_cost_diff_minor": 0.0,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    },
+    "R7 report every representment as won": {
+      "budget_family": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "budget_family_band": {
+        "pooled": 0.0,
+        "stratified": 0.0
+      },
+      "changed": 1111,
+      "clipped": 0,
+      "crn": {
+        "corr_same_draws": 1.0,
+        "share_identical_independent_draws": 0.8114,
+        "share_identical_same_draws": 1.0,
+        "var_paired_independent_draws": 48581299.66633879,
+        "var_paired_same_draws": 0.0,
+        "var_unpaired": 228284438.50343034
+      },
+      "e1_gate_folds_blocked": 0,
+      "e1_gate_full": "hold",
+      "e1_gate_types": [],
+      "folds_exercised": 20,
+      "kind": "false_win_claim",
+      "mean_cost_diff_minor": 0.0,
+      "role": "regression",
+      "vr_folds_blocked": 0,
+      "vr_folds_blocked_exercised": 0,
+      "vr_full": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse": 0.0,
+          "cardholder_mistake": 0.0,
+          "friendly_fraud": 0.0,
+          "merchant_error": 0.0,
+          "service_failure": 0.0,
+          "true_fraud": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      },
+      "vr_full_family_band": {
+        "blocked_by": [],
+        "contributions": {
+          "buyers_remorse/<1000000": 0.0,
+          "buyers_remorse/<8000": 0.0,
+          "cardholder_mistake/<1000000": 0.0,
+          "cardholder_mistake/<8000": 0.0,
+          "friendly_fraud/<1000000": 0.0,
+          "friendly_fraud/<8000": 0.0,
+          "merchant_error/<1000000": 0.0,
+          "merchant_error/<8000": 0.0,
+          "service_failure/<1000000": 0.0,
+          "service_failure/<8000": 0.0,
+          "true_fraud/<1000000": 0.0,
+          "true_fraud/<8000": 0.0
+        },
+        "family_types": [],
+        "outcome": "hold",
+        "stratified_e_value": 1.0,
+        "stratified_threshold": 24.999999999999996
+      }
+    }
+  },
+  "preregistration": "docs/experiments/E3_variance_reduction.md",
+  "stratified_share": 0.8,
+  "synthetic": true
+}
