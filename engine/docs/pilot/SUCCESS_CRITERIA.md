@@ -169,3 +169,60 @@ pilot:
 | date | criterion | change | reason | agreed by |
 |---|---|---|---|---|
 | | | | | |
+
+
+## Sample size with variance reduction (appended; synthetic evidence, illustrative inputs)
+
+docs/math/07 adds variance reduction to the statistics. What it changes for H5,
+with the same illustrative inputs as the worked example above (not a partner's).
+Pasted from real runs of `scripts/exp_e3_pilot.py` (same planner, Bernstein,
+optimised alpha):
+
+```
+$ uv run python scripts/exp_e3_pilot.py --monthly-volume 4000 \
+    --mix fraud=0.5,not_received=0.3,not_as_described=0.2 \
+    --min-improvement 5 --cost-cap 100 --sd 20 --variance-ratio 0.0049
+pilot plan before and after variance reduction (illustrative inputs; no outcome
+is predicted). H5: improvement in every reason code, bernstein, optimised alpha.
+  monthly volume 4,000, detect $5/case, cap $100, paired sd $20, outcome lag 0 weeks
+
+  design                                                   cases   months    weeks     +lag
+  paired (scripts/pilot_plan.py, today)                    3,044      0.8      3.3      3.3  (fraud)
+  no common random numbers (sd $286, ratio 0.0049)       303,469     75.9    328.8    328.8  (not_as_described)
+  paired + control variate, R^2 0.25, theta_max 0.5        3,677        1        4        4  (fraud)
+  paired + control variate, R^2 0.5, theta_max 0.5         3,172      0.8      3.5      3.5  (fraud)
+  paired + control variate, R^2 0.75, theta_max 0.5        2,595      0.7      2.9      2.9  (fraud)
+
+  cases = resolved cases in total; months = months of resolved history at this
+  volume; weeks = weeks of shadow traffic (+lag: plus the outcome lag).
+  no-CRN row: cap raised to $286 so the sd fits under it.
+
+$ ... same, with --theta-max 0.2 (a tighter bound on the control-variate coefficient)
+  paired + control variate, R^2 0.25, theta_max 0.2        3,059      0.8      3.4      3.4  (not_as_described)
+  paired + control variate, R^2 0.5, theta_max 0.2         2,590      0.7      2.9      2.9  (not_as_described)
+  paired + control variate, R^2 0.75, theta_max 0.2        2,067      0.6      2.3      2.3  (not_as_described)
+```
+
+Reading:
+
+- **Common random numbers are already in the "today" row, and they are most of the
+  saving.** The paired plan assumes the counterfactual cost is computed for the same
+  case under the same outcome draws. If the backtest's outcome model instead drew the
+  counterfactual outcome independently (variance ratio 0.0049, measured on synthetic
+  episodes in experiment E3 for R5), the same question would need about 300,000
+  resolved cases: 76 months of history instead of 0.8. The outcome model stated in
+  week 1 must reuse the realised draws wherever the decision did not change.
+- **Control variates help only with a known covariate mean and a tight coefficient
+  bound.** With `R^2 = 0.75` and `theta_max = 0.2` the plan falls from 3,044 to 2,067
+  cases (0.8 to 0.6 months, 3.3 to 2.3 shadow weeks, which then fits the 3-week
+  window); with `theta_max = 0.5` the wider bet range eats most of the gain, and at
+  `R^2 = 0.25` the plan does not improve. The bound cannot be set below the
+  coefficient the covariate needs: in cap units that is at least
+  `sqrt(R^2) x sd / cap` (0.17 here for `R^2 = 0.75`), so 0.2 is about the tightest
+  honest choice for these inputs. `R^2` and the covariate mean must come from
+  history before the shadow window and be written into an amendment; they are
+  ASSUMPTIONS here.
+- Stratified betting (the other tool in docs/math/07) does not shorten H5: H5 asks
+  for an improvement in *every* reason code, which needs one certificate per code. It
+  shortens the opposite question ("did any reason code get worse?"), used for
+  blocking.
