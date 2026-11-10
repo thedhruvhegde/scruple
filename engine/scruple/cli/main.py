@@ -237,6 +237,7 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.bench.cli import add_bench_parser
 
     add_bench_parser(sub)
+    __import__("scruple.zoo.cli", fromlist=["add_zoo_parser"]).add_zoo_parser(sub)
     return p
 
 
