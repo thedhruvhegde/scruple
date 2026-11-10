@@ -8,17 +8,23 @@
 
 Submitting answers 202 for a new job and 200 when an idempotency key returns the
 existing one; 409 if that key was used for a different submission. A gate evaluation
-runs as the submitting actor (`X-Actor`), never as an actor named in the body.
+runs as the authenticated caller, never as an actor named in the body.
+
+Authentication and tenancy are the HTTP API's (`scruple.auth`): submitting and
+cancelling need `propose` (a job evaluates or replays rules and writes to the audit
+log, like `POST /rules/{id}/versions/{v}/evaluate`), reading needs `read`. Every route
+sees only the caller's tenant's jobs; another tenant's job answers 404.
 """
 
 from __future__ import annotations
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
+from fastapi import APIRouter, Header, HTTPException, Query, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ValidationError
 
+from scruple.auth import Permission, Principal, require
 from scruple.jobs.models import (
     IDEMPOTENCY_PATTERN,
     Job,
@@ -28,8 +34,6 @@ from scruple.jobs.models import (
     JobSubmit,
 )
 from scruple.jobs.queue import IdempotencyConflictError, JobQueue, UnknownJobError
-from scruple.registry.models import ACTOR_PATTERN
-from scruple.storage.base import DEFAULT_TENANT
 
 
 class JobOut(BaseModel):
@@ -38,35 +42,33 @@ class JobOut(BaseModel):
     created: bool
 
 
-def _actor(x_actor: Annotated[str, Header(pattern=ACTOR_PATTERN, max_length=128)]) -> str:
-    return x_actor
+Reader = Annotated[Principal, require(Permission.READ)]
+Proposer = Annotated[Principal, require(Permission.PROPOSE)]
 
 
-Actor = Annotated[str, Depends(_actor)]
-
-
-def jobs_router(queue: JobQueue, tenant_id: str = DEFAULT_TENANT) -> APIRouter:
+def jobs_router(queue: JobQueue) -> APIRouter:
     router = APIRouter(prefix="/jobs", tags=["jobs"])
 
-    def _get(job_id: str) -> Job:
+    def _get(job_id: str, p: Principal) -> Job:
         try:
-            return queue.get(job_id, tenant_id)
+            return queue.get(job_id, p.tenant)
         except UnknownJobError:
             raise HTTPException(404, "unknown job") from None
 
     @router.post("", status_code=202)
     def submit(
         body: JobSubmit,
-        actor: Actor,
+        caller: Proposer,
         response: Response,
         idempotency_key: Annotated[
             str | None, Header(pattern=IDEMPOTENCY_PATTERN, max_length=128)
         ] = None,
     ) -> JobOut:
+        actor, tenant_id = caller.subject, caller.tenant
         params: dict[str, Any] = dict(body.params)
         gate_eval = body.kind is JobKind.GATE_EVALUATION
         if gate_eval and params.setdefault("actor", actor) != actor:
-            raise HTTPException(403, "a gate evaluation runs as X-Actor")
+            raise HTTPException(403, "a gate evaluation runs as the authenticated caller")
         key = body.idempotency_key or idempotency_key
         if body.idempotency_key and idempotency_key and body.idempotency_key != idempotency_key:
             raise HTTPException(400, "Idempotency-Key header and body disagree")
@@ -86,23 +88,27 @@ def jobs_router(queue: JobQueue, tenant_id: str = DEFAULT_TENANT) -> APIRouter:
 
     @router.get("")
     def list_jobs(
+        caller: Reader,
         status: JobStatus | None = None,
         rule_id: Annotated[str | None, Query(max_length=128)] = None,
         version: Annotated[int | None, Query(ge=1, le=2**31 - 1)] = None,
     ) -> list[Job]:
-        return queue.list_jobs(tenant_id=tenant_id, status=status, rule_id=rule_id, version=version)
+        return queue.list_jobs(
+            tenant_id=caller.tenant, status=status, rule_id=rule_id, version=version
+        )
 
     @router.get("/{job_id}")
-    def get_job(job_id: str) -> Job:
-        return _get(job_id)
+    def get_job(job_id: str, caller: Reader) -> Job:
+        return _get(job_id, caller)
 
     @router.get("/{job_id}/events")
-    def job_events(job_id: str) -> list[JobEvent]:
-        return queue.events(_get(job_id).job_id)
+    def job_events(job_id: str, caller: Reader) -> list[JobEvent]:
+        return queue.events(_get(job_id, caller).job_id)
 
     @router.post("/{job_id}/cancel")
-    def cancel(job_id: str, actor: Actor) -> Job:
-        return queue.cancel(_get(job_id).job_id, tenant_id=tenant_id, actor=actor)
+    def cancel(job_id: str, caller: Proposer) -> Job:
+        job = _get(job_id, caller).job_id
+        return queue.cancel(job, tenant_id=caller.tenant, actor=caller.subject)
 
     return router
 

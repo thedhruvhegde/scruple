@@ -20,7 +20,12 @@ def cmd_worker(args: argparse.Namespace) -> int:
     queue = open_queue(db)
     worker = Worker(
         queue,
-        JobContext(database=db, case_store=args.case_store, gate_config_json=cfg),
+        JobContext(
+            database=db,
+            case_store=args.case_store,
+            case_store_tenant=args.case_store_tenant,
+            gate_config_json=cfg,
+        ),
         worker_id=args.worker_id,
         lease_s=args.lease,
         poll_s=args.poll,
@@ -58,6 +63,11 @@ def add_worker_parser(sub: Any, default_db: str) -> None:
         f"(default: $SCRUPLE_DATABASE_URL, else {default_db})",
     )
     p.add_argument("--case-store", default=None, help="case store for case_store backtests")
+    p.add_argument(
+        "--case-store-tenant",
+        default="default",
+        help="the tenant the case store belongs to; other tenants' backtests cannot read it",
+    )
     p.add_argument("--gate-config", default=None, help="GateConfig JSON for gate evaluations")
     p.add_argument("--worker-id", default=None, help="default: host:pid:thread")
     p.add_argument("--lease", type=float, default=30.0, help="lease seconds (default 30)")

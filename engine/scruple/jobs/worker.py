@@ -35,6 +35,7 @@ from typing import Any, Literal
 
 from scruple.jobs.models import Job
 from scruple.jobs.queue import JobQueue
+from scruple.storage.base import DEFAULT_TENANT
 
 log = logging.getLogger("scruple.jobs")
 
@@ -51,10 +52,14 @@ class JobContext:
 
     database: str  # the gate database (SQLite path or Postgres URL)
     case_store: str | None = None  # operator-configured case store for backtests
+    # A case store is one tenant's file (its rows carry no tenant column): only jobs of
+    # this tenant may read it.
+    case_store_tenant: str = DEFAULT_TENANT
     gate_config_json: str | None = None  # GateConfig JSON; default config when None
     job_id: str = ""
     kind: str = ""
     attempt: int = 0
+    tenant: str = DEFAULT_TENANT  # the job's tenant: handlers read and write only its data
 
 
 Handler = Callable[[JobContext, dict[str, Any]], dict[str, Any]]
@@ -195,7 +200,13 @@ class Worker:
         return ran
 
     def _execute(self, job: Job) -> None:
-        ctx = replace(self.ctx, job_id=job.job_id, kind=job.kind, attempt=job.attempts)
+        ctx = replace(
+            self.ctx,
+            job_id=job.job_id,
+            kind=job.kind,
+            attempt=job.attempts,
+            tenant=job.tenant_id,
+        )
         handler = self.handlers[job.kind]
         run: _Run = (
             _ProcessRun(handler, ctx, job.params)

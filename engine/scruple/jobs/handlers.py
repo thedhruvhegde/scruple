@@ -30,14 +30,23 @@ from scruple.jobs.models import (
     canonical,
 )
 from scruple.jobs.worker import Handler, JobContext, PermanentJobError
+from scruple.storage.base import DEFAULT_TENANT
 
 
 def _gate(ctx: JobContext) -> Any:
     from scruple.gate.config import GateConfig
     from scruple.service import AgentGate
+    from scruple.storage import open_storage
 
     cfg = GateConfig.model_validate_json(ctx.gate_config_json) if ctx.gate_config_json else None
-    return AgentGate.open(ctx.database, config=cfg)
+    storage = open_storage(ctx.database)
+    # The job's tenant only: its registry, decisions and audit chain.
+    for_tenant = getattr(storage, "for_tenant", None)
+    if for_tenant is not None:
+        storage = for_tenant(ctx.tenant)
+    elif ctx.tenant != DEFAULT_TENANT:  # pragma: no cover - every SQL backend has it
+        raise PermanentJobError(f"this database cannot serve tenant {ctx.tenant!r}")
+    return AgentGate(storage, config=cfg)
 
 
 def _sha(obj: Any) -> str:
@@ -102,6 +111,10 @@ def backtest(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
         if isinstance(p.history, CaseStoreHistory):
             if not ctx.case_store:
                 raise PermanentJobError("this worker has no --case-store configured")
+            if ctx.tenant != ctx.case_store_tenant:
+                raise PermanentJobError(
+                    f"this worker's case store belongs to tenant {ctx.case_store_tenant!r}"
+                )
             history = load_store(ctx.case_store)
         else:
             from scruple.calibration import DEFAULT_PROFILE, stripe_disputes

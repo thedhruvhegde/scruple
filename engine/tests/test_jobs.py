@@ -21,6 +21,8 @@ from hypothesis import strategies as st
 
 from scruple.api.app import create_app
 from scruple.auth.authn import Authenticator
+from scruple.auth.keys import ApiKeyService, ScryptParams
+from scruple.auth.rbac import Role, key_permissions
 from scruple.jobs import (
     Backoff,
     IdempotencyConflictError,
@@ -45,6 +47,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # The API tests use the development-only X-Actor trust; tests/test_auth_*.py cover
 # real authentication.
 DEV_AUTH = Authenticator(dev_actor_header=True)
+READER = {"X-Actor": "auditor"}  # default caller for reads; writes set their own
 
 
 class ManualClock:
@@ -505,7 +508,7 @@ def test_bench_score_without_the_salt_fails_permanently(
 def test_api_submit_poll_cancel(tmp_path: Path) -> None:
     db = str(tmp_path / "gate.db")
     g = _gate(db)
-    c = TestClient(create_app(g, auth=DEV_AUTH))
+    c = TestClient(create_app(g, auth=DEV_AUTH), headers=READER)
     hdr = {"X-Actor": "ops", "Idempotency-Key": "eval-1"}
     body: dict[str, Any] = {
         "kind": "gate_evaluation",
@@ -536,7 +539,7 @@ def test_api_submit_poll_cancel(tmp_path: Path) -> None:
 def test_api_job_runs_in_a_separate_worker_and_survives_restart(tmp_path: Path) -> None:
     db = str(tmp_path / "gate.db")
     g = _gate(db)
-    c = TestClient(create_app(g, auth=DEV_AUTH))
+    c = TestClient(create_app(g, auth=DEV_AUTH), headers=READER)
     params = {
         "rule_id": GOOD_RULE_ID,
         "version": _version(g),
@@ -554,7 +557,47 @@ def test_api_job_runs_in_a_separate_worker_and_survives_restart(tmp_path: Path) 
         timeout=300,
     )
     assert out.returncode == 0, out.stderr
-    c2 = TestClient(create_app(AgentGate(SQLiteStorage(db), config=CFG), auth=DEV_AUTH))
+    c2 = TestClient(
+        create_app(AgentGate(SQLiteStorage(db), config=CFG), auth=DEV_AUTH), headers=READER
+    )
     polled = c2.get(f"/jobs/{job_id}").json()
     assert polled["status"] == "succeeded" and polled["result"]["synthetic"] is True
     assert json.loads(json.dumps(polled["result"]["report"]))["n_included"] > 0
+
+
+def test_jobs_are_tenant_scoped_and_run_in_their_own_tenant(tmp_path: Path) -> None:
+    """A job is submitted, seen and run in the caller's tenant only, by real keys."""
+    db = str(tmp_path / "gate.db")
+    g = _gate(db)  # tenant "default": the good rule proposed as a candidate
+    gb = AgentGate(g.storage.for_tenant("bank-b"), config=CFG)
+    gb.bootstrap_baseline()
+    gb.propose(GOOD_RULE_ID, GOOD_RULE, "ops-team", PROV)
+    keys = ApiKeyService(g.storage, params=ScryptParams(n=1024), permissions_for=key_permissions)
+
+    def key(subject: str, role: Role, tenant: str) -> dict[str, str]:
+        _, token = keys.create(subject, (), "local-admin", roles=[role], tenant=tenant)
+        return {"X-API-Key": token.get_secret_value()}
+
+    c = TestClient(create_app(g, auth=Authenticator(keys)))
+    b_agent = key("agent-b", Role.PROPOSER, "bank-b")
+    body = {"kind": "gate_evaluation", "params": {"rule_id": GOOD_RULE_ID, "version": 1}}
+    r = c.post("/jobs", json=body, headers=b_agent)
+    assert r.status_code == 202, r.text
+    job = r.json()["job"]
+    assert job["tenant_id"] == "bank-b" and job["params"]["actor"] == "agent-b"
+    assert (
+        c.post("/jobs", json=body, headers=key("aud-b", Role.AUDITOR, "bank-b")).status_code == 403
+    )
+    a_reader = key("aud-a", Role.AUDITOR, "default")
+    assert c.get(f"/jobs/{job['job_id']}", headers=a_reader).status_code == 404
+    assert c.get("/jobs", headers=a_reader).json() == []
+    a_agent = key("agent-a", Role.PROPOSER, "default")
+    assert c.post(f"/jobs/{job['job_id']}/cancel", headers=a_agent).status_code == 404
+
+    head_a = g.audit.head()
+    done = Worker(open_queue(db), JobContext(database=db), isolation="thread").run_once()
+    assert done is not None and done.status is JobStatus.SUCCEEDED, done
+    assert g.registry.get(GOOD_RULE_ID, 1).status is RuleStatus.CANDIDATE  # untouched
+    assert g.audit.head() == head_a
+    assert gb.registry.get(GOOD_RULE_ID, 1).status is not RuleStatus.CANDIDATE
+    assert gb.audit.verify().ok and g.audit.verify().ok
