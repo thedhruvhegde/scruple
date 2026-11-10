@@ -243,6 +243,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.agents.strategies.cli import add_strategies_parser
 
     add_strategies_parser(sub)
+    from scruple.eval.cli import add_eval_parser
+
+    add_eval_parser(sub)
     return p
 
 
