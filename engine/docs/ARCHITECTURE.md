@@ -5,7 +5,7 @@ order data flows through it. docs/DESIGN.md has the reasoning behind the gate; t
 file is the map. All data is synthetic.
 
 ```
- interfaces    api (FastAPI)          cli (argparse, demo)
+ interfaces    api (FastAPI) + auth   cli (argparse, demo)
                      \                 /
  service              AgentGate (service.py)  <- the only place verdicts change state
                  /        |          |          \
@@ -137,21 +137,65 @@ stored decisions, so a direct edit to a status or a decision is reported.
 change it makes is audited inside one transaction. `AgentGate.open(location)` picks
 the storage backend from the location string.
 
-## 8. Interfaces (`scruple/api/`, `scruple/cli/`)
+## 8. Interfaces (`scruple/api/`, `scruple/auth/`, `scruple/cli/`)
 
 ```
  HTTP request
    │ RequestIDMiddleware      X-Request-ID in, out, and on every log line
+   │ AuthMiddleware           credential -> Principal (401 if refused)
+   │   ├ API key              X-API-Key or Bearer scr_...  (keys.py, scrypt, cached check)
+   │   ├ OIDC bearer token    JWT vs the issuer's JWKS      (oidc.py, RS256/ES256)
+   │   ├ rate limit           token bucket per credential   (429 + Retry-After)
+   │   └ body size            Content-Length and streamed   (413)
+   │ guard_route              the route's declared protection, first (401/403);
+   │                          a route that declares none is closed (403)
    │ reject_unknown_inputs    unknown query params / body on bodiless route -> 422
    │ Pydantic body models     extra="forbid", nested all the way down -> 422
    ▼
- route ─► AgentGate ─► response model
+ route ─► tenant_gate(principal) ─► AgentGate for the caller's tenant ─► response
 ```
 
-Both front ends call `AgentGate` and nothing else. Identity is the `X-Actor` header,
-trusted as-is: a stub until real authn exists. `GET /version` and `scruple version`
-report the package version, commit and build date. The CLI `propose` command reads
-its file through the same `RegisterIn` model as `POST /rules`.
+Both front ends call `AgentGate` and nothing else. The caller's identity (the
+audit actor) and tenant come from the credential, never from a header or body the
+caller chooses. `X-Actor` is trusted only in the development-only mode
+(`SCRUPLE_AUTH_DEV_ACTOR_HEADER=true`, off by default, warned about at start and
+flagged on every response). The command line is the local admin of one tenant
+(`SCRUPLE_TENANT`, default `default`): whoever can run it can open the database
+anyway. Keys are managed with `scruple keys create|list|revoke`.
+
+`GET /version` and `scruple version` report the package version, commit and build
+date. The CLI `propose` command reads its file through the same `RegisterIn` model
+as `POST /rules`.
+
+### Protecting a route (for new routers: console, observability, ...)
+
+Every route must declare what it needs; `scruple.auth` gives three markers, each one
+line:
+
+```python
+from scruple.auth import CurrentPrincipal, Permission, Principal, public, require
+
+router = APIRouter(prefix="/console", dependencies=[require(Permission.READ)])  # whole router
+
+@router.post("/thing", dependencies=[require(Permission.ADMIN)])                # one route
+def thing(p: CurrentPrincipal): ...                                             # p.subject, p.tenant
+
+@router.post("/other")
+def other(p: Annotated[Principal, require(Permission.PROPOSE)]): ...            # check and get
+
+@router.get("/metrics-health", dependencies=[public()])                         # no credentials
+```
+
+`signed("name")` marks a route that verifies a request signature itself (the
+Stripe webhook). Permissions are `read`, `propose`, `shadow`, `approve`, `admin`;
+roles grant them (`scruple/auth/rbac.py`). A route that declares nothing answers
+403 to everyone, and tests/test_auth_rbac.py enumerates every route (included
+routers too, via `scruple.auth.deps.iter_routes`) and fails on an undeclared one,
+so add the marker and, for a new public route, add it to `PUBLIC` in that test with
+a reason. Use `Gate` (`scruple.api.app.tenant_gate`) for the caller's tenant's
+`AgentGate`; never hold a gate of your own across requests. Static mounts are not
+routes: the middleware still authenticates them, but nothing checks a permission,
+so serve no data from a mount.
 
 ## 9. Storage (`scruple/storage/`)
 
@@ -184,6 +228,15 @@ its file through the same `RegisterIn` model as `POST /rules`.
   column grants allow UPDATE only on `status` and `rollback_to`.
 - Driver errors become `DuplicateKeyError`, `ImmutableHistoryError` or
   `StorageError`, so callers never import a driver.
+- Tenancy: `rule_versions`, `audit_events` and `decisions` carry `tenant_id`, part
+  of each primary key; a store is bound to one tenant and every statement filters
+  on it (`SQLStorage.for_tenant(t)` is a view of the same connection for tenant
+  `t`). Each tenant has its own registry, decision numbers and audit hash chain.
+  `api_keys` holds keys for every tenant (looked up by id; the record names the
+  tenant); only `last_used_at` and one `revoked_at` may change. Postgres reaches
+  this through migrations 0002 (keys) and 0003 (tenancy); a SQLite file written
+  before tenancy is rebuilt once on open with every row in tenant `default`, rows
+  and hashes unchanged.
 - Locations: `:memory:`, a path or `sqlite:///path` for SQLite;
   `postgresql://...` for Postgres. Postgres schema changes go through alembic
   (`scruple/storage/migrations`); a test checks that `upgrade head` builds the same
@@ -213,5 +266,5 @@ its file through the same `RegisterIn` model as `POST /rules`.
 - Pre-commit: ruff, ruff-format, mypy (local), gitleaks.
 
 Not yet built: connection pooling (one connection per store, behind a lock), typed
-ids, real authn, signed audit checkpoints. The demo (`scruple demo`) still writes
+ids, SAML and mTLS, a shared rate-limit store, signed audit checkpoints. The demo (`scruple demo`) still writes
 SQLite files.
