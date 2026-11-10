@@ -27,7 +27,7 @@ from psycopg import errors
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
-from scruple.storage import imported_shadow
+from scruple.storage import episodes, imported_shadow
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -204,7 +204,7 @@ END
 $$;
 """
 
-SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL
+SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL + episodes.POSTGRES_DDL
 
 
 def translate(exc: psycopg.Error) -> StorageError:
@@ -314,6 +314,6 @@ GRANT SELECT, INSERT ON {schema}.rule_versions, {schema}.audit_events, {schema}.
     {schema}.api_keys TO {role};
 GRANT UPDATE (status, rollback_to) ON {schema}.rule_versions TO {role};
 GRANT UPDATE (revoked_at, last_used_at) ON {schema}.api_keys TO {role};
-GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shadow_summaries
-    TO {role};
+GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shadow_summaries,
+    {schema}.episodes, {schema}.episode_calls TO {role};
 """

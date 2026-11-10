@@ -11,7 +11,7 @@ import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from scruple.storage import imported_shadow
+from scruple.storage import episodes, imported_shadow
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -107,7 +107,7 @@ BEFORE DELETE ON api_keys
 BEGIN SELECT RAISE(ABORT, 'api keys are append-only; revoke instead'); END;
 """
 
-SCHEMA = BASE_SCHEMA + imported_shadow.SQLITE_DDL
+SCHEMA = BASE_SCHEMA + imported_shadow.SQLITE_DDL + episodes.SQLITE_DDL
 
 _HISTORY_MESSAGES = ("append-only", "immutable")
 
