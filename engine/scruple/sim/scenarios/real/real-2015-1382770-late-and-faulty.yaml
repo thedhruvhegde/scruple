@@ -1,0 +1,42 @@
+id: real-2015-1382770-late-and-faulty
+title: A $12 item arrived six weeks late and faulty
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1382770
+  product: Bank account or service
+  issue: Making/receiving payments, sending money
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 12.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - an item paid through PayPal arrived six weeks late
+  - it was faulty
+  - a refund was refused as over thirty days
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.3 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)
+  reg_note: 1005.11(a)(1) lists the Reg E error types; a dispute about goods or services bought
+    with a debit card is not one of them on the text's face (our reading; the official interpretations
+    are not shipped), so this one is settled under network rules.
+case:
+  network: visa
+  reason_code: '13.3'
+  family: service_failure
+  amount_minor: 1200
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant holds no product description or terms that answer a not-as-described claim
+    (S1), and the narrative says the goods failed; accept.

@@ -1,0 +1,42 @@
+id: real-2015-1463686-discs-do-not-work
+title: Discs that do not work, replaced with more that do not work
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1463686
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with explanation
+  amounts_usd:
+  - 55.0
+  consumer_says_refunded: 'no'
+  merchant_response: keeps shipping the same discs
+  evidence_mentioned: []
+  facts:
+  - the cardholder was charged $55 for discs
+  - the discs have a technical problem
+  - the merchant keeps sending the same inoperable discs instead of fixing it
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.3 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(c)(1)
+  - 12 CFR 1026.13(a)(3)
+  reg_note: A quality dispute the merchant does not resolve is a claim the cardholder may assert
+    against the issuer (1026.12(c)(1)); goods not accepted are also 1026.13(a)(3).
+case:
+  network: visa
+  reason_code: '13.3'
+  family: service_failure
+  amount_minor: 5500
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant holds no product description or terms that answer a not-as-described claim
+    (S1), and the narrative says the goods failed; accept.

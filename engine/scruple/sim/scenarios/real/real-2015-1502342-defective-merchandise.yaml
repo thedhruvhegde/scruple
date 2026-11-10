@@ -1,0 +1,45 @@
+id: real-2015-1502342-defective-merchandise
+title: Defective merchandise the merchant cannot exchange
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2015-1502342
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 94.0
+  consumer_says_refunded: 'no'
+  merchant_response: willing to work with the cardholder but has no replacement
+  evidence_mentioned:
+  - documentation sent to the issuer
+  facts:
+  - merchandise bought online arrived defective
+  - the cardholder disputed $94 with documentation
+  - the issuer declined, saying the merchant was willing to work with the cardholder
+  - the merchant has no stock to exchange
+  assumptions:
+  - 'ASSUMPTION: reason code 4853 (the narrative names the network only)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(c)(1)
+  - 12 CFR 1026.13(a)(3)
+  reg_note: A quality dispute the merchant does not resolve is a claim the cardholder may assert
+    against the issuer (1026.12(c)(1)); goods not accepted are also 1026.13(a)(3).
+case:
+  network: mastercard
+  reason_code: '4853'
+  family: service_failure
+  amount_minor: 9400
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant holds no product description or terms that answer a not-as-described claim
+    (S1), and the narrative says the goods failed; accept.

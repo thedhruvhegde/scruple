@@ -1,0 +1,46 @@
+id: real-2025-19115987-monthly-39-never-authorised
+title: A $39 monthly charge from an unknown company the cardholder never authorised
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2025-19115987
+  product: Checking or savings account
+  issue: Managing an account
+  company_response: Closed with explanation
+  amounts_usd:
+  - 39.0
+  consumer_says_refunded: partly
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - four companies charged the account monthly
+  - one charged $39 every month, each after a small international charge
+  - the cardholder never authorised it; the bank refunded only some
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.4 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.6(b)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: An unauthorized debit card transfer is an error under 1005.11(a)(1)(i); liability
+    is capped by 1005.6(b); the institution investigates within 10 business days or gives provisional
+    credit (1005.11(c)(1), (c)(2)).
+case:
+  network: visa
+  reason_code: '10.4'
+  family: true_fraud
+  amount_minor: 3900
+  opened_after_days: 20
+  documents:
+  - kind: device_ip_match
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant's own device and AVS records do not tie the order to the cardholder, so a
+    10.4/4837 response has no required evidence (S1); accept true fraud.

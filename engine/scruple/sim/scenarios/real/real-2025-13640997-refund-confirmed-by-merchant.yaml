@@ -1,0 +1,56 @@
+id: real-2025-13640997-refund-confirmed-by-merchant
+title: The merchant confirms a refund covering the $770 debit payment
+sources:
+- S1
+- A-15
+- A-22
+- A-23
+grounding:
+  complaint: cfpb2025-13640997
+  product: Checking or savings account
+  issue: Managing an account
+  company_response: Closed with explanation
+  amounts_usd:
+  - 770.0
+  - 1000.0
+  consumer_says_refunded: 'no'
+  merchant_response: confirmed the refund was issued
+  evidence_mentioned:
+  - the merchant's refund confirmation
+  facts:
+  - $770 was paid by debit card
+  - the merchant confirmed a $1,000 refund that includes the $770
+  - the merchant says the bank also received a chargeback
+  - the bank says no error occurred
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.6 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the $770 part of the refund settled four days before the dispute opened'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)
+  reg_note: 1005.11(a)(1) lists the Reg E error types; a dispute about goods or services bought
+    with a debit card is not one of them on the text's face (our reading; the official interpretations
+    are not shipped), so this one is settled under network rules.
+case:
+  network: visa
+  reason_code: '13.6'
+  family: service_failure
+  amount_minor: 77000
+  opened_after_days: 20
+  refund_in_flight:
+    settles_day: -4
+issuer:
+  representment: true
+expected:
+  action: represent
+  evidence:
+  - refund_record
+  resolution: won
+  why: A settled refund makes the dispute moot; the refund confirmation is the 13.6 answer (S1),
+    and accepting would credit the cardholder twice.
+checks:
+  incidents: 1
+  cardholder_net_minor: 77000

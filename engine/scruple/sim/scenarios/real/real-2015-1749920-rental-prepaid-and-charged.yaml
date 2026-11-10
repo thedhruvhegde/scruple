@@ -1,0 +1,45 @@
+id: real-2015-1749920-rental-prepaid-and-charged
+title: A prepaid rental car charged again at pickup
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1749920
+  product: Bank account or service
+  issue: Deposits and withdrawals
+  company_response: Closed with explanation
+  amounts_usd:
+  - 210.0
+  - 350.0
+  consumer_says_refunded: partly
+  merchant_response: not stated
+  evidence_mentioned:
+  - documents mailed, faxed and taken to a branch
+  facts:
+  - a rental car was prepaid for $210
+  - $350 more was charged at pickup
+  - the $350 was refunded; the $210 was credited and taken back three times
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 12.6.1 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the case is the $210 prepayment, collected twice for one rental'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(ii)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: A duplicate or wrong-amount debit is an incorrect electronic fund transfer under 1005.11(a)(1)(ii);
+    investigation time limits are 1005.11(c).
+case:
+  network: visa
+  reason_code: 12.6.1
+  family: merchant_error
+  amount_minor: 21000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant has nothing showing two separate sales (S1 asks for the settlement record
+    of distinct transactions); the extra charge is owed back, so accept.

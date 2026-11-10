@@ -1,0 +1,44 @@
+id: real-2025-16654903-duplicates-within-a-minute
+title: Several identical debits within a minute, up to $99
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2025-16654903
+  product: Checking or savings account
+  issue: Problem with a lender or other company charging your account
+  company_response: Closed with explanation
+  amounts_usd:
+  - 4.0
+  - 99.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - several duplicate transactions left the account within a minute
+  - they ranged from $4 to $99
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4834 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the case is one $99 duplicate'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(ii)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: A duplicate or wrong-amount debit is an incorrect electronic fund transfer under 1005.11(a)(1)(ii);
+    investigation time limits are 1005.11(c).
+case:
+  network: mastercard
+  reason_code: '4834'
+  family: merchant_error
+  amount_minor: 9900
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant has nothing showing two separate sales (S1 asks for the settlement record
+    of distinct transactions); the extra charge is owed back, so accept.

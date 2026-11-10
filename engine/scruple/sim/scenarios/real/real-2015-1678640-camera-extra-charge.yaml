@@ -1,0 +1,45 @@
+id: real-2015-1678640-camera-extra-charge
+title: An $80 charge added days after a camera purchase
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2015-1678640
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with explanation
+  amounts_usd:
+  - 340.0
+  - 350.0
+  - 80.0
+  consumer_says_refunded: 'no'
+  merchant_response: supplied documentation to the issuer
+  evidence_mentioned: []
+  facts:
+  - a camera was bought online for $340, $350 with tax
+  - a few days later the merchant added an $80 charge
+  - the cardholder says the extra charge was never authorised
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4834 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.13(b)
+  reg_note: A second or inflated charge for one purchase is credit not extended to the consumer,
+    a billing error under 1026.13(a)(1) (our reading); notice is 1026.13(b).
+case:
+  network: mastercard
+  reason_code: '4834'
+  family: merchant_error
+  amount_minor: 8000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant has nothing showing two separate sales (S1 asks for the settlement record
+    of distinct transactions); the extra charge is owed back, so accept.

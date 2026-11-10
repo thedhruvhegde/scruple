@@ -1,0 +1,45 @@
+id: real-cc-17366379-flight-cancelled-online
+title: A $490 flight cancelled online; the refund promised was never paid
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpbcc2024-17366379
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 490.0
+  consumer_says_refunded: 'no'
+  merchant_response: promised a refund and did not pay it
+  evidence_mentioned:
+  - proof of the online cancellation
+  facts:
+  - a $490 flight ticket was cancelled on the airline's website
+  - the airline promised a refund to the card that never came
+  - the cardholder sent proof of the cancellation to the issuer, which refused
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4853 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.12(c)(1)
+  reg_note: Returned goods the merchant will not credit are property not accepted by the consumer
+    (1026.13(a)(3), our reading); the cardholder may also assert the claim against the issuer
+    under 1026.12(c)(1).
+case:
+  network: mastercard
+  reason_code: '4853'
+  family: service_failure
+  amount_minor: 49000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant holds no product description or terms that answer a not-as-described claim
+    (S1), and the narrative says the goods failed; accept.

@@ -1,0 +1,46 @@
+id: real-cc-9884250-card-stolen-in-mail
+title: A new card stolen in the mail and used before activation
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-9884250
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 440.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - a newly approved card was stolen during delivery and never activated
+  - the thief spent $440 in several places
+  - the issuer closed the fraud dispute without telling the cardholder
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.4 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the case is one $140 order at one merchant'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(b)(1)(i)
+  - 12 CFR 1026.13(a)(1)
+  reg_note: Use by someone without authority and without benefit to the cardholder is unauthorized
+    use (1026.12(b)(1)(i)); the charge is a billing error under 1026.13(a)(1).
+case:
+  network: visa
+  reason_code: '10.4'
+  family: true_fraud
+  amount_minor: 14000
+  opened_after_days: 20
+  documents:
+  - kind: avs_cvv_match
+  - kind: device_ip_match
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant's own device and AVS records do not tie the order to the cardholder, so a
+    10.4/4837 response has no required evidence (S1); accept true fraud.

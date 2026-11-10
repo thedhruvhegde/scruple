@@ -1,0 +1,44 @@
+id: real-cc-13153422-lost-card-restaurants
+title: A lost card used over eight times at restaurants and supermarkets
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-13153422
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 650.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - the cardholder lost the card
+  - it was used more than eight times at restaurants and supermarkets, over $650 in all
+  - a police report and a dispute were filed
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.2 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the case is one $81 restaurant charge with no chip read'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(b)(1)(i)
+  - 12 CFR 1026.13(a)(1)
+  reg_note: Use by someone without authority and without benefit to the cardholder is unauthorized
+    use (1026.12(b)(1)(i)); the charge is a billing error under 1026.13(a)(1).
+case:
+  network: visa
+  reason_code: '10.2'
+  family: true_fraud
+  amount_minor: 8100
+  opened_after_days: 20
+  mcc: '5812'
+expected:
+  action: accept
+  resolution: accepted
+  why: Card-present fraud is answered with a chip read (S1); the merchant holds none for this
+    sale, so liability is the merchant's and contesting only adds fees.

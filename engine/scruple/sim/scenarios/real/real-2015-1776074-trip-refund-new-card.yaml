@@ -1,0 +1,53 @@
+id: real-2015-1776074-trip-refund-new-card
+title: A cancelled trip was refunded, but the card number had changed
+sources:
+- S1
+- A-15
+- A-22
+- A-23
+grounding:
+  complaint: cfpb2015-1776074
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with explanation
+  amounts_usd:
+  - 180.0
+  consumer_says_refunded: 'no'
+  merchant_response: issued the refund
+  evidence_mentioned: []
+  facts:
+  - a $180 trip was cancelled and the merchant issued a refund to the issuer
+  - the card number was replaced after a theft before the refund arrived
+  - the issuer will not forward the refund
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.6 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the refund settled five days before the dispute opened'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(e)(2)
+  - 12 CFR 1026.13(a)(4)
+  reg_note: When the merchant has issued a credit, the issuer must post it within 3 business days
+    of the credit statement (1026.12(e)(2)); not posting it is a billing error under 1026.13(a)(4).
+case:
+  network: visa
+  reason_code: '13.6'
+  family: service_failure
+  amount_minor: 18000
+  opened_after_days: 20
+  refund_in_flight:
+    settles_day: -5
+issuer:
+  representment: true
+expected:
+  action: represent
+  evidence:
+  - refund_record
+  resolution: won
+  why: The merchant's refund settled before the dispute (S1 refund confirmation); accepting would
+    pay the cardholder twice, so represent with the refund record.
+checks:
+  incidents: 1
+  cardholder_net_minor: 18000

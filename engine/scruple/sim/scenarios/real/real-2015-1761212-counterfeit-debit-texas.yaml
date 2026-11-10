@@ -1,0 +1,45 @@
+id: real-2015-1761212-counterfeit-debit-texas
+title: A counterfeit copy of a debit card spent $450 in Texas
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1761212
+  product: Bank account or service
+  issue: Using a debit or ATM card
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 450.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - someone made a copy of the debit card
+  - purchases totalling $450 were made in Texas
+  - the bank contacted the cardholder about the fraud
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.1 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: one merchant took the $450 by magnetic stripe, with no chip read'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.6(b)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: An unauthorized debit card transfer is an error under 1005.11(a)(1)(i); liability
+    is capped by 1005.6(b); the institution investigates within 10 business days or gives provisional
+    credit (1005.11(c)(1), (c)(2)).
+case:
+  network: visa
+  reason_code: '10.1'
+  family: true_fraud
+  amount_minor: 45000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: Card-present fraud is answered with a chip read (S1); the merchant holds none for this
+    sale, so liability is the merchant's and contesting only adds fees.

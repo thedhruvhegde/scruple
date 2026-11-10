@@ -1,0 +1,43 @@
+id: real-2025-13550046-cancelled-membership-debited
+title: A cancelled membership debited $29
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2025-13550046
+  product: Checking or savings account
+  issue: Problem with a lender or other company charging your account
+  company_response: Closed with explanation
+  amounts_usd:
+  - 29.0
+  consumer_says_refunded: 'no'
+  merchant_response: refused to refund
+  evidence_mentioned: []
+  facts:
+  - a membership the consumer cancelled and does not use was debited $29
+  - the company can see it is cancelled and refused a refund
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.2 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.11(b)(1)
+  reg_note: A debit after the consumer revoked the merchant's authority is, on our reading, an
+    unauthorized transfer (1005.11(a)(1)(i)); the notice rule is 1005.11(b)(1).
+case:
+  network: visa
+  reason_code: '13.2'
+  family: service_failure
+  amount_minor: 2900
+  opened_after_days: 20
+  documents:
+  - kind: terms_acceptance
+expected:
+  action: accept
+  resolution: accepted
+  why: The cardholder cancelled before these charges and the merchant holds no record of an uncancelled
+    plan, the 13.2/4841 evidence (S1); accept.

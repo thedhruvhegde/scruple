@@ -1,0 +1,46 @@
+id: real-2015-1510416-card-in-hand-41
+title: A $41 charge at a store while the card never left the cardholder
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpb2015-1510416
+  product: Bank account or service
+  issue: Using a debit or ATM card
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 41.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - a $41 debit card charge was made at a store the cardholder did not visit
+  - a second, larger attempt was declined
+  - the card was never lost or stolen
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4870 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: a counterfeit magnetic-stripe copy, no chip read'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.6(b)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: An unauthorized debit card transfer is an error under 1005.11(a)(1)(i); liability
+    is capped by 1005.6(b); the institution investigates within 10 business days or gives provisional
+    credit (1005.11(c)(1), (c)(2)).
+case:
+  network: mastercard
+  reason_code: '4870'
+  family: true_fraud
+  amount_minor: 4100
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: Card-present fraud is answered with a chip read (S1); the merchant holds none for this
+    sale, so liability is the merchant's and contesting only adds fees.

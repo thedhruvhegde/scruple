@@ -1,0 +1,50 @@
+id: real-2025-15032568-two-states-one-day
+title: Charges in two states on one day while the cardholder was in a third
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2025-15032568
+  product: Checking or savings account
+  issue: Problem with a lender or other company charging your account
+  company_response: Closed with explanation
+  amounts_usd:
+  - 49.0
+  - 90.0
+  - 150.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - three charges of $49, $90 and $150 were made in California and North Carolina on one day
+  - the cardholder lives in Florida and has never been to those places
+  - the bank says the charges came from the same device and holds the cardholder liable
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 10.4 (the narrative names neither)'
+  - 'ASSUMPTION: family true_fraud: the cardholder did not make or allow the transaction, taking
+    the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the case is the $150 charge'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)(i)
+  - 12 CFR 1005.6(b)
+  - 12 CFR 1005.11(c)(1)
+  reg_note: An unauthorized debit card transfer is an error under 1005.11(a)(1)(i); liability
+    is capped by 1005.6(b); the institution investigates within 10 business days or gives provisional
+    credit (1005.11(c)(1), (c)(2)).
+case:
+  network: visa
+  reason_code: '10.4'
+  family: true_fraud
+  amount_minor: 15000
+  opened_after_days: 20
+  documents:
+  - kind: avs_cvv_match
+  - kind: device_ip_match
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant's own device and AVS records do not tie the order to the cardholder, so a
+    10.4/4837 response has no required evidence (S1); accept true fraud.

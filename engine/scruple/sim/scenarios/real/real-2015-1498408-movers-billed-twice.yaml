@@ -1,0 +1,44 @@
+id: real-2015-1498408-movers-billed-twice
+title: Movers billed twice at rates outside the quote
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1498408
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 450.0
+  - 90.0
+  consumer_says_refunded: 'no'
+  merchant_response: no reply
+  evidence_mentioned: []
+  facts:
+  - a quote for moving services was accepted
+  - the cardholder was billed $450 and $90 at rates not in the quote
+  - no invoice was sent and the movers did not reply
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 12.6.1 (the narrative names neither)'
+  - 'ASSUMPTION: family merchant_error: the merchant made the processing error, taking the narrative
+    at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the $90 is a second billing for the same job'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.13(b)
+  reg_note: A second or inflated charge for one purchase is credit not extended to the consumer,
+    a billing error under 1026.13(a)(1) (our reading); notice is 1026.13(b).
+case:
+  network: visa
+  reason_code: 12.6.1
+  family: merchant_error
+  amount_minor: 9000
+  opened_after_days: 20
+expected:
+  action: accept
+  resolution: accepted
+  why: The merchant has nothing showing two separate sales (S1 asks for the settlement record
+    of distinct transactions); the extra charge is owed back, so accept.

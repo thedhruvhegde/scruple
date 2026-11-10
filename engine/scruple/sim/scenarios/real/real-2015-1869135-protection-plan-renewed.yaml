@@ -1,0 +1,49 @@
+id: real-2015-1869135-protection-plan-renewed
+title: An auto-renewed protection plan the cardholder says they never renewed
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1869135
+  product: Credit card
+  issue: Billing disputes
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 15.0
+  consumer_says_refunded: partly
+  merchant_response: said the plan had to be cancelled within 30 days
+  evidence_mentioned: []
+  facts:
+  - a protection plan renewed automatically on the card
+  - the covered computer no longer works
+  - the merchant credited $15 and said cancellation had to be within 30 days
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.2 (the narrative names neither)'
+  - 'ASSUMPTION: family buyers_remorse: the consumer dispute is not valid under the network rules'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the renewal price is $99.00 (masked)'
+  - 'ASSUMPTION: the merchant holds the auto-renewal terms and no cancellation before renewal'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.12(b)(1)(i)
+  reg_note: A charge after the cardholder withdrew permission is, on our reading, credit not made
+    to a person with authority (1026.13(a)(1)); 1026.12(b)(1)(i) defines authority.
+case:
+  network: visa
+  reason_code: '13.2'
+  family: buyers_remorse
+  amount_minor: 9900
+  opened_after_days: 20
+  documents:
+  - kind: terms_acceptance
+  - kind: cancellation_record
+expected:
+  action: represent
+  evidence:
+  - terms_acceptance
+  - cancellation_record
+  resolution: won
+  why: Auto-renewal under accepted terms with no cancellation inside the window is answered by
+    the terms and the cancellation history (13.2, S1); represent.

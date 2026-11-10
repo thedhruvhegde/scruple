@@ -1,0 +1,50 @@
+id: real-cc-10077741-package-left-outside
+title: Carrier left the package outside the building; the cardholder never had it
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-10077741
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 80.0
+  consumer_says_refunded: 'no'
+  merchant_response: delivery record shows the package left at the building
+  evidence_mentioned:
+  - the merchant's delivery record
+  - the cardholder's recent orders
+  facts:
+  - an $80 clothing order was never received
+  - the merchant says the carrier left it outside the building
+  - the cardholder's other packages are normally left inside
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.1 (the narrative names neither)'
+  - 'ASSUMPTION: family buyers_remorse: the consumer dispute is not valid under the network rules'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: under the network rules, carrier delivery to the cardholder''s address answers
+    a 13.1 claim, so the claim is not valid even if the parcel was later taken'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: visa
+  reason_code: '13.1'
+  family: buyers_remorse
+  amount_minor: 8000
+  opened_after_days: 20
+  documents:
+  - kind: delivery_proof
+expected:
+  action: represent
+  evidence:
+  - delivery_proof
+  - receipt
+  resolution: won
+  why: The merchant holds carrier proof of delivery to the cardholder's address and the receipt,
+    the 13.1 evidence (S1); represent with both.

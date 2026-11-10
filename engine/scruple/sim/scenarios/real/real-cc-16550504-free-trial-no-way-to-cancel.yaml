@@ -1,0 +1,46 @@
+id: real-cc-16550504-free-trial-no-way-to-cancel
+title: A 7-day trial with no way to cancel; $9 charges continue
+sources:
+- S1
+- A-15
+- A-22
+- A-16
+grounding:
+  complaint: cfpbcc2024-16550504
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 21.0
+  - 9.0
+  consumer_says_refunded: 'no'
+  merchant_response: offers no cancellation channel
+  evidence_mentioned: []
+  facts:
+  - a 7-day free trial could not be cancelled online and had no phone number
+  - $21 was paid, then two $9 charges followed
+  assumptions:
+  - 'ASSUMPTION: network Mastercard and reason code 4841 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the cardholder''s attempt to cancel within the trial counts as a cancellation'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.12(b)(1)(i)
+  reg_note: A charge after the cardholder withdrew permission is, on our reading, credit not made
+    to a person with authority (1026.13(a)(1)); 1026.12(b)(1)(i) defines authority.
+case:
+  network: mastercard
+  reason_code: '4841'
+  family: service_failure
+  amount_minor: 900
+  opened_after_days: 20
+  documents:
+  - kind: terms_acceptance
+expected:
+  action: accept
+  resolution: accepted
+  why: The cardholder cancelled before these charges and the merchant holds no record of an uncancelled
+    plan, the 13.2/4841 evidence (S1); accept.

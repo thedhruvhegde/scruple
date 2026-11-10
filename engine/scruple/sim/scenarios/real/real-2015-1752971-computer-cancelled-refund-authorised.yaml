@@ -1,0 +1,52 @@
+id: real-2015-1752971-computer-cancelled-refund-authorised
+title: A $1,700 computer order cancelled within hours; the merchant authorised the refund
+sources:
+- S1
+- A-13
+- A-22
+- A-23
+grounding:
+  complaint: cfpb2015-1752971
+  product: Credit card
+  issue: Transaction issue
+  company_response: Closed with explanation
+  amounts_usd:
+  - 1700.0
+  consumer_says_refunded: 'no'
+  merchant_response: documented that it authorised the refund
+  evidence_mentioned:
+  - the retailer's refund authorisation
+  facts:
+  - a computer was ordered for $1,700 and cancelled within hours
+  - the product was never received
+  - the retailer documented that it authorised the refund to the card
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.6 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the dispute opens as an inquiry and the authorised refund settles on day 3, inside
+    the inquiry window'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(e)(2)
+  - 12 CFR 1026.13(a)(4)
+  reg_note: When the merchant has issued a credit, the issuer must post it within 3 business days
+    of the credit statement (1026.12(e)(2)); not posting it is a billing error under 1026.13(a)(4).
+case:
+  network: visa
+  reason_code: '13.6'
+  family: service_failure
+  amount_minor: 170000
+  opened_after_days: 6
+  opening_stage: inquiry
+  refund_in_flight:
+    settles_day: 3
+expected:
+  action: wait
+  resolution: accepted
+  why: The merchant's own refund settles inside the inquiry window; refunding again or accepting
+    would pay the cardholder twice (A-23), so wait.
+checks:
+  incidents: 0
+  cardholder_net_minor: 170000

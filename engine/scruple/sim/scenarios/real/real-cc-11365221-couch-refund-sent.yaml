@@ -1,0 +1,54 @@
+id: real-cc-11365221-couch-refund-sent
+title: A charity shop refunded a returned couch; the issuer has no record
+sources:
+- S1
+- A-15
+- A-22
+- A-23
+grounding:
+  complaint: cfpbcc2024-11365221
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 550.0
+  consumer_says_refunded: 'no'
+  merchant_response: sent the refund
+  evidence_mentioned:
+  - the shop's refund
+  facts:
+  - a couch was bought and promptly returned
+  - the shop sent a $550 refund
+  - the issuer says it has no record of the refund and charges interest
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.6 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the refund settled three days before the dispute opened'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.12(e)(2)
+  - 12 CFR 1026.13(a)(4)
+  reg_note: When the merchant has issued a credit, the issuer must post it within 3 business days
+    of the credit statement (1026.12(e)(2)); not posting it is a billing error under 1026.13(a)(4).
+case:
+  network: visa
+  reason_code: '13.6'
+  family: service_failure
+  amount_minor: 55000
+  opened_after_days: 20
+  refund_in_flight:
+    settles_day: -3
+issuer:
+  representment: true
+expected:
+  action: represent
+  evidence:
+  - refund_record
+  resolution: won
+  why: 13.6 is answered with the processor's refund confirmation (S1); the refund already settled,
+    so the chargeback would pay twice and the refund record undoes it.
+checks:
+  incidents: 1
+  cardholder_net_minor: 55000

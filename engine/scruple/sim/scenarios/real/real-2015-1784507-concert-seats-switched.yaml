@@ -1,0 +1,47 @@
+id: real-2015-1784507-concert-seats-switched
+title: Floor seats bought at $140 each were switched to $89 seats
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1784507
+  product: Bank account or service
+  issue: Using a debit or ATM card
+  company_response: Closed with explanation
+  amounts_usd:
+  - 140.0
+  - 89.0
+  consumer_says_refunded: 'no'
+  merchant_response: not stated
+  evidence_mentioned: []
+  facts:
+  - concert tickets were bought online as floor seats at $140 each
+  - the reseller switched them to a section priced at $89
+  - the couple spent half the show trying to resolve it
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.5 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: two tickets; the dispute is the $51 per ticket difference'
+  regime: reg_e
+  regs:
+  - 12 CFR 1005.11(a)(1)
+  reg_note: 1005.11(a)(1) lists the Reg E error types; a dispute about goods or services bought
+    with a debit card is not one of them on the text's face (our reading; the official interpretations
+    are not shipped), so this one is settled under network rules.
+case:
+  network: visa
+  reason_code: '13.5'
+  family: service_failure
+  amount_minor: 10200
+  opened_after_days: 20
+  captured_minor: 28000
+expected:
+  action: accept
+  resolution: accepted
+  why: The seats delivered were not those sold; with no terms allowing a substitution (13.5, S1)
+    the price difference is owed, so accept the $102.
+checks:
+  cardholder_net_minor: 10200

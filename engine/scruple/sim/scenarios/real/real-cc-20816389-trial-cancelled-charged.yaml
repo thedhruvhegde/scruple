@@ -1,0 +1,45 @@
+id: real-cc-20816389-trial-cancelled-charged
+title: A trial cancelled at once, then two $63 monthly charges
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpbcc2024-20816389
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with explanation
+  amounts_usd:
+  - 63.0
+  consumer_says_refunded: 'no'
+  merchant_response: no response
+  evidence_mentioned: []
+  facts:
+  - a one-month trial was bought and cancelled immediately
+  - two later months were charged at $63 each
+  - support portal and emails got no answer
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.2 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the case is one $63 charge'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.12(b)(1)(i)
+  reg_note: A charge after the cardholder withdrew permission is, on our reading, credit not made
+    to a person with authority (1026.13(a)(1)); 1026.12(b)(1)(i) defines authority.
+case:
+  network: visa
+  reason_code: '13.2'
+  family: service_failure
+  amount_minor: 6300
+  opened_after_days: 20
+  documents:
+  - kind: terms_acceptance
+expected:
+  action: accept
+  resolution: accepted
+  why: The cardholder cancelled before these charges and the merchant holds no record of an uncancelled
+    plan, the 13.2/4841 evidence (S1); accept.

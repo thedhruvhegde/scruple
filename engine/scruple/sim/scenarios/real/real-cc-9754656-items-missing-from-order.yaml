@@ -1,0 +1,53 @@
+id: real-cc-9754656-items-missing-from-order
+title: Three items of a $710 order were never shipped; one box was
+sources:
+- S1
+- A-15
+- A-22
+- A-26
+grounding:
+  complaint: cfpbcc2024-9754656
+  product: Credit card
+  issue: Problem with a purchase shown on your statement
+  company_response: Closed with monetary relief
+  amounts_usd:
+  - 710.0
+  consumer_says_refunded: 'no'
+  merchant_response: relied on proof that one box shipped
+  evidence_mentioned:
+  - the shipped box
+  facts:
+  - an order of $710 arrived without three items, which were never shipped
+  - the issuer ruled for the merchant because a box was shipped
+  - the cardholder was never contacted during the dispute
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.1 (the narrative names neither)'
+  - 'ASSUMPTION: family service_failure: the consumer dispute is valid under the network rules,
+    taking the narrative at face value'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the three missing items are worth $210.00 of the $710.00'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(3)
+  - 12 CFR 1026.13(b)
+  reg_note: Goods or services not delivered as agreed are a billing error under 1026.13(a)(3);
+    the cardholder's written notice within 60 days is 1026.13(b).
+case:
+  network: visa
+  reason_code: '13.1'
+  family: service_failure
+  amount_minor: 21000
+  opened_after_days: 20
+  shipments:
+  - amount_minor: 50000
+    delivered_day: 3
+    disputed: false
+  - amount_minor: 21000
+    disputed: true
+expected:
+  action: accept
+  resolution: accepted
+  why: The delivery proof covers the box that arrived, not the disputed items, so it does not
+    answer this claim (S1, A-26); accept the $210 that is owed.
+checks:
+  cardholder_net_minor: 21000

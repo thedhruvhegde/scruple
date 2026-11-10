@@ -1,0 +1,49 @@
+id: real-2015-1612924-free-report-recurring
+title: A free credit report offer that enrolled the cardholder in a $39 membership
+sources:
+- S1
+- A-15
+- A-22
+grounding:
+  complaint: cfpb2015-1612924
+  product: Credit card
+  issue: Other fee
+  company_response: Closed with explanation
+  amounts_usd:
+  - 39.0
+  consumer_says_refunded: 'no'
+  merchant_response: cancellation by phone only
+  evidence_mentioned: []
+  facts:
+  - the cardholder replied to an emailed free credit score offer
+  - the cardholder says they must have unwittingly agreed to a continuing charge
+  - a $39 charge appeared; cancellation was by phone only, with limited hours
+  assumptions:
+  - 'ASSUMPTION: network Visa and reason code 13.2 (the narrative names neither)'
+  - 'ASSUMPTION: family buyers_remorse: the consumer dispute is not valid under the network rules'
+  - 'ASSUMPTION: the CFPB masks dates, so the processing and opening dates are ours'
+  - 'ASSUMPTION: the merchant holds the accepted terms and no cancellation before the billing
+    date'
+  regime: reg_z
+  regs:
+  - 12 CFR 1026.13(a)(1)
+  - 12 CFR 1026.12(b)(1)(i)
+  reg_note: A charge after the cardholder withdrew permission is, on our reading, credit not made
+    to a person with authority (1026.13(a)(1)); 1026.12(b)(1)(i) defines authority.
+case:
+  network: visa
+  reason_code: '13.2'
+  family: buyers_remorse
+  amount_minor: 3900
+  opened_after_days: 20
+  documents:
+  - kind: terms_acceptance
+  - kind: cancellation_record
+expected:
+  action: represent
+  evidence:
+  - terms_acceptance
+  - cancellation_record
+  resolution: won
+  why: The cardholder accepted the terms and had not cancelled before the charge; accepted terms
+    and the cancellation history are the 13.2 evidence (S1), so represent.
