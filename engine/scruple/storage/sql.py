@@ -330,6 +330,8 @@ class SQLStorage:
     """
 
     def __init__(self, conn: Connection, tenant: str = DEFAULT_TENANT) -> None:
+        from scruple.storage.imported_shadow import SQLImportedShadow
+
         if not re.match(TENANT_PATTERN, tenant):
             raise ValueError(f"invalid tenant id {tenant!r}")
         self._conn = conn
@@ -338,6 +340,9 @@ class SQLStorage:
         self.audit = SQLAudit(conn, tenant)
         self.decisions = SQLDecisions(conn, tenant)
         self.api_keys = SQLApiKeys(conn)
+        # Runtime state beyond the history aggregates (each its own repository). These
+        # take the tenant on every call, so one instance serves every tenant view.
+        self.imported_shadow = SQLImportedShadow(conn)
 
     def for_tenant(self, tenant: str) -> Self:
         """The same connection and transaction, bound to `tenant`. Closing any

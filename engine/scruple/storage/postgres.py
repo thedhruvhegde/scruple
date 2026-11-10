@@ -27,6 +27,7 @@ from psycopg import errors
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
+from scruple.storage import imported_shadow
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -38,9 +39,9 @@ _HISTORY_MESSAGES = ("append-only", "immutable")
 # Keep in step with the alembic migrations (scruple/storage/migrations); a test
 # checks that both produce the same catalog. The DDL is cumulative and idempotent,
 # like the migrations: 0001 tables, 0002 api keys, 0003 tenancy (a column added
-# to existing tables, then the primary keys widened), so `create_schema=True` also
-# upgrades a database made by an older version.
-SCHEMA = """
+# to existing tables, then the primary keys widened), 0004 imported shadow, so
+# `create_schema=True` also upgrades a database made by an older version.
+BASE_SCHEMA = """
 CREATE TABLE IF NOT EXISTS rule_versions (
     rule_id TEXT NOT NULL,
     version INTEGER NOT NULL,
@@ -203,6 +204,8 @@ END
 $$;
 """
 
+SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL
+
 
 def translate(exc: psycopg.Error) -> StorageError:
     msg = str(exc).strip()
@@ -311,4 +314,6 @@ GRANT SELECT, INSERT ON {schema}.rule_versions, {schema}.audit_events, {schema}.
     {schema}.api_keys TO {role};
 GRANT UPDATE (status, rollback_to) ON {schema}.rule_versions TO {role};
 GRANT UPDATE (revoked_at, last_used_at) ON {schema}.api_keys TO {role};
+GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shadow_summaries
+    TO {role};
 """

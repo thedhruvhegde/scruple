@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import threading
+from collections.abc import Callable
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request, Response
@@ -53,6 +54,7 @@ from scruple.registry import (
 )
 from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
 from scruple.service import AgentGate, ApprovalError, IntegrityReport
+from scruple.storage.imported_shadow import DurableImportedShadow, imported_shadows
 from scruple.version import BuildInfo, build_info, package_version
 
 
@@ -333,6 +335,19 @@ def create_app(
         return _recorder(g, rule_id, version).summary()
 
     # Imported (real) cases: no ground truth; metrics are labelled observed or estimated.
+    # Accepted batches are stored (append-only) and replayed, so a restart loses nothing.
+    # One lookup per tenant: each reads and writes only its own tenant's rows.
+    imported_by_tenant: dict[str, Callable[[str, int], DurableImportedShadow]] = {}
+    imported_lock = threading.Lock()
+
+    def imported(g: AgentGate, rule_id: str, version: int) -> DurableImportedShadow:
+        with imported_lock:
+            tenant = g.storage.tenant
+            if tenant not in imported_by_tenant:
+                imported_by_tenant[tenant] = imported_shadows(g, tenant)
+            lookup = imported_by_tenant[tenant]
+        return lookup(rule_id, version)
+
     @app.post(
         "/shadow/rules/{rule_id}/versions/{version}/imported/decisions", dependencies=[SHADOW]
     )
@@ -342,7 +357,7 @@ def create_app(
         if any(d.agent_id != actor for d in body.decisions):
             raise HTTPException(403, "the caller must be every decision's agent_id")
         try:
-            return _recorder(g, rule_id, version).record_imported(body.decisions)
+            return imported(g, rule_id, version).record(body.decisions, actor)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
@@ -351,13 +366,21 @@ def create_app(
         rule_id: str, version: int, body: ImportedOutcomeBatch, actor: Actor, g: Gate
     ) -> ImportedObserveResult:
         try:
-            return _recorder(g, rule_id, version).observe_imported(body.outcomes)
+            return imported(g, rule_id, version).observe(body.outcomes, actor)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
     @app.get("/shadow/rules/{rule_id}/versions/{version}/imported", dependencies=[READ])
     def shadow_summary_imported(rule_id: str, version: int, g: Gate) -> ImportedShadowSummary:
-        return _recorder(g, rule_id, version).summary_imported()
+        return imported(g, rule_id, version).summary()
+
+    @app.get("/shadow/rules/{rule_id}/versions/{version}/imported/history", dependencies=[READ])
+    def shadow_history_imported(rule_id: str, version: int, g: Gate) -> list[ImportedShadowSummary]:
+        """Every stored summary, oldest first (aggregates; kept by retention)."""
+        return [
+            ImportedShadowSummary.model_validate_json(s.body_json)
+            for s in imported(g, rule_id, version).history()
+        ]
 
     @app.get("/audit/verify", dependencies=[READ])
     def verify(g: Gate, expected_head: str | None = None) -> IntegrityReport:

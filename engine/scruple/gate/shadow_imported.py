@@ -37,7 +37,10 @@ Checks (all read observable fields only; counted per decision, by name):
 Zero side effects, as for `ShadowRecorder`: this module imports nothing that can write
 (no storage, registry, audit log, service or file output; a test checks the import
 graph), keeps immutable inputs and in-memory counters only, and `record` returns
-statistics, never an action to execute.
+statistics, never an action to execute. Durability is layered on top, outside this
+module: `scruple.storage.imported_shadow.DurableImportedShadow` appends each accepted
+batch to an append-only table and rebuilds a recorder by replaying them (`record` and
+`observe` are deterministic and all-or-nothing, so a replay reproduces the state).
 """
 
 from __future__ import annotations
@@ -312,8 +315,12 @@ class ImportedShadowRecorder:
         )
 
     def observe(self, outcomes: Sequence[ImportedOutcome]) -> ImportedObserveResult:
-        """Attach later versions of recorded cases. Never changes a recorded decision."""
+        """Attach later versions of recorded cases. Never changes a recorded decision.
+
+        All or nothing: every outcome is checked before any is applied, so a refused
+        batch leaves the recorder exactly as it was (a durable store relies on this)."""
         updated = unknown = 0
+        matched: list[tuple[_Rec, ImportedOutcome]] = []
         for o in outcomes:
             rec = self._recs.get(o.case.case_id)
             if rec is None:
@@ -326,6 +333,8 @@ class ImportedShadowRecorder:
                 old.currency,
             ):
                 raise ValueError(f"{o.case.case_id}: outcome does not match the recorded case")
+            matched.append((rec, o))
+        for rec, o in matched:
             rec.case = o.case
             for m in o.movements:
                 rec.movements.setdefault(m.external_id, m)
