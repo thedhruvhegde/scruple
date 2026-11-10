@@ -35,6 +35,7 @@ from scruple.registry import (
 )
 from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
 from scruple.service import AgentGate, ApprovalError, IntegrityReport
+from scruple.storage.imported_shadow import imported_shadows
 from scruple.version import BuildInfo, build_info, package_version
 
 
@@ -198,6 +199,9 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         return _recorder(rule_id, version).summary()
 
     # Imported (real) cases: no ground truth; metrics are labelled observed or estimated.
+    # Accepted batches are stored (append-only) and replayed, so a restart loses nothing.
+    imported = imported_shadows(g)
+
     @app.post("/shadow/rules/{rule_id}/versions/{version}/imported/decisions")
     def shadow_record_imported(
         rule_id: str, version: int, body: ImportedDecisionBatch, actor: Actor
@@ -205,7 +209,7 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         if any(d.agent_id != actor for d in body.decisions):
             raise HTTPException(403, "X-Actor must match every decision's agent_id")
         try:
-            return _recorder(rule_id, version).record_imported(body.decisions)
+            return imported(rule_id, version).record(body.decisions, actor)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
@@ -214,13 +218,21 @@ def create_app(gate: AgentGate | None = None) -> FastAPI:
         rule_id: str, version: int, body: ImportedOutcomeBatch, actor: Actor
     ) -> ImportedObserveResult:
         try:
-            return _recorder(rule_id, version).observe_imported(body.outcomes)
+            return imported(rule_id, version).observe(body.outcomes, actor)
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
     @app.get("/shadow/rules/{rule_id}/versions/{version}/imported")
     def shadow_summary_imported(rule_id: str, version: int) -> ImportedShadowSummary:
-        return _recorder(rule_id, version).summary_imported()
+        return imported(rule_id, version).summary()
+
+    @app.get("/shadow/rules/{rule_id}/versions/{version}/imported/history")
+    def shadow_history_imported(rule_id: str, version: int) -> list[ImportedShadowSummary]:
+        """Every stored summary, oldest first (aggregates; kept by retention)."""
+        return [
+            ImportedShadowSummary.model_validate_json(s.body_json)
+            for s in imported(rule_id, version).history()
+        ]
 
     @app.get("/audit/verify")
     def verify(expected_head: str | None = None) -> IntegrityReport:

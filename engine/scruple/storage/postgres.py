@@ -27,6 +27,7 @@ from psycopg import errors
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
+from scruple.storage import imported_shadow
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -37,7 +38,7 @@ _HISTORY_MESSAGES = ("append-only", "immutable")
 
 # Keep in step with the alembic migrations (scruple/storage/migrations); a test
 # checks that both produce the same catalog.
-SCHEMA = """
+BASE_SCHEMA = """
 CREATE TABLE IF NOT EXISTS rule_versions (
     rule_id TEXT NOT NULL,
     version INTEGER NOT NULL,
@@ -111,6 +112,8 @@ CREATE OR REPLACE TRIGGER decisions_no_delete BEFORE DELETE ON decisions
 CREATE OR REPLACE TRIGGER decisions_no_truncate BEFORE TRUNCATE ON decisions
     FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse('decisions are append-only');
 """
+
+SCHEMA = BASE_SCHEMA + imported_shadow.POSTGRES_DDL
 
 
 def translate(exc: psycopg.Error) -> StorageError:
@@ -217,4 +220,6 @@ REVOKE ALL ON {schema}.rule_versions, {schema}.audit_events, {schema}.decisions 
 GRANT SELECT, INSERT ON {schema}.rule_versions, {schema}.audit_events, {schema}.decisions
     TO {role};
 GRANT UPDATE (status, rollback_to) ON {schema}.rule_versions TO {role};
+GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shadow_summaries
+    TO {role};
 """

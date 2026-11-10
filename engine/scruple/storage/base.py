@@ -74,6 +74,11 @@ class Storage(Transactional, RuleVersionRepository, AuditRepository, DecisionRep
     def close(self) -> None: ...
 
 
+# Tenancy: every table added for runtime state carries `tenant_id`, defaulting to this
+# value until authenticated tenants are wired through the API.
+DEFAULT_TENANT = "default"
+
+
 class StorageError(Exception):
     """A backend failure, translated from the driver's own exception type."""
 

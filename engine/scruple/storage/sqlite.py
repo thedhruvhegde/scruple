@@ -11,10 +11,11 @@ import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 
+from scruple.storage import imported_shadow
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
-SCHEMA = """
+BASE_SCHEMA = """
 CREATE TABLE IF NOT EXISTS rule_versions (
     rule_id TEXT NOT NULL,
     version INTEGER NOT NULL,
@@ -67,6 +68,8 @@ CREATE TRIGGER IF NOT EXISTS decisions_no_delete
 BEFORE DELETE ON decisions
 BEGIN SELECT RAISE(ABORT, 'decisions are append-only'); END;
 """
+
+SCHEMA = BASE_SCHEMA + imported_shadow.SQLITE_DDL
 
 _HISTORY_MESSAGES = ("append-only", "immutable")
 
