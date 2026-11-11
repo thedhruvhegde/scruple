@@ -146,8 +146,8 @@ checks). `scruple demo --stats bootstrap` runs the original story.
 | Raw file edit (triggers dropped) | Hash chain breaks at the edited entry |
 | Edit the rule table to flip a status | Projection check: replays audit events and compares |
 | Edit a stored decision | Decision SHA-256 is recorded in the chain |
-| Truncate the tail | Only caught with an externally anchored head (`--expected-head`) |
-| Rewrite the entire chain consistently | **Not caught** without an external anchor or signing; see "Next" |
+| Truncate the tail | Caught against an externally anchored head (`--expected-head`, or `audit verify-anchor`) |
+| Rewrite the entire chain consistently | Caught only against an anchor made before the rewrite (`audit anchor` with an RFC 3161 TSA or a pushed git commit); not caught without one |
 
 ## What is stubbed or simulated
 
@@ -159,7 +159,8 @@ checks). `scruple demo --stats bootstrap` runs the original story.
   instantly. In reality they lag by weeks.
 - **Human analyst:** escalations are resolved optimally at a fixed cost.
 - **Authn/authz:** the `X-Actor` header is trusted. The approver list lives in config.
-- **Head anchoring:** manual (`--expected-head`). Nothing publishes the head anywhere.
+- **Head anchoring:** on demand (`scruple audit anchor`: RFC 3161 timestamp or git
+  commit). Nothing runs it on a schedule; the git anchor is not pushed by scruple.
 - **Assurance:** runs on demand (`agent-gate assurance`), not on a schedule.
 - **Storage:** SQLite only. A Postgres implementation of `Storage` is not written.
 - **Multi-tenant, UI, notifications:** none.

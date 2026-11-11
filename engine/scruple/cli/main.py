@@ -52,6 +52,10 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
+    if args.action != "verify":
+        from scruple.audit.cli import dispatch
+
+        return dispatch(args, _gate)
     # Read-only: verifying must never write (no baseline import into the evidence).
     rep = _gate(args, bootstrap=False).verify_integrity(args.expected_head)
     print(
@@ -216,9 +220,10 @@ def build_parser() -> argparse.ArgumentParser:
     rt.add_argument("--seeds", type=int, default=300, help="exploits: number of seeds")
     rt.add_argument("--start", type=int, default=0, help="exploits: first seed")
     rt.add_argument("--json", action="store_true", help="exploits: print JSON")
-    au = add("audit", cmd_verify, "verify the audit trail (hash chain + projections)")
-    au.add_argument("action", choices=["verify"])
-    au.add_argument("--expected-head", default=None, help="externally anchored head hash")
+    au = add("audit", cmd_verify, "verify or anchor the audit trail (hash chain + projections)")
+    from scruple.audit.cli import add_audit_args
+
+    add_audit_args(au)
     add_ci_parser(sub)
     v = add("version", cmd_version, "print version and build metadata", db=False)
     v.add_argument("--json", action="store_true", help="print as JSON")
