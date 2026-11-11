@@ -162,6 +162,9 @@ present, never their content), `evidence_details.due_by`, `.has_evidence`, `.pas
 `id`, `object`, `amount`, `currency`, `created`, `fee`, `fee_details[]` (`amount`,
 `currency`, `type`), `net`, `reporting_category`, `status`, `type`. Test mode only
 unless `--allow-live`.
+Or pull it from the API with a test-mode key: `STRIPE_API_KEY=sk_test_... scruple
+ingest stripe-pull --since 2026-01-01 --until 2026-07-01 --out disputes.jsonl` (paged,
+resumable, charge expanded, free text dropped; docs/INTEGRATIONS.md).
 
 **Adyen** (`--format adyen`): the dispute notifications received (standard
 notification envelopes, a JSON array of them, or JSON Lines), with the HMAC key
