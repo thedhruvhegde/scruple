@@ -707,6 +707,35 @@ proxy optimum (forge, claim wins) & 0.437 & \$48.95 & 55.4\% & 0.795 & 0.557\\
 
 H1 held (the proxy optimum uses two exploits, the scorecard optimum none), H3 held (the proxy optimum is flagged on 20 of 20 folds by EVD-01, SR-01 and PROC-01), and H4 held (1{,}440 of 1{,}440 tail and 360 of 360 expectation checks of the gap bounds). \textbf{H2 failed}: the proxy optimum was \$33.87 per case \emph{cheaper} on the ledger (paired difference $-33.87$, 95\% interval $-35.64$ to $-32.10$). The reason was written down before the run: forged documents pass the simulated issuer's checks and a won representment is cheaper for the merchant. The money saved is money the cardholder was owed, kept by forgery. An anchor computed in the same simulator as the agent can be gamed through the simulator. The cost test said promote; provenance and self-report checks blocked. This is exclusion (1) of \cref{sec:composition}, measured.
 
+\subsection{E3: a variance-reduced gate (synthetic; pre-registered; fails H1)}\label{sec:e3}
+
+E1's gate held on R5 (``concede every dispute under \$25'') even on all 10{,}000 cases. E3 asked whether a variance-reduced gate detects it while keeping control false blocks at most 5\%. The new test adds a \emph{stratified} betting e-process, one wealth process whose bet depends on the case family, $K_t=\prod_{i\le t}(1+\lambda_{k_i,i}(X_i-m_{k_i}))$, which is a non-negative supermartingale under the conditional null ``no family regressed'' by the argument of \cref{lem:stratum}. It spends $0.8\alpha$ (block at $K\ge25$) and E1's block family spends $0.2\alpha$. Both settings were fixed from synthetic Monte Carlo before any benchmark case was played. Pre-registered: \textbf{H1} R5 is blocked on the full benchmark; \textbf{H2} no control is blocked; \textbf{H3} at most 5\% of the 60 control folds are blocked. E3 passes iff all three hold.
+
+\paragraph{A prediction against ourselves.} Every e-value for the conditional null satisfies $\E_1[\log E]\le B=\sum_i\mu_i^+/c$ (\texttt{docs/math/09}, Proposition 9.7, an instance of \cref{prop:captax} applied case by case), and power 0.5 at level 0.04 needs $B\ge\kl(0.5\|0.04)=0.94$. From E1's published means R5's pooled budget is $0.67$, so the pre-registration predicted that H1 would fail: detecting R5 needs a tighter cap or more cases, not a better test.
+
+\paragraph{Result: FAIL, as predicted, but closer.} The replay reproduced E1's verdicts exactly. R5's stratified e-value reached 14.9 against the bar of 25; its family budget on the benchmark was 8.1 (pooled 0.67), because its cost sits in buyer's remorse while other families improve. H2 held (every control's stratified e-value was 1.0) and H3 held (0 of 60 folds, Wilson 95\% upper bound 0.060). R2 and R3 stayed blocked (e-values 939 and $3.0\times10^{14}$); R1 (2.32) and R4 (3.47) held; no fold of any policy was blocked by either test.
+
+\paragraph{Common random numbers, measured.} Both policies see the same case and the same issuer draw. For R5 the variance of the paired difference was $2.4\times10^5$ (USD minor squared) with the same draws, $4.9\times10^7$ with independent issuer draws on the same cases, and $2.3\times10^8$ for two independent samples: same-draw pairing cuts the variance about 200-fold against same-case pairing alone and about 950-fold against unpaired samples. 92.8\% of R5's differences are exactly zero with the same draws, 76.3\% with independent draws.
+
+\paragraph{Post hoc, not pre-registered: the bet cap.} After the result, the same saved costs were re-analysed with the bet cap of \cref{sec:betting} raised from 0.5 to 0.95 (still valid). The wide stratified test blocks R5 on the benchmark itself ($e=119$ against 25). On 100 resamples of 10{,}000 cases (\cref{fig:e3}) stratification and the wider cap are each worth about as much, and together detect R5 in 0.86 of resamples; no control was ever blocked. These resamples reuse the benchmark's own costs and were chosen after seeing the result: they motivate a next pre-registered experiment with the wide cap as primary. They are not a pass for E3.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[ybar, width=0.82\linewidth, height=5.2cm, bar width=8pt, ymin=0, ymax=1.05,
+  symbolic x coords={R5,R1,R4,C3}, xtick=data, ylabel={$\P(\text{gate blocks})$}, enlarge x limits=0.18,
+  legend columns=4, legend style={font=\scriptsize, at={(0.5,-0.2)}, anchor=north, draw=none, /tikz/every even column/.append style={column sep=8pt}},
+  tick label style={font=\small}, label style={font=\small}, area legend]
+\addplot[fill=cgrey, draw=none] coordinates {(R5,0.00) (R1,0.01) (R4,0.00) (C3,0.00)};
+\addplot[fill=csky, draw=none] coordinates {(R5,0.32) (R1,0.03) (R4,0.00) (C3,0.00)};
+\addplot[fill=cbrass, draw=none] coordinates {(R5,0.53) (R1,0.15) (R4,0.04) (C3,0.00)};
+\addplot[fill=cpine, draw=none] coordinates {(R5,0.86) (R1,0.24) (R4,0.11) (C3,0.00)};
+\legend{{E1 family, cap 0.5},{stratified, cap 0.5},{E1 family, cap 0.95},{stratified, cap 0.95}}
+\end{axis}
+\end{tikzpicture}
+\caption{E3, post hoc and not pre-registered: share of 100 resampled benchmarks of 10{,}000 cases (seed 0) on which the gate blocks, for three cost-only regressions and the control C3. R5: 0, 0.32, 0.53, 0.86; R1: 0.01, 0.03, 0.15, 0.24; R4: 0, 0, 0.04, 0.11; C3: 0 throughout. Synthetic; \nolinkurl{scripts/exp_e3_variance.py resample}, \nolinkurl{results/experiments/E3_variance_reduction/posthoc_resampled.json}.}\label{fig:e3}
+\end{figure}
+
 \subsection{Real data: CFPB complaints (real)}
 
 Three tasks on public-domain CFPB complaint narratives with frozen splits, graded by code against real fields (\cref{tab:cfpb}). Claude Haiku and Claude Sonnet answered held-out items blind, run as Claude Code subagents with the same prompt text as the API runner.

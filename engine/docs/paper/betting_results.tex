@@ -46,4 +46,4 @@ What the numbers say:
 \item \textbf{The mixture pays for its grid.} Its log-wealth is within $\log14=2.64$ of the best grid bet (\cref{prop:mixture}), which costs it detections when the best bet is the largest one. It wins only when $\lambda^\star$ is far from the cap, which these regressions are not.
 \item \textbf{Nothing helps on 500-case folds.} No strategy blocked any of the 20 folds of any policy; the floors above are thousands of cases.
 \end{itemize}
-These are statements about the benchmark's own paired costs (resampling reuses them), not about a population of agent changes. A separate workstream is adding control variates to \texttt{scruple/stats}; that work was not merged when this was written, and nothing here depends on it.
+These are statements about the benchmark's own paired costs (resampling reuses them), not about a population of agent changes. A variance-reduced gate built since was tested on the same regressions in a pre-registered experiment (\cref{sec:e3}); nothing in this section depends on it.
