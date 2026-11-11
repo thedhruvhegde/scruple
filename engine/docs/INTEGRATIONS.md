@@ -54,9 +54,26 @@ Rules every adapter follows:
   `payment_method_details_card_checks`, `three_d_secure_details_charge`, `shipping`,
   `address` and `refund` (same commit; contract tests cover them, including the inline
   `charge.refunds` list).
-- Not done: writes (submitting evidence, closing disputes), retries and rate-limit
-  backoff, Connect (`Stripe-Account` header); the client does not send `expand[]`
-  itself (export with it, or fetch charges separately).
+- Pull from the API (`scruple ingest stripe-pull`, `scruple.ingest.stripe.pull`):
+  `--since D --until D --out export.jsonl [--store cases.db --report I.json]`. Pages
+  `GET /v1/disputes` with `created[gte]`, `created[lt]` and `expand[]=data.charge`,
+  100 per page; key from `STRIPE_API_KEY` only (test keys only unless `--allow-live`,
+  live-mode objects refused too). Evidence values become presence markers and the
+  expanded charge is cut to the `Charge` wire fields (address and tracking number as
+  presence markers) before the page is written, so no free text, name, email or
+  address reaches the file. Resumable: a cursor file (`OUT.cursor.json`) holds the
+  window, last id, byte length and sha256 of the export after every page; a rerun
+  continues, cuts any bytes written after the last cursor, refuses a cursor for
+  another window or an export that no longer matches (`--restart`), and is a no-op
+  once complete. Exit 3 means incomplete (`--max-pages`), rerun to resume. With
+  `--store` the finished export goes through the ordinary ingest pipeline.
+  `StripeClient(max_retries=...)` retries 429, 5xx and transport errors with
+  exponential backoff (`backoff_s * 2**attempt`, or `Retry-After` if larger) and
+  stops on `Stripe-Should-Retry: false`; the pull uses 5 retries. Tests: a fake
+  Stripe serving the vendored fixtures through `httpx.MockTransport`
+  (tests/test_ingest_stripe_pull.py); never run against Stripe itself here.
+- Not done: writes (submitting evidence, closing disputes), Connect (`Stripe-Account`
+  header), expanding `payment_intent` (the mapper does not read it).
 
 ## Stripe webhooks (`scruple.ingest.stripe.webhook`, route in `scruple.ingest.api`)
 

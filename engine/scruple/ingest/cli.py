@@ -1,4 +1,6 @@
-"""`scruple ingest stripe|adyen|csv|jsonl --in FILE --store DB` and `scruple ingest verify`.
+"""`scruple ingest stripe|adyen|csv|jsonl --in FILE --store DB`, `scruple ingest verify`
+and `scruple ingest stripe-pull --since D --until D --out FILE [--store DB]` (pages the
+Stripe disputes API with `STRIPE_API_KEY`, test mode only; `scruple.ingest.stripe.pull`).
 
 Exit codes: 0 every record stored; 1 some records failed (the rest were stored, unless
 `--strict`); 2 the file or the options were rejected and nothing was stored. Keys come
@@ -41,7 +43,13 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         verify_adyen=not args.no_verify,
         strict=args.strict,
     )
-    store = None if args.dry_run else CaseStore(args.store)
+    return _ingest_and_print(data, opts, None if args.dry_run else args.store, args)
+
+
+def _ingest_and_print(
+    data: bytes, opts: IngestOptions, store_path: str | None, args: argparse.Namespace
+) -> int:
+    store = None if store_path is None else CaseStore(store_path)
     try:
         report = ingest(
             data,
@@ -49,7 +57,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
             store,
             tokenizer=tokenizer_from_env(),
             cipher=cipher_from_env(),
-            adyen_hmac_keys=adyen_keys_from_env() if args.source == "adyen" else (),
+            adyen_hmac_keys=adyen_keys_from_env() if opts.source == "adyen" else (),
         )
     finally:
         if store is not None:
@@ -68,6 +76,37 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         out.write_text(report.model_dump_json(indent=2) + "\n", encoding="utf-8")
         print(f"report written to {out}")
     return 1 if report.rows_failed else 0
+
+
+def cmd_stripe_pull(args: argparse.Namespace) -> int:
+    from scruple.ingest.stripe.pull import client_from_env, parse_instant, pull_disputes
+
+    out = Path(args.out)
+    with client_from_env(allow_live=args.allow_live) as client:
+        rep = pull_disputes(
+            client,
+            parse_instant(args.since),
+            parse_instant(args.until),
+            out,
+            Path(args.cursor) if args.cursor else None,
+            page_size=args.page_size,
+            max_pages=args.max_pages,
+            allow_live=args.allow_live,
+            restart=args.restart,
+        )
+    print(rep.summary())
+    if not rep.complete:
+        return 3
+    if not args.store:
+        return 0
+    opts = IngestOptions(
+        source="stripe",
+        label=args.label or f"{out.name} (stripe api pull)",
+        encrypt_paths=tuple(args.encrypt_path or ()),
+        allow_live=args.allow_live,
+        strict=args.strict,
+    )
+    return _ingest_and_print(out.read_bytes(), opts, args.store, args)
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
@@ -132,6 +171,24 @@ def add_ingest_parser(sub: Any) -> None:
             no_verify=False,
             config=None,
         )
+    sp = isub.add_parser(
+        "stripe-pull", help="page the Stripe disputes API (test mode) into an export file"
+    )
+    sp.add_argument("--since", required=True, help="created at or after (date, ISO or unix)")
+    sp.add_argument("--until", required=True, help="created before (date, ISO or unix)")
+    sp.add_argument("--out", required=True, help="export file (JSON Lines, appended per page)")
+    sp.add_argument("--cursor", default=None, help="cursor file (default: OUT.cursor.json)")
+    sp.add_argument("--restart", action="store_true", help="discard the cursor and start over")
+    sp.add_argument("--page-size", type=int, default=100, help="disputes per page (1-100)")
+    sp.add_argument("--max-pages", type=int, default=None, help="stop after N pages this run")
+    sp.add_argument("--allow-live", action="store_true", help="accept a live key and live data")
+    sp.add_argument("--store", default=None, help="then ingest the export into this case store")
+    sp.add_argument("--report", default=None, help="write the JSON ingest report here")
+    sp.add_argument("--label", default=None, help="dataset name kept with the run")
+    sp.add_argument("--strict", action="store_true", help="store nothing if a record fails")
+    sp.add_argument("--encrypt-path", action="append", help="dotted path kept only encrypted")
+    sp.add_argument("--show-errors", type=int, default=20, help="row errors to print")
+    sp.set_defaults(fn=_guard(cmd_stripe_pull), encrypt_path=None)
     v = isub.add_parser("verify", help="summarise a case store (suppression-safe)")
     v.add_argument("--store", required=True)
     v.add_argument("--k", type=int, default=10, help="small-cell threshold (default 10)")
