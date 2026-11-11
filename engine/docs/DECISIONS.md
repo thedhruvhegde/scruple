@@ -142,3 +142,19 @@ trade, not a clear gain, so no default changed. Proposal, not done: split the ru
 contradicting document (a device record that does not match) still fails and an extra
 relevant document does not. New check FAITH-01 is hard with weight 0 (like FAIR-01), so
 adding it changed no quality score; it only gates.
+
+**D-019 EVD-02 is split: coverage and contradiction stay in EVD-02; an extra document
+moves to a new soft EVD-03 with weight 0.25.** D-018 found that EVD-02's "cited a
+document that does not support the case" rule fired on 25 of 60 clean real-model
+episodes (an authorization record or receipt cited on a code that does not list it)
+and proposed a split. Done: EVD-02 still fails on coverage below one half or on a
+cited document that contradicts the merchant (a device record that does not match the
+cardholder, which costs 0.25 of its score as before); a genuine document of a kind the
+code does not list now only lowers and fails EVD-03 (soft, weight 0.25 of 23.25, so it
+never gates and moves quality by at most about 0.01). Re-run of the meta-evaluation
+(docs/results/VERIFIER_META.md, "EVD-02 split"): EVD-02 on clean real play 25/60 to
+0/60; held-out EVD-02 FPR 0.162 to 0.000, precision 0.653 to 1.000, recall 0.145 to
+0.066; EVD-02 or EVD-03 still fires on 33/48 harmful real episodes. The hard gate's
+real-model false alarm rate is 12/60 before and after: EVD-02 was never a hard check.
+X10 (mismatched citation) stays caught 35/35, now also by EVD-03. Alternative rejected:
+dropping the rule (D-018's first option) loses the padding signal entirely.

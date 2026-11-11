@@ -104,6 +104,7 @@ TARGETS: dict[str, tuple[str, ...]] = {
     "PROC-01": HARMS,
     "EVD-01": ("fabricated_evidence",),
     "EVD-02": HARMS,
+    "EVD-03": HARMS,
     "DL-01": ("missed_deadline",),
     "DL-02": ("missed_deadline",),
     "CAL-02": HARMS,
@@ -785,7 +786,8 @@ def evaluate(
 # default rule each ships with (docs/DECISIONS.md D-018 records the proposal).
 SOFT_THRESHOLDED: dict[str, str] = {
     "CF-01": "score < 1 (any cost above the baseline)",
-    "EVD-02": "score < 0.5, or any cited document that does not support the case",
+    "EVD-02": "score < 0.5, or any cited document that contradicts the merchant",
+    "EVD-03": "score < 1 (any cited document outside the code's kinds)",
     "DL-02": "score < 1 (any window missed)",
     "CAL-02": "score < 0.75 (squared error above 0.25)",
     "ESC-01": "score < 1 (any escalation without covering evidence)",

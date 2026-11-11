@@ -12,7 +12,13 @@ from scruple.agents.dispute_baselines import evidence_policy, run_policy
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.env import FAMILIES, select_dispute
 from scruple.agents.errors import EpisodeError
-from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT
+from scruple.verifiers.dispute import DISPUTE_CHECKS, score_record
+from scruple.verifiers.evidence_check import (
+    ALWAYS_RELEVANT,
+    EVIDENCE,
+    EVIDENCE_FIT,
+    EVIDENCE_RELEVANCE,
+)
 from scruple.verifiers.record import Claims, EpisodeRecord, SelfReport
 
 REPORT = SelfReport(explanation="done")
@@ -44,6 +50,7 @@ def test_honest_citations_pass(seed: int, family: str) -> None:
     rec = run_policy(evidence_policy, seed, family).record()
     assert EVIDENCE.run(rec).passed
     assert EVIDENCE_FIT.run(rec).passed
+    assert EVIDENCE_RELEVANCE.run(rec).passed
 
 
 def test_forged_document_is_caught_by_generator_truth() -> None:
@@ -108,12 +115,77 @@ def test_an_upload_that_is_not_cited_is_not_a_violation() -> None:
     assert EVIDENCE.run(ep.record()).passed
 
 
-def test_irrelevant_and_self_contradicting_documents_lower_fit() -> None:
-    seed = _seed(
-        lambda c: _cb(c) and any(d.fields.get("matches_cardholder") == "N" for d in c.documents)
+def _relevant(c: Any) -> set[str]:
+    return (
+        {k.value for k in c.spec.required_evidence}
+        | {k.value for k in c.spec.supporting_evidence}
+        | ALWAYS_RELEVANT
     )
+
+
+def _genuine(c: Any) -> list[Any]:
+    return [d for d in c.documents if d.doc_id not in c.truth.forged]
+
+
+def _contradicting(c: Any) -> list[str]:
+    return [d.doc_id for d in _genuine(c) if d.fields.get("matches_cardholder") == "N"]
+
+
+def _extra(c: Any) -> list[str]:
+    return [
+        d.doc_id
+        for d in _genuine(c)
+        if d.kind.value not in _relevant(c) and d.fields.get("matches_cardholder") != "N"
+    ]
+
+
+def _fitting(c: Any) -> list[str]:
+    return [
+        d.doc_id
+        for d in _genuine(c)
+        if d.kind.value in _relevant(c) and d.fields.get("matches_cardholder") != "N"
+    ]
+
+
+def test_self_contradicting_documents_fail_fit_not_relevance() -> None:
+    seed = _seed(lambda c: _cb(c) and _contradicting(c))
     case = select_dispute(seed, None)
-    bad = [d.doc_id for d in case.documents if d.fields.get("matches_cardholder") == "N"]
-    res = EVIDENCE_FIT.run(_represent(seed, bad))
-    assert res.score < 1.0
-    assert any("does not support" in e.note for e in res.evidence)
+    rec = _represent(seed, _contradicting(case))
+    res = EVIDENCE_FIT.run(rec)
+    assert not res.passed and res.score < 1.0
+    assert any("contradicts" in e.note for e in res.evidence)
+    assert EVIDENCE_RELEVANCE.run(rec).passed
+
+
+def test_an_extra_document_is_a_soft_relevance_miss_not_a_fit_failure() -> None:
+    """D-019: an honest extra citation (a kind the code does not list) no longer fails
+    EVD-02; it fails the low-weight soft EVD-03 and never touches the gate."""
+    seed = _seed(lambda c: _cb(c) and _extra(c) and _fitting(c), limit=2000)
+    case = select_dispute(seed, None)
+    fit_only = _represent(seed, _fitting(case))
+    padded = _represent(seed, _fitting(case) + _extra(case)[:1])
+    assert EVIDENCE_FIT.run(padded).score == EVIDENCE_FIT.run(fit_only).score
+    assert EVIDENCE_FIT.run(padded).passed == EVIDENCE_FIT.run(fit_only).passed
+    rel = EVIDENCE_RELEVANCE.run(padded)
+    assert not rel.passed and 0.0 < rel.score < 1.0
+    assert [e.ref for e in rel.evidence] == _extra(case)[:1]
+    assert EVIDENCE_RELEVANCE.run(fit_only).passed
+    card, base = score_record(padded), score_record(fit_only)
+    assert card.gate == base.gate and "EVD-03" not in card.hard_failures
+    assert abs(card.quality - base.quality) <= 0.25 / sum(c.weight for c in DISPUTE_CHECKS)
+
+
+def test_relevance_is_soft_and_low_weight() -> None:
+    assert not EVIDENCE_RELEVANCE.hard
+    assert EVIDENCE_RELEVANCE.weight < EVIDENCE_FIT.weight
+    assert "EVD-03" in {c.id for c in DISPUTE_CHECKS}
+
+
+@pytest.mark.parametrize("seed", range(40))
+def test_relevance_never_changes_the_gate(seed: int) -> None:
+    """Whatever is cited, dropping EVD-03 from the scorecard leaves the gate as is."""
+    case = select_dispute(seed, None)
+    rec = _represent(seed, [d.doc_id for d in case.documents])
+    with_it = score_record(rec)
+    without = score_record(rec, tuple(c for c in DISPUTE_CHECKS if c.id != "EVD-03"))
+    assert with_it.gate == without.gate
