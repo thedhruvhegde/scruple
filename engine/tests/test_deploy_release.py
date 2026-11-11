@@ -113,3 +113,13 @@ def test_every_action_is_version_pinned() -> None:
 def test_actionlint_is_clean() -> None:
     out = subprocess.run(["actionlint", str(WORKFLOW)], capture_output=True, text=True, check=False)
     assert out.returncode == 0, out.stdout + out.stderr
+
+
+def test_scanner_is_pinned_to_a_commit() -> None:
+    """CI regression: `aquasecurity/trivy-action@0.28.0` stopped resolving (only
+    v-prefixed tags exist upstream now), failing the job at "Set up job"."""
+    scans = _uses("aquasecurity/trivy-action")
+    assert len(scans) == 2
+    for s in scans:
+        ref = s["uses"].split("@", 1)[1]
+        assert len(ref) == 40 and all(c in "0123456789abcdef" for c in ref), ref

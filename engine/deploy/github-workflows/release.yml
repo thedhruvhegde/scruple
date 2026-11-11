@@ -101,8 +101,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Pinned by commit: the unprefixed tags (0.28.0 and the like) no longer exist
+      # upstream, only v-prefixed ones (checked with git ls-remote, 2026-11-11).
       - name: vulnerability scan (table, fails on fixable HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: scruple-engine:scan
           format: table
@@ -113,7 +115,7 @@ jobs:
 
       - name: vulnerability scan (SARIF for code scanning)
         if: always()
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: scruple-engine:scan
           format: sarif
