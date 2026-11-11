@@ -145,6 +145,7 @@ the storage backend from the location string.
    │ AuthMiddleware           credential -> Principal (401 if refused)
    │   ├ API key              X-API-Key or Bearer scr_...  (keys.py, scrypt, cached check)
    │   ├ OIDC bearer token    JWT vs the issuer's JWKS      (oidc.py, RS256/ES256)
+   │   ├ console session      signed cookie after SAML SSO  (session.py, /console/* only)
    │   ├ rate limit           token bucket per credential   (429 + Retry-After)
    │   └ body size            Content-Length and streamed   (413)
    │ guard_route              the route's declared protection, first (401/403);
@@ -162,6 +163,27 @@ caller chooses. `X-Actor` is trusted only in the development-only mode
 flagged on every response). The command line is the local admin of one tenant
 (`SCRUPLE_TENANT`, default `default`): whoever can run it can open the database
 anyway. Keys are managed with `scruple keys create|list|revoke`.
+
+SAML 2.0 sign-on for the console sits alongside OIDC (`scruple/auth/saml.py`,
+`saml_routes.py`, `session.py`; on when the five `SCRUPLE_SAML_*` endpoint settings
+and `SCRUPLE_CONSOLE_SECRET` are set). SP-initiated, HTTP-POST binding:
+`GET /auth/saml/login` (public) redirects to the IdP with an AuthnRequest and a
+signed, expiring RelayState carrying the request id; `POST /auth/saml/acs`
+(`signed("saml")`) checks the response with python3-saml in strict mode (assertion
+signed by the configured IdP certificate, SHA-256 or stronger, Issuer, Audience,
+Destination, Recipient, time window, InResponseTo, one assertion, each assertion id
+once) and maps NameID (or an attribute), a tenant attribute and a roles attribute
+(optionally renamed by `SCRUPLE_SAML_ROLE_MAP`) through the same role table as API
+keys. The result is a signed, expiring `scruple_session` cookie (HttpOnly,
+SameSite=Lax, Secure on https, path `/console`) that the authenticator accepts on
+console paths only, never on the JSON API. XML signatures are verified by xmlsec1
+through python3-saml; nothing in scruple parses or verifies XML signatures by hand.
+`GET /auth/saml/metadata` serves the SP metadata. Not built: signed AuthnRequests,
+encrypted assertions, single logout, a replay cache shared across processes.
+Tests (`tests/test_auth_saml.py`) use a locally generated IdP key and certificate
+and xmlsec-signed responses, and check unsigned, wrongly signed, tampered, wrapped
+(XSW), SHA-1, wrong audience/issuer/recipient/destination, expired, unsolicited,
+mismatched, replayed and entity-expansion responses are all refused.
 
 Rate-limit buckets are per process by default. `SCRUPLE_RATE_LIMIT_BACKEND=database`
 keeps them in `rate_limit_buckets` on the gate database (`scruple/auth/ratelimit_db.py`,

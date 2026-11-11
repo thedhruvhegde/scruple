@@ -6,7 +6,11 @@ Credentials, in the order they are looked for:
    (`scruple.auth.keys`).
 2. ``Authorization: Bearer <JWT>``: an OIDC access or id token, when an issuer is
    configured (`scruple.auth.oidc`).
-3. ``X-Actor: <name>``: ONLY when `dev_actor_header` is on. The header is trusted
+3. The ``scruple_session`` cookie, set by the SAML assertion consumer service
+   (`scruple.auth.session`): ONLY on console paths, and only when sessions are
+   configured. A cookie that does not check out is ignored (the request is
+   anonymous), so a stale session just means signing in again.
+4. ``X-Actor: <name>``: ONLY when `dev_actor_header` is on. The header is trusted
    as-is and the caller gets every permission in the default tenant. It exists so
    the synthetic demo and local experiments run without keys; never enable it on
    a network anyone else can reach. It is off by default and logs a warning when on.
@@ -31,6 +35,7 @@ from scruple.auth.models import (
     ApiKeyRecord,
     Principal,
 )
+from scruple.auth.session import SessionSigner, cookie_value, in_scope
 from scruple.registry.models import ACTOR_PATTERN
 
 log = logging.getLogger("scruple.auth")
@@ -70,15 +75,20 @@ class Authenticator:
         tokens: TokenVerifier | None = None,
         *,
         dev_actor_header: bool = False,
+        sessions: SessionSigner | None = None,
     ) -> None:
         self.keys = keys
         self.tokens = tokens
         self.dev_actor_header = dev_actor_header
+        self.sessions = sessions
         if dev_actor_header:
             log.warning(DEV_WARNING)
 
-    def authenticate(self, headers: Mapping[str, str]) -> Authenticated | None:
-        """`headers` is case-insensitive (Starlette `Headers`) or lower-cased keys."""
+    def authenticate(
+        self, headers: Mapping[str, str], path: str | None = None
+    ) -> Authenticated | None:
+        """`headers` is case-insensitive (Starlette `Headers`) or lower-cased keys;
+        `path` decides whether a session cookie may count (console paths only)."""
         api_key = headers.get("x-api-key")
         authz = headers.get("authorization")
         bearer: str | None = None
@@ -95,6 +105,11 @@ class Authenticator:
             if self.tokens is None:
                 raise AuthError("bearer tokens are not configured; use an API key")
             return Authenticated(self.tokens.verify(bearer))
+        if self.sessions is not None and in_scope(path):
+            token = cookie_value(headers)
+            principal = self.sessions.principal(token) if token else None
+            if principal is not None:
+                return Authenticated(principal)
         if self.dev_actor_header:
             actor = headers.get("x-actor")
             if actor is not None:

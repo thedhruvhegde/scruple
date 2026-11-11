@@ -248,6 +248,9 @@ def create_app(
     app.include_router(health_router(root, settings))
     # HTML console at /console (scruple/console): the caller's tenant only, like the API.
     app.include_router(console_router(app.state.gates.get))
+    from scruple.auth.config import install_saml
+
+    install_saml(app, settings)  # /auth/saml/* when SAML sign-on is configured
     with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
         app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
 
