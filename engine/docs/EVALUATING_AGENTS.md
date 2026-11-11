@@ -202,6 +202,14 @@ observation; `get_case`, `list_evidence`, `get_evidence`, `get_ledger_view`,
 scorecard. Use a strategy's system prompt as your agent's instructions:
 `uv run scruple strategies show checklist-first`.
 
+ACH, recon and real-scenario episodes: `list_workflow_case_types` names the case types;
+`start_ach_episode(seed, case_type)` and `start_recon_episode(seed, case_type)` start
+synthetic episodes played with `ach_*` and `recon_*` tools (`ach_get_case`, `ach_wait`,
+`ach_dishonor`, ..., `recon_match`, `recon_adjust`, ...; each closes with
+`*_submit_decision`). `start_scenario_episode(scenario_id)` starts a dispute episode on
+a real CFPB-grounded scenario, played with the dispute tools above. A tool refuses an
+episode of another kind.
+
 The server keeps episodes in memory, so to aggregate, your client logs every tool
 call it made, one JSON line per episode, MCP names and arguments as sent:
 

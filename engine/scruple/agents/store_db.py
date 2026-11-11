@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import threading
 from collections import OrderedDict
+from collections.abc import Collection
 from typing import TYPE_CHECKING, Any
 
 from scruple.agents.dispute_episode import DisputeEpisode
@@ -177,7 +178,7 @@ def durable_table(store: DbEpisodeStore) -> EpisodeTable:
     optional import)."""
     from mcp.server.mcpserver.exceptions import ToolError
 
-    from scruple.mcp.sim_server import EpisodeTable
+    from scruple.mcp.sim_server import LEGACY_KINDS, EpisodeTable, wrong_kind_message
 
     class DurableEpisodeTable(EpisodeTable):
         def start(self, seed: int, case_type: str | None) -> Episode:
@@ -196,8 +197,24 @@ def durable_table(store: DbEpisodeStore) -> EpisodeTable:
             assert isinstance(ep, DisputeEpisode)
             return ep
 
-        def call(self, episode_id: str, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+        def start_kind(self, kind: str, seed: int, case_type: str | None) -> AnyEpisode:
             try:
+                return store.start(seed, case_type, kind)
+            except (ValueError, KeyError) as exc:
+                raise ToolError(str(exc).strip("'\"")) from exc
+
+        def call(
+            self,
+            episode_id: str,
+            tool: str,
+            args: dict[str, Any],
+            kinds: Collection[str] = LEGACY_KINDS,
+        ) -> dict[str, Any]:
+            try:
+                kind = store._row(episode_id).kind
+                kind = "dispute" if kind == "scenario" else kind  # a dispute episode
+                if kind not in kinds:
+                    raise ToolError(wrong_kind_message(episode_id, kind))
                 return store.call(episode_id, tool, args)
             except UnknownEpisodeError:
                 raise ToolError(

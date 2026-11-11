@@ -186,3 +186,60 @@ def test_every_episode_kind_round_trips_like_the_file_store(
     assert type(again) is type(b)
     loaded = files.load(b.episode_id)
     assert (again.closed, again.score) == (loaded.closed, loaded.score)
+
+
+@pytest.mark.parametrize(
+    ("kind", "start_args", "read_tool"),
+    [
+        ("ach", {"seed": 2}, "ach_get_case"),
+        ("recon", {"seed": 2}, "recon_get_task"),
+    ],
+)
+def test_mcp_workflow_episodes_survive_a_server_restart(
+    tmp_path: Path, kind: str, start_args: dict[str, Any], read_tool: str
+) -> None:
+    path = str(tmp_path / "gate.db")
+
+    def server() -> Any:
+        return build_sim_server(durable_table(DbEpisodeStore.on(SQLiteStorage(path))))
+
+    async def main() -> Any:
+        async with Client(server()) as c:
+            eid = data(await c.call_tool(f"start_{kind}_episode", start_args))["episode_id"]
+            first = data(await c.call_tool(read_tool, {"episode_id": eid}))
+            wrong = await c.call_tool("get_case", {"episode_id": eid})
+        async with Client(server()) as c:  # a new server process, same database
+            again = data(await c.call_tool(read_tool, {"episode_id": eid}))
+            done = data(
+                await c.call_tool(
+                    f"{kind}_submit_decision", {"episode_id": eid, "explanation": "x"}
+                )
+            )
+        return first, again, wrong, done
+
+    first, again, wrong, done = anyio.run(main)
+    assert first == again
+    assert wrong.is_error and f"use the {kind}_* tools" in wrong.content[0].text
+    assert done["tool_calls"] == 3  # both reads and the submit, across the restart
+
+
+def test_mcp_scenario_episode_is_durable(tmp_path: Path) -> None:
+    from scruple.realdata.scenarios import load_real_scenarios
+
+    path = str(tmp_path / "gate.db")
+    sid = load_real_scenarios()[0].id
+
+    def server() -> Any:
+        return build_sim_server(durable_table(DbEpisodeStore.on(SQLiteStorage(path))))
+
+    async def main() -> Any:
+        async with Client(server()) as c:
+            r = await c.call_tool("start_scenario_episode", {"scenario_id": sid})
+            eid = data(r)["episode_id"]
+            await c.call_tool("accept", {"episode_id": eid})
+        async with Client(server()) as c:
+            return data(
+                await c.call_tool("submit_dispute", {"episode_id": eid, "explanation": "ok"})
+            )
+
+    assert anyio.run(main)["episode_id"].startswith("ep-")
