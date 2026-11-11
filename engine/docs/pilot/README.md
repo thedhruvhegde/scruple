@@ -116,3 +116,28 @@ Proposals common to all three:
 | READOUT_TEMPLATE.md | the report we hand over in week 6 |
 | TERMS_DRAFT.md | draft pilot terms and DPA outline, for counsel review |
 | OUTREACH.md | who to approach first, email, leave-behind, discovery, objections |
+
+## Running every step at once
+
+`scruple pilot run` runs ingest (redaction, tokenisation and encryption with the keys
+in the environment), calibration from aggregates, the backtest, shadow mode replayed
+over the imported history, the CI gate on synthetic held-out cases plus the history,
+and the evidence pack, and writes `manifest.json` with every step's status, inputs,
+outputs and their sha256:
+
+```bash
+uv run scruple backtest synth --n 5000 --seed 7 --out SYNTHETIC.json   # labelled test data
+uv run scruple pilot run --history SYNTHETIC.json \
+    --candidate docs/pilot/demo/fraud.json --out pilot/
+STRIPE_API_KEY=sk_test_... uv run scruple pilot run --history stripe-pull \
+    --since 2026-01-01 --until 2026-07-01 --candidate rule.json --out pilot/
+```
+
+- Same inputs, same bytes: no wall clock is read (the gate database uses the fixed CI
+  clock, since a pilot run is a replay). A rerun with an unchanged history, candidate
+  and options is a no-op; anything else rebuilds every step from scratch.
+- `--candidate` may be a rule JSON or an agent (`agent.py`, `module:attr`). The gate
+  and evidence steps judge one rule, so for an agent or a multi-rule file they are
+  skipped and the manifest says why.
+- Tested on edited copies of Stripe's published fixtures and on SYNTHETIC histories
+  (tests/test_pilot_run.py). Not yet run on a partner's data.
