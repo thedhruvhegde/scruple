@@ -163,6 +163,12 @@ flagged on every response). The command line is the local admin of one tenant
 (`SCRUPLE_TENANT`, default `default`): whoever can run it can open the database
 anyway. Keys are managed with `scruple keys create|list|revoke`.
 
+Rate-limit buckets are per process by default. `SCRUPLE_RATE_LIMIT_BACKEND=database`
+keeps them in `rate_limit_buckets` on the gate database (`scruple/auth/ratelimit_db.py`,
+alembic 0008): on Postgres a row lock per bucket makes every replica share one limit,
+timed by the database server's clock; on SQLite the processes that open the same file
+share it.
+
 `GET /version` and `scruple version` report the package version, commit and build
 date. The CLI `propose` command reads its file through the same `RegisterIn` model
 as `POST /rules`.

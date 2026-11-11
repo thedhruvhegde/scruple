@@ -222,7 +222,7 @@ def create_app(
 
         auth = build_authenticator(settings, root.storage)
     if limits is None:
-        limits = Limits.from_settings(settings)
+        limits = Limits.from_settings(settings, storage=root.storage)
     app.add_middleware(
         AuthMiddleware,
         authenticator=auth,

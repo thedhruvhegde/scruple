@@ -7,8 +7,8 @@ principal's `limit_key` (method, tenant, credential id), so each API key or toke
 subject has its own; anonymous requests share one bucket per client address.
 
 `InMemoryBuckets` is per process: with several workers, each enforces the limit
-on its own share. A shared backend (Redis, the database) implements
-`RateLimitBackend.take` with the same semantics.
+on its own share. `scruple.auth.ratelimit_db.SQLBuckets` is the shared backend on
+the gate database, with the same semantics (`SCRUPLE_RATE_LIMIT_BACKEND=database`).
 """
 
 from __future__ import annotations

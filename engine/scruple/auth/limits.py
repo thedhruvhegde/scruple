@@ -10,6 +10,8 @@
 - Bodies over the caller's limit (the key's `max_body_bytes`, else the default)
   get 413: at once when `Content-Length` says so, else as soon as the streamed
   body passes the limit.
+- Buckets live in memory per process unless `SCRUPLE_RATE_LIMIT_BACKEND=database`,
+  which shares them through the gate database (`scruple.auth.ratelimit_db`).
 - Development-only `X-Actor` principals are not rate limited (the synthetic demo
   and test suites drive them hard); their bodies are still size limited.
 """
@@ -39,7 +41,21 @@ class Limits:
     backend: RateLimitBackend = field(default_factory=InMemoryBuckets)
 
     @classmethod
-    def from_settings(cls, s: Settings, backend: RateLimitBackend | None = None) -> Limits:
+    def from_settings(
+        cls,
+        s: Settings,
+        backend: RateLimitBackend | None = None,
+        *,
+        storage: object | None = None,
+    ) -> Limits:
+        """Limits from settings. With `rate_limit_backend = "database"` the buckets are
+        shared through `storage`'s database (`scruple.auth.ratelimit_db`)."""
+        if backend is None and s.rate_limit_backend == "database":
+            if storage is None:
+                raise ValueError("rate_limit_backend 'database' needs the gate storage")
+            from scruple.auth.ratelimit_db import buckets_for
+
+            backend = buckets_for(storage)
         return cls(
             default=Limit(s.rate_limit_per_minute, s.rate_limit_burst),
             anonymous=Limit(s.rate_limit_anonymous_per_minute, s.rate_limit_anonymous_burst),
