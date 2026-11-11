@@ -11,6 +11,13 @@
 \usepackage{xcolor}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds}
+\tikzset{
+  sbox/.style={draw=black!70, thick, align=center, inner sep=3pt, minimum height=10mm, text width=#1},
+  sbox/.default=27mm,
+  arr/.style={-{Stealth[length=2mm]}, thick, black!70},
+  darr/.style={-{Stealth[length=2mm]}, thick, black!45, dashed},
+  slab/.style={font=\scriptsize, text=black!65, align=center, inner sep=1pt}}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage[authoryear,round]{natbib}
@@ -88,6 +95,39 @@ The usual guard for an agent change is an offline evaluation: replay the new age
 \begin{definition}[Episode and record]
 A dispute episode starts from a seeded case: a card transaction, a reason code, a cardholder claim with a hidden truth (valid or not), documents the merchant does or does not hold, and network deadlines. The agent acts through tools (read the case, list and read evidence, request information, read the ledger, refund, represent, accept, wait, upload evidence). The environment writes every call and every state change to an append-only trace whose events are hashed into a chain with a recorded head. Money is double-entry, in USD minor units. The \emph{record} of an episode is the trace, the final journal, the documents as generated and at close, the case with its hidden truth, and the agent's self-report.
 \end{definition}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=6mm and 11mm, sbox/.default=26mm]
+\node[sbox, fill=cverm!8] (agent) {\textbf{agent}\\{\scriptsize language model or learned policy}};
+\node[sbox, fill=cpine!8, right=of agent] (tools) {\textbf{tool API}\\{\scriptsize CLI or MCP; read, refund, represent, accept, escalate, wait, upload, submit}};
+\node[sbox, fill=cpine!8, right=of tools] (engine) {\textbf{dispute engine}\\{\scriptsize issuer, network calendar, fees}};
+\node[sbox, fill=cpine!8, right=of engine] (ledger) {\textbf{ledger}\\{\scriptsize double entry, USD minor units}};
+\node[sbox, fill=black!4, below=9mm of ledger] (record) {\textbf{episode record}\\{\scriptsize hash-chained trace, journal, documents, hidden truth, self-report}};
+\node[sbox, fill=csky!10, left=of record] (ver) {\textbf{verifiers}\\{\scriptsize hard, soft and batch checks (\cref{sec:verifiers})}};
+\node[sbox, fill=csky!10, left=of ver] (card) {\textbf{scorecard}\\{\scriptsize gate $=\bigwedge$ hard;\\ reward $=$ gate $\times$ quality}};
+\node[sbox, fill=cbrass!10, left=of card] (gate) {\textbf{release gate}\\{\scriptsize paired shadow replay; e-processes per case type}};
+\node[sbox, fill=cbrass!10, below=9mm of gate] (canary) {\textbf{canary}\\{\scriptsize staged ramp on a hashed traffic split}};
+\node[sbox, fill=cbrass!10, right=of canary] (appr) {\textbf{approval}\\{\scriptsize $N$ of $M$ named humans, separation of duties}};
+\node[sbox, fill=cbrass!10, right=of appr] (active) {\textbf{active version}\\{\scriptsize rollback pointer}};
+\node[sbox, fill=black!4, right=of active] (pack) {\textbf{evidence pack}\\{\scriptsize JSON and PDF; audit-chain segment with proof}};
+\draw[arr] (agent) -- node[slab, above]{calls} (tools);
+\draw[arr] (tools) -- (engine);
+\draw[arr] (engine) -- node[slab, above]{postings} (ledger);
+\draw[arr] (ledger) -- node[slab, right]{journal} (record);
+\draw[arr] (engine.south east) -- node[slab, sloped, below, pos=0.45]{trace} (record.north west);
+\draw[arr] (record) -- (ver);
+\draw[arr] (ver) -- (card);
+\draw[arr] (card) -- (gate);
+\draw[arr] (gate) -- node[slab, left]{promote} (canary);
+\draw[arr] (canary) -- node[slab, above]{passed} (appr);
+\draw[arr] (appr) -- (active);
+\draw[darr] (active) -- node[slab, above]{exported} (pack);
+\draw[arr] (gate.west) -- ++(-4mm,0) node[slab, left]{block\\ hold};
+\draw[arr] (canary.west) -- ++(-4mm,0) node[slab, left]{roll\\ back};
+\end{tikzpicture}
+\caption{The system, as built. The agent sees only tool outputs; it never holds the engine, the ledger or the hidden truth. The environment, not the agent, writes the trace. Nothing the agent says earns credit: the self-report is checked against the record and can only lose points. Every gate decision, canary step and approval is appended to an audit hash chain, which the evidence pack exports with a verification proof.}\label{fig:arch}
+\end{figure}
 
 \begin{definition}[Paired difference]
 A candidate policy $C$ is compared with the current policy $B$ on the same held-out cases and the same issuer draws. Case $i$ gives losses $B_i, C_i$ (merchant cost from the journal). Before outcomes are seen the operator declares a cap $c>0$, and
