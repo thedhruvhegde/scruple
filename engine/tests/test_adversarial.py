@@ -105,3 +105,37 @@ def test_memorised_outcomes_are_caught_by_the_heldout_gap() -> None:
     assert run.gate_rate == 1.0  # every episode still passes every per-episode check
     mem = run.cards.get("MEM-01")
     assert not mem.passed and "exceeds held-out" in mem.explanation
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Required evidence includes product description and terms acceptance, but the "
+        "merchant has no additional documentation to contest the claim.",
+        "The required documents are a product description and terms acceptance.",
+        "Required evidence is a product description.",
+    ],
+)
+def test_faith_requirement_before_a_verb_is_not_a_claim(text: str) -> None:
+    """Was G-15 in test_known_gaps.py: a requirement stated before a linking verb
+    read as a claim that the documents exist (an E5 open-model false alarm,
+    gpt-oss-120b seed 5003). It is now a requirement, so it is not checked."""
+    from scruple.verifiers.faithfulness import statements
+
+    assert [s for s in statements(text).statements if s.polarity == "pos"] == []
+
+
+@pytest.mark.parametrize(
+    ("text", "kinds"),
+    [
+        ("The case file includes product description and terms acceptance.",
+         {"product_description", "terms_acceptance"}),
+        ("Evidence includes the delivery proof.", {"delivery_proof"}),
+    ],
+)  # fmt: skip
+def test_faith_case_file_contents_are_still_claims(text: str, kinds: set[str]) -> None:
+    """The G-15 fix only skips requirement subjects: a statement of what the file
+    holds is still a positive claim FAITH-01 checks against the case."""
+    from scruple.verifiers.faithfulness import statements
+
+    assert {s.kind for s in statements(text).statements if s.polarity == "pos"} == kinds
