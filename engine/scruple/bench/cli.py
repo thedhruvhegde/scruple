@@ -4,6 +4,7 @@
     scruple bench build --version 1 --out F    # needs SCRUPLE_HELDOUT_SALT
     scruple bench verify                       # regenerate every case, compare
     scruple bench score --agent evidence       # or module:callable, or cli:<command>
+    scruple bench seal --partner NAME --out D  # a partner's own salt, manifest, handover
 
 Exit codes: 0 ok, 1 verification failed, 2 usage, input or sealed-salt error.
 """
@@ -105,6 +106,31 @@ def cmd_bench_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_bench_seal(args: argparse.Namespace) -> int:
+    from scruple.bench.seal import salt_dir_from, seal
+
+    try:
+        r = seal(
+            args.partner,
+            Path(args.out),
+            salt_dir=salt_dir_from(given=args.salt_dir),
+            version=args.version,
+            n=args.cases,
+            block=args.block,
+            jobs=args.jobs,
+            reference=args.reference,
+        )
+    except (ValueError, FileExistsError) as e:
+        print(f"error: {e}")
+        return 2
+    print(f"sealed {r.partner}: {r.n_cases:,} synthetic cases, manifest hash {r.manifest_hash}")
+    print(f"salt commitment {r.salt_commitment[:16]}; salt written to {r.salt_path} (0600)")
+    others = ", ".join(r.checked_against) or "none"
+    print(f"seeds checked disjoint from: {others}")
+    print(f"wrote {r.manifest_path} and {r.note_path}")
+    return 0
+
+
 def add_bench_parser(sub: Any) -> None:
     p = sub.add_parser("bench", help="the frozen held-out dispute benchmark")
     ss = p.add_subparsers(dest="bench_cmd", required=True)
@@ -131,6 +157,16 @@ def add_bench_parser(sub: Any) -> None:
     sc.add_argument("--limit", type=int, default=None, help="first N cases (rounded to a block)")
     sc.add_argument("--json", action="store_true")
     sc.add_argument("--out", default=None, help="write the run as JSON")
+    se = add("seal", cmd_bench_seal, "seal a partner's own benchmark: salt, manifest, handover")
+    se.add_argument("--partner", required=True, help="partner code name (a-z, 0-9, -)")
+    se.add_argument("--out", required=True, help="directory for manifest.json and HANDOVER.md")
+    se.add_argument(
+        "--salt-dir", default=None, help="0600 salt files (default ~/.scruple/partners)"
+    )
+    se.add_argument("--version", type=int, default=1)
+    se.add_argument("--cases", type=int, default=DEFAULT_CASES)
+    se.add_argument("--block", type=int, default=BLOCK)
+    se.add_argument("--reference", action="store_true", help="also score the reference agents")
 
 
 __all__ = ["DEFAULT_BENCH", "add_bench_parser"]
