@@ -105,3 +105,47 @@ in prompt order. Baselines and Claude are scored on the same 22.
   allowance reasoning. They are graded as wrong.
 - **22 items.** No difference from TF-IDF is distinguishable for either open
   model. The outcome-judgement question (AUROC) is untested for open models.
+
+### E5 final (added 2026-11-11, session 2)
+
+This replaces the 22-item E5 table above. Same item ids, same grader, same
+`system` and `prompt` text through the raw Groq API (temperature 0, no tools, 2,048
+max tokens). Real CFPB data. Each table covers the first k items, in prompt order,
+that every graded system answered.
+
+Reproduce: `uv run python scripts/compare_real_models.py
+results/real/open_models/cfpb/<dir>`, with dir one of `regime_full`, `outcome_full`,
+`outcome_completed` or `routing_completed`.
+
+| task | n | majority | keywords | tf-idf + lr | claude haiku | claude sonnet | gpt-oss-120b | gpt-oss-20b |
+|---|---|---|---|---|---|---|---|---|
+| regime-2015 (accuracy) | 100 | 0.630 | 0.800 | 0.870 | 0.900 | 0.930 | 0.910 | 0.840 |
+| outcome-2015 (auroc) | 100 | 0.500 | 0.568 | 0.701 | 0.550 | 0.606 | 0.425 | not run |
+| outcome-2015 (auroc) | 75 | 0.500 | 0.560 | 0.727 | 0.606 | 0.605 | 0.452 | 0.422 |
+| routing-2025 (issue acc.) | 13 | 0.462 | 0.385 | 0.462 | 0.615 | 0.462 | 0.538 | not run |
+
+Against TF-IDF + LR (95% CI):
+
+- gpt-oss-120b:
+  - regime: +0.040 [-0.010, +0.100]
+  - outcome (n=100): -0.275 [-0.450, -0.102]
+  - routing (n=13): +0.077 [-0.231, +0.385]
+- gpt-oss-20b:
+  - regime: -0.030 [-0.100, +0.040]
+  - outcome (n=75): -0.305 [-0.482, -0.116]
+
+What it shows:
+
+- **Coverage.** The Groq per-day token cap (200,000 per model) stopped the runs.
+  - Not run: gpt-oss-20b, 25 outcome and 50 routing items; gpt-oss-120b, 37
+    routing items; qwen/qwen3.8-27b, every CFPB item.
+  - Not-run items are counted, never graded.
+- **The same split as Claude, stronger.**
+  - Rule knowledge is good: both gpt-oss models beat the keyword rules on regime
+    and are level with TF-IDF.
+  - Outcome judgement is worse than the classifier, and below chance: AUROC
+    0.43-0.45 with every reply parsed.
+- **gpt-oss-20b had 3 empty regime replies.** It spent the 2,048-token allowance
+  reasoning. They are graded as wrong.
+- **The harnesses differ.** Claude ran as subagents reading a prompt file; the open
+  models got one API completion per item. The text was the same.

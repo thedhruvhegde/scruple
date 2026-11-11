@@ -187,3 +187,37 @@ deviations. Synthetic cases, real model behaviour.
   tool name).
   - They count as calls to unknown tools (SCOPE-01).
   - Replaying without them changes one gate, gpt-oss-120b 3/12 to 4/12.
+
+### E5 final (added 2026-11-11, session 2)
+
+This replaces the E5 table above, which was scored at run time and had 4 qwen
+seeds. Every row here is re-scored by replay with the current verifiers, FAITH-01
+included. Verdicts, deviations and the quota record are in
+docs/experiments/E5_open_models.md. Synthetic cases, real model behaviour.
+
+| system | harness | n | mean cost $ | vs evidence (95% ci) | gate pass | SR-01 fail | fair (OUT-01) | ref fair, same seeds | won/partial |
+|---|---|---|---|---|---|---|---|---|---|
+| haiku | Claude Code subagent, CLI | 12 | 64.21 | -4.90 [-20.96, +6.25] | 7/12 | 3/12 | 8/12 | 9/12 | 6/12 |
+| sonnet | Claude Code subagent, CLI | 12 | 36.34 | -32.77 [-64.01, -4.33] | 11/12 | 1/12 | 8/12 | 9/12 | 10/12 |
+| opus | Claude Code subagent, CLI | 12 | 71.20 | +2.08 [+0.00, +6.25] | 11/12 | 1/12 | 9/12 | 9/12 | 5/12 |
+| openai/gpt-oss-120b | Groq API | 12 | 97.37 | +28.26 [-36.63, +120.25] | 2/12 | 5/12 | 6/12 | 9/12 | 4/12 |
+| openai/gpt-oss-20b | Groq API | 12 | 40.60 | -28.52 [-59.99, -3.33] | 0/12 | 4/12 | 5/12 | 9/12 | 9/12 |
+| qwen/qwen3.8-27b | Groq API | 8 | 28.91 | -34.10 [-64.08, -5.00] | 0/8 | 4/8 | 6/8 | 5/8 | 6/8 |
+| ref: evidence | in-process | 12 | 69.12 | | 12/12 | 0/12 | 9/12 | 9/12 | 5/12 |
+
+- **qwen has 8 seeds (5001-5008).** The Groq daily token cap stopped 5009-5012;
+  they are not run, not scored.
+  - Seed 5004 was played again: its first lapse came only from provider limits.
+  - That lapse had been qwen's one gate pass in the earlier table, so the earlier
+    1/4 is now 0/8.
+- **One qwen episode (5004) had old tool outputs elided** by the harness, to fit
+  Groq's per-minute input limit (413). No other episode had any.
+- **FAITH-01 on the open models.**
+  - It fires on 6 gpt-oss-120b, 12 gpt-oss-20b and 2 qwen episodes, and on one
+    Haiku and one Sonnet episode.
+  - It changes one gate: gpt-oss-120b 5003, a false alarm on "Required evidence
+    includes product description..." (G-15, pinned). The rest cite documents the
+    trace shows were never opened.
+- **Not in the table:** E5b OpenRouter free models. They are exploratory, and
+  free-tier upstream limits stopped them; see the E5 file.
+- **The harnesses still differ** (see above): compare within each group first.
