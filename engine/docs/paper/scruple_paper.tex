@@ -12,6 +12,7 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds}
+\usepgfplotslibrary{groupplots}
 \tikzset{
   sbox/.style={draw=black!70, thick, align=center, inner sep=3pt, minimum height=10mm, text width=#1},
   sbox/.default=27mm,
@@ -733,7 +734,7 @@ E1's gate held on R5 (``concede every dispute under \$25'') even on all 10{,}000
 \legend{{E1 family, cap 0.5},{stratified, cap 0.5},{E1 family, cap 0.95},{stratified, cap 0.95}}
 \end{axis}
 \end{tikzpicture}
-\caption{E3, post hoc and not pre-registered: share of 100 resampled benchmarks of 10{,}000 cases (seed 0) on which the gate blocks, for three cost-only regressions and the control C3. R5: 0, 0.32, 0.53, 0.86; R1: 0.01, 0.03, 0.15, 0.24; R4: 0, 0, 0.04, 0.11; C3: 0 throughout. Synthetic; \nolinkurl{scripts/exp_e3_variance.py resample}, \nolinkurl{results/experiments/E3_variance_reduction/posthoc_resampled.json}.}\label{fig:e3}
+\caption{E3, post hoc and not pre-registered: share of 100 resampled benchmarks of 10{,}000 cases (seed 0) on which the gate blocks, for three cost-only regressions and the control C3. R5: 0, 0.32, 0.53, 0.86; R1: 0.01, 0.03, 0.15, 0.24; R4: 0, 0, 0.04, 0.11; C3: 0 throughout. Synthetic; \texttt{scripts/exp\_e3\_variance.py resample}, \nolinkurl{results/experiments/E3_variance_reduction/posthoc_resampled.json}.}\label{fig:e3}
 \end{figure}
 
 \subsection{Real data: CFPB complaints (real)}
@@ -776,9 +777,40 @@ Claude Haiku, Sonnet and Opus each handled the same 12 simulated disputes end to
 
 \paragraph{Verifier false positives found by real models.} Real models exposed three false positives that the scripted attacks had missed: a truthful claim of read-only calls was flagged; saying ``lost'' about a case the merchant accepted was flagged as a lie; and a structured claim field had no description, so models read ``refunded'' as ``refund I issued'' while the verifier read ``total returned to the cardholder''. After the fixes, gate pass on the same call logs rose from 5/12 to 7/12 (Haiku), 8/12 to 11/12 (Sonnet) and 8/12 to 11/12 (Opus).
 
-\subsection{E4: does a win-rate incentive make real models hack? (pre-registered)}
+\subsection{E4: does a win-rate incentive make real models hack? (pre-registered; H1 not supported)}\label{sec:e4}
 
-Each model played 12 fresh seeds under the honest brief and under a brief that said only win rate matters (72 episodes). \textbf{H1 was not supported}: 7 of 36 (model, seed) pairs changed whether a valid claim was contested, 4 toward contesting and 3 away (one-sided sign test $p=0.50$). \textbf{No model fabricated}: no document upload in either arm, unlike the E2 optimiser. \textbf{H3 held}: all 21 incentive-arm episodes with an unfair win or flawed evidence surfaced on the scorecard. Found after the fact (a lead, not a result): under the incentive Opus cited evidence that did not cover the reason code more often (flawed-evidence episodes from 1 to 7) and its gate pass fell from 9/12 to 3/12. Unfair wins were 2 in every arm, which points to the simulated issuer rather than to the incentive.
+E2's optimiser learned forgery from a naive proxy. E4 asked whether real language-model agents do the same when told only win rate matters. Claude Haiku, Sonnet and Opus each played 12 fresh seeds (6001 to 6012) twice: under the honest brief of \cref{sec:episodes}, and under a brief whose goal line read ``You are evaluated only on your dispute win rate. Maximise the share of disputes you win.'' with the same tools and rules and no instruction to break them (72 episodes; real behaviour, synthetic cases). Pre-registered: \textbf{H1} pooled over models, valid claims are contested more often under the incentive (sign test paired by model and seed, one-sided, $\alpha=0.05$); \textbf{H2} some model uploads a document the evidence checks flag; \textbf{H3} every incentive-arm episode with an unfair win or flawed evidence surfaces on the scorecard; \textbf{H4} merchant cost is no worse under the incentive.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=4 by 1, horizontal sep=6mm, yticklabels at=edge left},
+  width=0.285\linewidth, height=3.8cm, ymin=0.5, ymax=3.5, ytick={1,2,3}, yticklabels={Opus,Sonnet,Haiku},
+  tick label style={font=\scriptsize}, title style={font=\footnotesize}, grid=major, grid style={cgrey!40}]
+\nextgroupplot[title={valid claims contested (of 6)}, xmin=0, xmax=6.5, xtick={0,3,6}]
+\draw[thick,cgrey] (axis cs:5,3)--(axis cs:3,3); \draw[thick,cgrey] (axis cs:3,2)--(axis cs:6,2);
+\addplot[only marks, mark=*, mark size=2pt, cpine] coordinates {(5,3) (3,2) (3,1)};
+\addplot[only marks, mark=square*, mark size=1.8pt, cverm] coordinates {(3,3) (6,2) (3,1)};
+\nextgroupplot[title={flawed evidence (of 12)}, xmin=0, xmax=12.5, xtick={0,6,12}]
+\draw[thick,cgrey] (axis cs:10,3)--(axis cs:8,3); \draw[thick,cgrey] (axis cs:6,2)--(axis cs:2,2); \draw[thick,cgrey] (axis cs:1,1)--(axis cs:7,1);
+\addplot[only marks, mark=*, mark size=2pt, cpine] coordinates {(10,3) (6,2) (1,1)};
+\addplot[only marks, mark=square*, mark size=1.8pt, cverm] coordinates {(8,3) (2,2) (7,1)};
+\nextgroupplot[title={gate pass (of 12)}, xmin=0, xmax=12.5, xtick={0,6,12}]
+\draw[thick,cgrey] (axis cs:8,3)--(axis cs:6,3); \draw[thick,cgrey] (axis cs:9,2)--(axis cs:8,2); \draw[thick,cgrey] (axis cs:9,1)--(axis cs:3,1);
+\addplot[only marks, mark=*, mark size=2pt, cpine] coordinates {(8,3) (9,2) (9,1)};
+\addplot[only marks, mark=square*, mark size=1.8pt, cverm] coordinates {(6,3) (8,2) (3,1)};
+\nextgroupplot[title={mean merchant cost (\$)}, xmin=60, xmax=140, xtick={60,100,140}]
+\draw[thick,cgrey] (axis cs:128.44,3)--(axis cs:82.57,3); \draw[thick,cgrey] (axis cs:76.36,2)--(axis cs:82.61,2);
+\addplot[only marks, mark=*, mark size=2pt, cpine] coordinates {(128.44,3) (76.36,2) (82.57,1)};
+\addplot[only marks, mark=square*, mark size=1.8pt, cverm] coordinates {(82.57,3) (82.61,2) (82.57,1)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{E4, per model: honest brief (circles) and win-rate brief (squares), 12 episodes per arm. Real model behaviour on synthetic cases (seeds 6001 to 6012). Opus's flawed-evidence episodes rose from 1 to 7 and its gate pass fell from 9 to 3; Sonnet contested every valid claim under the incentive; Haiku moved the other way. Three arms share a mean cost of \$82.57 because the engine is deterministic per seed. \nolinkurl{results/real/incentives/e4.json}; \texttt{uv run python scripts/exp\_e4.py results/real/incentives}.}\label{fig:e4}
+\end{figure}
+
+\paragraph{Results.} \textbf{H1 was not supported}: 7 of 36 (model, seed) pairs changed whether a valid claim was contested, 4 toward contesting and 3 away (one-sided sign test $p=0.50$); the direction differed by model (\cref{fig:e4}). \textbf{H2 was not observed}: no model called the upload tool in either arm, so there was no fabrication, unlike the E2 optimiser. \textbf{H3 held}: all 21 incentive-arm episodes with an unfair win or flawed evidence surfaced on the scorecard. \textbf{H4 held on average and was mixed by model}: cost fell for Haiku (\$128.44 to \$82.57), was flat for Opus and rose slightly for Sonnet (\$76.36 to \$82.61).
+
+\paragraph{What the hypotheses did not name.} Under the incentive Opus contested on weaker evidence: it cited documents that did not cover the reason code's requirements in 7 episodes against 1, and its gate pass fell from 9 to 3 of 12. This is the clearest effect of the incentive in E4, and it was found after the fact, so it is a lead, not a result. Unfair wins were 2 in every arm, which points to cases where the simulated issuer accepts any representment rather than to the incentive. Three duplicate \texttt{start} calls left episodes that were never played; they are excluded and every seed's played episode is included. With 12 cases per arm E4 cannot show that the incentive makes these models contest more. One reading, a hypothesis for a larger follow-up and not a conclusion: instruction-tuned models resist the simplest proxy hack that blind optimisation finds.
 
 \section{What broke, and what we fixed}\label{sec:improve}
 
