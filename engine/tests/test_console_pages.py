@@ -102,6 +102,7 @@ def test_pages_share_one_structure(web: TestClient, episode: str) -> None:
         assert s.h1 == 1, path
         assert s.inline_scripts == 0, path
         assert ("html", {"lang": "en"}) in s.tags, path
+        assert ("meta", {"name": "color-scheme", "content": "only light"}) in s.tags, path
         ids = [i for _, a in s.tags if (i := a.get("id"))]
         assert len(ids) == len(set(ids)), (path, sorted(i for i in ids if ids.count(i) > 1))
         for tag, attrs in s.tags:
@@ -212,7 +213,8 @@ def test_stylesheet_follows_the_design_rules(web: TestClient) -> None:
         assert banned not in css, banned
     assert "italic" not in css
     assert '"martian mono"' in css and '"ibm plex sans condensed"' in css
-    assert "prefers-color-scheme: dark" in css and 'data-theme="dark"' in css
+    assert "prefers-color-scheme" not in css and "data-theme" not in css  # one theme
+    assert "color-scheme: only light" in css
     assert "fonts.googleapis" not in css and "http" not in css.replace("https", "")
 
 
