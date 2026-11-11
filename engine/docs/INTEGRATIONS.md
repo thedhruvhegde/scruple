@@ -332,3 +332,80 @@ uv run scruple ingest verify --store cases.db [--k 10] [--json]
   ramp from the policy is returned by `Policy.ramp()` for whoever starts a ramp. Example
   thresholds are configuration, not a statement of what any institution requires
   (ASSUMPTION).
+
+## Outbound integrations: how events leave (`scruple.integrations`)
+
+- The audit log is the outbox. A gate change and its audit entry commit together; the
+  dispatcher (`scruple worker --dispatch-integrations`, every 5 s, or
+  `scruple integrations dispatch`) reads a tenant's entries after its cursor, stores
+  `GateEvent`s and queues jobs with idempotency keys derived from the event. A rolled
+  back change sends nothing; a crash between queueing and moving the cursor queues
+  nothing twice; the gate never waits on, or fails because of, a receiver.
+- Events: `decision.recorded`, `approval.requested`, `approval.granted`,
+  `approval.satisfied`, `approval.rejected`. Ids are `evt_` plus 24 hex of
+  SHA-256(tenant, audit entry hash). Decision events carry the summary, reasons, owner,
+  agent, report path, `policy_sha256` when a policy is in force, and `data: synthetic`.
+- A tenant's first setting or endpoint starts the cursor at the current audit head:
+  history is not replayed to a new receiver.
+- Per-tenant settings (`IntegrationSettings`: `slack`, `jira`, `linear`) are versioned
+  and audited (`integration.settings_set`). They name secrets by environment variable,
+  and the variable must start with the tenant's prefix, `SCRUPLE_SECRET_<TENANT>_`
+  (tenant upper-cased, `-` to `_`), so one tenant's admin cannot aim an integration at
+  the database password or another tenant's token.
+- Outbound HTTP (`safehttp.SafeHttp`): https only; no credentials, fragments or odd
+  ports in the URL; every resolved address must be public (private, loopback,
+  link-local including 169.254.169.254, CGNAT, multicast, reserved, unspecified and
+  IPv4-mapped addresses are refused); the request is pinned to the checked address
+  (`Host` and TLS SNI keep the name), so DNS rebinding between check and connect does
+  not work; redirects are not followed; proxies from the environment are ignored;
+  responses are capped at 64 KiB. `SCRUPLE_INTEGRATIONS_ALLOW_HOSTS` exempts named
+  hosts from the address check; `SCRUPLE_INTEGRATIONS_DEV=1` allows http (development).
+- Tests never use the network: `Runtime(http=SafeHttp(transport=httpx.MockTransport(...),
+  resolver=...))` and `make_handlers(runtime=...)` with a thread-isolated worker.
+
+## Outbound webhooks (`scruple.integrations.webhooks`)
+
+- Endpoints per tenant: `POST /integrations/webhooks {url, events, description}`
+  (admin), or `scruple integrations webhooks add URL`. The URL is checked at
+  registration and again on every delivery. Disable, enable and rotate are audited.
+- Signing secret: `whsec_` plus 32 random bytes, shown once (at creation and at
+  rotation), stored sealed with `SCRUPLE_FIELD_KEYS` (AES-256-GCM, bound to tenant and
+  endpoint). Without field keys, registration answers 503 (development mode stores it
+  unsealed). Rotation signs with the new and the old secret for 24 hours.
+- Request: `POST`, body the canonical JSON of the event (sorted keys, no spaces) with
+  `api_version: 1`. Headers: `Scruple-Signature: t=<unix>,v1=<hex>[,v1=<hex>]` where
+  `v1 = hex(HMAC-SHA256(secret, "<t>.<raw body>"))`, plus `Scruple-Event-Id`,
+  `Scruple-Event-Type`, `Scruple-Delivery-Id`, `Scruple-Attempt`.
+- Retries: one `webhook_deliver` job per (endpoint, event). Network errors, 408, 429
+  and 5xx are retried with the job queue's exponential backoff (2 s doubling, capped at
+  300 s) for up to 8 attempts; any other status, a URL that now fails the address
+  check, or a disabled endpoint fails at once. Deliveries are at least once:
+  deduplicate on `Scruple-Event-Id`.
+- Log and replay: `webhook_deliveries` (status, attempts, last status and error) and
+  `webhook_attempts` (every attempt with time, status, error, duration and job).
+  `GET /integrations/webhooks/deliveries[?status=failed]`,
+  `GET .../deliveries/{id}`, `POST .../deliveries/{id}/replay` (audited, same event id).
+- Verifying a delivery (receiver side, standard library only; tested against the
+  signer in `tests/test_integrations_webhooks.py`):
+
+```python
+# scruple-webhook-verify
+import hashlib
+import hmac
+import time
+
+
+def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
+    """True if `header` (Scruple-Signature) signs `body` (the raw bytes) with `secret`."""
+    fields = [p.split("=", 1) for p in header.split(",") if "=" in p]
+    stamps = [v for k, v in fields if k == "t"]
+    sigs = [v for k, v in fields if k == "v1"]
+    if len(stamps) != 1 or not stamps[0].isdigit() or not sigs:
+        return False
+    if abs(time.time() - int(stamps[0])) > tolerance:
+        return False  # too old or from the future: a replay
+    expected = hmac.new(
+        secret.encode(), stamps[0].encode() + b"." + body, hashlib.sha256
+    ).hexdigest()
+    return any(hmac.compare_digest(expected, s) for s in sigs)
+```

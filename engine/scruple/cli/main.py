@@ -269,6 +269,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.policy.cli import add_policy_parser
 
     add_policy_parser(sub, DEFAULT_DB)
+    from scruple.integrations.cli import add_integrations_parser
+
+    add_integrations_parser(sub, DEFAULT_DB)
     return p
 
 
