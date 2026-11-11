@@ -21,7 +21,7 @@ What `verify_token` checks (RFC 3161 section 2.4.2 and RFC 5652 section 5.4):
 
 Not checked: revocation (no CRL or OCSP fetch; there is no network in verification),
 chains longer than one intermediate step, RSA-PSS signatures, and the TSA's accuracy
-field. These are listed in docs/trust/POLICIES.md as gaps.
+field. These are listed as gaps in docs/trust/README.md.
 
 No network here: `request_timestamp` takes an optional `httpx` transport, and the
 tests run a local TSA built from a throwaway key and certificate.
