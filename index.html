@@ -195,8 +195,10 @@ main:focus { outline: none; }
 .row > * { min-width: 0; }
 .first .row { padding-top: 88px; }
 .lhs { display: grid; gap: 20px; align-content: start; }
-.lhs h2 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 28px; line-height: 1.12; letter-spacing: -0.02em; display: grid; gap: 10px; }
-.lhs h2 .n { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; }
+.lhs h2 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: clamp(26px, 2.4vw, 32px); line-height: 1.125; letter-spacing: -0.02em; display: grid; gap: 16px; }
+/* the section label runs on as a character rule to the edge of its column: 02 / PROOF -------- */
+.lhs h2 .n { display: flex; gap: 1ch; font-size: 12px; line-height: 16px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; }
+.lhs h2 .n::after { content: var(--dash); content: var(--dash) / ""; flex: 1; min-width: 0; overflow: hidden; color: var(--rule-strong); font-weight: 400; letter-spacing: 0; }
 .lhs .sum { font-size: 18px; line-height: 1.5; max-width: 42ch; }
 .lhs .src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); }
 .kv { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); }
