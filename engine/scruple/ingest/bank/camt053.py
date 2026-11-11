@@ -11,6 +11,22 @@ and `Ntry` (`Amt@Ccy`, `CdtDbtInd`, `Sts` or `Sts/Cd`, `BookgDt`, `ValDt`,
 `RtrInf/Rsn/Cd`, `RmtInf/Ustrd`, plus `AddtlNtryInf`). A business application header
 wrapper (as in prowide-iso20022's public sample) is allowed: the first `Document` in a
 camt.053 namespace is used.
+
+Entry status (`Ntry/Sts`) is validated, not kept verbatim. Versions 001.02 to 001.06
+carry a code directly (`<Sts>BOOK</Sts>`, type `EntryStatus2Code`: BOOK, PDNG, INFO);
+001.07 onwards carry a choice (`<Sts><Cd>BOOK</Cd></Sts>`, `EntryStatus1Choice`) whose
+`Cd` is from the external code list `ExternalEntryStatus1Code` (BOOK, FUTR, INFO, PDNG,
+RJCT) or whose `Prtry` is a bank's own code. Sources: the generated ISO 20022 model of
+prowide-iso20022 at commit 18723858 (`EntryStatus2Code.java`, `EntryStatus1Choice.java`,
+`ReportEntry2` to `ReportEntry8` for 001.02-06 and `ReportEntry9` to `ReportEntry15` for
+001.07-13; Apache 2.0) and the ISO external code sets as republished by Open Banking UK
+(`OpenBankingUK/External_Internal_CodeSets`, `ISO_External_Codeset.csv` at commit
+fd33a35). Both fetched from GitHub on 2026-11-11; docs/SOURCES.md S18 and S19. The
+external list is revised by ISO from time to time: a code it adds later is refused
+until `EXTERNAL_ENTRY_STATUS` is updated, rather than guessed at. An unknown code, or
+the wrong form for the version, refuses the file (`SchemaMismatchError`). A
+proprietary status is kept as `prtry:<code>` so it can never be read as an ISO code.
+A missing `Sts` (mandatory in the schema) is kept as no status.
 """
 
 from __future__ import annotations
@@ -39,6 +55,11 @@ from scruple.ingest.errors import (
 from scruple.ingest.limits import MAX_FILE_BYTES, check_size
 
 _NS = re.compile(r"^\{urn:iso:std:iso:20022:tech:xsd:camt\.053\.001\.(0[2-9]|1[0-3])\}")
+# EntryStatus2Code (camt.053.001.02-06) and ExternalEntryStatus1Code (001.07-13);
+# sources in the module docstring.
+ENTRY_STATUS_2 = frozenset({"BOOK", "PDNG", "INFO"})
+EXTERNAL_ENTRY_STATUS = frozenset({"BOOK", "FUTR", "INFO", "PDNG", "RJCT"})
+FIRST_CHOICE_VERSION = 7  # 001.07: Sts becomes EntryStatus1Choice
 MAX_ENTRIES = 200_000
 MAX_STATEMENTS = 1_000
 
@@ -111,7 +132,40 @@ def _type_code(ntry: Element) -> str | None:
     return _text(bk, "Prtry/Cd")
 
 
-def _statement(stmt: Element) -> BankStatement:
+def entry_status(ntry: Element, version: int) -> str | None:
+    """The validated `Ntry/Sts` for a camt.053.001.<version> entry (module docstring)."""
+    sts = _find(ntry, "Sts")
+    if sts is None:
+        return None
+    code, cd, prtry = (sts.text or "").strip(), _text(sts, "Cd"), _text(sts, "Prtry")
+    if version < FIRST_CHOICE_VERSION:
+        if cd is not None or prtry is not None:
+            raise SchemaMismatchError(
+                f"camt.053.001.{version:02d} Sts is a code, not Sts/Cd or Sts/Prtry"
+            )
+        if code not in ENTRY_STATUS_2:
+            raise SchemaMismatchError(
+                f"entry status {code[:8]!r} is not one of {', '.join(sorted(ENTRY_STATUS_2))}"
+            )
+        return code
+    if code:
+        raise SchemaMismatchError(
+            f"camt.053.001.{version:02d} Sts needs Cd or Prtry, not a bare code"
+        )
+    if (cd is None) == (prtry is None):
+        raise SchemaMismatchError("entry Sts needs exactly one of Cd and Prtry")
+    if cd is not None:
+        if cd not in EXTERNAL_ENTRY_STATUS:
+            raise SchemaMismatchError(
+                f"entry status {cd[:8]!r} is not an ExternalEntryStatus1Code "
+                f"({', '.join(sorted(EXTERNAL_ENTRY_STATUS))})"
+            )
+        return cd
+    assert prtry is not None
+    return truncate(f"prtry:{prtry}", 16)
+
+
+def _statement(stmt: Element, version: int) -> BankStatement:
     acct = _find(stmt, "Acct")
     account_id = _text(acct, "Id/IBAN") or _text(acct, "Id/Othr/Id")
     if not account_id:
@@ -155,7 +209,7 @@ def _statement(stmt: Element) -> BankStatement:
                 customer_ref=truncate(_text(ntry, "NtryRef"), 64),
                 end_to_end_id=truncate(_text(tx, "Refs/EndToEndId"), 64),
                 return_reason=truncate(_text(tx, "RtrInf/Rsn/Cd"), 35),
-                status=truncate(_text(ntry, "Sts/Cd") or _text(ntry, "Sts"), 16),
+                status=entry_status(ntry, version),
                 description=truncate(desc, 500),
             )
         )
@@ -185,6 +239,9 @@ def parse_camt053(
     doc = next((el for el in root.iter() if _local(el) == "Document" and _NS.match(el.tag)), None)
     if doc is None:
         raise SchemaMismatchError("no camt.053.001.02-13 Document element")
+    ns = _NS.match(doc.tag)
+    assert ns is not None
+    version = int(ns.group(1))
     body = _find(doc, "BkToCstmrStmt")
     stmts = _kids(body, "Stmt") if body is not None else []
     if not stmts:
@@ -192,7 +249,7 @@ def parse_camt053(
     if len(stmts) > MAX_STATEMENTS:
         raise InputTooLargeError(f"more than {MAX_STATEMENTS} statements")
     try:
-        return tuple(_statement(s) for s in stmts)
+        return tuple(_statement(s, version) for s in stmts)
     except ValidationError as e:
         raise SchemaMismatchError(
             f"camt.053 value out of range: {e.error_count()} errors"
