@@ -167,6 +167,7 @@ def test_a_failed_append_does_not_leave_the_cache_ahead() -> None:
         ("dispute", None),
         ("ach", None),
         ("recon", None),
+        ("aml", None),
         ("scenario", "real-cc-15328101-gas-charged-twice"),
     ],
 )
@@ -193,6 +194,7 @@ def test_every_episode_kind_round_trips_like_the_file_store(
     [
         ("ach", {"seed": 2}, "ach_get_case"),
         ("recon", {"seed": 2}, "recon_get_task"),
+        ("aml", {"seed": 2}, "aml_get_alert"),
     ],
 )
 def test_mcp_workflow_episodes_survive_a_server_restart(

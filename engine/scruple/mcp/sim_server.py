@@ -11,10 +11,11 @@ engine instead (lifecycle stages, deadlines, evidence documents, issuer replies)
 shared read tools work for both kinds; `accept`, `wait`, `upload_evidence`,
 `refund(amount_minor=...)` and `submit_dispute` are for dispute episodes.
 
-`start_ach_episode`, `start_recon_episode` and `start_scenario_episode` start the other
-episode kinds the API and CLI serve. ACH and recon episodes have their own tool sets,
-exposed with an `ach_` or `recon_` prefix (`ach_get_case`, `recon_match`, ...) and
-refused on episodes of another kind; a scenario episode is a dispute episode on a
+`start_ach_episode`, `start_recon_episode`, `start_aml_episode` and
+`start_scenario_episode` start the other episode kinds the API and CLI serve. ACH,
+recon and AML episodes have their own tool sets, exposed with an `ach_`, `recon_` or
+`aml_` prefix (`ach_get_case`, `recon_match`, `aml_file_sar`, ...) and refused on
+episodes of another kind; a scenario episode is a dispute episode on a
 real CFPB-grounded scenario and plays the dispute tools above.
 
 Run it with `scruple mcp sim` (or `uv run scruple mcp sim`).
@@ -34,6 +35,8 @@ from pydantic_core import to_jsonable_python
 
 from scruple.agents.ach_episode import ACH_TASK, AchEpisode
 from scruple.agents.ach_tools import ACH_TOOLS
+from scruple.agents.aml_episode import AML_TASK, AmlEpisode
+from scruple.agents.aml_tools import AML_TOOLS
 from scruple.agents.dispute_episode import DISPUTE_TASK, DisputeEpisode
 from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME, DisputeToolSpec
 from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironment
@@ -44,6 +47,7 @@ from scruple.agents.recon_tools import RECON_TOOLS
 from scruple.agents.store import new_episode
 from scruple.agents.tools import TOOL_BY_NAME
 from scruple.sim.ach.models import AchFamily
+from scruple.sim.aml.models import AmlFamily
 from scruple.sim.recon.models import BreakKind
 from scruple.version import package_version
 
@@ -57,10 +61,10 @@ WorkflowCaseType = Annotated[
 ]
 
 
-AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode
+AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode
 # Episode kinds the unprefixed tools serve (a scenario episode is a dispute episode).
 LEGACY_KINDS = frozenset({"simple", "dispute"})
-WORKFLOW_PREFIX = {"ach": "ach_", "recon": "recon_"}
+WORKFLOW_PREFIX = {"ach": "ach_", "recon": "recon_", "aml": "aml_"}
 
 
 def episode_kind(ep: Any) -> str:
@@ -397,6 +401,11 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
                 "format": "kinds and a file format joined by +, then optionally @difficulty",
             },
             "scenario": {"scenario_ids": [rs.id for rs in load_real_scenarios()]},
+            "aml": {
+                "families": [f.value for f in AmlFamily],
+                "format": "family, family@difficulty or @difficulty (difficulty in [0, 1])",
+                "data": "synthetic transaction graphs",
+            },
             "data": "ach and recon cases are synthetic; scenario cases are built from "
             "public CFPB complaints (docs/data/CFPB.md)",
         }
@@ -428,7 +437,15 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
         ep = t.start_kind("scenario", seed, scenario_id)
         return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
 
-    for kind, specs in (("ach", ACH_TOOLS), ("recon", RECON_TOOLS)):
+    @server.tool(
+        description="Start an aml episode: triage one transaction-monitoring alert on a "
+        "synthetic transaction graph. " + AML_TASK
+    )
+    def start_aml_episode(seed: Seed, case_type: WorkflowCaseType = None) -> dict[str, Any]:
+        ep = t.start_kind("aml", seed, case_type)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
+    for kind, specs in (("ach", ACH_TOOLS), ("recon", RECON_TOOLS), ("aml", AML_TOOLS)):
         for spec in specs:
             fn = _workflow_tool(t, kind, spec)
             server.add_tool(fn, name=fn.__name__, description=spec.description)

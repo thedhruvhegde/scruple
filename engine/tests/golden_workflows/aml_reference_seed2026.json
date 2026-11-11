@@ -1,0 +1,54 @@
+{
+ "events": [
+  {
+   "alert_id": "AL-E2F09E90",
+   "on": "2026-05-16",
+   "type": "alert_opened"
+  },
+  {
+   "amount_minor": 3547201,
+   "decision": "file_sar",
+   "indicators": [
+    "near_threshold_cash",
+    "profile_mismatch"
+   ],
+   "narrative": "Red flags near_threshold_cash, profile_mismatch on the linked transfers.",
+   "on": "2026-05-16",
+   "txn_ids": [
+    "T-00020",
+    "T-00022",
+    "T-00024",
+    "T-00027"
+   ],
+   "type": "decided"
+  }
+ ],
+ "family": "structuring",
+ "outcome": {
+  "correct": true,
+  "cost": 0,
+  "decision": "file_sar",
+  "indicators": [
+   "near_threshold_cash",
+   "profile_mismatch"
+  ],
+  "info_requests": 0,
+  "sar_amount_minor": 3547201,
+  "txn_ids": [
+   "T-00020",
+   "T-00022",
+   "T-00024",
+   "T-00027"
+  ]
+ },
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 2026,
+ "synthetic": true,
+ "trace_head": "2559e3cc2297498de0d3418878dec2f93ef054fc3113f2d30e44df43ba8b81e4"
+}
