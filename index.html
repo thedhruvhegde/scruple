@@ -75,21 +75,28 @@ a { color: inherit; }
 .band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .page { max-width: 1240px; margin: 0 auto; }
 
-/* ---------- bar ---------- */
+/* ---------- bar ----------
+   Shared by every page: copy this block. ul.nav-sec holds in-page anchors,
+   ul.nav-pg holds the pages (arrow suffix, aria-current="page" on the page you are on). */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 32px; height: 60px; }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 24px; height: 60px; position: relative; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
 .brand svg { width: 24px; height: 24px; display: block; }
 .brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-.nav { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.nav::-webkit-scrollbar { display: none; }
-.nav a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 2px; }
+.nav-pg { margin-left: auto !important; }
+.nav-pg::before { content: "|"; color: var(--rule-strong); padding: 0 8px 0 0; }
+.nav a { position: relative; display: block; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav-pg a { color: var(--fg); }
+.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
+.nav-pg a[aria-current="page"] { font-weight: 600; }
 .nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
 .toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
 .toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
 .toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; } }
+@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; overflow-x: auto; scrollbar-width: none; } }
 
 /* ---------- messages ---------- */
 .msg { background: var(--panel); border: 1px solid var(--rule-strong); padding: 16px 18px 18px; display: grid; gap: 10px; min-width: 0; }
@@ -211,8 +218,9 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="#top" aria-label="Scruple, back to top"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#how">How it works</a><a href="#proof">Proof</a><a href="#redteam">Red team</a><a href="#who">Who it's for</a><a href="#audit">Audit trail</a><a href="#status">Status</a><a href="results/">Results</a><a href="paper/">Paper</a>
+    <nav class="nav" id="nav" aria-label="Site">
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li></ul>
     </nav>
     <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
   </div>
