@@ -1,8 +1,8 @@
 # Web console (roadmap 181-184)
 
 A server-rendered console over the gate and the verifiers: FastAPI router, Jinja2
-templates, one small script, two self-hosted fonts. No frontend framework and nothing
-loaded from a CDN. All data it shows is synthetic unless a page names a real dataset.
+templates, one stylesheet, two self-hosted fonts and no script at all. No frontend
+framework and nothing loaded from a CDN. All data it shows is synthetic unless a page names a real dataset.
 
 ```bash
 scruple console --db agent-gate.db --port 8090            # its own app, / -> /console/ -> /console/dashboard
@@ -171,9 +171,9 @@ enumeration covers the console.
   sends `Origin`, the same origin. The secret is `SCRUPLE_CONSOLE_SECRET` (environment
   only, at least 32 characters) or random per process. Set it when running more than
   one worker.
-- CSP: `default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self';
+- CSP: `default-src 'none'; script-src 'none'; style-src 'self'; font-src 'self';
   img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`. No
-  inline script, style or event handler anywhere (tests parse every page for them).
+  script tag, inline style or event handler anywhere (tests parse every page for them).
   Also `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`,
   `Cache-Control: no-store` on pages.
 - Escaping: Jinja autoescape on every template; tests plant markup in a rule
@@ -187,18 +187,17 @@ enumeration covers the console.
 
 The marketing site's rules: Martian Mono for display and every screen character, IBM
 Plex Sans Condensed for body text (both OFL, self-hosted in `static/fonts` with their
-licences); bands in pine, bone and sand; traces on dark screens in both themes;
-hovers are instant inversions; tags are bracketed text; chart axes are labelled in
+licences); bands in bone, pine and sand with the site's exact token values; traces and
+charts on dark screens; hovers are instant inversions; tags are bracketed text; chart axes are labelled in
 Martian Mono with box-drawing tick characters. No gradients, shadows, rounded corners,
-icons, emoji or motion. Light and dark follow the system and a
-LIGHT / DARK toggle (saved in localStorage). On narrow screens wide text tables become
+icons, emoji or motion. One theme: no toggle, no `prefers-color-scheme` rules, and
+`color-scheme: only light` (CSS and a meta tag), so an operating system dark setting
+changes nothing; the bands are the look. On narrow screens wide text tables become
 stacked records and numeric tables scroll inside their panel; the page itself never
 scrolls sideways.
 
 ## Not built
 
-A single theme (the console still follows the system and offers LIGHT / DARK,
-while the site's rules ask for one theme; dashboard charts sit on dark screens either
-way), pagination of the dashboard's job and gate-run tables (they show the most
+Pagination of the dashboard's job and gate-run tables (they show the most
 recent), pagination of diffs (a diff shows every changed case; fine for hundreds), live
 updates, and per-person (private) saved filters.
