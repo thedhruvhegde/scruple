@@ -776,6 +776,108 @@ def evaluate(
     }
 
 
+# --- threshold calibration (dev split only; reported on the held-out test split) ------
+
+# Soft per-episode checks whose verdict is a threshold on a score in [0, 1], and the
+# default rule each ships with (docs/DECISIONS.md D-018 records the proposal).
+SOFT_THRESHOLDED: dict[str, str] = {
+    "CF-01": "score < 1 (any cost above the baseline)",
+    "EVD-02": "score < 0.5, or any cited document that does not support the case",
+    "DL-02": "score < 1 (any window missed)",
+    "CAL-02": "score < 0.75 (squared error above 0.25)",
+    "ESC-01": "score < 1 (any escalation without covering evidence)",
+}
+TARGET_FPRS = (0.01, 0.05)
+
+
+def _op(rows: Sequence[Row], check: str, t: float | None) -> dict[str, Any]:
+    """Operating point: fire iff score < t (t None: the check's own verdict)."""
+    target = set(TARGETS.get(check, HARMS))
+    fired = [(check in r.fired) if t is None else (r.scores.get(check, 1.0) < t) for r in rows]
+    hit = [bool(set(r.harms) & target) for r in rows]
+    clean = [r.clean for r in rows]
+    fp = sum(f and c for f, c in zip(fired, clean, strict=True))
+    tp = sum(f and h for f, h in zip(fired, hit, strict=True))
+    n_clean, n_hit, n_fired = sum(clean), sum(hit), sum(fired)
+    return {
+        "fpr": round(fp / n_clean, 4) if n_clean else None,
+        "recall": round(tp / n_hit, 4) if n_hit else None,
+        "precision": round(tp / n_fired, 4) if n_fired else None,
+        "n": [fp, n_clean, tp, n_hit, n_fired],
+    }
+
+
+def choose_threshold(rows: Sequence[Row], check: str, target_fpr: float) -> float:
+    """The most sensitive threshold t (fire iff score < t) whose false-positive rate on
+    the clean rows given is at most `target_fpr`. Candidates are the scores seen, plus
+    1.0 + epsilon (fire on anything below a perfect score) and 0.0 (never fire)."""
+    cands = sorted({r.scores[check] for r in rows if check in r.scores} | {0.0, 1.0})
+    best = 0.0
+    for c in [*cands, 1.0 + 1e-9]:
+        op = _op(rows, check, c)
+        if op["fpr"] is None or op["fpr"] <= target_fpr:
+            best = max(best, c)
+    return best
+
+
+def calibrate(rows: Sequence[Row], target_fprs: Sequence[float] = TARGET_FPRS) -> dict[str, Any]:
+    """Pick each soft threshold on the synthetic dev split; report it on the synthetic
+    test split (held-out when sealed) and on the real-model rows. The test and real
+    rows are never used to choose anything."""
+    dev = [r for r in rows if r.split == "dev"]
+    test = [r for r in rows if r.split == "test"]
+    real = [r for r in rows if r.split == "real"]
+    out: dict[str, Any] = {}
+    for check, rule in SOFT_THRESHOLDED.items():
+        if not any(check in r.scores for r in dev):
+            continue
+        entry: dict[str, Any] = {
+            "default_rule": rule,
+            "default": {"dev": _op(dev, check, None), "test": _op(test, check, None),
+                        "real": _op(real, check, None)},
+            "chosen": {},
+        }  # fmt: skip
+        for f in target_fprs:
+            t = choose_threshold(dev, check, f)
+            entry["chosen"][str(f)] = {
+                "threshold": round(t, 6),
+                "dev": _op(dev, check, t),
+                "test": _op(test, check, t),
+                "real": _op(real, check, t),
+            }
+        out[check] = entry
+    return out
+
+
+def _op_text(op: Mapping[str, Any]) -> str:
+    f = "-" if op["fpr"] is None else f"{op['fpr']:.3f}"
+    r = "-" if op["recall"] is None else f"{op['recall']:.3f}"
+    return f"{f} / {r}"
+
+
+def render_calibration(cal: Mapping[str, Any]) -> str:
+    lines = [
+        "## soft-check thresholds (chosen on dev, reported on test and real)",
+        "",
+        "Rule: fire iff score < t. Cells are FPR on clean rows / recall of the target harm.",
+        "",
+        "| check | rule | t | dev | test | real |",
+        "|---|---|---|---|---|---|",
+    ]
+    for check, e in cal.items():
+        d = e["default"]
+        lines.append(
+            f"| {check} | default: {e['default_rule']} | - | {_op_text(d['dev'])} | "
+            f"{_op_text(d['test'])} | {_op_text(d['real'])} |"
+        )
+        for f, c in e["chosen"].items():
+            lines.append(
+                f"| {check} | dev FPR <= {f} | {c['threshold']:.4g} | {_op_text(c['dev'])} | "
+                f"{_op_text(c['test'])} | {_op_text(c['real'])} |"
+            )
+    return "\n".join(lines) + "\n"
+
+
 # --- report ----------------------------------------------------------------------------
 
 
@@ -848,6 +950,8 @@ def render(result: Mapping[str, Any]) -> str:
             f"- {fp['source']} {fp['episode_id']}: "
             + "; ".join(f"{k}: {w}" for k, w in fp["why"].items())
         )
+    if "calibration" in result:
+        lines += ["", render_calibration(result["calibration"])]
     return "\n".join(lines) + "\n"
 
 
@@ -869,6 +973,7 @@ def run_meta(
         n, n_train=n_train, space=space, jobs=jobs, real_dirs=real_dirs
     )
     result = evaluate(rows, batches, reps=reps)
+    result["calibration"] = calibrate(rows)
     synthetic = sum(r.group != "real" for r in rows)
     result["meta"] = {
         "n_rows": len(rows),
@@ -927,6 +1032,7 @@ __all__ = [
     "EXCESS_USD_MINOR",
     "HARMS",
     "META_OFFSET",
+    "SOFT_THRESHOLDED",
     "TARGETS",
     "BatchRow",
     "CheckStats",
@@ -937,7 +1043,9 @@ __all__ = [
     "add_verifiers_parser",
     "auc",
     "build_corpus",
+    "calibrate",
     "check_stats",
+    "choose_threshold",
     "corpus_cases",
     "evaluate",
     "exploit_sources",

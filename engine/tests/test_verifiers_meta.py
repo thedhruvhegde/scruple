@@ -254,3 +254,59 @@ def test_cli_writes_json_and_table(tmp_path: Path) -> None:
     assert data["meta"]["n_real"] == 0 and data["meta"]["n_synthetic"] == len(data["rows"])
     assert "## checks on synthetic episodes" in (out / "VERIFIER_META.md").read_text()
     assert render(data).startswith("# verifier meta-evaluation")
+
+
+# --- threshold calibration ------------------------------------------------------------
+
+
+def _scored(split: str, score: float, harm: bool, i: int) -> Row:
+    return Row(
+        source="s",
+        group="reference",
+        split=split,  # type: ignore[arg-type]
+        index=i,
+        episode_id=f"e{i}",
+        harms=("excess_cost",) if harm else (),
+        attempted=False,
+        fired=("CF-01",) if score < 1 else (),
+        scores={"CF-01": score},
+        gate=True,
+        reward=1.0,
+    )
+
+
+@settings(max_examples=60, deadline=None)
+@given(
+    st.lists(st.tuples(st.sampled_from([0.0, 0.2, 0.5, 0.8, 0.95, 1.0]), st.booleans()),
+             min_size=1, max_size=40),
+    st.sampled_from([0.0, 0.05, 0.2]),
+)  # fmt: skip
+def test_chosen_threshold_meets_the_target_on_dev(
+    data: list[tuple[float, bool]], target: float
+) -> None:
+    from scruple.verifiers.meta import _op, choose_threshold
+
+    rows = [_scored("dev", s, h, i) for i, (s, h) in enumerate(data)]
+    t = choose_threshold(rows, "CF-01", target)
+    op = _op(rows, "CF-01", t)
+    assert op["fpr"] is None or op["fpr"] <= target + 1e-12
+    # most sensitive: the next candidate up would break the target (or there is none)
+    higher = sorted({s for s, _ in data if s > t} | ({1.0 + 1e-9} if t <= 1.0 else set()))
+    if higher:
+        nxt = _op(rows, "CF-01", higher[0])
+        assert nxt["fpr"] is not None and nxt["fpr"] > target
+
+
+def test_calibration_never_reads_the_test_split() -> None:
+    from scruple.verifiers.meta import calibrate
+
+    dev = [
+        _scored("dev", s, h, i) for i, (s, h) in enumerate([(0.2, True), (0.9, False), (1, False)])
+    ]
+    test_a = [_scored("test", 0.5, False, i) for i in range(5)]
+    test_b = [_scored("test", 0.99, True, i) for i in range(5)]
+    a, b = calibrate([*dev, *test_a]), calibrate([*dev, *test_b])
+    for f in ("0.01", "0.05"):
+        assert a["CF-01"]["chosen"][f]["threshold"] == b["CF-01"]["chosen"][f]["threshold"]
+        assert a["CF-01"]["chosen"][f]["dev"] == b["CF-01"]["chosen"][f]["dev"]
+    assert a["CF-01"]["chosen"]["0.05"]["test"] != b["CF-01"]["chosen"]["0.05"]["test"]
