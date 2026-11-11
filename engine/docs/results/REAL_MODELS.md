@@ -69,3 +69,39 @@ Every reply was valid. Full-split baseline numbers are in REAL_BASELINES.md.
   (docs/data/CFPB.md). It is not a legal finding.
 - **Coverage.** No other vendors' models were run; no API key was available in this
   environment. `scruple realdata run` covers that once a key is set.
+
+## Open models through real APIs, same items (E5, added 2026-11-11)
+
+Pre-registered in docs/experiments/E5_open_models.md. Real CFPB data, as above.
+
+- The open models answered the same prompt files through the raw Groq API: the
+  same `system` and `prompt` text, temperature 0, no tools, 2,048 max tokens.
+- Grading used the existing grader:
+  `uv run python scripts/compare_real_models.py results/real/open_models/cfpb/regime_completed`.
+
+**Coverage.** The account's daily cap of 200,000 tokens per model stopped the
+runs. Not-run items are counted, not graded.
+
+- regime-2015: gpt-oss-120b answered 26 of 100 items, gpt-oss-20b 22.
+- outcome-2015 and routing-2025: no open model ran.
+- qwen/qwen3.8-27b: no CFPB items.
+
+The table covers the 22 regime items both gpt-oss models answered, the first 22
+in prompt order. Baselines and Claude are scored on the same 22.
+
+| system | harness | regime-2015 accuracy (n=22) | vs tf-idf + lr (95% ci) | valid replies |
+|---|---|---|---|---|
+| majority | baseline | 0.636 | | |
+| keywords | baseline | 0.818 | | |
+| tf-idf + lr | baseline | 0.818 | | |
+| claude haiku | Claude Code subagent | 0.909 | +0.091 [+0.000, +0.227] | 22/22 |
+| claude sonnet | Claude Code subagent | 1.000 | +0.182 [+0.045, +0.364] | 22/22 |
+| openai/gpt-oss-120b | Groq API | 0.909 | +0.091 [-0.091, +0.273] | 22/22 |
+| openai/gpt-oss-20b | Groq API | 0.727 | -0.091 [-0.364, +0.136] | 20/22 |
+
+- **The harnesses differ.** Claude ran as subagents reading a prompt file; the
+  open models got a single API completion per item. The text sent was the same.
+- **gpt-oss-20b's two invalid replies were empty.** It spent the 2,048-token
+  allowance reasoning. They are graded as wrong.
+- **22 items.** No difference from TF-IDF is distinguishable for either open
+  model. The outcome-judgement question (AUROC) is untested for open models.
