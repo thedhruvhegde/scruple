@@ -64,7 +64,8 @@ a { color: inherit; }
 .msg.us .av { background: var(--on-accent); color: var(--accent); }
 .msg p.say { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-weight: 500; font-size: clamp(18px, 2.05vw, 28px); line-height: 1.22; letter-spacing: -0.02em; }
 .msg.them p.say { color: var(--fg); }
-.msg.us p.say b { color: var(--brass); font-weight: 700; }
+/* brass for the 128, in the light screen brass: the bone band brass is too dark to read on pine */
+.msg.us p.say b { color: var(--c-brass); font-weight: 700; }
 .struck { background-image: linear-gradient(var(--block), var(--block)); background-repeat: no-repeat; background-position: 0 58%; background-size: 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; color: var(--muted); }
 .msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px; align-items: stretch; }
 @media (max-width: 760px) { .msgs { grid-template-columns: minmax(0, 1fr); padding-block: 24px; } }
