@@ -227,6 +227,9 @@ operator cannot edit (it is the external anchor, docs/ARCHITECTURE.md section 6)
 `restore.sh` only restores into an empty database, then checks the checksum, the
 migration head, `scruple audit verify` (chain plus registry and decision
 projections) and that the recorded head entry is present and unchanged.
+With client tools newer than the server (pg_restore 17+ against a 16 server), it
+replays the archive through psql without the `SET transaction_timeout` line the
+older server rejects.
 
 Tested: `tests/test_deploy_backup.py` runs both scripts against the throwaway
 PostgreSQL cluster the storage tests use (populated by a real gate run), and

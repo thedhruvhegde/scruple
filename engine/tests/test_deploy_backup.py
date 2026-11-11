@@ -150,3 +150,39 @@ def test_restore_catches_a_dump_that_lost_the_recorded_head(
     (tmp_path / "b.head").write_text(f"{seq} {'0' * 64}\n")  # anchor that is not in the dump
     r = _run(RESTORE, prefix, dst)
     assert r.returncode == 1 and "does not match the head" in r.stderr
+
+
+def test_restore_with_client_tools_newer_than_the_server(
+    make_db: Callable[[], str], tmp_path: Path
+) -> None:
+    """CI regression: pg_restore 17+ emits `SET transaction_timeout`, which a 16
+    server rejects. The shim reports a newer major and behaves like one."""
+    real = shutil.which("pg_restore")
+    assert real is not None
+    shim = tmp_path / "bin"
+    shim.mkdir()
+    (shim / "pg_restore").write_text(
+        "#!/usr/bin/env bash\n"
+        'if [ "$1" = --version ]; then echo "pg_restore (PostgreSQL) 99.0"; exit 0; fi\n'
+        'for a in "$@"; do case "$a" in --dbname=*) echo "ERROR: transaction_timeout" >&2;'
+        " exit 1;; esac; done\n"
+        'echo "SET transaction_timeout = 0;"\n'
+        f'exec {real} "$@"\n'
+    )
+    (shim / "pg_restore").chmod(0o755)
+    src, dst = make_db(), make_db()
+    head = _populated(src)
+    prefix = tmp_path / "b"
+    assert _run(BACKUP, src, prefix).returncode == 0
+    env = _env()
+    env["PATH"] = f"{shim}:{env['PATH']}"
+    r = subprocess.run(
+        [str(RESTORE), str(prefix), dst], capture_output=True, text=True, env=env, check=False
+    )
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "replaying through psql" in r.stdout and "restore: OK" in r.stdout
+    g = AgentGate.open(dst)
+    try:
+        assert g.verify_integrity(head).ok
+    finally:
+        g.storage.close()
