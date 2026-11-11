@@ -296,3 +296,39 @@ uv run scruple ingest verify --store cases.db [--k 10] [--json]
 ## Backtest and calibration (`scruple.backtest`, `scruple.calibration`)
 
 - Imported histories feed the backtest and the aggregates-only calibration: docs/BACKTEST.md.
+
+## Policy files (`scruple.policy`, `scruple policy`)
+
+- One versioned file per tenant: YAML, TOML or JSON, `policy_version: 1`. Validated by
+  pydantic with unknown keys refused at every level (a typo is an error).
+- Sections: `stats` (provider `bootstrap`, `evalue` or `evalue_vr`, plus alpha, beta,
+  confidence, resamples, band edges), `case_types` (per case-type tolerance and minimum
+  detectable regression, keyed `scenario` or `scenario/<$80`; evalue providers only;
+  scenario and band checked against the gate's case types), `fairness` (verifier
+  profile: merchant, balanced, compliance), `approval` (an `ApprovalPolicy`), `canary`
+  (a `RampSchedule`).
+- Strict reading: 256 KiB cap, UTF-8 only, YAML via a `SafeLoader` subclass that refuses
+  duplicate keys (PyYAML keeps the last one silently), JSON duplicates refused too.
+- `policy_sha256`: SHA-256 of the canonical JSON of the validated policy. YAML, TOML and
+  JSON spellings, in any key order, hash the same.
+- Compiled onto `GateConfig` (`Policy.gate_config`), which then carries `policy_sha256`.
+  The hash ends up in every `decision.recorded` audit entry made under the policy, every
+  scorecard and every evidence pack. With no policy the field is left out, so existing
+  config hashes, scorecards and packs stay byte-identical.
+- Per tenant, append-only: table `tenant_policies` (created on first apply, never
+  updated). Each apply is audited as `policy.set` (number, name, hash, previous hash).
+  Applying the policy already in force is a no-op.
+- An `approval` section is applied through `AgentGate.set_approval_policy`, so only a
+  gate operator (`GateConfig.approvers`) can apply such a policy; a refusal writes nothing.
+- The API's per-tenant gates (`TenantGates`) read the current hash on each request and
+  rebuild the gate when it changes, so a policy applied from the CLI or another replica
+  applies on the next request.
+- Routes: `GET /policy` (read), `GET /policy/history` (read), `POST /policy` (admin).
+- CLI: `scruple policy validate FILE...` (exit 1 if any invalid), `show FILE|--current`,
+  `diff OLD NEW` (either may be `@current`; exit 1 when they differ), `apply FILE --actor`,
+  `history`.
+- Not done: the fairness profile is carried and hashed but the gate's own checks do not
+  read it (the verifier profiles score episodes, `scruple.verifiers.profiles`); the canary
+  ramp from the policy is returned by `Policy.ramp()` for whoever starts a ramp. Example
+  thresholds are configuration, not a statement of what any institution requires
+  (ASSUMPTION).

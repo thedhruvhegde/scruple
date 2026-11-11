@@ -137,12 +137,16 @@ class WhoAmI(BaseModel):
 
 
 class TenantGates:
-    """One `AgentGate` per tenant over the same storage, made on first use."""
+    """One `AgentGate` per tenant over the same storage, made on first use, under the
+    tenant's current policy (`scruple.policy`) when it has one."""
 
     def __init__(self, root: AgentGate) -> None:
+        from scruple.policy.apply import PolicyGates
+
         self._root = root
         self._gates = {root.storage.tenant: root}
         self._lock = threading.Lock()
+        self._policies = PolicyGates()  # each tenant's policy file, if it has one
 
     def get(self, tenant: str) -> AgentGate:
         with self._lock:
@@ -151,7 +155,8 @@ class TenantGates:
                 g = AgentGate(r.storage.for_tenant(tenant), r.clock, r.config)
                 g.bootstrap_baseline()
                 self._gates[tenant] = g
-            return self._gates[tenant]
+            base = self._gates[tenant]
+        return self._policies.gate(base)
 
 
 def tenant_gate(request: Request, principal: CurrentPrincipal) -> AgentGate:
@@ -248,6 +253,10 @@ def create_app(
     app.include_router(health_router(root, settings))
     # HTML console at /console (scruple/console): the caller's tenant only, like the API.
     app.include_router(console_router(app.state.gates.get))
+    # Tenant policy files (scruple.policy): read, history, and admin-only apply.
+    from scruple.policy.api import policy_router
+
+    app.include_router(policy_router(app.state.gates.get))
     with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
         app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
 

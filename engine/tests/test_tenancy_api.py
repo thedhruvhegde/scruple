@@ -58,9 +58,10 @@ LISTS = {
     "/console/diff/rules",
     "/console/diff/agents",
     "/console/backtests",
+    "/policy/history",
 }
 # Routes that create in the caller's own tenant.
-CREATES = {"/rules", "/jobs"}
+CREATES = {"/rules", "/jobs", "/policy"}
 CFG = GateConfig(n_cases=1_000, bootstrap_resamples=100, canary_n_cases=1_000)
 
 

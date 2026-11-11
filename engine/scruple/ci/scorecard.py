@@ -114,11 +114,13 @@ class Scorecard(BaseModel):
     # it, `verdict` is the worse of `synthetic_verdict` and `history.verdict`.
     synthetic_verdict: Verdict | None = None
     history: HistoryGate | None = None
+    # The tenant policy the gate ran under (scruple.policy); omitted without one.
+    policy_sha256: str | None = None
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
         data: dict[str, Any] = handler(self)
-        for k in ("evalue", "canary_sequential", "synthetic_verdict", "history"):
+        for k in ("evalue", "canary_sequential", "synthetic_verdict", "history", "policy_sha256"):
             if data.get(k) is None:
                 data.pop(k, None)
         return data
@@ -247,6 +249,7 @@ def build_scorecard(
         canary=canary_line,
         config_sha256=content_hash(config),
         audit_head=audit_head,
+        policy_sha256=config.policy_sha256,
         evalue=None if shadow is None else shadow.evalue,
         canary_sequential=None if canary is None else canary.sequential,
     )
