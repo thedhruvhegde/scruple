@@ -100,12 +100,35 @@
     draw(pre, [top, [[" ".repeat(cx) + "^ ", "f"], [note, "d"]]]);
   }
 
+  /* ---------- stamp: BLOCKED, set in a box of characters ---------- */
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let stampKey = "", landT = 0;
+  function stamp(ep, pos, notes) {
+    const box = $("#stamp"), N = ep.steps.length, ids = [];
+    for (const [i, list] of notes) if (i < pos || pos >= N) for (const [c] of list) if (c.hard && !ids.includes(c.id)) ids.push(c.id);
+    const key = ids.length ? ep.episode_id + ids.join() : "";
+    if (!ids.length) { box.hidden = true; stampKey = ""; return; }
+    const lines = ["BLOCKED", ids.join(" ")];
+    const w = Math.max(...lines.map((l) => l.length)) + 4;
+    const pad = (t) => { const l = Math.floor((w - t.length) / 2); return " ".repeat(l) + t + " ".repeat(w - t.length - l); };
+    box.textContent = ["#" + "=".repeat(w) + "#", ...lines.map((l) => "#" + pad(l) + "#"), "#" + "=".repeat(w) + "#"].join("\n");
+    box.style.top = $("#trace").offsetTop + 14 + "px";
+    box.hidden = false;
+    if (key !== stampKey && !reduce) {
+      box.classList.add("land");
+      clearTimeout(landT);
+      landT = setTimeout(() => box.classList.remove("land"), 90);
+    }
+    stampKey = key;
+  }
+
   let last = null, lastW = 0;
   function render(d) {
     last = d;
     caseFile(d.ep);
     rules();
     timeline(d.ep, d.pos);
+    stamp(d.ep, d.pos, d.notes);
     lastW = cols($("#casefile"));
   }
   document.addEventListener("replay", (e) => render(e.detail));

@@ -175,6 +175,10 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
 /* the dispute's stages under the replay; the current one is inverted */
 .timeline { border-top: 1px solid var(--scr-edge); white-space: pre; overflow: hidden; color: var(--c-dim); }
 .timeline b.c-now { background: var(--c-fg); color: var(--scr-bg); font-weight: 600; }
+/* a rubber stamp when the replay reaches a hard check that fails; it lands in two steps, no fade */
+.stamp { position: absolute; right: 22px; margin: 0; z-index: 2; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.3; font-weight: 600; color: var(--c-verm); background: var(--scr-bg); padding: 2px 0; transform: rotate(-4deg); pointer-events: none; }
+.stamp.land { transform: rotate(-9deg) scale(1.18); }
+@media (max-width: 760px) { .stamp { font-size: 11px; right: 14px; } }
 .spk { display: block; line-height: 1.15; margin-bottom: 7px; }
 .c-f { color: var(--c-fg); } .c-d { color: var(--c-mute); } .c-g { color: var(--c-pine); } .c-b { color: var(--c-brass); } .c-v { color: var(--c-verm); } .c-s { color: var(--c-sky); }
 
@@ -401,6 +405,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
             <pre class="term casefile" id="casefile" aria-hidden="true"></pre>
             <div id="trace" tabindex="0" aria-label="Replay of tool calls"><pre class="term rules" id="rules" aria-hidden="true"></pre><pre class="term trace" id="trace-pre"></pre></div>
             <pre class="term timeline" id="timeline" aria-hidden="true"></pre>
+            <pre class="stamp" id="stamp" hidden></pre>
           </div>
           <div class="ctrl">
             <button type="button" class="btn" id="b-play">Play</button>
