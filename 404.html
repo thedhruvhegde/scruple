@@ -111,6 +111,14 @@ p { margin: 0; max-width: 46ch; color: var(--muted); }
 .btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .links { display: flex; flex-wrap: wrap; gap: 10px; max-width: none; }
 .links .btn { margin-top: 0; }
+/* a receipt for the request, with the missing line, and the mark tipped over */
+.scene { display: flex; flex-wrap: wrap; align-items: end; gap: 32px 56px; margin-top: 40px; }
+.scene pre { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.45; margin: 0; color: var(--fg); }
+.scene b { color: var(--brass); font-weight: 600; }
+.tip { margin: 0; }
+.tip pre { font-size: 15px; line-height: 1.2; min-height: 7.2em; }
+.tip figcaption { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; color: var(--muted); margin-top: 10px; }
+@media (max-width: 400px) { .scene pre { font-size: 11px; } }
 </style>
 </head>
 <body>
@@ -140,7 +148,51 @@ p { margin: 0; max-width: 46ch; color: var(--muted); }
   <h1>Nothing at this address.</h1>
   <p>The page you asked for does not exist. The site has three pages: home, results and the paper.</p>
   <p class="links"><a class="btn" href="/scruple/">Back to scruple</a><a class="btn" href="/scruple/results/">Results</a><a class="btn" href="/scruple/paper/">Paper</a></p>
+  <div class="scene" aria-hidden="true">
+    <pre class="receipt"> ________________________________
+|                                |
+|        SCRUPLE / LEDGER        |
+|        request receipt         |
+|  ----------------------------  |
+|  01  /scruple/          found  |
+|  02  /scruple/results/  found  |
+|  03  /scruple/paper/    found  |
+|  <b id="miss">04  this address     missing</b>  |
+|  ----------------------------  |
+|  postings at this address   0  |
+|  status                   404  |
+|                                |
+|           <b>[ VOID ]</b>             |
+|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\|</pre>
+    <figure class="tip"><pre id="tip">             _.=
+         _.=''
+     _.=''
+ _.=''/\
+<b>[#]</b>  /__\</pre><figcaption>nothing to weigh at this address</figcaption></figure>
+  </div>
 </main>
 <script src="/scruple/nav.js" defer></script>
+<script>
+(() => {
+  "use strict";
+  // the requested path goes on the missing line, cut to fit the receipt
+  const miss = document.getElementById("miss"), W = 28, tail = "missing";
+  let path = location.pathname.replace(/\/+$/, "") || "/";
+  const room = W - 4 - tail.length - 1;
+  if (path.length > room) path = "..." + path.slice(-(room - 3));
+  miss.textContent = "04  " + path + " ".repeat(W - 4 - path.length - tail.length) + tail;
+  // the mark tips over once, in three steps, then stays still; reduced motion shows the last frame
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const tip = document.getElementById("tip"), last = tip.innerHTML;
+  const F = [
+    "\n\n <b>[#]</b>\n===============\n      /\\\n     /__\\",
+    "\n\n <b>[#]</b>        _.==\n====.__.==''\n      /\\\n     /__\\",
+    "\n              _.=\n          _.=''\n <b>[#]</b> _.=''\n==''  /\\\n     /__\\",
+  ];
+  tip.innerHTML = F[0];
+  [1, 2].forEach((i) => setTimeout(() => { tip.innerHTML = F[i]; }, 500 + i * 180));
+  setTimeout(() => { tip.innerHTML = last; }, 500 + 3 * 180);
+})();
+</script>
 </body>
 </html>
