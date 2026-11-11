@@ -426,3 +426,40 @@ def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
     ).hexdigest()
     return any(hmac.compare_digest(expected, s) for s in sigs)
 ```
+
+## Jira and Linear change tickets (`scruple.integrations.tickets`)
+
+- One issue per candidate (rule id at a version) per tracker: the first gate decision
+  about it opens the issue (decision, stage, outcome, summary, reasons, content hash,
+  decision hash, audit seq, policy hash, report path, and a note that gate numbers are
+  synthetic); every later decision adds a comment. `GET /integrations/tickets` (read).
+- Configured per tenant in `IntegrationSettings`:
+  `jira: {base_url, email, api_token_env, project_key, issue_type, labels}` and
+  `linear: {api_key_env, team_id}`. Secrets by environment variable, tenant prefix only.
+- Outbound connector interface (`Connector`: `find`, `create`, `update`), two
+  implementations, both through `SafeHttp` (the Jira site URL is the tenant's, so the
+  SSRF rules apply to it):
+  - Jira Cloud REST v3 (Atlassian's public REST reference): `POST /rest/api/3/issue`
+    with `project.key`, `summary`, `issuetype.name`, `labels` and an Atlassian Document
+    Format `description`; `POST /rest/api/3/issue/{key}/comment`;
+    `GET /rest/api/3/search/jql` to find an issue by its marker label. Basic auth with
+    the account email and an API token.
+  - Linear GraphQL (`https://api.linear.app/graphql`, Linear's public API docs):
+    `issueCreate(input: {id, teamId, title, description})`,
+    `commentCreate(input: {id, issueId, body})`, `issue(id)`. Personal API key in the
+    `Authorization` header without a prefix.
+- Idempotent by decision id: one `ticket_sync` job per (tracker, decision), key
+  `ticket:<tracker>:<decision id>`; `ticket_updates` records each decision once done, so
+  a retry or a second dispatch sends nothing. Creating the candidate's issue is claimed
+  with a row first, so two jobs never both create it; a failed attempt releases the
+  claim; a crashed worker's claim is taken over after two minutes, after searching the
+  tracker for the issue it may have created (Jira: a `scruple-<hash>` marker label
+  that names neither the tenant nor the rule; Linear: the issue id).
+- Linear issue and comment ids are UUIDs (version-4 format) derived from tenant and
+  candidate or decision, so a lost response never duplicates either.
+- Errors: network errors, 429 and 5xx are retried by the job queue (8 attempts); other
+  4xx fail at once.
+- Not done: Jira has no client-chosen comment ids, so a crash after Jira accepted a
+  comment and before it was recorded repeats that comment once. Issues are never
+  transitioned or closed; the connectors were tested against fakes built from the
+  public API references, not against live Jira or Linear.

@@ -14,6 +14,7 @@ from typing import Any
 
 from scruple.clock import Clock
 from scruple.integrations.runtime import Runtime
+from scruple.integrations.tickets import PROVIDERS, TICKET_KIND, sync
 from scruple.integrations.webhooks import WEBHOOK_KIND, deliver
 from scruple.jobs.worker import Handler, JobContext, PermanentJobError
 from scruple.storage.base import DEFAULT_TENANT
@@ -56,11 +57,25 @@ def make_handlers(
         finally:
             storage.close()
 
-    return {WEBHOOK_KIND: webhook}
+    def ticket(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+        provider, event_id = params.get("provider"), params.get("event_id")
+        if provider not in PROVIDERS or not isinstance(event_id, str):
+            raise PermanentJobError("params.provider and params.event_id are required")
+        storage = _storage(ctx)
+        try:
+            return sync(storage, rt(), str(provider), event_id, clock=clock)
+        finally:
+            storage.close()
+
+    return {WEBHOOK_KIND: webhook, TICKET_KIND: ticket}
+
+
+def ticket_sync(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+    return make_handlers()[TICKET_KIND](ctx, params)
 
 
 def webhook_deliver(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
     return make_handlers()[WEBHOOK_KIND](ctx, params)
 
 
-__all__ = ["make_handlers", "webhook_deliver"]
+__all__ = ["make_handlers", "ticket_sync", "webhook_deliver"]

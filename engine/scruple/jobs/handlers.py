@@ -177,12 +177,20 @@ def webhook_deliver(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
     return run(ctx, params)
 
 
+def ticket_sync(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+    """One Jira or Linear change-ticket update (scruple.integrations.tickets)."""
+    from scruple.integrations.jobs import ticket_sync as run
+
+    return run(ctx, params)
+
+
 HANDLERS: dict[str, Handler] = {
     JobKind.GATE_EVALUATION.value: gate_evaluation,
     JobKind.BACKTEST.value: backtest,
     JobKind.BENCH_SCORE.value: bench_score,
     "retention_apply": retention_apply,
     "webhook_deliver": webhook_deliver,
+    "ticket_sync": ticket_sync,
 }
 
 __all__ = [
@@ -191,5 +199,6 @@ __all__ = [
     "bench_score",
     "gate_evaluation",
     "retention_apply",
+    "ticket_sync",
     "webhook_deliver",
 ]
