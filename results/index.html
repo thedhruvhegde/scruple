@@ -59,21 +59,50 @@ a { color: inherit; }
 .band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .page { max-width: 1240px; margin: 0 auto; }
 
-/* ---------- bar ---------- */
+/* ---------- bar ----------
+   Shared by every page: copy this block with nav.js. ul.nav-sec holds in-page anchors,
+   ul.nav-pg holds the pages (arrow suffix, aria-current="page" on the page you are on). */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 32px; height: 60px; }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 24px; height: 60px; position: relative; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
 .brand svg { width: 24px; height: 24px; display: block; }
 .brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-.nav { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.nav::-webkit-scrollbar { display: none; }
-.nav a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 2px; }
+.nav-pg { margin-left: auto !important; }
+.nav-pg::before { content: "|"; color: var(--rule-strong); padding: 0 8px 0 0; }
+.nav a { position: relative; display: block; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav-pg a { color: var(--fg); }
+.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
+.nav-pg a[aria-current="page"] { font-weight: 600; }
+.nav-sec a[aria-current] { color: var(--fg); }
+.nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { position: absolute; top: 6px; }
+.nav-sec a[aria-current]::before { content: "["; left: 1px; }
+.nav-sec a[aria-current]::after { content: "]"; right: 1px; }
 .nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
 .toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
 .toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
 .toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; } }
+.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
+.skip:focus { transform: none; outline: none; }
+main:focus { outline: none; }
+.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
+.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); outline: none; }
+/* under 1100px the links fold into a [ MENU ] panel that drops over the page, so nothing reflows */
+@media (max-width: 1100px) {
+  .bar-in { height: 52px; gap: 12px; }
+  .menu { display: block; margin-left: auto; }
+  .nav { display: none; position: absolute; top: calc(100% + 1px); left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    flex-direction: column; align-items: stretch; gap: 10px; background: var(--bg); border-bottom: 1px solid var(--rule-strong); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); font-size: 13px; }
+  .bar.open .nav { display: flex; }
+  .nav ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 12px; }
+  .nav-pg { margin-left: 0 !important; padding-top: 10px !important; border-top: 1px dashed var(--rule-strong) !important; }
+  .nav-pg::before { display: none; }
+  .nav a { padding: 10px; width: fit-content; }
+  .nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { top: 10px; }
+}
+@media (max-width: 380px) { .brand span { display: none; } }
 
 /* ---------- rows ---------- */
 .row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; padding-block: 88px; scroll-margin-top: 64px; }
@@ -232,11 +261,14 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
   </defs>
 </svg>
 
+<a class="skip" href="#top">Skip to content</a>
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="../" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#real">Real data</a><a href="#watch">Watch a case</a><a href="#experiments">Experiments</a><a href="../paper/">Paper</a><a href="#sources">Sources</a>
+    <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
+    <nav class="nav" id="nav" aria-label="Site">
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#real">Real data</a></li><li><a href="#watch">Watch a case</a></li><li><a href="#experiments">Experiments</a></li><li><a href="#sources">Sources</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="./" aria-current="page">Results</a></li><li><a href="../paper/">Paper</a></li></ul>
     </nav>
     <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
   </div>
@@ -392,6 +424,7 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
   </section>
 </main>
 
+<script src="../nav.js" defer></script>
 <script src="results.js"></script>
 </body>
 </html>
