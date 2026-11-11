@@ -131,6 +131,8 @@
   "AP-08": "new_vendor"
  },
  "outcome": {
+  "changes": {},
+  "correct_changes": 0,
   "correct_invoices": 8,
   "dispositions": {
    "AP-01": "held",
@@ -144,6 +146,7 @@
   },
   "invoices": 8,
   "lost_minor": 0,
+  "misdirected_minor": 0,
   "overpaid_minor": 0,
   "paid_minor": 4043956
  },
@@ -156,5 +159,5 @@
  },
  "seed": 7,
  "synthetic": true,
- "trace_head": "4feb6ae9783755ca999b2b7d1144d32069680437f569d27421c0b258051849b3"
+ "trace_head": "6039b9caae66555aae074c52ebeed8e3e9b6e50ffce221eaf9427b40de64f129"
 }

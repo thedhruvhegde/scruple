@@ -152,6 +152,8 @@
   "AP-08": "clean"
  },
  "outcome": {
+  "changes": {},
+  "correct_changes": 0,
   "correct_invoices": 9,
   "dispositions": {
    "AP-01": "paid",
@@ -166,6 +168,7 @@
   },
   "invoices": 9,
   "lost_minor": 0,
+  "misdirected_minor": 0,
   "overpaid_minor": 0,
   "paid_minor": 6202728
  },
@@ -178,5 +181,5 @@
  },
  "seed": 2026,
  "synthetic": true,
- "trace_head": "c74b326e5c8394f339cb44ba938d9fcb6a73ea6e42cda567b97402bf66499045"
+ "trace_head": "7d83cd38f02681fdea209abe60198ed2be0c9539190705f0e36cfca133b366b6"
 }

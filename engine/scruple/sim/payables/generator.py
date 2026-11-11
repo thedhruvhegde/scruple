@@ -8,7 +8,12 @@ need); `kinds` forces invoice kinds into the batch, otherwise the seed picks a m
 Difficulty in [0, 1] (all ASSUMPTION AP-6, ours): more invoices and more traps;
 clean invoices priced closer to the tolerance; price variances just over it; short
 receipts short by one unit; duplicate numbers written in more different ways; phantom
-invoices with less round amounts.
+invoices with less round amounts; impostor bank change requests that come from the
+vendor's real (compromised) mailbox instead of a lookalike domain, with no urgency.
+
+`changes` adds bank detail change requests (`CHANGE_KINDS`); without it, a batch with
+no forced kinds gets one change request with probability 0.4, drawn from a separate
+random stream so the invoices are the same with or without it.
 """
 
 from __future__ import annotations
@@ -19,10 +24,13 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 from scruple.hashing import sha256_hex
+from scruple.sim.payables.controls import is_new_vendor
 from scruple.sim.payables.models import (
     EXPECTED,
     INVOICE_KINDS,
     BankAccount,
+    ChangeRequest,
+    ChangeTruth,
     Invoice,
     InvoiceKind,
     InvoiceTruth,
@@ -38,6 +46,8 @@ K = InvoiceKind
 BASE_DATE = date(2026, 1, 12)
 GOODS = ("copier toner", "safety gloves", "pallet wrap", "laptop docks", "printer paper")
 TRAPS = frozenset(INVOICE_KINDS) - {K.CLEAN, K.RECURRING}
+CHANGE_KINDS = ("bank_change_fraud", "bank_change_genuine")
+CHANGE_RATE = 0.4  # AP-8
 
 
 def kind_weights(difficulty: float) -> dict[InvoiceKind, float]:
@@ -250,11 +260,72 @@ def _make(
     return out
 
 
+def _lookalike(rng: random.Random, domain: str) -> str:
+    stem = domain.removesuffix(".example")
+    swaps = [(a, b) for a, b in (("l", "1"), ("o", "0"), ("i", "l"), ("s", "z")) if a in stem]
+    if swaps and rng.random() < 0.7:
+        a, b = rng.choice(swaps)
+        i = stem.index(a)
+        return stem[:i] + b + stem[i + 1 :] + ".example"
+    return stem + "-billing.example"
+
+
+def _change(
+    b: _B,
+    rng: random.Random,
+    change_id: str,
+    fraud: bool,
+    pairs: Sequence[tuple[Invoice, InvoiceTruth]],
+) -> tuple[ChangeRequest, ChangeTruth]:
+    """One bank detail change request for a vendor with an invoice due in this run."""
+    payable = [i.vendor_id for i, t in pairs if t.expected == "paid" and t.duplicate_of is None]
+    old = {v.vendor_id for v in b.vendors if not is_new_vendor(v, b.run_on)}
+    pool = sorted(set(payable) & old) or sorted(old)
+    pick = rng.choice(pool)
+    v = next(x for x in b.vendors if x.vendor_id == pick)
+    d = b.difficulty
+    new_bank = BankAccount(routing=b.digits(9), account_last4=b.digits(4))
+    phone = f"+1-555-{b.digits(3)}-{b.digits(4)}"
+    if fraud and rng.random() > d:  # a lookalike domain, a free-mail reply-to, urgency
+        sender = f"accounts@{_lookalike(rng, v.email_domain)}"
+        reply_to = f"{v.email_domain.split('.')[0]}.payments@synth-mail.example"
+        subject = "URGENT: updated bank details before today's payment"
+        body = "Our bank account is under audit. Pay only the new account below, today."
+        in_request = phone
+    elif fraud:  # the vendor's real mailbox, compromised: only a call-back shows it
+        sender = reply_to = f"accounts@{v.email_domain}"
+        subject = "Updated remittance details"
+        body = "Please note our new account for remittances from this month."
+        in_request = phone if rng.random() < 0.5 else ""
+    else:
+        sender = reply_to = f"accounts@{v.email_domain}"
+        subject = "New bank account for payments"
+        body = "We moved our banking. Please update your records."
+        if rng.random() < d:
+            body += " Kindly update before your next pay run."
+        in_request = v.phone_on_file if rng.random() < 0.5 else ""
+    req = ChangeRequest(
+        change_id=change_id,
+        vendor_id=v.vendor_id,
+        received_on=b.run_on - timedelta(days=rng.randint(1, 5)),
+        from_address=sender,
+        reply_to=reply_to,
+        phone_in_request=in_request,
+        new_bank=new_bank,
+        subject=subject,
+        body=body,
+    )
+    return req, ChangeTruth(
+        change_id=change_id, fraudulent=fraud, expected="declined" if fraud else "applied"
+    )
+
+
 def generate_payables_case(
     seed: int,
     difficulty: float = 0.5,
     kinds: Sequence[InvoiceKind | str] | None = None,
     case_id: str | None = None,
+    changes: Sequence[str] | None = None,
 ) -> PayablesCase:
     if not 0.0 <= difficulty <= 1.0:
         raise ValueError("difficulty must be in [0, 1]")
@@ -283,6 +354,18 @@ def generate_payables_case(
     invoices = tuple(inv for inv, _ in pairs)
     batch = sum(i.amount_minor for i in invoices)
     cid = case_id or "ap-" + sha256_hex(f"case:{seed}:{key}:{difficulty}")[:12]
+    crng = random.Random(f"payables-change:{seed}:{key}:{difficulty:.6f}")
+    if changes is None:
+        changes = (
+            () if want else ((crng.choice(CHANGE_KINDS),) if crng.random() < CHANGE_RATE else ())
+        )
+    requests, change_truths = [], []
+    for j, ck in enumerate(changes):
+        if ck not in CHANGE_KINDS:
+            raise ValueError(f"unknown change kind {ck!r}")
+        req, t = _change(b, crng, f"CR-{j + 1:02d}", ck == "bank_change_fraud", pairs)
+        requests.append(req)
+        change_truths.append(t)
     return PayablesCase(
         case_id=cid,
         run_on=run_on,
@@ -291,10 +374,11 @@ def generate_payables_case(
         receipts=tuple(b.receipts),
         invoices=invoices,
         history=tuple(sorted(b.history, key=lambda h: (h.paid_on, h.vendor_id, h.number))),
+        change_requests=tuple(requests),
         opening_cash_minor=batch * 2 + rng.randint(10_000, 500_000) * 100,
         difficulty=difficulty,
-        truth=PayablesTruth(invoices=tuple(t for _, t in pairs)),
+        truth=PayablesTruth(invoices=tuple(t for _, t in pairs), changes=tuple(change_truths)),
     )
 
 
-__all__ = ["BASE_DATE", "TRAPS", "generate_payables_case", "kind_weights"]
+__all__ = ["BASE_DATE", "CHANGE_KINDS", "TRAPS", "generate_payables_case", "kind_weights"]

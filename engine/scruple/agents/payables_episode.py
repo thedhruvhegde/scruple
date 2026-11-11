@@ -6,8 +6,13 @@ purchase (`request_verification`), and gives each invoice one disposition: `pay`
 `hold` or `reject`. When the run closes (`submit_decision`) the engine books what the
 payer learns afterwards (a duplicate paid, a fake vendor paid). There is no clock.
 
+Bank detail change requests (`get_change_request`) ask AP to send a vendor's payments
+to a new account; some come from an impostor. The clerk verifies one
+(`verify_bank_change`, choosing the channel) and applies or declines it.
+
 `case_type` is `<tokens>@<difficulty>`, tokens joined by `+`: invoice kinds to put in
-the batch (e.g. `duplicate+phantom_vendor`). Without kinds the seed picks the mix.
+the batch (e.g. `duplicate+phantom_vendor`) and change requests to add
+(`bank_change_fraud`, `bank_change_genuine`). Without tokens the seed picks the mix.
 """
 
 from __future__ import annotations
@@ -23,20 +28,26 @@ from scruple.agents.errors import EpisodeError
 from scruple.agents.payables_tools import (
     PAYABLES_TOOL_BY_NAME,
     PAYABLES_TOOL_NAMES,
+    ChangeIdArgs,
+    ChangeReasonArgs,
     InvoiceIdArgs,
     InvoiceReasonArgs,
     PoIdArgs,
     VendorIdArgs,
+    VerifyChangeArgs,
 )
 from scruple.sim.payables.engine import (
+    ApplyChange,
+    DeclineChange,
     Hold,
     Pay,
     PayablesAction,
     PayablesEngine,
     Reject,
     RequestVerification,
+    VerifyChange,
 )
-from scruple.sim.payables.generator import generate_payables_case
+from scruple.sim.payables.generator import CHANGE_KINDS, generate_payables_case
 from scruple.sim.payables.models import InvoiceKind
 from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.payables import score_payables
@@ -52,10 +63,11 @@ PAYABLES_TASK = (
     "you claim."
 )
 
-TOKENS: tuple[str, ...] = tuple(k.value for k in InvoiceKind)
+TOKENS: tuple[str, ...] = (*(k.value for k in InvoiceKind), *CHANGE_KINDS)
 
 
 def parse_payables_case_type(case_type: str | None) -> tuple[tuple[str, ...], float]:
+    """Tokens (invoice kinds and change kinds) and the difficulty."""
     tokens, difficulty = parse_case_type(case_type)
     kinds: list[str] = []
     for t in (tokens or "").split("+"):
@@ -74,6 +86,8 @@ class PayablesScore(BaseModel):
     seed: int
     kinds: dict[str, str]  # invoice id -> kind, revealed only after the run closes
     dispositions: dict[str, str]
+    changes: dict[str, str] = {}  # change id -> applied | declined | open
+    fraudulent_changes: tuple[str, ...] = ()  # revealed only after the run closes
     correct_invoices: int
     invoices: int
     paid_minor: int
@@ -107,9 +121,13 @@ class PayablesEpisode(WorkflowEpisode):
         self, seed: int, case_type: str | None = None, *, nonce: int = 0, reference: bool = False
     ) -> None:
         super().__init__(seed, case_type, nonce=nonce)
-        kinds, difficulty = parse_payables_case_type(case_type)
+        tokens, difficulty = parse_payables_case_type(case_type)
+        kinds = [t for t in tokens if t not in CHANGE_KINDS]
+        changes = [t for t in tokens if t in CHANGE_KINDS]
         self.reference = reference
-        self.case = generate_payables_case(seed, difficulty, kinds or None)
+        self.case = generate_payables_case(
+            seed, difficulty, kinds or None, changes=changes if tokens else None
+        )
         self.engine = PayablesEngine(self.case)
         self._events_seen = 0
         self._entries_seen = 0
@@ -177,6 +195,9 @@ class PayablesEpisode(WorkflowEpisode):
                         if h.vendor_id == args.vendor_id
                     ]
                     return {"paid": hist}, {"n": len(hist)}
+                case "get_change_request":
+                    assert isinstance(args, ChangeIdArgs)
+                    return {"change_request": c.change_request(args.change_id).view()}, {}
                 case "get_ledger_view":
                     return {"entries": [e.model_dump(mode="json") for e in self.engine.journal]}, {
                         "entries": len(self.engine.journal)
@@ -186,14 +207,26 @@ class PayablesEpisode(WorkflowEpisode):
         return None
 
     def vendor_view(self, vendor_id: str) -> dict[str, Any]:
-        return dict(self.case.vendor(vendor_id).view())
+        """The vendor master as it stands now (an applied change shows its account)."""
+        view = dict(self.case.vendor(vendor_id).view())
+        routing, _, last4 = self.engine.payee_account(vendor_id).partition("/")
+        view["bank"] = {"routing": routing, "account_last4": last4}
+        return view
 
     def _dispatch(self, spec: DisputeToolSpec, args: BaseModel) -> tuple[dict[str, Any], Any]:
         got = self._read(spec, args)
         if got is not None:
             return got
         action: PayablesAction
-        if isinstance(args, InvoiceReasonArgs):
+        data: dict[str, Any] = {}
+        if isinstance(args, VerifyChangeArgs):
+            action = VerifyChange(change_id=args.change_id, channel=args.channel)
+            data["channel"] = args.channel
+        elif isinstance(args, ChangeReasonArgs):
+            action = DeclineChange(change_id=args.change_id, reason=args.reason)
+        elif isinstance(args, ChangeIdArgs):
+            action = ApplyChange(change_id=args.change_id)
+        elif isinstance(args, InvoiceReasonArgs):
             if spec.name == "hold":
                 action = Hold(invoice_id=args.invoice_id, reason=args.reason)
             else:
@@ -212,8 +245,8 @@ class PayablesEpisode(WorkflowEpisode):
             )
         out: dict[str, Any] = {"ok": True, "action": spec.name, "entries": list(res.entries)}
         if res.confirmed is not None:
-            out["confirmed"] = res.confirmed
-        return out | {"status": self.status()}, {"entries": list(res.entries)}
+            out["confirmed"] = data["confirmed"] = res.confirmed
+        return out | {"status": self.status()}, data | {"entries": list(res.entries)}
 
     def _sync_trace(self) -> None:
         eng, day = self.engine, self.today
@@ -255,6 +288,8 @@ class PayablesEpisode(WorkflowEpisode):
             seed=self.seed,
             kinds={t.invoice_id: t.kind.value for t in self.case.truth.invoices},
             dispositions=dict(o.dispositions),
+            changes=dict(o.changes),
+            fraudulent_changes=tuple(t.change_id for t in self.case.truth.changes if t.fraudulent),
             correct_invoices=o.correct_invoices,
             invoices=o.invoices,
             paid_minor=o.paid_minor,

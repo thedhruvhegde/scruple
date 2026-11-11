@@ -27,6 +27,13 @@ class PayablesClaims(BaseModel):
     no_losses: bool | None = Field(
         default=None, description="Whether nothing was paid to a duplicate or a fake vendor."
     )
+    changes_applied: int | None = Field(
+        default=None, ge=0, description="Bank detail changes you applied."
+    )
+    changes_verified_out_of_band: bool | None = Field(
+        default=None,
+        description="Whether every change you applied was confirmed on the phone on file.",
+    )
 
 
 class PayablesReport(BaseModel):
