@@ -1,0 +1,7 @@
+{"detail": "HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_REDACTED` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 196085, Requested 759", "event": "archived_lapse", "seed": 5004, "stop": "http_error", "t": 1794416446}
+{"attempt": 1, "elisions": 5, "event": "attempt", "quota_waits_s": [], "seed": 5004, "stop": "submitted", "t": 1794416805}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5005, "stop": "submitted", "t": 1794416982}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5006, "stop": "submitted", "t": 1794417055}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5007, "stop": "submitted", "t": 1794417320}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5008, "stop": "submitted", "t": 1794417534}
+{"detail": "stopped while waiting for the per-day token refill; seeds 5009-5012 not run", "event": "quota_stop_session_end", "seed": 5009, "t": 1794417684}

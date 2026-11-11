@@ -1,0 +1,102 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-47c1cb9acc40bf72"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b6e7d4cd79a1eb7c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-ec3fe8d87a8d4685"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-091194a91bb69fb9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-80a453c8cc155b0c"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-47c1cb9acc40bf72",
+     "ev-b6e7d4cd79a1eb7c",
+     "ev-ec3fe8d87a8d4685",
+     "ev-091194a91bb69fb9",
+     "ev-80a453c8cc155b0c"
+    ],
+    "narrative": "Goods or Services Not Provided"
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-47c1cb9acc40bf72",
+      "ev-b6e7d4cd79a1eb7c",
+      "ev-ec3fe8d87a8d4685",
+      "ev-091194a91bb69fb9",
+      "ev-80a453c8cc155b0c"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1
+    },
+    "confidence": 0.95,
+    "explanation": "Goods or Services Not Provided"
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5005
+}

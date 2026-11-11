@@ -1,0 +1,105 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b4f868d7ea100c1a"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0bc6f6773eda5bc7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "Is this chargeback filed as a duplicate transaction or an incorrect amount? If duplicate, please provide the reference number of the original transaction. If incorrect amount, what amount was the cardholder charged versus what they expected?"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "fields": {
+     "amount_minor": "8385",
+     "auth_code": "119763",
+     "batch_id": "BATCH-20260206-001",
+     "currency": "USD",
+     "merchant_ref": "ca46d88a1059",
+     "settlement_date": "2026-02-06",
+     "settlement_status": "settled"
+    },
+    "issued_on": "2026-02-06",
+    "kind": "settlement_record"
+   },
+   "tool": "upload_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b4f868d7ea100c1a",
+     "ev-0bc6f6773eda5bc7",
+     "ev-0bf0af2f27d70b56"
+    ],
+    "narrative": "Merchant disputes this chargeback under reason code 4834 (Point-of-Interaction Error - Incorrect Amount). The cardholder claims the amount is wrong, but the transaction was authorized and settled at the correct amount of $83.85. Evidence provided: (1) Receipt showing the transaction for $83.85 on 2026-02-06, matching the captured amount exactly. (2) Authorization record confirming the transaction was approved with auth code 119763 for $83.85. (3) Settlement record confirming the transaction was settled on 2026-02-06 for $83.85 with no discrepancies. The amount charged matches the amount authorized and settled. There is no evidence of a point-of-interaction error. The cardholder has not provided a specific alternative amount they expected. We request this chargeback be denied."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "upload_evidence",
+      "represent",
+      "wait",
+      "submit_decision"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b4f868d7ea100c1a",
+      "ev-0bc6f6773eda5bc7",
+      "ev-0bf0af2f27d70b56"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1
+    },
+    "confidence": 0.95,
+    "explanation": "4834 Point-of-Interaction Error (Incorrect Amount) chargeback for $83.85. The cardholder claimed the amount was wrong. I requested info from the issuer and got a vague 'the amount is wrong' statement with no specific alternative amount. I uploaded a settlement record (required evidence) and represented with the receipt, authorization record, and settlement record, all showing the transaction was authorized and settled at exactly $83.85 with no discrepancy. The issuer accepted our representment on 2026-03-15, reversing the chargeback. The merchant's net cost is only the $15.00 chargeback fee. All deadlines were met (responded same day, 45 days available)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5007
+}
