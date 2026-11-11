@@ -1,7 +1,7 @@
 """usage events: append-only metering per tenant (scruple.storage.usage)
 
-Revision ID: 0011
-Revises: 0010
+Revision ID: 0012
+Revises: 0011
 
 Frozen copy of `scruple.storage.usage.POSTGRES_DDL` at the time of writing.
 Never edit a released migration; add a new revision.
@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from alembic import op
 
-revision = "0011"
-down_revision = "0010"
+revision = "0012"
+down_revision = "0011"
 branch_labels = None
 depends_on = None
 

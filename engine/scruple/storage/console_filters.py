@@ -47,7 +47,7 @@ CREATE TRIGGER IF NOT EXISTS {_T}_no_delete BEFORE DELETE ON {_T}
 BEGIN SELECT RAISE(ABORT, '{_T} is append-only'); END;
 """
 
-# Keep in step with migration 0010 (a test compares the catalogs).
+# Keep in step with migration 0011 (a test compares the catalogs).
 POSTGRES_DDL = f"""
 CREATE TABLE IF NOT EXISTS {_T} (
     id BIGSERIAL PRIMARY KEY,{_COLS});

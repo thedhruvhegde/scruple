@@ -1,7 +1,7 @@
 """console saved filters: per-tenant, append-only (scruple.storage.console_filters)
 
-Revision ID: 0010
-Revises: 0009
+Revision ID: 0011
+Revises: 0010
 
 Frozen copy of `scruple.storage.console_filters.POSTGRES_DDL` at the time of
 writing. Never edit a released migration; add a new revision.
@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from alembic import op
 
-revision = "0010"
-down_revision = "0009"
+revision = "0011"
+down_revision = "0010"
 branch_labels = None
 depends_on = None
 

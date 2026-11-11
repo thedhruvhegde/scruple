@@ -48,7 +48,7 @@ else is a 422. On the approvals inbox, `q` also narrows the waiting versions; th
 event facet and the pages apply to the history.
 
 Saved filters are a name for a filter's canonical query string (`q` and facets only),
-stored per tenant in the append-only `console_filter_events` table (alembic 0010):
+stored per tenant in the append-only `console_filter_events` table (alembic 0011):
 saving appends, saving a name again replaces it (latest wins), deleting appends a
 tombstone. They are shared by everyone in the tenant, so saving and deleting need the
 console `admin` permission (engine `admin`, the `risk_admin` role); only whoever saved

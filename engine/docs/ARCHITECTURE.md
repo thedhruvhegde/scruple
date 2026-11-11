@@ -332,7 +332,7 @@ SQLite files.
 
 ### Usage metering (`scruple/usage/`)
 
-Append-only `usage_events` per tenant (alembic 0011), unique by `(tenant_id,
+Append-only `usage_events` per tenant (alembic 0012), unique by `(tenant_id,
 event_key)`. Events are derived from the tenant's gate decisions: `gate_run` (one per
 shadow, canary or assurance decision), `gate_cases` (the cases a shadow or canary
 replayed, as the decision records them) and `rollout` (one per activation), keyed
@@ -352,7 +352,7 @@ them through a metered price on a Stripe meter with the same event name; the met
 prices and subscriptions are set up in Stripe. `billing.toml` (`[billing]`) maps
 tenants to Stripe customers and scruple meters to event names; the key comes from
 `SCRUPLE_STRIPE_BILLING_KEY` only. Per tenant, meter and UTC day, the total not yet
-in the append-only `billing_pushes` ledger (alembic 0012) is sent as one event whose
+in the append-only `billing_pushes` ledger (alembic 0013) is sent as one event whose
 `identifier` and `Idempotency-Key` derive from (tenant, meter, day, running total):
 re-runs send nothing, late usage sends only the difference, and a retry after a lost
 answer is deduplicated by Stripe. Days older than `lookback_days` (at most 34; Stripe

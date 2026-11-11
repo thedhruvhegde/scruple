@@ -1,7 +1,7 @@
 """billing pushes: append-only ledger of usage sent to a provider (scruple.storage.billing)
 
-Revision ID: 0012
-Revises: 0011
+Revision ID: 0013
+Revises: 0012
 
 Frozen copy of `scruple.storage.billing.POSTGRES_DDL` at the time of writing.
 Never edit a released migration; add a new revision.
@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from alembic import op
 
-revision = "0012"
-down_revision = "0011"
+revision = "0013"
+down_revision = "0012"
 branch_labels = None
 depends_on = None
 
