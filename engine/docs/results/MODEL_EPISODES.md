@@ -216,7 +216,7 @@ docs/experiments/E5_open_models.md. Synthetic cases, real model behaviour.
   - It fires on 6 gpt-oss-120b, 12 gpt-oss-20b and 2 qwen episodes, and on one
     Haiku and one Sonnet episode.
   - It changes one gate: gpt-oss-120b 5003, a false alarm on "Required evidence
-    includes product description..." (G-15, pinned). The rest cite documents the
+    includes product description..." (G-15, since closed). The rest cite documents the
     trace shows were never opened.
 - **Not in the table:** E5b OpenRouter free models. They are exploratory, and
   free-tier upstream limits stopped them; see the E5 file.

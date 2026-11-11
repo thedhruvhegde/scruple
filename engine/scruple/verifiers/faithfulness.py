@@ -119,6 +119,10 @@ NEG_SKIP = frozenset({("authorization",), ("terms",)})  # "no authorization" nam
 
 NEGATORS = frozenset({"no", "without", "nor", "neither", "none", "lacks", "lacked", "lacking"})
 REQUIRED_WORDS = frozenset({"required", "requires", "require", "needed", "missing"})
+# Verbs that join a requirement subject to its list ("required evidence includes ...").
+LINK_VERBS = frozenset(
+    {"includes", "include", "including", "is", "are", "lists", "covers", "comprises", "means"}
+)
 SCOPE_OK = frozenset(
     {",", "and", "or", "nor", "/", "(", ")", "the", "a", "an", "any", "required", "separate",
      "matching", "document", "documents", "on", "file", "of", "evidence", "kinds", "kind"}
@@ -287,15 +291,25 @@ def _scope(toks: list[str], start: int) -> Literal["neg", "qualified", "required
     word "required" ("the required AVS/CVV match": a requirement, not a statement of
     fact unless the clause says it was absent), or nothing."""
     j = start - 1
-    qualified = required = False
+    qualified = required = linked = False
     while j >= 0:
         t = toks[j]
-        if t in NEGATORS:
+        if linked:
+            # Past a linking verb only a requirement subject counts: "Required
+            # evidence includes product description" (G-15) states what is needed,
+            # not what the case holds.
+            if t in REQUIRED_WORDS:
+                return "required"
+            if not (t in SCOPE_OK or _is_kind_token(t)):
+                break
+        elif t in NEGATORS:
             return "qualified" if qualified else "neg"
-        if t in QUALIFIED:
+        elif t in QUALIFIED:
             qualified = True
         elif t in REQUIRED_WORDS:
             required = True
+        elif t in LINK_VERBS and not required:
+            linked = True
         elif not (t in SCOPE_OK or _is_kind_token(t)):
             break
         j -= 1

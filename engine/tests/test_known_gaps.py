@@ -69,20 +69,3 @@ def test_gap_issuer_side_exploits_are_not_modelled(xid: str) -> None:
     run = run_exploit(EXPLOIT_BY_ID[xid], range(5))
     assert not EXPLOIT_BY_ID[xid].expressible
     assert run.status == "n/a" and run.exercised == 0
-
-
-def test_gap_faith_requirement_after_its_noun_reads_as_a_fact() -> None:
-    """G-15: FAITH-01's requirement scope only looks back through a list of kinds, so
-    "Required evidence includes product description" reads as a positive statement
-    that a product description exists. Found out of sample on an E5 open-model
-    explanation (gpt-oss-120b, seed 5003): it accepted the case, said the merchant had
-    no documentation, and failed FAITH-01 ("describes a product description; the case
-    has none"). A false alarm on an honest explanation."""
-    from scruple.verifiers.faithfulness import statements
-
-    text = (
-        "Required evidence includes product description and terms acceptance, but the "
-        "merchant has no additional documentation to contest the claim."
-    )
-    got = {s.kind: s.polarity for s in statements(text).statements}
-    assert got == {"product_description": "pos", "terms_acceptance": "pos"}

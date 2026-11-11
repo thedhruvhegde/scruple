@@ -474,8 +474,8 @@ flight when they stopped are logged and not graded.
      here.
    - The refund-race fix. It changed no row.
    - FAITH-01 moves one gate: gpt-oss-120b seed 5003, from pass to fail. That firing
-     is a false alarm (G-15 in docs/VERIFIER_FINDINGS.md, pinned in
-     tests/test_known_gaps.py).
+     is a false alarm (G-15 in docs/VERIFIER_FINDINGS.md, since closed: re-scored
+     with the fix, the stored episode passes FAITH-01; the table here is as run).
      - The explanation says "Required evidence includes product description and
        terms acceptance, but the merchant has no additional documentation".
      - The phrase table reads this as a claim that both documents exist.
