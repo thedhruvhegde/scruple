@@ -1555,6 +1555,21 @@ class DisputeEngine:
                     ),
                 )
             )
+        elif (back := self.ledger.returned(c.txn_id)) > c.amount_minor:
+            # within the capture (a partial dispute), but on top of a settled refund:
+            # the cardholder holds the refund and the chargeback (A-23)
+            self._emit(
+                IncidentRecorded(
+                    case_id=c.case_id,
+                    incident=Incident(
+                        case_id=c.case_id,
+                        on=st.life.entered_on,
+                        kind="double_refund",
+                        detail=f"chargeback debit on top of a refund returns {back} "
+                        f"for a dispute of {c.amount_minor}",
+                    ),
+                )
+            )
         self._enter(st, Stage.CHARGEBACK, st.life.entered_on)
         self._emit(AwaitingSet(case_id=c.case_id, awaiting="merchant", due=st.due))
 

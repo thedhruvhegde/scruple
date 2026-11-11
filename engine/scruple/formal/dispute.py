@@ -182,10 +182,13 @@ def _resolve(s: State, ops: Any, day: Any, res: Any, reversal: Any = 0) -> State
 
 
 def _debit(s: State, p: Params, ops: Any, day: Any) -> State:
-    """`_on_chargeback`'s debit: always posts; over the capture it is a violation."""
+    """`_on_chargeback`'s debit: always posts; over the capture it is a violation,
+    and above the disputed amount an incident."""
     over = p["A"] - imax(ops, 0, p["C"] - s["returned"])
     s = _to_cardholder(s, ops, p["A"], day)
-    flagged = over > 0
+    # over the capture the ledger records a violation; within it (a partial dispute)
+    # but on top of a refund, the engine still flags an incident
+    flagged = ops.or_(over > 0, s["returned"] > p["A"])
     return _set(
         s,
         debited=True,
