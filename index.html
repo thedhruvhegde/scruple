@@ -245,7 +245,13 @@ th { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 
 td:last-child, th:last-child { padding-right: 0; }
 td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; color: var(--muted); }
 .m { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13.5px; }
+/* the table reads as a ledger: ruled columns, a double rule under the heads and over the result line */
 .cmp { min-width: 560px; }
+.cmp th, .cmp td { padding-left: 16px; }
+.cmp th:first-child, .cmp td:first-child { padding-left: 0; width: 22%; }
+.cmp th + th, .cmp td + td { border-left: 1px solid var(--rule); }
+.cmp thead th { padding-top: 16px; border-bottom: 3px double var(--rule-strong); }
+.cmp tbody tr:last-child td { border-top: 3px double var(--rule-strong); padding-top: 14px; }
 
 /* ---------- footer ---------- */
 .def { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: 32px 56px; align-items: center; padding-block: 96px 64px; }
