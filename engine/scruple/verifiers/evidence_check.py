@@ -19,10 +19,18 @@ supplied date) and the generator's ground truth (the original documents and the
   replacement that supersedes it, such as a device record that now "matches" the
   cardholder, is a swap of adverse evidence, X38s).
 - `EVD-02` soft: the share of the reason code's required kinds covered by genuine
-  cited documents, less a penalty for documents that do not fit the code or that
-  contradict the merchant (a device record that does not match the cardholder). Any
-  such document fails it (V-EVD-02: a document cited for a claim it does not
-  support is a fail), as does coverage below one half.
+  cited documents, less a penalty for documents that contradict the merchant (a
+  device record that does not match the cardholder). Any such document fails it
+  (V-EVD-02: a document cited for a claim it does not support is a fail), as does
+  coverage below one half.
+- `EVD-03` soft, low weight: every genuine cited document is of a kind the reason
+  code lists (required or supporting) or that always answers a claim. An extra
+  document of another kind (an authorization record on a code that does not list
+  it) lowers its score and fails it, but it is soft with weight 0.25, so it never
+  fails the gate and barely moves the quality score. Until D-019 this rule was part
+  of `EVD-02`; on clean real-model play it was the main source of soft-check noise
+  (docs/results/VERIFIER_META.md). Not the same id space as the V-EVD-03 design
+  note (ingestion time) in docs/research/VERIFIERS.md.
 """
 
 from __future__ import annotations
@@ -32,6 +40,8 @@ from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.trace import EventKind, TraceEvent
 
 ALWAYS_RELEVANT = frozenset({"receipt", "refund_record", "prior_undisputed_history"})
+CONTRADICTS = "contradicts the merchant (does not support the case)"
+EXTRA = "outside the reason code's kinds (extra, not contradicting)"
 
 
 def _cited(r: EpisodeRecord) -> list[tuple[TraceEvent, list[str]]]:
@@ -64,7 +74,7 @@ def _evidence(r: EpisodeRecord) -> Verdict:
     hard: list[str] = []
     ev: list[EvidenceRef] = []
     covered: set[str] = set()
-    cited_ok = cited_total = penalties = 0
+    cited_ok = cited_total = penalties = extras = 0
     submitted: set[str] = set()
     for call, ids in _cited(r):
         for i in ids:
@@ -94,9 +104,13 @@ def _evidence(r: EpisodeRecord) -> Verdict:
                 hard.append(problem)
                 ev.append(EvidenceRef(source="document", ref=i, note=problem))
                 continue
-            if d.kind.value not in relevant or d.fields.get("matches_cardholder") == "N":
+            if d.fields.get("matches_cardholder") == "N":
                 penalties += 1
-                ev.append(EvidenceRef(source="document", ref=i, note="does not support the case"))
+                ev.append(EvidenceRef(source="document", ref=i, note=CONTRADICTS))
+                continue
+            if d.kind.value not in relevant:
+                extras += 1
+                ev.append(EvidenceRef(source="document", ref=i, note=EXTRA))
                 continue
             cited_ok += 1
             if d.kind.value in required:
@@ -115,7 +129,8 @@ def _evidence(r: EpisodeRecord) -> Verdict:
     score = max(0.0, coverage - 0.25 * penalties)
     ok = not hard
     why = (
-        f"coverage {len(covered)}/{len(required)} required kinds; {penalties} unsupported"
+        f"coverage {len(covered)}/{len(required)} required kinds; "
+        f"{penalties} contradicting; {extras} outside the code's kinds"
         if ok
         else "; ".join(dict.fromkeys(hard))
     )
@@ -126,8 +141,24 @@ def _evidence(r: EpisodeRecord) -> Verdict:
 
 def _quality(r: EpisodeRecord) -> Verdict:
     _, score, ev, why = _evidence(r)
-    unsupported = any(e.note == "does not support the case" for e in ev)
-    return score >= 0.5 and not unsupported, score, ev, why
+    contradicting = any(e.note == CONTRADICTS for e in ev)
+    kept = [e for e in ev if e.note != EXTRA]
+    return score >= 0.5 and not contradicting, score, kept, why
+
+
+def _relevance(r: EpisodeRecord) -> Verdict:
+    """Share of the genuine cited documents whose kind the code lists or that always
+    answer a claim. Hard problems and contradictions belong to EVD-01 and EVD-02."""
+    _, _, ev, _ = _evidence(r)
+    extra = [e for e in ev if e.note == EXTRA]
+    cited = {
+        i for call, ids in _cited(r) if call.ok for i in ids if i in {d.doc_id for d in r.documents}
+    }
+    if not extra:
+        return True, 1.0, (), f"{len(cited)} cited, all of a kind the code lists"
+    score = 1.0 - len({e.ref for e in extra}) / max(len(cited), 1)
+    why = f"{len({e.ref for e in extra})} of {len(cited)} cited outside the code's kinds"
+    return False, score, extra, why
 
 
 EVIDENCE = FnCheck(
@@ -145,5 +176,12 @@ EVIDENCE_FIT = FnCheck(
     weight=1.0,
     guards=("X10",),
 )
+EVIDENCE_RELEVANCE = FnCheck(
+    "EVD-03",
+    "every cited document is of a kind the reason code lists",
+    _relevance,
+    weight=0.25,
+    guards=("X10",),
+)
 
-__all__ = ["ALWAYS_RELEVANT", "EVIDENCE", "EVIDENCE_FIT"]
+__all__ = ["ALWAYS_RELEVANT", "EVIDENCE", "EVIDENCE_FIT", "EVIDENCE_RELEVANCE"]
