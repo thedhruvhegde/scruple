@@ -12,6 +12,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 
 from scruple.storage import (
+    billing,
     console_filters,
     episodes,
     imported_shadow,
@@ -124,6 +125,7 @@ SCHEMA = (
     + ratelimit.SQLITE_DDL
     + console_filters.SQLITE_DDL
     + usage.SQLITE_DDL
+    + billing.SQLITE_DDL
 )
 
 _HISTORY_MESSAGES = ("append-only", "immutable")

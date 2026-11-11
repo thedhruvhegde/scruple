@@ -279,7 +279,7 @@ so serve no data from a mount.
   | table / state | tenant | why |
   |---|---|---|
   | rule_versions, audit_events, decisions | `tenant_id` in the key | each tenant's own registry and chain |
-  | imported_shadow_*, episodes, episode_calls, jobs, job_events, console_filter_events, usage_events | `tenant_id` column | every read and write filters on it; jobs run in their tenant (`JobContext.tenant`) |
+  | imported_shadow_*, episodes, episode_calls, jobs, job_events, console_filter_events, usage_events, billing_pushes | `tenant_id` column | every read and write filters on it; jobs run in their tenant (`JobContext.tenant`) |
   | retention_policies, retention_purges | `tenant_id` column, read across tenants | `scruple retention apply` is an operator command over every tenant's policy; each purge is audited in the purged tenant's own chain |
   | api_keys | `tenant_id` column, looked up across tenants | a key is found by its id before the tenant is known; the record names the tenant |
   | case store (`CaseStore`, a separate SQLite file) | one tenant per file | webhooks authenticate by the provider's signature, not a key, so the signing secret picks the tenant (`tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS`; a bare secret is `SCRUPLE_INGEST_TENANT`'s) and each tenant writes its own store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`; worker `--case-store-tenant`); `cases` and `movements` carry no tenant column |
@@ -330,6 +330,25 @@ ran. `aggregate` totals per meter per UTC day or month. `scruple usage sync|repo
 on the command line; `GET /usage` and `GET /usage/events` on the API, both `admin`
 and both for the caller's tenant only (they sync first). Billing reads the
 aggregates; metering prices nothing.
+
+### Billing hooks (`scruple/billing/`)
+
+Usage reaches Stripe as billing meter events (`POST /v1/billing/meter_events`, field
+names and limits from the vendored subset of Stripe's OpenAPI spec in
+`tests/fixtures/stripe_billing`, API version 2026-09-30.endive). A subscription bills
+them through a metered price on a Stripe meter with the same event name; the meters,
+prices and subscriptions are set up in Stripe. `billing.toml` (`[billing]`) maps
+tenants to Stripe customers and scruple meters to event names; the key comes from
+`SCRUPLE_STRIPE_BILLING_KEY` only. Per tenant, meter and UTC day, the total not yet
+in the append-only `billing_pushes` ledger (alembic 0012) is sent as one event whose
+`identifier` and `Idempotency-Key` derive from (tenant, meter, day, running total):
+re-runs send nothing, late usage sends only the difference, and a retry after a lost
+answer is deduplicated by Stripe. Days older than `lookback_days` (at most 34; Stripe
+takes timestamps up to 35 days old) are reported stale, never dropped silently. Test
+mode by default: live keys are refused unless `mode = "live"` and `--allow-live`, and
+a live-mode answer to a test key is an error. `scruple billing plan` is the dry run;
+`scruple billing push` sends. Tests run against a fake transport; nothing in the suite
+calls Stripe.
 
 ## 11. Persistence of runtime state, and jobs
 

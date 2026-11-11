@@ -28,6 +28,7 @@ from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
 from scruple.storage import (
+    billing,
     console_filters,
     episodes,
     imported_shadow,
@@ -221,6 +222,7 @@ SCHEMA = (
     + ratelimit.POSTGRES_DDL
     + console_filters.POSTGRES_DDL
     + usage.POSTGRES_DDL
+    + billing.POSTGRES_DDL
 )
 
 
@@ -357,4 +359,6 @@ GRANT SELECT, INSERT ON {schema}.console_filter_events TO {role};
 GRANT USAGE ON SEQUENCE {schema}.console_filter_events_id_seq TO {role};
 GRANT SELECT, INSERT ON {schema}.usage_events TO {role};
 GRANT USAGE ON SEQUENCE {schema}.usage_events_id_seq TO {role};
+GRANT SELECT, INSERT ON {schema}.billing_pushes TO {role};
+GRANT USAGE ON SEQUENCE {schema}.billing_pushes_id_seq TO {role};
 """
