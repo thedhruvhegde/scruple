@@ -10,98 +10,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<link rel="stylesheet" href="/scruple/site.css">
 <style>
-:root {
-  --bg: #EDEAE1; --panel: #E4E0D5; --fg: #121513; --muted: #565B57; --rule: #D3D0C5; --rule-strong: #9C9F98;
-  --accent: #1D4A3A; --on-accent: #EDEAE1; --brass: #7A5C20; --block: #A63A1D;
-  --scr-bg: #0A1120; --scr-edge: #24324F;
-  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
-  --c-fg: #E6E3D6; --c-dim: #55617D; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
-  /* one theme: the operating system's dark setting never changes the page */
-  color-scheme: only light;
-}
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
 html, body { margin: 0; min-height: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; padding: 0 16px; }
 ::selection { background: var(--accent); color: var(--on-accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-/* ---------- bar ----------
-   Shared by every page: copy this block, the header markup and nav.js. ul.nav-sec holds in-page
-   anchors (numbered by css; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"
-   on the page you are on). The header is 60px in the flow and sticks at -12px, so once you scroll
-   it shows 48px: a compact bar with no layout shift. Its bottom edge is a character ruler that
-   fills with reading progress (span.bar-rule, set by nav.js; a plain ruler without script). */
-.bar { position: sticky; top: calc(env(safe-area-inset-top, 0px) - 12px); z-index: 30; height: 60px; padding-top: 12px;
-  --bar-ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; --bar-fill: "===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================="; }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 20px; height: 36px; position: relative; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; padding: 4px 6px 4px 0; }
-.brand svg { width: 24px; height: 24px; display: block; }
-.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-.brand:focus-visible { outline: none; background: var(--fg); color: var(--bg); }
-.crumb { display: none; }
-.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
-.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
-.nav a { display: block; text-decoration: none; color: var(--muted); padding: 6px 4px; white-space: pre; }
-/* every section link reserves one character on each side, so the [ ] of the current one never moves anything */
-.nav-sec { counter-reset: sec; }
-.nav-sec li { counter-increment: sec; }
-.nav-sec a::before { content: " " counter(sec, decimal-leading-zero) " "; content: " " counter(sec, decimal-leading-zero) " " / ""; color: var(--rule-strong); }
-.nav-sec a::after { content: " "; content: " " / ""; }
-.nav-sec a[aria-current] { color: var(--fg); }
-.nav-sec a[aria-current]::before { content: "[" counter(sec, decimal-leading-zero) " "; content: "[" counter(sec, decimal-leading-zero) " " / ""; color: inherit; }
-.nav-sec a[aria-current]::after { content: "]"; content: "]" / ""; }
-.nav-pg { margin-left: auto !important; }
-.nav-pg::before { content: "::"; content: "::" / ""; color: var(--rule-strong); padding: 0 10px 0 6px; }
-.nav-pg a { color: var(--fg); padding: 6px 8px; }
-.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
-.nav-pg a[aria-current="page"] { font-weight: 600; }
-.nav-pg a[aria-current="page"]::before { content: "["; content: "[" / ""; }
-.nav-pg a[aria-current="page"]::after { content: "]"; content: "]" / ""; }
-.nav a:hover, .nav a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
-.nav a:hover::before, .nav a:focus-visible::before { color: inherit; }
-/* the bottom edge: +----:----+ in rule ink, overdrawn by ====> as you read, then the keys and how far */
-.bar-rule { position: absolute; bottom: 0; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); height: 12px; overflow: hidden; white-space: nowrap; pointer-events: none;
-  font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
-.bar-rule::before { content: var(--bar-ruler); content: var(--bar-ruler) / ""; }
-.bar-rule i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; overflow: hidden; background: var(--bg); color: var(--fg); font-style: normal; }
-.bar-rule i::before { content: var(--bar-fill); content: var(--bar-fill) / ""; }
-.bar-rule i::after { content: ">"; content: ">" / ""; position: absolute; right: 0; top: 0; background: var(--bg); color: var(--accent); }
-.bar-rule b { position: absolute; right: 0; top: 0; background: var(--bg); color: var(--muted); font-weight: 400; padding-left: 1ch; white-space: pre; }
-.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
-.skip:focus { transform: none; outline: none; }
-main:focus { outline: none; }
-.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
-.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--fg); color: var(--bg); outline: none; }
-/* under 1100px: scruple / 02 proof, and the links fold into [ MENU ], a small dark terminal list
-   that drops over the page under the button, so nothing reflows */
-@media (max-width: 1100px) {
-  .bar { height: 56px; padding-top: 8px; top: calc(env(safe-area-inset-top, 0px) - 8px); }
-  .bar-in { gap: 10px; }
-  .crumb { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
-  .crumb i, .crumb b { font: inherit; }
-  .menu { display: block; margin-left: auto; }
-  .nav { display: none; position: absolute; top: calc(100% + 13px); right: 0; width: min(340px, 100%); flex-direction: column; align-items: stretch; gap: 14px;
-    background: var(--scr-bg); border: 1px solid var(--scr-edge); color: var(--c-fg); padding: 14px 14px 16px; font-size: 13px; text-transform: lowercase; }
-  .nav::before { content: "$ ls scruple/"; content: "$ ls scruple/" / ""; color: var(--c-pine); }
-  .bar.open .nav { display: flex; }
-  .nav ul { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-dim); padding: 0 0 4px 0; }
-  .nav a, .nav-pg a { color: var(--c-fg); padding: 9px 4px; }
-  .nav-sec a::before { color: var(--c-dim); }
-  .nav-sec a[aria-current] { color: var(--c-pine); }
-  .nav-sec a[aria-current]::before { content: ">" counter(sec, decimal-leading-zero) " "; content: ">" counter(sec, decimal-leading-zero) " " / ""; }
-  .nav-sec a[aria-current]::after { content: " <"; content: " <" / ""; }
-  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; }
-  .nav-pg::before { padding: 0 0 4px 0; }
-  .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
-  .nav-pg a { padding-left: 4px; }
-  .nav-pg a[aria-current="page"] { color: var(--c-brass); }
-  .nav a:hover, .nav a:focus-visible { background: var(--c-fg); color: var(--scr-bg); }
-}
-@media (max-width: 520px) { .crumb.in-sec[data-page]:not([data-page=""]) i { display: none; } .crumb.in-sec b { padding-left: 0; } }
-@media (max-width: 380px) { .brand span { display: none; } }
 .bar { margin: 0 -16px; }
 main { max-width: 1240px; margin: 0 auto; padding: 96px 0; display: grid; gap: 20px; }
 .code { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); margin: 0; }

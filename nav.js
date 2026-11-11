@@ -9,7 +9,7 @@
  *   a.skip                 first in the body, href="#top" pointing at main; shown only on focus
  *
  * keys 1-9 jump to the sections, unless you are typing or holding a modifier.
- * to add it to a page: copy the bar markup and the bar css block, then
+ * to add it to a page: link site.css (tokens and bar css), copy the bar markup, then
  *   <script src="nav.js" defer></script>   (or ../nav.js one level down)
  *
  * it only reads layout on scroll and flips attributes or text, so the state changes instantly, no fades.
