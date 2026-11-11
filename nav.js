@@ -1,4 +1,4 @@
-/* nav.js: the top bar, shared by every page (home, results, paper, 404).
+/* nav.js: the top bar, shared by every page (home, results, paper, pilot, 404).
  *
  * markup it expects, inside header.bar:
  *   span.crumb[data-page]  under 1000px: "/ results / <> watch", the page then the section in view
