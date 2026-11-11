@@ -76,6 +76,19 @@ class Settings(BaseModel):
     oidc_default_tenant: str | None = None
     oidc_roles_claim: str = "scruple_roles"
     oidc_subject_claim: str = "sub"
+    # SAML 2.0 sign-on for the console (scruple.auth.saml): on when the five below are
+    # all set. The session key comes from SCRUPLE_CONSOLE_SECRET (env only).
+    saml_sp_entity_id: str | None = Field(default=None, description="this SP's entity id")
+    saml_acs_url: str | None = Field(default=None, description="https://host/auth/saml/acs")
+    saml_idp_entity_id: str | None = Field(default=None, description="expected Issuer")
+    saml_idp_sso_url: str | None = Field(default=None, description="IdP SSO URL (redirect)")
+    saml_idp_cert_file: str | None = Field(default=None, description="IdP signing cert, PEM")
+    saml_subject_attribute: str | None = Field(default=None, description="else the NameID")
+    saml_tenant_attribute: str = "scruple_tenant"
+    saml_default_tenant: str | None = None
+    saml_roles_attribute: str = "scruple_roles"
+    saml_role_map: str = Field(default="", description="idp-group=role,... (comma separated)")
+    saml_session_seconds: int = Field(default=8 * 3600, ge=300, le=7 * 86_400)
     # --- request limits (scruple.auth.limits), per API key unless the key says otherwise ---
     rate_limit_per_minute: int = Field(default=600, ge=1, le=1_000_000)
     rate_limit_burst: int = Field(default=100, ge=1, le=1_000_000)

@@ -37,7 +37,7 @@ class Permission(StrEnum):
 
 ALL_PERMISSIONS: frozenset[Permission] = frozenset(Permission)
 
-AuthMethod = Literal["api_key", "oidc", "local", "dev_header"]
+AuthMethod = Literal["api_key", "oidc", "local", "dev_header", "saml"]
 
 
 class Principal(BaseModel):

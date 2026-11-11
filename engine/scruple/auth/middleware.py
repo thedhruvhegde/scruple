@@ -101,7 +101,13 @@ class AuthMiddleware:
                 return
         try:
             # Off the event loop: a key check costs one scrypt and a database read.
-            who = None if own else await anyio.to_thread.run_sync(self.authn.authenticate, headers)
+            who = (
+                None
+                if own
+                else await anyio.to_thread.run_sync(
+                    self.authn.authenticate, headers, scope.get("path")
+                )
+            )
         except AuthError as e:
             if lim is not None:
                 lim.backend.take(failures_key, lim.auth_failures)

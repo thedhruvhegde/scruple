@@ -57,6 +57,9 @@ def create_console_app(
     )
     app.add_middleware(RequestIDMiddleware)
     app.include_router(console_router(gate, sources, secret=secret))
+    from scruple.auth.config import install_saml
+
+    install_saml(app, settings)  # /auth/saml/* when SAML sign-on is configured
 
     @app.get("/", include_in_schema=False, dependencies=[public()])
     def root() -> RedirectResponse:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from scruple.auth.authn import Authenticator
@@ -11,8 +13,12 @@ from scruple.auth.rbac import key_permissions
 from scruple.clock import Clock
 
 if TYPE_CHECKING:
+    from scruple.auth.saml import SAMLServiceProvider
+    from scruple.auth.session import SessionSigner
     from scruple.settings import Settings
     from scruple.storage import Storage
+
+SECRET_ENV = "SCRUPLE_CONSOLE_SECRET"  # noqa: S105 - the variable's name, not a secret
 
 
 def key_service(settings: Settings, storage: Storage, clock: Clock | None = None) -> ApiKeyService:
@@ -49,11 +55,74 @@ def oidc_verifier(settings: Settings) -> OIDCVerifier | None:
     return OIDCVerifier(cfg)
 
 
+def saml_setup(
+    settings: Settings, secret: bytes | None = None
+) -> tuple[SAMLServiceProvider, SessionSigner] | None:
+    """The SAML service provider and the console session signer, when SAML is
+    configured; else None. Setting only some of the five required settings is an
+    error. `secret` defaults to `SCRUPLE_CONSOLE_SECRET`, which is then required:
+    sessions must survive restarts and be shared by workers."""
+    parts = (
+        settings.saml_sp_entity_id,
+        settings.saml_acs_url,
+        settings.saml_idp_entity_id,
+        settings.saml_idp_sso_url,
+        settings.saml_idp_cert_file,
+    )
+    if not any(parts):
+        return None
+    if not all(parts):
+        raise ValueError(
+            "SAML needs saml_sp_entity_id, saml_acs_url, saml_idp_entity_id, "
+            "saml_idp_sso_url and saml_idp_cert_file together"
+        )
+    from scruple.auth.saml import SAMLConfig, SAMLServiceProvider
+    from scruple.auth.session import SessionSigner
+
+    if secret is None:
+        raw = os.environ.get(SECRET_ENV, "")
+        if len(raw) < 32:
+            raise ValueError(f"SAML sign-on needs {SECRET_ENV} (at least 32 characters)")
+        secret = raw.encode()
+    role_map = dict(pair.split("=", 1) for pair in settings.saml_role_map.split(",") if "=" in pair)
+    cfg = SAMLConfig(
+        sp_entity_id=str(settings.saml_sp_entity_id),
+        acs_url=str(settings.saml_acs_url),
+        idp_entity_id=str(settings.saml_idp_entity_id),
+        idp_sso_url=str(settings.saml_idp_sso_url),
+        idp_x509_cert=Path(str(settings.saml_idp_cert_file)).read_text(encoding="ascii"),
+        subject_attribute=settings.saml_subject_attribute,
+        tenant_attribute=settings.saml_tenant_attribute,
+        default_tenant=settings.saml_default_tenant,
+        roles_attribute=settings.saml_roles_attribute,
+        role_map={k.strip(): v.strip() for k, v in role_map.items()},
+    )
+    return SAMLServiceProvider(cfg, secret), SessionSigner(
+        secret, ttl_seconds=settings.saml_session_seconds
+    )
+
+
 def build_authenticator(
     settings: Settings, storage: Storage, clock: Clock | None = None
 ) -> Authenticator:
+    saml = saml_setup(settings)
     return Authenticator(
         key_service(settings, storage, clock),
         oidc_verifier(settings),
         dev_actor_header=settings.auth_dev_actor_header,
+        sessions=saml[1] if saml is not None else None,
     )
+
+
+def install_saml(app: object, settings: Settings) -> bool:
+    """Mount the SAML routes on a FastAPI app when SAML is configured."""
+    saml = saml_setup(settings)
+    if saml is None:
+        return False
+    from fastapi import FastAPI
+
+    from scruple.auth.saml_routes import saml_router
+
+    assert isinstance(app, FastAPI)
+    app.include_router(saml_router(*saml))
+    return True
