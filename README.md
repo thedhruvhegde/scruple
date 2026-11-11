@@ -16,11 +16,13 @@ train on it. evaluate on it. ship through it.
 
 ## the engine
 
-- `engine/`: simulator, verifiers, statistics, gate, integrations, pilot kit. 5,193 tests. [engine/README.md](engine/README.md).
+- `engine/`: simulator, verifiers, statistics, formal checks, gate, auth, deploy, integrations, pilot kit. 7,414 tests. [engine/README.md](engine/README.md).
 - real models on real cfpb complaints: [engine/docs/results/REAL_MODELS.md](engine/docs/results/REAL_MODELS.md).
 - claude haiku, sonnet and opus working simulated disputes: [engine/docs/results/MODEL_EPISODES.md](engine/docs/results/MODEL_EPISODES.md).
-- pre-registered experiments, one pass and one fail: [engine/docs/experiments](engine/docs/experiments).
-- the maths: [engine/docs/math](engine/docs/math).
+- pre-registered experiments, e1 to e5, failures published: [engine/docs/experiments](engine/docs/experiments).
+- the maths: [engine/docs/math](engine/docs/math). the paper, by dhruv hegde: [engine/docs/paper/scruple_paper.pdf](engine/docs/paper/scruple_paper.pdf).
+- on the site: [results](https://thedhruvhegde.github.io/scruple/results/), with replays of every real model case, and [the paper](https://thedhruvhegde.github.io/scruple/paper/).
+- open models through real apis, many kinds of agents, z3 proofs of the money rules: [engine/README.md](engine/README.md).
 
 ## the site
 
