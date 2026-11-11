@@ -42,7 +42,7 @@
     // two parts, so a phone can drop the page name and keep the section: <i>/ results</i><b> / 02 watch a case</b>
     const i = links.indexOf(cur), sec = i >= 0 ? `${two(i + 1)} ${cur.textContent.trim().toLowerCase()}` : "";
     const a = document.createElement("i"), b = document.createElement("b");
-    a.textContent = page ? "/ " + page : sec ? "" : "/ top"; b.textContent = sec ? (page ? " / " : "/ ") + sec : "";
+    a.textContent = page ? "/ " + page : sec ? "" : "/ home"; b.textContent = sec ? (page ? " / " : "/ ") + sec : "";
     crumb.replaceChildren(a, b); crumb.classList.toggle("in-sec", !!sec);
   }
   function mark() {
@@ -57,13 +57,14 @@
       cur = hit; setCrumb();
     }
     if (!fill || !cw) return;
-    // whole characters only, so the ====> lands on the ruler's own grid
     const max = document.documentElement.scrollHeight - innerHeight, p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-    const n = Math.round(p * Math.floor(rule.clientWidth / cw));
-    if (n !== lastFill) { fill.style.width = (n * cw).toFixed(2) + "px"; lastFill = n; }
     const keys = links.length && fine.matches && wide.matches ? `keys 1-${Math.min(9, links.length)}   ` : "";
     const txt = max > 0 ? `${keys}${String(Math.round(p * 100)).padStart(3, "0")}%` : "";
     if (txt !== lastInfo && info) { info.textContent = txt; lastInfo = txt; }
+    // whole characters only, so the ====> lands on the ruler's own grid and stops short of the label
+    const room = Math.floor(rule.clientWidth / cw) - (txt ? txt.length + 2 : 0);
+    const n = Math.max(0, Math.round(p * room));
+    if (n !== lastFill) { fill.style.width = (n * cw).toFixed(2) + "px"; lastFill = n; }
   }
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(mark); } };
   addEventListener("scroll", queue, { passive: true });
