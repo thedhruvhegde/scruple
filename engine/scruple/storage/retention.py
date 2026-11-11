@@ -215,13 +215,14 @@ class SQLRetention:
         """Delete this tenant's imported-shadow events stored before `cutoff`. Must run
         inside the caller's transaction. Returns (rows, digest)."""
         rows = self._c.query(
-            "SELECT rule_id, version, seq, at, body_sha256 FROM imported_shadow_events "
-            "WHERE tenant_id=?",
+            "SELECT rule_id, version, seq, at, kind, body_json, body_sha256 "
+            "FROM imported_shadow_events WHERE tenant_id=?",
             (tenant_id,),
         )
         gone = [r for r in rows if datetime.fromisoformat(r["at"]) < cutoff]
         if not gone:
             return 0, digest([])
+        self._keep_decision_keys(tenant_id, gone)
         keys = [f"{r['rule_id']}|{r['version']}|{r['seq']}|{r['body_sha256']}" for r in gone]
         if self.dialect == "postgres":
             self._c.execute(f"SET LOCAL {GUC} = 'purge'")
@@ -238,6 +239,25 @@ class SQLRetention:
         else:
             self._c.execute(_SQLITE_SHADOW_TRIGGER)
         return len(gone), digest(keys)
+
+    def _keep_decision_keys(self, tenant_id: str, gone: list[Any]) -> None:
+        """Before deleting decision batches, keep each decision's key hash (and only
+        that) in `imported_shadow_keys`, so a decision re-sent for a purged case is
+        still refused (`scruple.storage.imported_shadow`)."""
+        from scruple.gate.shadow_imported import ImportedDecisionBatch
+        from scruple.storage.imported_shadow import decision_key
+
+        for r in gone:
+            if r["kind"] != "decisions":
+                continue
+            batch = ImportedDecisionBatch.model_validate_json(r["body_json"])
+            for d in batch.decisions:
+                key = decision_key(tenant_id, r["rule_id"], int(r["version"]), d.case.case_id)
+                self._c.execute(
+                    "INSERT INTO imported_shadow_keys (tenant_id, rule_id, version, key_sha256, "
+                    "seq) VALUES (?,?,?,?,?) ON CONFLICT DO NOTHING",
+                    (tenant_id, r["rule_id"], int(r["version"]), key, int(r["seq"])),
+                )
 
 
 def retention_for(storage: object) -> SQLRetention:

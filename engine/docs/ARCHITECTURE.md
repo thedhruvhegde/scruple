@@ -408,8 +408,11 @@ workers or cron runs queue it once. The job applies its tenant's policy as of 00
 that day (a retry deletes nothing more), refuses a future day, and is not submittable
 over HTTP (not a `JobKind`).
 
-Known limits: decisions re-sent for a case whose imported-shadow events were purged
-are accepted as new (the case ids went with the rows); re-importing an old export
+A decision re-sent for a case whose imported-shadow events were purged is refused:
+the purge keeps each decision's key as a SHA-256 of (tenant, rule, version, case id)
+in the append-only `imported_shadow_keys` (alembic 0009), never the case id.
+
+Known limits: re-importing an old export
 file brings purged cases back; a case store is one tenant's file, so its `cases` rows
 carry no tenant column. Retention does not cover episodes (synthetic) or job results
 (no case rows by construction). Migrations 0004-0007 follow

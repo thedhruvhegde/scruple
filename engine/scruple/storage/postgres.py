@@ -342,4 +342,5 @@ GRANT SELECT, INSERT, UPDATE ON {schema}.jobs TO {role};
 GRANT USAGE ON SEQUENCE {schema}.jobs_id_seq, {schema}.job_events_id_seq TO {role};
 GRANT SELECT, INSERT ON {schema}.retention_policies, {schema}.retention_purges TO {role};
 GRANT SELECT, INSERT, UPDATE, DELETE ON {schema}.rate_limit_buckets TO {role};
+GRANT SELECT, INSERT ON {schema}.imported_shadow_keys TO {role};
 """

@@ -18,6 +18,13 @@ catches up on events written elsewhere, inside the backend's write transaction
 the same sequence number or score a batch against a stale view.
 
 Both tables are append-only (database triggers), like every other history table.
+
+Purged decisions. Retention deletes row-level events, and with them the case ids a
+rebuilt recorder would use to refuse a decision sent twice. So, inside the purge,
+the key of every purged decision goes to `imported_shadow_keys`: the SHA-256 of
+(tenant, rule, version, case id), never the case id itself. `record` refuses a batch
+naming a case whose key is there ("already recorded (purged by retention)"), so a
+re-sent decision is not counted twice. The table is append-only and is not purged.
 """
 
 from __future__ import annotations
@@ -48,9 +55,29 @@ if TYPE_CHECKING:
 
 EventKind = Literal["decisions", "outcomes"]
 
-_TABLES = ("imported_shadow_events", "imported_shadow_summaries")
+_TABLES = ("imported_shadow_events", "imported_shadow_summaries", "imported_shadow_keys")
 
-SQLITE_DDL = """
+
+def decision_key(tenant_id: str, rule_id: str, version: int, case_id: str) -> str:
+    """Stable key of one recorded decision; survives retention as a hash only."""
+    return hashlib.sha256(
+        f"{tenant_id}\x1f{rule_id}\x1f{version}\x1f{case_id}".encode()
+    ).hexdigest()
+
+
+_KEYS_DDL = """
+CREATE TABLE IF NOT EXISTS imported_shadow_keys (
+    tenant_id TEXT NOT NULL,
+    rule_id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    key_sha256 TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    PRIMARY KEY (tenant_id, rule_id, version, key_sha256)
+);
+"""
+
+SQLITE_DDL = (
+    """
 CREATE TABLE IF NOT EXISTS imported_shadow_events (
     tenant_id TEXT NOT NULL DEFAULT 'default',
     rule_id TEXT NOT NULL,
@@ -72,17 +99,21 @@ CREATE TABLE IF NOT EXISTS imported_shadow_summaries (
     body_json TEXT NOT NULL,
     PRIMARY KEY (tenant_id, rule_id, version, seq)
 );
-""" + "".join(
-    f"""CREATE TRIGGER IF NOT EXISTS {t}_no_update BEFORE UPDATE ON {t}
+"""
+    + _KEYS_DDL
+    + "".join(
+        f"""CREATE TRIGGER IF NOT EXISTS {t}_no_update BEFORE UPDATE ON {t}
 BEGIN SELECT RAISE(ABORT, '{t} is append-only'); END;
 CREATE TRIGGER IF NOT EXISTS {t}_no_delete BEFORE DELETE ON {t}
 BEGIN SELECT RAISE(ABORT, '{t} is append-only'); END;
 """
-    for t in _TABLES
+        for t in _TABLES
+    )
 )
 
 # Keep in step with migration 0004 (a test compares the catalogs).
-POSTGRES_DDL = """
+POSTGRES_DDL = (
+    """
 CREATE TABLE IF NOT EXISTS imported_shadow_events (
     tenant_id TEXT NOT NULL DEFAULT 'default',
     rule_id TEXT NOT NULL,
@@ -104,8 +135,10 @@ CREATE TABLE IF NOT EXISTS imported_shadow_summaries (
     body_json TEXT NOT NULL,
     PRIMARY KEY (tenant_id, rule_id, version, seq)
 );
-""" + "".join(
-    f"""
+"""
+    + _KEYS_DDL
+    + "".join(
+        f"""
 CREATE OR REPLACE TRIGGER {t}_no_update BEFORE UPDATE ON {t}
     FOR EACH ROW EXECUTE FUNCTION scruple_refuse('{t} is append-only');
 CREATE OR REPLACE TRIGGER {t}_no_delete BEFORE DELETE ON {t}
@@ -113,7 +146,8 @@ CREATE OR REPLACE TRIGGER {t}_no_delete BEFORE DELETE ON {t}
 CREATE OR REPLACE TRIGGER {t}_no_truncate BEFORE TRUNCATE ON {t}
     FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse('{t} is append-only');
 """
-    for t in _TABLES
+        for t in _TABLES
+    )
 )
 
 
@@ -158,6 +192,9 @@ class ImportedShadowRepository(Protocol):
     def last_snapshot_seq(self, tenant_id: str, rule_id: str, version: int) -> int: ...
     def append_snapshot(self, snap: ShadowSnapshot) -> None: ...
     def snapshots(self, tenant_id: str, rule_id: str, version: int) -> list[ShadowSnapshot]: ...
+    def purged_keys(
+        self, tenant_id: str, rule_id: str, version: int, keys: Sequence[str]
+    ) -> set[str]: ...
 
 
 _EVENT_COLS = "tenant_id, rule_id, version, seq, kind, at, actor, body_json, body_sha256"
@@ -249,6 +286,21 @@ class SQLImportedShadow:
             (tenant_id, rule_id, version),
         )
         return [ShadowSnapshot.model_validate(dict(r)) for r in rows]
+
+    def purged_keys(
+        self, tenant_id: str, rule_id: str, version: int, keys: Sequence[str]
+    ) -> set[str]:
+        """Which of `keys` belong to decisions retention purged."""
+        found: set[str] = set()
+        uniq = sorted(set(keys))
+        for i in range(0, len(uniq), 500):
+            part = uniq[i : i + 500]
+            marks = ",".join("?" * len(part))
+            head = "SELECT key_sha256 FROM imported_shadow_keys WHERE tenant_id=? AND rule_id=? "
+            sql = head + f"AND version=? AND key_sha256 IN ({marks})"
+            rows = self._c.query(sql, (tenant_id, rule_id, version, *part))
+            found |= {r["key_sha256"] for r in rows}
+        return found
 
 
 def _sha(text: str) -> str:
@@ -349,6 +401,16 @@ class DurableImportedShadow:
         body = ImportedDecisionBatch(decisions=tuple(decisions)).model_dump_json()
         with self._lock, self._writing():
             rec = self._catch_up()
+            keys = {
+                decision_key(self.tenant_id, self.rule_id, self.version, d.case.case_id): (
+                    d.case.case_id
+                )
+                for d in decisions
+            }
+            gone = self._repo.purged_keys(self.tenant_id, self.rule_id, self.version, list(keys))
+            if gone:
+                ids = sorted(keys[k] for k in gone)
+                raise ValueError(f"already recorded (purged by retention): {', '.join(ids[:5])}")
             out = rec.record(decisions)  # ValueError: refused, nothing changed
             self._dirty = True
             self._append("decisions", actor, body)
@@ -454,6 +516,11 @@ class MemoryImportedShadow:
 
     def append_snapshot(self, snap: ShadowSnapshot) -> None:
         self._snaps.append(snap)
+
+    def purged_keys(
+        self, tenant_id: str, rule_id: str, version: int, keys: Sequence[str]
+    ) -> set[str]:
+        return set()  # nothing purges an in-memory repository
 
     def snapshots(self, tenant_id: str, rule_id: str, version: int) -> list[ShadowSnapshot]:
         return sorted(
