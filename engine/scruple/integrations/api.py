@@ -5,6 +5,7 @@ Every route is the caller's tenant's only and needs `admin`, except where noted.
     GET  /integrations/settings                              current settings
     POST /integrations/settings                              new settings version (audited)
     POST /integrations/dispatch                              one dispatcher pass now
+    GET  /integrations/tickets                               change tickets (read)
     GET  /integrations/webhooks                              endpoints (no secrets)
     POST /integrations/webhooks                              register; the secret is shown once
     POST /integrations/webhooks/{endpoint_id}/rotate         new secret, old one overlaps 24 h
@@ -80,6 +81,11 @@ def integrations_router(
     @router.post("/dispatch", dependencies=[ADMIN])
     def run_dispatch(p: CurrentPrincipal) -> DispatchResult:
         return dispatch(gate_for(p.tenant), need_queue())
+
+    @router.get("/tickets", dependencies=[require(Permission.READ)])
+    def tickets(p: CurrentPrincipal) -> list[dict[str, Any]]:
+        """The tenant's change tickets: one per candidate per tracker."""
+        return store(p)[1].tickets()
 
     @router.get("/webhooks", dependencies=[ADMIN])
     def endpoints(p: CurrentPrincipal) -> list[dict[str, Any]]:

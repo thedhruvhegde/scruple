@@ -62,6 +62,7 @@ LISTS = {
     "/integrations/settings",
     "/integrations/webhooks",
     "/integrations/webhooks/deliveries",
+    "/integrations/tickets",
 }
 # Routes that create in the caller's own tenant.
 CREATES = {

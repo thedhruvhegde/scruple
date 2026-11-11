@@ -28,6 +28,10 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.integrations.events import to_event
 from scruple.integrations.store import GateEvent, IntegrationStore
+from scruple.integrations.tickets import MAX_ATTEMPTS as TICKET_ATTEMPTS
+from scruple.integrations.tickets import TICKET_KIND
+from scruple.integrations.tickets import TIMEOUT_S as TICKET_TIMEOUT
+from scruple.integrations.tickets import configured as configured_trackers
 from scruple.integrations.webhooks import MAX_ATTEMPTS as WEBHOOK_ATTEMPTS
 from scruple.integrations.webhooks import TIMEOUT_S as WEBHOOK_TIMEOUT
 from scruple.integrations.webhooks import WEBHOOK_KIND, delivery_id
@@ -76,8 +80,24 @@ def _webhooks(store: IntegrationStore, event: GateEvent) -> list[PlannedJob]:
     return out
 
 
+def _tickets(store: IntegrationStore, event: GateEvent) -> list[PlannedJob]:
+    if event.type != "decision.recorded":
+        return []
+    decision = event.data["decision_id"]
+    return [
+        PlannedJob(
+            TICKET_KIND,
+            {"provider": provider, "event_id": event.id},
+            f"ticket:{provider}:{decision}",
+            TICKET_ATTEMPTS,
+            TICKET_TIMEOUT,
+        )
+        for provider in configured_trackers(store.settings())
+    ]
+
+
 # Each integration turns an event into the jobs it needs (and any rows those read).
-PLANNERS: list[Planner] = [_webhooks]
+PLANNERS: list[Planner] = [_webhooks, _tickets]
 
 
 def dispatch(gate: AgentGate, queue: JobQueue, *, limit: int = 1_000) -> DispatchResult:

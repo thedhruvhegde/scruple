@@ -439,21 +439,57 @@ class IntegrationStore:
     # --- tickets --------------------------------------------------------------------
 
     def ticket(self, provider: str, candidate: str) -> dict[str, Any] | None:
+        """The candidate's issue: `issue_id` is None while its creation is in progress."""
         rows = self._q(
-            "SELECT issue_id, issue_key, url FROM ticket_links "
+            "SELECT issue_id, issue_key, url, created_at FROM ticket_links "
             "WHERE tenant_id=? AND provider=? AND candidate=?",
             (self.tenant, provider, candidate),
         )
         return dict(rows[0]) if rows else None
 
-    def put_ticket(
-        self, provider: str, candidate: str, issue_id: str, issue_key: str, url: str, now: datetime
+    def claim_ticket(self, provider: str, candidate: str, now: datetime) -> bool:
+        """Take the right to create the candidate's issue (True once per candidate)."""
+        rows = self._q(
+            "INSERT INTO ticket_links (tenant_id, provider, candidate, created_at) "
+            "VALUES (?,?,?,?) ON CONFLICT (tenant_id, provider, candidate) DO NOTHING "
+            "RETURNING candidate",
+            (self.tenant, provider, candidate, ts(now)),
+        )
+        return bool(rows)
+
+    def reclaim_ticket(
+        self, provider: str, candidate: str, stale_before: datetime, now: datetime
+    ) -> bool:
+        """Take over a creation that has been in progress since before `stale_before`."""
+        rows = self._q(
+            "UPDATE ticket_links SET created_at=? WHERE tenant_id=? AND provider=? "
+            "AND candidate=? AND issue_id IS NULL AND created_at<? RETURNING candidate",
+            (ts(now), self.tenant, provider, candidate, ts(stale_before)),
+        )
+        return bool(rows)
+
+    def complete_ticket(
+        self, provider: str, candidate: str, issue_id: str, issue_key: str, url: str
     ) -> None:
         self._x(
-            "INSERT INTO ticket_links (tenant_id, provider, candidate, issue_id, issue_key, "
-            "url, created_at) VALUES (?,?,?,?,?,?,?) "
-            "ON CONFLICT (tenant_id, provider, candidate) DO NOTHING",
-            (self.tenant, provider, candidate, issue_id, issue_key, url, ts(now)),
+            "UPDATE ticket_links SET issue_id=?, issue_key=?, url=? "
+            "WHERE tenant_id=? AND provider=? AND candidate=? AND issue_id IS NULL",
+            (issue_id, issue_key, url, self.tenant, provider, candidate),
+        )
+
+    def release_ticket(self, provider: str, candidate: str) -> None:
+        """Give up a creation claim (the attempt failed; a retry claims again)."""
+        self._x(
+            "DELETE FROM ticket_links WHERE tenant_id=? AND provider=? AND candidate=? "
+            "AND issue_id IS NULL",
+            (self.tenant, provider, candidate),
+        )
+
+    def tickets(self) -> list[dict[str, Any]]:
+        return self._q(
+            "SELECT provider, candidate, issue_id, issue_key, url, created_at FROM ticket_links "
+            "WHERE tenant_id=? ORDER BY created_at, provider, candidate",
+            (self.tenant,),
         )
 
     def ticket_updated(self, provider: str, decision_id: str) -> bool:
