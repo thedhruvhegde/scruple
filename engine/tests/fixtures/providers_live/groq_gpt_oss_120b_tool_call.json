@@ -1,0 +1,46 @@
+{
+ "choices": [
+  {
+   "finish_reason": "tool_calls",
+   "index": 0,
+   "logprobs": null,
+   "message": {
+    "reasoning": "We need to handle dispute. Let's get case details.",
+    "role": "assistant",
+    "tool_calls": [
+     {
+      "function": {
+       "arguments": "{}",
+       "name": "get_case"
+      },
+      "id": "fc_3005688d-3bb2-4024-a233-7ec75680ad2e",
+      "type": "function"
+     }
+    ]
+   }
+  }
+ ],
+ "created": 1794354491,
+ "id": "chatcmpl-701156e1-68c3-45b9-9b9e-b81aafabe0d0",
+ "model": "openai/gpt-oss-120b",
+ "object": "chat.completion",
+ "service_tier": "on_demand",
+ "system_fingerprint": "fp_90620edd96",
+ "usage": {
+  "completion_time": 0.071900239,
+  "completion_tokens": 31,
+  "completion_tokens_details": {
+   "reasoning_tokens": 12
+  },
+  "prompt_time": 0.093453403,
+  "prompt_tokens": 1610,
+  "queue_time": 0.326516466,
+  "total_time": 0.165353642,
+  "total_tokens": 1641
+ },
+ "usage_breakdown": null,
+ "x_groq": {
+  "id": "req_01m73xsb8hepvaq6wqrk3e75qa",
+  "seed": 5001
+ }
+}

@@ -1,0 +1,65 @@
+{
+ "choices": [
+  {
+   "finish_reason": "tool_calls",
+   "index": 0,
+   "logprobs": null,
+   "message": {
+    "content": null,
+    "reasoning": "Let me start by understanding the case. This is a Visa chargeback with reason code 13.2 \"Cancelled Recurring Transaction\" for $39.96 (3996 minor units). The case is at the chargeback stage, merchant needs to respond by April 1, 2026 (30 days left). The required evidence is \"terms_acceptance\" and \"cancellation_record\", with supporting evidence \"account_activity\".\n\nFirst, let me check what evidence is already available.",
+    "reasoning_details": [
+     {
+      "format": "unknown",
+      "index": 0,
+      "text": "Let me start by understanding the case. This is a Visa chargeback with reason code 13.2 \"Cancelled Recurring Transaction\" for $39.96 (3996 minor units). The case is at the chargeback stage, merchant needs to respond by April 1, 2026 (30 days left). The required evidence is \"terms_acceptance\" and \"cancellation_record\", with supporting evidence \"account_activity\".\n\nFirst, let me check what evidence is already available.",
+      "type": "reasoning.text"
+     }
+    ],
+    "refusal": null,
+    "role": "assistant",
+    "tool_calls": [
+     {
+      "function": {
+       "arguments": "{}",
+       "name": "list_evidence"
+      },
+      "id": "call-3bfd33b7-ba56-47ba-a760-b4075da6be25",
+      "index": 0,
+      "type": "function"
+     }
+    ]
+   },
+   "native_finish_reason": "tool_calls"
+  }
+ ],
+ "created": 1794354500,
+ "id": "gen-1794354500-B3wnBaiOecraRVB66Opy",
+ "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+ "object": "chat.completion",
+ "provider": "Nvidia",
+ "service_tier": null,
+ "system_fingerprint": null,
+ "usage": {
+  "completion_tokens": 124,
+  "completion_tokens_details": {
+   "audio_tokens": 0,
+   "image_tokens": 0,
+   "reasoning_tokens": 107
+  },
+  "cost": 0,
+  "cost_details": {
+   "upstream_inference_completions_cost": 0,
+   "upstream_inference_cost": 0,
+   "upstream_inference_prompt_cost": 0
+  },
+  "is_byok": false,
+  "prompt_tokens": 2657,
+  "prompt_tokens_details": {
+   "audio_tokens": 0,
+   "cache_write_tokens": 0,
+   "cached_tokens": 0,
+   "video_tokens": 0
+  },
+  "total_tokens": 2781
+ }
+}

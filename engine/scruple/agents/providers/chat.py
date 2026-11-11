@@ -9,6 +9,14 @@ assistant `tool_calls` with JSON-string `arguments`, `tool` role results,
 Ollama, Together, Groq and others) take `max_tokens` and usually `seed`; models
 served there sometimes write tool calls into the text, which is parsed as a
 fallback (the same parser as scruple.agents.runners.local).
+
+Groq validates tool calls server side. When a model names a tool that was not in
+the request (seen live with openai/gpt-oss-120b calling `commentary`, a leaked
+channel name), Groq answers HTTP 400 with `error.code` `tool_use_failed` and the
+model's text in `error.failed_generation`
+(https://console.groq.com/docs/tool-use). That is a model mistake, not a failed
+request: `rejected_turn` turns it into a text tool call, the episode answers it
+with its usual unknown-tool error, and the model gets another turn.
 """
 
 from __future__ import annotations
@@ -144,6 +152,34 @@ class ChatProvider(Provider):
                 out.stop = "tool_use"
                 out.text_calls = True
         return out
+
+    def rejected_turn(self, status: int, body: str, turn: int) -> Turn | None:
+        if status != 400:
+            return None
+        try:
+            err = json.loads(body).get("error")
+        except (ValueError, AttributeError):
+            return None
+        if not isinstance(err, dict) or err.get("code") != "tool_use_failed":
+            return None
+        failed = str(err.get("failed_generation") or "")
+        calls: list[ToolCall] = []
+        try:
+            obj = json.loads(failed)
+        except ValueError:
+            obj = None
+        if isinstance(obj, dict) and isinstance(obj.get("name"), str):
+            calls = [ToolCall(short_call_id(turn, 0), obj["name"], obj.get("arguments"))]
+        else:
+            calls = [ToolCall(c.call_id, c.name, c.args) for c in extract_text_tool_calls(failed)]
+        return Turn(
+            assistant={"role": "assistant", "content": failed or "(no output)"},
+            calls=calls,
+            stop="tool_use" if calls else "end",
+            text=failed,
+            text_calls=True,
+            rejected=True,
+        )
 
     def user_message(self, text: str) -> dict[str, Any]:
         return {"role": "user", "content": text}

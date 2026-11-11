@@ -118,6 +118,7 @@ def record_from_run(m: Manifest, run: EpisodeRun) -> EvalRecord:
         stop=run.stop,
         turns=run.turns,
         held_submits=run.held_submits,
+        rejected_turns=run.rejected_turns,
         input_tokens=run.input_tokens,
         output_tokens=run.output_tokens,
         requests=run.requests,

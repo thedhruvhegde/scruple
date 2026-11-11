@@ -52,6 +52,7 @@ class Turn:
     input_tokens: int = 0
     output_tokens: int = 0
     text_calls: bool = False  # tool calls parsed from text (no native ids to answer)
+    rejected: bool = False  # the API refused the generation (Provider.rejected_turn)
 
 
 @dataclass
@@ -79,6 +80,7 @@ class ProviderHTTPError(ProviderError):
     def __init__(self, status: int, body: str) -> None:
         super().__init__(f"HTTP {status}: {body[:300]}")
         self.status = status
+        self.body = body
 
 
 class ProviderInfo(BaseModel):
@@ -158,6 +160,11 @@ class Provider(ABC):
 
     @abstractmethod
     def tool_messages(self, results: list[ToolOutcome], turn: Turn) -> list[dict[str, Any]]: ...
+
+    def rejected_turn(self, status: int, body: str, turn: int) -> Turn | None:
+        """A model turn the API refused to return (an error response that carries the
+        model's own malformed generation). `None`: the error is a real request failure."""
+        return None
 
 
 __all__ = [

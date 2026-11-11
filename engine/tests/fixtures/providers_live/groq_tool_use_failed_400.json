@@ -1,0 +1,12 @@
+{
+ "_note": "Recorded live from api.groq.com (openai/gpt-oss-120b, 2026-11-10), HTTP 400, body only. The harness log kept the first 300 characters; the failed_generation tail after the opening of `claims` is reconstructed in the same shape.",
+ "body": {
+  "error": {
+   "code": "tool_use_failed",
+   "failed_generation": "{\"name\": \"commentary\", \"arguments\": {\n  \"claims\": {\n    \"actions\": [\"represent\"]\n  },\n  \"explanation\": \"Represented with the receipt.\"\n}}",
+   "message": "Tool call validation failed: tool call validation failed: attempted to call tool 'commentary' which was not in request.tools",
+   "type": "invalid_request_error"
+  }
+ },
+ "status": 400
+}

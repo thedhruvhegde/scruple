@@ -10,8 +10,11 @@ episode returns. The loop:
 3. Optional self-review (`LoopConfig.critique_holds`): the first `submit_decision`
    is answered with the critique prompt instead of being executed; the episode
    never sees the held call.
-4. A turn with no tool calls gets a nudge (`nudges`), then the run stops.
-5. Stops: `submitted`, `max_turns`, `token_budget`, `model_stopped`, `refusal`,
+4. A generation the API refused (`Provider.rejected_turn`, e.g. Groq's
+   `tool_use_failed`) is a model turn: its calls are answered like any other
+   (an unknown tool gets the episode's error), and it is counted.
+5. A turn with no tool calls gets a nudge (`nudges`), then the run stops.
+6. Stops: `submitted`, `max_turns`, `token_budget`, `model_stopped`, `refusal`,
    `max_tokens`, `http_error`, `timeout`, `bad_response`. Anything but `submitted`
    lapses the episode (the scorecard flags it).
 
@@ -39,6 +42,7 @@ from scruple.agents.providers.base import (
     GenSettings,
     Provider,
     ProviderError,
+    ProviderHTTPError,
     ToolDef,
     ToolOutcome,
     Turn,
@@ -108,6 +112,7 @@ class EpisodeRun(BaseModel):
     stop: RunStop
     turns: int
     held_submits: int
+    rejected_turns: int = 0  # generations the API refused (counted, then answered)
     input_tokens: int
     output_tokens: int
     requests: int
@@ -168,7 +173,13 @@ class ProviderRunner:
         body = self.provider.body(
             self.model, self.plan.system, messages, self.tools if tools else None, gen
         )
-        data = self.client.post(self.provider.path(self.model), body)
+        try:
+            data = self.client.post(self.provider.path(self.model), body)
+        except ProviderHTTPError as exc:
+            rejected = self.provider.rejected_turn(exc.status, exc.body, turn)
+            if rejected is None:
+                raise
+            return rejected
         return self.provider.parse(data, turn)
 
     # --- the loop ---------------------------------------------------------------------
@@ -197,6 +208,7 @@ class ProviderRunner:
                 return finish("http_error", str(exc))
             except (ValueError, LookupError, TypeError, AttributeError) as exc:
                 return finish("bad_response", repr(exc))
+            state.rejected += mt.rejected
             state.input_tokens += mt.input_tokens
             state.output_tokens += mt.output_tokens
             messages.append(mt.assistant)
@@ -257,6 +269,7 @@ class ProviderRunner:
             stop=stop,
             turns=state.turns,
             held_submits=state.held,
+            rejected_turns=state.rejected,
             input_tokens=state.input_tokens,
             output_tokens=state.output_tokens,
             requests=stats.requests,
@@ -279,6 +292,7 @@ class _State:
         self.holds_left = holds_left
         self.nudges_left = nudges_left
         self.held = 0
+        self.rejected = 0
         self.input_tokens = 0
         self.output_tokens = 0
         self.calls: list[CallLog] = []

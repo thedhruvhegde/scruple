@@ -69,6 +69,7 @@ class EvalRecord(BaseModel):
     stop: str
     turns: int | None = None
     held_submits: int = 0
+    rejected_turns: int = 0
     input_tokens: int | None = None
     output_tokens: int | None = None
     requests: int | None = None
