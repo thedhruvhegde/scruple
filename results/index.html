@@ -168,6 +168,10 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
 /* replay drawn in characters (ascii.js) */
 .casefile { padding-bottom: 0; color: var(--c-mute); white-space: pre; overflow: hidden; }
 .casefile b { font-weight: 600; }
+/* ledger paper behind the trace: ruled columns for the call number and the day */
+#trace { position: relative; }
+.rules { position: absolute; top: 0; left: 0; right: 0; overflow: hidden; color: var(--scr-edge); white-space: pre; pointer-events: none; user-select: none; }
+#trace-pre { position: relative; }
 .spk { display: block; line-height: 1.15; margin-bottom: 7px; }
 .c-f { color: var(--c-fg); } .c-d { color: var(--c-mute); } .c-g { color: var(--c-pine); } .c-b { color: var(--c-brass); } .c-v { color: var(--c-verm); } .c-s { color: var(--c-sky); }
 
@@ -392,7 +396,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
           <div class="screen" data-head="replay">
             <div class="scr-head"><span id="scr-title"><b>loading</b></span><span id="scr-day"></span></div>
             <pre class="term casefile" id="casefile" aria-hidden="true"></pre>
-            <div id="trace" tabindex="0" aria-label="Replay of tool calls"><pre class="term trace" id="trace-pre"></pre></div>
+            <div id="trace" tabindex="0" aria-label="Replay of tool calls"><pre class="term rules" id="rules" aria-hidden="true"></pre><pre class="term trace" id="trace-pre"></pre></div>
           </div>
           <div class="ctrl">
             <button type="button" class="btn" id="b-play">Play</button>

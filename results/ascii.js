@@ -60,10 +60,26 @@
     draw(pre, out);
   }
 
+  /* ---------- ledger paper: ruled columns behind the trace ---------- */
+  function rules() {
+    const pre = $("#rules"), tr = $("#trace-pre"), W = cols(tr);
+    const lh = parseFloat(getComputedStyle(tr).lineHeight) || 20, n = Math.ceil(tr.offsetHeight / lh);
+    // call number | day | the call ............ | and a closing rule at the right edge
+    const line = (i) => {
+      const a = Array(W).fill(" ");
+      a[2] = a[13] = ":"; a[W - 1] = "|";
+      if (i % 5 === 4) for (let x = 14; x < W - 1; x += 4) a[x] = ".";
+      return a.join("");
+    };
+    pre.style.height = tr.offsetHeight + "px";
+    pre.textContent = Array.from({ length: n }, (_, i) => line(i)).join("\n");
+  }
+
   let last = null, lastW = 0;
   function render(d) {
     last = d;
     caseFile(d.ep);
+    rules();
     lastW = cols($("#casefile"));
   }
   document.addEventListener("replay", (e) => render(e.detail));
