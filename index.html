@@ -37,24 +37,11 @@
     if (run) d.classList.add("intro");
   })();
 </script>
+<link rel="stylesheet" href="site.css">
 <style>
 /* Layout: full-bleed bands that alternate bone, deep pine, night blue and sand. Each band
    has a second, inset tone for panels so surfaces layer. Inside each band: words left (5/12),
    a mounted screen right (7/12). One character field flies between screens as you scroll. */
-:root {
-  --bg: #EDEAE1; --panel: #E4E0D5; --fg: #121513; --muted: #565B57; --rule: #D3D0C5; --rule-strong: #9C9F98;
-  --accent: #1D4A3A; --on-accent: #EDEAE1; --brass: #7A5C20; --block: #A63A1D;
-  --scr-bg: #0A1120; --scr-edge: #24324F;
-  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
-  /* screen ink, read by the canvas */
-  --c-fg: #E6E3D6; --c-dim: #55617D; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
-  /* one theme: the operating system's dark setting never changes the page */
-  color-scheme: only light;
-}
-.band-pine  { --bg: #12301F; --panel: #173A28; --fg: #EDEAE1; --muted: #A8BCB0; --rule: #255040; --rule-strong: #4D7464; --accent: #86D0AA; --on-accent: #12301F; --brass: #E6C77E; --block: #F2906B; }
-.band-night { --bg: #0E1626; --panel: #142038; --fg: #E6E3D6; --muted: #A1ABC0; --rule: #1F2B44; --rule-strong: #3F4E6E; --accent: #7FD0A8; --on-accent: #0E1626; --brass: #E8C46A; --block: #F07E58; }
-.band-sand  { --bg: #E3D8BF; --panel: #D8CBAD; --fg: #17140C; --muted: #554D3E; --rule: #CBBF9F; --rule-strong: #968B71; --accent: #1D4A3A; --on-accent: #E3D8BF; --brass: #6E5216; --block: #9A3317; }
 
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased; }
@@ -64,84 +51,8 @@ h1, h2, h3, p { margin: 0; }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .page { max-width: 1240px; margin: 0 auto; }
 
-/* ---------- bar ----------
-   Shared by every page: copy this block, the header markup and nav.js. ul.nav-sec holds in-page
-   anchors (numbered by css; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"
-   on the page you are on). The header is 60px in the flow and sticks at -12px, so once you scroll
-   it shows 48px: a compact bar with no layout shift. Its bottom edge is a character ruler that
-   fills with reading progress (span.bar-rule, set by nav.js; a plain ruler without script). */
-.bar { position: sticky; top: calc(env(safe-area-inset-top, 0px) - 12px); z-index: 30; height: 60px; padding-top: 12px;
-  --bar-ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; --bar-fill: "===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================="; }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 20px; height: 36px; position: relative; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; padding: 4px 6px 4px 0; }
-.brand svg { width: 24px; height: 24px; display: block; }
-.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-.brand:focus-visible { outline: none; background: var(--fg); color: var(--bg); }
-.crumb { display: none; }
-.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
-.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
-.nav a { display: block; text-decoration: none; color: var(--muted); padding: 6px 4px; white-space: pre; }
-/* every section link reserves one character on each side, so the [ ] of the current one never moves anything */
-.nav-sec { counter-reset: sec; }
-.nav-sec li { counter-increment: sec; }
-.nav-sec a::before { content: " " counter(sec, decimal-leading-zero) " "; content: " " counter(sec, decimal-leading-zero) " " / ""; color: var(--rule-strong); }
-.nav-sec a::after { content: " "; content: " " / ""; }
-.nav-sec a[aria-current] { color: var(--fg); }
-.nav-sec a[aria-current]::before { content: "[" counter(sec, decimal-leading-zero) " "; content: "[" counter(sec, decimal-leading-zero) " " / ""; color: inherit; }
-.nav-sec a[aria-current]::after { content: "]"; content: "]" / ""; }
-.nav-pg { margin-left: auto !important; }
-.nav-pg::before { content: "::"; content: "::" / ""; color: var(--rule-strong); padding: 0 10px 0 6px; }
-.nav-pg a { color: var(--fg); padding: 6px 8px; }
-.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
-.nav-pg a[aria-current="page"] { font-weight: 600; }
-.nav-pg a[aria-current="page"]::before { content: "["; content: "[" / ""; }
-.nav-pg a[aria-current="page"]::after { content: "]"; content: "]" / ""; }
-.nav a:hover, .nav a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
-.nav a:hover::before, .nav a:focus-visible::before { color: inherit; }
-/* the bottom edge: +----:----+ in rule ink, overdrawn by ====> as you read, then the keys and how far */
-.bar-rule { position: absolute; bottom: 0; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); height: 12px; overflow: hidden; white-space: nowrap; pointer-events: none;
-  font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
-.bar-rule::before { content: var(--bar-ruler); content: var(--bar-ruler) / ""; }
-.bar-rule i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; overflow: hidden; background: var(--bg); color: var(--fg); font-style: normal; }
-.bar-rule i::before { content: var(--bar-fill); content: var(--bar-fill) / ""; }
-.bar-rule i::after { content: ">"; content: ">" / ""; position: absolute; right: 0; top: 0; background: var(--bg); color: var(--accent); }
-.bar-rule b { position: absolute; right: 0; top: 0; background: var(--bg); color: var(--muted); font-weight: 400; padding-left: 1ch; white-space: pre; }
-.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
-.skip:focus { transform: none; outline: none; }
-main:focus { outline: none; }
-.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
-.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--fg); color: var(--bg); outline: none; }
-/* under 1100px: scruple / 02 proof, and the links fold into [ MENU ], a small dark terminal list
-   that drops over the page under the button, so nothing reflows */
-@media (max-width: 1100px) {
-  .bar { height: 56px; padding-top: 8px; top: calc(env(safe-area-inset-top, 0px) - 8px); }
-  .bar-in { gap: 10px; }
-  .crumb { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
-  .crumb i, .crumb b { font: inherit; }
-  .menu { display: block; margin-left: auto; }
-  .nav { display: none; position: absolute; top: calc(100% + 13px); right: 0; width: min(340px, 100%); flex-direction: column; align-items: stretch; gap: 14px;
-    background: var(--scr-bg); border: 1px solid var(--scr-edge); color: var(--c-fg); padding: 14px 14px 16px; font-size: 13px; text-transform: lowercase; }
-  .nav::before { content: "$ ls scruple/"; content: "$ ls scruple/" / ""; color: var(--c-pine); }
-  .bar.open .nav { display: flex; }
-  .nav ul { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-dim); padding: 0 0 4px 0; }
-  .nav a, .nav-pg a { color: var(--c-fg); padding: 9px 4px; }
-  .nav-sec a::before { color: var(--c-dim); }
-  .nav-sec a[aria-current] { color: var(--c-pine); }
-  .nav-sec a[aria-current]::before { content: ">" counter(sec, decimal-leading-zero) " "; content: ">" counter(sec, decimal-leading-zero) " " / ""; }
-  .nav-sec a[aria-current]::after { content: " <"; content: " <" / ""; }
-  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; }
-  .nav-pg::before { padding: 0 0 4px 0; }
-  .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
-  .nav-pg a { padding-left: 4px; }
-  .nav-pg a[aria-current="page"] { color: var(--c-brass); }
-  .nav a:hover, .nav a:focus-visible { background: var(--c-fg); color: var(--scr-bg); }
-}
-@media (max-width: 520px) { .crumb.in-sec[data-page]:not([data-page=""]) i { display: none; } .crumb.in-sec b { padding-left: 0; } }
-@media (max-width: 380px) { .brand span { display: none; } }
 
 /* ---------- messages ---------- */
 .msg { background: var(--panel); border: 1px solid var(--rule-strong); padding: 16px 18px 18px; display: grid; gap: 10px; min-width: 0; }
@@ -153,7 +64,8 @@ main:focus { outline: none; }
 .msg.us .av { background: var(--on-accent); color: var(--accent); }
 .msg p.say { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-weight: 500; font-size: clamp(18px, 2.05vw, 28px); line-height: 1.22; letter-spacing: -0.02em; }
 .msg.them p.say { color: var(--fg); }
-.msg.us p.say b { color: var(--brass); font-weight: 700; }
+/* brass for the 128, in the light screen brass: the bone band brass is too dark to read on pine */
+.msg.us p.say b { color: var(--c-brass); font-weight: 700; }
 .struck { background-image: linear-gradient(var(--block), var(--block)); background-repeat: no-repeat; background-position: 0 58%; background-size: 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; color: var(--muted); }
 .msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px; align-items: stretch; }
 @media (max-width: 760px) { .msgs { grid-template-columns: minmax(0, 1fr); padding-block: 24px; } }
@@ -176,7 +88,7 @@ main:focus { outline: none; }
 #skip:hover, #skip:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 
 /* ---------- screens ---------- */
-.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); }
+.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: inset 0 0 0 4px var(--scr-deep), 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); }
 .screen.hero { aspect-ratio: 16 / 7; min-height: 300px; width: 100%; z-index: 2; }
 .screen.panel { height: 420px; }
 .screen.drag { cursor: grab; touch-action: pan-y; }
@@ -197,11 +109,12 @@ body { counter-reset: fig; }
 .w-pips { white-space: pre; color: var(--rule-strong); }
 .w-pips b { color: var(--brass) !important; font-size: inherit !important; }
 .w-pips i { font-style: normal; color: var(--fg); }
-.hero-cap .w-note { flex: 1; min-width: 0; display: flex; gap: 1ch; white-space: nowrap; overflow: hidden; }
+/* the note keeps its line whole: when the row is too narrow it drops below the name, never cut off */
+.hero-cap .w-note { flex: 1 0 auto; display: flex; gap: 1ch; white-space: nowrap; }
 .hero-cap .w-note::before { content: "/"; content: "/" / ""; color: var(--rule-strong); }
-.hero-cap .btn { margin: 0 -10px; }
+.hero-cap .btn { margin: 0 -10px 0 auto; }
 @media (max-width: 760px) { .hero-cap .w-note { flex-basis: 100%; white-space: normal; } .hero-cap .w-note::before { display: none; } }
-@media (max-width: 760px) { .screen.hero { aspect-ratio: 4 / 3; } .hero-cap { padding-bottom: 28px; } .screen.panel { height: 360px; } .screen { box-shadow: 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
+@media (max-width: 760px) { .screen.hero { aspect-ratio: 4 / 3; } .hero-cap { padding-bottom: 28px; } .screen.panel { height: 360px; } .screen { box-shadow: inset 0 0 0 3px var(--scr-deep), 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
 #field { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 25; display: block; }
 .intro #field { z-index: 45; }
 
@@ -230,12 +143,6 @@ body { counter-reset: fig; }
 .tri { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border: 1px solid var(--rule-strong); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 14px; }
 .tri span { padding: 8px 16px; border-right: 1px solid var(--rule-strong); }
 .tri span:last-child { border-right: 0; background: var(--accent); color: var(--on-accent); }
-/* buttons are bracketed words, [ Edit entry 14 ]; the brackets sit on the text edge, hover inverts */
-.btn { display: inline-flex; align-items: center; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; line-height: 16px; padding: 12px 10px; margin-left: -10px; border: 0; color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; white-space: pre; }
-.btn::before { content: "[ "; content: "[ " / ""; font-weight: 700; }
-.btn::after { content: " ]"; content: " ]" / ""; font-weight: 700; }
-.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
-.btn[aria-pressed="true"] { background: var(--block); color: var(--bg); }
 @media (max-width: 600px) { .tri { flex-direction: column; width: 100%; } .tri span { border-right: 0; border-bottom: 1px solid var(--rule-strong); } .tri span:last-child { border-bottom: 0; } }
 
 .tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
@@ -269,7 +176,9 @@ ol.fl { columns: 2; column-gap: 56px; }
 ol.fl li { counter-increment: fl; }
 .fl a { display: inline-block; text-decoration: none; color: var(--fg); padding: 0 4px; margin-left: -4px; white-space: pre; }
 ol.fl a::before { content: counter(fl, decimal-leading-zero) "  "; content: counter(fl, decimal-leading-zero) "  " / ""; color: var(--muted); }
-.fl a.pg::after { content: " ->"; content: " ->" / ""; }
+/* pages read as directories, results/ and paper/, not arrows */
+.fl a.pg { text-transform: lowercase; }
+.fl a.pg::after { content: "/"; content: "/" / ""; }
 .fl a:hover, .fl a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .fl a:hover::before, .fl a:focus-visible::before { color: inherit; }
 @media (max-width: 760px) { .foot-nav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .foot-nav > div:first-child { grid-column: 1 / -1; } }
@@ -289,7 +198,6 @@ ol.fl a::before { content: counter(fl, decimal-leading-zero) "  "; content: coun
 /* ---------- character rules ----------
    Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
    Generated content carries empty alt text, so screen readers skip it. */
-:root { --eq: "================================================================================================================================================================================================================================================================================================================================================================================================================"; --dots: "................................................................................................................................................................................................................................................................................................................................................................................................................"; --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
 main > .band { position: relative; }
 main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
 /* wide screens only: a ruler down the empty left margin, headed by the band's number (00 is the hero) */
@@ -336,7 +244,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <span class="crumb" data-page="" aria-hidden="true">/ home</span>
     <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
-      <ul class="nav-sec" aria-label="On this page"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ul>
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#how" data-g=">_" aria-label="How it works">How</a></li><li><a href="#proof" data-g=".|">Proof</a></li><li><a href="#redteam" data-g="|#">Red team</a></li><li><a href="#who" data-g="()" aria-label="Who it's for">Who</a></li><li><a href="#audit" data-g="oo" aria-label="Audit trail">Audit</a></li><li><a href="#status" data-g="-^">Status</a></li></ul>
       <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li></ul>
     </nav>
   </div>
@@ -626,33 +534,34 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     });
     return out;
   }
+  // secondary text on the text screens is mist (14), not dim (1): dim stays for art and rules, mist reads at AA
   const T = (s, c = 0) => [s, c];
   function terminal(s, t) {
     const w = s.C < 60, blink = reduce || Math.floor(t * 1.6) % 2 === 0;
     return textCells(s.C, s.R, [
       [T("$ ", 2), T("scruple demo")], [],
-      [T(w ? "simulate " : "1 simulate   ", 1), T("3,000 held-out disputes")],
-      [T(w ? "verify   " : "2 verify     ", 1), T("ledger, outcome, policy")],
-      [T(w ? "gate     " : "3 gate       ", 1), T("shadow, canary, approval")], [],
-      [T("[dec-00001] ", 1), T("shadow   "), T("PROMOTE", 2)],
-      [T("[dec-00002] ", 1), T("canary   "), T("CANARY_PASSED", 2)],
-      [T("[dec-00003] ", 1), T("shadow   "), T("BLOCK", 4), T(w ? "" : "  late_evidence +$10.79", 4)],
-      [T("[dec-00004] ", 1), T("approve  "), T("ACTIVATED", 2)],
-      [T("[dec-00005] ", 1), T("rollback "), T("ROLLED_BACK", 3)], [],
-      [T("audit ", 1), T("20 entries  "), T("INTEGRITY OK", 2)],
+      [T(w ? "simulate " : "1 simulate   ", 14), T("3,000 held-out disputes")],
+      [T(w ? "verify   " : "2 verify     ", 14), T("ledger, outcome, policy")],
+      [T(w ? "gate     " : "3 gate       ", 14), T("shadow, canary, approval")], [],
+      [T("[dec-00001] ", 14), T("shadow   "), T("PROMOTE", 2)],
+      [T("[dec-00002] ", 14), T("canary   "), T("CANARY_PASSED", 2)],
+      [T("[dec-00003] ", 14), T("shadow   "), T("BLOCK", 4), T(w ? "" : "  late_evidence +$10.79", 4)],
+      [T("[dec-00004] ", 14), T("approve  "), T("ACTIVATED", 2)],
+      [T("[dec-00005] ", 14), T("rollback "), T("ROLLED_BACK", 3)], [],
+      [T("audit ", 14), T("20 entries  "), T("INTEGRITY OK", 2)],
       [T("$ ", 2), T(blink ? "_" : " ", 3)],
     ]);
   }
   const SL = [["fraud", 20.25, 20.25], ["not received", 71.42, 31.77], ["not as described", 53.29, 53.29], ["partial refund", 0, 0],
     ["late evidence", 0, 10.79], ["duplicate", 0, 0], ["currency mismatch", 0, 0], ["over $10,000", 35, 35]];
   function bars(s) {
-    const C = s.C, lab = C < 60 ? 12 : 18, room = C - lab - 10, rows = [[T("loss / case    ", 1), T("= now  ", 6), T("# with rule", 0)], []];
+    const C = s.C, lab = C < 60 ? 12 : 18, room = C - lab - 10, rows = [[T("loss / case    ", 14), T("= now  ", 6), T("# with rule", 0)], []];
     for (const [name, a, b] of SL) {
       const la = Math.round(a / 72 * room), lb = Math.round(b / 72 * room), col = b < a ? 2 : b > a ? 4 : 0, l = name.slice(0, lab - 1).padEnd(lab, " ");
-      rows.push([T(l, 1), T("=".repeat(la), 6), T(la ? " " + a.toFixed(2) : "0.00", 1)]);
+      rows.push([T(l, 14), T("=".repeat(la), 6), T(la ? " " + a.toFixed(2) : "0.00", 14)]);
       rows.push([T(" ".repeat(lab)), T("#".repeat(lb), col), T((lb ? " " : "") + b.toFixed(2), col)]);
     }
-    rows.push([]); rows.push([T("average ", 1), T("38.43 -> 27.49 ", 2), T("looks better", 1)]); rows.push([T("late    ", 1), T("0.00 -> 10.79 ", 4), T("BLOCKED", 4)]);
+    rows.push([]); rows.push([T("average ", 14), T("38.43 -> 27.49 ", 2), T("looks better", 14)]); rows.push([T("late    ", 14), T("0.00 -> 10.79 ", 4), T("BLOCKED", 4)]);
     return textCells(C, s.R, rows);
   }
   const CHN = [[12, "rule.registered", "9a6b6a9c", "8b4e2eff"], [13, "status_changed", "53fa05d8", "9a6b6a9c"], [14, "decision", "c4a3af3b", "53fa05d8"],
@@ -666,14 +575,14 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         const bad = tampered && seq >= 14, ed = tampered && seq === 14, col = bad ? 4 : 0, pc = bad ? 4 : 6, pad = (x) => x.slice(0, bw).padEnd(bw, " ");
         L[0].push(T("+" + "-".repeat(bw + 2) + "+", pc)); L[5].push(T("+" + "-".repeat(bw + 2) + "+", pc));
         L[1].push(T("| ", pc), T(pad("entry " + seq), col), T(" |", pc));
-        L[2].push(T("| ", pc), T(pad(ed ? "edited by hand" : ev), ed ? 4 : 1), T(" |", pc));
-        L[3].push(T("| ", pc), T(pad("prev " + prev), 1), T(" |", pc));
+        L[2].push(T("| ", pc), T(pad(ed ? "edited by hand" : ev), ed ? 4 : 14), T(" |", pc));
+        L[3].push(T("| ", pc), T(pad("prev " + prev), 14), T(" |", pc));
         L[4].push(T("| ", pc), T(pad("hash " + h + (ed ? " !=" : "")), col), T(" |", pc));
         if (j < grp.length - 1) { const br = tampered && seq === 14; for (let k = 0; k < 6; k++) L[k].push(T(k === 2 ? (br ? "x" : ">") : " ", br ? 4 : 2)); }
       });
       rows.push(...L, []);
     }
-    rows.push(tampered ? [T("verify: ", 1), T("TAMPERING DETECTED at entry 14", 4)] : [T("verify: ", 1), T("INTEGRITY OK", 2), T("  head f83678b2", 1)]);
+    rows.push(tampered ? [T("verify: ", 14), T("TAMPERING DETECTED at entry 14", 4)] : [T("verify: ", 14), T("INTEGRITY OK", 2), T("  head f83678b2", 14)]);
     return textCells(s.C, s.R, rows);
   }
 
@@ -939,6 +848,53 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   });
   addEventListener("popstate", () => { if (location.hash) settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))); });
 
+  /* ---------- the hero stirs under the pointer ----------
+     Fine pointers only, never under reduced motion. While the pointer moves over the settled hero,
+     glyphs within a few cells of it gather a little energy: they re-roll toward the CODE set and
+     lean the way the pointer travels, then settle back over about a second. Energy lives in one
+     array, stepped with the 24 fps ambient tick; only cells that hold some are visited. */
+  const stir = { on: false, x: 0, y: 0, vx: 0, vy: 0, wx: 0, wy: 0, moved: false, E: null, live: [], tick: -1 };
+  function stirClear() { if (!stir.live.length) return; for (const j of stir.live) stir.E[j] = 0; stir.live.length = 0; }
+  function stirStep(s) {
+    const C = s.C, R = s.R;
+    if (!stir.E || stir.E.length !== C * R) { stir.E = new Float32Array(C * R); stir.live.length = 0; }
+    const E = stir.E, live = stir.live;
+    let n = 0;   // decay: 0.86 a tick leaves under 3% after one second
+    for (let q = 0; q < live.length; q++) { const j = live[q], v = E[j] * 0.86; if (v < 0.03) E[j] = 0; else { E[j] = v; live[n++] = j; } }
+    live.length = n;
+    stir.wx = stir.wx * 0.7 + stir.vx * 0.3; stir.wy = stir.wy * 0.7 + stir.vy * 0.3;
+    if (!stir.on || !stir.moved) { stir.vx = stir.vy = 0; return; }
+    const pc = (stir.x - s.rect.left - s.ox) / s.cw, pr = (stir.y - s.rect.top - s.oy) / s.ch, RC = 7, RR = 3.5;
+    const amt = Math.min(1, 0.4 + Math.hypot(stir.vx, stir.vy) / 90) * 0.32;
+    for (let r = Math.max(0, Math.ceil(pr - RR)); r <= Math.min(R - 1, Math.floor(pr + RR)); r++)
+      for (let c = Math.max(0, Math.ceil(pc - RC)); c <= Math.min(C - 1, Math.floor(pc + RC)); c++) {
+        const d = Math.hypot((c - pc) / RC, (r - pr) / RR); if (d >= 1) continue;
+        const j = r * C + c; if (!E[j]) live.push(j);
+        E[j] = Math.min(1, E[j] + amt * (1 - d) * (1 - d));
+      }
+    stir.vx = stir.vy = 0; stir.moved = false;
+  }
+  function drawStirred(s, t, tick) {
+    const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, E = stir.E, C = s.C;
+    const wl = Math.hypot(stir.wx, stir.wy), m = Math.min(1, wl / 30) / (wl || 1), lx = stir.wx * m * s.cw * 1.4, ly = stir.wy * m * s.ch * 0.45;
+    for (const c of cellsOf(s, t)) {
+      const j = c.r * C + c.c, e = E[j];
+      if (e < 0.04) { emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); continue; }
+      const roll = hash(j, Math.floor(tick / 3)) < e * 0.85;
+      emit(s.sz, x0 + c.c * s.cw + lx * e, y0 + c.r * s.ch + ly * e,
+        roll ? CODE.charCodeAt(Math.floor(hash(j, tick >> 2) * CODE.length)) : c.k, roll && e > 0.55 ? 5 : c.col);
+    }
+  }
+  if (!reduce && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const el = screens[0].el;
+    el.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      if (stir.on) { stir.vx += e.clientX - stir.x; stir.vy += e.clientY - stir.y; }
+      stir.x = e.clientX; stir.y = e.clientY; stir.on = true; stir.moved = true;
+    }, { passive: true });
+    el.addEventListener("pointerleave", () => { stir.on = false; });
+  }
+
   /* ---------- per-frame ---------- */
   const T0 = performance.now();
   let lastY = -1, lastTick = -1, force = true;
@@ -957,7 +913,9 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     if (reduce) { if (p >= 0.5) i++; p = 0; }
     if (i >= screens.length) i = screens.length - 1;
     for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (!visible(s.rect)) continue; if (j) corners(s); if (!(j === i || (p > 0 && j === i + 1))) idleDots(s); }
-    if (p === 0) { const s = screens[i]; if (visible(s.rect)) drawScreen(s, ta); }
+    if (i === 0 && p === 0 && I.done && tick !== stir.tick) { stir.tick = tick; stirStep(screens[0]); }
+    else if (i !== 0 || p > 0) stirClear();
+    if (p === 0) { const s = screens[i]; if (visible(s.rect)) { if (i === 0 && stir.live.length) drawStirred(s, ta, tick); else drawScreen(s, ta); } }
     else {
       const A = screens[i], B = screens[i + 1], ca = cellsOf(A, ta), cb = cellsOf(B, ta);
       const ax = A.rect.left + A.ox, ay = A.rect.top + A.oy, bx = B.rect.left + B.ox, by = B.rect.top + B.oy;

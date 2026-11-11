@@ -1,0 +1,120 @@
+/* site.css: shared by every page (home, results, paper, 404).
+   The tokens live here and only here: the bone page, its three other bands, the screen ink
+   (read by the canvas on the home page) and the character rules. Then the top bar, which
+   nav.js drives. Page styles follow in each page's own <style>. */
+:root {
+  --bg: #EDEAE1; --panel: #E3DFD4; --fg: #111412; --muted: #4E544F; --rule: #D2CEC2; --rule-strong: #959890;
+  --accent: #1A4636; --on-accent: #EDEAE1; --brass: #74561A; --block: #A1351B;
+  /* screens: the glass, its lit edge, and a darker bezel just inside it for depth (hard edged, no blur) */
+  --scr-bg: #0A1120; --scr-edge: #24324F; --scr-deep: #050912;
+  --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  /* screen ink; --c-mute is the night band's muted tone, for secondary text on screens */
+  --c-fg: #E6E3D6; --c-dim: #55617D; --c-mute: #A1ABC0; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
+  /* paper: a + every 96px and a dot every 24px, a tone off the band, like a ledger's printed grid */
+  --tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M0 0h1v1h-1zM0 24h1v1h-1zM0 48h1v1h-1zM0 72h1v1h-1zM24 0h1v1h-1zM24 24h1v1h-1zM24 48h1v1h-1zM24 72h1v1h-1zM48 0h1v1h-1zM48 24h1v1h-1zM48 72h1v1h-1zM72 0h1v1h-1zM72 24h1v1h-1zM72 48h1v1h-1zM72 72h1v1h-1z' fill='%23E2DED4'/%3E%3Cpath d='M46 48h5v1h-5zM48 46h1v5h-1z' fill='%23D9D5C9'/%3E%3C/svg%3E");
+  /* one theme: the operating system's dark setting never changes the page */
+  color-scheme: only light;
+}
+.band-pine  { --bg: #0F2D1E; --panel: #153826; --fg: #EFECE3; --muted: #AFC4B7; --rule: #224A39; --rule-strong: #4F7A67; --accent: #8BD6B0; --on-accent: #0F2D1E; --brass: #E8CA82; --block: #F49B78; --tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M0 0h1v1h-1zM0 24h1v1h-1zM0 48h1v1h-1zM0 72h1v1h-1zM24 0h1v1h-1zM24 24h1v1h-1zM24 48h1v1h-1zM24 72h1v1h-1zM48 0h1v1h-1zM48 24h1v1h-1zM48 72h1v1h-1zM72 0h1v1h-1zM72 24h1v1h-1zM72 48h1v1h-1zM72 72h1v1h-1z' fill='%23183826'/%3E%3Cpath d='M46 48h5v1h-5zM48 46h1v5h-1z' fill='%2321452F'/%3E%3C/svg%3E"); }
+.band-night { --bg: #0C1424; --panel: #131E35; --fg: #E8E5D9; --muted: #A7B1C6; --rule: #1D2942; --rule-strong: #43547A; --accent: #84D4AD; --on-accent: #0C1424; --brass: #EAC76E; --block: #F4865E; --tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M0 0h1v1h-1zM0 24h1v1h-1zM0 48h1v1h-1zM0 72h1v1h-1zM24 0h1v1h-1zM24 24h1v1h-1zM24 48h1v1h-1zM24 72h1v1h-1zM48 0h1v1h-1zM48 24h1v1h-1zM48 72h1v1h-1zM72 0h1v1h-1zM72 24h1v1h-1zM72 48h1v1h-1zM72 72h1v1h-1z' fill='%23141D31'/%3E%3Cpath d='M46 48h5v1h-5zM48 46h1v5h-1z' fill='%231C2840'/%3E%3C/svg%3E"); }
+.band-sand  { --bg: #E5D8BB; --panel: #DACAA8; --fg: #15120A; --muted: #4D4536; --rule: #CCBD9A; --rule-strong: #8F8466; --accent: #1A4636; --on-accent: #E5D8BB; --brass: #664B10; --block: #93301A; --tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M0 0h1v1h-1zM0 24h1v1h-1zM0 48h1v1h-1zM0 72h1v1h-1zM24 0h1v1h-1zM24 24h1v1h-1zM24 48h1v1h-1zM24 72h1v1h-1zM48 0h1v1h-1zM48 24h1v1h-1zM48 72h1v1h-1zM72 0h1v1h-1zM72 24h1v1h-1zM72 48h1v1h-1zM72 72h1v1h-1z' fill='%23DACEB3'/%3E%3Cpath d='M46 48h5v1h-5zM48 46h1v5h-1z' fill='%23D1C3A3'/%3E%3C/svg%3E"); }
+
+:root { --eq: "================================================================================================================================================================================================================================================================================================================================================================================================================"; --dots: "................................................................................................................................................................................................................................................................................................................................................................................................................"; --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----"; }
+
+/* every band: its own ground, printed with the grid, which runs from the page's centre line */
+.band { background: var(--bg) var(--tex) center top / 96px 96px; color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- buttons ----------
+   Bracketed words, [ Edit entry 14 ]: the [ sits on the text edge (hence the -10px), hover is an
+   instant inversion. .solid starts inverted; aria-pressed turns vermilion. */
+.btn { display: inline-flex; align-items: center; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; line-height: 16px; padding: 12px 10px; margin-left: -10px; border: 0; color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; white-space: pre; }
+.btn::before { content: "[ "; content: "[ " / ""; font-weight: 700; }
+.btn::after { content: " ]"; content: " ]" / ""; font-weight: 700; }
+.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.btn[aria-pressed="true"] { background: var(--block); color: var(--bg); }
+.btn.solid { background: var(--fg); color: var(--bg); }
+.btn.solid:hover, .btn.solid:focus-visible { background: transparent; color: var(--fg); }
+.btn[disabled] { color: var(--muted); cursor: default; }
+.btn[disabled]:hover { background: transparent; color: var(--muted); }
+
+/* ---------- bar ----------
+   Shared by every page: link site.css, copy the header markup, load nav.js. ul.nav-sec holds in-page
+   anchors (a[data-g] carries each one's glyph; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"
+   on the page you are on). The header is 60px in the flow and sticks at -12px, so once you scroll
+   it shows 48px: a compact bar with no layout shift. Its bottom edge is a character ruler that
+   fills with reading progress (span.bar-rule, set by nav.js; a plain ruler without script). */
+.bar { background-image: none; position: sticky; top: calc(env(safe-area-inset-top, 0px) - 12px); z-index: 30; height: 60px; padding-top: 12px;
+  --bar-ruler: "+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----+----.----"; --bar-fill: "===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================="; }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 20px; height: 36px; position: relative; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; padding: 4px 6px 4px 0; }
+.brand svg { width: 24px; height: 24px; display: block; }
+.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.brand:focus-visible { outline: none; background: var(--fg); color: var(--bg); }
+.crumb { display: none; }
+.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-transform: lowercase; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
+.nav a { display: block; text-decoration: none; color: var(--muted); padding: 6px 4px; white-space: pre; }
+/* each section link: a two-character glyph that stands for it, then a short name. The full title is
+   the link's aria-label. Each item reserves one character on each side, so the [ ] of the current
+   one never moves anything: [ >_ how ]   .| proof   |# red team   () who   oo audit   -^ status */
+.nav-sec li { display: flex; align-items: center; }
+.nav-sec li::before, .nav-sec li::after { content: " "; content: " " / ""; white-space: pre; font-weight: 700; color: var(--fg); }
+.nav-sec li:has(> a[aria-current])::before { content: "["; content: "[" / ""; }
+.nav-sec li:has(> a[aria-current])::after { content: "]"; content: "]" / ""; }
+.nav-sec a::before { content: attr(data-g) " "; content: attr(data-g) " " / ""; white-space: pre; color: var(--accent); }
+.nav-sec a[aria-current] { color: var(--fg); }
+/* the pages, one bracketed group set apart at the right: [ home | results | paper ], the page you are on inverted */
+.nav-pg { margin-left: auto !important; color: var(--fg); }
+.nav-pg li { display: flex; align-items: center; }
+.nav-pg li:first-child::before { content: "["; content: "[" / ""; font-weight: 700; padding-right: 2px; }
+.nav-pg li:last-child::after { content: "]"; content: "]" / ""; font-weight: 700; padding-left: 2px; }
+.nav-pg li + li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); }
+.nav-pg a { color: var(--fg); padding: 6px 6px; text-transform: lowercase; }
+.nav-pg a[aria-current="page"] { background: var(--fg); color: var(--bg); font-weight: 600; }
+.nav a:hover, .nav a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.nav a:hover::before, .nav a:focus-visible::before { color: inherit; }
+/* the bottom edge: +----.----+ in rule ink, overdrawn by ====> as you read, then the keys and how far */
+.bar-rule { position: absolute; bottom: 0; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); height: 12px; overflow: hidden; white-space: nowrap; pointer-events: none;
+  font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.bar-rule::before { content: var(--bar-ruler); content: var(--bar-ruler) / ""; }
+.bar-rule i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; overflow: hidden; background: var(--bg); color: var(--fg); font-style: normal; }
+.bar-rule i::before { content: var(--bar-fill); content: var(--bar-fill) / ""; }
+.bar-rule i::after { content: ">"; content: ">" / ""; position: absolute; right: 0; top: 0; background: var(--bg); color: var(--accent); }
+.bar-rule b { position: absolute; right: 0; top: 0; background: var(--bg); color: var(--muted); font-weight: 400; padding-left: 1ch; white-space: pre; }
+.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
+.skip:focus { transform: none; outline: none; }
+main:focus { outline: none; }
+.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
+.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--fg); color: var(--bg); outline: none; }
+/* under 1000px: scruple / .| proof, and the links fold into [ MENU ], a small dark terminal list
+   that drops over the page under the button, so nothing reflows */
+@media (max-width: 1000px) {
+  .bar { height: 56px; padding-top: 8px; top: calc(env(safe-area-inset-top, 0px) - 8px); }
+  .bar-in { gap: 10px; }
+  .crumb { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
+  .crumb i, .crumb b { font: inherit; }
+  .menu { display: block; margin-left: auto; }
+  .nav { display: none; position: absolute; top: calc(100% + 13px); right: 0; width: min(340px, 100%); flex-direction: column; align-items: stretch; gap: 14px;
+    background: var(--scr-bg); border: 1px solid var(--scr-edge); color: var(--c-fg); padding: 14px 14px 16px; font-size: 13px; text-transform: lowercase; }
+  .nav::before { content: "$ ls scruple/"; content: "$ ls scruple/" / ""; color: var(--c-pine); }
+  .bar.open .nav { display: flex; }
+  .nav ul { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-mute); padding: 0 0 4px 0; }
+  .nav a, .nav-pg a { color: var(--c-fg); padding: 9px 4px; }
+  .nav-sec li::before { content: "  "; content: "  " / ""; }
+  .nav-sec li::after { content: none; }
+  .nav-sec a { flex: 1; }
+  .nav-sec a::before { color: var(--c-mute); }
+  .nav-sec a[aria-current] { color: var(--c-pine); }
+  .nav-sec li:has(> a[aria-current])::before { content: "> "; content: "> " / ""; color: var(--c-pine); }
+  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; display: flex !important; flex-wrap: wrap; color: var(--c-fg); }
+  .nav-pg::before { flex-basis: 100%; }
+  .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
+  .nav-pg li + li::before { color: var(--c-dim); }
+  .nav-pg a { padding: 9px 8px; }
+  .nav-pg a[aria-current="page"] { background: var(--c-fg); color: var(--scr-bg); }
+  .nav a:hover, .nav a:focus-visible { background: var(--c-fg); color: var(--scr-bg); }
+}
+@media (max-width: 520px) { .crumb.in-sec[data-page]:not([data-page=""]) i { display: none; } .crumb.in-sec b { padding-left: 0; } }
+@media (max-width: 380px) { .brand span { display: none; } }
