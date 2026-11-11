@@ -254,7 +254,7 @@ so serve no data from a mount.
   | imported_shadow_*, episodes, episode_calls, jobs, job_events | `tenant_id` column | every read and write filters on it; jobs run in their tenant (`JobContext.tenant`) |
   | retention_policies, retention_purges | `tenant_id` column, read across tenants | `scruple retention apply` is an operator command over every tenant's policy; each purge is audited in the purged tenant's own chain |
   | api_keys | `tenant_id` column, looked up across tenants | a key is found by its id before the tenant is known; the record names the tenant |
-  | case store (`CaseStore`, a separate SQLite file) | one tenant per file | webhooks authenticate by the provider's signature, not a key, so the tenant is configuration (`SCRUPLE_INGEST_TENANT`, worker `--case-store-tenant`); `cases` and `movements` carry no tenant column |
+  | case store (`CaseStore`, a separate SQLite file) | one tenant per file | webhooks authenticate by the provider's signature, not a key, so the signing secret picks the tenant (`tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS`; a bare secret is `SCRUPLE_INGEST_TENANT`'s) and each tenant writes its own store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`; worker `--case-store-tenant`); `cases` and `movements` carry no tenant column |
   | console reference runs and backtest reports | shared | synthetic reference data loaded at start, not tenant data; rules, decisions and approvals in the console are the caller's tenant's |
   | MCP simulator episodes | tenant `default` | the MCP server has no authentication; episodes are synthetic |
   | live shadow recorders | in memory, keyed by tenant | not stored (see docs/DEPLOY.md, known gaps) |
