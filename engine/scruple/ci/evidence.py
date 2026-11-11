@@ -20,6 +20,14 @@ the time it was made; a manual rollback is an operator event, not a gate verdict
 it does not turn an earlier PASS into BLOCK. The current status, every status change
 and the rollback (who, when, why, which version was restored) are listed separately
 (schema version 2; version 1 read the verdict from the last decision of any kind).
+
+Partner history: a CI run with `--history` scores the candidate on two sources. The
+history source is not stored in the gate database (it is a backtest of a file the
+partner holds), so the pack carries it only when the caller passes it: `scruple ci
+run --history ... --evidence DIR` does, and `scruple ci evidence --scorecard FILE`
+takes it from that run's scorecard after checking it scored the same decisions. The
+pack's scorecard then holds both sources and the overall verdict, exactly as in the
+CI scorecard; without history the pack bytes are unchanged.
 """
 
 from __future__ import annotations
@@ -33,7 +41,8 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.audit.log import compute_hash
 from scruple.audit.models import GENESIS_HASH, AuditEntry
-from scruple.ci.scorecard import Scorecard, build_scorecard
+from scruple.ci.history import HistoryGate
+from scruple.ci.scorecard import Scorecard, build_scorecard, with_history
 from scruple.gate.approval import (
     EVENT_POLICY_SET,
     EVENT_SATISFIED,
@@ -318,7 +327,18 @@ def build_lifecycle(
     )
 
 
-def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> EvidencePack:
+def build_evidence_pack(
+    gate: AgentGate,
+    rule_id: str,
+    version: int,
+    history: HistoryGate | None = None,
+    fail_on_hold: bool = True,
+) -> EvidencePack:
+    """The pack for one version. `history` is the partner-history source of the CI run
+    that gated it (`Scorecard.history`); with it, the pack's scorecard is the CI
+    scorecard with both sources, and `data` says which data each comes from.
+    `fail_on_hold` (the run's `[ci]` setting) applies to the combined exit code only,
+    so a pack without history is byte-identical to before."""
     rv = gate.registry.get(rule_id, version)
     records = [r for r in gate.decisions(rule_id) if r.decision.version == version]
     if not records:
@@ -346,6 +366,8 @@ def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> Evidence
     # lifecycle and the decisions, not scored as a gate verdict.
     gate_records = [r for r in records if r.decision.stage is not Stage.ROLLBACK] or records
     card = build_scorecard(gate_records, gate.config, gate.audit.head())
+    if history is not None:
+        card = with_history(card, history, fail_on_hold)
     stats: dict[str, Any] = {
         "method": card.statistics.method if card.statistics else None,
         "shadow": None if card.statistics is None else card.statistics.model_dump(mode="json"),
@@ -371,6 +393,7 @@ def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> Evidence
     if card.evalue is not None:  # e-values, confidence sequences, required n, alpha shares
         stats["evalue"] = card.evalue.model_dump(mode="json")
     return EvidencePack(
+        data=card.data if history is not None else "synthetic",
         rule_id=rule_id,
         version=version,
         content_hash=rv.content_hash,
@@ -390,6 +413,23 @@ def build_evidence_pack(gate: AgentGate, rule_id: str, version: int) -> Evidence
         },
         audit=AuditSegment(entries=tuple(segment), proof=proof),
     )
+
+
+def history_from_scorecard(card: Scorecard, pack: EvidencePack) -> HistoryGate | None:
+    """The history source of `card`, after checking the card scored exactly the pack's
+    gate decisions (same rule, version and decision ids): a scorecard from another run
+    cannot lend its history to this pack. Raises ValueError on a mismatch."""
+    if (card.rule_id, card.version) != (pack.rule_id, pack.version):
+        raise ValueError(
+            f"scorecard is for {card.rule_id}@v{card.version}, not {pack.rule_id}@v{pack.version}"
+        )
+    mine = [d.decision_id for d in pack.scorecard.decisions]
+    theirs = [d.decision_id for d in card.decisions]
+    if mine != theirs:
+        raise ValueError(
+            "scorecard decisions differ from the database's: " + ", ".join(theirs or ["none"])
+        )
+    return card.history
 
 
 def load_pack(text: str) -> tuple[EvidencePack, str]:

@@ -141,7 +141,10 @@ one hash chain, so `scruple audit verify` covers them.
   `scruple ci run --evidence DIR`): sorted JSON with scorecard, statistics,
   decisions, ramp, approvals, config hash, seed commitments and an audit segment
   whose hashes recompute to the chain head; plus a PDF rendered from it. Seeds are
-  never exported.
+  never exported. A run with `--history` puts its partner-history source in the
+  pack (scorecard `history`, combined verdict, and a "Partner history" PDF section);
+  `scruple ci evidence ... --scorecard card.json` does the same from a saved
+  scorecard, refused unless it scored the same rule, version and decision ids.
 
 Statistics are injected through `scruple.gate.provider.StatsProvider`; the default
 is the existing seeded bootstrap. A sequential test can replace it without changing
