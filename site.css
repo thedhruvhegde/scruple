@@ -100,7 +100,7 @@ main:focus { outline: none; }
   .nav::before { content: "$ ls scruple/"; content: "$ ls scruple/" / ""; color: var(--c-pine); }
   .bar.open .nav { display: flex; }
   .nav ul { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-dim); padding: 0 0 4px 0; }
+  .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-mute); padding: 0 0 4px 0; }
   .nav a, .nav-pg a { color: var(--c-fg); padding: 9px 4px; }
   .nav-sec li::before { content: "  "; content: "  " / ""; }
   .nav-sec li::after { content: none; }
