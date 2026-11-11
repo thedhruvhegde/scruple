@@ -4,19 +4,8 @@
 (() => {
   "use strict";
   const $ = (s) => document.querySelector(s);
-  const root = document.documentElement;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const GH = "https://github.com/thedhruvhegde/scruple/";
-
-  /* ---------- theme (same as the home page) ---------- */
-  const darkMQ = matchMedia("(prefers-color-scheme: dark)");
-  const isDark = () => (root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : darkMQ.matches);
-  function syncTheme() { $("#t-light").setAttribute("aria-pressed", String(!isDark())); $("#t-dark").setAttribute("aria-pressed", String(isDark())); }
-  function setTheme(t) { root.setAttribute("data-theme", t); try { localStorage.setItem("scruple-theme", t); } catch (e) { /* unavailable */ } syncTheme(); }
-  $("#t-light").addEventListener("click", () => setTheme("light"));
-  $("#t-dark").addEventListener("click", () => setTheme("dark"));
-  darkMQ.addEventListener("change", syncTheme);
-  syncTheme();
 
   /* ---------- helpers ---------- */
   const el = (tag, attrs = {}, ...kids) => {
