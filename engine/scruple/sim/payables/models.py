@@ -10,6 +10,11 @@ to it) and the replies a verification would get never leave the environment.
 No real-world rule is modelled: three-way match, duplicate checks and vendor
 verification are standard accounts payable controls, and every parameter is an
 ASSUMPTION (docs/WORKFLOWS.md AP-*).
+
+Bank detail change requests (`ChangeRequest`) are emails asking AP to send a vendor's
+payments to a new account. Some come from an impostor (business email compromise).
+The control is out-of-band verification: call the vendor back on the phone number
+already on file, never on a number or address the request supplies (AP-7).
 """
 
 from __future__ import annotations
@@ -142,6 +147,40 @@ class PaidInvoice(BaseModel):
     paid_on: date
 
 
+ChangeChannel = Literal["phone_on_file", "phone_in_request", "reply_email"]
+CHANGE_CHANNELS: tuple[ChangeChannel, ...] = ("phone_on_file", "phone_in_request", "reply_email")
+ChangeDisposition = Literal["applied", "declined"]
+
+
+class ChangeRequest(BaseModel):
+    """An emailed request to change a vendor's bank account (what AP received)."""
+
+    model_config = _FROZEN
+
+    change_id: str
+    vendor_id: str
+    received_on: date
+    from_address: str
+    reply_to: str
+    phone_in_request: str = ""
+    new_bank: BankAccount
+    subject: str
+    body: str
+
+    def view(self) -> dict[str, object]:
+        out = self.model_dump(mode="json")
+        out["synthetic"] = True
+        return out
+
+
+class ChangeTruth(BaseModel):
+    model_config = _FROZEN
+
+    change_id: str
+    fraudulent: bool  # sent by someone impersonating the vendor
+    expected: ChangeDisposition
+
+
 class InvoiceTruth(BaseModel):
     model_config = _FROZEN
 
@@ -156,6 +195,13 @@ class PayablesTruth(BaseModel):
     model_config = _FROZEN
 
     invoices: tuple[InvoiceTruth, ...]
+    changes: tuple[ChangeTruth, ...] = ()
+
+    def change(self, change_id: str) -> ChangeTruth:
+        for t in self.changes:
+            if t.change_id == change_id:
+                return t
+        raise KeyError(change_id)
 
     def of(self, invoice_id: str) -> InvoiceTruth:
         for t in self.invoices:
@@ -174,6 +220,7 @@ class PayablesCase(BaseModel):
     receipts: tuple[Receipt, ...]
     invoices: tuple[Invoice, ...] = Field(min_length=1)
     history: tuple[PaidInvoice, ...]
+    change_requests: tuple[ChangeRequest, ...] = ()
     opening_cash_minor: int = Field(gt=0)
     difficulty: float = Field(ge=0, le=1)
     truth: PayablesTruth
@@ -189,6 +236,10 @@ class PayablesCase(BaseModel):
             raise ValueError("invoices must name known vendors and POs")
         if {t.invoice_id for t in self.truth.invoices} != {i.invoice_id for i in self.invoices}:
             raise ValueError("every invoice needs a truth")
+        if {t.change_id for t in self.truth.changes} != {c.change_id for c in self.change_requests}:
+            raise ValueError("every change request needs a truth")
+        if any(c.vendor_id not in vids for c in self.change_requests):
+            raise ValueError("change requests must name known vendors")
         if sum(i.amount_minor for i in self.invoices) > self.opening_cash_minor:
             raise ValueError("the account must cover the whole batch")
         return self
@@ -210,6 +261,12 @@ class PayablesCase(BaseModel):
             if p.po_id == po_id:
                 return p
         raise KeyError(po_id)
+
+    def change_request(self, change_id: str) -> ChangeRequest:
+        for c in self.change_requests:
+            if c.change_id == change_id:
+                return c
+        raise KeyError(change_id)
 
     def receipts_for(self, po_id: str) -> tuple[Receipt, ...]:
         return tuple(r for r in self.receipts if r.po_id == po_id)
@@ -233,17 +290,23 @@ class PayablesCase(BaseModel):
                 }
                 for i in self.invoices
             ],
+            "change_requests": [c.change_id for c in self.change_requests],
             "currency": "USD",
             "synthetic": True,
         }
 
 
 __all__ = [
+    "CHANGE_CHANNELS",
     "EXPECTED",
     "INVOICE_KINDS",
     "NEW_VENDOR_DAYS",
     "PRICE_TOLERANCE_PCT",
     "BankAccount",
+    "ChangeChannel",
+    "ChangeDisposition",
+    "ChangeRequest",
+    "ChangeTruth",
     "Disposition",
     "Invoice",
     "InvoiceKind",

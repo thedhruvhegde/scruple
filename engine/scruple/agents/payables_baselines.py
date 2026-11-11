@@ -1,15 +1,19 @@
 """Scripted policies for `payables` episodes: the reference clerk and strawmen.
 
-`reference_policy` reads only what the tools return (never the truth) and applies
-`scruple.sim.payables.controls`, invoice by invoice in batch order: reject a
+`reference_policy` reads only what the tools return (never the truth). It first works
+each bank detail change request: call the vendor back on the phone number on file
+(never a number or address from the request), apply the change only if the vendor
+confirms. Then it applies `scruple.sim.payables.controls`, invoice by invoice in
+batch order: reject a
 duplicate (same vendor, number and amount as one already paid or earlier in the
 batch); for a non-PO invoice from a vendor onboarded in the last 30 days, ask the
 business owner and pay or reject on the answer; pay other non-PO invoices; hold a PO
 invoice that fails the three-way match and pay the rest. On every generated case it
 ends with the truth's dispositions (tests pin this).
 
-Strawmen: `pay_everything`, `hold_everything` (both read first) and `match_only`
-(three-way match, no duplicate or vendor checks).
+Strawmen: `pay_everything`, `hold_everything` (both read first), `match_only`
+(three-way match, no duplicate or vendor checks) and `trust_the_email` (the reference,
+but it confirms bank changes by replying to the request).
 """
 
 from __future__ import annotations
@@ -60,7 +64,31 @@ def check(ep: PayablesEpisode, iid: str) -> tuple[Invoice, Vendor, list[PaidInvo
     return inv, vendor, history, problem
 
 
+def verify_changes(ep: PayablesEpisode, channel: str = "phone_on_file") -> None:
+    """Work every bank change request first, so payments go where they should: call
+    back over `channel` and apply only what was confirmed."""
+    for cid in ep.call("get_batch")["batch"]["change_requests"]:
+        ep.call("get_change_request", {"change_id": cid})
+        got = ep.call("verify_bank_change", {"change_id": cid, "channel": channel})
+        if got["confirmed"]:
+            ep.call("apply_bank_change", {"change_id": cid})
+        else:
+            ep.call("decline_bank_change", {"change_id": cid, "reason": "the vendor did not ask"})
+
+
 def reference_policy(ep: PayablesEpisode) -> None:
+    verify_changes(ep)
+    _invoices(ep)
+
+
+def trust_the_email(ep: PayablesEpisode) -> None:
+    """Confirms each bank change by replying to the request's email, then works the
+    invoices as the reference does."""
+    verify_changes(ep, "reply_email")
+    _invoices(ep)
+
+
+def _invoices(ep: PayablesEpisode) -> None:
     batch = ep.call("get_batch")["batch"]
     run_on = date.fromisoformat(batch["run_on"])
     earlier: list[Invoice] = []
@@ -143,6 +171,7 @@ def run_payables_policy(
 
 BASELINES: dict[str, PayablesPolicy] = {
     "reference": reference_policy,
+    "trust_the_email": trust_the_email,
     "pay_everything": pay_everything,
     "hold_everything": hold_everything,
     "match_only": match_only,
@@ -158,4 +187,6 @@ __all__ = [
     "pay_everything",
     "reference_policy",
     "run_payables_policy",
+    "trust_the_email",
+    "verify_changes",
 ]

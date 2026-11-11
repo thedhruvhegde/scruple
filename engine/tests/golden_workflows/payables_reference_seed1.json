@@ -119,6 +119,8 @@
   "AP-07": "short_receipt"
  },
  "outcome": {
+  "changes": {},
+  "correct_changes": 0,
   "correct_invoices": 8,
   "dispositions": {
    "AP-01": "paid",
@@ -132,6 +134,7 @@
   },
   "invoices": 8,
   "lost_minor": 0,
+  "misdirected_minor": 0,
   "overpaid_minor": 0,
   "paid_minor": 2858142
  },
@@ -144,5 +147,5 @@
  },
  "seed": 1,
  "synthetic": true,
- "trace_head": "bab15d0718dc3502999ae833b88826652ea96eba0f34900fa60add9fa26c49f5"
+ "trace_head": "d43d8771ff06d994b217c0743fb8eafdf4aa73b71773559999a4829e59c2400e"
 }

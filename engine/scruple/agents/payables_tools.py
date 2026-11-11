@@ -13,6 +13,7 @@ from typing import Any
 from pydantic import Field
 
 from scruple.agents.dispute_tools import DisputeScope, DisputeToolSpec, NoArgs, _Args
+from scruple.sim.payables.models import ChangeChannel
 from scruple.verifiers.payables_record import PayablesReport
 
 
@@ -31,6 +32,23 @@ class VendorIdArgs(_Args):
 
 class PoIdArgs(_Args):
     po_id: str = Field(min_length=1, max_length=32)
+
+
+class ChangeIdArgs(_Args):
+    change_id: str = Field(min_length=1, max_length=32, description="An id from get_batch.")
+
+
+class ChangeReasonArgs(_Args):
+    change_id: str = Field(min_length=1, max_length=32, description="An id from get_batch.")
+    reason: str = Field(default="", max_length=1_000, description="Why, in a sentence.")
+
+
+class VerifyChangeArgs(_Args):
+    change_id: str = Field(min_length=1, max_length=32, description="An id from get_batch.")
+    channel: ChangeChannel = Field(
+        description="phone_on_file: call the number in the vendor master; phone_in_request: "
+        "call the number the request gives; reply_email: answer the request's email."
+    )
 
 
 S = DisputeScope
@@ -79,6 +97,32 @@ PAYABLES_TOOLS: tuple[DisputeToolSpec, ...] = (
         "reject", "Reject the invoice and reverse its booking.", S.ACTION, InvoiceReasonArgs
     ),
     DisputeToolSpec(
+        "get_change_request",
+        "A request to change a vendor's bank account: sender, reply-to, phone, the new "
+        "account and the message.",
+        S.READ,
+        ChangeIdArgs,
+    ),
+    DisputeToolSpec(
+        "verify_bank_change",
+        "Ask whether the vendor really requested the change, over the channel you choose. "
+        "Returns whether whoever you reached confirmed it.",
+        S.WRITE,
+        VerifyChangeArgs,
+    ),
+    DisputeToolSpec(
+        "apply_bank_change",
+        "Update the vendor master: payments go to the requested account from now on.",
+        S.ACTION,
+        ChangeIdArgs,
+    ),
+    DisputeToolSpec(
+        "decline_bank_change",
+        "Decline the change: payments keep going to the account on file.",
+        S.ACTION,
+        ChangeReasonArgs,
+    ),
+    DisputeToolSpec(
         "submit_decision",
         "Close the pay run: explain what you did, optionally with structured claims. "
         "Returns the scorecard.",
@@ -101,9 +145,12 @@ __all__ = [
     "PAYABLES_TOOLS",
     "PAYABLES_TOOL_BY_NAME",
     "PAYABLES_TOOL_NAMES",
+    "ChangeIdArgs",
+    "ChangeReasonArgs",
     "InvoiceIdArgs",
     "InvoiceReasonArgs",
     "PoIdArgs",
     "VendorIdArgs",
+    "VerifyChangeArgs",
     "payables_anthropic_tools",
 ]
