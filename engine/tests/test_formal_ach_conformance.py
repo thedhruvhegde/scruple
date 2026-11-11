@@ -19,14 +19,15 @@ from scruple.sim.ach.models import FAMILIES
 def test_engine_steps_are_model_steps(seed: int, difficulty: float) -> None:
     seen: collections.Counter[str] = collections.Counter()
     for i, case in enumerate(generate_ach_cases(seed, 120, difficulty=difficulty)):
-        seen.update(run_ach(case, i, invariants=False).commands)
+        # every invariant of the model also holds on each state the engine reaches
+        seen.update(run_ach(case, i).commands)
     assert sum(seen.values()) > 400
 
 
 @pytest.mark.parametrize("family", [f.value for f in FAMILIES])
 def test_every_family_conforms(family: str) -> None:
     for seed in range(25):
-        run_ach(generate_ach_case(seed, family, 0.7), seed, invariants=False)
+        run_ach(generate_ach_case(seed, family, 0.7), seed)
 
 
 def test_most_commands_are_exercised() -> None:

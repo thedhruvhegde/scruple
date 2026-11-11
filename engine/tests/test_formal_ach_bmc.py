@@ -12,8 +12,7 @@ from scruple.sim.ach.generator import generate_ach_case
 from scruple.sim.ach.models import AchCase
 
 FAST_DEPTH = 7
-BUGGY = ("no_money_invented", "no_negative_balance")
-SAFE = tuple(i.name for i in am.INVARIANTS if i.name not in BUGGY)
+SAFE = tuple(i.name for i in am.INVARIANTS)
 # a retry's own return is timely and not a duplicate, so a dishonor of it never stands
 NEVER = {f"DISHONOR_FINAL_R{n}" for n in (1, 2, 3)}
 
@@ -44,13 +43,6 @@ def test_invariants_are_inductive() -> None:
     assert set(ind.inductive) == set(SAFE), ind.dropped
 
 
-@pytest.mark.xfail(strict=True, reason="engine bug found by the model checker, fixed next")
-@pytest.mark.parametrize("name", BUGGY)
-def test_no_money_is_collected_twice(report: Report, name: str) -> None:
-    r = next(x for x in report.results if x.invariant == name)
-    assert r.holds, r.counterexample.text() if r.counterexample else name
-
-
 def _retry_and_dishonor(case: AchCase) -> AchEngine:
     eng = AchEngine(case)
     rid = eng.settled_returns()[0].return_id
@@ -59,14 +51,13 @@ def _retry_and_dishonor(case: AchCase) -> AchEngine:
     return eng
 
 
-@pytest.mark.xfail(strict=True, reason="bug: a dishonor and a retry both collect the entry")
 def test_dishonor_while_a_retry_is_in_flight_does_not_collect_twice() -> None:
     """Counterexample (depth 5): an R01 return settles, the originator reinitiates and,
-    before the retry settles, dishonors the return. Both settle the next banking day:
-    the entry is collected twice and the receivable goes negative. A generated case
-    shows it for a day (the contest takes it back); with an untimely R01 and a
-    receiver whose funds have arrived, the dishonor stands and it stays collected
-    twice."""
+    before the retry settles, dishonors the return. The engine accepted that: both
+    settled the next banking day, the entry was collected twice and the receivable went
+    negative. A generated case showed it for a day (the contest took it back); with an
+    untimely R01 and a receiver whose funds have arrived the dishonor stood and the
+    entry stayed collected twice. Now the dishonor waits for the retry."""
     eng = _retry_and_dishonor(generate_ach_case(0, "nsf_recoverable", 0.0))
     eng.advance(1)
     assert eng.receivable() >= 0
