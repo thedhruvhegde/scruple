@@ -5,7 +5,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: [index.html, wonders.js, nav.js, site.css, 404.html, robots.txt, sitemap.xml, "assets/**", "results/**", "paper/**", .github/workflows/pages.yml]
+    paths: [index.html, wonders.js, nav.js, site.css, 404.html, robots.txt, sitemap.xml, "assets/**", "results/**", "paper/**", "pilot/**", .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
           mkdir "$RUNNER_TEMP/site"
           cp index.html wonders.js nav.js site.css 404.html robots.txt sitemap.xml "$RUNNER_TEMP/site/"
           cp -r assets "$RUNNER_TEMP/site/"
-          for d in results paper; do if [ -d "$d" ]; then cp -r "$d" "$RUNNER_TEMP/site/"; fi; done
+          for d in results paper pilot; do if [ -d "$d" ]; then cp -r "$d" "$RUNNER_TEMP/site/"; fi; done
           find "$RUNNER_TEMP/site" -name '*.py' -delete
           rm -rf "$RUNNER_TEMP/site/assets/readme"
           touch "$RUNNER_TEMP/site/.nojekyll"
