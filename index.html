@@ -132,7 +132,7 @@ main:focus { outline: none; }
 .msg.them p.say { color: var(--fg); }
 .msg.us p.say b { color: var(--brass); font-weight: 700; }
 .struck { background-image: linear-gradient(var(--block), var(--block)); background-repeat: no-repeat; background-position: 0 58%; background-size: 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; color: var(--muted); }
-.msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px 32px; align-items: stretch; }
+.msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px; align-items: stretch; }
 @media (max-width: 760px) { .msgs { grid-template-columns: minmax(0, 1fr); padding-block: 24px; } }
 
 /* intro chat screen */
@@ -215,9 +215,14 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 /* ---------- character rules ----------
    Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
    Generated content carries empty alt text, so screen readers skip it. */
-:root { --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
+:root { --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
 main > .band { position: relative; }
 main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+/* a title rule over each screen: +-- name ------------ cols x rows --+ (the grid is set by layout()) */
+.screen[data-head]::before, .screen[data-head]::after { position: absolute; bottom: calc(100% + 12px); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--muted); white-space: nowrap; pointer-events: none; }
+.screen[data-head]::before { content: "+-- " attr(data-head) " " var(--dash); content: "+-- " attr(data-head) " " var(--dash) / ""; left: -9px; right: -9px; overflow: hidden; }
+.screen[data-head]::after { content: " " attr(data-grid) " --+"; content: " " attr(data-grid) " --+" / ""; right: -9px; background: var(--bg); }
+@media (max-width: 760px) { .screen[data-head]::before, .screen[data-head]::after { bottom: calc(100% + 9px); } .screen[data-head]::before { left: -6px; right: -6px; } .screen[data-head]::after { right: -6px; } }
 </style>
 </head>
 <body>
@@ -270,7 +275,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
           <p class="say">No. You filed <b>128</b> disputes you could never win.</p>
         </div>
       </div>
-      <div class="screen hero" data-screen="wonder" role="img" id="hero-scr" aria-label="One of the new seven wonders of the world, drawn in moving text characters."></div>
+      <div class="screen hero" data-screen="wonder" data-head="wonder" role="img" id="hero-scr" aria-label="One of the new seven wonders of the world, drawn in moving text characters."></div>
       <div class="hero-cap"><p><b id="w-name">a wonder</b> <span id="w-place"></span><span class="sep">/</span>drawn in characters, a different wonder each visit</p><button type="button" class="btn" id="w-next">Another wonder</button></div>
     </div>
   </section>
@@ -288,7 +293,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="tri" aria-label="Train on it. Evaluate on it. Ship through it."><span>Train on it.</span><span>Evaluate on it.</span><span>Ship through it.</span></p>
       </div>
       <div>
-        <div class="screen panel" data-screen="terminal" role="img" aria-label="Terminal: scruple demo. Good rule promoted, bad rule blocked, audit integrity OK."></div>
+        <div class="screen panel" data-screen="terminal" data-head="terminal" role="img" aria-label="Terminal: scruple demo. Good rule promoted, bad rule blocked, audit integrity OK."></div>
         <p class="scr-cap"><span><b>scruple demo</b>, abridged</span><span>synthetic data</span></p>
       </div>
     </div>
@@ -301,7 +306,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="sum">Two learned rules with the same condition. The bad one lowered the average loss by $10.94 a case, and made late-evidence disputes worse. Blocked.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="bars" role="img" aria-label="Bar chart of mean loss per case by case type. Item not received falls from 71.42 to 31.77 dollars. Late evidence rises from 0 to 10.79 dollars."></div>
+        <div class="screen panel" data-screen="bars" data-head="loss by case type" role="img" aria-label="Bar chart of mean loss per case by case type. Item not received falls from 71.42 to 31.77 dollars. Late evidence rises from 0 to 10.79 dollars."></div>
         <p class="scr-cap"><span><b>Mean loss per case</b>, current policy against the bad rule</span><span>3,000 held-out cases</span></p>
       </div>
       <div class="full tw">
@@ -337,7 +342,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src">Still open, and pinned as tests: many submissions probing one held-out set, live drift, harm across case-type boundaries.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="wall" role="img" aria-label="Animation: attacks stream in from the left and break against a wall. The ledger on the right stays untouched."></div>
+        <div class="screen panel" data-screen="wall" data-head="red team" role="img" aria-label="Animation: attacks stream in from the left and break against a wall. The ledger on the right stays untouched."></div>
         <p class="scr-cap"><span><b>7 attacks, 0 through</b></span><span>scruple redteam</span></p>
       </div>
     </div>
@@ -356,7 +361,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src">Today: simulator, verifiers, gate for learned rules. Next: step-by-step RL environments, model and prompt changes.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="torus" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
+        <div class="screen panel" data-screen="torus" data-head="one loop" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
         <p class="scr-cap"><span><b>One loop</b>: train, evaluate, ship</span><span>same verifiers each time</span></p>
       </div>
     </div>
@@ -371,7 +376,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src" id="chain-v" aria-live="polite">Integrity OK. 20 entries, head f83678b2730cb21c.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="chain" role="img" aria-label="Audit chain, entries 12 to 17, each storing the hash of the one before."></div>
+        <div class="screen panel" data-screen="chain" data-head="audit chain" role="img" aria-label="Audit chain, entries 12 to 17, each storing the hash of the one before."></div>
         <p class="scr-cap"><span><b>Audit chain</b>, entries 12 to 17 from the same run</span><span>SHA-256</span></p>
       </div>
     </div>
@@ -392,7 +397,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src">Reference implementation v0.1.0, 93 tests. The CLI answers to scruple and agent-gate.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
+        <div class="screen panel" data-screen="rain" data-head="ledger rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
         <p class="scr-cap"><span><b>Ledger rain</b>, debits and credits in replay</span><span>synthetic</span></p>
       </div>
     </div>
@@ -401,7 +406,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   <footer class="band band-night">
     <div class="page">
       <div class="def">
-        <div class="screen panel drag" data-screen="mark" role="img" aria-label="The Scruple mark in 3D: a beam on a fulcrum, tipped by one small brass weight. Drag to rotate."></div>
+        <div class="screen panel drag" data-screen="mark" data-head="the mark" role="img" aria-label="The Scruple mark in 3D: a beam on a fulcrum, tipped by one small brass weight. Drag to rotate."></div>
         <div>
           <p class="word">scruple</p>
           <p class="pron">/ˈskruː.pəl/ noun</p>
@@ -658,6 +663,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       const r = s.el.getBoundingClientRect();
       s.sz = TEXT[s.kind] ? 1 : 0; s.cw = SIZES[s.sz] * RATIO; s.ch = Math.round(SIZES[s.sz] * 1.22);
       s.C = Math.max(10, Math.floor((r.width - 20) / s.cw)); s.R = Math.max(5, Math.floor((r.height - 20) / s.ch));
+      s.el.dataset.grid = `${s.C} x ${s.R}`;
       s.ox = (r.width - s.C * s.cw) / 2; s.oy = (r.height - s.R * s.ch) / 2; s.cache = null; s.static = null; s.grid = null; s.poses = null;
     }
     buildAtlas();
