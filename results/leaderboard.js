@@ -32,6 +32,8 @@
     if (!c) return none(r.harness === "reference" ? "" : "not run");
     const sub = c.vs_tfidf ? [sgn(c.vs_tfidf.diff, p3), `[${sgn(c.vs_tfidf.ci95[0], p3)}, ${sgn(c.vs_tfidf.ci95[1], p3)}]`] : null;
     const valid = c.valid != null && c.valid < c.n ? [`${c.valid}/${c.n} valid replies`] : [];
+    // a partial run is scored on the items it answered, against TF-IDF on those same items
+    if (c.subset_of) valid.unshift(`n ${c.n} of ${c.subset_of}, TF-IDF ${p3(c.tfidf_same_items)}`);
     return cell(p3(c.value), [...valid, ...(sub || [])]);
   }
 
@@ -41,7 +43,7 @@
       const rows = d.rows.filter((r) => r.harness === g);
       if (!rows.length) continue;
       const head = el("tr", "lb-group"), th = el("th", null, label);
-      th.colSpan = 11; th.scope = "colgroup"; head.append(th); body.append(head);
+      th.colSpan = 10; th.scope = "colgroup"; head.append(th); body.append(head);
       for (const r of rows) {
         const tr = el("tr");
         const name = el("th"); name.scope = "row";
@@ -64,7 +66,7 @@
             e.cost_vs_evidence ? cell(usd(e.cost_vs_evidence.diff), `[${usd(e.cost_vs_evidence.ci95[0])}, ${usd(e.cost_vs_evidence.ci95[1])}]`) : cell("ref", `mean $${e.mean_cost_usd.toFixed(2)}`),
           );
         } else for (let i = 0; i < 5; i++) tr.append(none(i ? "" : "no episodes"));
-        tr.append(...["regime-shared", "regime-2015", "outcome-2015", "routing-2025"].map((t) => cfpb(r.cfpb[t], r)));
+        tr.append(...["regime-2015", "outcome-2015", "routing-2025"].map((t) => cfpb(r.cfpb[t], r)));
         if (r.e4) {
           const h = r.e4.honest.gate_pass, i = r.e4.incentive.gate_pass;
           tr.append(cell(`${h.k}/${h.n} to ${i.k}/${i.n}`, `SR-01 ${r.e4.honest.sr01_fail.k} to ${r.e4.incentive.sr01_fail.k}`));
@@ -74,20 +76,24 @@
     }
     marks.forEach((r, i) => {
       const li = el("li"); li.id = `lb-n${i + 1}`;
-      const fin = (x) => (/[.)]$/.test(x) ? x : x + ".");
+      const fin = (x) => (/\.$/.test(x) ? x : x + ".");
       const text = [r.partial.length ? "Partial. " + r.partial.map((x) => fin(x[0].toUpperCase() + x.slice(1))).join(" ") : "", ...r.notes.map(fin)].filter(Boolean).join(" ");
       li.append(el("b", null, `[${i + 1}] ${r.name}`), el("span", null, text));
       notes.append(li);
     });
-    const h1 = d.h1_sr01_open_minus_claude.complete_open_models, e4 = d.e4;
+    const H = d.h1_sr01_open_minus_claude, a = H.all_open_models, c = H.complete_open_models, e4 = d.e4;
+    const ci = (x) => `${sgn(x.diff, p3)} [${sgn(x.ci95[0], p3)}, ${sgn(x.ci95[1], p3)}]`;
     const li = el("li");
     li.append(el("b", null, "Pooled"), el("span", null,
-      `Self-report failure rate, the two complete open models minus Claude, paired over ${h1.seeds.length} seeds: ${sgn(h1.diff, p3)} [${sgn(h1.ci95[0], p3)}, ${sgn(h1.ci95[1], p3)}]. Under incentive (E4, seeds ${e4.seeds}), ${e4.h3.surfaced} of ${e4.h3.bad_episodes} bad episodes surfaced on the scorecard; the sign test on contesting valid claims found ${e4.h1.positive} of ${e4.h1.nonzero} non-zero pairs positive, p = ${e4.h1.p_one_sided.toFixed(2)}.`));
+      `Self-report failure rate, open models minus Claude, paired by seed. Pre-registered, all three open models on the ${a.seeds.length} seeds each finished: ${ci(a)}. The two gpt-oss models on ${c.seeds.length} seeds: ${ci(c)}. Under incentive (E4, seeds ${e4.seeds}), ${e4.h3.surfaced} of ${e4.h3.bad_episodes} bad episodes surfaced on the scorecard; the sign test on contesting valid claims found ${e4.h1.positive} of ${e4.h1.nonzero} non-zero pairs positive, p = ${e4.h1.p_one_sided.toFixed(2)}.`));
     notes.append(li);
+    const b = el("li");
+    b.append(el("b", null, "Not shown"), el("span", null, `E5b, ${d.e5b.models.length} free models through OpenRouter (exploratory), produced no usable data, so it has no row.`));
+    notes.append(b);
   }
 
   fetch(new URL("data/leaderboard.json", document.baseURI))
     .then((r) => { if (!r.ok) throw new Error(`leaderboard.json: ${r.status}`); return r.json(); })
     .then(render)
-    .catch((err) => { const tr = el("tr"), td = el("td", null, "Could not load the leaderboard data. Serve the site over http (python3 -m http.server)."); td.colSpan = 11; tr.append(td); body.append(tr); console.error(err); });
+    .catch((err) => { const tr = el("tr"), td = el("td", null, "Could not load the leaderboard data. Serve the site over http (python3 -m http.server)."); td.colSpan = 10; tr.append(td); body.append(tr); console.error(err); });
 })();

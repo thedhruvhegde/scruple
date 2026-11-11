@@ -430,20 +430,20 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       </div>
       <div class="lhs">
         <p class="src">The harnesses differ. Claude played all 12 seeds in one conversation and saw each scorecard; each open model got a fresh conversation per case and never saw a score. Compare within a group with more confidence than across. Intervals: Wilson 95% on counts; paired bootstrap over seeds or items, 2,000 resamples, for cost and the CFPB differences. With 12 cases an interval spans about half the scale, so most differences here are not distinguishable.</p>
-        <p class="src">Episodes are synthetic dispute cases (seeds 5001 to 5012); the model behaviour is real. CFPB tasks are real held-out complaints, graded by code. The Claude episode rows are the stored call logs re-scored with the current verifiers, as the open models were. Not run means no result exists; nothing is filled in.</p>
-        <p class="src">Built by results/build_leaderboard.py, which recounts every episode count and paired cost difference from the per-episode rows and stops on a mismatch.</p>
+        <p class="src">Episodes are synthetic dispute cases (seeds 5001 to 5012); the model behaviour is real. CFPB tasks are real held-out complaints, graded by code. Every episode row, Claude and open models alike, is its stored call log re-scored by replay with the current verifiers (E5 final). Not run means no result exists; nothing is filled in.</p>
+        <p class="src">Built by results/build_leaderboard.py, which replays every call log itself, recounts every episode count and paired cost difference, and stops on a mismatch. Where a replay changed a row as first scored, a note says so.</p>
       </div>
       <div class="full tw lb">
         <table id="lb-table" style="min-width: 1100px">
           <caption>All systems, real result files only</caption>
           <thead>
-            <tr><th scope="col" rowspan="2">System and harness</th><th scope="colgroup" colspan="5" class="lb-span">Simulated disputes, current verifiers</th><th scope="colgroup" colspan="4" class="lb-span">Real CFPB complaints</th><th scope="col" class="lb-span">Incentive (E4)</th></tr>
-            <tr><th scope="col">n</th><th scope="col">Gate<br>pass</th><th scope="col">Fair<br>outcome</th><th scope="col">SR-01<br>fails</th><th scope="col">Cost vs<br>evidence</th><th scope="col">Regime<br>22 shared</th><th scope="col">Regime<br>n 100</th><th scope="col">Relief AUROC<br>n 100</th><th scope="col">Routing<br>n 50</th><th scope="col">Gate pass<br>honest to incentive</th></tr>
+            <tr><th scope="col" rowspan="2">System and harness</th><th scope="colgroup" colspan="5" class="lb-span">Simulated disputes, current verifiers</th><th scope="colgroup" colspan="3" class="lb-span">Real CFPB complaints</th><th scope="col" class="lb-span">Incentive (E4)</th></tr>
+            <tr><th scope="col">n</th><th scope="col">Gate<br>pass</th><th scope="col">Fair<br>outcome</th><th scope="col">SR-01<br>fails</th><th scope="col">Cost vs<br>evidence</th><th scope="col">Regime<br>n 100</th><th scope="col">Relief AUROC<br>n 100</th><th scope="col">Routing<br>n 50</th><th scope="col">Gate pass<br>honest to incentive</th></tr>
           </thead>
           <tbody id="lb-body"></tbody>
         </table>
       </div>
-      <p class="full src">Under each count, its Wilson 95% interval. Under each cost, the 95% interval of the paired difference. Under each CFPB score, the difference from TF-IDF and its 95% interval. [n] marks a note below; partial run marks a run that stopped early or skipped tasks. On a phone the table scrolls sideways.</p>
+      <p class="full src">Under each count, its Wilson 95% interval. Under each cost, the 95% interval of the paired difference. Under each CFPB score, the difference from TF-IDF and its 95% interval; a run that stopped early is scored on the items it answered, against TF-IDF on those same items. [n] marks a note below; partial run marks a run that stopped early or skipped tasks. On a phone the table scrolls sideways.</p>
       <ol class="full lb-notes" id="lb-notes" aria-label="Notes to the leaderboard"></ol>
     </div>
   </section>
