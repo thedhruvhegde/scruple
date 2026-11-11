@@ -48,11 +48,35 @@
       [["  fair    ", "d"], ...MODELS.map((m, i) => [(i ? "  " : "") + m + " " + S[m].fair, "f"])],
       [["  SR-01   ", "d"], ...MODELS.map((m, i) => [(i ? "  " : "") + m + " " + sr(m), sr(m) ? "v" : "g"])],
       [["          ", "d"], ["SR-01: self-report contradicts the ledger", "d"]], [],
+      ...sparks(eps), [],
       [["E1   ", "g"], ["pass, narrowly", "g"], ["   ", "d"], ["E2   ", "v"], ["fails on H2", "v"]],
       [["$ ", "g"], ["_", "b"]],
     ];
     const pre = $("#overview"); pre.textContent = "";
-    for (const l of L) pre.append(lineOf(l));
+    for (const l of L) {
+      if (!l.tight) { pre.append(lineOf(l)); continue; }
+      const b = el("span", { class: "spk" }); for (const x of l.tight) b.append(lineOf(x)); pre.append(b);
+    }
+  }
+
+  /* per case sparklines, seeds in order: merchant cost as a two-row bar (. half, | full,
+     set tight so the rows touch), then the gate and the fairness check per case */
+  function sparks(eps) {
+    const rows = [...MODELS.map((m) => [m, eps.episodes.filter((e) => e.model === m).map((e) => [e.seed, e.cost_usd, e.gate, e.fair])]),
+      ["ref", eps.refs.filter((r) => r.system === "ref:evidence").map((r) => [r.seed, r.cost_usd, r.gate, r.fair_outcome])]];
+    const max = Math.max(...rows.flatMap(([, v]) => v.map((x) => x[1])));
+    const L = [[["  per case ", "d"], [`cost, to $${max.toFixed(0)}`.padEnd(14), "d"], ["gate".padEnd(14), "d"], ["fair", "d"]]];
+    for (const [name, v] of rows) {
+      v.sort((a, b) => a[0] - b[0]);
+      const lv = v.map((x) => Math.max(1, Math.ceil(x[1] / max * 4))), ink = name === "ref" ? "s" : "f";
+      const top = lv.map((l) => (l > 3 ? "|" : l > 2 ? "." : " ")).join(""), bot = lv.map((l) => (l > 1 ? "|" : ".")).join("");
+      L.push({ tight: [
+        [["           ", "d"], [top, ink]],
+        [["  " + name.padEnd(9), "d"], [bot + "  ", ink], ...v.map((x) => [x[2] ? "|" : "x", x[2] ? "g" : "v"]), ["  ", "d"], ...v.map((x) => [x[3] ? "." : "*", x[3] ? "d" : "b"])],
+      ] });
+    }
+    L.push([["           ", "d"], ["x blocked  * unfair  ref: evidence policy", "d"]]);
+    return L;
   }
 
   /* ---------- real data chart and table ---------- */
