@@ -100,7 +100,23 @@ a { color: inherit; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
 .toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
 .toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; overflow-x: auto; scrollbar-width: none; } }
+.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
+.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); outline: none; }
+/* under 1100px the links fold into a [ MENU ] panel that drops over the page, so nothing reflows */
+@media (max-width: 1100px) {
+  .bar-in { height: 52px; gap: 12px; }
+  .toggle { margin-left: auto; }
+  .menu { display: block; order: 3; }
+  .nav { display: none; position: absolute; top: calc(100% + 1px); left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    flex-direction: column; align-items: stretch; gap: 10px; background: var(--bg); border-bottom: 1px solid var(--rule-strong); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); font-size: 13px; }
+  .bar.open .nav { display: flex; }
+  .nav ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 12px; }
+  .nav-pg { margin-left: 0 !important; padding-top: 10px !important; border-top: 1px dashed var(--rule-strong) !important; }
+  .nav-pg::before { display: none; }
+  .nav a { padding: 10px; width: fit-content; }
+  .nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { top: 10px; }
+}
+@media (max-width: 380px) { .brand span { display: none; } }
 
 /* ---------- messages ---------- */
 .msg { background: var(--panel); border: 1px solid var(--rule-strong); padding: 16px 18px 18px; display: grid; gap: 10px; min-width: 0; }
@@ -222,6 +238,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="#top" aria-label="Scruple, back to top"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+    <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
       <ul class="nav-sec" aria-label="On this page"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ul>
       <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li></ul>

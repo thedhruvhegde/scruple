@@ -3,6 +3,7 @@
  * markup it expects, inside header.bar:
  *   nav#nav > ul.nav-sec  in-page anchors, <a href="#id">; the one in view gets aria-current="location"
  *   nav#nav > ul.nav-pg   pages, the page you are on carries aria-current="page" in the html
+ *   button#nav-menu       [ MENU ], shown under 1100px; opens nav#nav as a panel over the page
  *
  * to add it to a page: copy the bar markup and the bar css block, then
  *   <script src="nav.js" defer></script>   (or ../nav.js one level down)
@@ -34,4 +35,15 @@
   addEventListener("resize", queue);
   addEventListener("hashchange", queue);
   mark();
+
+  /* ---------- the narrow-screen menu ---------- */
+  const btn = document.getElementById("nav-menu");
+  if (!btn) return;
+  const isOpen = () => btn.getAttribute("aria-expanded") === "true";
+  function set(open) { btn.setAttribute("aria-expanded", String(open)); bar.classList.toggle("open", open); }
+  btn.addEventListener("click", () => { set(!isOpen()); if (isOpen()) { const f = nav.querySelector("a"); if (f) f.focus({ preventScroll: true }); } });
+  nav.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) { set(false); btn.focus(); } });
+  addEventListener("pointerdown", (e) => { if (isOpen() && !bar.contains(e.target)) set(false); });
+  matchMedia("(min-width: 1101px)").addEventListener("change", (m) => { if (m.matches) set(false); });
 })();
