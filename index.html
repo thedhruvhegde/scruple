@@ -212,6 +212,12 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 @media (max-width: 900px) { .def { grid-template-columns: minmax(0, 1fr); } }
 .foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; border-top: 1px solid var(--rule); padding-block: 16px 40px; }
 .foot-row span { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+/* ---------- character rules ----------
+   Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
+   Generated content carries empty alt text, so screen readers skip it. */
+:root { --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
+main > .band { position: relative; }
+main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
 </style>
 </head>
 <body>
