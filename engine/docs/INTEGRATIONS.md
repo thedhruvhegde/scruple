@@ -515,3 +515,16 @@ def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
   (Slack rejections record "rejected in Slack by <subject>"; links ask for a reason).
   Tested against a fake Slack built from the public Web API and Block Kit references,
   not against a live workspace.
+
+## Policy and integration tables, and the API schema
+
+- `tenant_policies` and the integration tables (`integration_*`, `webhook_*`,
+  `ticket_*`, `link_nonces`) have no alembic migration: they are created with
+  `CREATE TABLE IF NOT EXISTS` on first use (`scruple.storage.lazy`), so a database that
+  never used them is unchanged. On Postgres with a non-owner application role
+  (`app_role_grants`), create them first as the owner (run any `scruple policy apply`
+  or `scruple integrations settings set` once with the owner's URL).
+- `/policy` and `/integrations/*` routes are left out of the OpenAPI schema, like the
+  console: they are operator configuration, not part of the SDKs generated from it.
+  Every one still declares its permission (`require`, or `signed` for the Slack and
+  link routes), and the route guard test enumerates them.

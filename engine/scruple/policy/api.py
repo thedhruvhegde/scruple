@@ -35,7 +35,9 @@ def _out(rec: PolicyRecord) -> dict[str, Any]:
 
 
 def policy_router(gate_for: Callable[[str], AgentGate]) -> APIRouter:
-    router = APIRouter(prefix="/policy", tags=["policy"])
+    # Left out of the OpenAPI schema (like the console): operator configuration, not
+    # part of the client SDKs generated from it (sdk/typescript/openapi.json).
+    router = APIRouter(prefix="/policy", tags=["policy"], include_in_schema=False)
 
     @router.get("", dependencies=[require(Permission.READ)])
     def current(principal: CurrentPrincipal) -> dict[str, Any]:

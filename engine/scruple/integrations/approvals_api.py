@@ -79,12 +79,20 @@ def approvals_router(
     runtime: Runtime | Callable[[], Runtime] | None = None,
     now: Callable[[], float] = time.time,
 ) -> APIRouter:
-    router = APIRouter(prefix="/integrations", tags=["integrations"])
+    # Left out of the OpenAPI schema (like the console): operator configuration, not
+    # part of the client SDKs generated from it (sdk/typescript/openapi.json).
+    router = APIRouter(prefix="/integrations", tags=["integrations"], include_in_schema=False)
+
+    made: list[Runtime] = []
 
     def rt() -> Runtime:
-        if runtime is None:
-            return Runtime.from_env()
-        return runtime if isinstance(runtime, Runtime) else runtime()
+        if isinstance(runtime, Runtime):
+            return runtime
+        if runtime is not None:
+            return runtime()
+        if not made:  # read the environment once, on first use
+            made.append(Runtime.from_env())
+        return made[0]
 
     def known(tenant: str) -> IntegrationStore | None:
         if tenant not in IntegrationStore.tenants(root_storage):
