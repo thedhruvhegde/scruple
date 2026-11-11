@@ -1,5 +1,5 @@
 .PHONY: install test test-slow test-postgres lint format typecheck demo bench serve check cov \
-	release db-up db-down db-migrate
+	release db-up db-down db-migrate formal
 
 # Local postgres from docker-compose.yml (needs POSTGRES_PASSWORD in env or .env).
 DB_URL ?= postgresql://scruple@127.0.0.1:$${POSTGRES_PORT:-5432}/scruple
@@ -46,6 +46,11 @@ bench:
 
 serve:
 	uv run scruple serve
+
+# Bounded model checking and induction (z3) of the dispute, ACH and reconciliation
+# models; docs/FORMAL.md says what is proved. A few minutes.
+formal:
+	uv run python -m scruple.formal.run
 
 check: lint typecheck test
 
