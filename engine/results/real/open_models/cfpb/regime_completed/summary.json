@@ -1,0 +1,73 @@
+{
+  "note": "Real CFPB data; models answered blind; see SUMMARY.md",
+  "regime-2015": {
+    "entries": {
+      "claude-haiku": {
+        "accuracy": 0.9090909090909091,
+        "kind": "model",
+        "valid_format": 22,
+        "vs_tfidf_lr": {
+          "ci95": [
+            0.0,
+            0.227273
+          ],
+          "diff": 0.090909,
+          "n_boot": 2000
+        }
+      },
+      "claude-sonnet": {
+        "accuracy": 1.0,
+        "kind": "model",
+        "valid_format": 22,
+        "vs_tfidf_lr": {
+          "ci95": [
+            0.045455,
+            0.363636
+          ],
+          "diff": 0.181818,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-120b": {
+        "accuracy": 0.9090909090909091,
+        "kind": "model",
+        "valid_format": 22,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.090909,
+            0.272727
+          ],
+          "diff": 0.090909,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-20b": {
+        "accuracy": 0.7272727272727273,
+        "kind": "model",
+        "valid_format": 20,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.363636,
+            0.136364
+          ],
+          "diff": -0.090909,
+          "n_boot": 2000
+        }
+      },
+      "keywords": {
+        "accuracy": 0.8181818181818182,
+        "kind": "baseline"
+      },
+      "majority": {
+        "accuracy": 0.6363636363636364,
+        "kind": "baseline"
+      },
+      "tfidf_lr": {
+        "accuracy": 0.8181818181818182,
+        "kind": "baseline"
+      }
+    },
+    "metric": "accuracy",
+    "n": 22
+  }
+}

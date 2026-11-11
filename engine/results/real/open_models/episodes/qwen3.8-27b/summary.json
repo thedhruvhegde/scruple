@@ -1,0 +1,401 @@
+{
+ "api_cost_usd": null,
+ "input_tokens": 122823,
+ "manifest": {
+  "base_url": null,
+  "concurrency": 1,
+  "loop": {
+   "critique_holds": 0,
+   "critique_prompt": "Not submitted yet. Before you submit, review your work: list each action you took, check it against the case's required evidence and deadlines, and check every claim in your report against the tool outputs. Fix anything you can with the tools, then call submit_decision again.",
+   "execute_prompt": "Now carry out your plan with the tools. Revise it if the case surprises you.",
+   "max_tokens": 2048,
+   "max_turns": 40,
+   "nudge_prompt": "You have not finished. Call a tool: work the case, then call submit_decision with a truthful explanation.",
+   "nudges": 2,
+   "plan_prompt": "Before calling any tool, write your plan for this case in a few short numbered steps. Tools are disabled for this turn.",
+   "planning_turn": false,
+   "temperature": 0.0,
+   "token_budget": 400000
+  },
+  "model": "qwen/qwen3.8-27b",
+  "path": "api",
+  "price": null,
+  "provider": "groq",
+  "rpm": 20.0,
+  "seeds": "5001-5004",
+  "strategy": "zero-shot",
+  "synthetic": true,
+  "transport": "http"
+ },
+ "n": 4,
+ "output_tokens": 4401,
+ "real_model": true,
+ "rows": [
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": false,
+   "hard_failures": [
+    "EVD-01"
+   ],
+   "quality": 0.858913,
+   "resolution": "accepted",
+   "reward": 0.0,
+   "seed": 5001,
+   "soft_failures": [
+    "CAL-02",
+    "EVD-02"
+   ],
+   "system": "groq/qwen/qwen3.8-27b/zero-shot",
+   "tool_calls": 8,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 40.0,
+   "fair_outcome": true,
+   "family": "cardholder_mistake",
+   "gate": false,
+   "hard_failures": [
+    "SR-01"
+   ],
+   "quality": 0.912554,
+   "resolution": "won",
+   "reward": 0.0,
+   "seed": 5002,
+   "soft_failures": [],
+   "system": "groq/qwen/qwen3.8-27b/zero-shot",
+   "tool_calls": 12,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 15.0,
+   "fair_outcome": false,
+   "family": "service_failure",
+   "gate": false,
+   "hard_failures": [
+    "EVD-01",
+    "PROC-01"
+   ],
+   "quality": 0.662826,
+   "resolution": "won",
+   "reward": 0.0,
+   "seed": 5003,
+   "soft_failures": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "system": "groq/qwen/qwen3.8-27b/zero-shot",
+   "tool_calls": 11,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 41.23,
+   "fair_outcome": true,
+   "family": "friendly_fraud",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.98913,
+   "resolution": "won",
+   "reward": 0.9891304347826086,
+   "seed": 5004,
+   "soft_failures": [
+    "EVD-02"
+   ],
+   "system": "groq/qwen/qwen3.8-27b/zero-shot",
+   "tool_calls": 15,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:evidence",
+   "tool_calls": 10,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 78.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.855652,
+   "resolution": "accepted",
+   "reward": 0.8556521739130435,
+   "seed": 5002,
+   "soft_failures": [
+    "CAL-02",
+    "OUT-01"
+   ],
+   "system": "ref:evidence",
+   "tool_calls": 23,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 107.32,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5003,
+   "soft_failures": [],
+   "system": "ref:evidence",
+   "tool_calls": 11,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 121.37,
+   "fair_outcome": false,
+   "family": "friendly_fraud",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.851957,
+   "resolution": "accepted",
+   "reward": 0.8519565217391304,
+   "seed": 5004,
+   "soft_failures": [
+    "CAL-02",
+    "OUT-01"
+   ],
+   "system": "ref:evidence",
+   "tool_calls": 29,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 53.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.869557,
+   "resolution": "accepted",
+   "reward": 0.8695565217391305,
+   "seed": 5002,
+   "soft_failures": [
+    "OUT-01"
+   ],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 107.32,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5003,
+   "soft_failures": [],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 96.37,
+   "fair_outcome": false,
+   "family": "friendly_fraud",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.869557,
+   "resolution": "accepted",
+   "reward": 0.8695565217391305,
+   "seed": 5004,
+   "soft_failures": [
+    "OUT-01"
+   ],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:oracle",
+   "tool_calls": 10,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 78.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.855652,
+   "resolution": "accepted",
+   "reward": 0.8556521739130435,
+   "seed": 5002,
+   "soft_failures": [
+    "CAL-02",
+    "OUT-01"
+   ],
+   "system": "ref:oracle",
+   "tool_calls": 23,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 107.32,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5003,
+   "soft_failures": [],
+   "system": "ref:oracle",
+   "tool_calls": 11,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 121.37,
+   "fair_outcome": false,
+   "family": "friendly_fraud",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.841087,
+   "resolution": "accepted",
+   "reward": 0.841086956521739,
+   "seed": 5004,
+   "soft_failures": [
+    "CAL-02",
+    "EVD-02",
+    "OUT-01"
+   ],
+   "system": "ref:oracle",
+   "tool_calls": 29,
+   "tool_errors": 0
+  }
+ ],
+ "seeds": "5001-5004",
+ "stops": {
+  "http_error": 1,
+  "submitted": 3
+ },
+ "synthetic_cases": true,
+ "system": "groq/qwen/qwen3.8-27b/zero-shot",
+ "systems": [
+  {
+   "fair": 3,
+   "gate": 1,
+   "mean_cost_usd": 37.7975,
+   "mean_reward": 0.24728260869565216,
+   "n": 4,
+   "reward_vs_evidence": [
+    -0.6796152173913044,
+    -0.9999913043478261,
+    -0.14711739130434784
+   ],
+   "system": "groq/qwen/qwen3.8-27b/zero-shot",
+   "top_hard_failures": [
+    [
+     "EVD-01",
+     2
+    ],
+    [
+     "SR-01",
+     1
+    ],
+    [
+     "PROC-01",
+     1
+    ]
+   ],
+   "vs_evidence": [
+    -52.730000000000004,
+    -86.23,
+    -19.229999999999997
+   ],
+   "won_partial": 3
+  },
+  {
+   "fair": 2,
+   "gate": 4,
+   "mean_cost_usd": 90.5275,
+   "mean_reward": 0.9268978260869565,
+   "n": 4,
+   "reward_vs_evidence": null,
+   "system": "ref:evidence",
+   "top_hard_failures": [],
+   "vs_evidence": null,
+   "won_partial": 0
+  },
+  {
+   "fair": 2,
+   "gate": 4,
+   "mean_cost_usd": 78.0275,
+   "mean_reward": 0.9347739130434782,
+   "n": 4,
+   "reward_vs_evidence": [
+    0.007876086956521755,
+    0.0,
+    0.01575217391304351
+   ],
+   "system": "ref:always_accept",
+   "top_hard_failures": [],
+   "vs_evidence": [
+    -12.499999999999998,
+    -24.999999999999996,
+    0.0
+   ],
+   "won_partial": 0
+  },
+  {
+   "fair": 2,
+   "gate": 4,
+   "mean_cost_usd": 90.5275,
+   "mean_reward": 0.9241804347826087,
+   "n": 4,
+   "reward_vs_evidence": [
+    -0.002717391304347838,
+    -0.008152173913043514,
+    0.0
+   ],
+   "system": "ref:oracle",
+   "top_hard_failures": [],
+   "vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "won_partial": 0
+  }
+ ]
+}

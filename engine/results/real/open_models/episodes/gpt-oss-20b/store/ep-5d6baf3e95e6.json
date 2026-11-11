@@ -1,0 +1,78 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the settlement record for the transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "fields": {
+     "currency": "USD",
+     "settlement_amount": "8385"
+    },
+    "issued_on": "2026-02-06",
+    "kind": "settlement_record"
+   },
+   "tool": "upload_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b4f868d7ea100c1a",
+     "ev-0bf0af2f27d70b56"
+    ],
+    "narrative": "The transaction was authorized for $83.85 and the settlement record confirms the same amount. The receipt shows the same amount, indicating no duplicate or incorrect amount. The issuer\u2019s statement that the amount is wrong is incorrect. The merchant has provided all required evidence and the transaction was processed correctly."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 5
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "days": 20
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "request_info",
+      "upload_evidence",
+      "represent",
+      "wait",
+      "get_case"
+     ],
+     "evidence_ids": [
+      "ev-b4f868d7ea100c1a",
+      "ev-0bf0af2f27d70b56"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0
+    },
+    "confidence": 0.99,
+    "explanation": "I reviewed the case, requested the settlement record, uploaded it, and represented the merchant with receipt and settlement evidence. The issuer accepted the representation within the deadline, resulting in a win for the merchant with no refund. All actions were completed before the due date, and the merchant\u2019s net loss was minimized."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5007
+}

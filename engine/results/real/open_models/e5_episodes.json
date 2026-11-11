@@ -1,0 +1,349 @@
+{
+ "h1_sr01_open_minus_claude": {
+  "all_open_models": {
+   "ci95": [
+    -0.75,
+    0.4167
+   ],
+   "diff": -0.1667,
+   "open": [
+    "gpt-oss-120b",
+    "gpt-oss-20b",
+    "qwen3.8-27b"
+   ],
+   "seeds": [
+    5001,
+    5002,
+    5003,
+    5004
+   ]
+  },
+  "complete_open_models": {
+   "ci95": [
+    -0.1111,
+    0.5417
+   ],
+   "diff": 0.2361,
+   "open": [
+    "gpt-oss-120b",
+    "gpt-oss-20b"
+   ],
+   "seeds": [
+    5001,
+    5002,
+    5003,
+    5004,
+    5005,
+    5006,
+    5007,
+    5008,
+    5009,
+    5010,
+    5011,
+    5012
+   ]
+  }
+ },
+ "note": "Synthetic dispute cases (FULL_MIX); real model behaviour. Claude rows: Claude Code subagents via the scruple episode CLI, re-scored by replay. Open models: raw API via scruple eval run (Groq).",
+ "open_runs": {
+  "gpt-oss-120b": {
+   "input_tokens": 159707,
+   "model": "openai/gpt-oss-120b",
+   "output_tokens": 18975,
+   "rejected_turns": 5,
+   "stops": {
+    "submitted": 12
+   },
+   "turns": 75
+  },
+  "gpt-oss-20b": {
+   "input_tokens": 151513,
+   "model": "openai/gpt-oss-20b",
+   "output_tokens": 25292,
+   "rejected_turns": 7,
+   "stops": {
+    "submitted": 12
+   },
+   "turns": 78
+  },
+  "qwen3.8-27b": {
+   "input_tokens": 122823,
+   "model": "qwen/qwen3.8-27b",
+   "output_tokens": 4401,
+   "rejected_turns": 0,
+   "stops": {
+    "http_error": 1,
+    "submitted": 3
+   },
+   "turns": 30
+  }
+ },
+ "seeds": [
+  5001,
+  5002,
+  5003,
+  5004,
+  5005,
+  5006,
+  5007,
+  5008,
+  5009,
+  5010,
+  5011,
+  5012
+ ],
+ "sensitivity": {
+  "gpt-oss-120b": {
+   "no_quota_lapses": {
+    "fair_outcome": 6,
+    "gate_pass": 3,
+    "hard_failures": {
+     "EVD-01": 2,
+     "PROC-01": 5,
+     "SCOPE-01": 5,
+     "SR-01": 5
+    },
+    "n": 12,
+    "sr01_fail": 5
+   },
+   "no_rejected": {
+    "fair_outcome": 6,
+    "gate_pass": 4,
+    "hard_failures": {
+     "EVD-01": 2,
+     "PROC-01": 5,
+     "SR-01": 5
+    },
+    "n": 12,
+    "sr01_fail": 5
+   }
+  },
+  "gpt-oss-20b": {
+   "no_quota_lapses": {
+    "fair_outcome": 5,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1,
+     "EVD-01": 4,
+     "PROC-01": 12,
+     "SCOPE-01": 4,
+     "SR-01": 4
+    },
+    "n": 12,
+    "sr01_fail": 4
+   },
+   "no_rejected": {
+    "fair_outcome": 5,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1,
+     "EVD-01": 4,
+     "PROC-01": 12,
+     "SR-01": 4
+    },
+    "n": 12,
+    "sr01_fail": 4
+   }
+  },
+  "qwen3.8-27b": {
+   "no_quota_lapses": {
+    "fair_outcome": 2,
+    "gate_pass": 0,
+    "hard_failures": {
+     "EVD-01": 2,
+     "PROC-01": 1,
+     "SR-01": 1
+    },
+    "n": 3,
+    "sr01_fail": 1
+   },
+   "no_rejected": {
+    "fair_outcome": 3,
+    "gate_pass": 1,
+    "hard_failures": {
+     "EVD-01": 2,
+     "PROC-01": 1,
+     "SR-01": 1
+    },
+    "n": 4,
+    "sr01_fail": 1
+   }
+  }
+ },
+ "systems": [
+  {
+   "cost_vs_evidence": [
+    -4.9,
+    -20.96,
+    6.25
+   ],
+   "fair_outcome": 8,
+   "gate_pass": 7,
+   "hard_failures": {
+    "DL-01": 1,
+    "PROC-01": 4,
+    "SR-01": 3
+   },
+   "harness": "claude-code-subagent",
+   "mean_cost_usd": 64.21,
+   "mean_reward": 0.555,
+   "n": 12,
+   "sr01_fail": 3,
+   "system": "haiku",
+   "won_partial": 6
+  },
+  {
+   "cost_vs_evidence": [
+    -32.77,
+    -64.01,
+    -4.33
+   ],
+   "fair_outcome": 8,
+   "gate_pass": 11,
+   "hard_failures": {
+    "DL-01": 1,
+    "PROC-01": 1,
+    "SR-01": 1
+   },
+   "harness": "claude-code-subagent",
+   "mean_cost_usd": 36.34,
+   "mean_reward": 0.853,
+   "n": 12,
+   "sr01_fail": 1,
+   "system": "sonnet",
+   "won_partial": 10
+  },
+  {
+   "cost_vs_evidence": [
+    2.08,
+    0.0,
+    6.25
+   ],
+   "fair_outcome": 9,
+   "gate_pass": 11,
+   "hard_failures": {
+    "SR-01": 1
+   },
+   "harness": "claude-code-subagent",
+   "mean_cost_usd": 71.2,
+   "mean_reward": 0.872,
+   "n": 12,
+   "sr01_fail": 1,
+   "system": "opus",
+   "won_partial": 5
+  },
+  {
+   "cost_vs_evidence": [
+    28.26,
+    -36.63,
+    120.25
+   ],
+   "fair_outcome": 6,
+   "gate_pass": 3,
+   "hard_failures": {
+    "EVD-01": 2,
+    "PROC-01": 5,
+    "SCOPE-01": 5,
+    "SR-01": 5
+   },
+   "harness": "api",
+   "mean_cost_usd": 97.37,
+   "mean_reward": 0.226,
+   "n": 12,
+   "sr01_fail": 5,
+   "system": "gpt-oss-120b",
+   "won_partial": 4
+  },
+  {
+   "cost_vs_evidence": [
+    -28.52,
+    -59.99,
+    -3.33
+   ],
+   "fair_outcome": 5,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1,
+    "EVD-01": 4,
+    "PROC-01": 12,
+    "SCOPE-01": 4,
+    "SR-01": 4
+   },
+   "harness": "api",
+   "mean_cost_usd": 40.6,
+   "mean_reward": 0.0,
+   "n": 12,
+   "sr01_fail": 4,
+   "system": "gpt-oss-20b",
+   "won_partial": 9
+  },
+  {
+   "cost_vs_evidence": [
+    -52.73,
+    -86.23,
+    -19.23
+   ],
+   "fair_outcome": 3,
+   "gate_pass": 1,
+   "hard_failures": {
+    "EVD-01": 2,
+    "PROC-01": 1,
+    "SR-01": 1
+   },
+   "harness": "api",
+   "mean_cost_usd": 37.8,
+   "mean_reward": 0.247,
+   "n": 4,
+   "sr01_fail": 1,
+   "system": "qwen3.8-27b",
+   "won_partial": 3
+  },
+  {
+   "cost_vs_evidence": null,
+   "fair_outcome": 9,
+   "gate_pass": 12,
+   "hard_failures": {},
+   "harness": "in-process",
+   "mean_cost_usd": 69.12,
+   "mean_reward": 0.964,
+   "n": 12,
+   "sr01_fail": 0,
+   "system": "ref:evidence",
+   "won_partial": 5
+  },
+  {
+   "cost_vs_evidence": [
+    58.16,
+    1.1,
+    144.54
+   ],
+   "fair_outcome": 6,
+   "gate_pass": 12,
+   "hard_failures": {},
+   "harness": "in-process",
+   "mean_cost_usd": 127.27,
+   "mean_reward": 0.885,
+   "n": 12,
+   "sr01_fail": 0,
+   "system": "ref:always_accept",
+   "won_partial": 0
+  },
+  {
+   "cost_vs_evidence": [
+    1.83,
+    0.0,
+    5.48
+   ],
+   "fair_outcome": 10,
+   "gate_pass": 12,
+   "hard_failures": {},
+   "harness": "in-process",
+   "mean_cost_usd": 70.94,
+   "mean_reward": 0.96,
+   "n": 12,
+   "sr01_fail": 0,
+   "system": "ref:oracle",
+   "won_partial": 4
+  }
+ ]
+}

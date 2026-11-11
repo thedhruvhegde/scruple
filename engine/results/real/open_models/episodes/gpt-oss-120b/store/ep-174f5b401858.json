@@ -1,0 +1,49 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder's statement and any additional evidence such as terms acceptance or cancellation record that may have been uploaded since last check."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Refund already issued; cardholder claims non\u2011delivery; merchant accepts liability to close dispute."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": null,
+     "deadlines_met": true,
+     "evidence_ids": [],
+     "outcome": "accepted",
+     "refunded_minor": 3996,
+     "win_rate": 0
+    },
+    "confidence": 0.99,
+    "explanation": "The dispute was opened for a cancelled recurring transaction (reason code 13.2). The cardholder claimed non\u2011delivery. The merchant had already refunded the full amount (3996\u202f\u00a2) as shown in the case status. Since the refund was already processed, the merchant accepted liability to close the chargeback, meeting the April\u202f1 deadline. No additional evidence was required. The dispute is now resolved with the merchant having refunded the cardholder."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5001
+}

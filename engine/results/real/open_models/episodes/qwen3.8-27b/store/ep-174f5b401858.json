@@ -1,0 +1,70 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-436980a18fb30800"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-630f5078c52db8e2"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "question": "Cancelled Recurring Transaction"
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Cancelled Recurring Transaction"
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "request_info",
+      "accept"
+     ],
+     "cost_usd_minor": 5496,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-436980a18fb30800",
+      "ev-630f5078c52db8e2"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 3996,
+     "win_rate": 0
+    },
+    "confidence": 0.7,
+    "explanation": "Cancelled Recurring Transaction"
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5001
+}

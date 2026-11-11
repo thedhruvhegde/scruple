@@ -1,0 +1,22 @@
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1614332", "input_tokens": 330, "model": "openai/gpt-oss-20b", "output_tokens": 327, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1564871", "input_tokens": 1207, "model": "openai/gpt-oss-20b", "output_tokens": 312, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.12(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1710693", "input_tokens": 360, "model": "openai/gpt-oss-20b", "output_tokens": 1410, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1569394", "input_tokens": 409, "model": "openai/gpt-oss-20b", "output_tokens": 473, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1783629", "input_tokens": 402, "model": "openai/gpt-oss-20b", "output_tokens": 429, "stop": "end"}
+{"answer": "{\"regime\":\"reg_e\",\"citation\":\"12 CFR 1005.11(b)(1)\"}", "attempts": 1, "id": "cfpb2015-1547453", "input_tokens": 655, "model": "openai/gpt-oss-20b", "output_tokens": 365, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.12(a)(2)\"}", "attempts": 1, "id": "cfpb2015-1571290", "input_tokens": 386, "model": "openai/gpt-oss-20b", "output_tokens": 1043, "stop": "end"}
+{"answer": "{\"regime\":\"reg_e\",\"citation\":\"12 CFR 1005.11(b)(1)\"}", "attempts": 1, "id": "cfpb2015-1709545", "input_tokens": 501, "model": "openai/gpt-oss-20b", "output_tokens": 956, "stop": "end"}
+{"answer": "", "attempts": 1, "id": "cfpb2015-1776345", "input_tokens": 448, "model": "openai/gpt-oss-20b", "output_tokens": 2048, "stop": "max_tokens"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(b)(1)\"}", "attempts": 1, "id": "cfpb2015-1393411", "input_tokens": 417, "model": "openai/gpt-oss-20b", "output_tokens": 537, "stop": "end"}
+{"answer": "{\"regime\":\"reg_e\",\"citation\":\"12 CFR 1005.11(b)(1)\"}", "attempts": 1, "id": "cfpb2015-1755552", "input_tokens": 505, "model": "openai/gpt-oss-20b", "output_tokens": 1936, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1638808", "input_tokens": 415, "model": "openai/gpt-oss-20b", "output_tokens": 404, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1608218", "input_tokens": 486, "model": "openai/gpt-oss-20b", "output_tokens": 320, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1650605", "input_tokens": 421, "model": "openai/gpt-oss-20b", "output_tokens": 458, "stop": "end"}
+{"answer": "{\"regime\":\"reg_e\",\"citation\":\"12 CFR 1005.11(b)(1)\"}", "attempts": 1, "id": "cfpb2015-1645162", "input_tokens": 617, "model": "openai/gpt-oss-20b", "output_tokens": 301, "stop": "end"}
+{"answer": "{\"regime\":\"reg_e\",\"citation\":\"12 CFR 1005.6(b)(1)\"}", "attempts": 1, "id": "cfpb2015-1348778", "input_tokens": 462, "model": "openai/gpt-oss-20b", "output_tokens": 750, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1726106", "input_tokens": 446, "model": "openai/gpt-oss-20b", "output_tokens": 542, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1621370", "input_tokens": 360, "model": "openai/gpt-oss-20b", "output_tokens": 580, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1451545", "input_tokens": 361, "model": "openai/gpt-oss-20b", "output_tokens": 466, "stop": "end"}
+{"answer": "", "attempts": 1, "id": "cfpb2015-1486288", "input_tokens": 933, "model": "openai/gpt-oss-20b", "output_tokens": 2048, "stop": "max_tokens"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1840899", "input_tokens": 439, "model": "openai/gpt-oss-20b", "output_tokens": 387, "stop": "end"}
+{"answer": "{\"regime\":\"reg_z\",\"citation\":\"12 CFR 1026.13(a)(1)\"}", "attempts": 1, "id": "cfpb2015-1736288", "input_tokens": 420, "model": "openai/gpt-oss-20b", "output_tokens": 210, "stop": "end"}

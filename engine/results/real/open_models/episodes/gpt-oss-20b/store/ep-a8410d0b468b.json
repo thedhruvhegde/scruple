@@ -1,0 +1,60 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-610932bb7fc465e8",
+     "ev-1434435dbe5e512c",
+     "ev-465428009030b75f",
+     "ev-6a886f211594cf2f"
+    ],
+    "narrative": "We have provided authenticity proof and product description confirming the item was genuine and matches the description. The transaction was authorized and receipt shows purchase. The merchant has no evidence of counterfeit."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "represent",
+      "wait"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-610932bb7fc465e8",
+      "ev-1434435dbe5e512c",
+      "ev-465428009030b75f",
+      "ev-6a886f211594cf2f"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1
+    },
+    "confidence": 1,
+    "explanation": "Submitted authenticity proof, product description, receipt, and authorization record. Issuer accepted the dispute within 10 days, resolving the case in merchant\u2019s favor. No refund was issued. All actions were within the 30\u2011day deadline."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5010
+}

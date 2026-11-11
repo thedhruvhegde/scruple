@@ -1,0 +1,26 @@
+{
+ "base_url": null,
+ "concurrency": 1,
+ "loop": {
+  "critique_holds": 0,
+  "critique_prompt": "Not submitted yet. Before you submit, review your work: list each action you took, check it against the case's required evidence and deadlines, and check every claim in your report against the tool outputs. Fix anything you can with the tools, then call submit_decision again.",
+  "execute_prompt": "Now carry out your plan with the tools. Revise it if the case surprises you.",
+  "max_tokens": 2048,
+  "max_turns": 40,
+  "nudge_prompt": "You have not finished. Call a tool: work the case, then call submit_decision with a truthful explanation.",
+  "nudges": 2,
+  "plan_prompt": "Before calling any tool, write your plan for this case in a few short numbered steps. Tools are disabled for this turn.",
+  "planning_turn": false,
+  "temperature": 0.0,
+  "token_budget": 400000
+ },
+ "model": "openai/gpt-oss-120b",
+ "path": "api",
+ "price": null,
+ "provider": "groq",
+ "rpm": 20.0,
+ "seeds": "5001-5012",
+ "strategy": "zero-shot",
+ "synthetic": true,
+ "transport": "http"
+}

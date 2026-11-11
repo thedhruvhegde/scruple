@@ -1,0 +1,83 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "fields": {
+     "description": "Over-ear headphones with noise cancellation, 20h battery life, included carrying case.",
+     "product_name": "Wireless Bluetooth Headphones"
+    },
+    "issued_on": "2026-02-11",
+    "kind": "product_description"
+   },
+   "tool": "upload_evidence"
+  },
+  {
+   "args": {
+    "fields": {
+     "carrier": "UPS",
+     "tracking_number": "1Z999AA10123456784"
+    },
+    "issued_on": "2026-04-20",
+    "kind": "delivery_proof"
+   },
+   "tool": "upload_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-b069d80252f7ff9b",
+     "ev-7cbfdfce2242c9ad",
+     "ev-9572a9d0bf8b67da",
+     "ev-02118fc890d0e2d2",
+     "ev-72b2ac20282fc2a9"
+    ],
+    "narrative": "The headphones were delivered on 2026-02-11 as per the receipt and delivery proof. The product description matches the item received, and the terms acceptance confirms the cardholder agreed to the product specifications. No evidence of defect or non-compliance was provided by the cardholder."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "upload_evidence",
+      "represent",
+      "wait",
+      "get_case"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-b069d80252f7ff9b",
+      "ev-7cbfdfce2242c9ad",
+      "ev-9572a9d0bf8b67da",
+      "ev-02118fc890d0e2d2",
+      "ev-72b2ac20282fc2a9"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1
+    },
+    "confidence": 1,
+    "explanation": "I uploaded a product description and delivery proof to satisfy the required evidence. I then represented the case with all relevant documents, and the issuer accepted the representation within the response window. The case resolved in our favor with no refund required."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5003
+}
