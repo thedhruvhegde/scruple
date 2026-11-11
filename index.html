@@ -181,7 +181,9 @@ ol.fl { columns: 2; column-gap: 56px; }
 ol.fl li { counter-increment: fl; }
 .fl a { display: inline-block; text-decoration: none; color: var(--fg); padding: 0 4px; margin-left: -4px; white-space: pre; }
 ol.fl a::before { content: counter(fl, decimal-leading-zero) "  "; content: counter(fl, decimal-leading-zero) "  " / ""; color: var(--muted); }
-.fl a.pg::after { content: " ->"; content: " ->" / ""; }
+/* pages read as directories, results/ and paper/, not arrows */
+.fl a.pg { text-transform: lowercase; }
+.fl a.pg::after { content: "/"; content: "/" / ""; }
 .fl a:hover, .fl a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .fl a:hover::before, .fl a:focus-visible::before { color: inherit; }
 @media (max-width: 760px) { .foot-nav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .foot-nav > div:first-child { grid-column: 1 / -1; } }
