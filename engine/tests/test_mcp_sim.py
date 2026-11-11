@@ -13,6 +13,7 @@ from mcp import Client
 from scruple.agents import Episode
 from scruple.agents.ach_tools import ACH_TOOL_NAMES
 from scruple.agents.aml_tools import AML_TOOL_NAMES
+from scruple.agents.payables_tools import PAYABLES_TOOL_NAMES
 from scruple.agents.recon_tools import RECON_TOOL_NAMES
 from scruple.agents.tools import TOOL_NAMES
 from scruple.mcp.sim_server import EpisodeTable, build_sim_server
@@ -47,6 +48,7 @@ def test_lists_episode_tools() -> None:
         ("ach", ACH_TOOL_NAMES),
         ("recon", RECON_TOOL_NAMES),
         ("aml", AML_TOOL_NAMES),
+        ("payables", PAYABLES_TOOL_NAMES),
     ):
         workflow |= {f"start_{kind}_episode", *(f"{kind}_{n}" for n in names)}
     assert set(tools) == {*TOOL_NAMES, "start_episode", "list_case_types", *dispute, *workflow}

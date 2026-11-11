@@ -1,9 +1,9 @@
 """A local file store so an episode can span several processes (the CLI).
 
 Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, `ach`,
-`recon`, `aml`, or `scenario` for a real-life scenario whose case type is the scenario id),
-seed, case type (the case family for `dispute`), nonce and call log. An episode is
-rebuilt by replaying the log, which is exact because episodes are
+`recon`, `aml`, `payables`, or `scenario` for a real-life scenario whose case type is
+the scenario id), seed, case type (the case family for `dispute`), nonce and call log.
+An episode is rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
 assumed (a terminal session); concurrent writers to the same episode are not locked.
 """
@@ -20,6 +20,7 @@ from scruple.agents.ach_episode import AchEpisode
 from scruple.agents.aml_episode import AmlEpisode
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
+from scruple.agents.payables_episode import PayablesEpisode
 from scruple.agents.recon_episode import ReconEpisode
 
 DEFAULT_STORE = ".scruple/episodes"
@@ -34,12 +35,15 @@ class UnknownEpisodeError(KeyError):
     pass
 
 
-KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml")
-AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode
-WORKFLOW_KINDS: dict[str, type[AchEpisode] | type[ReconEpisode] | type[AmlEpisode]] = {
+KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml", "payables")
+AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode | PayablesEpisode
+WORKFLOW_KINDS: dict[
+    str, type[AchEpisode] | type[ReconEpisode] | type[AmlEpisode] | type[PayablesEpisode]
+] = {
     "ach": AchEpisode,
     "recon": ReconEpisode,
     "aml": AmlEpisode,
+    "payables": PayablesEpisode,
 }
 
 

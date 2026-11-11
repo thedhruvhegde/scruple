@@ -1,0 +1,160 @@
+{
+ "events": [
+  {
+   "cash_minor": 46183724,
+   "type": "opened"
+  },
+  {
+   "amount_minor": 37500,
+   "invoice_id": "AP-02",
+   "type": "booked",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 1469910,
+   "invoice_id": "AP-03",
+   "type": "booked",
+   "vendor_id": "V-004"
+  },
+  {
+   "amount_minor": 1767348,
+   "invoice_id": "AP-04",
+   "type": "booked",
+   "vendor_id": "V-003"
+  },
+  {
+   "amount_minor": 43757,
+   "invoice_id": "AP-08",
+   "type": "booked",
+   "vendor_id": "V-017"
+  },
+  {
+   "amount_minor": 443156,
+   "invoice_id": "AP-01",
+   "type": "booked",
+   "vendor_id": "V-005"
+  },
+  {
+   "amount_minor": 217241,
+   "invoice_id": "AP-05",
+   "type": "booked",
+   "vendor_id": "V-012"
+  },
+  {
+   "amount_minor": 133200,
+   "invoice_id": "AP-06",
+   "type": "booked",
+   "vendor_id": "V-004"
+  },
+  {
+   "amount_minor": 375000,
+   "invoice_id": "AP-07",
+   "type": "booked",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 37500,
+   "invoice_id": "AP-02",
+   "to_account": "749982609/7726",
+   "type": "paid",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 1469910,
+   "invoice_id": "AP-03",
+   "to_account": "910058967/8683",
+   "type": "paid",
+   "vendor_id": "V-004"
+  },
+  {
+   "amount_minor": 1767348,
+   "invoice_id": "AP-04",
+   "to_account": "069214455/2112",
+   "type": "paid",
+   "vendor_id": "V-003"
+  },
+  {
+   "confirmed": true,
+   "invoice_id": "AP-08",
+   "type": "verification_replied"
+  },
+  {
+   "amount_minor": 43757,
+   "invoice_id": "AP-08",
+   "to_account": "574754418/8269",
+   "type": "paid",
+   "vendor_id": "V-017"
+  },
+  {
+   "invoice_id": "AP-01",
+   "reason": "price more than 2% over the po",
+   "type": "held"
+  },
+  {
+   "confirmed": true,
+   "invoice_id": "AP-05",
+   "type": "verification_replied"
+  },
+  {
+   "amount_minor": 217241,
+   "invoice_id": "AP-05",
+   "to_account": "399492806/7479",
+   "type": "paid",
+   "vendor_id": "V-012"
+  },
+  {
+   "amount_minor": 133200,
+   "invoice_id": "AP-06",
+   "to_account": "910058967/8683",
+   "type": "paid",
+   "vendor_id": "V-004"
+  },
+  {
+   "amount_minor": 375000,
+   "invoice_id": "AP-07",
+   "to_account": "749982609/7726",
+   "type": "paid",
+   "vendor_id": "V-002"
+  },
+  {
+   "type": "settled"
+  }
+ ],
+ "kinds": {
+  "AP-01": "price_variance",
+  "AP-02": "recurring",
+  "AP-03": "clean",
+  "AP-04": "clean",
+  "AP-05": "new_vendor",
+  "AP-06": "clean",
+  "AP-07": "clean",
+  "AP-08": "new_vendor"
+ },
+ "outcome": {
+  "correct_invoices": 8,
+  "dispositions": {
+   "AP-01": "held",
+   "AP-02": "paid",
+   "AP-03": "paid",
+   "AP-04": "paid",
+   "AP-05": "paid",
+   "AP-06": "paid",
+   "AP-07": "paid",
+   "AP-08": "paid"
+  },
+  "invoices": 8,
+  "lost_minor": 0,
+  "overpaid_minor": 0,
+  "paid_minor": 4043956
+ },
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 7,
+ "synthetic": true,
+ "trace_head": "4feb6ae9783755ca999b2b7d1144d32069680437f569d27421c0b258051849b3"
+}
