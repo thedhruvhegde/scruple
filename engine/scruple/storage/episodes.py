@@ -19,18 +19,26 @@ if TYPE_CHECKING:
 
 _TABLES = ("episodes", "episode_calls")
 
-_DDL = """
-CREATE TABLE IF NOT EXISTS episodes (
+# Every episode kind the stores serve (`scruple.agents.store.KINDS`). Adding one
+# needs a migration (0010 added aml and payables) and the SQLite rebuild below.
+EPISODE_KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml", "payables")
+KIND_CHECK = "CHECK (kind IN (" + ", ".join(f"'{k}'" for k in EPISODE_KINDS) + "))"
+
+EPISODES_TABLE = f"""CREATE TABLE IF NOT EXISTS episodes (
     tenant_id TEXT NOT NULL DEFAULT 'default',
     episode_id TEXT NOT NULL,
-    kind TEXT NOT NULL CHECK (kind IN ('simple', 'dispute', 'scenario', 'ach', 'recon')),
+    kind TEXT NOT NULL {KIND_CHECK},
     seed BIGINT NOT NULL,
     case_type TEXT,
     nonce INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     PRIMARY KEY (tenant_id, episode_id)
 );
-CREATE TABLE IF NOT EXISTS episode_calls (
+"""
+
+_DDL = (
+    EPISODES_TABLE
+    + """CREATE TABLE IF NOT EXISTS episode_calls (
     tenant_id TEXT NOT NULL DEFAULT 'default',
     episode_id TEXT NOT NULL,
     seq INTEGER NOT NULL,
@@ -40,6 +48,7 @@ CREATE TABLE IF NOT EXISTS episode_calls (
     PRIMARY KEY (tenant_id, episode_id, seq)
 );
 """
+)
 
 SQLITE_DDL = _DDL + "".join(
     f"""CREATE TRIGGER IF NOT EXISTS {t}_no_update BEFORE UPDATE ON {t}
@@ -50,7 +59,34 @@ BEGIN SELECT RAISE(ABORT, '{t} is append-only'); END;
     for t in _TABLES
 )
 
-# Keep in step with migration 0005 (a test compares the catalogs).
+
+def sqlite_needs_kinds_upgrade(conn: Any) -> bool:
+    """A SQLite file whose `episodes` table predates the current kind list."""
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'episodes'"
+    ).fetchone()
+    return row is not None and KIND_CHECK not in row[0]
+
+
+def sqlite_kinds_upgrade_script() -> str:
+    """Rebuild `episodes` with the current kind check, in one transaction. Rows are
+    copied unchanged; the triggers are dropped first (nothing is updated or deleted
+    through them) and recreated by the schema script that runs next."""
+    return "\n".join(
+        [
+            "BEGIN IMMEDIATE;",
+            "DROP TRIGGER IF EXISTS episodes_no_update;",
+            "DROP TRIGGER IF EXISTS episodes_no_delete;",
+            "ALTER TABLE episodes RENAME TO episodes_pre_kinds;",
+            EPISODES_TABLE,
+            "INSERT INTO episodes SELECT * FROM episodes_pre_kinds;",
+            "DROP TABLE episodes_pre_kinds;",
+            "COMMIT;",
+        ]
+    )
+
+
+# Keep in step with migrations 0005 and 0010 (a test compares the catalogs).
 POSTGRES_DDL = _DDL + "".join(
     f"""
 CREATE OR REPLACE TRIGGER {t}_no_update BEFORE UPDATE ON {t}

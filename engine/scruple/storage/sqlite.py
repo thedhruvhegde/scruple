@@ -171,6 +171,8 @@ class SQLiteConnection:
         self._depth = 0
         if _needs_tenancy_upgrade(self._conn):
             self._conn.executescript(_tenancy_upgrade_script())
+        if episodes.sqlite_needs_kinds_upgrade(self._conn):
+            self._conn.executescript(episodes.sqlite_kinds_upgrade_script())
         self._conn.executescript(SCHEMA)
 
     def close(self) -> None:
