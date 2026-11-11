@@ -8,6 +8,8 @@ Core PDF fonts are Latin-1, so other characters are replaced with '?'.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from fpdf import FPDF
 
 from scruple.audit.report import usd
@@ -30,9 +32,62 @@ class _Doc(FPDF):
         self.cell(0, 5, _t(f"{self._footer_text}  page {self.page_no()}"), align="C")
 
 
+def _money(minor: float, currency: str) -> str:
+    return f"{minor / 100:,.2f} {currency}"
+
+
+def _history(h: Callable[[str], None], line: Callable[[str], None], pack: EvidencePack) -> None:
+    hg = pack.scorecard.history
+    assert hg is not None
+    h(f"Partner history: {hg.verdict.upper()}" + (" (SYNTHETIC DATA)" if hg.synthetic else ""))
+    line(f"Dataset: {hg.dataset} ({hg.format}), content hash {hg.history_sha256}")
+    line(f"Backtest verdict: {hg.backtest_verdict}; robust to the estimate band: {hg.robust}")
+    line(f"Why: {hg.why}")
+    line(f"Method: {hg.method}")
+    line(f"Estimated costs from: {hg.profile}")
+    excluded = ", ".join(f"{k} {v}" for k, v in sorted(hg.excluded.items())) or "none"
+    line(
+        f"Cases: {hg.n_input} input, {hg.n_included} included ({hg.n_observed} observed, "
+        f"{hg.n_estimated} estimated); excluded: {excluded}"
+    )
+    line(
+        f"Cost on history: {_money(hg.baseline_cost, hg.currency)}; candidate "
+        f"{_money(hg.candidate_cost, hg.currency)} (observed "
+        f"{_money(hg.candidate_cost_observed, hg.currency)}, estimated "
+        f"{_money(hg.candidate_cost_estimated, hg.currency)}, band "
+        f"[{_money(hg.candidate_cost_low, hg.currency)}, "
+        f"{_money(hg.candidate_cost_high, hg.currency)}])"
+    )
+    if hg.mean_diff is not None:
+        line(
+            f"Mean difference per case {hg.mean_diff:,.2f} (minor units), interval "
+            f"[{hg.ci_low:,.2f}, {hg.ci_high:,.2f}]"
+        )
+    if hg.rule_fields_defaulted:
+        fields = ", ".join(f"{k} {v}" for k, v in sorted(hg.rule_fields_defaulted.items()))
+        line(f"Rule fields missing from the history (defaulted): {fields}")
+    for r in hg.by_reason:
+        need = (
+            f", needs {r.cases_needed} cases"
+            if not r.sufficient and r.cases_needed is not None
+            else ""
+        )
+        line(
+            f"  {r.reason}: {r.verdict}, n={r.n} ({r.n_observed} observed, "
+            f"{r.n_estimated} estimated), mean diff {r.mean_diff:,.2f} "
+            f"[{r.ci_low:,.2f}, {r.ci_high:,.2f}]{need}"
+        )
+
+
 def render_pdf(pack: EvidencePack) -> bytes:
     sha = pack.pack_sha256
-    doc = _Doc(f"scruple evidence pack {sha[:16]} - synthetic data")
+    card = pack.scorecard
+    hist = card.history
+    if hist is None:
+        tag = "synthetic data"
+    else:
+        tag = "synthetic data and " + ("SYNTHETIC history" if hist.synthetic else "partner history")
+    doc = _Doc(f"scruple evidence pack {sha[:16]} - {tag}")
     doc.set_creation_date(last_timestamp(pack))
     doc.set_title(_t(f"Evidence pack {pack.rule_id}@v{pack.version}"))
     doc.set_author("scruple")
@@ -50,7 +105,6 @@ def render_pdf(pack: EvidencePack) -> bytes:
         doc.set_x(doc.l_margin)
         doc.multi_cell(width, 5, _t(text))
 
-    card = pack.scorecard
     doc.set_font("Helvetica", style="B", size=15)
     doc.multi_cell(width, 9, _t(f"Evidence pack: {pack.rule_id}@v{pack.version}"))
     doc.set_font("Helvetica", size=9)
@@ -77,7 +131,15 @@ def render_pdf(pack: EvidencePack) -> bytes:
         "Seed commitments: "
         + ", ".join(f"{k} {v}" for k, v in sorted(pack.seed_commitments.items()))
     )
-    line("Data: synthetic simulator data only. Thresholds are illustrative defaults.")
+    if hist is None:
+        line("Data: synthetic simulator data only. Thresholds are illustrative defaults.")
+    else:
+        line(f"Data: {pack.data}. Thresholds are illustrative defaults.")
+        line(
+            f"Overall verdict {card.verdict.value.upper()}: the worse of synthetic "
+            f"{(card.synthetic_verdict or card.verdict).value.upper()} and history "
+            f"{hist.verdict.upper()}."
+        )
 
     h("Rule")
     line(card.rule_description)
@@ -139,6 +201,9 @@ def render_pdf(pack: EvidencePack) -> bytes:
         ramp = pack.canary_ramp
         stages = ", ".join(f"{p:g}%" for p in ramp.schedule.stages)
         line(f"Ramp: {ramp.status}, stages {stages}, current share {ramp.percent:g}%")
+
+    if hist is not None:
+        _history(h, line, pack)
 
     h("Approvals")
     a = pack.approvals

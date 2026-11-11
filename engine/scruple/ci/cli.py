@@ -11,7 +11,7 @@ from typing import Any
 from scruple.ci.comment import render_comment
 from scruple.ci.config import load_candidate, load_config
 from scruple.ci.github import DEFAULT_API, GitHubClient, Transport, UrllibTransport, token_from_env
-from scruple.ci.history import HistorySection
+from scruple.ci.history import HistoryGate, HistorySection
 from scruple.ci.runner import run_candidate
 from scruple.ci.scorecard import Scorecard, load_scorecard
 from scruple.ci.status import payload_for
@@ -78,15 +78,36 @@ def cmd_ci_run(args: argparse.Namespace) -> int:
             )
     print(f"scorecard written to {out}")
     if args.evidence:
-        write_evidence(run.gate, card.rule_id, card.version, Path(args.evidence))
+        write_evidence(
+            run.gate,
+            card.rule_id,
+            card.version,
+            Path(args.evidence),
+            history=card.history,
+            fail_on_hold=cfg.ci.fail_on_hold,
+        )
     return card.exit_code
 
 
-def write_evidence(gate: AgentGate, rule_id: str, version: int, out_dir: Path) -> Path:
-    from scruple.ci.evidence import build_evidence_pack
+def write_evidence(
+    gate: AgentGate,
+    rule_id: str,
+    version: int,
+    out_dir: Path,
+    history: HistoryGate | None = None,
+    fail_on_hold: bool = True,
+    scorecard: Scorecard | None = None,
+) -> Path:
+    """Write the pack as JSON and PDF. `history` (or the history of `scorecard`, checked
+    against the database's decisions) adds the partner-history source."""
+    from scruple.ci.evidence import build_evidence_pack, history_from_scorecard
     from scruple.ci.evidence_pdf import render_pdf
 
-    pack = build_evidence_pack(gate, rule_id, version)
+    pack = build_evidence_pack(gate, rule_id, version, history, fail_on_hold)
+    if scorecard is not None and history is None:
+        found = history_from_scorecard(scorecard, pack)
+        if found is not None:
+            pack = build_evidence_pack(gate, rule_id, version, found, fail_on_hold)
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = out_dir / f"evidence-{rule_id}-v{version}"
     stem.with_suffix(".json").write_text(pack.to_json())
@@ -96,9 +117,16 @@ def write_evidence(gate: AgentGate, rule_id: str, version: int, out_dir: Path) -
 
 
 def cmd_ci_evidence(args: argparse.Namespace) -> int:
-    gate_cfg = load_config(args.config).gate if args.config else None
-    gate = AgentGate.open(args.db, config=gate_cfg)
-    write_evidence(gate, args.rule_id, args.version, Path(args.out))
+    cfg = load_config(args.config) if args.config else None
+    gate = AgentGate.open(args.db, config=None if cfg is None else cfg.gate)
+    write_evidence(
+        gate,
+        args.rule_id,
+        args.version,
+        Path(args.out),
+        fail_on_hold=True if cfg is None else cfg.ci.fail_on_hold,
+        scorecard=_card(args.scorecard) if args.scorecard else None,
+    )
     return 0
 
 
@@ -181,6 +209,11 @@ def add_ci_parser(sub: Any) -> None:
     ev.add_argument("--out", default=".", help="output directory")
     ev.add_argument(
         "--config", default=None, help="scruple.toml whose [gate] produced the decisions"
+    )
+    ev.add_argument(
+        "--scorecard",
+        default=None,
+        help="the run's scorecard: adds its partner-history source (decisions must match)",
     )
 
     st = ci_sub.add_parser("status", help="emit a commit status or check-run payload")
