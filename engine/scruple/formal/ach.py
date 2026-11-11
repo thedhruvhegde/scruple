@@ -306,7 +306,14 @@ def _inv_invented(s: State, p: Params, ops: Any) -> Any:
 
 
 def _inv_negative(s: State, p: Params, ops: Any) -> Any:
-    return ops.and_(s["rcv"] >= 0, s["contra"] >= 0, s["bad"] >= 0, s["fees"] >= 0)
+    """Never below zero, even counting what dishonors and retries in flight will collect."""
+    return ops.and_(
+        s["rcv"] - in_flight(s, p, ops) >= 0,
+        s["rcv"] >= 0,
+        s["contra"] >= 0,
+        s["bad"] >= 0,
+        s["fees"] >= 0,
+    )
 
 
 def _inv_dishonor(s: State, p: Params, ops: Any) -> Any:
@@ -357,7 +364,75 @@ def _step_terminal(s: State, s2: State, p: Params, i: Inputs, ops: Any, took: An
     return ops.not_(resolved(s, ops))
 
 
+def _times(ops: Any, conds: list[Any], a: Any) -> Any:
+    """`a` times the number of true conditions, kept linear for the solver."""
+    out: Any = 0
+    for c in conds:
+        out = out + ops.ite(c, a, 0)
+    return out
+
+
+def in_flight(s: State, p: Params, ops: Any) -> Any:
+    """Receivable already on its way back: dishonors submitted and a retry in flight."""
+    return _times(ops, [s[f"d_{k}"] == D_SUBMITTED for k in range(N)] + [s["retry"]], p["a"])
+
+
+def _inv_well_formed(s: State, p: Params, ops: Any) -> Any:
+    """The shape of a reachable state: which slots are in use, and the cash a count of
+    settled returns, dishonors, contests and retries implies."""
+    a = p["a"]
+    returned = _times(ops, [s[f"st_{k}"] == SETTLED for k in range(N)], a)
+    dishonored = _times(ops, [s[f"d_{k}"] >= D_SETTLED for k in range(N)], a)
+    contested = _times(ops, [s[f"d_{k}"] == D_CONTESTED for k in range(N)], a)
+    retried = _times(
+        ops,
+        [
+            ops.and_(s["attempts"] >= n, ops.or_(s["attempts"] > n, ops.not_(s["retry"])))
+            for n in range(1, MAX_RETRIES + 1)
+        ],
+        a,
+    )
+    out = [
+        collected(s) == a - returned + dishonored - contested + retried,
+        s["st_0"] >= SCHEDULED,
+        (s["st_1"] >= SCHEDULED) == p["two"],
+        s["fees"] >= 0,
+        s["contra"] >= 0,
+        s["bad"] >= 0,
+        s["attempts"] >= 0,
+        s["attempts"] <= MAX_RETRIES,
+        s["improper"] >= 0,
+        ops.or_(ops.not_(s["retry"]), s["attempts"] >= 1),
+    ]
+    for k in range(N):
+        out += [s[f"st_{k}"] >= NONE, s[f"st_{k}"] <= SETTLED]
+    for n in range(1, MAX_RETRIES + 1):
+        k = n + 1
+        used = s[f"st_{k}"] != NONE
+        out += [
+            ops.or_(
+                ops.not_(used),
+                s["attempts"] > n,
+                ops.and_(s["attempts"] == n, ops.not_(s["retry"])),
+            ),
+            ops.or_(ops.not_(used), s[f"tim_{k}"]),
+            ops.or_(ops.not_(used), ops.not_(s[f"dup_{k}"])),
+            ops.or_(ops.not_(used), ops.not_(ops.and_(s[f"nsf_{k}"], s[f"uf_{k}"]))),
+            # a retry's return is pending only while it is the latest retry
+            ops.or_(s[f"st_{k}"] != SCHEDULED, s["attempts"] == n),
+        ]
+    out.append(ops.not_(ops.and_(s["last_nsf"], s["last_uf"])))
+    out += [ops.not_(ops.and_(s[f"nsf_{k}"], s[f"uf_{k}"])) for k in (0, 1)]
+    return ops.and_(*out)
+
+
 INVARIANTS = (
+    Invariant(
+        "well_formed",
+        "slots in use agree with the retries made; cash equals the invoice less settled "
+        "returns plus dishonors not contested plus retry debits",
+        _inv_well_formed,
+    ),
     Invariant(
         "double_entry",
         "every step's postings sum to zero and all balances net to zero",
@@ -376,7 +451,8 @@ INVARIANTS = (
     ),
     Invariant(
         "no_negative_balance",
-        "receivable, accepted returns, bad debt and fees never below zero",
+        "receivable (also net of dishonors and retries in flight), accepted returns, "
+        "bad debt and fees never below zero",
         _inv_negative,
     ),
     Invariant(

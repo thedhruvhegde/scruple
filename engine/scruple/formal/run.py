@@ -19,7 +19,7 @@ from typing import Any
 
 from scruple.formal.ops import Model
 
-DEFAULT_DEPTH = {"dispute": 20}
+DEFAULT_DEPTH = {"dispute": 30, "ach": 12}
 
 
 @dataclass(frozen=True)
@@ -29,9 +29,9 @@ class Target:
 
 
 def targets(depth: int | None = None) -> list[Target]:
-    from scruple.formal import dispute
+    from scruple.formal import ach, dispute
 
-    return [Target(dispute.MODEL, depth or DEFAULT_DEPTH["dispute"])]
+    return [Target(m, depth or DEFAULT_DEPTH[m.name]) for m in (dispute.MODEL, ach.MODEL)]
 
 
 def run(depth: int | None = None) -> list[dict[str, Any]]:
