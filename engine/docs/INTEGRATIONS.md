@@ -463,3 +463,55 @@ def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
   comment and before it was recorded repeats that comment once. Issues are never
   transitioned or closed; the connectors were tested against fakes built from the
   public API references, not against live Jira or Linear.
+
+## Slack approvals (`scruple.integrations.slack`, routes in `.approvals_api`)
+
+- Settings (`IntegrationSettings.slack`): `team_id`, `channel` (a channel id),
+  `bot_token_env`, `signing_secret_envs` (one, or two while rotating), `interactive`
+  (buttons, default on), `links` (signed links by direct message), `public_base_url`
+  (where links point), `link_ttl_seconds` (default 24 h), and `approvers`: Slack user id
+  to scruple subject, with roles that must grant `approve` and must not also grant
+  `propose` (checked when the settings are saved).
+- Outgoing: for every `approval.requested` event, a `slack_notify` job posts a Block Kit
+  message (`chat.postMessage`, bot token as `Authorization: Bearer`) to the channel:
+  header, rule, version, content hash, proposer, expiry, a note that gate evidence is
+  synthetic, and Approve and Reject buttons (Reject asks for confirmation). With
+  `links`, each mapped approver who may approve this version (a named approver of the
+  policy in force, not the proposer, owner or learning agent) gets a direct message with
+  their own approve and reject links; links never go to the shared channel. Each message
+  is remembered once sent, so a retry after a partial failure sends only the rest.
+  `ratelimited`, `internal_error`, 429 and 5xx are retried; other Slack errors
+  (`invalid_auth`, `channel_not_found`, ...) fail the job.
+- Interactivity: `POST /integrations/slack/interactions` (set it as the Slack app's
+  Request URL). Verified per Slack's "Verifying requests from Slack": `X-Slack-Signature`
+  is `v0=` + hex HMAC-SHA256 of `v0:{X-Slack-Request-Timestamp}:{raw body}` with the
+  signing secret, compared in constant time, and the timestamp must be within five
+  minutes (the tests include the worked example from that page). The button names its
+  tenant, but that tenant is only looked at if it has integration settings, and the
+  request must verify with that tenant's secret and come from its `team_id`. A verified
+  request is single use (its signature is remembered). The clicking user must be mapped;
+  the answer goes back as an ephemeral message through `response_url` (only
+  `https://hooks.slack.com/...`).
+- Signed links: `v1.<kid>.<claims>.<hmac>` (`scruple.integrations.signing.LinkSigner`),
+  HMAC-SHA256 with a key ring in `SCRUPLE_APPROVAL_LINK_KEYS` (`kid:base64url,...`, at
+  least 32 bytes each, first active; old keys keep verifying until removed). Claims bind
+  tenant, rule, version, content hash, request, action, approver, expiry (the earlier of
+  the TTL and the request's expiry) and a random nonce. `GET` shows a confirmation page
+  and changes nothing (link unfurlers and mail scanners fetch links); the page's `POST`
+  acts, once (`link_nonces`). Rejections need a reason. Pages are `no-store`,
+  `no-referrer`, framed by nobody, with a CSP that allows no scripts.
+- Identity and duties: either path builds a `Principal` for the mapped subject (method
+  `slack` or `approval_link`) and refuses it without `approve`; removing someone from
+  the mapping revokes their links. The request the button or link was made for must
+  still be open (same request seq and content hash). Then `AgentGate.grant_approval`
+  or `reject_approval` enforce named approvers, separation of duties, expiry and quorum,
+  exactly as for the API and console.
+- Audit: `integration.approval_action` (via, subject, Slack team and user or link key,
+  outcome) in the same transaction as the grant or rejection;
+  `integration.approval_refused` with the reason for anything refused after the
+  signature checked out. Unverified requests are answered 401 and leave no trace.
+- Not done: the original channel message is not edited after a decision (the clicking
+  user gets an ephemeral answer); Slack's modal for a typed rejection reason is not used
+  (Slack rejections record "rejected in Slack by <subject>"; links ask for a reason).
+  Tested against a fake Slack built from the public Web API and Block Kit references,
+  not against a live workspace.

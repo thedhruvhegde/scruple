@@ -184,6 +184,13 @@ def ticket_sync(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
     return run(ctx, params)
 
 
+def slack_notify(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+    """One Slack approval-request message (scruple.integrations.slack)."""
+    from scruple.integrations.jobs import slack_notify as run
+
+    return run(ctx, params)
+
+
 HANDLERS: dict[str, Handler] = {
     JobKind.GATE_EVALUATION.value: gate_evaluation,
     JobKind.BACKTEST.value: backtest,
@@ -191,6 +198,7 @@ HANDLERS: dict[str, Handler] = {
     "retention_apply": retention_apply,
     "webhook_deliver": webhook_deliver,
     "ticket_sync": ticket_sync,
+    "slack_notify": slack_notify,
 }
 
 __all__ = [
@@ -199,6 +207,7 @@ __all__ = [
     "bench_score",
     "gate_evaluation",
     "retention_apply",
+    "slack_notify",
     "ticket_sync",
     "webhook_deliver",
 ]

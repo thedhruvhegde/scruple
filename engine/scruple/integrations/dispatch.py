@@ -27,6 +27,9 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel, ConfigDict
 
 from scruple.integrations.events import to_event
+from scruple.integrations.slack import MAX_ATTEMPTS as SLACK_ATTEMPTS
+from scruple.integrations.slack import SLACK_KIND
+from scruple.integrations.slack import TIMEOUT_S as SLACK_TIMEOUT
 from scruple.integrations.store import GateEvent, IntegrationStore
 from scruple.integrations.tickets import MAX_ATTEMPTS as TICKET_ATTEMPTS
 from scruple.integrations.tickets import TICKET_KIND
@@ -96,8 +99,18 @@ def _tickets(store: IntegrationStore, event: GateEvent) -> list[PlannedJob]:
     ]
 
 
+def _slack(store: IntegrationStore, event: GateEvent) -> list[PlannedJob]:
+    if event.type != "approval.requested" or store.settings().slack is None:
+        return []
+    return [
+        PlannedJob(
+            SLACK_KIND, {"event_id": event.id}, f"slack:{event.id}", SLACK_ATTEMPTS, SLACK_TIMEOUT
+        )
+    ]
+
+
 # Each integration turns an event into the jobs it needs (and any rows those read).
-PLANNERS: list[Planner] = [_webhooks, _tickets]
+PLANNERS: list[Planner] = [_webhooks, _tickets, _slack]
 
 
 def dispatch(gate: AgentGate, queue: JobQueue, *, limit: int = 1_000) -> DispatchResult:
