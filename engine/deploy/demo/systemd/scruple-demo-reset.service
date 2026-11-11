@@ -1,0 +1,14 @@
+# Nightly reset of the hosted demo (deploy/demo/README.md). Install:
+#   sudo cp systemd/scruple-demo-reset.* /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now scruple-demo-reset.timer
+# Assumes the checkout lives at /opt/scruple/engine; change WorkingDirectory if not.
+[Unit]
+Description=Reset the scruple hosted demo (synthetic data only)
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/scruple/engine/deploy/demo
+ExecStart=/opt/scruple/engine/deploy/demo/reset.sh
+TimeoutStartSec=15min

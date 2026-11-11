@@ -21,6 +21,7 @@ account**; the release workflow passes actionlint and has never run on GitHub.
 | `deploy/terraform/aws/` | single-tenant AWS skeleton (ECS Fargate, ALB, RDS, Secrets Manager), UNTESTED |
 | `deploy/scripts/backup.sh`, `restore.sh` | logical backup and verified restore |
 | `scripts/smoke.sh` | post-deploy smoke test against any base URL |
+| `deploy/demo/` | hosted demo: one VM, docker compose plus Caddy, synthetic data, nightly reset, read-only key |
 | `scruple/api/health.py` | `/health`, `/ready` |
 | `scruple/observability/` | `/metrics`, request and gate metrics, optional tracing |
 | docs/SLOs.md | proposed SLOs and alerts |
