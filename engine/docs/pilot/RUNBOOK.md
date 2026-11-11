@@ -6,9 +6,11 @@ been run with a partner yet.
 
 How the commands were checked: every command not marked otherwise was run on
 2026-11-11 against this tree on a synthetic history (`scruple backtest synth`), in the
-order below, and did what the line says. Commands marked **(added in v1-pilot)** are
-being built on the `v1-pilot` branch and are not in this tree yet; check their `--help`
-once merged before relying on the flags shown. Run everything from the engine directory
+order below, and did what the line says. The same day, `scruple pilot run` and
+`scruple pilot readout` ran on a synthetic history, `scruple bench seal` sealed a small
+synthetic set, and `scruple ingest stripe-pull` was checked for its flags and key
+handling only (it needs a Stripe test-mode key and network;
+tests/test_ingest_stripe_pull.py covers it on Stripe's published fixtures). Run everything from the engine directory
 (`uv run scruple ...`), or as `docker run IMAGE ...` with the image.
 
 ## Where things live
@@ -18,7 +20,7 @@ once merged before relying on the flags shown. Run everything from the engine di
 | case store (`cases.db`) | partner's environment (default) or the scruple machine, tokenised and redacted | whoever runs ingest; never both synthetic and real in one store |
 | gate database (`pilot.db` or a Postgres schema) | same place as the case store | S operates, P can read with an `auditor` key |
 | field and token keys (`SCRUPLE_FIELD_KEYS`, `SCRUPLE_TOKEN_KEYS`) | P's secret manager, environment only | P; deleting them crypto-shreds |
-| held-out salt (`SCRUPLE_HELDOUT_SALT`) | environment only | S; per-partner salt and manifest handover script **(added in v1-pilot, B10)** |
+| held-out salt (`SCRUPLE_HELDOUT_SALT`) | environment only | S; per-partner salt and handover: `scruple bench seal --partner <code> --out handover/<code>` (salt in `~/.scruple/partners/`, mode 0600) |
 | audit anchors | a git repository P controls, or RFC 3161 tokens | P (so S cannot rewrite history unseen) |
 | readout, scorecards, evidence packs | as TERMS_DRAFT.md allows | both |
 
@@ -112,7 +114,7 @@ git -C audit-anchors add criteria.sha256 && git -C audit-anchors commit -m "sign
 export SCRUPLE_TOKEN_KEYS="k1:<base64url 32 bytes>"     # from P's secret manager
 export SCRUPLE_FIELD_KEYS="k1:<base64url 32 bytes>"
 
-# Stripe, from the API in test mode (added in v1-pilot, B02); STRIPE_API_KEY from the environment
+# Stripe, from the API in test mode (paged, resumable); STRIPE_API_KEY from the environment
 uv run scruple ingest stripe-pull --since 2026-01-01 --until 2026-10-01 \
   --out export.jsonl --store cases.db --report ingest.json
 
@@ -189,8 +191,13 @@ Exit 1 means the gate blocked. A history verdict of "insufficient evidence" is a
 
 ## Week 6: readout and deletion
 
-One command for ingest, backtest, shadow and report: `scruple pilot run` **(added in
-v1-pilot, B03)**. Until it lands, the readout is filled from the outputs above.
+One command for ingest, calibration, backtest, shadow, gate and evidence pack, and one
+to fill the readout from it (docs/pilot/README.md):
+
+```bash
+uv run scruple pilot run --history cases.db --candidate rule.json --out pilot/   # the ingested store
+uv run scruple pilot readout --run pilot/ --criteria criteria.json --out readout/
+```
 
 ```bash
 uv run scruple audit verify --db pilot.db                       # "INTEGRITY OK"
