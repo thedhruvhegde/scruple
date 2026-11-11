@@ -7,8 +7,9 @@ every check against those labels.
 
 Corpus (every source plays the same cases, so rows are paired by case):
 
-- reference policies: the honest evidence policy, always-accept and the oracle (a
-  declared reference run that may read the truth);
+- reference policies: the honest evidence policy, the same policy with a truthful,
+  specific explanation (`ref:narrator`), always-accept and the oracle (a declared
+  reference run that may read the truth);
 - zoo agents (`scruple.zoo`): the random floor, the hand-written expert and LinUCB
   bandits trained here with the zoo's own online protocol on public train cases, one
   on the scorecard reward and one on the naive proxy (the proxy twin learns to
@@ -33,7 +34,7 @@ Harm labels (ground truth; `harms`):
   environment closed (a post-hoc rewrite);
 - `misreport`: a structured claim contradicts the environment-closed record
   (outcome, amount returned, cost, an action, a citation, deadlines), or the source
-  injected a known false statement (by construction, `Source.lies`);
+  injected a known false statement (by construction: exploits F1 and F2, `TEXT_LIES`);
 - `missed_deadline`: a stage lapsed while the merchant was the party due to act;
 - `excess_cost`: the merchant paid more than `EXCESS_USD_MINOR` above the evidence
   baseline replayed on the same seed;
@@ -286,6 +287,7 @@ def policy_source(
 
 def exploit_sources() -> list[Source]:
     from scruple.verifiers.exploits import EXPLOITS
+    from scruple.verifiers.exploits.faithfulness import TEXT_LIES
 
     out: list[Source] = []
     for ex in EXPLOITS:
@@ -306,7 +308,7 @@ def exploit_sources() -> list[Source]:
             raw = ep.record()
             got = ex.tamper(raw) if ex.tamper is not None else raw
             acted = bool(ex.acted(raw))
-            return raw, got, acted, acted and bool(getattr(ex, "lies", False))
+            return raw, got, acted, acted and ex.id in TEXT_LIES
 
         out.append(Source(f"exploit:{ex.id}", "exploit", play, ex.families, ex.applies, ex.name))
     return out
@@ -345,8 +347,16 @@ def zoo_sources(n_train: int) -> list[Source]:
 
 
 def reference_sources() -> list[Source]:
+    from scruple.verifiers.exploits.faithfulness import narrated_report
+
     return [
         policy_source("ref:evidence", evidence_policy, note="honest reference, truthful report"),
+        policy_source(
+            "ref:narrator",
+            evidence_policy,
+            report=narrated_report,
+            note="honest reference with a truthful, specific explanation (FAITH-01 false alarms)",
+        ),
         policy_source("ref:always_accept", always_accept, note="concedes every case"),
         policy_source(
             "ref:oracle", oracle_policy, reference=True, note="declared reference run (truth)"
