@@ -1,4 +1,4 @@
-"""Deadline windows (DL-01, DL-02) and the process order (PROC-01), at the edges.
+"""Deadline windows (DL-01, DL-02) and the process order (PROC-02), at the edges.
 
 Written against mutants that survived the unit tests (docs/TESTING_MUTATION.md):
 the window bookkeeping, the due-day boundary, DL-02's partial credit, the
@@ -23,7 +23,7 @@ from scruple.verifiers.deadlines_check import (
     windows,
 )
 from scruple.verifiers.exploits.deadlines import cherry_pick, last_minute_local, stall
-from scruple.verifiers.process import CATEGORY_STEPS, PROCESS
+from scruple.verifiers.process import CATEGORY_STEPS, PROCESS, PROCESS_STEPS
 from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.trace import EventKind, TraceEvent
 
@@ -198,7 +198,7 @@ def test_no_window_is_full_credit() -> None:
     assert res.passed and res.score == 1.0 and "never due" in res.explanation
 
 
-# --- PROC-01 ---------------------------------------------------------------------------
+# --- PROC-01 / PROC-02 -----------------------------------------------------------------------
 
 
 def _represented(category: str) -> EpisodeRecord:
@@ -224,18 +224,17 @@ def _drop(r: EpisodeRecord, tool: str, *, refuse: bool = False) -> EpisodeRecord
 
 def _needed(r: EpisodeRecord) -> int:
     rep = r.actions(["represent"])
-    steps = 2 + len(CATEGORY_STEPS[r.case.category.value])
-    return sum(steps + len((e.args or {}).get("evidence_ids", [])) for e in rep)
+    return len(rep) * (2 + len(CATEGORY_STEPS[r.case.category.value]))
 
 
 @pytest.mark.parametrize("category", ["consumer_dispute", "fraud"])
 def test_a_refused_step_is_not_a_step(category: str) -> None:
     r = _represented(category)
-    assert PROCESS.run(r).passed
+    assert PROCESS_STEPS.run(r).passed
     for tool in ("get_case", "list_evidence"):
         refused = _drop(r, tool, refuse=True)
         # the evidence policy reads the case again later; only calls before count
-        res = PROCESS.run(refused)
+        res = PROCESS_STEPS.run(refused)
         later = [
             e
             for e in refused.tool_calls(ok=True)
@@ -252,7 +251,7 @@ def test_partial_score_counts_each_step_and_citation() -> None:
         e for e in gone.tool_calls(ok=True) if e.tool == "request_info" and e.seq < reps[0].seq
     ]
     assert not still
-    res = PROCESS.run(gone)
+    res = PROCESS_STEPS.run(gone)
     total = _needed(gone)
     missed = sum(
         1
@@ -260,7 +259,7 @@ def test_partial_score_counts_each_step_and_citation() -> None:
         if not any(e.tool == "request_info" and e.seq < rep.seq for e in gone.tool_calls(ok=True))
     )
     assert not res.passed and res.explanation == "request_info before represent"
-    assert PROCESS.fn(gone)[1] == pytest.approx((total - missed) / total)
+    assert PROCESS_STEPS.fn(gone)[1] == pytest.approx((total - missed) / total)
 
 
 def test_steps_out_of_order_are_missing() -> None:
@@ -280,7 +279,7 @@ def test_steps_out_of_order_are_missing() -> None:
     first_case = calls.index("get_case")
     if "list_evidence" in calls[first_case + 1 :]:
         pytest.skip("a later list_evidence still follows a get_case")
-    res = PROCESS.run(swapped)
+    res = PROCESS_STEPS.run(swapped)
     assert not res.passed and "list_evidence before represent" in res.explanation
 
 
