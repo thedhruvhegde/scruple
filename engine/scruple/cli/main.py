@@ -269,6 +269,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.pilot.cli import add_pilot_parser
 
     add_pilot_parser(sub)
+    from scruple.cli.init import add_init_parser
+
+    add_init_parser(sub)
     return p
 
 

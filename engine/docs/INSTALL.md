@@ -83,6 +83,27 @@ make lint typecheck test      # what every commit must pass
 make test-slow                # slow suites, including the wheel install test
 ```
 
+## Setting up a new partner: `scruple init`
+
+One command, safe to re-run, with `--yes` for CI:
+
+```bash
+scruple init --yes --dir /etc/scruple --db /var/lib/scruple/scruple.db \
+  --tenant acme --admin risk-admin@acme.example --key-out /run/secrets/scruple-admin.key
+SCRUPLE_CONFIG=/etc/scruple/scruple.toml scruple serve
+```
+
+It writes `scruple.toml` (no secrets: a password in `--db` is used for this run and
+never written; set `SCRUPLE_DATABASE_PASSWORD`), writes `scruple-policy.toml` (an
+approval policy skeleton, filled from `--approver name=role` and `--required`),
+migrates Postgres to the alembic head, imports the synthetic baseline into the
+tenant, creates one `risk_admin` key (shown once, or written 0600 to `--key-out`)
+and runs an in-process smoke check (audit chain, `/health`, anonymous refusal, the
+new key). A re-run validates what exists, keeps it, creates nothing twice and never
+shows a key again; flags that disagree with an existing config are refused. Without
+`--yes` it asks for missing values and confirms the plan; with no terminal and no
+`--yes` it refuses. Verified by `tests/test_cli_init.py`, on SQLite and Postgres 16.
+
 ## Clients
 
 - Python: `from scruple import Client` (in the main package; httpx). Typed with the
