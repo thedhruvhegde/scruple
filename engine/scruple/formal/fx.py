@@ -12,8 +12,9 @@ explicit rounding functions, so every step is visible:
 Note the double rounding: the product is first rounded to 28 significant digits and
 only then to an integer, as `decimal` does. The daily USD rates themselves are data
 (synthetic, A-27) taken from `FxTable.usd_per_unit`. The conformance tests check this
-model against `FxTable.convert`; `scruple.formal.smt.fx_checks` proves rounding bounds
-on it for every amount up to a limit.
+model against `FxTable.convert` directly (hypothesis) and through every posting the
+dispute engine makes in a foreign currency. z3 is not used here: the 28-digit
+constants make the rounding queries too slow for it (docs/FORMAL.md).
 """
 
 from __future__ import annotations
