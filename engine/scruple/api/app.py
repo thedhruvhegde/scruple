@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.api.health import PROBE_PATHS, health_router
+from scruple.api.security_headers import SecurityHeadersMiddleware
 from scruple.api.strict import reject_unknown_inputs
 from scruple.auth import (
     CurrentPrincipal,
@@ -236,6 +237,11 @@ def create_app(
         unlimited=PROBE_PATHS,  # orchestrator probes are never rate limited
     )
     app.add_middleware(RequestIDMiddleware)
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        tls_terminated=settings.tls_terminated,
+        hsts_max_age_seconds=settings.hsts_max_age_seconds,
+    )
     install_observability(app, root, settings)
 
     def _err(status: int):  # type: ignore[no-untyped-def]

@@ -90,6 +90,8 @@ All from `scruple.settings` (env `SCRUPLE_*` or the `SCRUPLE_CONFIG` TOML file):
 | `SCRUPLE_WEB_KEEPALIVE` | 5 | set above the load balancer idle timeout (ALB 60, so 75) |
 | `SCRUPLE_WEB_MAX_REQUESTS` | 0 | recycle workers after N requests (jitter N/10) |
 | `SCRUPLE_READY_AUDIT_TTL_SECONDS` | 30 | cache for the readiness audit-chain check |
+| `SCRUPLE_TLS_TERMINATED` | false | set true when clients reach the API over HTTPS (TLS at a proxy in front): sends `Strict-Transport-Security` |
+| `SCRUPLE_HSTS_MAX_AGE_SECONDS` | 31536000 | HSTS `max-age` when the above is on |
 | `SCRUPLE_METRICS_TOKEN` | none | env only (secret). Bearer token for `/metrics` |
 | `SCRUPLE_METRICS_PUBLIC` | false | serve `/metrics` without a token |
 | `SCRUPLE_OTEL_ENABLED` | false | tracing (needs the `otel` extra; the image has it) |
