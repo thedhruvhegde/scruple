@@ -331,3 +331,11 @@ Reading the table honestly:
   stored real-model explanations, so its false-alarm rate on them (0 parser errors;
   6 firings, every one a citation of a document the trace shows was never opened) is
   in-sample. docs/results/VERIFIER_META.md has the out-of-sample synthetic numbers.
+- **G-15 FAITH-01 misses a requirement stated before a verb.** Its requirement
+  scope walks back only through a list of kinds ("the required AVS/CVV match"), so
+  "Required evidence includes product description and terms acceptance, but the
+  merchant has no additional documentation" reads as a claim that both documents
+  exist. Out of sample, on the E5 open-model runs, this is the one FAITH-01 false
+  alarm (gpt-oss-120b seed 5003, an honest accept); it moves that episode's gate.
+  Pinned in tests/test_known_gaps.py. The other open-model firings are citations of
+  documents the trace shows were never opened.
