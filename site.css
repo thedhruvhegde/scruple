@@ -74,9 +74,9 @@
 main:focus { outline: none; }
 .menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
 .menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--fg); color: var(--bg); outline: none; }
-/* under 1100px: scruple / 02 proof, and the links fold into [ MENU ], a small dark terminal list
+/* under 1000px: scruple / .| proof, and the links fold into [ MENU ], a small dark terminal list
    that drops over the page under the button, so nothing reflows */
-@media (max-width: 1100px) {
+@media (max-width: 1000px) {
   .bar { height: 56px; padding-top: 8px; top: calc(env(safe-area-inset-top, 0px) - 8px); }
   .bar-in { gap: 10px; }
   .crumb { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }

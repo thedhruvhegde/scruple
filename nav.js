@@ -1,12 +1,12 @@
 /* nav.js: the top bar, shared by every page (home, results, paper, 404).
  *
  * markup it expects, inside header.bar:
- *   span.crumb[data-page]  under 1100px: "/ results / <> watch", the page then the section in view
+ *   span.crumb[data-page]  under 1000px: "/ results / <> watch", the page then the section in view
  *   nav#nav > ul.nav-sec   in-page anchors, <a href="#id" data-g="<>" aria-label="Watch a case">Watch</a>:
  *                          a two-character glyph, a short name, the full title as the label;
  *                          the one in view gets aria-current="location"
  *   nav#nav > ul.nav-pg    pages, the page you are on carries aria-current="page" in the html
- *   button#nav-menu        [ MENU ], shown under 1100px; opens nav#nav as a small terminal list
+ *   button#nav-menu        [ MENU ], shown under 1000px; opens nav#nav as a small terminal list
  *   span.bar-rule > i, b   the bottom edge: i is the ====> fill, b the keys hint and percent read
  *   a.skip                 first in the body, href="#top" pointing at main; shown only on focus
  *
@@ -26,7 +26,7 @@
   const crumb = bar.querySelector(".crumb"), rule = bar.querySelector(".bar-rule");
   const fill = rule && rule.querySelector("i"), info = rule && rule.querySelector("b");
   const page = crumb ? crumb.dataset.page || "" : "";
-  const fine = matchMedia("(hover: hover) and (pointer: fine)"), wide = matchMedia("(min-width: 1101px)");
+  const fine = matchMedia("(hover: hover) and (pointer: fine)"), wide = matchMedia("(min-width: 1001px)");
   links.forEach((a, i) => { if (i < 9) a.setAttribute("aria-keyshortcuts", String(i + 1)); });
 
   /* ---------- the section in view, the crumb and the reading ruler ---------- */
@@ -99,5 +99,5 @@
   nav.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
   addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) { set(false); btn.focus(); } });
   addEventListener("pointerdown", (e) => { if (isOpen() && !bar.contains(e.target)) set(false); });
-  matchMedia("(min-width: 1101px)").addEventListener("change", (m) => { if (m.matches) set(false); });
+  matchMedia("(min-width: 1001px)").addEventListener("change", (m) => { if (m.matches) set(false); });
 })();
