@@ -183,7 +183,34 @@ The design principle is that nothing the agent says earns credit. Self-reports a
 \begin{equation}\label{eq:reward}
 \text{gate} = \textstyle\bigwedge_{h}\text{hard}_h,\qquad \text{quality} = \sum_j w_j s_j \big/ \sum_j w_j,\qquad \text{reward} = \text{gate}\times\text{quality},
 \end{equation}
-so a hard failure zeroes the reward and ten perfect soft scores cannot outvote one violation. \Cref{tab:checks} lists the checks and, for each, an attack that fools a naive metric and is stopped by the check.
+so a hard failure zeroes the reward and ten perfect soft scores cannot outvote one violation. \Cref{tab:checks} lists the checks and, for each, an attack that fools a naive metric and is stopped by the check. \Cref{fig:stack} shows the three kinds of check and how the release decision combines them; \cref{sec:composition} proves what the combination guarantees.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\footnotesize,
+  lay/.style={draw=black!70, thick, align=left, inner sep=4pt, text width=78mm},
+  ann/.style={font=\scriptsize, text=black!70, align=left, text width=34mm, anchor=west}]
+\node[lay, fill=cverm!7] (hard) {\textbf{hard checks, every episode}\\[1pt]{\scriptsize INV-01 ledger invariants after every action, INV-05 record integrity, PROC-01 process order, EVD-01 provenance, DL-01 deadlines, SR-01 self-report against the record, SCOPE-01 scope; FAIR-01 under the stricter profiles}};
+\node[lay, fill=cverm!7, below=3mm of hard] (batch) {\textbf{hard checks, every batch}\\[1pt]{\scriptsize CON-01 consistency across merchant tiers, CAL-01 calibration, SR-03 claimed win rate, MEM-01 exposed against held-out probes}};
+\node[lay, fill=cbrass!10, below=3mm of batch] (soft) {\textbf{soft checks, weighted into quality}\\[1pt]{\scriptsize CF-01 counterfactual replay, OUT-01 fair outcome, EVD-02 coverage, DL-02 stage credit, CAL-02 Brier, SR-02 text written at a grader, ESC-01 escalation basis}};
+\node[lay, fill=csky!12, below=3mm of soft] (stat) {\textbf{statistical tests over paired costs}\\[1pt]{\scriptsize block family $B$: per-type and pooled e-processes, weighted e-Bonferroni at $\alpha_{\text{block}}$; certificate $T$: betting e-process for $H_0{:}\ \mu\ge\delta$ at level $\alpha$}};
+\node[draw=black!70, thick, circle, minimum size=10mm, fill=white, right=22mm of $(batch.east)!0.5!(soft.east)$] (and) {\large$\bigwedge$};
+\node[draw=black!70, thick, fill=cpine!12, right=6mm of and, align=center] (prom) {\textbf{promote}};
+\draw[arr] (hard.east) -- (and);
+\draw[arr] (batch.east) -- (and);
+\draw[arr] (soft.east) -- (and);
+\draw[arr] (stat.east) -- (and);
+\node[slab, anchor=south west] at (hard.east) {$H$};
+\node[slab, anchor=south west] at (batch.east) {$H$};
+\node[slab, anchor=north west] at (soft.east) {$S$};
+\node[slab, anchor=north west] at (stat.east) {$\neg B\wedge T$};
+\draw[arr] (and) -- (prom);
+\node[draw=black!40, align=left, inner sep=4pt, text width=116mm, below=4mm of stat.south west, anchor=north west, font=\scriptsize] (thm) {per episode: gate $=\bigwedge$ hard, reward $=$ gate $\times$ quality\\[2pt]
+promote side: $\P(\text{promote}\mid\text{harm }j)\le\min_c\alpha_{c,j}$; a correct hard check that reads the harm has $\alpha_{c,j}=0$, the certificate $T$ has $\alpha$, soft checks have no level\\[2pt]
+block side: $\P(\text{block}\mid\text{no harm})\le\alpha_{\text{block}}+\P(\text{some hard check false-alarms})$};
+\end{tikzpicture}
+\caption{The verifier stack. Hard checks are conjuncts: one failure zeroes the episode's reward and blocks the candidate. Soft checks only lower quality. Statistical tests read costs recomputed from the ledger, never the agent's report. By \cref{thm:composition}, the promote decision is as strict as the strictest conjunct that covers a harm, false blocks add up across conjuncts, and a harm no conjunct covers (for example an unfair win under the default profile, which only OUT-01 scores) carries no guarantee.}\label{fig:stack}
+\end{figure}
 
 \begin{table}[t]
 \centering\small
