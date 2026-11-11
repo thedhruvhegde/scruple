@@ -32,7 +32,9 @@ from scruple.storage import (
     console_filters,
     episodes,
     imported_shadow,
+    integrations,
     jobs,
+    policies,
     ratelimit,
     retention,
     usage,
@@ -223,6 +225,8 @@ SCHEMA = (
     + console_filters.POSTGRES_DDL
     + usage.POSTGRES_DDL
     + billing.POSTGRES_DDL
+    + policies.POSTGRES_DDL
+    + integrations.POSTGRES_DDL
 )
 
 
@@ -361,4 +365,10 @@ GRANT SELECT, INSERT ON {schema}.usage_events TO {role};
 GRANT USAGE ON SEQUENCE {schema}.usage_events_id_seq TO {role};
 GRANT SELECT, INSERT ON {schema}.billing_pushes TO {role};
 GRANT USAGE ON SEQUENCE {schema}.billing_pushes_id_seq TO {role};
+GRANT SELECT, INSERT ON {schema}.tenant_policies, {schema}.integration_settings,
+    {schema}.integration_events, {schema}.webhook_attempts, {schema}.ticket_updates,
+    {schema}.link_nonces TO {role};
+GRANT SELECT, INSERT, UPDATE ON {schema}.integration_cursor, {schema}.webhook_endpoints,
+    {schema}.webhook_deliveries TO {role};
+GRANT SELECT, INSERT, UPDATE, DELETE ON {schema}.ticket_links TO {role};
 """

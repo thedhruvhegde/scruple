@@ -325,6 +325,8 @@ def test_linear_issue_and_comments_use_stable_ids(store: IntegrationStore) -> No
     assert comment["id"] == stable_uuid("default", "comment", "dec-00002")
     assert comment["issueId"] == inp["id"]
     # the tracker already has this decision's comment (an attempt whose answer was lost)
+    # ticket_updates is append-only; drop the guard to simulate the lost local marker
+    _s(store).connection.execute("DROP TRIGGER ticket_updates_no_delete")
     _s(store).connection.execute("DELETE FROM ticket_updates WHERE decision_id='dec-00002'")
     assert sync(_s(store), rt, "linear", _event(store, 2))["issue"] == "RSK-1"
     assert len(t.linear.comments) == 1

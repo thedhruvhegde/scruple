@@ -8,6 +8,12 @@ as empty, so reading never creates anything.
 
 The DDL is plain enough for both backends: TEXT, BIGINT, composite primary keys,
 no autoincrement (callers allocate keys inside a transaction).
+
+First-use creation is for SQLite only. On PostgreSQL these tables are part of the
+schema (`PostgresStorage` and the alembic migrations), so the service can run as a
+role that cannot create tables; `ensure_tables` is a no-op there. Append-only tables
+get the same refuse-update/delete triggers as the rest of the history
+(`append_only_triggers`).
 """
 
 from __future__ import annotations
@@ -42,11 +48,48 @@ def table_exists(conn: Connection, dialect: Dialect, name: str) -> bool:
     return bool(rows)
 
 
-def ensure_tables(conn: Connection, statements: Iterable[str]) -> None:
-    """Run each `CREATE ... IF NOT EXISTS` statement (one statement per string)."""
+def append_only_triggers(table: str, dialect: Dialect) -> tuple[str, ...]:
+    """Triggers that refuse UPDATE and DELETE (and TRUNCATE on PostgreSQL) on `table`."""
+    msg = f"'{table} is append-only'"
+    if dialect == "sqlite":
+        return tuple(
+            f"CREATE TRIGGER IF NOT EXISTS {table}_no_{op.lower()} BEFORE {op} ON {table}\n"
+            f"BEGIN SELECT RAISE(ABORT, {msg}); END"
+            for op in ("UPDATE", "DELETE")
+        )
+    return (
+        *(
+            f"CREATE OR REPLACE TRIGGER {table}_no_{op.lower()} BEFORE {op} ON {table}\n"
+            f"    FOR EACH ROW EXECUTE FUNCTION scruple_refuse({msg})"
+            for op in ("UPDATE", "DELETE")
+        ),
+        f"CREATE OR REPLACE TRIGGER {table}_no_truncate BEFORE TRUNCATE ON {table}\n"
+        f"    FOR EACH STATEMENT EXECUTE FUNCTION scruple_refuse({msg})",
+    )
+
+
+def postgres_ddl(statements: Iterable[str]) -> str:
+    """One script from single statements (for the PostgreSQL schema and migrations)."""
+    return "".join(f"{sql};\n" for sql in statements)
+
+
+def ensure_tables(conn: Connection, statements: Iterable[str], dialect: Dialect) -> None:
+    """Run each `CREATE ... IF NOT EXISTS` statement (one statement per string).
+
+    SQLite only: on PostgreSQL the tables already exist (schema and migrations).
+    """
+    if dialect != "sqlite":
+        return
     with conn.transaction():
         for sql in statements:
             conn.execute(sql)
 
 
-__all__ = ["Dialect", "connection_of", "ensure_tables", "table_exists"]
+__all__ = [
+    "Dialect",
+    "append_only_triggers",
+    "connection_of",
+    "ensure_tables",
+    "postgres_ddl",
+    "table_exists",
+]

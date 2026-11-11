@@ -6,8 +6,9 @@ audited (`policy.set` in the tenant's chain, with the policy's hash and number),
 which policy governed a decision is answerable from the audit log alone: each
 `decision.recorded` entry made under a policy carries its `policy_sha256`.
 
-The table is created on the first `apply_policy` (`scruple.storage.lazy`); a
-database that never had a policy is unchanged and reads as "no policy".
+On SQLite the table is created on the first `apply_policy` (`scruple.storage.lazy`);
+a database that never had a policy is unchanged and reads as "no policy". On
+PostgreSQL it is part of the schema (`scruple.storage.policies`, migration 0014).
 """
 
 from __future__ import annotations
@@ -18,19 +19,9 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.policy.models import Policy
 from scruple.storage.lazy import connection_of, ensure_tables, table_exists
+from scruple.storage.policies import SQLITE_DDL, TABLE
 
-TABLE = "tenant_policies"
-DDL = (
-    f"""CREATE TABLE IF NOT EXISTS {TABLE} (
-    tenant_id TEXT NOT NULL,
-    number BIGINT NOT NULL,
-    policy_sha256 TEXT NOT NULL,
-    body_json TEXT NOT NULL,
-    actor TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, number)
-)""",
-)
+DDL = SQLITE_DDL  # created on first apply on SQLite; schema on PostgreSQL
 EVENT_POLICY_APPLIED = "policy.set"
 
 
@@ -96,7 +87,7 @@ class PolicyStore:
 
     def append(self, policy: Policy, actor: str, now: datetime) -> PolicyRecord:
         """Store `policy` as the next number. Call inside the gate's transaction."""
-        ensure_tables(self._conn, DDL)
+        ensure_tables(self._conn, DDL, self._dialect)
         with self._conn.transaction():
             rows = self._conn.query(
                 f"SELECT MAX(number) AS n FROM {TABLE} WHERE tenant_id=?",  # noqa: S608

@@ -242,6 +242,8 @@ def test_post_message_errors_and_partial_retries(tmp_path: Path) -> None:
     w = World(tmp_path)
     (event,) = [e for e in IntegrationStore(w.storage).events() if e.type == "approval.requested"]
     store = IntegrationStore(w.storage)
+    # link_nonces is append-only; drop the guard to simulate markers that were never written
+    w.storage.connection.execute("DROP TRIGGER link_nonces_no_delete")
     w.storage.connection.execute("DELETE FROM link_nonces")
     w.slack.posts.clear()
     w.slack.answers = [{"ok": True}, {"ok": False, "error": "ratelimited"}]
@@ -250,6 +252,7 @@ def test_post_message_errors_and_partial_retries(tmp_path: Path) -> None:
     assert store.nonce_used(f"sent:{event.id}:C0001")
     out = notify(w.storage, w.runtime, event.id, clock=w.clock)
     assert out["sent"] == ["UALICE", "UBOB"]  # the channel message is not repeated
+    w.storage.connection.execute("DROP TRIGGER IF EXISTS link_nonces_no_delete")
     w.storage.connection.execute("DELETE FROM link_nonces")
     w.slack.answers = [{"ok": False, "error": "invalid_auth"}]
     with pytest.raises(PermanentJobError, match="invalid_auth"):

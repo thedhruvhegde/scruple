@@ -332,8 +332,8 @@ uv run scruple ingest verify --store cases.db [--k 10] [--json]
   The hash ends up in every `decision.recorded` audit entry made under the policy, every
   scorecard and every evidence pack. With no policy the field is left out, so existing
   config hashes, scorecards and packs stay byte-identical.
-- Per tenant, append-only: table `tenant_policies` (created on first apply, never
-  updated). Each apply is audited as `policy.set` (number, name, hash, previous hash).
+- Per tenant, append-only: table `tenant_policies` (never updated or deleted; a trigger
+  refuses both). Each apply is audited as `policy.set` (number, name, hash, previous hash).
   Applying the policy already in force is a no-op.
 - An `approval` section is applied through `AgentGate.set_approval_policy`, so only a
   gate operator (`GateConfig.approvers`) can apply such a policy; a refusal writes nothing.
@@ -519,11 +519,15 @@ def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
 ## Policy and integration tables, and the API schema
 
 - `tenant_policies` and the integration tables (`integration_*`, `webhook_*`,
-  `ticket_*`, `link_nonces`) have no alembic migration: they are created with
-  `CREATE TABLE IF NOT EXISTS` on first use (`scruple.storage.lazy`), so a database that
-  never used them is unchanged. On Postgres with a non-owner application role
-  (`app_role_grants`), create them first as the owner (run any `scruple policy apply`
-  or `scruple integrations settings set` once with the owner's URL).
+  `ticket_*`, `link_nonces`): on Postgres they are part of the schema (alembic 0014,
+  and `PostgresStorage` on open), and `app_role_grants` covers them (INSERT and SELECT
+  on history; UPDATE on the cursor, endpoints and deliveries; UPDATE and DELETE on
+  ticket claims). On SQLite they are created with `CREATE TABLE IF NOT EXISTS` on first
+  use (`scruple.storage.lazy`), so a dev database that never used them is unchanged.
+- Append-only on both backends, by trigger: `tenant_policies`, `integration_settings`,
+  `integration_events`, `webhook_attempts`, `ticket_updates`, `link_nonces`. The
+  others hold mutable state (cursor, endpoint active flag and secrets, delivery status,
+  in-progress ticket claims).
 - `/policy` and `/integrations/*` routes are left out of the OpenAPI schema, like the
   console: they are operator configuration, not part of the SDKs generated from it.
   Every one still declares its permission (`require`, or `signed` for the Slack and

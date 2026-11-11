@@ -10,8 +10,10 @@
     ticket_updates         one update per decision per provider (idempotency)
     link_nonces            used approval-link nonces and Slack request signatures
 
-Tables are created when a tenant first configures something (`scruple.storage.lazy`);
-reads of a database that never used integrations create nothing.
+On SQLite tables are created when a tenant first configures something
+(`scruple.storage.lazy`), and reads of a database that never used integrations create
+nothing. On PostgreSQL they are part of the schema (`scruple.storage.integrations`,
+migration 0014). Append-only tables refuse UPDATE and DELETE by trigger.
 """
 
 from __future__ import annotations
@@ -24,55 +26,10 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.integrations.config import IntegrationSettings
 from scruple.jobs.queue import ts
+from scruple.storage.integrations import SQLITE_DDL, TABLES
 from scruple.storage.lazy import connection_of, ensure_tables, table_exists
 
-DDL = (
-    """CREATE TABLE IF NOT EXISTS integration_settings (
-    tenant_id TEXT NOT NULL, number BIGINT NOT NULL, body_json TEXT NOT NULL,
-    actor TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (tenant_id, number))""",
-    """CREATE TABLE IF NOT EXISTS integration_events (
-    tenant_id TEXT NOT NULL, event_id TEXT NOT NULL, audit_seq BIGINT NOT NULL,
-    event_type TEXT NOT NULL, body_json TEXT NOT NULL, created_at TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, event_id))""",
-    """CREATE TABLE IF NOT EXISTS integration_cursor (
-    tenant_id TEXT NOT NULL PRIMARY KEY, last_seq BIGINT NOT NULL)""",
-    """CREATE TABLE IF NOT EXISTS webhook_endpoints (
-    tenant_id TEXT NOT NULL, endpoint_id TEXT NOT NULL, url TEXT NOT NULL,
-    events_json TEXT NOT NULL, secrets_json TEXT NOT NULL, active INTEGER NOT NULL,
-    description TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, endpoint_id))""",
-    """CREATE TABLE IF NOT EXISTS webhook_deliveries (
-    tenant_id TEXT NOT NULL, delivery_id TEXT NOT NULL, endpoint_id TEXT NOT NULL,
-    event_id TEXT NOT NULL, status TEXT NOT NULL, attempts INTEGER NOT NULL,
-    last_status_code INTEGER, last_error TEXT, created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL, delivered_at TEXT, replays INTEGER NOT NULL,
-    PRIMARY KEY (tenant_id, delivery_id))""",
-    """CREATE TABLE IF NOT EXISTS webhook_attempts (
-    tenant_id TEXT NOT NULL, delivery_id TEXT NOT NULL, attempt_no INTEGER NOT NULL,
-    at TEXT NOT NULL, status_code INTEGER, error TEXT, duration_ms INTEGER NOT NULL,
-    job_id TEXT NOT NULL, PRIMARY KEY (tenant_id, delivery_id, attempt_no))""",
-    """CREATE TABLE IF NOT EXISTS ticket_links (
-    tenant_id TEXT NOT NULL, provider TEXT NOT NULL, candidate TEXT NOT NULL,
-    issue_id TEXT, issue_key TEXT, url TEXT, created_at TEXT NOT NULL,
-    PRIMARY KEY (tenant_id, provider, candidate))""",
-    """CREATE TABLE IF NOT EXISTS ticket_updates (
-    tenant_id TEXT NOT NULL, provider TEXT NOT NULL, decision_id TEXT NOT NULL,
-    candidate TEXT NOT NULL, at TEXT NOT NULL, PRIMARY KEY (tenant_id, provider, decision_id))""",
-    """CREATE TABLE IF NOT EXISTS link_nonces (
-    tenant_id TEXT NOT NULL, nonce TEXT NOT NULL, purpose TEXT NOT NULL,
-    used_at TEXT NOT NULL, PRIMARY KEY (tenant_id, nonce))""",
-)
-TABLES = (
-    "integration_settings",
-    "integration_events",
-    "integration_cursor",
-    "webhook_endpoints",
-    "webhook_deliveries",
-    "webhook_attempts",
-    "ticket_links",
-    "ticket_updates",
-    "link_nonces",
-)
+DDL = SQLITE_DDL  # created on first use on SQLite; schema on PostgreSQL
 
 
 class Endpoint(BaseModel):
@@ -165,7 +122,7 @@ class IntegrationStore:
 
     def ensure(self) -> IntegrationStore:
         if not self._ready:
-            ensure_tables(self._conn, DDL)
+            ensure_tables(self._conn, DDL, self._dialect)
             self._ready = True
         return self
 
