@@ -326,6 +326,10 @@
     ["blob/main/engine/docs/experiments/E2_reward_hacking.md", "engine/docs/experiments/E2_reward_hacking.md", "E2, pre-registration and results."],
     ["blob/main/engine/docs/math/README.md", "engine/docs/math/README.md", "The statistics behind the gate."],
     ["blob/main/results/build_data.py", "results/build_data.py", "The export script for this page."],
+    ["blob/main/engine/results/real/open_models/e5_episodes.json", "engine/results/real/open_models/e5_episodes.json", "Open models and Claude on the same seeds, current verifiers."],
+    ["tree/main/engine/results/real/open_models", "engine/results/real/open_models/", "Open-model call logs, API bodies and CFPB answers."],
+    ["blob/main/engine/results/real/incentives/e4.json", "engine/results/real/incentives/e4.json", "E4, honest and incentive briefs, per episode."],
+    ["blob/main/results/build_leaderboard.py", "results/build_leaderboard.py", "The export script for the leaderboard."],
   ];
   const ul = $("#links");
   for (const [p, name, what] of LINKS) ul.append(el("li", {}, el("a", { href: GH + p }, el("span", { text: name }), el("span", { text: what }))));
