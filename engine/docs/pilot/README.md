@@ -141,3 +141,27 @@ STRIPE_API_KEY=sk_test_... uv run scruple pilot run --history stripe-pull \
   skipped and the manifest says why.
 - Tested on edited copies of Stripe's published fixtures and on SYNTHETIC histories
   (tests/test_pilot_run.py). Not yet run on a partner's data.
+
+## The readout from the run
+
+`scruple pilot readout --run pilot/ --criteria criteria.json --out readout/` fills
+READOUT_TEMPLATE.md from the run's files and writes readout.md, readout.pdf and
+readout.json (same inputs, same bytes). The criteria file is SUCCESS_CRITERIA.md in
+machine form (JSON or TOML), written and hashed before the data arrives; its sha256 is
+printed in the readout. Each criterion is pass, fail or not enough data by a fixed rule
+(`scruple.pilot.readout`):
+
+```json
+{"partner": "[PARTNER]", "signed": "[date]", "criteria": [
+  {"id": "H1", "metric": "planted_blocked",
+   "plants": [{"id": "p1", "run": "plants/p1", "reason": "product_not_received"}]},
+  {"id": "H2", "metric": "new_hard_violations", "max": 0},
+  {"id": "H3", "metric": "self_report_gap", "min_cases": 30,
+   "reported": {"fraudulent": 0.41}},
+  {"id": "H4", "metric": "identical_reruns", "reruns": ["rerun1", "rerun2", "rerun3"]},
+  {"id": "H5", "metric": "improvement_every_reason"}]}
+```
+
+Each plant and each rerun is its own `scruple pilot run` directory (paths relative to
+the criteria file). Names, signatures, the outcome model and the deletion table stay
+as `[...]` for people to fill in.
