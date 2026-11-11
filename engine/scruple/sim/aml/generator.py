@@ -303,11 +303,160 @@ def _property(b: Builder, subject: str, rule: AlertRule) -> None:
     b.leg(t0 + timedelta(hours=lag), subject, title, out, "wire", memo="CLOSING FUNDS", linked=True)
 
 
+# --- typologies -------------------------------------------------------------------------
+def _structuring_subject(b: Builder) -> str:
+    if b.rng.random() < b.difficulty / 2:  # a cash business that structures its takings
+        job = b.rng.choice(("food truck", "nail salon"))
+        return b.internal(
+            "business",
+            job,
+            b.rng.randint(200, 3_000),
+            b.dollars(4_000, 6_000, False),
+            cash_intensive=True,
+        )
+    job = b.rng.choice(("warehouse associate", "self-employed contractor", "retail clerk"))
+    return b.internal("individual", job, b.rng.randint(90, 3_000), b.dollars(2_000, 6_000, False))
+
+
+def _structuring(b: Builder, subject: str, rule: AlertRule) -> None:
+    """Three to six cash deposits, each at or under the CTR threshold (more than
+    $10,000 would be reported, 31 CFR 1010.311), at several branches over days. The
+    band's floor falls from $9,000 to $7,000 with difficulty (AM-2, ours); at low
+    difficulty amounts are round hundreds."""
+    n = b.rng.randint(3, 6)
+    lo = round(CTR_THRESHOLD_MINOR * (0.9 - 0.2 * b.difficulty))
+    days = sorted(b.window_day() for _ in range(n))
+    for day in days:
+        amt = b.rng.randint(lo, CTR_THRESHOLD_MINOR - 100)
+        if b.rng.random() > b.difficulty:
+            amt -= amt % 10_000
+        amt = max(lo, amt)
+        b.leg(
+            b.at(day, 9, 17),
+            CASH,
+            subject,
+            amt,
+            "cash",
+            branch=f"BR-{b.rng.randint(1, 5)}",
+            linked=True,
+            typology=True,
+        )
+
+
+def _mule_subject(b: Builder) -> str:
+    job = b.rng.choice(("student", "unemployed", "gig worker"))
+    return b.internal("individual", job, b.rng.randint(15, 120), b.dollars(800, 2_500, False))
+
+
+def _mule_rule(b: Builder) -> AlertRule:
+    return b.rng.choice((AlertRule.FAN_IN, AlertRule.FAN_OUT))
+
+
+def _mule_accounts(b: Builder, k: int) -> list[str]:
+    """Counterparties: new accounts, a few aged ones at high difficulty (at most 40%)."""
+    n_old = int(k * 0.4 * b.difficulty)
+    return [b.person(365, 3_000) if i < n_old else b.person(5, 150) for i in range(k)]
+
+
+def _mule_ring(b: Builder, subject: str, rule: AlertRule) -> None:
+    """A collector (FAN_IN: many new accounts pay in, wires out within hours) or a
+    distributor (FAN_OUT: one wire in, split across new accounts within hours). The
+    money passes through: 82% to 99% of it leaves within 72 hours (AM-4, ours)."""
+    k = b.rng.randint(5, 10)
+    mark = {"linked": True, "typology": True}
+    if rule is AlertRule.FAN_IN:
+        total, last = 0, b.at(b.window_start)
+        for s in _mule_accounts(b, k):
+            for _ in range(b.rng.randint(1, 2)):
+                at = b.at(b.window_day(0, 8), 7, 23)
+                amt = b.dollars(300, 2_500)
+                total += amt
+                last = max(last, at)
+                b.leg(at, s, subject, amt, "p2p", memo=b.rng.choice(("", "rent", "thanks")), **mark)
+        share = b.rng.uniform(0.85 - 0.03 * b.difficulty, 0.98)
+        n_out = b.rng.randint(1, 2)
+        for i in range(n_out):
+            dst = b.external(
+                f"SYNTH HOLDER {b.rng.randint(100, 999)}",
+                "individual",
+                b.rng.choice(("US", "US", "MX", "PA")),
+            )
+            at = last + timedelta(hours=b.rng.randint(6, 60) + i)
+            b.leg(at, subject, dst, int(total * share / n_out), "wire", **mark)
+    else:
+        src = b.external(
+            f"SYNTH TRADING {b.rng.randint(10, 99)} LTD",
+            "business",
+            b.rng.choice(("US", "HK", "AE")),
+        )
+        amount = b.dollars(15_000, 60_000)
+        t0 = b.at(b.window_day(0, 9), 8, 14)
+        b.leg(t0, src, subject, amount, "wire", **mark)
+        share = b.rng.uniform(0.88, 0.99)
+        accounts = _mule_accounts(b, k)
+        weights = [b.rng.uniform(0.5, 1.5) for _ in accounts]
+        for a, w in zip(accounts, weights, strict=True):
+            at = t0 + timedelta(hours=b.rng.randint(2, 30))
+            b.leg(at, subject, a, max(100, int(amount * share * w / sum(weights))), "p2p", **mark)
+
+
+def _rapid_subject(b: Builder) -> str:
+    kind = b.rng.choice(("individual", "business"))
+    job = b.rng.choice(("import-export consultant", "freelance designer", "holding company"))
+    return b.internal(kind, job, b.rng.randint(30, 900), b.dollars(3_000, 10_000, False))
+
+
+def _rapid(b: Builder, subject: str, rule: AlertRule) -> None:
+    """Two or three cycles, four days apart: a large wire in from one party,
+    88% to 99% of it wired out to another within 2 to 72 hours (slower with
+    difficulty; AM-4, ours)."""
+    c = b.rng.randint(2, 3)
+    mark = {"linked": True, "typology": True}
+    for start in sorted(b.rng.sample(range(0, WINDOW_DAYS - 5, 4), c)):
+        day = b.window_start + timedelta(days=start)
+        t0 = b.at(day, 8, 12)
+        amount = b.dollars(20_000, 150_000)
+        src = b.external(
+            f"SYNTH VENTURES {b.rng.randint(10, 99)}", "business", b.rng.choice(("US", "CY", "AE"))
+        )
+        dst = b.external(
+            f"SYNTH GLOBAL {b.rng.randint(10, 99)}", "business", b.rng.choice(("HK", "LV", "US"))
+        )
+        b.leg(t0, src, subject, amount, "wire", **mark)
+        lag = b.rng.randint(2, round(24 + 48 * b.difficulty))
+        b.leg(
+            t0 + timedelta(hours=lag),
+            subject,
+            dst,
+            int(amount * b.rng.uniform(0.88, 0.99)),
+            "wire",
+            **mark,
+        )
+
+
 def _fixed(rule: AlertRule) -> Callable[[Builder], AlertRule]:
     return lambda b: rule
 
 
 PATTERNS: dict[AmlFamily, Pattern] = {
+    F.STRUCTURING: Pattern(
+        _fixed(AlertRule.CASH_NEAR_THRESHOLD),
+        _structuring_subject,
+        _structuring,
+        ("Savings I kept at home.", ()),
+    ),
+    F.MULE_RING: Pattern(
+        _mule_rule,
+        _mule_subject,
+        _mule_ring,
+        ("A friend asked me to help move money for a business.", ()),
+    ),
+    F.RAPID_MOVEMENT: Pattern(
+        _fixed(AlertRule.PASS_THROUGH),
+        _rapid_subject,
+        _rapid,
+        ("Payments for consulting work, passed on to my partners.", ()),
+    ),
     F.CASH_BUSINESS: Pattern(
         _fixed(AlertRule.CASH_NEAR_THRESHOLD),
         _cash_business_subject,
