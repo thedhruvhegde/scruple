@@ -119,6 +119,13 @@ class Settings(BaseModel):
     otel_service_name: str = Field(default="scruple-engine", min_length=1, max_length=128)
     # Readiness (scruple.api.health): how long a passing audit-chain check is reused.
     ready_audit_ttl_seconds: float = Field(default=30, ge=0, le=86_400)
+    # Security headers (scruple.api.security_headers).
+    tls_terminated: bool = Field(
+        default=False,
+        description="the API is reached over HTTPS (TLS ends here or at a proxy in front): "
+        "send Strict-Transport-Security",
+    )
+    hsts_max_age_seconds: int = Field(default=31_536_000, ge=0, le=63_072_000)
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""
