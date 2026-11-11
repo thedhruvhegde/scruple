@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros.html" as m with context %}
+{% import "_listing.html" as l with context %}
 {% set section = "runs" %}
 {% block title %}runs and scores{% endblock %}
 {% block head %}
@@ -12,10 +13,11 @@
 <div class="sec" id="rules">
   <h2><span class="n">01 / RULE VERSIONS</span>Gate verdicts per version</h2>
   <p class="note">The verdict is the outcome of the last gate decision (shadow, canary, activation, assurance); a manual rollback is listed but is not a verdict. Open a version for its statistics.</p>
+  {{ l.filters(pg, path, {}, saved) }}
   <div class="tw"><table>
     <thead><tr><th>Version</th><th>Status</th><th>Verdict</th><th>Last decision</th><th class="r">Decisions</th><th>Owner / agent</th><th>Content</th></tr></thead>
     <tbody>
-    {% for row in rows %}
+    {% for row in pg.items %}
       <tr>
         <td class="m"><a href="{{ P }}/rules/{{ row.rv.rule_id }}/versions/{{ row.rv.version }}">{{ row.rv.ref }}</a></td>
         <td>{{ m.status(row.rv.status) }}</td>
@@ -26,10 +28,11 @@
         <td class="m dim">{{ row.rv.content_hash | short }}</td>
       </tr>
     {% else %}
-      <tr><td colspan="7" class="dim">No rule versions yet. Propose one with <code>scruple propose</code>.</td></tr>
+      <tr><td colspan="7" class="dim">{% if pg.filter.active %}No rule versions match this filter.{% else %}No rule versions yet. Propose one with <code>scruple propose</code>.{% endif %}</td></tr>
     {% endfor %}
     </tbody>
   </table></div>
+  {{ l.pager(pg, path) }}
 </div>
 
 <div class="sec" id="agents">
@@ -56,6 +59,7 @@
 
 <div class="sec" id="decisions">
   <h2><span class="n">03 / DECISIONS</span>Latest decisions</h2>
+  <p class="note">The twelve newest. <a href="{{ P }}/runs">Search and page through every gate run</a>.</p>
   <div class="tw"><table class="stack">
     <thead><tr><th>Decision</th><th>Version</th><th>Stage</th><th>Outcome</th><th>Summary</th><th>Actor</th><th>When</th></tr></thead>
     <tbody>

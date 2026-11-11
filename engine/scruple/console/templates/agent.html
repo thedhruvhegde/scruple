@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros.html" as m with context %}
+{% import "_listing.html" as l with context %}
 {% set section = "runs" %}
 {% block title %}{{ run.name }}{% endblock %}
 {% block head %}
@@ -12,9 +13,10 @@
 <div class="sec">
   <h2><span class="n">01 / EPISODES</span>Cases this version handled</h2>
   <p class="note">The case type is the generator's hidden family, revealed only after the episode closed. Correct: the cardholder ended with exactly what the merchant truly owed.</p>
+  {{ l.filters(pg, path, {}, saved, run.name) }}
   <div class="tw"><table class="stack">
     <thead><tr><th>Episode</th><th>Case</th><th>Case type</th><th>Network / code</th><th>Action</th><th>Resolution</th><th class="r">Cost</th><th>Correct</th><th>Gate</th><th class="r">Reward</th><th>Failed checks</th></tr></thead>
-    <tbody>{% for r in rows %}
+    <tbody>{% for r in pg.items %}
       <tr>
         <td data-label="Episode" class="m"><a href="{{ P }}/agents/{{ run.name }}/episodes/{{ r.episode_id }}">{{ r.episode_id }}</a></td>
         <td data-label="Case" class="m">{{ r.case_id }}</td><td data-label="Case type" class="m">{{ r.family }}</td><td data-label="Network / code" class="m">{{ r.network }} {{ r.reason_code }}</td>
@@ -22,8 +24,9 @@
         <td data-label="Correct">{{ m.yes(r.correct, "yes", "no") }}</td><td data-label="Gate">{{ m.yes(r.gate) }}</td><td data-label="Reward" class="m r">{{ r.reward | num(3) }}</td>
         <td data-label="Failed checks" class="k wrap">{{ r.failed | join(", ") if r.failed else "none" }}</td>
       </tr>
-    {% else %}<tr><td colspan="11" class="dim">No closed episodes.</td></tr>{% endfor %}</tbody>
+    {% else %}<tr><td colspan="11" class="dim">{% if pg.filter.active %}No episodes match this filter.{% else %}No closed episodes.{% endif %}</td></tr>{% endfor %}</tbody>
   </table></div>
+  {{ l.pager(pg, path) }}
   {% if others %}<p class="actions">{% for o in others %}<a class="btn" href="{{ P }}/diff/agents?a={{ run.name }}&amp;b={{ o }}">Diff against {{ o }}</a>{% endfor %}</p>{% endif %}
 </div>
 {% endblock %}

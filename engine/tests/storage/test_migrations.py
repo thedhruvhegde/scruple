@@ -101,7 +101,7 @@ def test_upgrade_head_on_empty_db_matches_the_backend(postgres_url: str, empty_d
         row = c.execute("SELECT version_num FROM alembic_version").fetchone()
     assert row is not None and row[0] == m.head()
     migrated = _catalog(empty_db)
-    assert len(migrated["triggers"]) == 38 and len(migrated["functions"]) == 4
+    assert len(migrated["triggers"]) == 41 and len(migrated["functions"]) == 4
 
     name = f"m_{uuid.uuid4().hex[:16]}"
     with psycopg.connect(postgres_url, autocommit=True) as c:
@@ -150,6 +150,7 @@ def test_upgrade_is_idempotent_and_downgrade_removes_everything(empty_db: str) -
         "retention_purges",
         "rate_limit_buckets",
         "imported_shadow_keys",
+        "console_filter_events",
     }
     m.downgrade(empty_db)
     assert _tables(empty_db) == {"alembic_version"}

@@ -297,7 +297,11 @@ def test_every_console_route_declares_a_permission(gate: AgentGate) -> None:
             continue
         assert len(perms) == 1, route.path
         seen[f"{sorted(route.methods or ())[0]} {route.path}"] = perms[0]
-    assert all(p == "approve" for k, p in seen.items() if k.startswith("POST"))
+    # Every POST that changes the gate needs approve; the tenant's shared saved
+    # filters are tenant configuration, so curating them needs admin.
+    filters = {"POST /console/filters", "POST /console/filters/{filter_id}/delete"}
+    assert all(p == "approve" for k, p in seen.items() if k.startswith("POST") and k not in filters)
+    assert {seen[k] for k in filters} == {"admin"}
     downloads = [k for k in seen if k.endswith((".json", ".pdf", ".md"))]
     assert downloads and all(seen[k] == "export" for k in downloads)
     reads = [k for k in seen if k.startswith("GET") and k not in downloads]

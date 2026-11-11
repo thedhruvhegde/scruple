@@ -20,6 +20,7 @@ replay set for rule diffs, default 4242 / 1000).
 | Path | Roadmap | What it shows |
 |---|---|---|
 | `/console/` | 181 | rule versions with status and gate verdict; agent versions with gate pass rate, correct rate, mean reward, mean ledger cost and hard failures; the latest decisions |
+| `/console/runs` | | every gate decision of the tenant (shadow, canary, activation, rollback, assurance), newest first, searchable and paged |
 | `/console/rules/{id}/versions/{v}` | 181 | the rule, every decision with its checks; shadow statistics (interval, arms, per case-type slices); e-values per case type (regression, running max, improvement, confidence sequence bounds, e-threshold, alpha share, required n, the plan's total); canary metrics and the sequential canary (harm and benefit e-values, confidence sequences); the ramp; every audit event for the version; evidence pack downloads |
 | `/console/agents/{name}` | 181 | every episode of one agent version: case, hidden case type, action, resolution, cost, correct, gate, reward, failed checks |
 | `/console/agents/{name}/episodes/{ep}` | 182 | the case viewer, rendered from the `EpisodeRecord`: case fields and the hidden truth; the timeline (stage transitions, state changes with response deadlines, clock moves, incidents); ledger postings per journal entry with a balance check; evidence documents (kind, dates, source, field names, content hash, changed, forged); the agent's tool calls, explanation and claims; every verifier check with score, weight, explanation and evidence links to the trace event, journal entry or document; the full hash-chained trace with a chain check |
@@ -34,6 +35,27 @@ Downloads: `.../versions/{v}/evidence.json` and `.pdf` (the CI evidence pack),
 The rule diff uses its own replay seed, not the gate's held-out seed, so the cases a
 reviewer browses are never the cases the gate decides on. Pages print seed
 commitments, never the held-out or canary seeds.
+
+## Search, filters and pages
+
+Rule versions (`/console/`), gate runs (`/console/runs`), cases (`/console/agents/{name}`)
+and the approvals inbox take the same query parameters (`scruple/console/listing.py`):
+`q` (up to 100 characters; every word must appear, case-insensitive), one value per
+facet (`status`, `verdict`; `stage`, `outcome`; `family`, `action`, `gate`, `correct`;
+`event`), `page` and `per` (10, 25, 50 or 100). Filtering runs on the server over the
+caller's tenant only; facet values must match `^[A-Za-z0-9_.@:-]{0,64}$`, anything
+else is a 422. On the approvals inbox, `q` also narrows the waiting versions; the
+event facet and the pages apply to the history.
+
+Saved filters are a name for a filter's canonical query string (`q` and facets only),
+stored per tenant in the append-only `console_filter_events` table (alembic 0010):
+saving appends, saving a name again replaces it (latest wins), deleting appends a
+tombstone. They are shared by everyone in the tenant, so saving and deleting need the
+console `admin` permission (engine `admin`, the `risk_admin` role); only whoever saved
+a filter may delete it. At most 50 per list. A stored query string is parsed and
+re-canonicalised before it is linked. Search terms and filter names are printed
+escaped; tests send `<script>`, `<img onerror>`, quote-breaking and `</textarea>`
+terms to every list and check none reaches a page unescaped.
 
 ## Approvals
 
@@ -59,10 +81,11 @@ Every route declares what it needs with one dependency from
 `scruple/console/permissions.py`:
 
 ```python
-principal: Annotated[Principal, requires("read")]  # "read" | "approve" | "export"
+principal: Annotated[Principal, requires("read")]  # "read" | "approve" | "export" | "admin"
 ```
 
-GET pages need `read`, downloads `export`, POSTs `approve`. Static files are
+GET pages need `read`, downloads `export`, approval POSTs `approve`, saved-filter
+POSTs `admin`. Static files are
 `public()`. `requires` wraps `scruple.auth.require`, so the console uses the same
 authentication as the JSON API (API key, OIDC bearer token, or the development-only
 `X-Actor` trust) and the same fail-closed route guard; no credentials answers 401, a
@@ -73,6 +96,7 @@ missing permission 403. The console permissions map onto the engine's:
 | `read` | `read` | every page |
 | `approve` | `approve` | approve, reject, request approval |
 | `export` | `read` | evidence packs and report downloads: the same data the read-only JSON API returns, so an auditor can take evidence away |
+| `admin` | `admin` | save and delete the tenant's shared saved filters |
 
 Who acts is always the authenticated subject: the forms have no name field, and a
 posted `actor` field is refused (422). Each caller sees only their own tenant's gate
@@ -114,5 +138,5 @@ scrolls sideways.
 
 ## Not built
 
-Pagination (an agent version or a diff shows every case; fine for hundreds), live
-updates, and real authentication (see Permissions).
+Pagination of diffs (a diff shows every changed case; fine for hundreds), live
+updates, and per-person (private) saved filters.
