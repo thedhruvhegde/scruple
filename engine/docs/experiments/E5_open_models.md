@@ -357,3 +357,68 @@ The verifiers flagged every instance. The comparison mixes model and harness
 (fresh conversation per episode and no scorecard feedback, against one
 conversation with feedback), and n is 4-12 per model. It is a measurement of
 these runs, not a ranking of model families.
+
+## Session 2 addendum (written before any session-2 run)
+
+Written on 2026-11-11 at about 17:00 UTC, before any request of the second
+session. Nothing in Hypotheses, Tasks or the analysis code changes.
+
+### What session 2 runs
+
+- (a) qwen/qwen3.8-27b, seeds 5005-5012.
+- (a) qwen seed 5004 again. Its lapse came only from provider limits (three
+  HTTP 413s, then the daily cap; see Results), never from the model. The lapsed
+  record is kept under `episodes/qwen3.8-27b/lapsed/`, and the replay is the
+  scored one. The first-session tables above stay as they were.
+- (b) all three models: the rest of `regime-2015` (to n=100), then
+  `outcome-2015` (n=100), then `routing-2025` (n=50), on the item ids of
+  `results/real/models/*.prompts.jsonl`.
+
+### Deviation 4: two provider-limit rules in the drivers
+
+Both are in `results/real/open_models/harness_transport.py`, tested in
+`tests/test_e5_harness_transport.py`, and apply to every model from this session
+on.
+
+- **HTTP 413.** Groq refuses a request whose input alone is over the model's
+  per-minute input limit (7,000 tokens for qwen). On a 413 the driver replaces
+  the oldest tool output still in full with a fixed note ("elided by the harness
+  ... call the tool again to see it") and resends, one output at a time, until the
+  request fits. The elision holds for the rest of the episode. The system prompt,
+  the first observation, the model's own messages and the newest 4 messages are
+  never touched.
+  - Rule only acts on a 413. No first-session episode of gpt-oss-120b or
+    gpt-oss-20b ever got one, so those runs are what this rule would have
+    produced, and they are not replayed.
+  - It changes what qwen sees late in a long episode. The count of elisions per
+    episode is logged in `harness.jsonl` and reported.
+- **Daily quota.** Groq's per-day token cap refills continuously, and its 429
+  says how long until the request fits. The driver now waits that long (if under
+  an hour) and resends the same request; the model sees nothing. A longer or
+  unstated wait stops the driver with the item or seed unrecorded, to be played
+  from the start later. This is the pre-registered rule ("resumes when the quota
+  allows"), done without spending an attempt on it.
+- **Order.** Each model has its own quota, so the three models run side by side,
+  each in the pre-registered order ((a), then regime, outcome, routing). No model
+  uses another's budget.
+
+### E5b: OpenRouter free models (exploratory, not pre-registered in E5)
+
+Not part of any E5 hypothesis test. Reported in its own table.
+
+- Account limits seen at `/api/v1/key` before the run: free tier, $5 cap, $0
+  spent, **50 free-model requests per day** (`free_model_daily_requests`). Only
+  model ids ending in `:free` are used.
+- Models (both list `tools` in `supported_parameters`):
+  - nvidia/nemotron-3-ultra-550b-a55b:free (finished an unscored episode in the
+    E5 smoke test);
+  - google/gemma-4-31b-it:free. If its first scored episode lapses on upstream
+    429s, google/gemma-4-26b-a4b-it:free replaces it from that seed on, and the
+    swap is reported.
+- Task: dispute episodes only, zero-shot, the E5 loop and seeds, played in the
+  order 5001 (model 1), 5001 (model 2), 5002 (model 1), ... until the daily
+  request cap stops it. An episode is about 6-20 requests, so about 2-4 seeds per
+  model fit in a day. What ran is reported by count; nothing else is extrapolated.
+- No CFPB items on OpenRouter: the request cap does not cover them next to the
+  episodes.
+- Scored exactly as (a), by `analyse_e5.py`.
