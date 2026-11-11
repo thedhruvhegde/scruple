@@ -225,11 +225,12 @@ def _close(kind: str) -> Command:
 
 def _dishonor(k: int) -> Command:
     def g(s: State, p: Params, i: Inputs, ops: Any) -> Any:
-        # the engine does not wait for a retry in flight here (see docs/FORMAL.md)
+        # the amount must still be open after dishonors and a retry in flight
         return ops.and_(
             s[f"st_{k}"] == SETTLED,
             s[f"d_{k}"] == D_NONE,
             s["rcv"] >= p["a"],
+            s["rcv"] - in_flight(s, p, ops) >= p["a"],
         )
 
     def u(s: State, p: Params, i: Inputs, ops: Any) -> State:

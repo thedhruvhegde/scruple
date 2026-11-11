@@ -442,11 +442,19 @@ class AchEngine:
             out += ["accept", "write_off"]
             if open_ >= self.case.amount_minor and self.settled_returns():
                 out.append("reinitiate")
-        if open_ >= self.case.amount_minor and any(
+        if open_ - self.in_flight() >= self.case.amount_minor and any(
             r.dishonor_code is None for r in self.settled_returns()
         ):
             out.append("dishonor")
         return tuple(out)
+
+    def in_flight(self) -> int:
+        """Receivable already on its way back: dishonors submitted but not settled, and
+        a retry not settled. A dishonor must find the returned amount still open after
+        them, or a dishonor and a retry (or two dishonors) collect the entry twice."""
+        st = self._st
+        n = sum(1 for r in st.returns.values() if r.dishonor_code and not r.dishonor_settled)
+        return self.case.amount_minor * (n + (st.retry is not None))
 
     def view_returns(self) -> list[dict[str, object]]:
         return [
@@ -640,6 +648,8 @@ class AchEngine:
                     return refuse(ActionError.ALREADY_DISHONORED, action.return_id)
                 if open_ < a:
                     return refuse(ActionError.NOTHING_OPEN, "the returned amount is not receivable")
+                if open_ - self.in_flight() < a:
+                    return refuse(ActionError.PENDING, "; ".join(busy))
                 self._emit(
                     ActionApplied(
                         on=now,
