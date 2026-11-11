@@ -16,7 +16,7 @@ train on it. evaluate on it. ship through it.
 
 ## the engine
 
-- `engine/`: simulator, verifiers, statistics, formal checks, gate, auth, deploy, integrations, pilot kit. 7,414 tests. [engine/README.md](engine/README.md).
+- `engine/`: simulator, verifiers, statistics, formal checks, gate, auth, deploy, integrations, pilot kit. 8,361 tests. [engine/README.md](engine/README.md).
 - real models on real cfpb complaints: [engine/docs/results/REAL_MODELS.md](engine/docs/results/REAL_MODELS.md).
 - claude haiku, sonnet and opus working simulated disputes: [engine/docs/results/MODEL_EPISODES.md](engine/docs/results/MODEL_EPISODES.md).
 - pre-registered experiments, e1 to e5, failures published: [engine/docs/experiments](engine/docs/experiments).
