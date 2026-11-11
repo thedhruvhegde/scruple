@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
 <title>Scruple paper</title>
 <meta name="description" content="Verifiers that do not trust the agent: anytime-valid release gates and hacking bounds for AI agents that move money. By Dhruv Hegde. Proofs, experiments and the failures.">
 <link rel="canonical" href="https://thedhruvhegde.github.io/scruple/paper/">
@@ -18,11 +19,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
-<script>
-  (function () {
-    try { var t = localStorage.getItem("scruple-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
-  })();
-</script>
 <style>
 /* Same tokens, bands and type scale as the home page (index.html) and results/. */
 :root {
@@ -33,20 +29,12 @@
   --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   /* screen ink; --c-mute is the night band's muted tone, for secondary text on screens */
   --c-fg: #E6E3D6; --c-dim: #55617D; --c-mute: #A1ABC0; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
+  /* one theme: the operating system's dark setting never changes the page */
+  color-scheme: only light;
 }
 .band-pine  { --bg: #12301F; --panel: #173A28; --fg: #EDEAE1; --muted: #A8BCB0; --rule: #255040; --rule-strong: #4D7464; --accent: #86D0AA; --on-accent: #12301F; --brass: #E6C77E; --block: #F2906B; }
 .band-night { --bg: #0E1626; --panel: #142038; --fg: #E6E3D6; --muted: #A1ABC0; --rule: #1F2B44; --rule-strong: #3F4E6E; --accent: #7FD0A8; --on-accent: #0E1626; --brass: #E8C46A; --block: #F07E58; }
 .band-sand  { --bg: #E3D8BF; --panel: #D8CBAD; --fg: #17140C; --muted: #554D3E; --rule: #CBBF9F; --rule-strong: #968B71; --accent: #1D4A3A; --on-accent: #E3D8BF; --brass: #6E5216; --block: #9A3317; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
-  :root:not([data-theme="light"]) .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
-  :root:not([data-theme="light"]) .band-night { --bg: #0A101C; --panel: #0F172A; }
-  :root:not([data-theme="light"]) .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
-}
-:root[data-theme="dark"] { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
-:root[data-theme="dark"] .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
-:root[data-theme="dark"] .band-night { --bg: #0A101C; --panel: #0F172A; }
-:root[data-theme="dark"] .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
 
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
 html { background: var(--bg); }
@@ -60,48 +48,79 @@ a { color: inherit; }
 .page { max-width: 1240px; margin: 0 auto; }
 
 /* ---------- bar ----------
-   Shared by every page: copy this block with nav.js. ul.nav-sec holds in-page anchors,
-   ul.nav-pg holds the pages (arrow suffix, aria-current="page" on the page you are on). */
-.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 24px; height: 60px; position: relative; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
+   Shared by every page: copy this block, the header markup and nav.js. ul.nav-sec holds in-page
+   anchors (numbered by css; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"
+   on the page you are on). The header is 60px in the flow and sticks at -12px, so once you scroll
+   it shows 48px: a compact bar with no layout shift. Its bottom edge is a character ruler that
+   fills with reading progress (span.bar-rule, set by nav.js; a plain ruler without script). */
+.bar { position: sticky; top: calc(env(safe-area-inset-top, 0px) - 12px); z-index: 30; height: 60px; padding-top: 12px;
+  --bar-ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; --bar-fill: "===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================="; }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 20px; height: 36px; position: relative; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; padding: 4px 6px 4px 0; }
 .brand svg { width: 24px; height: 24px; display: block; }
 .brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.brand:focus-visible { outline: none; background: var(--fg); color: var(--bg); }
+.crumb { display: none; }
 .nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
-.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 2px; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
+.nav a { display: block; text-decoration: none; color: var(--muted); padding: 6px 4px; white-space: pre; }
+/* every section link reserves one character on each side, so the [ ] of the current one never moves anything */
+.nav-sec { counter-reset: sec; }
+.nav-sec li { counter-increment: sec; }
+.nav-sec a::before { content: " " counter(sec, decimal-leading-zero) " "; content: " " counter(sec, decimal-leading-zero) " " / ""; color: var(--rule-strong); }
+.nav-sec a::after { content: " "; content: " " / ""; }
+.nav-sec a[aria-current] { color: var(--fg); }
+.nav-sec a[aria-current]::before { content: "[" counter(sec, decimal-leading-zero) " "; content: "[" counter(sec, decimal-leading-zero) " " / ""; color: inherit; }
+.nav-sec a[aria-current]::after { content: "]"; content: "]" / ""; }
 .nav-pg { margin-left: auto !important; }
-.nav-pg::before { content: "|"; color: var(--rule-strong); padding: 0 8px 0 0; }
-.nav a { position: relative; display: block; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
-.nav-pg a { color: var(--fg); }
+.nav-pg::before { content: "::"; content: "::" / ""; color: var(--rule-strong); padding: 0 10px 0 6px; }
+.nav-pg a { color: var(--fg); padding: 6px 8px; }
 .nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
 .nav-pg a[aria-current="page"] { font-weight: 600; }
-.nav-sec a[aria-current] { color: var(--fg); }
-.nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { position: absolute; top: 6px; }
-.nav-sec a[aria-current]::before { content: "["; left: 1px; }
-.nav-sec a[aria-current]::after { content: "]"; right: 1px; }
-.nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-.toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
-.toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
-.toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
-.toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+.nav-pg a[aria-current="page"]::before { content: "["; content: "[" / ""; }
+.nav-pg a[aria-current="page"]::after { content: "]"; content: "]" / ""; }
+.nav a:hover, .nav a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.nav a:hover::before, .nav a:focus-visible::before { color: inherit; }
+/* the bottom edge: +----:----+ in rule ink, overdrawn by ====> as you read, then the keys and how far */
+.bar-rule { position: absolute; bottom: 0; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); height: 12px; overflow: hidden; white-space: nowrap; pointer-events: none;
+  font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.bar-rule::before { content: var(--bar-ruler); content: var(--bar-ruler) / ""; }
+.bar-rule i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; overflow: hidden; background: var(--bg); color: var(--fg); font-style: normal; }
+.bar-rule i::before { content: var(--bar-fill); content: var(--bar-fill) / ""; }
+.bar-rule i::after { content: ">"; content: ">" / ""; position: absolute; right: 0; top: 0; background: var(--bg); color: var(--accent); }
+.bar-rule b { position: absolute; right: 0; top: 0; background: var(--bg); color: var(--muted); font-weight: 400; padding-left: 1ch; white-space: pre; }
 .skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
 .skip:focus { transform: none; outline: none; }
 main:focus { outline: none; }
 .menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
-.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); outline: none; }
-/* under 1100px the links fold into a [ MENU ] panel that drops over the page, so nothing reflows */
+.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--fg); color: var(--bg); outline: none; }
+/* under 1100px: scruple / 02 proof, and the links fold into [ MENU ], a small dark terminal list
+   that drops over the page under the button, so nothing reflows */
 @media (max-width: 1100px) {
-  .bar-in { height: 52px; gap: 12px; }
+  .bar { height: 56px; padding-top: 8px; top: calc(env(safe-area-inset-top, 0px) - 8px); }
+  .bar-in { gap: 10px; }
+  .crumb { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
+  .crumb i, .crumb b { font: inherit; }
   .menu { display: block; margin-left: auto; }
-  .nav { display: none; position: absolute; top: calc(100% + 1px); left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
-    flex-direction: column; align-items: stretch; gap: 10px; background: var(--bg); border-bottom: 1px solid var(--rule-strong); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); font-size: 13px; }
+  .nav { display: none; position: absolute; top: calc(100% + 13px); right: 0; width: min(340px, 100%); flex-direction: column; align-items: stretch; gap: 14px;
+    background: var(--scr-bg); border: 1px solid var(--scr-edge); color: var(--c-fg); padding: 14px 14px 16px; font-size: 13px; text-transform: lowercase; }
+  .nav::before { content: "$ ls scruple/"; content: "$ ls scruple/" / ""; color: var(--c-pine); }
   .bar.open .nav { display: flex; }
-  .nav ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 12px; }
-  .nav-pg { margin-left: 0 !important; padding-top: 10px !important; border-top: 1px dashed var(--rule-strong) !important; }
-  .nav-pg::before { display: none; }
-  .nav a { padding: 10px; width: fit-content; }
-  .nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { top: 10px; }
+  .nav ul { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-dim); padding: 0 0 4px 0; }
+  .nav a, .nav-pg a { color: var(--c-fg); padding: 9px 4px; }
+  .nav-sec a::before { color: var(--c-dim); }
+  .nav-sec a[aria-current] { color: var(--c-pine); }
+  .nav-sec a[aria-current]::before { content: ">" counter(sec, decimal-leading-zero) " "; content: ">" counter(sec, decimal-leading-zero) " " / ""; }
+  .nav-sec a[aria-current]::after { content: " <"; content: " <" / ""; }
+  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; }
+  .nav-pg::before { padding: 0 0 4px 0; }
+  .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
+  .nav-pg a { padding-left: 4px; }
+  .nav-pg a[aria-current="page"] { color: var(--c-brass); }
+  .nav a:hover, .nav a:focus-visible { background: var(--c-fg); color: var(--scr-bg); }
 }
+@media (max-width: 520px) { .crumb.in-sec[data-page]:not([data-page=""]) i { display: none; } .crumb.in-sec b { padding-left: 0; } }
 @media (max-width: 380px) { .brand span { display: none; } }
 
 /* ---------- rows ---------- */
@@ -249,6 +268,49 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 .prose h3 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 15px; font-weight: 600; margin-top: 18px; }
 .prose p b { font-weight: 600; }
 .verdict { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+
+/* ---------- v3: the paper set in characters ---------- */
+/* title block: rules and a running head, like the top of a typeset preprint */
+.pp { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; line-height: 1.6; color: var(--muted); display: grid; }
+.pp .rule { white-space: nowrap; overflow: hidden; color: var(--rule-strong); }
+.pp .run { display: flex; justify-content: space-between; gap: 4px 24px; flex-wrap: wrap; }
+.pp .run b { color: var(--fg); font-weight: 600; }
+/* contents of the PDF with dotted leaders; each line opens the PDF at its page */
+.abs-row { display: grid; grid-template-columns: minmax(0, 68ch) minmax(0, 400px); justify-content: space-between; gap: 40px 56px; align-items: start; }
+.abs-row > * { min-width: 0; }
+@media (max-width: 1100px) { .abs-row { grid-template-columns: minmax(0, 1fr); } }
+.toc { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.5; }
+.toc-h { display: flex; justify-content: space-between; color: var(--muted); padding: 0 6px 8px; border-bottom: 1px solid var(--rule-strong); }
+.toc ol { list-style: none; margin: 0; padding: 6px 0 0; }
+.toc a { display: flex; gap: 0; padding: 3px 6px; text-decoration: none; color: var(--fg); }
+.toc .no { flex: none; width: 4ch; color: var(--muted); }
+.toc .t { flex: none; max-width: calc(100% - 9ch); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc .lead { flex: 1; min-width: 2ch; overflow: hidden; white-space: nowrap; color: var(--rule-strong); }
+.toc .lead::before { content: " ................................................................................................"; }
+.toc .pg { flex: none; width: 3ch; text-align: right; }
+.toc a:hover, .toc a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.toc a:hover .no, .toc a:hover .lead, .toc a:focus-visible .no, .toc a:focus-visible .lead { color: var(--bg); }
+/* theorem boxes, framed in characters by ascii.js; the label sits on the top rule,
+   the page in the PDF and an end mark on the bottom rule */
+.thm.boxed { border-top: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 540px), 1fr)); gap: 20px 28px; }
+.thm.boxed li { position: relative; display: block; padding: 28px 3ch 30px; border-bottom: 0; }
+.thm.boxed .frame { position: absolute; inset: 0; margin: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 16px; color: var(--rule-strong); white-space: pre; overflow: hidden; pointer-events: none; }
+.thm.boxed .frame + .frame { top: auto; height: 16px; }
+.thm.boxed li b, .thm.boxed li .lab, .thm.boxed .qed { position: absolute; z-index: 1; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 16px; margin: 0; padding: 0 1ch; background: var(--bg); }
+.thm.boxed li b { top: 0; left: 3ch; }
+.thm.boxed li .lab { top: 0; right: 3ch; }
+.thm.boxed .qed { bottom: 0; right: 3ch; color: var(--muted); text-decoration: none; }
+.thm.boxed .qed:hover, .thm.boxed .qed:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.thm .qed { display: block; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; color: var(--muted); }
+/* the bound drawn in characters (ascii.js reads the svg in section 04) */
+.chars { white-space: pre; overflow: hidden; color: var(--c-mute); line-height: 1.35; }
+.c-f { color: var(--c-fg); } .c-d { color: var(--c-mute); } .c-r { color: var(--c-dim); } .c-g { color: var(--c-pine); } .c-s { color: var(--c-sky); } .c-v { color: var(--c-verm); }
+.leg b { font-weight: 600; }
+/* the margin label, set sideways in the empty right margin on wide screens */
+.margin-label { display: none; }
+@media (min-width: 1400px) {
+  .margin-label { display: block; position: absolute; top: 96px; right: calc((100% - 1240px) / 2 - 64px); writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 22px; font-weight: 500; letter-spacing: 0.04em; color: var(--rule-strong); white-space: nowrap; pointer-events: none; }
+}
 </style>
 </head>
 <body><body>
@@ -268,25 +330,58 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="../" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+    <span class="crumb" data-page="paper" aria-hidden="true">/ paper</span>
     <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
       <ul class="nav-sec" aria-label="On this page"><li><a href="#abstract">Abstract</a></li><li><a href="#system">System</a></li><li><a href="#figures">Figures</a></li><li><a href="#new">Version 2</a></li><li><a href="#experiments">Experiments</a></li><li><a href="#sources">Sources</a></li></ul>
       <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="../results/">Results</a></li><li><a href="./" aria-current="page">Paper</a></li></ul>
     </nav>
-    <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
   </div>
+  <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>
 </header>
 
 <main id="top">
   <section class="band" id="abstract" aria-labelledby="top-h">
+    <p class="margin-label" aria-hidden="true">scruple preprint / nov 2026 / 31 pp</p>
     <div class="page sec">
+      <div class="pp" aria-hidden="true">
+        <span class="rule">================================================================================================================================================================================================================================================================================================================================================================================================================</span>
+        <div class="run"><span><b>scruple</b> / preprint</span><span>november 2026</span></div>
+        <div class="run"><span>16 sections, appendix A, 31 pages</span><span>proofs in full</span></div>
+        <span class="rule">----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+      </div>
       <h1 class="big" id="top-h"><span class="n">PAPER / PREPRINT, NOVEMBER 2026</span>Verifiers That Do Not Trust the Agent: Anytime-Valid Release Gates and Hacking Bounds for AI Agents That Move Money</h1>
       <p class="meta-line">Dhruv Hegde, Scruple. Synthetic numbers come from the scruple simulator. Real numbers come from public CFPB complaints or from real model behaviour.</p>
-      <div class="abs">
-        <p>An AI agent that handles card disputes moves money. It decides when to refund, when to fight, and with what evidence. Changes to such an agent are usually judged by win rates and by the agent's own reports. Both can be gamed.</p>
-        <p>Scruple is a release gate whose verifiers never credit the agent's claims. Cost is recomputed from double-entry ledger postings. Every action is checked against a hash-chained trace the environment writes. The statistics stay valid however often you look and whenever you stop.</p>
-        <p>We prove how much a hacked change can gain and still pass, for agents that adapt and partly see where audits fall. We give the audit rate at which hacking stops paying when the verifier errs both ways, and state what the combined promote decision guarantees.</p>
-        <p>Four pre-registered experiments on a frozen synthetic benchmark of 10,000 disputes: one passed narrowly, two failed their main hypothesis, one found no effect. Learners trained on the scorecard used no exploit; the same learners on a naive proxy found them. Real Claude models found bugs in the verifier.</p>
+      <div class="abs-row">
+        <div class="abs">
+          <p>An AI agent that handles card disputes moves money. It decides when to refund, when to fight, and with what evidence. Changes to such an agent are usually judged by win rates and by the agent's own reports. Both can be gamed.</p>
+          <p>Scruple is a release gate whose verifiers never credit the agent's claims. Cost is recomputed from double-entry ledger postings. Every action is checked against a hash-chained trace the environment writes. The statistics stay valid however often you look and whenever you stop.</p>
+          <p>We prove how much a hacked change can gain and still pass, for agents that adapt and partly see where audits fall. We give the audit rate at which hacking stops paying when the verifier errs both ways, and state what the combined promote decision guarantees.</p>
+          <p>Four pre-registered experiments on a frozen synthetic benchmark of 10,000 disputes: one passed narrowly, two failed their main hypothesis, one found no effect. Learners trained on the scorecard used no exploit; the same learners on a naive proxy found them. Real Claude models found bugs in the verifier.</p>
+        </div>
+        <nav class="toc" aria-label="Contents of the PDF">
+          <p class="toc-h">contents<span>page</span></p>
+          <ol>
+            <li><a href="scruple_paper.pdf#page=1"><span class="no">1</span><span class="t">Introduction</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>1</span></a></li>
+            <li><a href="scruple_paper.pdf#page=2"><span class="no">2</span><span class="t">Setting and notation</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>2</span></a></li>
+            <li><a href="scruple_paper.pdf#page=3"><span class="no">3</span><span class="t">Verifier design</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>3</span></a></li>
+            <li><a href="scruple_paper.pdf#page=4"><span class="no">4</span><span class="t">Anytime-valid paired test</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>4</span></a></li>
+            <li><a href="scruple_paper.pdf#page=7"><span class="no">5</span><span class="t">Rare case types</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>7</span></a></li>
+            <li><a href="scruple_paper.pdf#page=8"><span class="no">6</span><span class="t">Planning and the cap tax</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>8</span></a></li>
+            <li><a href="scruple_paper.pdf#page=9"><span class="no">7</span><span class="t">Variance-adaptive betting</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>9</span></a></li>
+            <li><a href="scruple_paper.pdf#page=12"><span class="no">8</span><span class="t">Asymmetric costs</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>12</span></a></li>
+            <li><a href="scruple_paper.pdf#page=12"><span class="no">9</span><span class="t">What promote guarantees</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>12</span></a></li>
+            <li><a href="scruple_paper.pdf#page=13"><span class="no">10</span><span class="t">Hacking-gap bounds</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>13</span></a></li>
+            <li><a href="scruple_paper.pdf#page=16"><span class="no">11</span><span class="t">Experiments</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>16</span></a></li>
+            <li><a href="scruple_paper.pdf#page=21"><span class="no">12</span><span class="t">Agent types</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>21</span></a></li>
+            <li><a href="scruple_paper.pdf#page=22"><span class="no">13</span><span class="t">Real situations</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>22</span></a></li>
+            <li><a href="scruple_paper.pdf#page=24"><span class="no">14</span><span class="t">What broke, what we fixed</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>24</span></a></li>
+            <li><a href="scruple_paper.pdf#page=26"><span class="no">15</span><span class="t">Limitations</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>26</span></a></li>
+            <li><a href="scruple_paper.pdf#page=26"><span class="no">16</span><span class="t">Related work</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>26</span></a></li>
+            <li><a href="scruple_paper.pdf#page=27"><span class="no"></span><span class="t">References</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>27</span></a></li>
+            <li><a href="scruple_paper.pdf#page=30"><span class="no">A</span><span class="t">Reproducibility</span><span class="lead" aria-hidden="true"></span><span class="pg"><span class="sr">page </span>30</span></a></li>
+          </ol>
+        </nav>
       </div>
       <div class="cta">
         <a class="btn solid" href="scruple_paper.pdf">Read the PDF</a>
@@ -1373,14 +1468,16 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <div class="page sec">
       <h2 id="thm-h"><span class="n">06 / NEW RESULTS</span>Each one proved in full in the PDF.</h2>
       <ul class="thm">
-        <li><b>Thm 10.3</b><span>If every hacked case is flagged with probability at least rho, given all the agent knew, an accepted change has a gap of at least gamma with probability at most <span class="f">(1 - rho)^ceil(n gamma / eps)</span>, and an expected accepted gap of at most <span class="f">eps / (n e ln(1/(1 - rho)))</span>. No independence needed.<span class="lab">adaptation</span></span></li>
-        <li><b>Cor 10.5</b><span>If the agent's signal has a likelihood ratio of at least l, then <span class="f">rho = (1 - beta) q l / (q l + 1 - q)</span>. An agent that can see the audits defeats any spot check.<span class="lab">adaptation</span></span></li>
-        <li><b>Thm 10.6</b><span>With a verifier that misses a share beta of hacks and flags a share phi of honest cases, hacking stops paying exactly at <span class="f">q* = g / ((1 - beta)(K + g) - phi K)</span>.<span class="lab">candidate novel, framing</span></span></li>
-        <li><b>Cor 10.7</b><span>No audit rate deters unless <span class="f">beta g &lt;= (1 - beta - phi) K</span>. False alarms raise the rate you need.<span class="lab">candidate novel, framing</span></span></li>
-        <li><b>Prop 7.1</b><span>Averaging bets over a grid of J sizes gives a valid test whose wealth is within <span class="f">log J</span> of the best fixed bet on every path.<span class="lab">adaptation</span></span></li>
-        <li><b>Prop 7.2</b><span>The best fixed-bet growth rate <span class="f">g*</span> of the observed costs equals a KL distance to a harmless law, so any valid test needs at least <span class="f">kl(1 - beta || alpha) / g*</span> cases.<span class="lab">adaptation</span></span></li>
-        <li><b>Thm 9.1</b><span>The promote decision carries the smallest level among the checks that cover a harm. False blocks add up. Harms no check covers carry no guarantee.<span class="lab">standard, applied</span></span></li>
+        <li><b>Thm 10.3</b><span>If every hacked case is flagged with probability at least rho, given all the agent knew, an accepted change has a gap of at least gamma with probability at most <span class="f">(1 - rho)^ceil(n gamma / eps)</span>, and an expected accepted gap of at most <span class="f">eps / (n e ln(1/(1 - rho)))</span>. No independence needed.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=14">p. 14 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Cor 10.5</b><span>If the agent's signal has a likelihood ratio of at least l, then <span class="f">rho = (1 - beta) q l / (q l + 1 - q)</span>. An agent that can see the audits defeats any spot check.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=15">p. 15 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Thm 10.6</b><span>With a verifier that misses a share beta of hacks and flags a share phi of honest cases, hacking stops paying exactly at <span class="f">q* = g / ((1 - beta)(K + g) - phi K)</span>.<span class="lab">candidate novel, framing</span></span><a class="qed" href="scruple_paper.pdf#page=15">p. 15 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Cor 10.7</b><span>No audit rate deters unless <span class="f">beta g &lt;= (1 - beta - phi) K</span>. False alarms raise the rate you need.<span class="lab">candidate novel, framing</span></span><a class="qed" href="scruple_paper.pdf#page=15">p. 15 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Prop 7.1</b><span>Averaging bets over a grid of J sizes gives a valid test whose wealth is within <span class="f">log J</span> of the best fixed bet on every path.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=9">p. 9 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Prop 7.2</b><span>The best fixed-bet growth rate <span class="f">g*</span> of the observed costs equals a KL distance to a harmless law, so any valid test needs at least <span class="f">kl(1 - beta || alpha) / g*</span> cases.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=10">p. 10 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Thm 9.1</b><span>The promote decision carries the smallest level among the checks that cover a harm. False blocks add up. Harms no check covers carry no guarantee.<span class="lab">standard, applied</span></span><a class="qed" href="scruple_paper.pdf#page=13">p. 13 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
       </ul>
+      <figure class="fig solo" style="margin:0"><div class="screen" data-head="theorem 10.3" data-grid="in characters"><pre class="term chars" id="bound-chars" role="img" aria-label="The hacking-gap bound against the audit rate, redrawn in characters from the hacking gap figure in section 04">loading</pre><p class="leg"><span><b class="c-g">-</b> bound, beta 0</span><span><b class="c-s">-</b> bound, beta 0.3</span><span><b class="c-v">-</b> bound, beta 0.3, leak l 0.2</span><span><b class="c-f">#</b> E2 batches, worst</span></p></div>
+        <figcaption class="fig-cap">The bound of Theorem 10.3, drawn in characters from the same points as the hacking gap figure in section 04: expected accepted gap on a log scale, against the audit rate q. <span class="src">paper Theorem 10.3 and Corollary 10.5, p. 14 and 15</span></figcaption></figure>
     </div>
   </section>
 
@@ -1482,20 +1579,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 </main>
 
 <script src="../nav.js" defer></script>
-<script>
-(() => {
-  "use strict";
-  const root = document.documentElement;
-  const $ = (s) => document.querySelector(s);
-  const darkMQ = matchMedia("(prefers-color-scheme: dark)");
-  const isDark = () => (root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : darkMQ.matches);
-  function syncTheme() { $("#t-light").setAttribute("aria-pressed", String(!isDark())); $("#t-dark").setAttribute("aria-pressed", String(isDark())); }
-  function setTheme(t) { root.setAttribute("data-theme", t); try { localStorage.setItem("scruple-theme", t); } catch (e) { /* unavailable */ } syncTheme(); }
-  $("#t-light").addEventListener("click", () => setTheme("light"));
-  $("#t-dark").addEventListener("click", () => setTheme("dark"));
-  darkMQ.addEventListener("change", syncTheme);
-  syncTheme();
-})();
-</script>
+<script src="ascii.js" defer></script>
 </body>
 </html>
