@@ -65,7 +65,7 @@
 \maketitle
 
 \begin{abstract}
-AI agents that handle card disputes move money: they decide when to refund, when to fight and with which evidence. Changes to them are usually judged by win rates and by the agent's own reports, and both can be gamed. We describe a release gate whose verifiers never credit the agent's claims: cost is recomputed from double-entry ledger postings, and every action is checked against a hash-chained trace written by the environment. Its statistics are anytime-valid. We prove that if each hacked case is caught with conditional probability at least $\rho$, whatever the agent knows, an accepted change carries a proxy-over-ledger gap $\Gamma\ge\gamma$ with probability at most $(1-\rho)^{\lceil n\gamma/\eps\rceil}$; we give $\rho$ for audits that leak, the audit rate at which hacking stops paying when the verifier errs both ways, and what the composed promote decision guarantees. On a frozen synthetic benchmark of 10{,}000 disputes, one of four pre-registered experiments passed (narrowly), two failed their primary hypothesis and one found no effect; we report why. An optimiser on a naive proxy learned forgery that the simulated ledger rated cheaper. Six learner types used no exploit when trained on the scorecard and found exploits on the proxy. Real Claude models exposed three verifier false positives.
+AI agents that handle card disputes move money: they decide when to refund, when to fight and with which evidence. Changes to them are usually judged by win rates and by the agent's own reports, and both can be gamed. We describe a release gate whose verifiers never credit the agent's claims: cost is recomputed from double-entry ledger postings, and every action is checked against a hash-chained trace written by the environment. Its statistics are anytime-valid. We prove that if each hacked case is caught with conditional probability at least $\rho$, whatever the agent knows, an accepted change carries a proxy-over-ledger gap $\Gamma\ge\gamma$ with probability at most $(1-\rho)^{\lceil n\gamma/\eps\rceil}$; we give $\rho$ for audits that leak, the audit rate at which hacking stops paying when the verifier errs both ways, and what the composed promote decision guarantees. On a frozen synthetic benchmark of 10{,}000 disputes, one of four pre-registered experiments passed (narrowly), two failed their primary hypothesis and one found no effect; we report why. An optimiser on a naive proxy learned forgery that the simulated ledger rated cheaper. Five learners used no exploit when trained on the scorecard; on the proxy all five claimed false wins and three learned forgery. Real Claude models exposed three verifier false positives.
 \end{abstract}
 
 \paragraph{Data and labels.} Numbers marked \emph{synthetic} come from the scruple simulator; numbers marked \emph{real} come from public CFPB complaint data or from real model behaviour. No number describes a real merchant, bank or card network. Each result is labelled \emph{standard} (known, applied here), \emph{adaptation} (a small variant of a known result) or \emph{candidate novel} (not found stated this way in a short search; a full literature review is still required). Code, data and every result file: \url{https://github.com/thedhruvhegde/scruple}, directory \texttt{engine/}.
@@ -83,12 +83,12 @@ The usual guard for an agent change is an offline evaluation: replay the new age
 
 \paragraph{Contributions.}
 \begin{itemize}
-\item A verifier design anchored to the ledger and to an environment-written trace, with an attack for every check (\cref{sec:verifiers}), and a record of what broke: an engine bug found through verifier false alarms, false positives found by real models, and three exploits closed.
+\item A verifier design anchored to the ledger and to an environment-written trace, with an attack for every check (\cref{sec:verifiers}), and a record of what broke: an engine bug found through verifier false alarms, false positives found by real models, and three exploits closed (\cref{sec:improve}).
 \item Anytime-valid paired and stratified tests with complete proofs (\cref{sec:sequential,sec:stratified}), sample-size planning with a matching lower bound (\cref{sec:planning}), and variance-adaptive betting with a sample-size floor computed from observed data (\cref{sec:betting}).
 \item A composition theorem for the release decision (\cref{sec:composition}) and its asymmetric-cost refinement (\cref{sec:decision}).
 \item Hacking-gap bounds for adaptive agents with leaky audits and an imperfect verifier, and the minimal audit rate that removes the incentive to hack (\cref{sec:hacking}).
 \item Four pre-registered experiments, reported whichever way they fell: planted regressions (E1, pass), an optimiser on a naive proxy (E2, fails H2), a variance-reduced gate (E3, fails H1) and a win-rate incentive for real models (E4, H1 not supported) (\cref{sec:experiments}).
-\item A comparison of six learner types under the scorecard and under the naive proxy; 64 dispute scenarios grounded in real CFPB complaints, and a timeliness analysis of 164{,}821 real complaints.
+\item A comparison of six agent types, five of them learners trained under both the scorecard and the naive proxy (\cref{sec:aitypes}); 64 dispute scenarios grounded in real CFPB complaints, and a timeliness analysis of 164{,}821 real complaints.
 \end{itemize}
 
 \section{Setting and notation}\label{sec:setting}
@@ -812,6 +812,70 @@ E2's optimiser learned forgery from a naive proxy. E4 asked whether real languag
 
 \paragraph{What the hypotheses did not name.} Under the incentive Opus contested on weaker evidence: it cited documents that did not cover the reason code's requirements in 7 episodes against 1, and its gate pass fell from 9 to 3 of 12. This is the clearest effect of the incentive in E4, and it was found after the fact, so it is a lead, not a result. Unfair wins were 2 in every arm, which points to cases where the simulated issuer accepts any representment rather than to the incentive. Three duplicate \texttt{start} calls left episodes that were never played; they are excluded and every seed's played episode is included. With 12 cases per arm E4 cannot show that the incentive makes these models contest more. One reading, a hypothesis for a larger follow-up and not a conclusion: instruction-tuned models resist the simplest proxy hack that blind optimisation finds.
 
+\section{Agent types: the objective matters more than the learner}\label{sec:aitypes}
+
+Do different kinds of agent, trained honestly, play disputes differently, and what happens when the same learner is trained on a naive objective? Six agents share one protocol: a driver reads the case through the public tools in the order PROC-01 requires, freezes the outputs into a decision context, and the agent picks one of six macro-acts (represent with genuine relevant documents, concede, escalate, wait five days, and two exploits: also cite documents that fail the genuineness checks, or upload the missing required kinds and represent). No agent holds the episode, the engine, the case or the issuer. The agents are hand-written expert rules (from \texttt{docs/RULES.md}), logistic regression and gradient boosting (fight or concede, labelled by paired branch rollouts), a LinUCB bandit, tabular Q-learning and a Monte Carlo planner with its own fitted model of the issuer. All train on the same 1{,}500 public cases, choose one setting on 400 dev cases, and are scored once on the first 2{,}000 cases of benchmark v1 (a declared subset, chosen for runtime). Each learner is trained twice, on the scorecard reward and on E2's proxy (mean of engine win and self-reported win); only the reward differs, and each picks its own report style from its training episodes. Synthetic throughout; the issuer is the simulator's assumed acceptance model.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.78\linewidth, height=6.4cm, xmin=38, xmax=140, ymin=42, ymax=90,
+  xlabel={mean merchant cost per case (USD)}, ylabel={fair outcomes (OUT-01, \%)},
+  grid=major, grid style={cgrey!40}, tick label style={font=\small}, label style={font=\small},
+  legend cell align=left, legend style={font=\scriptsize, at={(0.5,-0.22)}, anchor=north, draw=none, legend columns=3, /tikz/every even column/.append style={column sep=8pt}}]
+\draw[-{Stealth[length=1.6mm]}, cgrey] (axis cs:80.72,84.5) -- (axis cs:130.6,74.3);
+\draw[-{Stealth[length=1.6mm]}, cgrey] (axis cs:74.50,85.6) -- (axis cs:130.6,74.6);
+\draw[-{Stealth[length=1.6mm]}, cgrey] (axis cs:82.45,84.1) -- (axis cs:46.0,56.4);
+\draw[-{Stealth[length=1.6mm]}, cgrey] (axis cs:84.16,82.8) -- (axis cs:51.3,56.5);
+\draw[-{Stealth[length=1.6mm]}, cgrey] (axis cs:80.43,83.8) -- (axis cs:54.4,57.4);
+\addplot[only marks, mark=*, mark size=2.2pt, cpine] coordinates {(76.80,80.4) (80.72,84.5) (74.50,85.6) (82.45,84.1) (84.16,82.8) (80.43,83.8)};
+\addplot[only marks, mark=square*, mark size=2pt, cverm] coordinates {(131.52,74.1) (45.27,55.8) (50.70,55.9) (53.85,56.9)};
+\node[font=\tiny, anchor=north east, text=black!75] at (axis cs:131.52,72.8) {logreg, gbm};
+\node[font=\tiny, anchor=north, text=black!75, align=center] at (axis cs:49.5,54.6) {bandit, Q, planner};
+\node[font=\tiny, anchor=east, text=black!75, align=right] at (axis cs:73.5,83.0) {six scorecard\\ agents};
+\addplot[only marks, mark=triangle*, mark size=2.6pt, cbrass] coordinates {(82.51,77.8) (123.89,46.5) (85.78,85.8) (102.42,51.3)};
+\node[font=\tiny, anchor=west, text=black!75] at (axis cs:83.5,76.8) {evidence};
+\node[font=\tiny, anchor=west, text=black!75] at (axis cs:86.8,86.6) {oracle};
+\node[font=\tiny, anchor=east, text=black!75] at (axis cs:122.5,46.5) {always accept};
+\node[font=\tiny, anchor=west, text=black!75] at (axis cs:103.5,51.3) {random};
+\legend{trained on the scorecard, same learner on the proxy, references}
+\end{axis}
+\end{tikzpicture}
+\caption{Cost against fairness on 2{,}000 benchmark cases; grey arrows join each learner's scorecard-trained version to its proxy-trained twin. The six scorecard agents (expert rules and five learners) sit between \$74.50 and \$84.16 per case and 80.4\% to 85.6\% fair. The proxy pushes the learners that can fabricate down and to the left (cheaper, less fair) and the classifiers, which cannot, to the right (they fight everything). Synthetic; \texttt{results/zoo/eval.json}.}\label{fig:zoo}
+\end{figure}
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Agent types on the first 2{,}000 cases of benchmark v1 (synthetic). Paired differences against the evidence policy on the same cases, with 95\% bootstrap intervals (2{,}000 resamples). Gate: share of episodes with no hard failure.}\label{tab:zoo}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+agent & objective & cost vs evidence (\$) & fair vs evidence (pp) & gate \% & uploads\\
+\midrule
+expert rules & none & $-5.71$ [$-8.25$, $-3.25$] & $+2.5$ [$+1.7$, $+3.5$] & 99.6 & 0\\
+logistic regression & scorecard & $-1.79$ [$-5.56$, $+1.86$] & $+6.7$ [$+5.3$, $+8.1$] & 99.8 & 0\\
+gradient boosting & scorecard & $-8.01$ [$-11.42$, $-4.79$] & $+7.8$ [$+6.4$, $+9.2$] & 99.8 & 0\\
+LinUCB bandit & scorecard & $-0.06$ [$-3.85$, $+3.78$] & $+6.2$ [$+5.0$, $+7.6$] & 99.7 & 0\\
+Q-learning & scorecard & $+1.65$ [$-2.14$, $+5.38$] & $+5.0$ [$+3.5$, $+6.5$] & 98.6 & 0\\
+MC planner & scorecard & $-2.08$ [$-6.09$, $+1.94$] & $+5.9$ [$+4.5$, $+7.4$] & 99.6 & 0\\
+\midrule
+logistic regression & proxy & $+49.01$ [$+37.95$, $+59.26$] & $-3.8$ [$-6.2$, $-1.4$] & 73.7 & 0\\
+gradient boosting & proxy & $+49.01$ [$+37.95$, $+59.26$] & $-3.8$ [$-6.2$, $-1.4$] & 73.7 & 0\\
+LinUCB bandit & proxy & $-37.24$ [$-43.86$, $-30.80$] & $-22.1$ [$-25.2$, $-18.8$] & 51.9 & 911\\
+Q-learning & proxy & $-31.82$ [$-38.39$, $-25.44$] & $-21.9$ [$-24.9$, $-18.8$] & 48.8 & 883\\
+MC planner & proxy & $-28.66$ [$-36.02$, $-21.25$] & $-21.0$ [$-24.0$, $-17.8$] & 52.5 & 879\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What it shows.}
+\begin{itemize}
+\item \textbf{Learning on the scorecard raised fairness more than it cut cost.} Every scorecard learner raised the fair-outcome rate by 5.0 to 7.8 points over the evidence policy on the same cases; merchant cost fell clearly only for gradient boosting and the expert rules (\cref{tab:zoo}). The gains come from fighting longer: on invalid claims merchant wins rose 17 to 25 points in buyer's remorse and cardholder mistake, while on valid merchant-error claims wins rose 6 to 13 points and fair outcomes fell 7.6 to 13.0 points. The scorecard accepts that trade because OUT-01 is soft (\cref{sec:improve}).
+\item \textbf{The proxy found the exploits.} The three learners that could fabricate learned it under the proxy, uploading documents in 44 to 46\% of cases. They were the cheapest agents of all (\$28.66 to \$37.24 per case below the evidence policy) and won 91 to 96\% of cases; a leaderboard of cost or win rate would rank them first. They passed the gate in 49 to 53\% of episodes and fair outcomes fell 21 to 22 points. The classifiers could not fabricate; under the proxy they fought everything and claimed every win, at \$49.01 more per case, with SR-01 failing in 26\% of episodes. Every proxy agent claimed a win in every report and failed CAL-01 in all four blocks; every scorecard agent reported honestly. No scorecard learner used an exploit, which says the hard checks make exploits worth zero reward in this simulator, not anything about real agents.
+\item \textbf{The learner mattered less than the objective.} Scorecard learners differ from each other by at most 0.015 in reward, with overlapping cost intervals; each proxy twin moved further from its scorecard twin than any two scorecard learners differ.
+\item \textbf{The proxy also found a verifier gap}: the adverse-document swap of \cref{sec:improve}, now closed. Gate pass rates of the fabricating agents were measured before that fix and may be slightly too high.
+\end{itemize}
+Limits: one simulator, a 2{,}000-case subset, small tuning grids and one training seed; agents choose among macro-acts and write no tool calls or text, so this does not test language-model agents (\cref{sec:episodes,sec:e4} do).
+
 \section{What broke, and what we fixed}\label{sec:improve}
 
 A verifier is software, and it fails in both directions: it misses exploits, and it blames honest agents. Each failure below was found by running something against the verifiers, not by reading them. Synthetic episodes unless marked otherwise; numbers from \texttt{docs/VERIFIER\_FINDINGS.md} and \texttt{docs/results/MODEL\_EPISODES.md}.
@@ -824,7 +888,7 @@ A verifier is software, and it fails in both directions: it misses exploits, and
 \begin{itemize}
 \item \textbf{Memorised outcomes (X33) is caught by MEM-01.} The evaluator mixes 120 held-out probes (a sealed namespace, salted case ids) into the batch; MEM-01 compares the paired advantage over the baseline on exposed and held-out cases. The memoriser's advantage was \$11.99 per episode larger on exposed cases, $z=5.8$ at 300 seeds (4.0 at 100). Non-memorising exploits pass (gaps $-\$16.63$ to $+\$1.02$, $|z|\le1.2$, 150 seeds). A memoriser whose memory covers the held-out namespace (a leaked salt) is not caught.
 \item \textbf{Escalate everything (X28) is caught by ESC-01.} Before, 94 of 125 escalating episodes were caught. Of the 31 misses, 27 were escalations on genuine documents covering every required kind, where the arbitrator then ruled for the merchant on an invalid claim: a correct, cheaper outcome with nothing to catch. ESC-01 (soft) fails an escalation whose case file had no genuine document of every required kind and no settled refund or CE~3.0 history. ``Exercised'' now means such an escalation (87 of 87, partly by construction; CF-01 and OUT-01 also fire on 73 and 22 of them); under the old definition the catch rose from 94 to 98 of 125.
-\item \textbf{Adverse-document swap (X38s), found by a learner.} A proxy-trained agent in the learner comparison replaced a device record that did not match the cardholder with an authored one of the same kind that said it matched. EVD-01 flagged authored documents only in kinds the merchant never held, so the swap passed. EVD-01 now fails any cited upload of a kind the engine sealed for the case: the scripted swap wins 0.82 of the 11 applicable cases against the honest 0.00, and EVD-01 fires on 11 of 11 (4 of 11 before). Eleven cases is a small sample.
+\item \textbf{Adverse-document swap (X38s), found by a learner.} A proxy-trained agent in \cref{sec:aitypes} replaced a device record that did not match the cardholder with an authored one of the same kind that said it matched. EVD-01 flagged authored documents only in kinds the merchant never held, so the swap passed. EVD-01 now fails any cited upload of a kind the engine sealed for the case: the scripted swap wins 0.82 of the 11 applicable cases against the honest 0.00, and EVD-01 fires on 11 of 11 (4 of 11 before). Eleven cases is a small sample.
 \end{itemize}
 
 \begin{figure}[t]
