@@ -4,6 +4,7 @@
  *   nav#nav > ul.nav-sec  in-page anchors, <a href="#id">; the one in view gets aria-current="location"
  *   nav#nav > ul.nav-pg   pages, the page you are on carries aria-current="page" in the html
  *   button#nav-menu       [ MENU ], shown under 1100px; opens nav#nav as a panel over the page
+ *   a.skip                first in the body, href="#top" pointing at main; shown only on focus
  *
  * to add it to a page: copy the bar markup and the bar css block, then
  *   <script src="nav.js" defer></script>   (or ../nav.js one level down)
@@ -35,6 +36,13 @@
   addEventListener("resize", queue);
   addEventListener("hashchange", queue);
   mark();
+
+  /* ---------- skip link: move focus into main, not just the scroll ---------- */
+  const skip = document.querySelector("a.skip");
+  if (skip) skip.addEventListener("click", () => {
+    const m = document.getElementById(decodeURIComponent(skip.hash.slice(1)));
+    if (m) { m.tabIndex = -1; m.focus({ preventScroll: true }); }
+  });
 
   /* ---------- the narrow-screen menu ---------- */
   const btn = document.getElementById("nav-menu");

@@ -100,6 +100,9 @@ a { color: inherit; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
 .toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
 .toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
+.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
+.skip:focus { transform: none; outline: none; }
+main:focus { outline: none; }
 .menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
 .menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); outline: none; }
 /* under 1100px the links fold into a [ MENU ] panel that drops over the page, so nothing reflows */
@@ -234,6 +237,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 
 <canvas id="field" aria-hidden="true"></canvas>
 
+<a class="skip" href="#top">Skip to content</a>
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="#top" aria-label="Scruple, back to top"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
