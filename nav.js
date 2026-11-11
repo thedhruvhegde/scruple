@@ -1,8 +1,10 @@
 /* nav.js: the top bar, shared by every page (home, results, paper, 404).
  *
  * markup it expects, inside header.bar:
- *   span.crumb[data-page]  under 1100px: "/ results / 02 watch a case", the page then the section in view
- *   nav#nav > ul.nav-sec   in-page anchors, <a href="#id">; the one in view gets aria-current="location"
+ *   span.crumb[data-page]  under 1100px: "/ results / <> watch", the page then the section in view
+ *   nav#nav > ul.nav-sec   in-page anchors, <a href="#id" data-g="<>" aria-label="Watch a case">Watch</a>:
+ *                          a two-character glyph, a short name, the full title as the label;
+ *                          the one in view gets aria-current="location"
  *   nav#nav > ul.nav-pg    pages, the page you are on carries aria-current="page" in the html
  *   button#nav-menu        [ MENU ], shown under 1100px; opens nav#nav as a small terminal list
  *   span.bar-rule > i, b   the bottom edge: i is the ====> fill, b the keys hint and percent read
@@ -24,7 +26,6 @@
   const crumb = bar.querySelector(".crumb"), rule = bar.querySelector(".bar-rule");
   const fill = rule && rule.querySelector("i"), info = rule && rule.querySelector("b");
   const page = crumb ? crumb.dataset.page || "" : "";
-  const two = (n) => String(n).padStart(2, "0");
   const fine = matchMedia("(hover: hover) and (pointer: fine)"), wide = matchMedia("(min-width: 1101px)");
   links.forEach((a, i) => { if (i < 9) a.setAttribute("aria-keyshortcuts", String(i + 1)); });
 
@@ -39,8 +40,8 @@
   }
   function setCrumb() {
     if (!crumb) return;
-    // two parts, so a phone can drop the page name and keep the section: <i>/ results</i><b> / 02 watch a case</b>
-    const i = links.indexOf(cur), sec = i >= 0 ? `${two(i + 1)} ${cur.textContent.trim().toLowerCase()}` : "";
+    // two parts, so a phone can drop the page name and keep the section: <i>/ results</i><b> / <> watch</b>
+    const sec = cur ? `${cur.dataset.g ? cur.dataset.g + " " : ""}${cur.textContent.trim().toLowerCase()}` : "";
     const a = document.createElement("i"), b = document.createElement("b");
     a.textContent = page ? "/ " + page : sec ? "" : "/ home"; b.textContent = sec ? (page ? " / " : "/ ") + sec : "";
     crumb.replaceChildren(a, b); crumb.classList.toggle("in-sec", !!sec);

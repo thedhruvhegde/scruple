@@ -21,7 +21,7 @@
 
 /* ---------- bar ----------
    Shared by every page: link site.css, copy the header markup, load nav.js. ul.nav-sec holds in-page
-   anchors (numbered by css; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"
+   anchors (a[data-g] carries each one's glyph; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"
    on the page you are on). The header is 60px in the flow and sticks at -12px, so once you scroll
    it shows 48px: a compact bar with no layout shift. Its bottom edge is a character ruler that
    fills with reading progress (span.bar-rule, set by nav.js; a plain ruler without script). */
@@ -36,14 +36,15 @@
 .nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-transform: lowercase; }
 .nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
 .nav a { display: block; text-decoration: none; color: var(--muted); padding: 6px 4px; white-space: pre; }
-/* every section link reserves one character on each side, so the [ ] of the current one never moves anything */
-.nav-sec { counter-reset: sec; }
-.nav-sec li { counter-increment: sec; }
-.nav-sec a::before { content: " " counter(sec, decimal-leading-zero) " "; content: " " counter(sec, decimal-leading-zero) " " / ""; color: var(--rule-strong); }
-.nav-sec a::after { content: " "; content: " " / ""; }
+/* each section link: a two-character glyph that stands for it, then a short name. The full title is
+   the link's aria-label. Each item reserves one character on each side, so the [ ] of the current
+   one never moves anything: [ >_ how ]   .| proof   |# red team   () who   oo audit   -^ status */
+.nav-sec li { display: flex; align-items: center; }
+.nav-sec li::before, .nav-sec li::after { content: " "; content: " " / ""; white-space: pre; font-weight: 700; color: var(--fg); }
+.nav-sec li:has(> a[aria-current])::before { content: "["; content: "[" / ""; }
+.nav-sec li:has(> a[aria-current])::after { content: "]"; content: "]" / ""; }
+.nav-sec a::before { content: attr(data-g) " "; content: attr(data-g) " " / ""; white-space: pre; color: var(--accent); }
 .nav-sec a[aria-current] { color: var(--fg); }
-.nav-sec a[aria-current]::before { content: "[" counter(sec, decimal-leading-zero) " "; content: "[" counter(sec, decimal-leading-zero) " " / ""; color: inherit; }
-.nav-sec a[aria-current]::after { content: "]"; content: "]" / ""; }
 /* the pages, one bracketed group set apart at the right: [ home | results | paper ], the page you are on inverted */
 .nav-pg { margin-left: auto !important; color: var(--fg); }
 .nav-pg li { display: flex; align-items: center; }
@@ -82,10 +83,12 @@ main:focus { outline: none; }
   .nav ul { display: grid; grid-template-columns: minmax(0, 1fr); }
   .nav ul::before { content: "# " attr(aria-label); content: "# " attr(aria-label) / ""; color: var(--c-dim); padding: 0 0 4px 0; }
   .nav a, .nav-pg a { color: var(--c-fg); padding: 9px 4px; }
-  .nav-sec a::before { color: var(--c-dim); }
+  .nav-sec li::before { content: "  "; content: "  " / ""; }
+  .nav-sec li::after { content: none; }
+  .nav-sec a { flex: 1; }
+  .nav-sec a::before { color: var(--c-mute); }
   .nav-sec a[aria-current] { color: var(--c-pine); }
-  .nav-sec a[aria-current]::before { content: ">" counter(sec, decimal-leading-zero) " "; content: ">" counter(sec, decimal-leading-zero) " " / ""; }
-  .nav-sec a[aria-current]::after { content: " <"; content: " <" / ""; }
+  .nav-sec li:has(> a[aria-current])::before { content: "> "; content: "> " / ""; color: var(--c-pine); }
   .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; display: flex !important; flex-wrap: wrap; color: var(--c-fg); }
   .nav-pg::before { flex-basis: 100%; }
   .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
