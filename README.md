@@ -4,6 +4,8 @@
 
 verifiers for agents that move money. this repo holds the website and the engine.
 
+site: [thedhruvhegde.github.io/scruple](https://thedhruvhegde.github.io/scruple/) · [results](https://thedhruvhegde.github.io/scruple/results/) · [paper](https://thedhruvhegde.github.io/scruple/paper/) · [pilot](https://thedhruvhegde.github.io/scruple/pilot/)
+
 train on it. evaluate on it. ship through it.
 
 ## what scruple is
