@@ -712,6 +712,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   }
   const visible = (r) => r.bottom > -40 && r.top < H + 40;
   function drawScreen(s, t) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (const c of cellsOf(s, t)) emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); }
+  // corner ticks frame every screen but the hero, settled or in flight: four atlas glyphs each
+  function corners(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, x1 = x0 + (s.C - 1) * s.cw, y1 = y0 + (s.R - 1) * s.ch; emit(s.sz, x0, y0, 43, 1); emit(s.sz, x1, y0, 43, 1); emit(s.sz, x0, y1, 43, 1); emit(s.sz, x1, y1, 43, 1); }
   function idleDots(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (let r = 1; r < s.R; r += 4) for (let c = 2; c < s.C; c += 8) emit(s.sz, x0 + c * s.cw, y0 + r * s.ch, 46, 1); }
 
   /* ---------- intro: a chat, then the wonder takes the screen ---------- */
@@ -869,7 +871,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     if (p >= 1) { i++; p = 0; }   // fully arrived: draw the next screen itself, not the flight
     if (reduce) { if (p >= 0.5) i++; p = 0; }
     if (i >= screens.length) i = screens.length - 1;
-    for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (visible(s.rect) && !(j === i || (p > 0 && j === i + 1))) idleDots(s); }
+    for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (!visible(s.rect)) continue; if (j) corners(s); if (!(j === i || (p > 0 && j === i + 1))) idleDots(s); }
     if (p === 0) { const s = screens[i]; if (visible(s.rect)) drawScreen(s, ta); }
     else {
       const A = screens[i], B = screens[i + 1], ca = cellsOf(A, ta), cb = cellsOf(B, ta);
