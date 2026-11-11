@@ -171,7 +171,8 @@ main:focus { outline: none; }
 .typing { font-family: var(--f-mono); font-size: 13px; color: var(--muted); padding: 2px 4px; }
 .typing.right { justify-self: end; }
 .chat-foot { padding: 0 16px 14px; display: flex; justify-content: flex-end; }
-#skip { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; background: none; color: var(--muted); border: 1px solid var(--rule-strong); padding: 6px 10px; cursor: pointer; }
+#skip { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; background: none; color: var(--muted); border: 0; padding: 6px 8px; cursor: pointer; white-space: pre; }
+#skip::before { content: "[ "; content: "[ " / ""; } #skip::after { content: " ]"; content: " ]" / ""; }
 #skip:hover, #skip:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 
 /* ---------- screens ---------- */
@@ -185,7 +186,7 @@ main:focus { outline: none; }
 .hero-cap { position: relative; z-index: 3; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin: 22px 0 0; padding-bottom: 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
 .hero-cap b { color: var(--fg); font-weight: 600; text-transform: capitalize; }
 .hero-cap .sep { margin: 0 10px; color: var(--rule-strong); }
-.hero-cap .btn { padding: 8px 12px; font-size: 12px; }
+.hero-cap .btn { margin: 0 -10px; }
 @media (max-width: 760px) { .screen.hero { aspect-ratio: 4 / 3; } .hero-cap { padding-bottom: 28px; } .screen.panel { height: 360px; } .screen { box-shadow: 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
 #field { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 25; display: block; }
 .intro #field { z-index: 45; }
@@ -214,8 +215,12 @@ main:focus { outline: none; }
 .tri { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border: 1px solid var(--rule-strong); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 14px; }
 .tri span { padding: 8px 14px; border-right: 1px solid var(--rule-strong); }
 .tri span:last-child { border-right: 0; background: var(--accent); color: var(--on-accent); }
-.btn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; padding: 12px 18px; border: 1px solid var(--fg); color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; }
+/* buttons are bracketed words, [ Edit entry 14 ]; the brackets sit on the text edge, hover inverts */
+.btn { display: inline-flex; align-items: center; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; line-height: 16px; padding: 12px 10px; margin-left: -10px; border: 0; color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; white-space: pre; }
+.btn::before { content: "[ "; content: "[ " / ""; font-weight: 700; }
+.btn::after { content: " ]"; content: " ]" / ""; font-weight: 700; }
 .btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.btn[aria-pressed="true"] { background: var(--block); color: var(--bg); }
 @media (max-width: 600px) { .tri { flex-direction: column; width: 100%; } .tri span { border-right: 0; border-bottom: 1px solid var(--rule-strong); } .tri span:last-child { border-bottom: 0; } }
 
 .tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
