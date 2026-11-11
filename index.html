@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Scruple</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="only light">
 <meta name="description" content="Scruple: a simulator and verifiers for agents that move money.">
 <link rel="canonical" href="https://thedhruvhegde.github.io/scruple/">
 <meta property="og:type" content="website">
@@ -28,7 +29,6 @@
 <script>
   (function () {
     var d = document.documentElement, run = false;
-    try { var t = localStorage.getItem("scruple-theme"); if (t === "light" || t === "dark") d.setAttribute("data-theme", t); } catch (e) {}
     try {
       run = !matchMedia("(prefers-reduced-motion: reduce)").matches && !navigator.webdriver && (window.scrollY || 0) < 40
         && sessionStorage.getItem("scruple-intro") !== "seen";
@@ -49,20 +49,12 @@
   --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   /* screen ink, read by the canvas */
   --c-fg: #E6E3D6; --c-dim: #55617D; --c-pine: #6CC39B; --c-brass: #E8C46A; --c-verm: #F27B55; --c-sky: #93B3EA; --c-blue: #4F6FB4;
+  /* one theme: the operating system's dark setting never changes the page */
+  color-scheme: only light;
 }
 .band-pine  { --bg: #12301F; --panel: #173A28; --fg: #EDEAE1; --muted: #A8BCB0; --rule: #255040; --rule-strong: #4D7464; --accent: #86D0AA; --on-accent: #12301F; --brass: #E6C77E; --block: #F2906B; }
 .band-night { --bg: #0E1626; --panel: #142038; --fg: #E6E3D6; --muted: #A1ABC0; --rule: #1F2B44; --rule-strong: #3F4E6E; --accent: #7FD0A8; --on-accent: #0E1626; --brass: #E8C46A; --block: #F07E58; }
 .band-sand  { --bg: #E3D8BF; --panel: #D8CBAD; --fg: #17140C; --muted: #554D3E; --rule: #CBBF9F; --rule-strong: #968B71; --accent: #1D4A3A; --on-accent: #E3D8BF; --brass: #6E5216; --block: #9A3317; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
-  :root:not([data-theme="light"]) .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
-  :root:not([data-theme="light"]) .band-night { --bg: #0A101C; --panel: #0F172A; }
-  :root:not([data-theme="light"]) .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
-}
-:root[data-theme="dark"] { --bg: #0B100E; --panel: #111915; --fg: #E8E6DD; --muted: #A1A9A4; --rule: #1F2925; --rule-strong: #3A4842; --accent: #5AAE88; --on-accent: #0B100E; --brass: #D8B25E; --block: #EA6B45; --scr-bg: #070C18; color-scheme: dark; }
-:root[data-theme="dark"] .band-pine { --bg: #0D2018; --panel: #11291F; --rule: #1E3A2E; --rule-strong: #3A5A4C; }
-:root[data-theme="dark"] .band-night { --bg: #0A101C; --panel: #0F172A; }
-:root[data-theme="dark"] .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
 
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
@@ -96,10 +88,6 @@ a { color: inherit; }
 .nav-sec a[aria-current]::before { content: "["; left: 1px; }
 .nav-sec a[aria-current]::after { content: "]"; right: 1px; }
 .nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-.toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
-.toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
-.toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
-.toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
 .skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
 .skip:focus { transform: none; outline: none; }
 main:focus { outline: none; }
@@ -272,7 +260,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       <ul class="nav-sec" aria-label="On this page"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ul>
       <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li></ul>
     </nav>
-    <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
   </div>
 </header>
 
@@ -457,17 +444,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   const root = document.documentElement;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- theme ---------- */
-  const darkMQ = matchMedia("(prefers-color-scheme: dark)");
-  const isDark = () => (root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : darkMQ.matches);
-  const onTheme = [];
-  function syncTheme() { $("#t-light").setAttribute("aria-pressed", String(!isDark())); $("#t-dark").setAttribute("aria-pressed", String(isDark())); onTheme.forEach((f) => f()); }
-  function setTheme(t) { root.setAttribute("data-theme", t); try { localStorage.setItem("scruple-theme", t); } catch (e) { /* unavailable */ } syncTheme(); }
-  $("#t-light").addEventListener("click", () => setTheme("light"));
-  $("#t-dark").addEventListener("click", () => setTheme("dark"));
-  darkMQ.addEventListener("change", syncTheme);
-  syncTheme();
-
   /* ---------- helpers ---------- */
   const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
   const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
@@ -475,9 +451,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   function hash(a, b) { let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b + 0x632be5ab, 0xc2b2ae35); h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; return (h >>> 0) / 4294967296; }
   const CODE = "01{}[]()<>/\\=+-*#$%&_:;";
   /* screen ink: 0 fg, 1 dim, 2 pine, 3 brass, 4 verm, 5 sky, 6 blue */
-  let PAL = [], SCRBG = "#0A1120";
-  function readPal() { const cs = getComputedStyle(root); PAL = Wonders.palette.slice(); SCRBG = cs.getPropertyValue("--scr-bg").trim(); }
-  readPal(); onTheme.push(readPal);
+  const PAL = Wonders.palette, SCRBG = getComputedStyle(root).getPropertyValue("--scr-bg").trim() || "#0A1120";
   const RAMP = " .:-=+*#%@";
 
   /* ---------- the hero: one of the new seven wonders, chosen per visit ---------- */
@@ -717,7 +691,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       }
     }
   }
-  onTheme.push(() => { if (SIZES.length) buildAtlas(); });
   const emit = (sz, x, y, k, col) => buckets[sz][col].push(x, y, k);
   function flush() {
     for (let sz = 0; sz < 2; sz++) {
@@ -945,7 +918,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     layout(); I.t0 = performance.now(); requestAnimationFrame(frame);
     if (I.done && location.hash) requestAnimationFrame(() => settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))));
     let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { layout(); I.fg = null; I.frozen = false; force = true; }, 120); });
-    onTheme.push(() => { force = true; });
   };
   const fl = document.fonts && document.fonts.load ? Promise.race([document.fonts.load('500 10px "Martian Mono"'), new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
   fl.then(go, go);
