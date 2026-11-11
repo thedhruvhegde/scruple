@@ -80,7 +80,7 @@ results/ paper/     the results and paper pages
 results/*.py        build_data.py and build_leaderboard.py, run from engine/, write results/data
 pilot/              the six-week pilot offer, a mailto contact form, the one-page pdf
 site.css            every colour token, the bands, buttons and the bar, shared by all pages
-nav.js              the bar: glyph links, the section in view, the reading ruler, keys 1-9
+nav.js              the bar: section links, the section in view, the reading ruler, keys 1-9
 wonders.js          the seven wonders, drawn in characters
 assets/logos        5 colourways + 2 transparent sets: mark, horizontal, stacked, wordmark. svg + png
 assets/banners      github social 1280x640, og 1200x630, x header 1500x500, linkedin 1584x396
