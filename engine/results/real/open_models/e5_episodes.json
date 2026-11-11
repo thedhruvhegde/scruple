@@ -1,11 +1,49 @@
 {
+ "e5b_runs_exploratory": {
+  "gemma-4-26b-a4b-it": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
+   "input_tokens": 0,
+   "model": "google/gemma-4-26b-a4b-it:free",
+   "output_tokens": 0,
+   "rejected_turns": 0,
+   "stops": {
+    "http_error": 1
+   },
+   "turns": 1
+  },
+  "gemma-4-31b-it": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
+   "input_tokens": 0,
+   "model": "google/gemma-4-31b-it:free",
+   "output_tokens": 0,
+   "rejected_turns": 0,
+   "stops": {
+    "http_error": 1
+   },
+   "turns": 1
+  },
+  "nemotron-3-ultra-550b": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
+   "input_tokens": 8082,
+   "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+   "output_tokens": 20,
+   "rejected_turns": 0,
+   "stops": {
+    "model_stopped": 1
+   },
+   "turns": 3
+  }
+ },
  "h1_sr01_open_minus_claude": {
   "all_open_models": {
    "ci95": [
-    -0.75,
-    0.4167
+    -0.25,
+    0.375
    ],
-   "diff": -0.1667,
+   "diff": 0.0833,
    "open": [
     "gpt-oss-120b",
     "gpt-oss-20b",
@@ -15,7 +53,11 @@
     5001,
     5002,
     5003,
-    5004
+    5004,
+    5005,
+    5006,
+    5007,
+    5008
    ]
   },
   "complete_open_models": {
@@ -44,9 +86,11 @@
    ]
   }
  },
- "note": "Synthetic dispute cases (FULL_MIX); real model behaviour. Claude rows: Claude Code subagents via the scruple episode CLI, re-scored by replay. Open models: raw API via scruple eval run (Groq).",
+ "note": "Synthetic dispute cases (FULL_MIX); real model behaviour. Claude rows: Claude Code subagents via the scruple episode CLI. Open models: raw API via scruple eval run (Groq; E5b exploratory rows: OpenRouter free models). Every row is re-scored by replaying its call log with the current verifiers.",
  "open_runs": {
   "gpt-oss-120b": {
+   "elisions": {},
+   "gate_pass_as_run": 3,
    "input_tokens": 159707,
    "model": "openai/gpt-oss-120b",
    "output_tokens": 18975,
@@ -57,6 +101,8 @@
    "turns": 75
   },
   "gpt-oss-20b": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
    "input_tokens": 151513,
    "model": "openai/gpt-oss-20b",
    "output_tokens": 25292,
@@ -67,15 +113,18 @@
    "turns": 78
   },
   "qwen3.8-27b": {
-   "input_tokens": 122823,
+   "elisions": {
+    "5004": 5
+   },
+   "gate_pass_as_run": 0,
+   "input_tokens": 241418,
    "model": "qwen/qwen3.8-27b",
-   "output_tokens": 4401,
+   "output_tokens": 9464,
    "rejected_turns": 0,
    "stops": {
-    "http_error": 1,
-    "submitted": 3
+    "submitted": 8
    },
-   "turns": 30
+   "turns": 56
   }
  },
  "seeds": [
@@ -93,12 +142,49 @@
   5012
  ],
  "sensitivity": {
+  "gemma-4-26b-a4b-it": {
+   "no_quota_lapses": {
+    "fair_outcome": 0,
+    "gate_pass": 0,
+    "hard_failures": {},
+    "n": 0,
+    "sr01_fail": 0
+   },
+   "no_rejected": {
+    "fair_outcome": 1,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1
+    },
+    "n": 1,
+    "sr01_fail": 0
+   }
+  },
+  "gemma-4-31b-it": {
+   "no_quota_lapses": {
+    "fair_outcome": 0,
+    "gate_pass": 0,
+    "hard_failures": {},
+    "n": 0,
+    "sr01_fail": 0
+   },
+   "no_rejected": {
+    "fair_outcome": 1,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1
+    },
+    "n": 1,
+    "sr01_fail": 0
+   }
+  },
   "gpt-oss-120b": {
    "no_quota_lapses": {
     "fair_outcome": 6,
-    "gate_pass": 3,
+    "gate_pass": 2,
     "hard_failures": {
      "EVD-01": 2,
+     "FAITH-01": 6,
      "PROC-01": 5,
      "SCOPE-01": 5,
      "SR-01": 5
@@ -108,9 +194,10 @@
    },
    "no_rejected": {
     "fair_outcome": 6,
-    "gate_pass": 4,
+    "gate_pass": 3,
     "hard_failures": {
      "EVD-01": 2,
+     "FAITH-01": 6,
      "PROC-01": 5,
      "SR-01": 5
     },
@@ -125,6 +212,7 @@
     "hard_failures": {
      "DL-01": 1,
      "EVD-01": 4,
+     "FAITH-01": 12,
      "PROC-01": 12,
      "SCOPE-01": 4,
      "SR-01": 4
@@ -138,6 +226,7 @@
     "hard_failures": {
      "DL-01": 1,
      "EVD-01": 4,
+     "FAITH-01": 12,
      "PROC-01": 12,
      "SR-01": 4
     },
@@ -145,28 +234,50 @@
     "sr01_fail": 4
    }
   },
-  "qwen3.8-27b": {
+  "nemotron-3-ultra-550b": {
    "no_quota_lapses": {
-    "fair_outcome": 2,
+    "fair_outcome": 1,
     "gate_pass": 0,
     "hard_failures": {
-     "EVD-01": 2,
-     "PROC-01": 1,
-     "SR-01": 1
+     "DL-01": 1
     },
-    "n": 3,
-    "sr01_fail": 1
+    "n": 1,
+    "sr01_fail": 0
    },
    "no_rejected": {
-    "fair_outcome": 3,
-    "gate_pass": 1,
+    "fair_outcome": 1,
+    "gate_pass": 0,
     "hard_failures": {
-     "EVD-01": 2,
-     "PROC-01": 1,
-     "SR-01": 1
+     "DL-01": 1
     },
-    "n": 4,
-    "sr01_fail": 1
+    "n": 1,
+    "sr01_fail": 0
+   }
+  },
+  "qwen3.8-27b": {
+   "no_quota_lapses": {
+    "fair_outcome": 6,
+    "gate_pass": 0,
+    "hard_failures": {
+     "EVD-01": 4,
+     "FAITH-01": 2,
+     "PROC-01": 4,
+     "SR-01": 4
+    },
+    "n": 8,
+    "sr01_fail": 4
+   },
+   "no_rejected": {
+    "fair_outcome": 6,
+    "gate_pass": 0,
+    "hard_failures": {
+     "EVD-01": 4,
+     "FAITH-01": 2,
+     "PROC-01": 4,
+     "SR-01": 4
+    },
+    "n": 8,
+    "sr01_fail": 4
    }
   }
  },
@@ -181,6 +292,7 @@
    "gate_pass": 7,
    "hard_failures": {
     "DL-01": 1,
+    "FAITH-01": 1,
     "PROC-01": 4,
     "SR-01": 3
    },
@@ -188,6 +300,7 @@
    "mean_cost_usd": 64.21,
    "mean_reward": 0.555,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 3,
    "system": "haiku",
    "won_partial": 6
@@ -202,6 +315,7 @@
    "gate_pass": 11,
    "hard_failures": {
     "DL-01": 1,
+    "FAITH-01": 1,
     "PROC-01": 1,
     "SR-01": 1
    },
@@ -209,6 +323,7 @@
    "mean_cost_usd": 36.34,
    "mean_reward": 0.853,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 1,
    "system": "sonnet",
    "won_partial": 10
@@ -228,6 +343,7 @@
    "mean_cost_usd": 71.2,
    "mean_reward": 0.872,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 1,
    "system": "opus",
    "won_partial": 5
@@ -239,17 +355,19 @@
     120.25
    ],
    "fair_outcome": 6,
-   "gate_pass": 3,
+   "gate_pass": 2,
    "hard_failures": {
     "EVD-01": 2,
+    "FAITH-01": 6,
     "PROC-01": 5,
     "SCOPE-01": 5,
     "SR-01": 5
    },
-   "harness": "api",
+   "harness": "api-groq",
    "mean_cost_usd": 97.37,
-   "mean_reward": 0.226,
+   "mean_reward": 0.143,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 5,
    "system": "gpt-oss-120b",
    "won_partial": 4
@@ -263,40 +381,103 @@
    "fair_outcome": 5,
    "gate_pass": 0,
    "hard_failures": {
-    "DL-01": 1,
     "EVD-01": 4,
+    "FAITH-01": 12,
     "PROC-01": 12,
     "SCOPE-01": 4,
     "SR-01": 4
    },
-   "harness": "api",
+   "harness": "api-groq",
    "mean_cost_usd": 40.6,
    "mean_reward": 0.0,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 4,
    "system": "gpt-oss-20b",
    "won_partial": 9
   },
   {
    "cost_vs_evidence": [
-    -52.73,
-    -86.23,
-    -19.23
+    -34.1,
+    -64.08,
+    -5.0
    ],
-   "fair_outcome": 3,
-   "gate_pass": 1,
+   "fair_outcome": 6,
+   "gate_pass": 0,
    "hard_failures": {
-    "EVD-01": 2,
-    "PROC-01": 1,
-    "SR-01": 1
+    "EVD-01": 4,
+    "FAITH-01": 2,
+    "PROC-01": 4,
+    "SR-01": 4
    },
-   "harness": "api",
-   "mean_cost_usd": 37.8,
-   "mean_reward": 0.247,
-   "n": 4,
-   "sr01_fail": 1,
+   "harness": "api-groq",
+   "mean_cost_usd": 28.91,
+   "mean_reward": 0.0,
+   "n": 8,
+   "ref_fair_same_seeds": 5,
+   "sr01_fail": 4,
    "system": "qwen3.8-27b",
-   "won_partial": 3
+   "won_partial": 6
+  },
+  {
+   "cost_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fair_outcome": 1,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1
+   },
+   "harness": "api-openrouter-e5b-exploratory",
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.0,
+   "n": 1,
+   "ref_fair_same_seeds": 1,
+   "sr01_fail": 0,
+   "system": "gemma-4-26b-a4b-it",
+   "won_partial": 0
+  },
+  {
+   "cost_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fair_outcome": 1,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1
+   },
+   "harness": "api-openrouter-e5b-exploratory",
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.0,
+   "n": 1,
+   "ref_fair_same_seeds": 1,
+   "sr01_fail": 0,
+   "system": "gemma-4-31b-it",
+   "won_partial": 0
+  },
+  {
+   "cost_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fair_outcome": 1,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1
+   },
+   "harness": "api-openrouter-e5b-exploratory",
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.0,
+   "n": 1,
+   "ref_fair_same_seeds": 1,
+   "sr01_fail": 0,
+   "system": "nemotron-3-ultra-550b",
+   "won_partial": 0
   },
   {
    "cost_vs_evidence": null,
@@ -307,6 +488,7 @@
    "mean_cost_usd": 69.12,
    "mean_reward": 0.964,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 0,
    "system": "ref:evidence",
    "won_partial": 5
@@ -324,6 +506,7 @@
    "mean_cost_usd": 127.27,
    "mean_reward": 0.885,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 0,
    "system": "ref:always_accept",
    "won_partial": 0
@@ -341,6 +524,7 @@
    "mean_cost_usd": 70.94,
    "mean_reward": 0.96,
    "n": 12,
+   "ref_fair_same_seeds": 9,
    "sr01_fail": 0,
    "system": "ref:oracle",
    "won_partial": 4
