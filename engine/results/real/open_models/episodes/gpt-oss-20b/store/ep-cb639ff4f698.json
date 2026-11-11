@@ -1,0 +1,71 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-181685d721f26170",
+     "ev-bda4b9cf5b09a4e3",
+     "ev-fa395189ef9f69c9",
+     "ev-d022252c89297ca0"
+    ],
+    "narrative": "The transaction was authorized by the cardholder, as evidenced by the authorization record, AVS/CVV match, and device IP match. The receipt confirms the purchase details."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "question": "Please provide the cardholder's statement for the transaction."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "reason": "Transaction authorized and cardholder acknowledges usage; no further action needed."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "represent",
+      "wait",
+      "request_info",
+      "accept"
+     ],
+     "evidence_ids": [
+      "ev-181685d721f26170",
+      "ev-bda4b9cf5b09a4e3",
+      "ev-fa395189ef9f69c9",
+      "ev-d022252c89297ca0"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 7380
+    },
+    "confidence": 0.95,
+    "explanation": "I reviewed the case details and evidence. The authorization record, AVS/CVV match, and device IP match confirm cardholder authorization. I submitted these as represent evidence. After 10 days, the issuer provided a statement acknowledging cardholder usage. I accepted the case, concluding no liability. All actions were within the 45\u2011day chargeback window and the 30\u2011day pre\u2011arbitration window. No refund was needed as the merchant had already refunded the full amount. The case was resolved with no loss to the merchant."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5004
+}

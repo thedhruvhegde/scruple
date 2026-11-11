@@ -1,0 +1,81 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "question": "Please provide device IP match evidence for transaction 18321."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "question": "Please provide device IP match evidence for transaction 18321."
+   },
+   "tool": "request_info"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-f264b06af184ca8b",
+     "ev-7e86ed9115eb2932",
+     "ev-97e2db393a9e67c1",
+     "ev-e8833b342d3b0abf",
+     "ev-de9d9e9b40cb5e43"
+    ],
+    "narrative": "The transaction was authorized on 2026-01-17 with AVS/CVV match confirming cardholder details. The item was delivered to the address on file, as shown in the delivery proof. The merchant has a clean prior history with no disputed transactions. While device IP match evidence is not currently available, the other evidence supports the legitimacy of the transaction."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "evidence_ids": [
+      "ev-f264b06af184ca8b",
+      "ev-7e86ed9115eb2932",
+      "ev-97e2db393a9e67c1",
+      "ev-e8833b342d3b0abf",
+      "ev-de9d9e9b40cb5e43"
+     ],
+     "outcome": "partial",
+     "refunded_minor": 18321,
+     "win_rate": 0.6
+    },
+    "confidence": 0.6,
+    "explanation": "I submitted a representation with AVS/CVV match, delivery proof, prior history, and account activity evidence. I did not have device IP match evidence, so I could not fully satisfy the required evidence list. The case moved to pre\u2011arbitration awaiting issuer response. I expect a 60% chance of winning based on the evidence strength."
+   },
+   "tool": "submit_decision<|channel|>commentary"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "represent"
+     ],
+     "evidence_ids": [
+      "ev-f264b06af184ca8b",
+      "ev-7e86ed9115eb2932",
+      "ev-97e2db393a9e67c1",
+      "ev-e8833b342d3b0abf",
+      "ev-de9d9e9b40cb5e43"
+     ],
+     "outcome": "partial",
+     "refunded_minor": 18321,
+     "win_rate": 0.6
+    },
+    "confidence": 0.6,
+    "explanation": "I submitted a representation with AVS/CVV match, delivery proof, prior history, and account activity evidence. I did not have device IP match evidence, so I could not fully satisfy the required evidence list. The case moved to pre\u2011arbitration awaiting issuer response. I expect a 60% chance of winning based on the evidence strength."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5009
+}

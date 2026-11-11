@@ -1,0 +1,43 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "reason": "Merchant accepts liability to close the dispute promptly and avoid further fees."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "accept"
+     ],
+     "deadlines_met": true,
+     "outcome": "accepted",
+     "refunded_minor": 1377
+    },
+    "explanation": "I reviewed the case details, listed the evidence, and examined the ledger to confirm the chargeback amount and fees. The merchant accepted liability promptly, resolving the dispute before the May 10, 2026 deadline, avoiding further fees or escalation."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5008
+}

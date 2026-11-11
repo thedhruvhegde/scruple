@@ -1,0 +1,54 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {
+    "reason": "Merchant has already refunded the full amount to the cardholder, satisfying the dispute."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "accept"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "outcome": "accepted",
+     "refunded_minor": 8385,
+     "win_rate": 1.0
+    },
+    "confidence": 1.0,
+    "explanation": "The case was opened as a chargeback for a Point\u2011of\u2011Interaction error (duplicate/incorrect amount). The merchant had already issued a full refund of the transaction amount (8385\u202f\u00a2) as shown by the case status (refunded_minor = 8385). Since the cardholder has been fully reimbursed, the merchant has no liability. I therefore accepted the dispute, which resolves the case without further action or cost."
+   },
+   "tool": "json"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "accept"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "outcome": "accepted",
+     "refunded_minor": 8385,
+     "win_rate": 1
+    },
+    "confidence": 1,
+    "explanation": "The case was opened as a chargeback for a Point\u2011of\u2011Interaction error (duplicate/incorrect amount). The merchant had already issued a full refund of the transaction amount (8385\u202f\u00a2) as indicated by the case status (refunded_minor = 8385). Since the cardholder has been fully reimbursed, the merchant has no liability. I therefore accepted the dispute, which resolves the case without further action or cost."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5007
+}

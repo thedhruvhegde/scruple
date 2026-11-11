@@ -1,0 +1,39 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "reason": "Merchant accepts liability for the chargeback as the product was not as described per cardholder claim."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "accept"
+     ],
+     "outcome": "accepted",
+     "win_rate": 0
+    },
+    "explanation": "The dispute is for goods/services not as described (reason code 4853). Required evidence includes product description and terms acceptance, but the merchant has no additional documentation to contest the claim. The ledger already shows a chargeback debit of $92.32 and a $15.00 processor fee, indicating the issuer has debited the merchant for the full amount. To minimize further loss and comply with the dispute process, I accepted liability on 2026-04-20, within the chargeback response deadline (2026-06-04). No further actions (refund, representation, escalation) are needed as the case is now resolved."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5003
+}

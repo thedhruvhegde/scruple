@@ -1,0 +1,70 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-609d1d00585b60da"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-609d1d00585b60da",
+     "ev-3c9fe17128fc3096"
+    ],
+    "narrative": "The transaction was authorized on 2026-01-14 for $38.46 (3846 minor) with a valid auth code 922519. The receipt confirms the purchase amount and date. The cardholder's claim of non-recognition is unfounded as the merchant has both the authorization record and receipt showing the cardholder's participation in the transaction."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "reason": "Refund already issued; accept liability to close case."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "represent",
+      "wait",
+      "accept"
+     ],
+     "cost_usd_minor": 0,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-609d1d00585b60da",
+      "ev-3c9fe17128fc3096"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 3846,
+     "win_rate": 0
+    },
+    "confidence": 0.95,
+    "explanation": "I retrieved the case details and listed the available evidence. The required authorization record (ev-609d1d00585b60da) and the receipt (ev-3c9fe17128fc3096) were submitted in a representation to the issuer, showing a valid authorization and purchase. After waiting 10 days for the issuer's response, I noted that the merchant had already refunded the full amount ($38.46). To close the dispute and avoid further arbitration costs, I accepted liability on March 3, well before the pre\u2011arbitration filing deadline (March 13) and the original chargeback response deadline (March 23). The case is now resolved with the refund already processed."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5002
+}

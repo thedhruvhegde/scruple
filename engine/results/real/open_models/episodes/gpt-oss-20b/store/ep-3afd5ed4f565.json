@@ -1,0 +1,58 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-17029774c77667a7",
+     "ev-036244fe7117fccd",
+     "ev-0e61a15de1e92a83",
+     "ev-b2efa667d63620b7"
+    ],
+    "narrative": "The cardholder received the product as described in the product description (ev-17029774c77667a7) and accepted the terms of sale (ev-036244fe7117fccd). Delivery was confirmed on 2026-01-20 (ev-0e61a15de1e92a83). Communication logs (ev-b2efa667d63620b7) show the cardholder acknowledged receipt and satisfaction. Therefore, the chargeback is not justified."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 10
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "submit_decision"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "list_evidence",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-17029774c77667a7",
+      "ev-036244fe7117fccd",
+      "ev-0e61a15de1e92a83",
+      "ev-b2efa667d63620b7"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1
+    },
+    "confidence": 1,
+    "explanation": "I represented the case on 2026-03-26 using product description, terms acceptance, delivery proof, and communication log to show the cardholder received goods as described and accepted terms. The issuer accepted the representation on 2026-04-05, resolving the dispute in our favor. No refund was issued. I met the 45\u2011day deadline (due 2026-05-10)."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5008
+}

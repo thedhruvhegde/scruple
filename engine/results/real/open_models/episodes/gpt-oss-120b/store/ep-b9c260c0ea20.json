@@ -1,0 +1,82 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-f353a9345167df57",
+     "ev-d9982420eca82222"
+    ],
+    "narrative": "The cardholder was enrolled in a legitimate installment billing plan. The terms of the installment were clearly presented and accepted by the cardholder (terms_acceptance evidence). The transaction was properly authorized and settled (settlement_record evidence). No error occurred, and the merchant fulfilled its obligations."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-f353a9345167df57",
+      "ev-d9982420eca82222"
+     ],
+     "outcome": "won",
+     "win_rate": 0.9
+    },
+    "confidence": 0.97,
+    "explanation": "I retrieved the case details and listed the available evidence. The required evidence for this Installment Billing Dispute were the terms acceptance and settlement record. I submitted those two documents with a concise narrative explaining that the cardholder had knowingly entered a legitimate installment plan and that the transaction was properly authorized and settled. The issuer responded within the chargeback response window (by 2026-04-08, well before the 2026-05-13 deadline) and accepted the representment, resolving the dispute in the merchant\u2019s favor. No refund was required and the merchant incurred no net loss."
+   },
+   "tool": "json"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait"
+     ],
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-f353a9345167df57",
+      "ev-d9982420eca82222"
+     ],
+     "outcome": "won",
+     "win_rate": 0.9
+    },
+    "confidence": 0.97,
+    "explanation": "I retrieved the case details and listed the available evidence. The required evidence for this Installment Billing Dispute were the terms acceptance and settlement record. I submitted those two documents with a concise narrative explaining that the cardholder had knowingly entered a legitimate installment plan and that the transaction was properly authorized and settled. The issuer responded within the chargeback response window (by 2026-04-08, well before the 2026-05-13 deadline) and accepted the representment, resolving the dispute in the merchant\u2019s favor. No refund was required and the merchant incurred no net loss."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5006
+}
