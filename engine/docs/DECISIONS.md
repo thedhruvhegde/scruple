@@ -128,3 +128,17 @@ alpha) should be required for rare, expensive types once a policy owner names th
 Control variates for promotion (`ControlVariateEProcess`, `PostStratifiedEProcess`)
 are library only: they need a covariate mean known from design or a long pre-period,
 and with the mean learned from the same stream they lose power (docs/math/09, 9.4).
+
+**D-018 Soft-check thresholds stay as they are; EVD-02's "unsupported" rule is the
+candidate to change.** The meta-evaluation (docs/results/VERIFIER_META.md, synthetic
+dev/held-out corpus plus 108 real-model replays) re-thresholded CF-01, DL-02, ESC-01,
+CAL-02 and EVD-02 on the dev split to a 1% or 5% false-positive rate on clean rows and
+read the result on the held-out split and the real rows. CF-01, DL-02 and ESC-01 are
+already at the dev-chosen threshold. CAL-02 at the dev-chosen 0.96 raises the real-model
+FPR from 0.017 to 0.250, so 0.75 stays. EVD-02 without its "cited a document that does
+not support the case" rule falls from 0.162 to 0.009 FPR held-out (0.417 to 0.000 on
+real) but loses about half its recall of harmful episodes (0.145 to 0.082). That is a
+trade, not a clear gain, so no default changed. Proposal, not done: split the rule so a
+contradicting document (a device record that does not match) still fails and an extra
+relevant document does not. New check FAITH-01 is hard with weight 0 (like FAIR-01), so
+adding it changed no quality score; it only gates.
