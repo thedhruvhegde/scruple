@@ -34,7 +34,21 @@ if [ "$tables" != 0 ]; then
   exit 1
 fi
 
-pg_restore --dbname="$url" --no-owner --no-privileges --exit-on-error --single-transaction "$prefix.dump"
+# pg_restore 17+ always starts with `SET transaction_timeout = 0`, a setting older
+# servers reject. When the client tools are newer than the target server (a distro
+# client against a pinned server), render the archive to SQL, drop that one line,
+# and replay it through psql with the same all-or-nothing semantics.
+client_major="$(pg_restore --version | sed -E 's/^[^0-9]*([0-9]+).*/\1/')"
+server_major="$(psql "$url" -X -v ON_ERROR_STOP=1 -At -c \
+  "SELECT current_setting('server_version_num')::int / 10000")"
+if [ "$client_major" -gt "$server_major" ]; then
+  echo "restore: pg_restore $client_major is newer than server $server_major; replaying through psql"
+  pg_restore --no-owner --no-privileges --exit-on-error --file=- "$prefix.dump" \
+    | sed -e '/^SET transaction_timeout = 0;$/d' \
+    | psql "$url" -X -q -v ON_ERROR_STOP=1 --single-transaction >/dev/null
+else
+  pg_restore --dbname="$url" --no-owner --no-privileges --exit-on-error --single-transaction "$prefix.dump"
+fi
 echo "restore: pg_restore done"
 
 want="$(python3 -c 'from scruple.storage.migrate import head; print(head())' 2>/dev/null || true)"
