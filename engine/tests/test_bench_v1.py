@@ -57,6 +57,9 @@ def test_v1_reference_scores() -> None:
         assert s.batch_blocks == DEFAULT_CASES // 500
     ev, acc = ref["evidence"], ref["always_accept"]
     assert ev.regret.mean == 0.0
+    # rebuilt after the refund-race engine fixes (docs/VERIFIER_FINDINGS.md): the
+    # honest policy fails no hard check on any of the 10,000 cases (was INV-01 19)
+    assert ev.hard_failures == {} and ev.gate.mean == 1.0
     assert ev.cost.high < acc.cost.low  # the evidence policy is cheaper, beyond the CIs
     assert acc.win.mean == 0.0
 

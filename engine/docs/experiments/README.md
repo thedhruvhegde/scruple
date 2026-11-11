@@ -36,9 +36,18 @@ valid claims: 4655
 reference scores (95% intervals):
 | agent | cases | reward | gate pass | cost (USD minor) | regret vs evidence | correct | win | hard failures |
 |---|---|---|---|---|---|---|---|---|
-| evidence | 10000 | 0.966 [0.965, 0.967] | 0.998 [0.997, 0.999] | 8282 [8072, 8491] | 0 [0, 0] | 0.777 [0.769, 0.785] | 0.449 [0.439, 0.459] | INV-01 19 |
-| always_accept | 10000 | 0.861 [0.858, 0.864] | 0.985 [0.982, 0.987] | 12746 [12492, 13001] | 4465 [4256, 4673] | 0.445 [0.435, 0.454] | 0.000 [0.000, 0.000] | INV-01 155 |
-| oracle | 10000 | 0.948 [0.945, 0.951] | 0.985 [0.982, 0.987] | 8667 [8451, 8883] | 385 [282, 488] | 0.857 [0.850, 0.863] | 0.412 [0.402, 0.422] | INV-01 155 |
+| evidence | 10000 | 0.970 [0.969, 0.971] | 1.000 [1.000, 1.000] | 8272 [8062, 8481] | 0 [0, 0] | 0.779 [0.771, 0.787] | 0.451 [0.441, 0.461] | - |
+| always_accept | 10000 | 0.868 [0.865, 0.871] | 0.985 [0.982, 0.987] | 12746 [12492, 13001] | 4475 [4266, 4683] | 0.445 [0.435, 0.454] | 0.000 [0.000, 0.000] | INV-01 155 |
+| oracle | 10000 | 0.955 [0.952, 0.957] | 0.985 [0.982, 0.987] | 8667 [8451, 8883] | 395 [291, 498] | 0.857 [0.850, 0.863] | 0.412 [0.402, 0.422] | INV-01 155 |
+
+Reference rows rebuilt 2026-11-11 (`scruple bench build --version 1`, 466 s with 2
+processes) after the refund-race engine fixes (F-11 in docs/VERIFIER_FINDINGS.md),
+the CAL-01 tie fix (F-12) and the EVD-02 split (D-019). The cases did not change: the
+manifest, its hash and every block digest are identical, so this is still v1. Before
+the rebuild the evidence row read reward 0.966, gate 0.998, cost 8282, hard failures
+INV-01 19, batch CAL-01 3. The reward shift mixes all three changes (the new EVD-03
+weight moves every quality score a little); the gate and hard-failure change is the
+engine fix.
 ```
 
 Building v1 (three reference policies, 4 processes on a shared 4-core container)
@@ -53,8 +62,9 @@ Reading the reference rows:
 - The oracle reads ground truth (a declared reference run) and is *more* expensive
   than the evidence policy: knowing a claim is invalid does not win it when the
   merchant lacks the documents, and fighting costs fees.
-- Even the honest reference fails a hard check on 19 of 10,000 cases (INV-01, ledger
-  invariants), and the oracle and always-accept policies on 155. On 3,000 cases from
+- Before the engine fix the honest reference failed a hard check on 19 of 10,000 cases
+  (INV-01, ledger invariants); after it, on none. The oracle and always-accept
+  policies still fail INV-01 on 155. On 3,000 cases from
   a throwaway salt (not v1), all 7 honest INV-01 failures had a refund in flight and
   ended with the cardholder over-credited at close: the check charges a violation
   that stands at close to the agent (F-8 in docs/VERIFIER_FINDINGS.md). A gate that

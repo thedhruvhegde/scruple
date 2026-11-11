@@ -168,7 +168,8 @@ climb on scorecard: best = the honest corner, value 0.9649 exploits []; 55 polic
     (both random starts climb back to the honest corner, shedding peek, claim_rate, refund_inquiries and flat_confidence)
 ```
 
-On all 10,000 benchmark cases:
+On all 10,000 benchmark cases (run before the refund-race engine fix; on the rebuilt
+v1 reference the honest policy has no INV-01 failures, docs/experiments/README.md):
 
 | policy | knobs | reward | ledger cost per case (USD) | hard-failure rate | false win claims | uploads cited | engine win rate | correct |
 |---|---|---|---|---|---|---|---|---|
