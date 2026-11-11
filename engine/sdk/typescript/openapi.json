@@ -1634,6 +1634,15 @@
         "title": "LiveDecisionBatch",
         "type": "object"
       },
+      "Meter": {
+        "enum": [
+          "gate_run",
+          "gate_cases",
+          "rollout"
+        ],
+        "title": "Meter",
+        "type": "string"
+      },
       "Metric": {
         "properties": {
           "basis": {
@@ -2624,6 +2633,124 @@
           "improved"
         ],
         "title": "TypeEvidence",
+        "type": "object"
+      },
+      "UsageAggregate": {
+        "description": "One meter's total in one period, for one tenant.",
+        "properties": {
+          "events": {
+            "title": "Events",
+            "type": "integer"
+          },
+          "meter": {
+            "$ref": "#/components/schemas/Meter"
+          },
+          "period": {
+            "enum": [
+              "day",
+              "month"
+            ],
+            "title": "Period",
+            "type": "string"
+          },
+          "period_end": {
+            "format": "date",
+            "title": "Period End",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date",
+            "title": "Period Start",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "tenant": {
+            "title": "Tenant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant",
+          "period",
+          "period_start",
+          "period_end",
+          "meter",
+          "quantity",
+          "events"
+        ],
+        "title": "UsageAggregate",
+        "type": "object"
+      },
+      "UsageEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "event_key": {
+            "pattern": "^[A-Za-z0-9._:@-]{1,200}$",
+            "title": "Event Key",
+            "type": "string"
+          },
+          "meter": {
+            "$ref": "#/components/schemas/Meter"
+          },
+          "quantity": {
+            "maximum": 4.611686018427388e+18,
+            "minimum": 0.0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9][a-z0-9-]{2,63}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "source": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "tenant": {
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+            "title": "Tenant",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "tenant",
+          "event_key",
+          "meter",
+          "quantity",
+          "at",
+          "source"
+        ],
+        "title": "UsageEvent",
         "type": "object"
       },
       "ValidationError": {
@@ -4051,6 +4178,188 @@
           }
         },
         "summary": "Shadow Observe Imported"
+      }
+    },
+    "/usage": {
+      "get": {
+        "description": "Usage totals for the caller's tenant, oldest period first (UTC).",
+        "operationId": "totals_usage_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "period",
+            "required": false,
+            "schema": {
+              "default": "month",
+              "enum": [
+                "day",
+                "month"
+              ],
+              "title": "Period",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageAggregate"
+                  },
+                  "title": "Response Totals Usage Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Totals",
+        "tags": [
+          "usage"
+        ]
+      }
+    },
+    "/usage/events": {
+      "get": {
+        "description": "The caller's tenant's usage events, oldest first. `X-Total-Count` has the total.",
+        "operationId": "events_usage_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 9223372036854775807,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UsageEvent"
+                  },
+                  "title": "Response Events Usage Events Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Events",
+        "tags": [
+          "usage"
+        ]
       }
     },
     "/version": {

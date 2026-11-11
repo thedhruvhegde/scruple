@@ -279,7 +279,7 @@ so serve no data from a mount.
   | table / state | tenant | why |
   |---|---|---|
   | rule_versions, audit_events, decisions | `tenant_id` in the key | each tenant's own registry and chain |
-  | imported_shadow_*, episodes, episode_calls, jobs, job_events, console_filter_events | `tenant_id` column | every read and write filters on it; jobs run in their tenant (`JobContext.tenant`) |
+  | imported_shadow_*, episodes, episode_calls, jobs, job_events, console_filter_events, usage_events | `tenant_id` column | every read and write filters on it; jobs run in their tenant (`JobContext.tenant`) |
   | retention_policies, retention_purges | `tenant_id` column, read across tenants | `scruple retention apply` is an operator command over every tenant's policy; each purge is audited in the purged tenant's own chain |
   | api_keys | `tenant_id` column, looked up across tenants | a key is found by its id before the tenant is known; the record names the tenant |
   | case store (`CaseStore`, a separate SQLite file) | one tenant per file | webhooks authenticate by the provider's signature, not a key, so the signing secret picks the tenant (`tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS`; a bare secret is `SCRUPLE_INGEST_TENANT`'s) and each tenant writes its own store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`; worker `--case-store-tenant`); `cases` and `movements` carry no tenant column |
@@ -317,6 +317,19 @@ so serve no data from a mount.
 Not yet built: connection pooling (one connection per store, behind a lock), typed
 ids, SAML and mTLS, signed audit checkpoints (the shared rate-limit store is built: section 8). The demo (`scruple demo`) still writes
 SQLite files.
+
+### Usage metering (`scruple/usage/`)
+
+Append-only `usage_events` per tenant (alembic 0011), unique by `(tenant_id,
+event_key)`. Events are derived from the tenant's gate decisions: `gate_run` (one per
+shadow, canary or assurance decision), `gate_cases` (the cases a shadow or canary
+replayed, as the decision records them) and `rollout` (one per activation), keyed
+`<decision id>:<meter>` and timed by the decision's `created_at`, so
+`UsageStore.sync(gate)` is idempotent and a period's total does not depend on when it
+ran. `aggregate` totals per meter per UTC day or month. `scruple usage sync|report`
+on the command line; `GET /usage` and `GET /usage/events` on the API, both `admin`
+and both for the caller's tenant only (they sync first). Billing reads the
+aggregates; metering prices nothing.
 
 ## 11. Persistence of runtime state, and jobs
 

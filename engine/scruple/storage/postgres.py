@@ -34,6 +34,7 @@ from scruple.storage import (
     jobs,
     ratelimit,
     retention,
+    usage,
 )
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
@@ -219,6 +220,7 @@ SCHEMA = (
     + retention.POSTGRES_DDL
     + ratelimit.POSTGRES_DDL
     + console_filters.POSTGRES_DDL
+    + usage.POSTGRES_DDL
 )
 
 
@@ -353,4 +355,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON {schema}.rate_limit_buckets TO {role};
 GRANT SELECT, INSERT ON {schema}.imported_shadow_keys TO {role};
 GRANT SELECT, INSERT ON {schema}.console_filter_events TO {role};
 GRANT USAGE ON SEQUENCE {schema}.console_filter_events_id_seq TO {role};
+GRANT SELECT, INSERT ON {schema}.usage_events TO {role};
+GRANT USAGE ON SEQUENCE {schema}.usage_events_id_seq TO {role};
 """

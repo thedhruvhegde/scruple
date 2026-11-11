@@ -18,6 +18,7 @@ from scruple.storage import (
     jobs,
     ratelimit,
     retention,
+    usage,
 )
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
@@ -122,6 +123,7 @@ SCHEMA = (
     + retention.SQLITE_DDL
     + ratelimit.SQLITE_DDL
     + console_filters.SQLITE_DDL
+    + usage.SQLITE_DDL
 )
 
 _HISTORY_MESSAGES = ("append-only", "immutable")
