@@ -266,6 +266,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.cli.shadow import add_shadow_parser
 
     add_shadow_parser(sub, DEFAULT_DB)
+    from scruple.pilot.cli import add_pilot_parser
+
+    add_pilot_parser(sub)
     return p
 
 
