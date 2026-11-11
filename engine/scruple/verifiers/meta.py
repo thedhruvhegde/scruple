@@ -659,19 +659,11 @@ def auc(scores: Sequence[float], labels: Sequence[bool]) -> float | None:
     pos, neg = s[y], s[~y]
     if pos.size == 0 or neg.size == 0:
         return None
-    order = np.argsort(np.concatenate([pos, neg]), kind="mergesort")
-    allv = np.concatenate([pos, neg])[order]
-    ranks = np.empty(allv.size)
-    i = 0
-    while i < allv.size:  # average ranks over ties
-        j = i
-        while j + 1 < allv.size and allv[j + 1] == allv[i]:
-            j += 1
-        ranks[i : j + 1] = (i + j) / 2 + 1
-        i = j + 1
-    r = np.empty(allv.size)
-    r[order] = ranks
-    rank_pos = r[: pos.size].sum()
+    allv = np.concatenate([pos, neg])
+    _, inv, counts = np.unique(allv, return_inverse=True, return_counts=True)
+    ends = np.cumsum(counts)
+    avg = ends - (counts - 1) / 2  # average 1-based rank of each distinct value
+    rank_pos = avg[inv[: pos.size]].sum()
     return float((rank_pos - pos.size * (pos.size + 1) / 2) / (pos.size * neg.size))
 
 
@@ -696,14 +688,15 @@ def roc(
         if reps_v:
             lo, hi = (float(x) for x in np.percentile(reps_v, [2.5, 97.5]))
     points = []
-    for t in sorted({round(x, 6) for x in risk}):
-        flagged = [x >= t for x in risk]
-        tp = sum(f and h for f, h in zip(flagged, y, strict=True))
-        fp = sum(f and not h for f, h in zip(flagged, y, strict=True))
-        npos, nneg = sum(y), len(y) - sum(y)
+    ra = np.round(np.asarray(risk, dtype=float), 6)
+    ya_ = np.asarray(y, dtype=bool)
+    npos, nneg = int(ya_.sum()), int((~ya_).sum())
+    for t in np.unique(ra):  # flag every row with risk >= t
+        flagged = ra >= t
+        tp, fp = int((flagged & ya_).sum()), int((flagged & ~ya_).sum())
         points.append(
             {
-                "risk_at_least": t,
+                "risk_at_least": float(t),
                 "tpr": round(tp / npos, 4) if npos else None,
                 "fpr": round(fp / nneg, 4) if nneg else None,
             }
