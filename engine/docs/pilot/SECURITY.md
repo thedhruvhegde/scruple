@@ -127,7 +127,7 @@ HTTP/1.1 413 Request Entity Too Large
 
 | question | answer |
 |---|---|
-| Testing | 5,388 tests in the default suite (counted on the November 2026 run; 188 of them in tests/test_auth_*.py and tests/test_tenancy_*.py) (ruff, ruff format, mypy strict, pytest), plus slow and Postgres suites. CI workflow `.github/workflows/ci.yml` runs lint, typecheck, tests with coverage, the demo, Postgres tests with migrations, a compose check and an image build. |
+| Testing | 7,239 tests passed and 20 skipped in the default suite (run of 2026-11-11, `uv run pytest -n 2 --dist worksteal`; 227 of them in tests/test_auth_*.py and tests/test_tenancy_*.py) (ruff, ruff format, mypy strict, pytest), plus slow and Postgres suites. CI workflow `.github/workflows/ci.yml` runs lint, typecheck, tests with coverage, the demo, Postgres tests with migrations, a compose check and an image build. |
 | Change control | Small commits; every commit passes `make lint typecheck test`. |
 | Vulnerability scanning | Not set up (no dependency or image scanner in CI). |
 
@@ -141,17 +141,54 @@ recorded in docs/DESIGN.md.
 | SOC 2 | Not started. |
 | Penetration test | None yet, internal or external. |
 | SAML, mTLS | Not built. Authentication is API keys and OIDC bearer tokens. |
-| Shared rate limit store | Buckets are in memory per process; a Redis or database backend implements `RateLimitBackend` but none ships. |
-| Tenant administration | Tenants are created implicitly by the first key or token for them; there is no tenant list, quota or offboarding command. With `SCRUPLE_CASE_STORE` set, webhook batches are persisted to that case store, which is one tenant's file: the tenant is configuration (`SCRUPLE_INGEST_TENANT`), not taken from the request. |
+| Shared rate limit store | Done: `SCRUPLE_RATE_LIMIT_BACKEND=database` keeps the buckets in the gate database (`scruple/auth/ratelimit_db.py`); on Postgres a row lock per bucket gives every replica one limit (tests/test_auth_ratelimit_db.py, two app instances on one Postgres). Default stays in memory per process. Output below. |
+| Tenant administration | Tenants are created implicitly by the first key or token for them; there is no tenant list, quota or offboarding command. Webhook deliveries are routed by the signing secret: `tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS` map each secret to one tenant, and each tenant writes its own case store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`); a tenant with secrets but no store refuses to start (tests/test_ingest_webhook_tenants.py). |
 | Per-tenant genesis | Done: each tenant's chain starts from its own genesis, so a copy of one tenant's rows into another tenant fails verification. Tenant `default` keeps the old all-zero genesis (chains from before tenancy still verify), so a default chain copied into another database's default tenant is caught only by an anchored head. |
 | Key management | No KMS integration, no key-encryption keys, no per-tenant keys; keys are supplied by the operator. Nothing counts encryptions per key yet (NIST SP 800-38D limit noted in docs/INTEGRATIONS.md). |
 | Field encryption, redaction and tokenisation wired into storage and ingest | Done for imported cases (`scruple ingest`, case store; docs/INTEGRATIONS.md). Not applied to the gate database (rules, decisions, audit), which holds no partner case data. |
 | External anchoring or signing of the audit head | Not built (ROADMAP 141; docs/DESIGN.md "Next" item 4). A consistent rewrite of the whole chain is not detected without an external anchor (docs/VERIFIER_FINDINGS.md G-6). |
-| Retention policies | Built: per-tenant policies, audited purges in the purged tenant's chain (`scruple retention`, docs/ARCHITECTURE.md section 11). Nothing schedules `retention apply` yet. |
-| Persisting ingested webhook batches | Not built; accepted Stripe webhook batches stay in memory on the receiver (docs/INTEGRATIONS.md). |
+| Retention policies | Built: per-tenant policies, audited purges in the purged tenant's chain (`scruple retention`, docs/ARCHITECTURE.md section 11). Scheduled: `scruple worker --schedule-retention` (or `scruple retention schedule` from cron) queues one `retention_apply` job per tenant per UTC day, idempotent by day. A decision re-sent for a purged case is refused by its key hash. |
+| Persisting ingested webhook batches | Done with a case store configured: every accepted Stripe or Adyen delivery is written to the signing tenant's case store, idempotent by event id (`CaseStore.write_webhook`). Without one, the receiver verifies and acknowledges only. |
 | Adyen HTTP endpoint | Not built; the adapter is a function. |
 | Secrets from a vault | Not built (ROADMAP 156); environment variables only. |
 | Helm chart, Terraform module | Not built (ROADMAP 188, 189). |
 | Backups and restore runbook | Not written (ROADMAP 191). |
 | CI on github.com and gitlab.com | The action and template were tested locally and through a fake HTTP transport, not run on those hosts (docs/CI.md). |
 | Image build in this review | The image build is a CI job and is covered statically by tests/test_deploy.py; it was not rebuilt for this document. |
+
+Output for the items closed above (run 2026-11-11 on a local SQLite gate database;
+keys redacted). Two `scruple serve` processes on one database share one bucket
+(`SCRUPLE_RATE_LIMIT_BACKEND=database`, burst 3, 1 per minute), alternating ports:
+
+```
+$ for i in 1 2 3 4 5 6; do port=$((18441 + i % 2)); curl -s -o /dev/null -w "$port:%{http_code} " -H "X-API-Key: $READER" localhost:$port/rules; done
+18442:200 18441:200 18442:200 18441:429 18442:429 18441:429
+$ curl -i -H "X-API-Key: $READER" localhost:18441/rules
+HTTP/1.1 429 Too Many Requests
+retry-after: 60
+{"detail": "request rate limit exceeded; retry after 60 s"}
+```
+
+Retention as a daily job, once per tenant per day:
+
+```
+$ scruple retention set --db gate.db --tenant bank-a --days 30
+[{"days": 30, "tenant_id": "bank-a"}]
+$ scruple retention schedule --db gate.db
+[{"created": true, "job_id": "job-00000001", "tenant_id": "bank-a"}]
+$ scruple retention schedule --db gate.db
+[{"created": false, "job_id": "job-00000001", "tenant_id": "bank-a"}]
+$ scruple worker --db gate.db --once --isolation thread
+{"job": "job-00000001", "status": "succeeded"}
+```
+
+A Stripe delivery signed with bank-b's secret (`SCRUPLE_STRIPE_WEBHOOK_SECRETS="bank-a=whsec_...,bank-b=whsec_..."`,
+`SCRUPLE_CASE_STORES="bank-a=a.db,bank-b=b.db"`; synthetic event built from the vendored fixture) lands only in bank-b's store:
+
+```
+$ curl -s -X POST -H "Stripe-Signature: $SIGNED_WITH_BANK_B" --data-binary @event.json localhost:18443/ingest/stripe/webhook
+{"received":true,"event_id":"evt_demo_1","duplicate":false,"cases":1,"movements":0,"stored":true,"stale":0}
+$ python -c "import sqlite3; print(sqlite3.connect('a.db').execute('SELECT count(*) FROM webhook_events').fetchone()[0]); print('|'.join(sqlite3.connect('b.db').execute('SELECT tenant_id, event_id FROM webhook_events').fetchone()))"
+0
+bank-b|evt_demo_1
+```

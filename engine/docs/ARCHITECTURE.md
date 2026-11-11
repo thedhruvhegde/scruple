@@ -293,7 +293,7 @@ so serve no data from a mount.
 - Pre-commit: ruff, ruff-format, mypy (local), gitleaks.
 
 Not yet built: connection pooling (one connection per store, behind a lock), typed
-ids, SAML and mTLS, a shared rate-limit store, signed audit checkpoints. The demo (`scruple demo`) still writes
+ids, SAML and mTLS, signed audit checkpoints (the shared rate-limit store is built: section 8). The demo (`scruple demo`) still writes
 SQLite files.
 
 ## 11. Persistence of runtime state, and jobs

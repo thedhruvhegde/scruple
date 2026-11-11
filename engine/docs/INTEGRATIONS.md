@@ -72,10 +72,12 @@ Rules every adapter follows:
   remembered, so Stripe's retry can succeed later.
 - Vectors in the tests were computed independently with `openssl dgst -sha256 -hmac`.
 - Route: `POST /ingest/stripe/webhook`, mounted in `api/app.py` with one line.
-  Secrets from `SCRUPLE_STRIPE_WEBHOOK_SECRETS` (comma separated); unset means 503.
+  Secrets from `SCRUPLE_STRIPE_WEBHOOK_SECRETS` (comma separated; `tenant=secret` maps a
+  secret to a tenant, a bare secret is `SCRUPLE_INGEST_TENANT`'s); unset means 503.
   400 bad signature, 413 body over 2 MiB, 422 signed but unmappable.
-- Stubbed: accepted batches stay in memory on the receiver; persisting them into the
-  case store is not wired (exports go through `scruple ingest`).
+- Persisted to the signing tenant's case store when one is configured
+  (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`), idempotent by event id; without one,
+  verified and acknowledged only.
 
 ## Adyen dispute notifications (`scruple.ingest.adyen`)
 
