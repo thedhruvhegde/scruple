@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% import "_charts.html" as ch with context %}
+{% import "_dash.html" as dsh with context %}
+{% set section = "dashboard" %}
+{% block title %}savings{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/dashboard?period={{ ctx.win.period }}">dashboard</a><span>/</span><span>savings</span></p>
+<h1>Savings</h1>
+<p class="lede">Money saved or at risk from changes the gate judged: backtests on history, shadow mode on the gate's held-out replay and on imported decisions, and the harmful changes it blocked. {{ ctx.win.label | capitalize }}.</p>
+{{ dsh.subnav("savings", ctx.win.period) }}
+{{ dsh.periods("savings", ctx.win.period) }}
+{{ dsh.banner(ctx) }}
+{% endblock %}
+{% block body %}
+<div class="sec">{{ dsh.legend() }}
+  <div class="stats">
+    <div class="stat"><span>Avoided by blocked changes {{ dsh.basis("estimated") }}</span><b>{{ sv.avoided | usd }}</b></div>
+    <div class="stat"><span>Promoted changes, held-out replay {{ dsh.basis("synthetic") }}</span><b>{{ sv.shadow_net | signed_usd }}</b></div>
+    <div class="stat"><span>Backtests: history's realised cost {{ dsh.basis("observed") }}</span><b>{{ sv.backtest_observed | usd }}</b></div>
+    <div class="stat"><span>Backtests: candidate minus history {{ dsh.basis("estimated") }}</span><b>{{ sv.backtest_estimated | signed_usd }}</b></div>
+    <div class="stat"><span>Imported shadow: candidate minus production {{ dsh.basis(sv.imported_basis) }}</span><b>{{ sv.imported_net | signed_usd if sv.imported_net is not none else "none yet" }}</b></div>
+  </div>
+</div>
+
+<div class="sec" id="blocked">
+  <h2><span class="n">01 / BLOCKED</span>Harmful changes stopped before they went live</h2>
+  <p class="note">Estimated avoided cost: the change's net extra loss on the held-out replay when it was worse on average, otherwise the extra loss on the case types it made worse. Computed on the gate's synthetic held-out cases, scaled to the cases each decision replayed; it is not money a real ledger lost or kept.</p>
+  {{ ch.chart(sv.charts["avoided"]) }}
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Decision</th><th>Version</th><th class="r">Cases</th><th class="r">Mean change / case</th><th>Interval / case</th><th class="r">Worse types, extra loss</th><th class="r">Avoided</th><th class="r">e (worse)</th><th>Why</th></tr></thead>
+    <tbody>{% for b in sv.blocked %}
+      <tr>
+        <td class="m" data-label="Decision">{{ b.rec.decision.decision_id }}<br><span class="k">{{ b.rec.decision.created_at | when }}</span></td>
+        <td class="m" data-label="Version"><a href="{{ P }}/rules/{{ b.rec.decision.rule_id }}/versions/{{ b.rec.decision.version }}">{{ b.ref }}</a></td>
+        <td class="m r" data-label="Cases">{{ b.n | num }}</td>
+        <td class="m r" data-label="Mean change / case">{{ b.mean_improvement | signed_usd }}</td>
+        <td data-label="Interval / case">{{ m.interval(b.ci_low, b.ci_high, [b.ci_low, -1] | min, [b.ci_high, 1] | max) }}<span class="k">{{ b.ci_low | usd }} to {{ b.ci_high | usd }}</span></td>
+        <td class="m r" data-label="Worse types, extra loss">{{ b.harm | usd }}</td>
+        <td class="m r" data-label="Avoided"><b>{{ b.avoided | usd }}</b></td>
+        <td class="m r" data-label="e (worse)">{{ b.e_regression | evalue }}</td>
+        <td class="k wrap" data-label="Why">{{ b.rec.decision.summary }}</td>
+      </tr>
+    {% else %}<tr><td colspan="9" class="dim">No change was blocked in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="shadow">
+  <h2><span class="n">02 / SHADOW, HELD-OUT</span>Every shadow decision on the gate's replay</h2>
+  <p class="note">Net change = mean improvement per case (history's policy minus the candidate's loss, positive is better) times the replayed cases, with the decision's interval scaled the same way. e-values from <code>scruple.stats</code> where the tenant's policy uses the e-value gate: e (worse) tests "no worse than tolerance", e (better) tests "no better". Synthetic held-out cases.</p>
+  {{ ch.chart(sv.charts["shadow"]) }}
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Decision</th><th>Version</th><th>Outcome</th><th class="r">Cases</th><th class="r">Net change</th><th>Interval (net)</th><th class="r">e (worse)</th><th class="r">e (better)</th></tr></thead>
+    <tbody>{% for s in sv.shadow | reverse %}
+      <tr>
+        <td class="m" data-label="Decision">{{ s.rec.decision.decision_id }}<br><span class="k">{{ s.rec.decision.created_at | when }}</span></td>
+        <td class="m" data-label="Version"><a href="{{ P }}/rules/{{ s.rec.decision.rule_id }}/versions/{{ s.rec.decision.version }}">{{ s.ref }}</a></td>
+        <td data-label="Outcome">{{ m.outcome(s.rec.decision.outcome) }}</td>
+        <td class="m r" data-label="Cases">{{ s.n | num }}</td>
+        <td class="m r" data-label="Net change">{{ s.total | signed_usd }}</td>
+        <td class="m" data-label="Interval (net)">{{ (s.ci_low * s.n) | usd }} to {{ (s.ci_high * s.n) | usd }}</td>
+        <td class="m r" data-label="e (worse)">{{ s.e_regression | evalue }}</td>
+        <td class="m r" data-label="e (better)">{{ s.e_certify | evalue }}</td>
+      </tr>
+    {% else %}<tr><td colspan="8" class="dim">No shadow decisions in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="backtests">
+  <h2><span class="n">03 / BACKTESTS</span>Candidates replayed on the dispute history</h2>
+  <p class="note">History's cost is <b>observed</b>: realised from ledger postings and case states. Where the candidate did what history did, its cost is the same observed cost. Where it acted differently the cost is <b>estimated</b> (calibrated win rates), with an optimistic and a pessimistic end. Intervals and e-values come from the backtest's own statistics.</p>
+  {{ ch.chart(sv.charts["backtest"]) }}
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Candidate</th><th>Data</th><th class="r">Cases obs. / est.</th><th class="r">History cost</th><th class="r">Candidate, observed part</th><th class="r">Candidate, estimated part</th><th class="r">Difference</th><th>Range</th><th>Per case (pessimistic)</th><th>Verdict</th></tr></thead>
+    <tbody>{% for b in sv.backtests %}{% set r = b.report %}
+      <tr>
+        <td class="m" data-label="Candidate">{{ b.name }}<br><span class="k">{{ b.source }}{% if b.at %}, {{ b.at | when }}{% endif %}</span></td>
+        <td class="k wrap" data-label="Data">{% if r.synthetic %}<span class="tag dim">synthetic</span>{% else %}<span class="tag pass">real</span>{% endif %} {{ b.data_label }}</td>
+        <td class="m r" data-label="Cases obs. / est.">{{ r.n_observed }} / {{ r.n_estimated }}</td>
+        <td class="m r" data-label="History cost">{{ r.baseline_cost | usd }} {{ dsh.basis("observed") }}</td>
+        <td class="m r" data-label="Candidate, observed part">{{ r.candidate_cost_observed | usd }}</td>
+        <td class="m r" data-label="Candidate, estimated part">{{ r.candidate_cost_estimated | usd }} {{ dsh.basis("estimated") }}</td>
+        <td class="m r" data-label="Difference"><b>{{ b.delta | signed_usd }}</b></td>
+        <td class="m" data-label="Range">{{ b.delta_low | signed_usd }} to {{ b.delta_high | signed_usd }}</td>
+        <td class="m" data-label="Per case (pessimistic)">{% if r.pessimistic %}{{ r.pessimistic.mean_diff | signed_usd }} [{{ r.pessimistic.ci_low | usd }}, {{ r.pessimistic.ci_high | usd }}]{% else %}<span class="dim">n/a</span>{% endif %}{% if r.stats %}<br><span class="k">e (worse) {{ r.stats.pooled_regression_e_value | evalue }}, e (certify) {{ r.stats.certify_e_value | evalue }}</span>{% endif %}</td>
+        <td class="m" data-label="Verdict">{{ r.verdict }}{% if not r.robust %} <span class="tag hold">not robust</span>{% endif %}</td>
+      </tr>
+    {% else %}<tr><td colspan="10" class="dim">No backtests in this period. Queue one with <code>POST /jobs</code> (kind <code>backtest</code>) or drop reports in <code>&lt;data&gt;/{{ ctx.tenant }}/backtests/</code>.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="imported">
+  <h2><span class="n">04 / SHADOW, IMPORTED</span>Live or imported decisions scored without acting</h2>
+  <p class="note">Production's decisions on imported cases, re-decided by the candidate from the decision-time view. Agreement and production's cost are observed; the candidate's cost on changed decisions is estimated. Negative difference is better. The data label is the recorder's own.</p>
+  {% for i in sv.imported %}
+  {% set d = i.metric("candidate_minus_production") %}{% set ag = i.metric("agreement") %}
+  <div class="grid2">
+    <div>
+      <h3>{{ i.ref }} <span class="tag {{ 'dim' if i.summary.data == 'synthetic' else 'pass' }}">{{ i.summary.data }}</span></h3>
+      <dl class="kv">
+        <dt>decisions</dt><dd>{{ i.summary.decisions }} ({{ i.summary.resolved }} resolved, {{ i.summary.open }} open)</dd>
+        <dt>agreement</dt><dd>{{ ag.value | pct if ag else "n/a" }} {{ dsh.basis("observed") }}</dd>
+        <dt>difference</dt><dd>{% if d and d.value is not none %}{{ d.value | minor(i.summary.currency or "USD") }} [{{ d.low | minor(i.summary.currency or "USD") if d.low is not none else "n/a" }} to {{ d.high | minor(i.summary.currency or "USD") if d.high is not none else "n/a" }}] {{ dsh.basis(d.basis) }}{% else %}no resolved cases yet{% endif %}</dd>
+        <dt>priced from</dt><dd>{{ i.summary.profile }}</dd>
+        <dt>last update</dt><dd>{{ i.at | when }}</dd>
+      </dl>
+      <div class="tw"><table>
+        <thead><tr><th>Check</th><th>Kind</th><th class="r">Production</th><th class="r">Candidate</th></tr></thead>
+        <tbody>{% for f in i.summary.findings %}<tr><td class="m">{{ f.check }}</td><td class="k">{{ f.kind }}</td><td class="m r">{{ f.production }}</td><td class="m r">{{ f.candidate if f.candidate is not none else "n/a" }}</td></tr>{% else %}<tr><td colspan="4" class="dim">No findings.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </div>
+    <div>{{ ch.chart(sv.charts["imported:" ~ i.ref]) }}</div>
+  </div>
+  {% else %}<p class="note">No imported shadow decisions for this tenant. Send production's decisions to <code>POST /shadow/rules/{id}/versions/{v}/imported/decisions</code>.</p>{% endfor %}
+</div>
+
+<div class="sec" id="canary">
+  <h2><span class="n">05 / CANARY</span>Treatment against control on live traffic</h2>
+  <p class="note">Realised mean cost per case, treatment minus control (positive is worse), and the sequential test's call. In this build the canary's live traffic is simulated.</p>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Decision</th><th>Version</th><th>Outcome</th><th class="r">Treatment cases</th><th class="r">Treatment minus control / case</th><th>Sequential test</th></tr></thead>
+    <tbody>{% for c in sv.canary | reverse %}
+      <tr><td class="m" data-label="Decision">{{ c.rec.decision.decision_id }}</td><td class="m" data-label="Version">{{ c.ref }}</td><td data-label="Outcome">{{ m.outcome(c.rec.decision.outcome) }}</td><td class="m r" data-label="Treatment cases">{{ c.treatment | num }}</td><td class="m r" data-label="Difference">{{ c.delta_per_case | signed_usd }}</td><td class="m" data-label="Sequential test">{{ (c.sequential or "n/a") | replace("_", " ") }}</td></tr>
+    {% else %}<tr><td colspan="6" class="dim">No canary decisions in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

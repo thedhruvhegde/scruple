@@ -175,6 +175,52 @@ form.inline { display: inline; }
 .screen.side ol { min-width: 0; }
 .screen.side li { grid-template-columns: 3ch minmax(0, 1fr); }
 
+/* ---------- dashboard: sub-navigation, period picker, banner ---------- */
+.subnav { display: flex; flex-wrap: wrap; gap: 2px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.subnav a { text-decoration: none; color: var(--muted); padding: 6px 10px 4px; white-space: nowrap; border-bottom: 2px solid transparent; }
+.subnav a[aria-current="page"] { color: var(--fg); font-weight: 600; border-bottom-color: var(--accent); }
+.subnav a:hover, .subnav a:focus-visible { background: var(--fg); color: var(--bg); }
+.periods { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
+.periods a { color: var(--muted); text-decoration: none; padding: 2px 4px; white-space: nowrap; }
+.periods a[aria-current="true"] { color: var(--fg); font-weight: 600; }
+.periods a:hover, .periods a:focus-visible { background: var(--fg); color: var(--bg); }
+.banner { border: 1px solid var(--brass); padding: 10px 14px; font-size: 15px; max-width: 90ch; }
+.banner b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.08em; color: var(--brass); margin-right: 8px; }
+.legend .tag { margin-right: 2px; }
+.stat span .tag { font-size: 10px; margin-left: 4px; }
+.multiples { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 18px 24px; }
+.multiples > * { min-width: 0; }
+
+/* ---------- dashboard charts: inline SVG on dark screens ---------- */
+.chart { margin: 0; display: grid; gap: 8px; min-width: 0; }
+.chart figcaption { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.chart .ct { color: var(--fg); font-weight: 600; }
+.chart .basis { color: var(--muted); font-size: 11px; }
+.screen.plot { padding: 10px 8px 6px; overflow: hidden; }
+.svg { display: block; width: 100%; height: auto; }
+.svg.narrow { display: none; }
+@media (max-width: 640px) { .svg.wide { display: none; } .svg.narrow { display: block; } }
+.svg text { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 10px; fill: var(--c-dim); }
+.svg .hl.l { fill: var(--c-fg); }
+.svg .hl.v { fill: var(--c-fg); }
+.svg .xt { fill: var(--scr-edge); }
+.svg .grid { stroke: var(--scr-edge); stroke-width: 1; stroke-dasharray: 2 3; }
+.svg .zero { stroke: var(--c-dim); stroke-width: 1; }
+.svg .b { fill: var(--c-pine); }
+.svg .b.neg { fill: var(--c-verm); }
+.svg .b.hi { fill: var(--c-brass); }
+.svg .b.dim { fill: var(--c-dim); }
+.svg .wh { stroke: var(--c-fg); stroke-width: 1.25; }
+.svg .line { fill: none; stroke: var(--c-sky); stroke-width: 2; }
+.svg .area { fill: var(--c-sky); fill-opacity: 0.14; stroke: none; }
+.svg .mark { fill: var(--c-sky); }
+.svg .mark.hi, .svg .mark.neg { fill: var(--c-brass); }
+.nodata { margin: 0; padding: 24px 6px; color: var(--c-dim); }
+.rows summary { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; color: var(--muted); cursor: pointer; width: fit-content; }
+.rows summary:hover, .rows summary:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.rows table { margin-top: 6px; background: var(--panel); border: 1px solid var(--rule); }
+.rows td { padding: 5px 10px; font-size: 12px; }
+
 /* ---------- footer ---------- */
 .foot { padding-block: 18px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--rule); }
 

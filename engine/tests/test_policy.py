@@ -497,12 +497,12 @@ def test_tenant_fairness_profile_changes_the_console_scorecards() -> None:
 
     g = ready_gate()
     web = client(g)
-    before = web.get("/console/")
+    before = web.get("/console/rules")
     assert before.status_code == 200 and "FAIR-01" not in before.text
     compliance = Policy.model_validate({"name": "strict", "fairness": {"profile": "compliance"}})
     apply_policy(g, compliance, APPROVER)
     assert configured(g).config.verifier_profile == "compliance"
-    after = web.get("/console/")  # the evidence baseline wins against valid claims
+    after = web.get("/console/rules")  # the evidence baseline wins against valid claims
     assert after.status_code == 200 and "FAIR-01" in after.text
 
 

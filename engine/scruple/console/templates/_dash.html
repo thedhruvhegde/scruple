@@ -1,0 +1,35 @@
+{#- Shared pieces of the dashboard pages: sub-navigation, period picker, banners. -#}
+{% set dash_pages = [
+  ("", "Overview", "overview"),
+  ("/savings", "Savings", "savings"),
+  ("/payments", "Stripe and payments", "payments"),
+  ("/routing", "AI routing", "routing"),
+  ("/compute", "Runs and compute", "compute"),
+] %}
+
+{% macro subnav(page, period) -%}
+<nav class="subnav" aria-label="Dashboard">
+  {% for suffix, label, key in dash_pages %}<a href="{{ P }}/dashboard{{ suffix }}?period={{ period }}"{% if key == page %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+</nav>
+{%- endmacro %}
+
+{% macro periods(page, current) -%}
+{% set suffix = {"overview": "", "savings": "/savings", "payments": "/payments", "routing": "/routing", "compute": "/compute"}[page] %}
+<p class="periods" role="group" aria-label="Period">Period [{% for p in period_options %} <a href="{{ P }}/dashboard{{ suffix }}?period={{ p }}"{% if p == current %} aria-current="true"{% endif %}>{{ period_labels[p] }}</a>{% if not loop.last %} |{% endif %}{% endfor %} ]</p>
+{%- endmacro %}
+
+{% macro banner(ctx) -%}
+{% set mk = ctx.marker %}
+{% if ctx.synthetic %}
+<p class="banner"><b>SYNTHETIC</b> {{ mk.label if mk and mk.label else "This tenant holds synthetic demo data." }} Every number below comes from simulated cases or seeded data; none is a real outcome.</p>
+{% endif %}
+{%- endmacro %}
+
+{% macro basis(b) -%}
+{%- set cls = {"observed": "pass", "estimated": "hold", "synthetic": "dim", "mixed": "hold"} -%}
+<span class="tag {{ cls.get(b, 'dim') }}">{{ b }}</span>
+{%- endmacro %}
+
+{% macro legend() -%}
+<p class="note legend"><span class="tag pass">observed</span> read from records: ledger postings, case states, decisions, jobs. <span class="tag hold">estimated</span> priced by a model for an action that was not taken. <span class="tag dim">synthetic</span> computed on simulated cases; says nothing about real outcomes. Observed and estimated money are never added together.</p>
+{%- endmacro %}

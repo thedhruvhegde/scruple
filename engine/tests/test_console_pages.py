@@ -57,7 +57,7 @@ def episode(web: TestClient) -> str:
 
 def _pages(episode: str) -> list[tuple[str, tuple[str, ...]]]:
     return [
-        ("/console/", ("Runs and scores", f"{GOOD_RULE_ID}@v1", "evidence", "always-accept")),
+        ("/console/rules", ("Runs and scores", f"{GOOD_RULE_ID}@v1", "evidence", "always-accept")),
         ("/console/agents/evidence", ("Agent version evidence", episode, "Failed checks")),
         (
             f"/console/agents/evidence/episodes/{episode}",

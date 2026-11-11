@@ -1,0 +1,31 @@
+{#- Server-rendered SVG charts (geometry from scruple/console/charts.py). Every label
+    is printed through autoescape; colour comes from classes (the CSP allows no
+    inline style). Each chart is drawn wide and narrow; CSS shows one. -#}
+{% macro plot(c, p, size) -%}
+<svg class="svg {{ size }}" viewBox="0 0 {{ p.width }} {{ p.height }}" role="img" aria-label="{{ c.title }}" focusable="false">
+{%- if c.kind != "hbars" %}
+{%- for t in p.yticks %}<line class="grid" x1="{{ p.left }}" y1="{{ t.pos }}" x2="{{ p.right }}" y2="{{ t.pos }}"/><text class="yl" x="{{ p.left - 4 }}" y="{{ t.pos + 3.5 }}" text-anchor="end">{{ t.label }} &#x2524;</text>{% endfor %}
+<line class="zero" x1="{{ p.left }}" y1="{{ p.zero }}" x2="{{ p.right }}" y2="{{ p.zero }}"/>
+{%- for t in p.xticks %}<text class="xt" x="{{ t.pos }}" y="{{ p.bottom + 7 }}" text-anchor="middle">&#x2534;</text><text class="xl" x="{{ t.pos }}" y="{{ p.bottom + 19 }}" text-anchor="{{ 'start' if c.kind == 'steps' and loop.first else ('end' if c.kind == 'steps' and loop.last else 'middle') }}">{{ t.label }}</text>{% endfor %}
+{%- endif %}
+{%- if p.area %}<path class="area" d="{{ p.area }}"/><path class="line" d="{{ p.path }}"/>{% endif %}
+{%- for x, y, cls in p.marks %}<rect class="mark {{ cls }}" x="{{ x - 3 }}" y="{{ y - 3 }}" width="6" height="6"/>{% endfor %}
+{%- for b in p.bars %}<rect class="b {{ b.cls }}" x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}"><title>{{ b.label }}: {{ b.value }}</title></rect>
+{%- if b.lo is not none and b.hi is not none %}{% set cx = b.x + b.w / 2 %}<line class="wh" x1="{{ cx }}" y1="{{ b.lo }}" x2="{{ cx }}" y2="{{ b.hi }}"/><line class="wh" x1="{{ cx - 4 }}" y1="{{ b.lo }}" x2="{{ cx + 4 }}" y2="{{ b.lo }}"/><line class="wh" x1="{{ cx - 4 }}" y1="{{ b.hi }}" x2="{{ cx + 4 }}" y2="{{ b.hi }}"/>{% endif %}
+{%- endfor %}
+{%- for x, y, text, cls in p.labels %}<text class="hl {{ cls }}" x="{{ x }}" y="{{ y + 4 }}" text-anchor="{{ 'end' if cls == 'l' else 'start' }}">{{ text }}</text>{% endfor %}
+</svg>
+{%- endmacro %}
+
+{% macro chart(c) -%}
+<figure class="chart">
+  <figcaption><span class="ct">{{ c.title }}</span>{% if c.basis %} <span class="basis">{{ c.basis }}</span>{% endif %}</figcaption>
+  <div class="screen plot">
+    {% if c.empty %}<p class="nodata">no data in this period</p>{% else %}{{ plot(c, c.wide, "wide") }}{{ plot(c, c.narrow, "narrow") }}{% endif %}
+  </div>
+  {% if c.rows %}<details class="rows"><summary>data ({{ c.rows | length }})</summary>
+    <table><tbody>{% for k, v in c.rows %}<tr><td class="m">{{ k }}</td><td class="m r">{{ v }}</td></tr>{% endfor %}</tbody></table>
+  </details>{% endif %}
+  {% if c.note %}<p class="note">{{ c.note }}</p>{% endif %}
+</figure>
+{%- endmacro %}
