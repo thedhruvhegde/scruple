@@ -147,6 +147,34 @@ Every bet $\lambda_i$ used for case $i$ is $\F_{i-1}$-measurable.
 
 The gate decides \emph{promote}, \emph{hold} or \emph{block}. The error that costs money is promoting a harmful change; the error that costs adoption is blocking a good one.
 
+\paragraph{Dispute lifecycle.} \Cref{fig:life} is the engine's state machine. Deadlines and fees are those of the simulator (\texttt{docs/RULES.md}): sourced values cite public network documents as reported, the rest are marked as assumptions there. The agent acts only while the case awaits the merchant; the issuer and the network answer on the engine's clock, and a missed merchant deadline is decided by the engine, not by the agent.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=6mm and 33mm,
+  st/.style={draw=black!70, thick, align=left, inner sep=3pt, text width=71mm, minimum height=8mm, fill=cpine!6}]
+\node[st] (inq) {\textbf{inquiry}\hfill{\scriptsize merchant: 10 business days}};
+\node[st, below=of inq] (cb) {\textbf{chargeback}\hfill{\scriptsize fee \$15; merchant: 30 d (V), 45 d (MC)}};
+\node[st, below=of cb, fill=csky!14] (rep) {\textbf{representment}\hfill{\scriptsize issuer answers (engine: 10 d)}};
+\node[st, below=of rep] (pre) {\textbf{pre-arbitration}\hfill{\scriptsize fee \$25; merchant: 30 d}};
+\node[st, below=of pre, fill=csky!14] (arb) {\textbf{arbitration}\hfill{\scriptsize ruling (engine: 30 d)}};
+\node[draw=black!70, thick, fill=cbrass!10, align=center, text width=30mm, inner sep=3pt, fit={($(inq.north east)+(31mm,0)$) ($(arb.south east)+(59mm,0)$)}] (res) {};
+\node[align=center, text width=28mm] at (res.center) {\textbf{resolved}\\[2pt]{\scriptsize won, partial, lost or accepted\\[2pt] final postings in the ledger\\[2pt] arbitration loser pays \$600 (Visa) or \$575 (MC)}};
+\draw[arr] ($(inq.west)+(-12mm,0)$) -- node[slab, above]{opens} (inq.west);
+\draw[arr] ($(cb.west)+(-12mm,0)$) -- node[slab, above]{opens} (cb.west);
+\draw[arr] (inq) -- node[slab, right]{represent and not enough, or missed} (cb);
+\draw[arr] (cb) -- node[slab, right]{represent} (rep);
+\draw[arr] (rep) -- node[slab, right]{issuer files pre-arbitration} (pre);
+\draw[arr] (pre) -- node[slab, right]{escalate} (arb);
+\draw[arr] (inq.east) -- node[slab, above]{issuer satisfied: won} (inq.east -| res.west);
+\draw[arr] (cb.east) -- node[slab, above]{accept; missed: lost} (cb.east -| res.west);
+\draw[arr] (rep.east) -- node[slab, above]{issuer accepts: won} (rep.east -| res.west);
+\draw[arr] (pre.east) -- node[slab, above]{accept; missed: lost} (pre.east -| res.west);
+\draw[arr] (arb.east) -- node[slab, above]{ruling: won or lost} (arb.east -| res.west);
+\end{tikzpicture}
+\caption{The dispute lifecycle in the engine (collaboration workflow; simplified). Shaded states await the issuer or the network; the others await the merchant, whose deadline is shown. A case opens as an inquiry with probability 0.2 and as a chargeback otherwise (assumption A-32). Fees are charged on entering a state. A refund may be issued in any open state, and a settled refund record makes the dispute moot (A-23). Windows: Visa chargeback response 30 days (source S1), Mastercard 45 days (S1, S11), pre-arbitration response 30 days (Visa S8; Mastercard A-14), inquiry response 10 business days (A-13); fees (A-17) and engine timing (A-25) are assumptions. Not legal or network advice.}\label{fig:life}
+\end{figure}
+
 \paragraph{Benchmark.} Benchmark v1 is 10{,}000 synthetic dispute cases from a sealed held-out seed namespace; only a manifest of commitments is public (content hash \texttt{1286baf3\ldots2cb13f91}). Family mix: buyer's remorse 1{,}977; cardholder mistake 577; friendly fraud 2{,}791; merchant error 625; service failure 1{,}840; true fraud 2{,}190; 4{,}655 claims are valid. Reference policies (synthetic): the \emph{evidence} policy (represent when the required evidence exists, else concede) costs \$82.82 per case (95\% interval 80.72 to 84.91) and fails a hard check on 19 of 10{,}000 cases; always-accept costs \$127.46; an oracle that reads the hidden truth costs \$86.67, more than the evidence policy, because knowing a claim is invalid does not win it without documents.
 
 \section{Verifier design: anchoring to the ledger and the trace}\label{sec:verifiers}
