@@ -14,9 +14,12 @@ Groq validates tool calls server side. When a model names a tool that was not in
 the request (seen live with openai/gpt-oss-120b calling `commentary`, a leaked
 channel name), Groq answers HTTP 400 with `error.code` `tool_use_failed` and the
 model's text in `error.failed_generation`
-(https://console.groq.com/docs/tool-use). That is a model mistake, not a failed
-request: `rejected_turn` turns it into a text tool call, the episode answers it
-with its usual unknown-tool error, and the model gets another turn.
+(https://console.groq.com/docs/tool-use). Output it cannot parse at all comes back
+as `output_parse_failed`, often with an empty `failed_generation` (seen live with
+openai/gpt-oss-20b). Both are model mistakes, not failed requests:
+`rejected_turn` turns the generation into a text tool call (the episode answers an
+unknown tool with its usual error) or, with nothing parseable, into a turn with no
+calls, which gets the usual nudge.
 """
 
 from __future__ import annotations
@@ -49,6 +52,12 @@ _STOPS: dict[str, StopKind] = {
     "model_length": "max_tokens",
     "content_filter": "refusal",
 }
+
+
+# Groq error codes that carry a model generation it refused to return
+# (https://console.groq.com/docs/errors): a call to a tool not in the request, and
+# output its parser could not read.
+REJECTED_CODES = frozenset({"tool_use_failed", "output_parse_failed"})
 
 
 def short_call_id(turn: int, index: int) -> str:
@@ -160,7 +169,7 @@ class ChatProvider(Provider):
             err = json.loads(body).get("error")
         except (ValueError, AttributeError):
             return None
-        if not isinstance(err, dict) or err.get("code") != "tool_use_failed":
+        if not isinstance(err, dict) or err.get("code") not in REJECTED_CODES:
             return None
         failed = str(err.get("failed_generation") or "")
         calls: list[ToolCall] = []
@@ -172,8 +181,8 @@ class ChatProvider(Provider):
             calls = [ToolCall(short_call_id(turn, 0), obj["name"], obj.get("arguments"))]
         else:
             calls = [ToolCall(c.call_id, c.name, c.args) for c in extract_text_tool_calls(failed)]
-        return Turn(
-            assistant={"role": "assistant", "content": failed or "(no output)"},
+        return Turn(  # nothing generated: nothing to put in the history
+            assistant={"role": "assistant", "content": failed} if failed else {},
             calls=calls,
             stop="tool_use" if calls else "end",
             text=failed,
