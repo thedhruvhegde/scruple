@@ -44,13 +44,14 @@
 .nav-sec a[aria-current] { color: var(--fg); }
 .nav-sec a[aria-current]::before { content: "[" counter(sec, decimal-leading-zero) " "; content: "[" counter(sec, decimal-leading-zero) " " / ""; color: inherit; }
 .nav-sec a[aria-current]::after { content: "]"; content: "]" / ""; }
-.nav-pg { margin-left: auto !important; }
-.nav-pg::before { content: "::"; content: "::" / ""; color: var(--rule-strong); padding: 0 10px 0 6px; }
-.nav-pg a { color: var(--fg); padding: 6px 8px; }
-.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
-.nav-pg a[aria-current="page"] { font-weight: 600; }
-.nav-pg a[aria-current="page"]::before { content: "["; content: "[" / ""; }
-.nav-pg a[aria-current="page"]::after { content: "]"; content: "]" / ""; }
+/* the pages, one bracketed group set apart at the right: [ home | results | paper ], the page you are on inverted */
+.nav-pg { margin-left: auto !important; color: var(--fg); }
+.nav-pg li { display: flex; align-items: center; }
+.nav-pg li:first-child::before { content: "["; content: "[" / ""; font-weight: 700; padding-right: 2px; }
+.nav-pg li:last-child::after { content: "]"; content: "]" / ""; font-weight: 700; padding-left: 2px; }
+.nav-pg li + li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); }
+.nav-pg a { color: var(--fg); padding: 6px 6px; text-transform: lowercase; }
+.nav-pg a[aria-current="page"] { background: var(--fg); color: var(--bg); font-weight: 600; }
 .nav a:hover, .nav a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .nav a:hover::before, .nav a:focus-visible::before { color: inherit; }
 /* the bottom edge: +----:----+ in rule ink, overdrawn by ====> as you read, then the keys and how far */
@@ -85,11 +86,12 @@ main:focus { outline: none; }
   .nav-sec a[aria-current] { color: var(--c-pine); }
   .nav-sec a[aria-current]::before { content: ">" counter(sec, decimal-leading-zero) " "; content: ">" counter(sec, decimal-leading-zero) " " / ""; }
   .nav-sec a[aria-current]::after { content: " <"; content: " <" / ""; }
-  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; }
-  .nav-pg::before { padding: 0 0 4px 0; }
+  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; display: flex !important; flex-wrap: wrap; color: var(--c-fg); }
+  .nav-pg::before { flex-basis: 100%; }
   .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
-  .nav-pg a { padding-left: 4px; }
-  .nav-pg a[aria-current="page"] { color: var(--c-brass); }
+  .nav-pg li + li::before { color: var(--c-dim); }
+  .nav-pg a { padding: 9px 8px; }
+  .nav-pg a[aria-current="page"] { background: var(--c-fg); color: var(--scr-bg); }
   .nav a:hover, .nav a:focus-visible { background: var(--c-fg); color: var(--scr-bg); }
 }
 @media (max-width: 520px) { .crumb.in-sec[data-page]:not([data-page=""]) i { display: none; } .crumb.in-sec b { padding-left: 0; } }
