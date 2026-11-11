@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>Scruple pilot</title>
+<meta name="description" content="A six-week scruple pilot on card disputes: one candidate change, backtested on your own history, shadowed on live traffic and gated in your CI.">
+<link rel="canonical" href="https://thedhruvhegde.github.io/scruple/pilot/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Scruple">
+<meta property="og:title" content="Scruple pilot">
+<meta property="og:description" content="Six weeks, one workflow, one candidate change. Criteria signed before any data arrives.">
+<meta property="og:url" content="https://thedhruvhegde.github.io/scruple/pilot/">
+<meta property="og:image" content="https://thedhruvhegde.github.io/scruple/assets/banners/og-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="../assets/logos/bone-on-night/mark.svg">
+<link rel="icon" type="image/png" sizes="1024x1024" href="../assets/logos/bone-on-night/mark.png">
+<link rel="apple-touch-icon" href="../assets/logos/bone-on-night/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<link rel="stylesheet" href="../site.css">
+<style>
+/* Tokens, bands and the bar come from ../site.css; the type scale matches home, results/ and paper/. */
+
+*, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+::selection { background: var(--accent); color: var(--on-accent); }
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.page { max-width: 1240px; margin: 0 auto; }
+.m { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- rows ---------- */
+.row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; padding-block: 88px; scroll-margin-top: 64px; }
+.row > * { min-width: 0; }
+.lhs { display: grid; gap: 20px; align-content: start; }
+.lhs h2, h1.big { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 28px; line-height: 1.12; letter-spacing: -0.02em; display: grid; gap: 10px; }
+h1.big { font-size: clamp(30px, 4vw, 44px); }
+.lhs h2 .n, h1.big .n { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; }
+.sum { font-size: 18px; line-height: 1.5; max-width: 46ch; }
+.src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); line-height: 1.6; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+@media (max-width: 900px) { .row { grid-template-columns: minmax(0, 1fr); padding-block: 60px; } }
+
+/* numbered list on panel paper: 01 a backtest ... */
+.steps { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.steps li:last-child { border-bottom: 0; }
+.steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; color: var(--accent); padding-top: 3px; }
+.steps b { display: block; font-weight: 600; }
+.steps span { color: var(--muted); }
+.plain { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 10px; }
+.plain li { display: grid; grid-template-columns: 2ch minmax(0, 1fr); gap: 8px; }
+.plain li::before { content: "-"; content: "-" / ""; font-family: var(--f-mono); color: var(--muted); }
+
+/* ---------- tables ---------- */
+.tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; border-bottom-color: var(--rule-strong); }
+td:last-child, th:last-child { padding-right: 0; }
+td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; white-space: nowrap; }
+caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; padding: 14px 0 4px; }
+.stack { display: grid; gap: 28px; }
+
+/* ---------- screens (always dark) ---------- */
+.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: inset 0 0 0 4px var(--scr-deep), 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); color: var(--c-fg); }
+@media (max-width: 760px) { .screen { box-shadow: inset 0 0 0 3px var(--scr-deep), 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
+.scr-cap { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); margin-top: 18px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.scr-cap b { color: var(--fg); font-weight: 600; }
+.term { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.65; padding: 16px 18px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--c-mute); }
+@media (max-width: 760px) { .term { font-size: 11px; padding: 12px; } }
+.c-f { color: var(--c-fg); } .c-g { color: var(--c-pine); } .c-b { color: var(--c-brass); } .c-v { color: var(--c-verm); } .c-s { color: var(--c-sky); }
+/* a title rule over each screen: +-- name ---------------+ */
+.screen[data-head]::before { position: absolute; bottom: calc(100% + 12px); left: -9px; right: -9px; overflow: hidden; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--muted); white-space: nowrap; pointer-events: none; content: "+-- " attr(data-head) " " var(--dash); content: "+-- " attr(data-head) " " var(--dash) / ""; }
+@media (max-width: 760px) { .screen[data-head]::before { bottom: calc(100% + 9px); left: -6px; right: -6px; } }
+
+/* ---------- the form ---------- */
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; background: var(--panel); border: 1px solid var(--rule); padding: 20px; }
+.form > * { min-width: 0; }
+.form .wide { grid-column: 1 / -1; }
+@media (max-width: 600px) { .form { grid-template-columns: minmax(0, 1fr); padding: 16px; } }
+.f { display: grid; gap: 6px; align-content: start; }
+.f label { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg); }
+.f label i { font-style: normal; font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.f .hint { font-size: 14px; color: var(--muted); line-height: 1.4; }
+input, select, textarea { width: 100%; font: inherit; font-size: 16px; color: var(--fg); background: var(--bg); border: 1px solid var(--rule-strong); border-radius: 0; padding: 10px 12px; margin: 0; }
+textarea { min-height: 96px; resize: vertical; }
+select { appearance: none; background-image: none; padding-right: 32px; }
+.sel { position: relative; }
+.sel::after { content: "v"; content: "v" / ""; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: var(--f-mono); font-size: 12px; color: var(--muted); pointer-events: none; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+[aria-invalid="true"] { border-color: var(--block); outline: 1px solid var(--block); outline-offset: -1px; }
+.err { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--block); }
+.err:empty { display: none; }
+.err::before { content: "x "; content: "x " / ""; font-weight: 700; }
+.problems { border: 1px solid var(--block); padding: 12px 14px; font-size: 15px; }
+.problems[hidden] { display: none; }
+.problems b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--block); display: block; margin-bottom: 6px; }
+.problems ul { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.problems a { color: var(--fg); }
+.problems a:hover, .problems a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.send { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+#sent[hidden] { display: none; }
+#sent { margin-top: 28px; }
+#mail-pre { color: var(--c-fg); }
+/* the six weeks on a screen: a three-column ledger; narrow, the description drops under the name */
+.wk { display: grid; gap: 2px; white-space: normal; }
+.wk p { margin: 0; display: grid; grid-template-columns: 8ch 10ch minmax(0, 1fr); gap: 0 1ch; }
+.wk b { font-weight: 400; }
+.wk p.hd { display: block; margin-bottom: 1.65em; }
+.wk p.ft { display: block; margin-top: 1.65em; }
+@media (max-width: 520px) { .wk p { grid-template-columns: 7ch minmax(0, 1fr); } .wk p > span:last-child { grid-column: 2; margin-bottom: 4px; } }
+
+/* ---------- footer strip, as results/ ---------- */
+.foot-row { position: relative; display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; padding-block: 32px 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+.foot-row::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 0; left: 0; right: 0; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.foot-mark { margin: 0; font: inherit; font-size: 11px; line-height: 1.2; color: var(--fg); flex: none; }
+.foot-mark b { color: var(--brass); font-weight: 600; }
+.ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; flex: 1; min-width: 0; }
+.ledger li { display: flex; margin-right: 12px; }
+.ledger li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-right: 12px; flex: none; }
+.ledger li:last-child::after { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-left: 12px; }
+@media (max-width: 760px) { .foot-row { flex-direction: column; align-items: start; } .ledger { flex-direction: column; } .ledger li:last-child::after { display: none; } }
+.foot-row a:hover, .foot-row a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+
+/* ---------- character rules between bands, as results/ ---------- */
+main > .band { position: relative; }
+main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="0 0 24 24">
+      <g transform="rotate(-6 12 11)">
+        <rect x="1.5" y="10" width="21" height="2.4" fill="currentColor"/>
+        <rect x="3" y="5.4" width="4.6" height="4.6" fill="var(--brass)"/>
+      </g>
+      <path d="M12 12.6L17.5 21.5H6.5Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#top">Skip to content</a>
+<header class="bar band">
+  <div class="bar-in">
+    <a class="brand" href="../" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+    <span class="crumb" data-page="pilot" aria-hidden="true">/ pilot</span>
+    <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
+    <nav class="nav" id="nav" aria-label="Site">
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#get" data-g="++" aria-label="What you get">Get</a></li><li><a href="#weeks" data-g="|:" aria-label="Six weeks">Weeks</a></li><li><a href="#give" data-g="<-" aria-label="What you provide">Provide</a></li><li><a href="#contact" data-g="@>">Contact</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="../results/">Results</a></li><li><a href="../paper/">Paper</a></li><li><a href="./" aria-current="page">Pilot</a></li></ul>
+    </nav>
+  </div>
+  <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>
+</header>
+
+<main id="top">
+  <section class="band" aria-labelledby="top-h">
+    <div class="page row">
+      <div class="lhs">
+        <h1 class="big" id="top-h"><span class="n">PILOT</span>Six weeks, one change, on your own dispute history.</h1>
+        <p class="sum">Bring one change to the software that decides your card disputes: a new rule, a prompt edit, a model swap. Scruple backtests it on your resolved cases, scores it in shadow on live traffic, and gates it in your CI. You sign the success criteria before any of your data is loaded.</p>
+        <p>For teams that already decide disputes with software and want to change it safely: a fintech or marketplace running its own rules or an agent on Stripe or Adyen, a processor whose operations team maintains representment rules, or a company that sells a dispute agent and has to show each release is controlled.</p>
+        <p class="src">Status: a draft offer, November 2026. No pilot has run with a partner yet. Every number elsewhere on this site comes from the synthetic simulator or from public CFPB complaints. A pilot is how scruple gets its first number from a real dispute operation.</p>
+        <p class="acts"><a class="btn solid" href="#contact">Get in touch</a><a class="btn" href="scruple-pilot.pdf">One-page PDF</a></p>
+      </div>
+      <div>
+        <div class="screen" data-head="pilot / six weeks"><div class="term wk" role="list" aria-label="The six weeks, one line each">
+          <p class="hd"><span class="c-g">pilot</span> <span class="c-f">card disputes, one workflow, one candidate change</span></p>
+          <p role="listitem"><b class="c-b">before</b><span class="c-f">terms</span><span>NDA and terms, planner inputs, where it runs</span></p>
+          <p role="listitem"><b class="c-f">week 1</b><span class="c-f">kickoff</span><span><span class="c-g">criteria signed</span>, nothing loaded before</span></p>
+          <p role="listitem"><b class="c-f">week 2</b><span class="c-f">export</span><span>ingest report, rejected rows and why</span></p>
+          <p role="listitem"><b class="c-f">week 3</b><span class="c-f">backtest</span><span>changed decisions per reason code</span></p>
+          <p role="listitem"><b class="c-f">week 4</b><span class="c-f">shadow</span><span>your system decides, scruple acts on nothing</span></p>
+          <p role="listitem"><b class="c-f">week 5</b><span class="c-f">gate</span><span>scorecards on real pull requests</span></p>
+          <p role="listitem"><b class="c-f">week 6</b><span class="c-f">readout</span><span>pass, fail or not enough data</span></p>
+          <p class="ft"><span class="c-s">reported</span> whether the result passes or fails<br><span class="c-s">deleted</span>  your data and keys, confirmed in writing</p>
+        </div></div>
+        <p class="scr-cap"><span><b>the pilot</b>, as drafted in the engine's pilot kit</span><span>docs/pilot/SCOPE.md</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-pine" id="get" aria-labelledby="get-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="get-h"><span class="n">01 / WHAT YOU GET</span>Six things, each from a tool that exists today.</h2>
+        <p class="sum">The gate, the CI integration, evidence packs, the audit chain, Stripe, Adyen and CSV ingest, the backtest and shadow mode exist and are tested, on Stripe's published fixtures and on synthetic histories. None has yet run on a partner's data.</p>
+        <p class="src">Still to build or agree during the pilot: your own policy constraints as checks, the import mapping if you export CSV, and anything the scope lists as not built. Nothing planned is promised as finished until it is merged with tests.</p>
+      </div>
+      <ol class="steps">
+        <li><div><b>A backtest of one candidate change on your history.</b><span>Which decisions change, in which reason codes, and which hard policy constraints it would break: contesting after the evidence deadline, auto-deciding a high-value case, accepting a duplicate. Reported per reason code, never only as an average.</span></div></li>
+        <li><div><b>A shadow run on live traffic.</b><span>Your production system keeps deciding. Scruple scores what the candidate would have done and acts on nothing.</span></div></li>
+        <li><div><b>A gate in your CI.</b><span>A GitHub Action or GitLab template that blocks a pull request when the candidate regresses, and posts a scorecard. Synthetic held-out cases and your own history are shown separately, each with its own verdict.</span></div></li>
+        <li><div><b>A self-report check.</b><span>What your agent or dashboard says it wins, against what the balance transactions say happened.</span></div></li>
+        <li><div><b>An evidence pack per decision.</b><span>JSON and PDF, with the audit chain proof, that a risk or compliance reviewer can read without running anything.</span></div></li>
+        <li><div><b>A written readout.</b><span>Results against the criteria you agreed before seeing any data. Reported whether they pass or fail.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band band-night" id="weeks" aria-labelledby="weeks-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="weeks-h"><span class="n">02 / SIX WEEKS</span>Criteria first, data second, readout last.</h2>
+        <p class="sum">Each week has one output you can hold the pilot to. A failed criterion is not a reason to stop: it is a result, and it goes in the readout.</p>
+        <p class="src">Outcomes lag. Decisions shadowed in week 4 mostly resolve after week 6, so the readout says which cost results are still open. A cost improvement claim is optional and sized up front; six weeks of traffic is often not enough to detect a small one, and we will say so before you start.</p>
+      </div>
+      <div class="stack">
+        <div class="tw">
+          <table style="min-width: 520px">
+            <caption>Week by week</caption>
+            <thead><tr><th scope="col">Week</th><th scope="col">What happens</th><th scope="col">Output</th></tr></thead>
+            <tbody>
+              <tr><td class="k">1</td><td>Kickoff. Success criteria signed. Your current rules and the candidate translated into scruple's rule language. Export agreed.</td><td>Signed criteria, export plan</td></tr>
+              <tr><td class="k">2</td><td>You run the export. Ingest validates every row, redacts, tokenises card numbers and encrypts chosen fields before anything is stored.</td><td>Ingest report: rows read, stored, rejected and why</td></tr>
+              <tr><td class="k">3</td><td>The candidate and your current rules replayed on your resolved history. Planted regressions gated on the same history.</td><td>Backtest report per reason code</td></tr>
+              <tr><td class="k">4</td><td>Your system keeps deciding; scruple scores the candidate alongside it and writes nothing.</td><td>Shadow summary</td></tr>
+              <tr><td class="k">5</td><td>The gate installed on one repository you choose, as a required status check.</td><td>Scorecards on real pull requests</td></tr>
+              <tr><td class="k">6</td><td>Readout with your reviewer. Your data and keys deleted.</td><td>Readout, evidence packs, deletion confirmation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tw">
+          <table style="min-width: 420px">
+            <caption>Hours asked of your team, an estimate adjusted at kickoff</caption>
+            <thead><tr><th scope="col">Role</th><th scope="col">Over six weeks</th><th scope="col">Busiest</th></tr></thead>
+            <tbody>
+              <tr><td>Owner</td><td class="k">16 hours</td><td>Week 1, signing the criteria</td></tr>
+              <tr><td>Engineer</td><td class="k">17 hours</td><td>Weeks 2 and 5, export and CI</td></tr>
+              <tr><td>Dispute expert</td><td class="k">8 hours</td><td>Week 1, current rules</td></tr>
+              <tr><td>Reviewer</td><td class="k">4 hours</td><td>Week 6, the readout</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-sand" id="give" aria-labelledby="give-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="give-h"><span class="n">03 / WHAT YOU PROVIDE</span>A few thousand resolved disputes and one change.</h2>
+        <p class="sum">Read-only data, a named owner, and an engineer for two short stretches. Scruple runs inside your environment, or on a scruple-operated machine with only tokenised, redacted data.</p>
+        <p class="src">Pricing is set per pilot, agreed before kickoff.</p>
+      </div>
+      <div class="stack">
+        <ol class="steps">
+          <li><div><b>A named owner.</b><span>One person who signs the criteria and the readout, about 16 hours over the six weeks.</span></div></li>
+          <li><div><b>An engineer.</b><span>For the export and the CI steps, mostly in weeks 2 and 5.</span></div></li>
+          <li><div><b>A read-only export.</b><span>Resolved disputes and their balance movements, through the Stripe API, Adyen notifications or CSV, for the window the planner asks for.</span></div></li>
+          <li><div><b>One candidate change.</b><span>A new rule, a prompt edit or a model swap, and the rule or agent version it would replace.</span></div></li>
+          <li><div><b>A reviewer.</b><span>From risk, compliance or the dispute team, for the readout.</span></div></li>
+          <li><div><b>Criteria agreed before data arrives.</b><span>Four kinds of hypothesis: the gate catches regressions planted in your history; the candidate adds no hard policy violations; the self-report gap is measured from the ledger; the scorecard reproduces byte for byte in your CI.</span></div></li>
+        </ol>
+        <div class="tw">
+          <table>
+            <caption>Not in the six weeks</caption>
+            <tbody>
+              <tr><td>Workflows other than card disputes: ACH returns, wires, reconciliation, AML, payables.</td></tr>
+              <tr><td>Writing to Stripe, Adyen or any network. The Stripe client only reads.</td></tr>
+              <tr><td>Acting on live traffic. Shadow mode acts on nothing.</td></tr>
+              <tr><td>Replaying an LLM agent on history. Python agents with a decide function can already be backtested.</td></tr>
+              <tr><td>SSO, role-based access, a web console. Training any model on your data. Legal or network-rule advice.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="contact" aria-labelledby="contact-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="contact-h"><span class="n">04 / CONTACT</span>Tell us about your disputes.</h2>
+        <p class="sum">The form writes an email in your own mail app, addressed to the founder. Nothing is sent from this page and nothing is stored.</p>
+        <p>Or write directly to <a class="m" id="mail-plain" href="mailto:dhegde@umich.edu?subject=Scruple%20pilot">dhegde@umich.edu</a>.</p>
+        <p class="src">Monthly dispute volume sizes the pilot: the planner uses it to say whether six weeks of history and traffic can reach the sample size your criteria need.</p>
+      </div>
+      <div>
+        <form class="form" id="pilot-form" novalidate aria-describedby="form-note">
+          <div class="problems wide" id="problems" role="alert" tabindex="-1" hidden></div>
+          <div class="f"><label for="f-name">Name</label><input id="f-name" name="name" autocomplete="name" required maxlength="120" aria-describedby="f-name-err"><p class="err" id="f-name-err"></p></div>
+          <div class="f"><label for="f-company">Company</label><input id="f-company" name="company" autocomplete="organization" required maxlength="120" aria-describedby="f-company-err"><p class="err" id="f-company-err"></p></div>
+          <div class="f"><label for="f-role">Role</label><input id="f-role" name="role" autocomplete="organization-title" required maxlength="120" aria-describedby="f-role-hint f-role-err"><p class="hint" id="f-role-hint">For example: head of disputes, risk engineer.</p><p class="err" id="f-role-err"></p></div>
+          <div class="f"><label for="f-volume">Disputes a month</label><input id="f-volume" name="volume" inputmode="numeric" required maxlength="12" aria-describedby="f-volume-hint f-volume-err"><p class="hint" id="f-volume-hint">A whole number, a rough figure is fine.</p><p class="err" id="f-volume-err"></p></div>
+          <div class="f wide"><label for="f-tool">How disputes are decided today</label><span class="sel"><select id="f-tool" name="tool" required aria-describedby="f-tool-err">
+            <option value="">Choose one</option>
+            <option>In-house rules</option>
+            <option>An LLM agent we built</option>
+            <option>A vendor's dispute product</option>
+            <option>Processor tools (Stripe, Adyen)</option>
+            <option>By hand, no software yet</option>
+            <option>Something else</option>
+          </select></span><p class="err" id="f-tool-err"></p></div>
+          <div class="f wide"><label for="f-stack">Current tooling <i>(optional)</i></label><textarea id="f-stack" name="stack" maxlength="1000" aria-describedby="f-stack-hint f-stack-err"></textarea><p class="hint" id="f-stack-hint">Processor, rule engine or agent, where the dispute history lives, how releases are approved.</p><p class="err" id="f-stack-err"></p></div>
+          <div class="f wide"><label for="f-change">The change you would test <i>(optional)</i></label><textarea id="f-change" name="change" maxlength="1000" aria-describedby="f-change-err"></textarea><p class="err" id="f-change-err"></p></div>
+          <div class="send wide"><button type="submit" class="btn solid">Write the email</button><span class="src" id="form-note">Opens your mail app with the message filled in. You can edit it before sending.</span></div>
+        </form>
+        <div id="sent" hidden>
+          <div class="screen" data-head="your message"><pre class="term" id="mail-pre" aria-live="polite"></pre></div>
+          <p class="scr-cap"><span><b>If your mail app did not open</b>, use a link or copy the text</span><span>to dhegde@umich.edu</span></p>
+          <p class="acts" style="margin-top: 12px"><a class="btn" id="mail-again" href="mailto:dhegde@umich.edu">Open in mail</a><button type="button" class="btn" id="mail-copy">Copy the message</button><span class="src" id="copy-note" aria-live="polite"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="page foot-row">
+      <pre class="foot-mark" aria-hidden="true"> <b>[#]</b>
+===============
+      /\
+     /  \
+    /____\</pre>
+      <ul class="ledger">
+        <li>Scruple</li>
+        <li>A draft pilot offer. No partner data has been used.</li>
+        <li><a href="scruple-pilot.pdf">The one-page PDF</a></li>
+        <li><a href="../">Back to the home page</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script src="../nav.js" defer></script>
+<script src="pilot.js"></script>
+</body>
+</html>

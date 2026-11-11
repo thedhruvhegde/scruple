@@ -1,4 +1,4 @@
-/* site.css: shared by every page (home, results, paper, 404).
+/* site.css: shared by every page (home, results, paper, pilot, 404).
    The tokens live here and only here: the bone page, its three other bands, the screen ink
    (read by the canvas on the home page) and the character rules. Then the top bar, which
    nav.js drives. Page styles follow in each page's own <style>. */
@@ -64,8 +64,10 @@
 .nav-sec li:has(> a[aria-current])::after { content: "]"; content: "]" / ""; }
 .nav-sec a::before { content: attr(data-g) " "; content: attr(data-g) " " / ""; white-space: pre; color: var(--accent); }
 .nav-sec a[aria-current] { color: var(--fg); }
-/* the pages, one bracketed group set apart at the right: [ home | results | paper ], the page you are on inverted */
-.nav-pg { margin-left: auto !important; color: var(--fg); }
+/* the pages, one bracketed group set apart at the right: [ home | results | paper | pilot ], the page you are on inverted */
+.nav-pg { margin-left: auto !important; padding-left: 16px !important; color: var(--fg); }
+/* just above the menu breakpoint the longest bar (paper) is tight: closer section links keep 16px before the pages */
+@media (min-width: 1001px) and (max-width: 1100px) { .nav-sec a { padding-inline: 2px; } }
 .nav-pg li { display: flex; align-items: center; }
 .nav-pg li:first-child::before { content: "["; content: "[" / ""; font-weight: 700; padding-right: 2px; }
 .nav-pg li:last-child::after { content: "]"; content: "]" / ""; font-weight: 700; padding-left: 2px; }
@@ -108,7 +110,7 @@ main:focus { outline: none; }
   .nav-sec a::before { color: var(--c-mute); }
   .nav-sec a[aria-current] { color: var(--c-pine); }
   .nav-sec li:has(> a[aria-current])::before { content: "> "; content: "> " / ""; color: var(--c-pine); }
-  .nav-pg { margin-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; display: flex !important; flex-wrap: wrap; color: var(--c-fg); }
+  .nav-pg { margin-left: 0 !important; padding-left: 0 !important; padding-top: 12px !important; border-top: 1px dashed var(--scr-edge) !important; display: flex !important; flex-wrap: wrap; color: var(--c-fg); }
   .nav-pg::before { flex-basis: 100%; }
   .nav-pg:first-child { padding-top: 0 !important; border-top: 0 !important; }
   .nav-pg li + li::before { color: var(--c-dim); }

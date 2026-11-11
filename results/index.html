@@ -183,6 +183,36 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
 .exp { display: grid; gap: 28px; }
 .verdict { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 600; }
 
+/* ---------- leaderboard ---------- */
+.lb { padding-inline: 0 16px; }
+.lb table { border-collapse: separate; border-spacing: 0; }
+.lb th, .lb td { padding: 10px 10px 10px 0; }
+.lb caption { padding-left: 16px; font-weight: 400; color: var(--muted); }
+.lb thead th { white-space: normal; vertical-align: bottom; line-height: 1.35; }
+.lb thead th.lb-span { border-bottom: 1px solid var(--rule); color: var(--fg); }
+.lb thead tr:first-child th[rowspan] { border-bottom-color: var(--rule-strong); }
+/* the system column stays put while the table scrolls sideways on a phone */
+.lb tbody th, .lb thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--panel); padding-left: 16px; text-align: left; }
+.lb tbody th { width: 176px; min-width: 176px; font-family: var(--f-body); font-size: 15px; font-weight: 400; color: var(--fg); letter-spacing: 0; text-transform: none; white-space: normal; border-bottom: 1px solid var(--rule); }
+.lb tbody th b { display: block; font-weight: 600; }
+.lb tbody th span { display: block; font-size: 13px; color: var(--muted); line-height: 1.35; }
+.lb tbody th i { display: block; margin-top: 4px; font-style: normal; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.lb tr.lb-group th { position: static; padding: 18px 0 8px 16px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--rule-strong); background: transparent; }
+.lb-mark { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; color: var(--brass); text-decoration: none; }
+.lb-mark:hover, .lb-mark:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.lb-c b { display: block; font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.lb-c span { display: block; font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 10.5px; color: var(--muted); white-space: nowrap; margin-top: 2px; }
+.lb-c.no b { color: var(--block); }
+.lb-none span { color: var(--rule-strong); }
+.lb tbody th i.lb-h { display: block; margin: 0 0 3px; color: var(--muted); }
+.lb tbody tr:last-child td, .lb tbody tr:last-child th { border-bottom: 0; }
+.lb-notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lb-notes li { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 4px 24px; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 15px; scroll-margin-top: 80px; }
+.lb-notes li:target { background: var(--panel); }
+.lb-notes b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12.5px; font-weight: 600; }
+.lb-notes span { color: var(--muted); }
+@media (max-width: 600px) { .lb-notes li { grid-template-columns: minmax(0, 1fr); } .lb tbody th { width: 150px; min-width: 150px; } }
+
 /* ---------- sources ---------- */
 .links { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule-strong); }
 .links li { border-bottom: 1px solid var(--rule); }
@@ -243,8 +273,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <span class="crumb" data-page="results" aria-hidden="true">/ results</span>
     <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
-      <ul class="nav-sec" aria-label="On this page"><li><a href="#real" data-g="::" aria-label="Real data">Data</a></li><li><a href="#watch" data-g="<>" aria-label="Watch a case">Watch</a></li><li><a href="#experiments" data-g="+-">Experiments</a></li><li><a href="#sources" data-g="{}">Sources</a></li></ul>
-      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="./" aria-current="page">Results</a></li><li><a href="../paper/">Paper</a></li></ul>
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#real" data-g="::" aria-label="Real data">Data</a></li><li><a href="#watch" data-g="<>" aria-label="Watch a case">Watch</a></li><li><a href="#experiments" data-g="+-">Experiments</a></li><li><a href="#leaderboard" data-g="#=" aria-label="Leaderboard">Board</a></li><li><a href="#sources" data-g="{}">Sources</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="./" aria-current="page">Results</a></li><li><a href="../paper/">Paper</a></li><li><a href="../pilot/">Pilot</a></li></ul>
     </nav>
   </div>
   <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>
@@ -386,10 +416,42 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     </div>
   </section>
 
-  <section class="band" id="sources" aria-labelledby="src-h">
+  <section class="band" id="leaderboard" aria-labelledby="lb-h">
     <div class="page row">
       <div class="lhs">
-        <h2 id="src-h"><span class="n">04 / SOURCES</span>Every number on this page, at its source.</h2>
+        <h2 id="lb-h"><span class="n">04 / LEADERBOARD</span>Every model we ran, on one table.</h2>
+        <p class="sum">Claude ran as subagents through the scruple CLI; the open models ran through a raw API. Same seeds, same complaints, same verifiers. Rows are grouped by harness, not ranked.</p>
+        <ul class="kv wide">
+          <li><b>Gate</b><span>No hard verifier failure on the case. Higher is better.</span></li>
+          <li><b>Fair</b><span>The cardholder ended with what they were truly owed (OUT-01).</span></li>
+          <li><b>SR-01</b><span>The agent's own report contradicted the ledger. Lower is better.</span></li>
+          <li><b>Cost</b><span>Merchant loss per case minus the evidence policy's, same seeds. Lower is cheaper, not fairer.</span></li>
+        </ul>
+      </div>
+      <div class="lhs">
+        <p class="src">The harnesses differ. Claude played all 12 seeds in one conversation and saw each scorecard; each open model got a fresh conversation per case and never saw a score. Compare within a group with more confidence than across. Intervals: Wilson 95% on counts; paired bootstrap over seeds or items, 2,000 resamples, for cost and the CFPB differences. With 12 cases an interval spans about half the scale, so most differences here are not distinguishable.</p>
+        <p class="src">Episodes are synthetic dispute cases (seeds 5001 to 5012); the model behaviour is real. CFPB tasks are real held-out complaints, graded by code. Every episode row, Claude and open models alike, is its stored call log re-scored by replay with the current verifiers (E5 final). Not run means no result exists; nothing is filled in.</p>
+        <p class="src">Built by results/build_leaderboard.py, which replays every call log itself, recounts every episode count and paired cost difference, and stops on a mismatch. Where a replay changed a row as first scored, a note says so.</p>
+      </div>
+      <div class="full tw lb">
+        <table id="lb-table" style="min-width: 1100px">
+          <caption>All systems, real result files only</caption>
+          <thead>
+            <tr><th scope="col" rowspan="2">System and harness</th><th scope="colgroup" colspan="5" class="lb-span">Simulated disputes, current verifiers</th><th scope="colgroup" colspan="3" class="lb-span">Real CFPB complaints</th><th scope="col" class="lb-span">Incentive (E4)</th></tr>
+            <tr><th scope="col">n</th><th scope="col">Gate<br>pass</th><th scope="col">Fair<br>outcome</th><th scope="col">SR-01<br>fails</th><th scope="col">Cost vs<br>evidence</th><th scope="col">Regime<br>n 100</th><th scope="col">Relief AUROC<br>n 100</th><th scope="col">Routing<br>n 50</th><th scope="col">Gate pass<br>honest to incentive</th></tr>
+          </thead>
+          <tbody id="lb-body"></tbody>
+        </table>
+      </div>
+      <p class="full src">Under each count, its Wilson 95% interval. Under each cost, the 95% interval of the paired difference. Under each CFPB score, the difference from TF-IDF and its 95% interval; a run that stopped early is scored on the items it answered, against TF-IDF on those same items. [n] marks a note below; partial run marks a run that stopped early or skipped tasks. On a phone the table scrolls sideways.</p>
+      <ol class="full lb-notes" id="lb-notes" aria-label="Notes to the leaderboard"></ol>
+    </div>
+  </section>
+
+  <section class="band band-pine" id="sources" aria-labelledby="src-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="src-h"><span class="n">05 / SOURCES</span>Every number on this page, at its source.</h2>
         <p class="sum">The page reads JSON exported by <span class="m">results/build_data.py</span>, which replays each call log through the engine and stops if a fresh score differs from the published one.</p>
         <p class="src">Rebuild: cd engine, then uv run python ../results/build_data.py</p>
       </div>
@@ -415,5 +477,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 <script src="../nav.js" defer></script>
 <script src="results.js"></script>
 <script src="ascii.js"></script>
+<script src="leaderboard.js"></script>
 </body>
 </html>
