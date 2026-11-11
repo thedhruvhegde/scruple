@@ -900,7 +900,7 @@ represent everything (strawman) & 11/64 & 0.099--0.282 & 2{,}360\\
 \end{tabular}
 \end{table}
 
-The failures are informative (\cref{tab:scen}). The evidence policy misses both wrong-amount cases: its own receipt is the reason code's required evidence, so it represents a \$30 sale captured at \$60 and loses, paying \$25 more in fees; it cannot see that the receipt confirms the overcharge. The oracle misses the four settled-refund cases: it knows the claim is valid and concedes, but the merchant already refunded, so conceding pays the cardholder twice. Knowing who is right is not enough; the ledger matters. No language-model agent has been run on this suite yet; the grading command exists (\texttt{scruple realdata scenarios grade}).
+The failures are informative (\cref{tab:scen}). The evidence policy misses both wrong-amount cases: its own receipt is the reason code's required evidence, so it represents a \$30 sale captured at \$60 and loses, paying \$25 more in fees; it cannot see that the receipt confirms the overcharge. The oracle misses the four settled-refund cases: it knows the claim is valid and concedes, but the merchant already refunded, so conceding pays the cardholder twice. Knowing who is right is not enough; the ledger matters. No language-model agent has been run on this suite yet; the grading command exists (\texttt{scruple realdata scenarios grade}, \cref{app:repro}).
 
 \subsection{Complaint-handling timeliness}
 
@@ -1011,32 +1011,69 @@ oracle & 0 (0) & 12 & 12 & 12\\
 
 \paragraph{Agent benchmarks.} Benchmarks for tool-using agents \citep{liu2024agentbench,yao2024tau,jimenez2024swebench} score task success in an environment. Our setting adds money as the outcome, an agent whose reports are not trusted, and a release decision with stated error control.
 
-\section{Reproducibility}
+\bibliographystyle{plainnat}
+\bibliography{scruple_paper}
 
-Everything runs from the engine directory with Python 3.12 and \texttt{uv}; synthetic outputs are deterministic (every random source takes an explicit seed).
+
+\appendix
+\section{Reproducibility: where every number comes from}\label{app:repro}
+
+Everything runs from the \texttt{engine/} directory of the repository with Python 3.12 and \texttt{uv}. Synthetic outputs are deterministic (every random source takes an explicit seed). Benchmark v1 runs need the operator-held salt in \texttt{SCRUPLE\_HELDOUT\_SALT}; the salt is never published. Real-model call logs are committed and replay exactly. Paths are relative to \texttt{engine/}.
+
+\begin{table}[h]
+\centering\scriptsize
+\caption{Result files and write-ups behind each section.}\label{tab:files}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash\hsize=0.85\hsize}X>{\raggedright\arraybackslash\hsize=1.15\hsize}X@{}}
+\toprule
+section & result files & write-up\\
+\midrule
+\ref{sec:verifiers}, \ref{sec:improve} verifiers & \texttt{uv run scruple redteam exploits -{}-seeds 300} (printed table) & \nolinkurl{docs/VERIFIER_FINDINGS.md}, \nolinkurl{docs/TESTING_MUTATION.md}, \nolinkurl{docs/DECISIONS.md}\\
+\ref{sec:sequential}--\ref{sec:hacking} theory evidence & output of \nolinkurl{scripts/math_*.py}, pasted verbatim & \nolinkurl{docs/math/01} to \nolinkurl{09}\\
+\ref{sec:betting} betting & \nolinkurl{results/experiments/E1_paired_costs.json} & \nolinkurl{docs/math/07_variance_aware_betting.md}\\
+\ref{sec:e1} E1 & \nolinkurl{results/experiments/E1_planted_regressions.json} & \nolinkurl{docs/experiments/E1_planted_regressions.md}\\
+\ref{sec:e2} E2 & \nolinkurl{results/experiments/E2_reward_hacking.json} & \nolinkurl{docs/experiments/E2_reward_hacking.md}\\
+\ref{sec:e3} E3 & \nolinkurl{results/experiments/E3_variance_reduction/} (\texttt{cases}, \texttt{results}, \texttt{posthoc\_wide\_bet}, \texttt{posthoc\_resampled}) & \nolinkurl{docs/experiments/E3_variance_reduction.md}, \nolinkurl{docs/math/09_variance_reduction.md}\\
+CFPB models & \nolinkurl{results/real/*.json}, \nolinkurl{results/real/models/} & \nolinkurl{docs/results/REAL_MODELS.md}, \nolinkurl{docs/results/REAL_BASELINES.md}\\
+\ref{sec:episodes} model episodes & \nolinkurl{results/real/episodes/} (\texttt{episodes.json}, call logs \texttt{store-*}) & \nolinkurl{docs/results/MODEL_EPISODES.md}\\
+\ref{sec:e4} E4 & \nolinkurl{results/real/incentives/e4.json}, call logs \texttt{store-*} & \nolinkurl{docs/experiments/E4_real_model_incentives.md}\\
+\ref{sec:aitypes} agent types & \nolinkurl{results/zoo/eval.json}, \nolinkurl{results/zoo/train.json} & \nolinkurl{docs/results/AI_TYPES.md}\\
+\ref{sec:situations} real situations & scenario files in \nolinkurl{scruple/sim/scenarios/real/}; command output & \nolinkurl{docs/results/REAL_SITUATIONS.md}, \nolinkurl{docs/data/CFPB.md}\\
+\ref{sec:limits} simulator fidelity & \nolinkurl{scruple/sim/data/cfpb_aggregates.json} & \nolinkurl{docs/results/SIM_FIDELITY.md}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 {\scriptsize
 \begin{verbatim}
 make install && make lint typecheck test
-uv run python scripts/math_sequential.py        # Sec. 4
-uv run python scripts/math_stratified.py        # Sec. 5
-uv run python scripts/math_planning.py          # Sec. 6
-uv run python scripts/math_betting.py analyse   # Sec. 7, reads E1_paired_costs.json
-uv run python scripts/math_decision.py          # Sec. 8
-uv run python scripts/math_composition.py       # Sec. 9
-uv run python scripts/math_hacking.py           # Sec. 10, independent audits
-uv run python scripts/math_hacking_general.py   # Sec. 10, leaky audits, on E2's batches
-SCRUPLE_HELDOUT_SALT=... uv run python scripts/exp_planted.py run --jobs 4       # E1
-SCRUPLE_HELDOUT_SALT=... uv run python scripts/exp_hacking.py run --jobs 4       # E2
-SCRUPLE_HELDOUT_SALT=... uv run python scripts/math_betting.py collect --jobs 4  # E1 costs
-uv run scruple realdata baselines                                   # CFPB baselines
-uv run python scripts/compare_real_models.py results/real/models    # CFPB models
-uv run python scripts/exp_e4.py results/real/incentives             # E4
+uv run python scripts/math_sequential.py          # Sec. 4
+uv run python scripts/math_stratified.py          # Sec. 5
+uv run python scripts/math_planning.py            # Sec. 6
+uv run python scripts/math_betting.py analyse     # Sec. 7, reads E1_paired_costs.json
+uv run python scripts/math_decision.py            # Sec. 8
+uv run python scripts/math_composition.py         # Sec. 9
+uv run python scripts/math_hacking.py             # Sec. 10, independent audits
+uv run python scripts/math_hacking_general.py     # Sec. 10, leaky audits, on E2's batches
+uv run scruple redteam exploits --seeds 300       # verifier coverage
+SCRUPLE_HELDOUT_SALT=... uv run python scripts/exp_planted.py run --jobs 4        # E1
+SCRUPLE_HELDOUT_SALT=... uv run python scripts/exp_hacking.py run --jobs 4        # E2
+SCRUPLE_HELDOUT_SALT=... uv run python scripts/math_betting.py collect --jobs 4   # E1 costs
+SCRUPLE_HELDOUT_SALT=... uv run python scripts/exp_e3_variance.py run --jobs 4    # E3
+uv run python scripts/exp_e3_variance.py posthoc                                  # E3 post hoc
+uv run python scripts/exp_e3_variance.py resample                                 # E3 post hoc
+uv run scruple realdata baselines                                     # CFPB baselines
+uv run python scripts/compare_real_models.py results/real/models      # CFPB models
+uv run python scripts/model_episodes_report.py --profile all \
+  haiku=results/real/episodes/store-haiku sonnet=results/real/episodes/store-sonnet \
+  opus=results/real/episodes/store-opus                                # episodes, profiles
+uv run python scripts/exp_e4.py results/real/incentives               # E4
+uv run scruple zoo train --train 1500 --dev 400 --jobs 4              # agent types
+SCRUPLE_HELDOUT_SALT=... uv run scruple zoo eval --limit 2000 --jobs 4
+uv run scruple realdata scenarios run --out situations.json           # 64 scenarios
+uv run scruple realdata timeliness --out timeliness.json              # timeliness
+uv run scruple sim fidelity                                           # simulator fidelity
 cd docs/paper && pdflatex scruple_paper && bibtex scruple_paper \
   && pdflatex scruple_paper && pdflatex scruple_paper
 \end{verbatim}}
-Proof-level detail, simulation output and code references for each result are in \texttt{docs/math/01} to \texttt{08}.
-
-\bibliographystyle{plainnat}
-\bibliography{scruple_paper}
 
 \end{document}
