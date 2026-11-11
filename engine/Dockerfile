@@ -44,6 +44,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM ${PYTHON_IMAGE}
 ARG BUILD_COMMIT=unknown
 ARG BUILD_DATE=unknown
+# Pick up Debian security fixes released after the base image was built.
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 10001 scruple \
  && useradd --system --uid 10001 --gid scruple --home-dir /app --shell /usr/sbin/nologin scruple \
  && mkdir /data && chown scruple:scruple /data
