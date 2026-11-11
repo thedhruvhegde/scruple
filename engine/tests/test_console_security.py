@@ -44,7 +44,7 @@ def assert_escaped(text: str) -> None:
     body = text.split("<body>", 1)[1]
     for raw in RAW:
         assert raw not in body, raw
-    assert len(re.findall(r"<script\b", text)) == 1  # only the console's own script tag
+    assert not re.findall(r"<script\b", text)  # the console serves no script at all
 
 
 @pytest.fixture
@@ -267,6 +267,6 @@ def test_get_on_post_route_is_not_allowed(gate: AgentGate) -> None:
 
 def test_static_files_also_carry_headers(gate: AgentGate) -> None:
     c: TestClient = client(gate)
-    h = c.get("/console/static/console.js").headers
+    h = c.get("/console/static/console.css").headers
     assert h["x-content-type-options"] == "nosniff"
     assert "content-security-policy" in h

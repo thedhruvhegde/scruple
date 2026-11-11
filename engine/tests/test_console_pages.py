@@ -117,9 +117,11 @@ def test_pages_share_one_structure(web: TestClient, episode: str) -> None:
 
 def test_security_headers_on_every_page(web: TestClient, episode: str) -> None:
     for path, _ in _pages(episode):
-        h = web.get(path).headers
+        r = web.get(path)
+        assert "<script" not in r.text, path
+        h = r.headers
         csp = h["content-security-policy"]
-        assert "script-src 'self'" in csp and "default-src 'none'" in csp
+        assert "script-src 'none'" in csp and "default-src 'none'" in csp
         assert "unsafe-inline" not in csp and "frame-ancestors 'none'" in csp
         assert h["x-content-type-options"] == "nosniff"
         assert h["x-frame-options"] == "DENY"
@@ -195,7 +197,8 @@ def test_static_files_are_served(web: TestClient, name: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "name", ["../routes.py", "templates/base.html", "console.css.map", "%2e%2e/routes.py"]
+    "name",
+    ["../routes.py", "templates/base.html", "console.css.map", "%2e%2e/routes.py", "console.js"],
 )
 def test_only_whitelisted_static_files(web: TestClient, name: str) -> None:
     assert web.get(f"/console/static/{name}").status_code == 404

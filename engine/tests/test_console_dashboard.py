@@ -367,7 +367,7 @@ def test_planted_markup_is_escaped_everywhere(world: World) -> None:
         body = _body(text)
         for raw in RAW:
             assert raw not in body, (p, raw)
-        assert len(re.findall(r"<script\b", text)) == 1, p
+        assert not re.findall(r"<script\b", text), p
     pay = world.clients[A].get("/console/dashboard/payments").text
     assert f"{MARK}&lt;script&gt;" in pay  # the reason code, in the table and the chart
     cp = world.clients[A].get("/console/dashboard/compute").text

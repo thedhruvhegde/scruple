@@ -7,8 +7,8 @@ browser sends an `Origin` header, the origin is this host. The secret comes from
 `SCRUPLE_CONSOLE_SECRET` (environment only, like every secret here) or is random per
 process, which is fine for one process and logs everyone out on restart.
 
-Headers: a strict Content-Security-Policy with no inline script or style at all (the
-one script and the stylesheet are files served by the console), no framing, no
+Headers: a strict Content-Security-Policy with no script at all and no inline style
+(the stylesheet is a file served by the console), no framing, no
 referrer to other origins, no caching of pages that may hold decisions.
 """
 
@@ -30,7 +30,7 @@ MAX_FORM_BYTES = 8_192
 CSP = "; ".join(
     (
         "default-src 'none'",
-        "script-src 'self'",
+        "script-src 'none'",
         "style-src 'self'",
         "font-src 'self'",
         "img-src 'self'",

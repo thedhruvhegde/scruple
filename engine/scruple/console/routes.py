@@ -66,7 +66,6 @@ from scruple.storage.console_filters import SavedFilter, SavedFilterError, saved
 PREFIX = "/console"
 STATIC: dict[str, str] = {
     "console.css": "text/css; charset=utf-8",
-    "console.js": "text/javascript; charset=utf-8",
     "fonts/martian-mono.woff2": "font/woff2",
     "fonts/plex-sans-condensed-400.woff2": "font/woff2",
     "fonts/plex-sans-condensed-500.woff2": "font/woff2",

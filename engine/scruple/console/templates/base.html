@@ -7,7 +7,6 @@
 <meta name="robots" content="noindex">
 <title>{% block title %}console{% endblock %} / scruple console</title>
 <link rel="stylesheet" href="{{ P }}/static/console.css">
-<script src="{{ P }}/static/console.js"></script>
 </head>
 <body>
 {% set nav = [
@@ -32,7 +31,6 @@
     <nav class="nav" aria-label="Console">
       {% for href, label, key in nav %}<a href="{{ href }}"{% if key == current %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
     </nav>
-    <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" data-theme-set="light" aria-pressed="false">LIGHT</button>|<button type="button" data-theme-set="dark" aria-pressed="false">DARK</button> ]</div>
   </div>
 </header>
 <main>
