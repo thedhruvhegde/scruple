@@ -133,7 +133,11 @@ class Policy(_In):
         when a case-type band does not exist under the resulting band edges."""
         base = base or GateConfig()
         s = self.stats
-        update: dict[str, Any] = {"stats": s.provider, "policy_sha256": self.policy_sha256}
+        update: dict[str, Any] = {
+            "stats": s.provider,
+            "policy_sha256": self.policy_sha256,
+            "verifier_profile": self.fairness.profile.value,
+        }
         for field, target in (
             ("confidence", "confidence"),
             ("bootstrap_resamples", "bootstrap_resamples"),

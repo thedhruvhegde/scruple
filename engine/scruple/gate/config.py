@@ -104,20 +104,27 @@ class GateConfig(BaseModel):
     # Who may approve activation or roll back (segregation of duties enforced too).
     approvers: tuple[str, ...] = ("model-risk@demo.bank",)
 
+    # Verifier profile for episode scorecards under this gate (scruple.verifiers.profiles,
+    # DECISIONS D-016): how hard a win against a valid claim counts. Set from a tenant
+    # policy's `fairness.profile`; the default leaves every scorecard as before.
+    verifier_profile: Literal["merchant", "balanced", "compliance"] = "merchant"
+
     # The tenant policy file this configuration was compiled from (scruple.policy),
     # if any: its SHA-256, so every decision, scorecard and evidence pack names it.
     policy_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
 
     @model_serializer(mode="wrap")
     def _stable_dump(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
-        """Leave the evalue_vr setting out at its default, and the policy hash when there
-        is no policy, so the content hash of every configuration that existed before
-        them (audit, CI evidence) does not change."""
+        """Leave the evalue_vr setting and the verifier profile out at their defaults,
+        and the policy hash when there is no policy, so the content hash of every
+        configuration that existed before them (audit, CI evidence) does not change."""
         out: dict[str, object] = handler(self)
         if out.get("evalue_vr_stratified_share") == VR_SHARE_DEFAULT:
             out.pop("evalue_vr_stratified_share", None)
         if out.get("policy_sha256") is None:
             out.pop("policy_sha256", None)
+        if out.get("verifier_profile") == "merchant":
+            out.pop("verifier_profile", None)
         return out
 
     @field_validator("evalue_band_edges_usd_minor")

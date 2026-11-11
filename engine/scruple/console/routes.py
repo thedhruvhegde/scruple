@@ -134,12 +134,16 @@ def environment() -> Environment:
 
 
 def _single(only: AgentGate) -> Callable[[str], AgentGate]:
-    """One gate serves one tenant; a caller from any other tenant sees nothing."""
+    """One gate serves one tenant, under its current policy file (`scruple.policy`), as
+    the API's tenant gates do; a caller from any other tenant sees nothing."""
+    from scruple.policy.apply import PolicyGates
+
+    policies = PolicyGates()
 
     def gates(tenant: str) -> AgentGate:
         if tenant != getattr(only.storage, "tenant", tenant):
             raise HTTPException(404, "not found")
-        return only
+        return policies.gate(only)
 
     return gates
 
@@ -281,7 +285,9 @@ def console_router(
             rows=rows,
             pg=pg,
             saved=saved_for(principal, VERSIONS, gate),
-            agents=[agent_summary(run) for run in src.agents.values()],
+            agents=[
+                agent_summary(run, gate.config.verifier_profile) for run in src.agents.values()
+            ],
             decisions=gate.decisions()[-12:][::-1],
             reports=len(src.reports),
             pending=len(inbox(gate, gate.clock.now()).pending),
@@ -308,8 +314,10 @@ def console_router(
         if not isinstance(filt, Filter):
             return filt
         others = [n for n in src.agents if n != name]
+        g = gate_of(principal)
+        profile = g.config.verifier_profile  # the tenant policy's fairness profile
         pg = paginate(
-            episode_rows(run),
+            episode_rows(run, profile),
             filt,
             lambda r: joined(
                 (
@@ -335,9 +343,9 @@ def console_router(
             "agent.html",
             principal,
             run=run,
-            summary=agent_summary(run),
+            summary=agent_summary(run, profile),
             pg=pg,
-            saved=saved_for(principal, CASES, gate_of(principal)),
+            saved=saved_for(principal, CASES, g),
             others=others,
         )
 
@@ -403,7 +411,8 @@ def console_router(
         rec = run.record(episode_id) if run is not None else None
         if run is None or rec is None:
             return error(request, principal, 404, f"unknown episode {episode_id} for {name}")
-        view = case_view(rec, run.scorecards[episode_id])
+        profile = gate_of(principal).config.verifier_profile
+        view = case_view(rec, run.scorecards_for(profile)[episode_id])
         return render(request, "case.html", principal, run=run, v=view)
 
     # --- 183 diffs ----------------------------------------------------------------------
@@ -422,13 +431,17 @@ def console_router(
         ra, rb = agent_or_none(a or ""), agent_or_none(b or "")
         if ra is None or rb is None:
             return error(request, principal, 404, "pick two known agent versions")
-        d = agent_diff(ra, rb)
+        profile = gate_of(principal).config.verifier_profile
+        d = agent_diff(ra, rb, profile)
         pick = case or (d.changed[0].key if d.changed else None)
         side = None
         if pick is not None:
             xa, xb = ra.record(pick), rb.record(pick)
             if xa is not None and xb is not None:
-                side = (case_view(xa, ra.scorecards[pick]), case_view(xb, rb.scorecards[pick]))
+                side = (
+                    case_view(xa, ra.scorecards_for(profile)[pick]),
+                    case_view(xb, rb.scorecards_for(profile)[pick]),
+                )
         return render(
             request, "diff_agents.html", principal, d=d, names=names, pick=pick, side=side
         )

@@ -477,3 +477,50 @@ def test_cli_validate_show_diff_apply(
     assert "stats.alpha" in capsys.readouterr().out
     assert _run(["policy", "history", "--db", db]) == 0
     assert APPROVER in capsys.readouterr().out
+
+
+# --- fairness profile and canary ramp take effect ---------------------------------
+
+
+def test_fairness_profile_compiles_onto_the_gate_config() -> None:
+    plain = Policy(name="plain").gate_config()
+    assert plain.verifier_profile == "merchant"
+    assert "verifier_profile" not in plain.model_dump()  # default: config hashes unchanged
+    for profile in VerifierProfile:
+        cfg = Policy.model_validate({"name": "p", "fairness": {"profile": profile}}).gate_config()
+        assert cfg.verifier_profile == profile.value
+    assert _yaml().gate_config().model_dump()["verifier_profile"] == "balanced"
+
+
+def test_tenant_fairness_profile_changes_the_console_scorecards() -> None:
+    from tests.test_console_support import client, ready_gate
+
+    g = ready_gate()
+    web = client(g)
+    before = web.get("/console/")
+    assert before.status_code == 200 and "FAIR-01" not in before.text
+    compliance = Policy.model_validate({"name": "strict", "fairness": {"profile": "compliance"}})
+    apply_policy(g, compliance, APPROVER)
+    assert configured(g).config.verifier_profile == "compliance"
+    after = web.get("/console/")  # the evidence baseline wins against valid claims
+    assert after.status_code == 200 and "FAIR-01" in after.text
+
+
+def test_canary_ramp_follows_the_tenant_policy() -> None:
+    from tests.test_console_support import ready_gate
+
+    g = ready_gate()
+    ramp = Policy.model_validate({"name": "ramp", "canary": {"stages": [10, 25]}})
+    apply_policy(g, ramp, APPROVER)
+    state = g.start_canary_ramp(GOOD_RULE_ID, 1)
+    assert state.schedule == ramp.ramp() and state.schedule.stages == (10.0, 25.0)
+
+
+def test_canary_ramp_without_a_policy_is_the_default_schedule() -> None:
+    from scruple.gate.canary import RampSchedule
+    from scruple.policy.apply import policy_ramp
+    from tests.test_console_support import ready_gate
+
+    g = ready_gate()
+    assert policy_ramp(g) == RampSchedule()
+    assert g.start_canary_ramp(GOOD_RULE_ID, 1).schedule == RampSchedule()

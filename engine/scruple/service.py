@@ -469,9 +469,19 @@ class AgentGate:
     # --- staged canary ramp -----------------------------------------------------
 
     def start_canary_ramp(
-        self, rule_id: str, version: int, schedule: RampSchedule, actor: str = SYSTEM_ACTOR
+        self,
+        rule_id: str,
+        version: int,
+        schedule: RampSchedule | None = None,
+        actor: str = SYSTEM_ACTOR,
     ) -> CanaryState:
-        """Begin a staged ramp for a version that passed the one-shot canary."""
+        """Begin a staged ramp for a version that passed the one-shot canary. Without a
+        `schedule`, the tenant's policy file decides it (`Policy.ramp()`; the default
+        schedule when there is no policy)."""
+        if schedule is None:
+            from scruple.policy.apply import policy_ramp
+
+            schedule = policy_ramp(self)
         rv = self.registry.get(rule_id, version)
         last = self._latest(rule_id, version, Stage.CANARY)
         if (

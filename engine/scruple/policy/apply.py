@@ -9,13 +9,19 @@ quorum by someone the gate would not let do it directly). Applying the policy th
 is already current changes nothing and returns the current record.
 
 `configured(gate)`: the same gate with the tenant's current policy compiled onto
-its config (`Policy.gate_config`), or the gate itself when there is none.
+its config (`Policy.gate_config`), or the gate itself when there is none. That config
+carries the policy's fairness profile (`GateConfig.verifier_profile`), which the
+console's episode scorecards use.
+
+`policy_ramp(gate)`: the canary ramp from the tenant's policy (`Policy.ramp()`);
+`AgentGate.start_canary_ramp` uses it when no schedule is given.
 """
 
 from __future__ import annotations
 
 import threading
 
+from scruple.gate.canary import RampSchedule
 from scruple.policy.models import Policy
 from scruple.policy.store import EVENT_POLICY_APPLIED, PolicyRecord, PolicyStore
 from scruple.service import AgentGate
@@ -48,6 +54,16 @@ def apply_policy(gate: AgentGate, policy: Policy, actor: str) -> tuple[PolicyRec
 
 def current_policy(gate: AgentGate) -> PolicyRecord | None:
     return PolicyStore(gate.storage).current()
+
+
+def policy_ramp(gate: AgentGate) -> RampSchedule:
+    """The canary ramp the tenant's current policy asks for (`Policy.ramp()`), or the
+    default schedule when there is no policy (or the storage holds no policies)."""
+    try:
+        rec = current_policy(gate)
+    except TypeError:  # a Storage without SQL (test doubles) has no policies
+        return RampSchedule()
+    return RampSchedule() if rec is None else rec.policy.ramp()
 
 
 def configured(gate: AgentGate) -> AgentGate:
@@ -91,4 +107,4 @@ class PolicyGates:
             return self._cache.setdefault((id(base), rec.policy_sha256), g)
 
 
-__all__ = ["PolicyGates", "apply_policy", "configured", "current_policy"]
+__all__ = ["PolicyGates", "apply_policy", "configured", "current_policy", "policy_ramp"]

@@ -344,11 +344,16 @@ uv run scruple ingest verify --store cases.db [--k 10] [--json]
 - CLI: `scruple policy validate FILE...` (exit 1 if any invalid), `show FILE|--current`,
   `diff OLD NEW` (either may be `@current`; exit 1 when they differ), `apply FILE --actor`,
   `history`.
-- Not done: the fairness profile is carried and hashed but the gate's own checks do not
-  read it (the verifier profiles score episodes, `scruple.verifiers.profiles`); the canary
-  ramp from the policy is returned by `Policy.ramp()` for whoever starts a ramp. Example
-  thresholds are configuration, not a statement of what any institution requires
-  (ASSUMPTION).
+- Fairness profile: compiled onto `GateConfig.verifier_profile` (left out of the config
+  hash at the default `merchant`). The console scores agent episodes under it
+  (`scruple.verifiers.profiles`), so a `compliance` policy shows `FAIR-01` failures that
+  `merchant` does not. The gate's own rule checks (shadow, canary on simulated cases) do
+  not use episode verifiers, so the profile does not change gate verdicts. The MCP and
+  CLI episode servers are not tenant-scoped and keep the default profile.
+- Canary ramp: `AgentGate.start_canary_ramp(rule_id, version)` with no schedule uses the
+  tenant's policy (`Policy.ramp()`, via `policy_ramp`); an explicit schedule still wins.
+- Example thresholds are configuration, not a statement of what any institution
+  requires (ASSUMPTION).
 
 ## Outbound integrations: how events leave (`scruple.integrations`)
 

@@ -39,6 +39,7 @@ from scruple.sim.ledger import JournalEntry
 from scruple.sim.models import CaseResult, DisputeCase
 from scruple.sim.policy import Policy
 from scruple.verifiers.checks import CheckResult, EvidenceRef, Scorecard
+from scruple.verifiers.profiles import DEFAULT_PROFILE
 from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.trace import EventKind, TraceEvent, verify_events
 
@@ -83,8 +84,8 @@ class AgentSummary:
     hard_failures: tuple[tuple[str, int], ...]
 
 
-def agent_summary(run: AgentRun) -> AgentSummary:
-    cards = run.scorecards
+def agent_summary(run: AgentRun, profile: str = DEFAULT_PROFILE) -> AgentSummary:
+    cards = run.scorecards_for(profile)
     recs = run.records
     fails: Counter[str] = Counter()
     for c in cards.values():
@@ -123,10 +124,11 @@ def last_action(r: EpisodeRecord) -> str:
     return acts[-1].tool or "none" if acts else ("lapsed" if r.lapsed else "none")
 
 
-def episode_rows(run: AgentRun) -> list[EpisodeRow]:
+def episode_rows(run: AgentRun, profile: str = DEFAULT_PROFILE) -> list[EpisodeRow]:
     rows = []
+    cards = run.scorecards_for(profile)
     for r in run.records:
-        card = run.scorecards[r.episode_id]
+        card = cards[r.episode_id]
         rows.append(
             EpisodeRow(
                 episode_id=r.episode_id,
@@ -454,7 +456,8 @@ def _outcome_key(r: EpisodeRecord) -> str:
     return f"{last_action(r)} / {r.resolution or ('lapsed' if r.lapsed else 'open')}"
 
 
-def agent_diff(a: AgentRun, b: AgentRun) -> AgentDiff:
+def agent_diff(a: AgentRun, b: AgentRun, profile: str = DEFAULT_PROFILE) -> AgentDiff:
+    cards_a, cards_b = a.scorecards_for(profile), b.scorecards_for(profile)
     rb = {r.episode_id: r for r in b.records}
     pairs = [(x, rb[x.episode_id]) for x in a.records if x.episode_id in rb]
     by_type: dict[str, list[tuple[EpisodeRecord, EpisodeRecord]]] = defaultdict(list)
@@ -471,8 +474,8 @@ def agent_diff(a: AgentRun, b: AgentRun) -> AgentDiff:
                 mean_b=fmean([y.cost_usd_minor for _, y in ps]),
                 correct_a=sum(1 for x, _ in ps if x.outcome is not None and x.outcome.correct),
                 correct_b=sum(1 for _, y in ps if y.outcome is not None and y.outcome.correct),
-                gate_a=sum(1 for x, _ in ps if a.scorecards[x.episode_id].gate),
-                gate_b=sum(1 for _, y in ps if b.scorecards[y.episode_id].gate),
+                gate_a=sum(1 for x, _ in ps if cards_a[x.episode_id].gate),
+                gate_b=sum(1 for _, y in ps if cards_b[y.episode_id].gate),
                 changed=sum(1 for x, y in ps if _outcome_key(x) != _outcome_key(y)),
             )
         )

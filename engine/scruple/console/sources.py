@@ -26,7 +26,7 @@ from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.store import EpisodeStore, UnknownEpisodeError
 from scruple.backtest.engine import BacktestReport
 from scruple.verifiers.checks import Scorecard
-from scruple.verifiers.dispute import score_record
+from scruple.verifiers.profiles import DEFAULT_PROFILE, VerifierProfile, score_profile
 from scruple.verifiers.record import EpisodeRecord
 
 NAME_PATTERN = r"^[a-z0-9][a-z0-9_.-]{0,63}$"
@@ -48,9 +48,26 @@ class AgentRun:
         with self._lock:
             return tuple(self._load())
 
-    @cached_property
+    _cards: dict[str, dict[str, Scorecard]] = field(default_factory=dict, repr=False)
+
+    def scorecards_for(
+        self, profile: VerifierProfile | str = DEFAULT_PROFILE
+    ) -> dict[str, Scorecard]:
+        """Scorecards under a verifier profile (a tenant policy's `fairness.profile`,
+        carried as `GateConfig.verifier_profile`); computed once per profile."""
+        key = VerifierProfile(profile).value
+        with self._lock:
+            found = self._cards.get(key)
+        if found is None:
+            found = {r.episode_id: score_profile(r, key) for r in self.records}
+            with self._lock:
+                found = self._cards.setdefault(key, found)
+        return found
+
+    @property
     def scorecards(self) -> dict[str, Scorecard]:
-        return {r.episode_id: score_record(r) for r in self.records}
+        """Scorecards under the default (`merchant`) profile."""
+        return self.scorecards_for(DEFAULT_PROFILE)
 
     def record(self, episode_id: str) -> EpisodeRecord | None:
         return next((r for r in self.records if r.episode_id == episode_id), None)
