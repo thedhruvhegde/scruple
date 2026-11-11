@@ -1,5 +1,5 @@
 .PHONY: install test test-slow test-postgres lint format typecheck demo bench serve check cov \
-	release db-up db-down db-migrate formal
+	release db-up db-down db-migrate formal docs
 
 # Local postgres from docker-compose.yml (needs POSTGRES_PASSWORD in env or .env).
 DB_URL ?= postgresql://scruple@127.0.0.1:$${POSTGRES_PORT:-5432}/scruple
@@ -71,3 +71,8 @@ db-down:
 
 db-migrate:
 	SCRUPLE_DATABASE_URL=$(DB_URL) uv run alembic upgrade head
+
+# Public docs site (docs-site/): pages + docs/ + the API reference generated from the
+# OpenAPI schema, built strict into docs-site/build/site.
+docs:
+	uv run python docs-site/build.py

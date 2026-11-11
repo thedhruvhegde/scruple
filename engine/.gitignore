@@ -14,3 +14,4 @@ site/local/
 .hypothesis/
 .env
 .scruple/
+docs-site/build/

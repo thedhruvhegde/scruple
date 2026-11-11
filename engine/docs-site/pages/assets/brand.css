@@ -1,0 +1,43 @@
+/* scruple brand on top of mkdocs-material: the console's palette and fonts, square
+   corners, no shadows, instant hover inversions. Fonts are the console's own files
+   (OFL), copied in by build.py. */
+@font-face { font-family: "Martian Mono"; src: url("fonts/martian-mono.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
+@font-face { font-family: "IBM Plex Sans Condensed"; src: url("fonts/plex-sans-condensed-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "IBM Plex Sans Condensed"; src: url("fonts/plex-sans-condensed-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "IBM Plex Sans Condensed"; src: url("fonts/plex-sans-condensed-600.woff2") format("woff2"); font-weight: 600 700; font-display: swap; }
+
+:root {
+  --md-text-font: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --md-code-font: "Martian Mono", ui-monospace, Menlo, Consolas, monospace;
+  --md-primary-fg-color: #12301F;
+  --md-primary-fg-color--light: #173A28;
+  --md-primary-fg-color--dark: #0D2018;
+  --md-primary-bg-color: #EDEAE1;
+  --md-accent-fg-color: #1D4A3A;
+  --md-default-bg-color: #EDEAE1;
+  --md-default-fg-color: #121513;
+  --md-default-fg-color--light: #565B57;
+  --md-typeset-a-color: #1D4A3A;
+  --md-code-bg-color: #0A1120;
+  --md-code-fg-color: #E6E3D6;
+  --md-footer-bg-color: #E3D8BF;
+  --md-footer-fg-color: #17140C;
+  --md-footer-fg-color--light: #554D3E;
+}
+body, .md-typeset { font-feature-settings: "tnum" 1; }
+.md-typeset h1, .md-typeset h2, .md-typeset h3, .md-header__title, .md-nav__title {
+  font-family: var(--md-code-font); font-variation-settings: "wdth" 80; letter-spacing: 0; color: inherit;
+}
+.md-typeset h1 { font-weight: 600; }
+.md-header, .md-tabs { box-shadow: none !important; }
+.md-typeset code, .md-typeset pre, .md-typeset .admonition, .md-typeset details,
+.md-search__form, .md-search__output, .md-button, .md-typeset table:not([class]) {
+  border-radius: 0 !important; box-shadow: none !important;
+}
+.md-typeset pre > code { color: var(--md-code-fg-color); }
+.md-typeset :not(pre) > code { background: #E4E0D5; color: #121513; }
+.md-typeset a:hover, .md-typeset a:focus-visible { background: #121513; color: #EDEAE1; transition: none; }
+.md-nav__link, .md-typeset a { transition: none !important; }
+.md-typeset table:not([class]) { border: 1px solid #D3D0C5; }
+.md-typeset table:not([class]) th { font-family: var(--md-code-font); font-variation-settings: "wdth" 80; font-size: 0.62rem; text-transform: uppercase; background: #E4E0D5; }
+.md-footer-meta { background: #D8CBAD; }
