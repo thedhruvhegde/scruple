@@ -142,3 +142,57 @@ def test_episode_survives_a_rejected_generation() -> None:
         "role": "assistant",
         "content": load("groq_tool_use_failed_400.json")["body"]["error"]["failed_generation"],
     }
+
+
+def _parse_failed() -> str:
+    return json.dumps(load("groq_output_parse_failed_400.json")["body"])
+
+
+def test_output_parse_failed_is_a_rejected_turn_with_nothing_to_keep() -> None:
+    turn = make_provider("groq", api_key="k").rejected_turn(400, _parse_failed(), 2)
+    assert turn is not None and turn.rejected
+    assert turn.calls == [] and turn.stop == "end" and turn.assistant == {}
+
+
+def test_episode_is_nudged_after_an_unparseable_generation() -> None:
+    sent: list[dict[str, Any]] = []
+    submit = {
+        "choices": [
+            {
+                "finish_reason": "tool_calls",
+                "message": {
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "id": "fc_2",
+                            "type": "function",
+                            "function": {
+                                "name": "submit_decision",
+                                "arguments": '{"explanation": "done"}',
+                            },
+                        }
+                    ],
+                },
+            }
+        ],
+        "usage": {"prompt_tokens": 5, "completion_tokens": 5},
+    }
+    replies = [httpx.Response(400, text=_parse_failed()), httpx.Response(200, json=submit)]
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        sent.append(json.loads(req.content))
+        return replies.pop(0)
+
+    runner = ProviderRunner(
+        make_provider("groq", api_key="k"),
+        "openai/gpt-oss-20b",
+        get_strategy("zero-shot").api_plan(),
+        settings=RunSettings(max_retries=0),
+        transport=httpx.MockTransport(handler),
+        sleep=lambda _s: None,
+    )
+    run = runner.run(DisputeEpisode(5001))
+    assert run.stop == "submitted" and run.rejected_turns == 1
+    history = sent[1]["messages"]
+    assert [m["role"] for m in history] == ["system", "user", "user"]
+    assert history[-1]["content"] == get_strategy("zero-shot").api_plan().loop.nudge_prompt

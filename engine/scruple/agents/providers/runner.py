@@ -211,7 +211,8 @@ class ProviderRunner:
             state.rejected += mt.rejected
             state.input_tokens += mt.input_tokens
             state.output_tokens += mt.output_tokens
-            messages.append(mt.assistant)
+            if mt.assistant:  # empty when the API refused a generation it could not parse
+                messages.append(mt.assistant)
             if planning:
                 planning = False
                 if mt.stop == "refusal":
