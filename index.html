@@ -256,8 +256,23 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 
 /* ---------- footer ---------- */
 .def { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: 32px 56px; align-items: center; padding-block: 96px 64px; }
-.def .word { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-weight: 600; font-size: clamp(56px, 10vw, 136px); line-height: 1; letter-spacing: -0.05em; }
-.def .pron { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.def .word { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-weight: 600; font-size: clamp(64px, 11vw, 152px); line-height: 1; letter-spacing: -0.05em; }
+/* a double rule under the word, drawn in characters to the edge of its column */
+.def .word::after { content: var(--eq); content: var(--eq) / ""; display: block; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; letter-spacing: 0; font-weight: 400; color: var(--rule-strong); margin-top: 12px; }
+.def .pron { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 13px; color: var(--brass); margin-top: 12px; }
+/* the site again, as a directory listing: # on this page / # pages / # back */
+.foot-nav { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 3fr) minmax(0, 3fr); gap: 24px 56px; padding-block: 0 48px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 24px; }
+.foot-nav .fh { color: var(--muted); }
+.foot-nav .fh::before { content: "# "; content: "# " / ""; }
+.fl { list-style: none; margin: 8px 0 0; padding: 0; counter-reset: fl; }
+ol.fl { columns: 2; column-gap: 56px; }
+ol.fl li { counter-increment: fl; }
+.fl a { display: inline-block; text-decoration: none; color: var(--fg); padding: 0 4px; margin-left: -4px; white-space: pre; }
+ol.fl a::before { content: counter(fl, decimal-leading-zero) "  "; content: counter(fl, decimal-leading-zero) "  " / ""; color: var(--muted); }
+.fl a.pg::after { content: " ->"; content: " ->" / ""; }
+.fl a:hover, .fl a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.fl a:hover::before, .fl a:focus-visible::before { color: inherit; }
+@media (max-width: 760px) { .foot-nav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .foot-nav > div:first-child { grid-column: 1 / -1; } }
 .def ol { margin: 16px 0 0; padding-left: 22px; display: grid; gap: 6px; font-size: 17px; max-width: 46ch; }
 .def ol li::marker { font-family: var(--f-mono); color: var(--muted); font-size: 13px; }
 @media (max-width: 900px) { .def { grid-template-columns: minmax(0, 1fr); } }
@@ -274,7 +289,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 /* ---------- character rules ----------
    Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
    Generated content carries empty alt text, so screen readers skip it. */
-:root { --dots: "................................................................................................................................................................................................................................................................................................................................................................................................................"; --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
+:root { --eq: "================================================================================================================================================================================================================================================================================================================================================================================================================"; --dots: "................................................................................................................................................................................................................................................................................................................................................................................................................"; --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
 main > .band { position: relative; }
 main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
 /* wide screens only: a ruler down the empty left margin, headed by the band's number (00 is the hero) */
@@ -487,6 +502,11 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
           </ol>
         </div>
       </div>
+      <nav class="foot-nav" aria-label="Footer">
+        <div><p class="fh">on this page</p><ol class="fl"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ol></div>
+        <div><p class="fh">pages</p><ul class="fl"><li><a class="pg" href="results/">Results</a></li><li><a class="pg" href="paper/">Paper</a></li></ul></div>
+        <div><p class="fh">back</p><ul class="fl"><li><a href="#top">Top of the page</a></li></ul></div>
+      </nav>
       <div class="foot-row">
         <pre class="foot-mark" aria-hidden="true"> <b>[#]</b>
 ===============
