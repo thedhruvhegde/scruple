@@ -109,6 +109,8 @@ h1 { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weig
 p { margin: 0; max-width: 46ch; color: var(--muted); }
 .btn { display: inline-flex; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; padding: 12px 18px; border: 1px solid var(--fg); color: var(--fg); background: transparent; text-decoration: none; width: fit-content; margin-top: 12px; }
 .btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; max-width: none; }
+.links .btn { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -136,8 +138,8 @@ p { margin: 0; max-width: 46ch; color: var(--muted); }
 <main id="top">
   <p class="code">404 · not found</p>
   <h1>Nothing at this address.</h1>
-  <p>The page you asked for does not exist. The site is one page.</p>
-  <a class="btn" href="/scruple/">Back to scruple</a>
+  <p>The page you asked for does not exist. The site has three pages: home, results and the paper.</p>
+  <p class="links"><a class="btn" href="/scruple/">Back to scruple</a><a class="btn" href="/scruple/results/">Results</a><a class="btn" href="/scruple/paper/">Paper</a></p>
 </main>
 <script src="/scruple/nav.js" defer></script>
 </body>
