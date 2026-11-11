@@ -302,6 +302,10 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 .thm.boxed .qed { bottom: 0; right: 3ch; color: var(--muted); text-decoration: none; }
 .thm.boxed .qed:hover, .thm.boxed .qed:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .thm .qed { display: block; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; color: var(--muted); }
+/* the bound drawn in characters (ascii.js reads the svg in section 04) */
+.chars { white-space: pre; overflow: hidden; color: var(--c-mute); line-height: 1.35; }
+.c-f { color: var(--c-fg); } .c-d { color: var(--c-mute); } .c-r { color: var(--c-dim); } .c-g { color: var(--c-pine); } .c-s { color: var(--c-sky); } .c-v { color: var(--c-verm); }
+.leg b { font-weight: 600; }
 /* the margin label, set sideways in the empty right margin on wide screens */
 .margin-label { display: none; }
 @media (min-width: 1400px) {
@@ -1472,6 +1476,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <li><b>Prop 7.2</b><span>The best fixed-bet growth rate <span class="f">g*</span> of the observed costs equals a KL distance to a harmless law, so any valid test needs at least <span class="f">kl(1 - beta || alpha) / g*</span> cases.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=10">p. 10 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
         <li><b>Thm 9.1</b><span>The promote decision carries the smallest level among the checks that cover a harm. False blocks add up. Harms no check covers carry no guarantee.<span class="lab">standard, applied</span></span><a class="qed" href="scruple_paper.pdf#page=13">p. 13 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
       </ul>
+      <figure class="fig solo" style="margin:0"><div class="screen" data-head="theorem 10.3" data-grid="in characters"><pre class="term chars" id="bound-chars" role="img" aria-label="The hacking-gap bound against the audit rate, redrawn in characters from the hacking gap figure in section 04">loading</pre><p class="leg"><span><b class="c-g">-</b> bound, beta 0</span><span><b class="c-s">-</b> bound, beta 0.3</span><span><b class="c-v">-</b> bound, beta 0.3, leak l 0.2</span><span><b class="c-f">#</b> E2 batches, worst</span></p></div>
+        <figcaption class="fig-cap">The bound of Theorem 10.3, drawn in characters from the same points as the hacking gap figure in section 04: expected accepted gap on a log scale, against the audit rate q. <span class="src">paper Theorem 10.3 and Corollary 10.5, p. 14 and 15</span></figcaption></figure>
     </div>
   </section>
 
