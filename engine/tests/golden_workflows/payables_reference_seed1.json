@@ -1,0 +1,148 @@
+{
+ "events": [
+  {
+   "cash_minor": 28949174,
+   "type": "opened"
+  },
+  {
+   "amount_minor": 1083564,
+   "invoice_id": "AP-07",
+   "type": "booked",
+   "vendor_id": "V-003"
+  },
+  {
+   "amount_minor": 1194900,
+   "invoice_id": "AP-05",
+   "type": "booked",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 646671,
+   "invoice_id": "AP-03",
+   "type": "booked",
+   "vendor_id": "V-001"
+  },
+  {
+   "amount_minor": 646671,
+   "invoice_id": "AP-03-2",
+   "type": "booked",
+   "vendor_id": "V-001"
+  },
+  {
+   "amount_minor": 44205,
+   "invoice_id": "AP-01",
+   "type": "booked",
+   "vendor_id": "V-003"
+  },
+  {
+   "amount_minor": 234600,
+   "invoice_id": "AP-06",
+   "type": "booked",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 737766,
+   "invoice_id": "AP-02",
+   "type": "booked",
+   "vendor_id": "V-003"
+  },
+  {
+   "amount_minor": 3439960,
+   "invoice_id": "AP-04",
+   "type": "booked",
+   "vendor_id": "V-003"
+  },
+  {
+   "invoice_id": "AP-07",
+   "reason": "fewer goods received than invoiced",
+   "type": "held"
+  },
+  {
+   "amount_minor": 1194900,
+   "invoice_id": "AP-05",
+   "to_account": "357544015/5507",
+   "type": "paid",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 646671,
+   "invoice_id": "AP-03",
+   "to_account": "776051828/1200",
+   "type": "paid",
+   "vendor_id": "V-001"
+  },
+  {
+   "amount_minor": 646671,
+   "invoice_id": "AP-03-2",
+   "reason": "duplicate of an invoice already paid or in this run",
+   "type": "rejected",
+   "vendor_id": "V-001"
+  },
+  {
+   "amount_minor": 44205,
+   "invoice_id": "AP-01",
+   "to_account": "088611691/0466",
+   "type": "paid",
+   "vendor_id": "V-003"
+  },
+  {
+   "amount_minor": 234600,
+   "invoice_id": "AP-06",
+   "to_account": "357544015/5507",
+   "type": "paid",
+   "vendor_id": "V-002"
+  },
+  {
+   "amount_minor": 737766,
+   "invoice_id": "AP-02",
+   "to_account": "088611691/0466",
+   "type": "paid",
+   "vendor_id": "V-003"
+  },
+  {
+   "invoice_id": "AP-04",
+   "reason": "no goods received",
+   "type": "held"
+  },
+  {
+   "type": "settled"
+  }
+ ],
+ "kinds": {
+  "AP-01": "clean",
+  "AP-02": "clean",
+  "AP-03": "clean",
+  "AP-03-2": "duplicate",
+  "AP-04": "no_receipt",
+  "AP-05": "clean",
+  "AP-06": "recurring",
+  "AP-07": "short_receipt"
+ },
+ "outcome": {
+  "correct_invoices": 8,
+  "dispositions": {
+   "AP-01": "paid",
+   "AP-02": "paid",
+   "AP-03": "paid",
+   "AP-03-2": "rejected",
+   "AP-04": "held",
+   "AP-05": "paid",
+   "AP-06": "paid",
+   "AP-07": "held"
+  },
+  "invoices": 8,
+  "lost_minor": 0,
+  "overpaid_minor": 0,
+  "paid_minor": 2858142
+ },
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 1,
+ "synthetic": true,
+ "trace_head": "bab15d0718dc3502999ae833b88826652ea96eba0f34900fa60add9fa26c49f5"
+}

@@ -11,10 +11,11 @@ engine instead (lifecycle stages, deadlines, evidence documents, issuer replies)
 shared read tools work for both kinds; `accept`, `wait`, `upload_evidence`,
 `refund(amount_minor=...)` and `submit_dispute` are for dispute episodes.
 
-`start_ach_episode`, `start_recon_episode`, `start_aml_episode` and
-`start_scenario_episode` start the other episode kinds the API and CLI serve. ACH,
-recon and AML episodes have their own tool sets, exposed with an `ach_`, `recon_` or
-`aml_` prefix (`ach_get_case`, `recon_match`, `aml_file_sar`, ...) and refused on
+`start_ach_episode`, `start_recon_episode`, `start_aml_episode`,
+`start_payables_episode` and `start_scenario_episode` start the other episode kinds
+the API and CLI serve. ACH, recon, AML and payables episodes have their own tool
+sets, exposed with an `ach_`, `recon_`, `aml_` or `payables_` prefix (`ach_get_case`,
+`recon_match`, `aml_file_sar`, `payables_pay`, ...) and refused on
 episodes of another kind; a scenario episode is a dispute episode on a
 real CFPB-grounded scenario and plays the dispute tools above.
 
@@ -42,6 +43,8 @@ from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME, DisputeToolSpec
 from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironment
 from scruple.agents.episode import Episode, EpisodeError
 from scruple.agents.models import TASK
+from scruple.agents.payables_episode import PAYABLES_TASK, TOKENS, PayablesEpisode
+from scruple.agents.payables_tools import PAYABLES_TOOLS
 from scruple.agents.recon_episode import FORMATS, RECON_TASK, ReconEpisode
 from scruple.agents.recon_tools import RECON_TOOLS
 from scruple.agents.store import new_episode
@@ -61,10 +64,10 @@ WorkflowCaseType = Annotated[
 ]
 
 
-AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode
+AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode | PayablesEpisode
 # Episode kinds the unprefixed tools serve (a scenario episode is a dispute episode).
 LEGACY_KINDS = frozenset({"simple", "dispute"})
-WORKFLOW_PREFIX = {"ach": "ach_", "recon": "recon_", "aml": "aml_"}
+WORKFLOW_PREFIX = {"ach": "ach_", "recon": "recon_", "aml": "aml_", "payables": "payables_"}
 
 
 def episode_kind(ep: Any) -> str:
@@ -406,6 +409,11 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
                 "format": "family, family@difficulty or @difficulty (difficulty in [0, 1])",
                 "data": "synthetic transaction graphs",
             },
+            "payables": {
+                "tokens": list(TOKENS),
+                "format": "invoice kinds joined by +, then optionally @difficulty",
+                "data": "synthetic invoices, POs, receipts and vendors",
+            },
             "data": "ach and recon cases are synthetic; scenario cases are built from "
             "public CFPB complaints (docs/data/CFPB.md)",
         }
@@ -445,7 +453,21 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
         ep = t.start_kind("aml", seed, case_type)
         return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
 
-    for kind, specs in (("ach", ACH_TOOLS), ("recon", RECON_TOOLS), ("aml", AML_TOOLS)):
+    @server.tool(
+        description="Start a payables episode: work one pay run of vendor invoices. "
+        + PAYABLES_TASK
+    )
+    def start_payables_episode(seed: Seed, case_type: WorkflowCaseType = None) -> dict[str, Any]:
+        ep = t.start_kind("payables", seed, case_type)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
+    workflows = (
+        ("ach", ACH_TOOLS),
+        ("recon", RECON_TOOLS),
+        ("aml", AML_TOOLS),
+        ("payables", PAYABLES_TOOLS),
+    )
+    for kind, specs in workflows:
         for spec in specs:
             fn = _workflow_tool(t, kind, spec)
             server.add_tool(fn, name=fn.__name__, description=spec.description)

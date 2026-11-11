@@ -18,13 +18,21 @@ from scruple.agents.ach_tools import ACH_TOOL_NAMES, ach_anthropic_tools
 from scruple.agents.aml_tools import AML_TOOL_NAMES, aml_anthropic_tools
 from scruple.agents.dispute_tools import DISPUTE_TOOL_NAMES, dispute_anthropic_tools
 from scruple.agents.episode import EpisodeError
+from scruple.agents.payables_tools import PAYABLES_TOOL_NAMES, payables_anthropic_tools
 from scruple.agents.recon_tools import RECON_TOOL_NAMES, recon_anthropic_tools
 from scruple.agents.store import KINDS, EpisodeStore, UnknownEpisodeError
 from scruple.agents.tools import TOOL_NAMES, anthropic_tools
 
 ALL_TOOL_NAMES = tuple(
     dict.fromkeys(
-        (*TOOL_NAMES, *DISPUTE_TOOL_NAMES, *ACH_TOOL_NAMES, *RECON_TOOL_NAMES, *AML_TOOL_NAMES)
+        (
+            *TOOL_NAMES,
+            *DISPUTE_TOOL_NAMES,
+            *ACH_TOOL_NAMES,
+            *RECON_TOOL_NAMES,
+            *AML_TOOL_NAMES,
+            *PAYABLES_TOOL_NAMES,
+        )
     )
 )
 KIND_TOOLS = {
@@ -33,6 +41,7 @@ KIND_TOOLS = {
     "ach": ach_anthropic_tools,
     "recon": recon_anthropic_tools,
     "aml": aml_anthropic_tools,
+    "payables": payables_anthropic_tools,
 }
 
 
