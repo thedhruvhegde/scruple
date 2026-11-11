@@ -170,11 +170,26 @@ def retention_apply(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
     return run(ctx, params)
 
 
+def webhook_deliver(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+    """One outbound webhook delivery (scruple.integrations.webhooks)."""
+    from scruple.integrations.jobs import webhook_deliver as run
+
+    return run(ctx, params)
+
+
 HANDLERS: dict[str, Handler] = {
     JobKind.GATE_EVALUATION.value: gate_evaluation,
     JobKind.BACKTEST.value: backtest,
     JobKind.BENCH_SCORE.value: bench_score,
     "retention_apply": retention_apply,
+    "webhook_deliver": webhook_deliver,
 }
 
-__all__ = ["HANDLERS", "backtest", "bench_score", "gate_evaluation", "retention_apply"]
+__all__ = [
+    "HANDLERS",
+    "backtest",
+    "bench_score",
+    "gate_evaluation",
+    "retention_apply",
+    "webhook_deliver",
+]

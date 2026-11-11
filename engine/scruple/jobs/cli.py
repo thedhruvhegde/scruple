@@ -6,8 +6,18 @@ import argparse
 import json
 import signal
 import threading
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+
+
+def _chain(first: Callable[[], Any] | None, then: Callable[[], Any]) -> Callable[[], None]:
+    def both() -> None:
+        if first is not None:
+            first()
+        then()
+
+    return both
 
 
 def cmd_worker(args: argparse.Namespace) -> int:
@@ -18,7 +28,7 @@ def cmd_worker(args: argparse.Namespace) -> int:
     db = args.db or load_settings().database_dsn()
     cfg = Path(args.gate_config).read_text(encoding="utf-8") if args.gate_config else None
     queue = open_queue(db)
-    tick = None
+    tick: Callable[[], Any] | None = None
     sched_storage: Any = None
     if args.schedule_retention:
         from scruple.clock import SystemClock
@@ -28,6 +38,15 @@ def cmd_worker(args: argparse.Namespace) -> int:
         sched_storage = open_storage(db)
         scheduler = DailyScheduler(queue, sched_storage, SystemClock())
         tick = scheduler.tick
+    if args.dispatch_integrations:
+        from scruple.integrations.dispatch import Dispatcher
+        from scruple.storage import open_storage
+
+        if sched_storage is None:
+            sched_storage = open_storage(db)
+        dispatcher = Dispatcher(queue, sched_storage)
+        tick = _chain(tick, dispatcher.tick)
+
     worker = Worker(
         queue,
         JobContext(
@@ -94,6 +113,11 @@ def add_worker_parser(sub: Any, default_db: str) -> None:
         "--schedule-retention",
         action="store_true",
         help="queue one retention_apply job per tenant per UTC day (idempotent)",
+    )
+    p.add_argument(
+        "--dispatch-integrations",
+        action="store_true",
+        help="turn new gate events into webhook, ticket and Slack jobs (every 5 s)",
     )
 
 

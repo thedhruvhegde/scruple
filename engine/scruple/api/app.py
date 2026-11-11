@@ -46,7 +46,7 @@ from scruple.gate.shadow_imported import (
 )
 from scruple.ingest.api import ingest_router
 from scruple.jobs.api import jobs_router
-from scruple.jobs.queue import JobError, queue_for
+from scruple.jobs.queue import JobError, JobQueue, queue_for
 from scruple.logging import RequestIDMiddleware
 from scruple.observability import install_observability
 from scruple.observability.metrics import METRICS_PATH
@@ -265,6 +265,14 @@ def create_app(
     app.include_router(policy_router(app.state.gates.get))
     with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
         app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
+    # Outbound integrations (scruple.integrations): settings, webhooks, delivery log.
+    from scruple.integrations.api import integrations_router
+
+    try:
+        integrations_queue: JobQueue | None = queue_for(root.storage, clock=root.clock)
+    except JobError:
+        integrations_queue = None
+    app.include_router(integrations_router(app.state.gates.get, integrations_queue))
 
     @app.get("/version", dependencies=[public()])
     def version() -> BuildInfo:

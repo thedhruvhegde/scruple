@@ -62,9 +62,19 @@ LISTS = {
     "/console/diff/agents",
     "/console/backtests",
     "/policy/history",
+    "/integrations/settings",
+    "/integrations/webhooks",
+    "/integrations/webhooks/deliveries",
 }
 # Routes that create in the caller's own tenant.
-CREATES = {"/rules", "/jobs", "/policy"}
+CREATES = {
+    "/rules",
+    "/jobs",
+    "/policy",
+    "/integrations/settings",
+    "/integrations/webhooks",
+    "/integrations/dispatch",
+}
 CFG = GateConfig(n_cases=1_000, bootstrap_resamples=100, canary_n_cases=1_000)
 
 
@@ -119,6 +129,8 @@ def _fill(path: str, rule_id: str, decision_id: str, job_id: str = "job-00000001
         "name": "x",
         "episode_id": "ep-000000000000",
         "filter_id": "flt-000000000000",
+        "endpoint_id": "whe_0000000000000000",
+        "delivery_id": "whd_000000000000000000000000",
     }
     return re.sub(r"\{(\w+)\}", lambda m: values[m.group(1)], path)
 
@@ -226,7 +238,7 @@ def test_no_route_reaches_another_tenants_data(
             assert not leaked, (route.path, role, r.status_code, leaked)
             if route.path in CREATES and method == "post":
                 # creates in B's own tenant, or refused (empty body, no permission)
-                assert r.status_code in (202, 403, 422), (role, r.status_code, text)
+                assert r.status_code in (200, 201, 202, 403, 422), (role, r.status_code, text)
             elif route.path in LISTS:
                 assert r.status_code in (200, 403), (route.path, role, r.status_code, text)
             elif route.path.startswith("/console/") and method == "post":
