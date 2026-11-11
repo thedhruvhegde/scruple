@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 from collections import OrderedDict
 from collections.abc import Callable
+from dataclasses import replace
 from importlib.resources import files
 from typing import Annotated, Any, Literal
 
@@ -26,6 +27,20 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from scruple.api.strict import RAW_BODY
 from scruple.auth import public
 from scruple.console import fmt
+from scruple.console.listing import (
+    APPROVALS,
+    CASES,
+    RUNS,
+    SPECS,
+    VALUE_PATTERN,
+    VERSIONS,
+    Filter,
+    FilterError,
+    ListSpec,
+    joined,
+    paginate,
+)
+from scruple.console.listing import matches as matches_text
 from scruple.console.permissions import Principal, requires
 from scruple.console.security import Csrf, apply_headers, load_secret, read_form
 from scruple.console.sources import NAME_PATTERN, AgentRun, ConsoleSources
@@ -45,6 +60,7 @@ from scruple.gate.approval import ApprovalError
 from scruple.registry import InvalidTransitionError, RuleNotFoundError, RuleVersion
 from scruple.registry.models import RULE_ID_PATTERN
 from scruple.service import AgentGate
+from scruple.storage.console_filters import SavedFilter, SavedFilterError, saved_filters_for
 
 PREFIX = "/console"
 STATIC: dict[str, str] = {
@@ -72,6 +88,11 @@ Version = Annotated[int, Path(ge=1, le=2**63 - 1)]
 EpisodeId = Annotated[str, Path(pattern=r"^ep-[0-9a-f]{12}$")]
 DecisionId = Annotated[str, Path(pattern=r"^dec-[0-9]{5,12}$")]
 Ref = Annotated[str | None, Query(max_length=80)]
+Search = Annotated[str | None, Query(max_length=100)]
+FacetValue = Annotated[str | None, Query(max_length=64, pattern=VALUE_PATTERN)]
+PageNo = Annotated[int | None, Query(ge=1, le=1_000_000)]
+PerPage = Annotated[int | None, Query(ge=1, le=100)]
+FilterId = Annotated[str, Path(pattern=r"^flt-[0-9a-f]{12}$")]
 
 
 class _Form(BaseModel):
@@ -87,6 +108,17 @@ class DecisionForm(_Form):
 
 class RequestForm(_Form):
     pass
+
+
+class SaveFilterForm(_Form):
+    list: Literal["versions", "runs", "cases", "approvals"]
+    name: str = Field(min_length=1, max_length=60, pattern=r"^[^\x00-\x1f\x7f]+$")
+    query: str = Field(max_length=600)
+    agent: str | None = Field(default=None, pattern=NAME_PATTERN)
+
+
+class DeleteFilterForm(_Form):
+    agent: str | None = Field(default=None, pattern=NAME_PATTERN)
 
 
 def environment() -> Environment:
@@ -182,17 +214,73 @@ def console_router(
 
     # --- 181 runs and scores -------------------------------------------------------
 
+    def filter_or_error(
+        request: Request,
+        principal: Principal,
+        spec: ListSpec,
+        q: str | None,
+        facets: dict[str, str | None],
+        page: int | None,
+        per: int | None,
+    ) -> Filter | HTMLResponse:
+        try:
+            return Filter.build(spec, q, facets, page, per)
+        except FilterError as exc:
+            return error(request, principal, 422, str(exc))
+
+    def saved_for(
+        principal: Principal, spec: ListSpec, gate: AgentGate
+    ) -> list[SavedFilter] | None:
+        store = saved_filters_for(gate.storage)
+        if store is None:
+            return None
+        out = []
+        for f in store.list(principal.tenant, spec.name):
+            try:  # re-validated on the way out: a stored string is never trusted as-is
+                out.append(replace(f, query=Filter.parse(spec, f.query).canonical()))
+            except FilterError:
+                continue
+        return out
+
     @router.get("/", response_class=HTMLResponse)
     def overview(
-        request: Request, principal: Annotated[Principal, requires("read")]
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        q: Search = None,
+        status: FacetValue = None,
+        verdict: FacetValue = None,
+        page: PageNo = None,
+        per: PerPage = None,
     ) -> HTMLResponse:
         gate = gate_of(principal)
+        filt = filter_or_error(
+            request, principal, VERSIONS, q, {"status": status, "verdict": verdict}, page, per
+        )
+        if not isinstance(filt, Filter):
+            return filt
         rows = version_rows(gate)
+        pg = paginate(
+            rows,
+            filt,
+            lambda r: joined(
+                (
+                    r.rv.ref,
+                    r.rv.owner,
+                    r.rv.provenance.agent_id,
+                    r.rv.spec.description,
+                    r.rv.spec.describe(),
+                    r.rv.content_hash,
+                )
+            ),
+            lambda r: {"status": r.rv.status.value, "verdict": r.verdict or "none"},
+        )
         return render(
             request,
             "overview.html",
             principal,
             rows=rows,
+            pg=pg,
+            saved=saved_for(principal, VERSIONS, gate),
             agents=[agent_summary(run) for run in src.agents.values()],
             decisions=gate.decisions()[-12:][::-1],
             reports=len(src.reports),
@@ -201,20 +289,89 @@ def console_router(
 
     @router.get("/agents/{name}", response_class=HTMLResponse)
     def agent_page(
-        request: Request, name: Name, principal: Annotated[Principal, requires("read")]
+        request: Request,
+        name: Name,
+        principal: Annotated[Principal, requires("read")],
+        q: Search = None,
+        family: FacetValue = None,
+        action: FacetValue = None,
+        gate: FacetValue = None,
+        correct: FacetValue = None,
+        page: PageNo = None,
+        per: PerPage = None,
     ) -> HTMLResponse:
         run = agent_or_none(name)
         if run is None:
             return error(request, principal, 404, f"unknown agent version {name}")
+        facets = {"family": family, "action": action, "gate": gate, "correct": correct}
+        filt = filter_or_error(request, principal, CASES, q, facets, page, per)
+        if not isinstance(filt, Filter):
+            return filt
         others = [n for n in src.agents if n != name]
+        pg = paginate(
+            episode_rows(run),
+            filt,
+            lambda r: joined(
+                (
+                    r.episode_id,
+                    r.case_id,
+                    r.family,
+                    r.network,
+                    r.reason_code,
+                    r.action,
+                    r.resolution,
+                    *r.failed,
+                )
+            ),
+            lambda r: {
+                "family": r.family,
+                "action": r.action,
+                "gate": "pass" if r.gate else "fail",
+                "correct": "yes" if r.correct else "no",
+            },
+        )
         return render(
             request,
             "agent.html",
             principal,
             run=run,
             summary=agent_summary(run),
-            rows=episode_rows(run),
+            pg=pg,
+            saved=saved_for(principal, CASES, gate_of(principal)),
             others=others,
+        )
+
+    @router.get("/runs", response_class=HTMLResponse)
+    def runs_page(
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        q: Search = None,
+        stage: FacetValue = None,
+        outcome: FacetValue = None,
+        page: PageNo = None,
+        per: PerPage = None,
+    ) -> HTMLResponse:
+        gate = gate_of(principal)
+        facets = {"stage": stage, "outcome": outcome}
+        filt = filter_or_error(request, principal, RUNS, q, facets, page, per)
+        if not isinstance(filt, Filter):
+            return filt
+        pg = paginate(
+            gate.decisions()[::-1],
+            filt,
+            lambda r: joined(
+                (
+                    r.decision.decision_id,
+                    f"{r.decision.rule_id}@v{r.decision.version}",
+                    r.decision.summary,
+                    r.decision.actor,
+                    *r.decision.reasons,
+                )
+            ),
+            lambda r: {"stage": r.decision.stage.value, "outcome": r.decision.outcome.value},
+        )
+        return render(
+            request, "runs.html", principal, pg=pg, saved=saved_for(principal, RUNS, gate)
         )
 
     @router.get("/rules/{rule_id}/versions/{version}", response_class=HTMLResponse)
@@ -327,15 +484,35 @@ def console_router(
         status: int = 200,
         message: str | None = None,
         problem: str | None = None,
+        filt: Filter | None = None,
     ) -> HTMLResponse:
         gate = gate_of(principal)
-        box = inbox(gate, gate.clock.now())
+        box = inbox(gate, gate.clock.now(), history_limit=None)
+        filt = filt or Filter(APPROVALS)
+        pending = [
+            p
+            for p in box.pending
+            if not filt.q
+            or matches_text(
+                joined((p.rv.ref, p.rv.owner, p.rv.provenance.agent_id, p.rv.spec.description)),
+                filt.q,
+            )
+        ]
+        pg = paginate(
+            list(box.history),
+            filt,
+            lambda e: joined((e.event_type, e.actor, payload_text(e))),
+            lambda e: {"event": e.event_type},
+        )
         return render(
             request,
             "approvals.html",
             principal,
             status,
             box=box,
+            pending=pending,
+            pg=pg,
+            saved=saved_for(principal, APPROVALS, gate),
             message=message,
             problem=problem,
             payload=payload_text,
@@ -346,8 +523,86 @@ def console_router(
         request: Request,
         principal: Annotated[Principal, requires("read")],
         msg: Message | None = None,
+        q: Search = None,
+        event: FacetValue = None,
+        page: PageNo = None,
+        per: PerPage = None,
     ) -> HTMLResponse:
-        return inbox_page(request, principal, message=MESSAGES.get(msg or ""))
+        filt = filter_or_error(request, principal, APPROVALS, q, {"event": event}, page, per)
+        if not isinstance(filt, Filter):
+            return filt
+        return inbox_page(request, principal, message=MESSAGES.get(msg or ""), filt=filt)
+
+    # --- saved filters: shared by the tenant, so curating them is `admin` ------------
+
+    list_paths = {"versions": "/", "runs": "/runs", "approvals": "/approvals"}
+
+    def list_path(list_: str, agent: str | None) -> str | None:
+        if list_ == "cases":
+            return f"/agents/{agent}" if agent and agent in src.agents else None
+        return list_paths.get(list_)
+
+    @router.post("/filters", openapi_extra={RAW_BODY: True})
+    async def save_filter(
+        request: Request, principal: Annotated[Principal, requires("admin")]
+    ) -> Response:
+        try:
+            raw_form = await read_form(request)
+            csrf.verify(request, raw_form.get("csrf"))
+            form = SaveFilterForm.model_validate(raw_form)
+        except HTTPException as exc:
+            return error(request, principal, exc.status_code, str(exc.detail))
+        except ValidationError as exc:
+            why = "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors())
+            return error(request, principal, 422, why)
+        target = list_path(form.list, form.agent)
+        if target is None:
+            return error(request, principal, 404, "unknown list to save a filter for")
+        gate = gate_of(principal)
+        store = saved_filters_for(gate.storage)
+        if store is None:
+            return error(request, principal, 404, "this database keeps no saved filters")
+        try:
+            filt = Filter.parse(SPECS[form.list], form.query)
+            if not filt.active:
+                raise FilterError("nothing to save: the filter is empty")
+            store.save(
+                principal.tenant,
+                form.list,
+                form.name,
+                filt.canonical(),
+                principal.name,
+                gate.clock.now(),
+            )
+        except (FilterError, SavedFilterError) as exc:
+            return error(request, principal, 422, str(exc))
+        qs = filt.canonical()
+        return apply_headers(RedirectResponse(f"{PREFIX}{target}?{qs}", status_code=303))
+
+    @router.post("/filters/{filter_id}/delete", openapi_extra={RAW_BODY: True})
+    async def delete_filter(
+        request: Request, filter_id: FilterId, principal: Annotated[Principal, requires("admin")]
+    ) -> Response:
+        try:
+            raw_form = await read_form(request)
+            csrf.verify(request, raw_form.get("csrf"))
+            dform = DeleteFilterForm.model_validate(raw_form)
+        except HTTPException as exc:
+            return error(request, principal, exc.status_code, str(exc.detail))
+        except ValidationError:
+            return error(request, principal, 422, "bad form")
+        gate = gate_of(principal)
+        store = saved_filters_for(gate.storage)
+        if store is None:
+            return error(request, principal, 404, "this database keeps no saved filters")
+        try:
+            f = store.delete(principal.tenant, filter_id, principal.name, gate.clock.now())
+        except LookupError:
+            return error(request, principal, 404, f"no saved filter {filter_id}")
+        except SavedFilterError as exc:
+            return error(request, principal, 403, str(exc))
+        target = list_path(f.list, dform.agent) or "/"
+        return apply_headers(RedirectResponse(f"{PREFIX}{target}", status_code=303))
 
     async def form_of(
         request: Request, model: type[_Form]

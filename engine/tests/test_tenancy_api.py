@@ -54,6 +54,7 @@ LISTS = {
     "/jobs",
     # console pages that list the caller's own tenant (or the shared synthetic runs)
     "/console/",
+    "/console/runs",
     "/console/approvals",
     "/console/diff/rules",
     "/console/diff/agents",
@@ -114,6 +115,7 @@ def _fill(path: str, rule_id: str, decision_id: str, job_id: str = "job-00000001
         "job_id": job_id,
         "name": "x",
         "episode_id": "ep-000000000000",
+        "filter_id": "flt-000000000000",
     }
     return re.sub(r"\{(\w+)\}", lambda m: values[m.group(1)], path)
 

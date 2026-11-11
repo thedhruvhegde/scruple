@@ -648,7 +648,9 @@ class Inbox:
 HISTORY_EVENTS = (*APPROVAL_EVENTS, EVENT_REJECTED, "rule.activated")
 
 
-def inbox(gate: AgentGate, now: datetime) -> Inbox:
+def inbox(gate: AgentGate, now: datetime, history_limit: int | None = 30) -> Inbox:
+    """Versions waiting for approval, and approval history newest first (the last
+    `history_limit` events; None for all, which the console pages itself)."""
     entries = gate.audit.entries()
     policy = project_policy(entries)
     pending = []
@@ -670,7 +672,8 @@ def inbox(gate: AgentGate, now: datetime) -> Inbox:
             request, grants = project_approvals(entries, rv.rule_id, rv.version)
             status = evaluate_approvals(policy, request, grants, now)
         pending.append(PendingApproval(rv, canary[-1], ramp, actionable, blocker, request, status))
-    history = tuple(e for e in entries if e.event_type in HISTORY_EVENTS)[-30:][::-1]
+    events = [e for e in entries if e.event_type in HISTORY_EVENTS]
+    history = tuple((events if history_limit is None else events[-history_limit:])[::-1])
     return Inbox(policy, gate.config.approvers, tuple(pending), history)
 
 

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% import "macros.html" as m with context %}
+{% import "_listing.html" as l with context %}
 {% set section = "approvals" %}
 {% block title %}approvals{% endblock %}
 {% block head %}
 <p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>approvals</span></p>
 <h1>Approvals inbox</h1>
 <p class="lede">Versions that passed canary and wait for a person. The service decides who may approve: named approvers only, and never the proposer, the rule's owner or the agent that learned it.</p>
-<p class="meta"><span><b>{{ box.pending | length }}</b> waiting</span>{% if box.policy %}<span>policy <b>{{ box.policy.required }} of {{ box.policy.approvers | length }}</b> named approvers{% if box.policy.required_role %}, role <b>{{ box.policy.required_role }}</b> required{% endif %}</span>{% else %}<span>no approval policy: one approver from <b>{{ box.single_approvers | join(", ") }}</b></span>{% endif %}</p>
+<p class="meta"><span><b>{{ box.pending | length }}</b> waiting{% if pg.filter.q %} ({{ pending | length }} match){% endif %}</span>{% if box.policy %}<span>policy <b>{{ box.policy.required }} of {{ box.policy.approvers | length }}</b> named approvers{% if box.policy.required_role %}, role <b>{{ box.policy.required_role }}</b> required{% endif %}</span>{% else %}<span>no approval policy: one approver from <b>{{ box.single_approvers | join(", ") }}</b></span>{% endif %}</p>
 {% endblock %}
 {% block body %}
 {% if message %}<div class="sec"><p class="flash" role="status"><b>DONE</b>{{ message }}</p></div>{% endif %}
@@ -20,7 +21,13 @@
 </div>
 {% endif %}
 
-{% for p in box.pending %}{% set rv = p.rv %}{% set base = P ~ "/approvals/" ~ rv.rule_id ~ "/" ~ rv.version %}
+<div class="sec" id="filter">
+  <h2><span class="n">FILTER</span>Search the inbox and its history</h2>
+  <p class="note">Search matches waiting versions (ref, owner, agent, description) and history events (event, actor, detail); the event filter and pages apply to the history.</p>
+  {{ l.filters(pg, path, {}, saved) }}
+</div>
+
+{% for p in pending %}{% set rv = p.rv %}{% set base = P ~ "/approvals/" ~ rv.rule_id ~ "/" ~ rv.version %}
 <div class="sec" id="pending-{{ rv.rule_id }}-v{{ rv.version }}">
   <h2><span class="n">{{ "%02d" | format(loop.index) }} / WAITING</span><a href="{{ P }}/rules/{{ rv.rule_id }}/versions/{{ rv.version }}">{{ rv.ref }}</a></h2>
   <p>{{ rv.spec.description }}</p>
@@ -68,16 +75,17 @@
   {% endif %}
 </div>
 {% else %}
-<div class="sec"><p class="note">Nothing is waiting for approval.</p></div>
+<div class="sec"><p class="note">{% if box.pending %}No waiting version matches this search.{% else %}Nothing is waiting for approval.{% endif %}</p></div>
 {% endfor %}
 
 <div class="sec" id="history">
   <h2><span class="n">HISTORY</span>Approval events, newest first</h2>
   <div class="tw"><table class="stack">
     <thead><tr><th class="r">Seq</th><th>Event</th><th>Actor</th><th>When</th><th>Detail</th></tr></thead>
-    <tbody>{% for e in box.history %}
+    <tbody>{% for e in pg.items %}
       <tr><td data-label="Seq" class="m r">{{ e.seq }}</td><td data-label="Event" class="m">{{ e.event_type }}</td><td data-label="Actor" class="k">{{ e.actor }}</td><td data-label="When" class="m dim">{{ e.at | when }}</td><td data-label="Detail" class="wrap">{{ payload(e) }}</td></tr>
-    {% else %}<tr><td colspan="5" class="dim">No approval events yet.</td></tr>{% endfor %}</tbody>
+    {% else %}<tr><td colspan="5" class="dim">{% if pg.filter.active %}No approval events match this filter.{% else %}No approval events yet.{% endif %}</td></tr>{% endfor %}</tbody>
   </table></div>
+  {{ l.pager(pg, path) }}
 </div>
 {% endblock %}

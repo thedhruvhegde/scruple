@@ -20,6 +20,9 @@ The console's three permissions map onto the engine's (`scruple.auth.Permission`
     export    read       evidence packs and report downloads: the same data the
                          read-only JSON API returns (`/decisions/{id}/report`), so an
                          auditor (read only) can take evidence away
+    admin     admin      save and delete the tenant's shared saved filters: they
+                         change what every reader of the tenant is offered, so
+                         they are tenant configuration (read-only stays read-only)
 
 The principal is always authenticated and names its tenant; the console serves that
 tenant's gate only. The service, not the console, still decides whether that subject
@@ -38,13 +41,14 @@ from scruple.auth import Permission as AuthPermission
 from scruple.auth import Principal as AuthPrincipal
 from scruple.auth import require
 
-Permission = Literal["read", "approve", "export"]
-PERMISSIONS: tuple[Permission, ...] = ("read", "approve", "export")
+Permission = Literal["read", "approve", "export", "admin"]
+PERMISSIONS: tuple[Permission, ...] = ("read", "approve", "export", "admin")
 PERMISSION_ATTR = "__scruple_permission__"
 ENGINE_PERMISSION: dict[Permission, AuthPermission] = {
     "read": AuthPermission.READ,
     "approve": AuthPermission.APPROVE,
     "export": AuthPermission.READ,
+    "admin": AuthPermission.ADMIN,
 }
 
 

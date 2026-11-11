@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% import "_listing.html" as l with context %}
+{% set section = "gate-runs" %}
+{% block title %}gate runs{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/">console</a><span>/</span><span>gate runs</span></p>
+<h1>Gate runs</h1>
+<p class="lede">Every decision the gate recorded for this tenant, newest first: shadow replays, canaries, activations, rollbacks and assurance checks. Synthetic data.</p>
+<p class="meta"><span><b>{{ pg.total }}</b> decisions</span>{% if pg.filter.active %}<span><b>{{ pg.matched }}</b> match</span>{% endif %}</p>
+{% endblock %}
+{% block body %}
+<div class="sec" id="runs">
+  <h2><span class="n">01 / DECISIONS</span>Search, filter and page</h2>
+  {{ l.filters(pg, path, {}, saved) }}
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Decision</th><th>Version</th><th>Stage</th><th>Outcome</th><th>Summary</th><th>Actor</th><th>When</th></tr></thead>
+    <tbody>
+    {% for rec in pg.items %}{% set d = rec.decision %}
+      <tr>
+        <td data-label="Decision" class="m"><a href="{{ P }}/rules/{{ d.rule_id }}/versions/{{ d.version }}#{{ d.decision_id }}">{{ d.decision_id }}</a></td>
+        <td data-label="Version" class="m">{{ d.rule_id }}@v{{ d.version }}</td>
+        <td data-label="Stage" class="m">{{ d.stage.value }}</td>
+        <td data-label="Outcome">{{ m.outcome(d.outcome) }}</td>
+        <td data-label="Summary" class="wrap">{{ d.summary }}</td>
+        <td data-label="Actor" class="k">{{ d.actor }}</td>
+        <td data-label="When" class="m dim">{{ d.created_at | when }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="dim">{% if pg.filter.active %}No decisions match this filter.{% else %}No decisions yet.{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {{ l.pager(pg, path) }}
+</div>
+{% endblock %}
