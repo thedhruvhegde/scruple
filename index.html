@@ -534,33 +534,34 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     });
     return out;
   }
+  // secondary text on the text screens is mist (14), not dim (1): dim stays for art and rules, mist reads at AA
   const T = (s, c = 0) => [s, c];
   function terminal(s, t) {
     const w = s.C < 60, blink = reduce || Math.floor(t * 1.6) % 2 === 0;
     return textCells(s.C, s.R, [
       [T("$ ", 2), T("scruple demo")], [],
-      [T(w ? "simulate " : "1 simulate   ", 1), T("3,000 held-out disputes")],
-      [T(w ? "verify   " : "2 verify     ", 1), T("ledger, outcome, policy")],
-      [T(w ? "gate     " : "3 gate       ", 1), T("shadow, canary, approval")], [],
-      [T("[dec-00001] ", 1), T("shadow   "), T("PROMOTE", 2)],
-      [T("[dec-00002] ", 1), T("canary   "), T("CANARY_PASSED", 2)],
-      [T("[dec-00003] ", 1), T("shadow   "), T("BLOCK", 4), T(w ? "" : "  late_evidence +$10.79", 4)],
-      [T("[dec-00004] ", 1), T("approve  "), T("ACTIVATED", 2)],
-      [T("[dec-00005] ", 1), T("rollback "), T("ROLLED_BACK", 3)], [],
-      [T("audit ", 1), T("20 entries  "), T("INTEGRITY OK", 2)],
+      [T(w ? "simulate " : "1 simulate   ", 14), T("3,000 held-out disputes")],
+      [T(w ? "verify   " : "2 verify     ", 14), T("ledger, outcome, policy")],
+      [T(w ? "gate     " : "3 gate       ", 14), T("shadow, canary, approval")], [],
+      [T("[dec-00001] ", 14), T("shadow   "), T("PROMOTE", 2)],
+      [T("[dec-00002] ", 14), T("canary   "), T("CANARY_PASSED", 2)],
+      [T("[dec-00003] ", 14), T("shadow   "), T("BLOCK", 4), T(w ? "" : "  late_evidence +$10.79", 4)],
+      [T("[dec-00004] ", 14), T("approve  "), T("ACTIVATED", 2)],
+      [T("[dec-00005] ", 14), T("rollback "), T("ROLLED_BACK", 3)], [],
+      [T("audit ", 14), T("20 entries  "), T("INTEGRITY OK", 2)],
       [T("$ ", 2), T(blink ? "_" : " ", 3)],
     ]);
   }
   const SL = [["fraud", 20.25, 20.25], ["not received", 71.42, 31.77], ["not as described", 53.29, 53.29], ["partial refund", 0, 0],
     ["late evidence", 0, 10.79], ["duplicate", 0, 0], ["currency mismatch", 0, 0], ["over $10,000", 35, 35]];
   function bars(s) {
-    const C = s.C, lab = C < 60 ? 12 : 18, room = C - lab - 10, rows = [[T("loss / case    ", 1), T("= now  ", 6), T("# with rule", 0)], []];
+    const C = s.C, lab = C < 60 ? 12 : 18, room = C - lab - 10, rows = [[T("loss / case    ", 14), T("= now  ", 6), T("# with rule", 0)], []];
     for (const [name, a, b] of SL) {
       const la = Math.round(a / 72 * room), lb = Math.round(b / 72 * room), col = b < a ? 2 : b > a ? 4 : 0, l = name.slice(0, lab - 1).padEnd(lab, " ");
-      rows.push([T(l, 1), T("=".repeat(la), 6), T(la ? " " + a.toFixed(2) : "0.00", 1)]);
+      rows.push([T(l, 14), T("=".repeat(la), 6), T(la ? " " + a.toFixed(2) : "0.00", 14)]);
       rows.push([T(" ".repeat(lab)), T("#".repeat(lb), col), T((lb ? " " : "") + b.toFixed(2), col)]);
     }
-    rows.push([]); rows.push([T("average ", 1), T("38.43 -> 27.49 ", 2), T("looks better", 1)]); rows.push([T("late    ", 1), T("0.00 -> 10.79 ", 4), T("BLOCKED", 4)]);
+    rows.push([]); rows.push([T("average ", 14), T("38.43 -> 27.49 ", 2), T("looks better", 14)]); rows.push([T("late    ", 14), T("0.00 -> 10.79 ", 4), T("BLOCKED", 4)]);
     return textCells(C, s.R, rows);
   }
   const CHN = [[12, "rule.registered", "9a6b6a9c", "8b4e2eff"], [13, "status_changed", "53fa05d8", "9a6b6a9c"], [14, "decision", "c4a3af3b", "53fa05d8"],
@@ -574,14 +575,14 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         const bad = tampered && seq >= 14, ed = tampered && seq === 14, col = bad ? 4 : 0, pc = bad ? 4 : 6, pad = (x) => x.slice(0, bw).padEnd(bw, " ");
         L[0].push(T("+" + "-".repeat(bw + 2) + "+", pc)); L[5].push(T("+" + "-".repeat(bw + 2) + "+", pc));
         L[1].push(T("| ", pc), T(pad("entry " + seq), col), T(" |", pc));
-        L[2].push(T("| ", pc), T(pad(ed ? "edited by hand" : ev), ed ? 4 : 1), T(" |", pc));
-        L[3].push(T("| ", pc), T(pad("prev " + prev), 1), T(" |", pc));
+        L[2].push(T("| ", pc), T(pad(ed ? "edited by hand" : ev), ed ? 4 : 14), T(" |", pc));
+        L[3].push(T("| ", pc), T(pad("prev " + prev), 14), T(" |", pc));
         L[4].push(T("| ", pc), T(pad("hash " + h + (ed ? " !=" : "")), col), T(" |", pc));
         if (j < grp.length - 1) { const br = tampered && seq === 14; for (let k = 0; k < 6; k++) L[k].push(T(k === 2 ? (br ? "x" : ">") : " ", br ? 4 : 2)); }
       });
       rows.push(...L, []);
     }
-    rows.push(tampered ? [T("verify: ", 1), T("TAMPERING DETECTED at entry 14", 4)] : [T("verify: ", 1), T("INTEGRITY OK", 2), T("  head f83678b2", 1)]);
+    rows.push(tampered ? [T("verify: ", 14), T("TAMPERING DETECTED at entry 14", 4)] : [T("verify: ", 14), T("INTEGRITY OK", 2), T("  head f83678b2", 14)]);
     return textCells(s.C, s.R, rows);
   }
 
