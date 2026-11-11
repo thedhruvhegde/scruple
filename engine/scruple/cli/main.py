@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -292,8 +293,17 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+@functools.cache
+def _parser() -> argparse.ArgumentParser:
+    """The parser, built once per process. Building it registers every command
+    (over a hundred subparsers, tens of milliseconds), which dominated in-process
+    callers such as the episode load test. Parsing never mutates it and every
+    default is a constant, so one instance serves every call."""
+    return build_parser()
+
+
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    args = _parser().parse_args(argv)
     try:
         return int(args.fn(args))
     except (OSError, ValueError, KeyError, InvalidTransitionError) as exc:
