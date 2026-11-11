@@ -210,8 +210,16 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 .def ol { margin: 16px 0 0; padding-left: 22px; display: grid; gap: 6px; font-size: 17px; max-width: 46ch; }
 .def ol li::marker { font-family: var(--f-mono); color: var(--muted); font-size: 13px; }
 @media (max-width: 900px) { .def { grid-template-columns: minmax(0, 1fr); } }
-.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; border-top: 1px solid var(--rule); padding-block: 16px 40px; }
-.foot-row span { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+/* the last row is a ledger strip in characters: a ruler, the mark, then | cells | */
+.foot-row { position: relative; display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; padding-block: 32px 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+.foot-row::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 0; left: 0; right: 0; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.foot-mark { margin: 0; font: inherit; font-size: 11px; line-height: 1.2; color: var(--fg); flex: none; }
+.foot-mark b { color: var(--brass); font-weight: 600; }
+.ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; flex: 1; min-width: 0; }
+.ledger li { display: flex; margin-right: 12px; }
+.ledger li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-right: 12px; flex: none; }
+.ledger li:last-child::after { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-left: 12px; }
+@media (max-width: 760px) { .foot-row { flex-direction: column; align-items: start; } .ledger { flex-direction: column; } .ledger li:last-child::after { display: none; } }
 /* ---------- character rules ----------
    Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
    Generated content carries empty alt text, so screen readers skip it. */
@@ -417,9 +425,16 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         </div>
       </div>
       <div class="foot-row">
-        <span>Scruple</span>
-        <span>Synthetic data only. No customer data.</span>
-        <span>Hero art: the new seven wonders of the world, drawn in characters.</span>
+        <pre class="foot-mark" aria-hidden="true"> <b>[#]</b>
+===============
+      /\
+     /  \
+    /____\</pre>
+        <ul class="ledger">
+          <li>Scruple</li>
+          <li>Synthetic data only. No customer data.</li>
+          <li>Hero art: the new seven wonders of the world, drawn in characters.</li>
+        </ul>
       </div>
     </div>
   </footer>
