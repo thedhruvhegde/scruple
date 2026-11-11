@@ -267,6 +267,10 @@ def create_app(
     except JobError:
         integrations_queue = None
     app.include_router(integrations_router(app.state.gates.get, integrations_queue))
+    # Slack interactivity and signed approval links: each verifies its own signature.
+    from scruple.integrations.approvals_api import approvals_router
+
+    app.include_router(approvals_router(app.state.gates.get, root.storage))
 
     @app.get("/version", dependencies=[public()])
     def version() -> BuildInfo:

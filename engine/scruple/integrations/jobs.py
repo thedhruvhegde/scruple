@@ -14,6 +14,7 @@ from typing import Any
 
 from scruple.clock import Clock
 from scruple.integrations.runtime import Runtime
+from scruple.integrations.slack import SLACK_KIND, notify
 from scruple.integrations.tickets import PROVIDERS, TICKET_KIND, sync
 from scruple.integrations.webhooks import WEBHOOK_KIND, deliver
 from scruple.jobs.worker import Handler, JobContext, PermanentJobError
@@ -67,7 +68,21 @@ def make_handlers(
         finally:
             storage.close()
 
-    return {WEBHOOK_KIND: webhook, TICKET_KIND: ticket}
+    def slack(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+        event_id = params.get("event_id")
+        if not isinstance(event_id, str):
+            raise PermanentJobError("params.event_id is required")
+        storage = _storage(ctx)
+        try:
+            return notify(storage, rt(), event_id, clock=clock)
+        finally:
+            storage.close()
+
+    return {WEBHOOK_KIND: webhook, TICKET_KIND: ticket, SLACK_KIND: slack}
+
+
+def slack_notify(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+    return make_handlers()[SLACK_KIND](ctx, params)
 
 
 def ticket_sync(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
@@ -78,4 +93,4 @@ def webhook_deliver(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
     return make_handlers()[WEBHOOK_KIND](ctx, params)
 
 
-__all__ = ["make_handlers", "ticket_sync", "webhook_deliver"]
+__all__ = ["make_handlers", "slack_notify", "ticket_sync", "webhook_deliver"]

@@ -501,7 +501,7 @@ def test_bench_score_without_the_salt_fails_permanently(
     q.submit(JobSubmit(kind=JobKind.BENCH_SCORE, params={"agent": "always_accept", "limit": 10}))
     done = Worker(q, JobContext(database=str(tmp_path / "gate.db")), isolation="thread").run_once()
     assert done is not None and done.status is JobStatus.FAILED and done.attempts == 1
-    operator_only = {"retention_apply", "webhook_deliver", "ticket_sync"}
+    operator_only = {"retention_apply", "webhook_deliver", "ticket_sync", "slack_notify"}
     assert set(HANDLERS) == {k.value for k in JobKind} | operator_only
     q.close()
 

@@ -38,7 +38,14 @@ P = Permission
 FAST = ScryptParams(n=1024)
 PUBLIC = {"/health", "/ready", "/version", "/console/static/{name:path}"}
 # Routes that check a credential of their own: webhook signatures, the metrics token.
-SIGNED = {"/ingest/stripe/webhook", "/ingest/adyen/webhook", "/metrics"}
+SIGNED = {
+    "/ingest/stripe/webhook",
+    "/ingest/adyen/webhook",
+    "/metrics",
+    # Slack's request signature; scruple's own signed, single-use approval links
+    "/integrations/slack/interactions",
+    "/integrations/approval-links/{token}",
+}
 
 
 @pytest.fixture
