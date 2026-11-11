@@ -1,0 +1,6 @@
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "http_error", "t": 1794435434}
+{"detail": "HTTP 400: {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\"object\\\":\\\"error\\\",\\\"message\\\":\\\"Assistant tool call function.arguments must be valid JSON.\\\",\\\"type\\\":\\\"BadReq", "event": "archived_lapse", "seed": 5001, "stop": "http_error", "t": 1794435434}
+{"attempt": 2, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "http_error", "t": 1794435448}
+{"detail": "HTTP 400: {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\"object\\\":\\\"error\\\",\\\"message\\\":\\\"Assistant tool call function.arguments must be valid JSON.\\\",\\\"type\\\":\\\"BadReq", "event": "archived_lapse", "seed": 5001, "stop": "http_error", "t": 1794435448}
+{"attempt": 3, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "submitted", "t": 1794435472}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5002, "stop": "submitted", "t": 1794435527}
