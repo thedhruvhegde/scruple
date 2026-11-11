@@ -1,0 +1,71 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-3c9fe17128fc3096"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-609d1d00585b60da"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-609d1d00585b60da",
+     "ev-3c9fe17128fc3096"
+    ],
+    "narrative": "Merchant disputes the chargeback. The transaction was authorized on 2026-01-14 (auth code 922519) for $38.46 (ref 8a78a7faa7a8) and the authorization record shows approval status 'Y'. The merchant's receipt (ref 99175e67a7e9) confirms the same amount. Under reason code 11.1 (Card Recovery Bulletin) for an authorization-category claim, the approved authorization record is dispositive that the cardholder's card was validly authorized at the time of the transaction, so the chargeback has no merit and liability should be reversed."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait",
+      "get_ledger_view",
+      "submit_decision"
+     ],
+     "deadlines_met": false
+    },
+    "explanation": "The merchant disputed the $38.46 chargeback (Visa, MCC 4722, reason code 11.1 Card Recovery Bulletin, authorization category) with the authorization record (auth code 922519, approval status Y, ref 8a78a7faa7a8) and receipt (ref 99175e67a7e9) as evidence. The issuer did not accept the rebuttal and the case moved to pre-arbitration; after waiting out the window the case resolved with a deadline miss. The merchant ultimately bore the chargeback debit, processor fee, and pre-arbitration fee. No refund was issued by the merchant during the chargeback stage."
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5002
+}

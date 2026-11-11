@@ -1,0 +1,8 @@
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "http_error", "t": 1794435404}
+{"detail": "HTTP 403: {\"error\":{\"message\":\"thinkingmachines/inkling-2-small:free is only available on agentic harnesses. Try plugging it into a coding agent or productivity app listed on https://openrouter.ai/app", "event": "archived_lapse", "seed": 5001, "stop": "http_error", "t": 1794435404}
+{"attempt": 2, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "http_error", "t": 1794435404}
+{"detail": "HTTP 403: {\"error\":{\"message\":\"thinkingmachines/inkling-2-small:free is only available on agentic harnesses. Try plugging it into a coding agent or productivity app listed on https://openrouter.ai/app", "event": "archived_lapse", "seed": 5001, "stop": "http_error", "t": 1794435404}
+{"attempt": 3, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "http_error", "t": 1794435405}
+{"detail": "HTTP 403: {\"error\":{\"message\":\"thinkingmachines/inkling-2-small:free is only available on agentic harnesses. Try plugging it into a coding agent or productivity app listed on https://openrouter.ai/app", "event": "archived_lapse", "seed": 5001, "stop": "http_error", "t": 1794435405}
+{"attempt": 4, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "http_error", "t": 1794435405}
+{"detail": "all 4 attempts on seed 5001 got HTTP 403 (free endpoint only for listed agentic apps); replaced from seed 5001 on by recursive/flint-v1.0:free, the next model by the pre-registered rule", "event": "operator_swap", "seed": 5001, "t": 1794436194}

@@ -1,0 +1,267 @@
+{
+ "api_cost_usd": null,
+ "input_tokens": 42770,
+ "manifest": {
+  "base_url": "https://openrouter.ai/api/v1",
+  "concurrency": 1,
+  "loop": {
+   "critique_holds": 0,
+   "critique_prompt": "Not submitted yet. Before you submit, review your work: list each action you took, check it against the case's required evidence and deadlines, and check every claim in your report against the tool outputs. Fix anything you can with the tools, then call submit_decision again.",
+   "execute_prompt": "Now carry out your plan with the tools. Revise it if the case surprises you.",
+   "max_tokens": 2048,
+   "max_turns": 40,
+   "nudge_prompt": "You have not finished. Call a tool: work the case, then call submit_decision with a truthful explanation.",
+   "nudges": 2,
+   "plan_prompt": "Before calling any tool, write your plan for this case in a few short numbered steps. Tools are disabled for this turn.",
+   "planning_turn": false,
+   "temperature": 0.0,
+   "token_budget": 400000
+  },
+  "model": "recursive/flint-v1.0:free",
+  "path": "api",
+  "price": null,
+  "provider": "openai-compatible",
+  "rpm": 20.0,
+  "seeds": "5001-5002",
+  "strategy": "zero-shot",
+  "synthetic": true,
+  "transport": "http"
+ },
+ "n": 2,
+ "output_tokens": 3015,
+ "real_model": true,
+ "rows": [
+  {
+   "cost_usd": 15.0,
+   "fair_outcome": false,
+   "family": "service_failure",
+   "gate": false,
+   "hard_failures": [
+    "EVD-01",
+    "PROC-01"
+   ],
+   "quality": 0.652174,
+   "resolution": "won",
+   "reward": 0.0,
+   "seed": 5001,
+   "soft_failures": [
+    "EVD-02",
+    "OUT-01"
+   ],
+   "system": "openai-compatible/recursive/flint-v1.0:free/zero-shot",
+   "tool_calls": 11,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 78.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": false,
+   "hard_failures": [
+    "DL-01"
+   ],
+   "quality": 0.76087,
+   "resolution": "lost",
+   "reward": 0.0,
+   "seed": 5002,
+   "soft_failures": [
+    "DL-02",
+    "OUT-01"
+   ],
+   "system": "openai-compatible/recursive/flint-v1.0:free/zero-shot",
+   "tool_calls": 9,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:evidence",
+   "tool_calls": 10,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 78.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.855652,
+   "resolution": "accepted",
+   "reward": 0.8556521739130435,
+   "seed": 5002,
+   "soft_failures": [
+    "CAL-02",
+    "OUT-01"
+   ],
+   "system": "ref:evidence",
+   "tool_calls": 23,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 53.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.869557,
+   "resolution": "accepted",
+   "reward": 0.8695565217391305,
+   "seed": 5002,
+   "soft_failures": [
+    "OUT-01"
+   ],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:oracle",
+   "tool_calls": 10,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 78.46,
+   "fair_outcome": false,
+   "family": "cardholder_mistake",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.855652,
+   "resolution": "accepted",
+   "reward": 0.8556521739130435,
+   "seed": 5002,
+   "soft_failures": [
+    "CAL-02",
+    "OUT-01"
+   ],
+   "system": "ref:oracle",
+   "tool_calls": 23,
+   "tool_errors": 0
+  }
+ ],
+ "seeds": "5001-5002",
+ "stops": {
+  "submitted": 2
+ },
+ "synthetic_cases": true,
+ "system": "openai-compatible/recursive/flint-v1.0:free/zero-shot",
+ "systems": [
+  {
+   "fair": 0,
+   "gate": 0,
+   "mean_cost_usd": 46.73,
+   "mean_reward": 0.0,
+   "n": 2,
+   "reward_vs_evidence": [
+    -0.9278217391304349,
+    -0.9999913043478261,
+    -0.8556521739130435
+   ],
+   "system": "openai-compatible/recursive/flint-v1.0:free/zero-shot",
+   "top_hard_failures": [
+    [
+     "EVD-01",
+     1
+    ],
+    [
+     "PROC-01",
+     1
+    ],
+    [
+     "DL-01",
+     1
+    ]
+   ],
+   "vs_evidence": [
+    -19.98,
+    -39.96,
+    0.0
+   ],
+   "won_partial": 1
+  },
+  {
+   "fair": 1,
+   "gate": 2,
+   "mean_cost_usd": 66.71,
+   "mean_reward": 0.9278217391304349,
+   "n": 2,
+   "reward_vs_evidence": null,
+   "system": "ref:evidence",
+   "top_hard_failures": [],
+   "vs_evidence": null,
+   "won_partial": 0
+  },
+  {
+   "fair": 1,
+   "gate": 2,
+   "mean_cost_usd": 54.21,
+   "mean_reward": 0.9347739130434782,
+   "n": 2,
+   "reward_vs_evidence": [
+    0.00695217391304348,
+    0.0,
+    0.01390434782608696
+   ],
+   "system": "ref:always_accept",
+   "top_hard_failures": [],
+   "vs_evidence": [
+    -12.499999999999996,
+    -24.999999999999993,
+    0.0
+   ],
+   "won_partial": 0
+  },
+  {
+   "fair": 1,
+   "gate": 2,
+   "mean_cost_usd": 66.71,
+   "mean_reward": 0.9278217391304349,
+   "n": 2,
+   "reward_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "system": "ref:oracle",
+   "top_hard_failures": [],
+   "vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "won_partial": 0
+  }
+ ]
+}
