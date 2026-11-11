@@ -17,7 +17,7 @@ penetration test.
 | question | answer |
 |---|---|
 | Where does it run? | In the partner's environment by default: a Docker image (`Dockerfile`) or the Python package (`uv sync`, then `scruple ...`). `docker-compose.yml` runs the API with PostgreSQL 16. |
-| Customer VPC / on-premises? | Yes, by running the image or package inside it. There is no Helm chart and no Terraform module yet (ROADMAP 188, 189: not built). |
+| Customer VPC / on-premises? | Yes, by running the image or package inside it. A Helm chart (`deploy/helm/scruple`, linted and rendered, never installed on a cluster) and an AWS Terraform skeleton (`deploy/terraform/aws`, validated, never applied) exist (docs/DEPLOY.md). |
 | Hosted SaaS? | No. The engine is multi-tenant (section 5), but scruple runs no hosted service. |
 | Container hardening | Slim base image, non-root user (uid 10001), no secrets baked in, pinned `uv` image and frozen lockfile (tests/test_deploy.py). Compose runs the API with a read-only root filesystem, `no-new-privileges`, tmpfs `/tmp`, ports bound to 127.0.0.1. |
 | Outbound network | None needed for the gate. The Stripe client makes read-only `GET` requests to Stripe only when ingest is pointed at the API; tests make no network calls (HTTP clients take an injected transport). |
@@ -56,7 +56,7 @@ penetration test.
 | Audit log | Every state change is an audit entry `{seq, at, event_type, actor, payload, prev_hash}` hashed with SHA-256 over canonical JSON, chained to the previous entry (`scruple/audit/log.py`). Each tenant has its own chain, starting from `SHA-256("scruple-audit-genesis" \|\| 0x00 \|\| tenant_id)`, so a chain copied into another tenant fails verification; tenant `default` keeps the all-zero genesis of chains written before tenancy (tests/test_audit_tenant_genesis.py). |
 | Append-only | Enforced in the database: triggers refuse UPDATE and DELETE on audit events and decisions, and content changes and DELETE on rule versions; on Postgres also TRUNCATE. On Postgres the service runs as a role that does not own the tables and cannot drop the triggers (docs/ARCHITECTURE.md section 9). |
 | Tamper detection | `scruple audit verify` recomputes the chain and replays it against the registry and stored decisions. Tests: edited payload, deleted entry, reordered entries, a re-hashed edited entry, raw SQLite file edits of the audit log, of a rule status and of a decision (tests/test_audit.py). The demo shows a rewritten BLOCK decision being detected. |
-| Truncation | Detected only against an externally anchored head (`--expected-head`). Anchoring is manual today. |
+| Truncation | Detected against an externally anchored head: `--expected-head`, or `scruple audit anchor` (RFC 3161 timestamp or a git commit) and `scruple audit verify-anchor` (`scruple/audit/anchor.py`, tests/test_audit_anchor.py). Anchoring runs on demand, not on a schedule. |
 | Evidence export | `scruple ci evidence` writes sorted JSON plus a PDF with the scorecard, statistics, decisions, approvals, config hash, seed commitments and an audit segment whose hashes recompute to the chain head. Seeds are never exported. |
 | Reproducibility | Every random source takes an explicit seed; the same candidate and config give the same scorecard bytes, decision hashes and audit head (tested; the demo output is tested to be identical across runs). |
 
@@ -129,7 +129,7 @@ HTTP/1.1 413 Request Entity Too Large
 |---|---|
 | Testing | 7,239 tests passed and 20 skipped in the default suite (run of 2026-11-11, `uv run pytest -n 2 --dist worksteal`; 227 of them in tests/test_auth_*.py and tests/test_tenancy_*.py) (ruff, ruff format, mypy strict, pytest), plus slow and Postgres suites. CI workflow `.github/workflows/ci.yml` runs lint, typecheck, tests with coverage, the demo, Postgres tests with migrations, a compose check and an image build. |
 | Change control | Small commits; every commit passes `make lint typecheck test`. |
-| Vulnerability scanning | Not set up (no dependency or image scanner in CI). |
+| Vulnerability scanning | Trivy image scan in the release workflow (fixable HIGH/CRITICAL fail the run) and a ZAP baseline scan workflow (docs/trust/PENTEST_SCOPE.md). Neither has run on GitHub yet. No dependency scanner. |
 
 ## Not yet
 
@@ -139,20 +139,20 @@ recorded in docs/DESIGN.md.
 | gap | status |
 |---|---|
 | SOC 2 | Not started. |
-| Penetration test | None yet, internal or external. |
+| Penetration test | None yet, internal or external. Scope for one: docs/trust/PENTEST_SCOPE.md. |
 | SAML, mTLS | Not built. Authentication is API keys and OIDC bearer tokens. |
 | Shared rate limit store | Done: `SCRUPLE_RATE_LIMIT_BACKEND=database` keeps the buckets in the gate database (`scruple/auth/ratelimit_db.py`); on Postgres a row lock per bucket gives every replica one limit (tests/test_auth_ratelimit_db.py, two app instances on one Postgres). Default stays in memory per process. Output below. |
 | Tenant administration | Tenants are created implicitly by the first key or token for them; there is no tenant list, quota or offboarding command. Webhook deliveries are routed by the signing secret: `tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS` map each secret to one tenant, and each tenant writes its own case store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`); a tenant with secrets but no store refuses to start (tests/test_ingest_webhook_tenants.py). |
 | Per-tenant genesis | Done: each tenant's chain starts from its own genesis, so a copy of one tenant's rows into another tenant fails verification. Tenant `default` keeps the old all-zero genesis (chains from before tenancy still verify), so a default chain copied into another database's default tenant is caught only by an anchored head. |
 | Key management | No KMS integration, no key-encryption keys, no per-tenant keys; keys are supplied by the operator. Nothing counts encryptions per key yet (NIST SP 800-38D limit noted in docs/INTEGRATIONS.md). |
 | Field encryption, redaction and tokenisation wired into storage and ingest | Done for imported cases (`scruple ingest`, case store; docs/INTEGRATIONS.md). Not applied to the gate database (rules, decisions, audit), which holds no partner case data. |
-| External anchoring or signing of the audit head | Not built (ROADMAP 141; docs/DESIGN.md "Next" item 4). A consistent rewrite of the whole chain is not detected without an external anchor (docs/VERIFIER_FINDINGS.md G-6). |
+| External anchoring or signing of the audit head | Built, on demand: `scruple audit anchor` (RFC 3161 or git). A consistent rewrite of the whole chain is detected only against an anchor made before it (docs/VERIFIER_FINDINGS.md G-6). Not scheduled; RFC 3161 checks do not include revocation. |
 | Retention policies | Built: per-tenant policies, audited purges in the purged tenant's chain (`scruple retention`, docs/ARCHITECTURE.md section 11). Scheduled: `scruple worker --schedule-retention` (or `scruple retention schedule` from cron) queues one `retention_apply` job per tenant per UTC day, idempotent by day. A decision re-sent for a purged case is refused by its key hash. |
 | Persisting ingested webhook batches | Done with a case store configured: every accepted Stripe or Adyen delivery is written to the signing tenant's case store, idempotent by event id (`CaseStore.write_webhook`). Without one, the receiver verifies and acknowledges only. |
 | Adyen HTTP endpoint | Not built; the adapter is a function. |
 | Secrets from a vault | Not built (ROADMAP 156); environment variables only. |
-| Helm chart, Terraform module | Not built (ROADMAP 188, 189). |
-| Backups and restore runbook | Not written (ROADMAP 191). |
+| Helm chart, Terraform module | Written and checked statically, never installed or applied (docs/DEPLOY.md "Validation status"). |
+| Backups and restore runbook | Built: `deploy/scripts/backup.sh` and `restore.sh`, tested against a local Postgres (docs/DEPLOY.md). No restore drill against a real backup yet. |
 | CI on github.com and gitlab.com | The action and template were tested locally and through a fake HTTP transport, not run on those hosts (docs/CI.md). |
 | Image build in this review | The image build is a CI job and is covered statically by tests/test_deploy.py; it was not rebuilt for this document. |
 
