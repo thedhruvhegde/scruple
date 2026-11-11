@@ -52,6 +52,8 @@ LISTS = {
     "/auth/keys",
     "/openapi.json",
     "/jobs",
+    "/usage",
+    "/usage/events",
     # console pages that list the caller's own tenant (or the shared synthetic runs)
     "/console/",
     "/console/runs",

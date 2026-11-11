@@ -437,6 +437,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Totals
+         * @description Usage totals for the caller's tenant, oldest period first (UTC).
+         */
+        get: operations["totals_usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/usage/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Events
+         * @description The caller's tenant's usage events, oldest first. `X-Total-Count` has the total.
+         */
+        get: operations["events_usage_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/version": {
         parameters: {
             query?: never;
@@ -1091,6 +1131,11 @@ export interface components {
             /** Decisions */
             decisions: components["schemas"]["LiveDecision"][];
         };
+        /**
+         * Meter
+         * @enum {string}
+         */
+        Meter: "gate_run" | "gate_cases" | "rollout";
         /** Metric */
         Metric: {
             /**
@@ -1428,6 +1473,55 @@ export interface components {
             sd_within_assumption?: boolean | null;
             /** Tolerance */
             tolerance: number;
+        };
+        /**
+         * UsageAggregate
+         * @description One meter's total in one period, for one tenant.
+         */
+        UsageAggregate: {
+            /** Events */
+            events: number;
+            meter: components["schemas"]["Meter"];
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "day" | "month";
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /** Quantity */
+            quantity: number;
+            /** Tenant */
+            tenant: string;
+        };
+        /** UsageEvent */
+        UsageEvent: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Event Key */
+            event_key: string;
+            meter: components["schemas"]["Meter"];
+            /** Quantity */
+            quantity: number;
+            /** Rule Id */
+            rule_id?: string | null;
+            /** Source */
+            source: string;
+            /** Tenant */
+            tenant: string;
+            /** Version */
+            version?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -2308,6 +2402,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportedObserveResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    totals_usage_get: {
+        parameters: {
+            query?: {
+                period?: "day" | "month";
+                start?: string | null;
+                end?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageAggregate"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    events_usage_events_get: {
+        parameters: {
+            query?: {
+                start?: string | null;
+                end?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageEvent"][];
                 };
             };
             /** @description Validation Error */

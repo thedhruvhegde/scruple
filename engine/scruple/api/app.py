@@ -251,6 +251,9 @@ def create_app(
     from scruple.auth.config import install_saml
 
     install_saml(app, settings)  # /auth/saml/* when SAML sign-on is configured
+    from scruple.usage.api import usage_router
+
+    app.include_router(usage_router())  # GET /usage, /usage/events (admin)
     with contextlib.suppress(JobError):  # a Storage the queue cannot share has no /jobs
         app.include_router(jobs_router(queue_for(root.storage, clock=root.clock)))
 
