@@ -4,7 +4,7 @@ Usage (keys come from the environment; behind the E5 proxy they are placeholders
     uv run python results/real/open_models/run_episodes.py PROVIDER MODEL STRATEGY SEEDS OUT
 
 A thin wrapper over `scruple eval run` (scruple.eval.batch.run_eval): same runner,
-same scoring, same run directory. Two additions:
+same scoring, same run directory. Three additions:
 
 - every request and response BODY is logged to OUT/transcripts/seed-N.jsonl
   (logging_transport.py; headers are never read);
@@ -12,7 +12,8 @@ same scoring, same run directory. Two additions:
   up to 3 more times; one that still fails stays in the run as a lapsed episode.
   Every replaced lapsed record is kept under OUT/lapsed/ first;
 - provider limits (harness_transport.py, E5 deviation 4): a 413 elides the oldest
-  tool outputs until the request fits; a daily quota stops the driver (exit 3)
+  tool outputs until the request fits; a daily quota with a stated wait under an
+  hour is waited out, a longer or unstated one stops the driver (exit 3)
   with the seed left to replay from the start on the next run. Both, and every
   attempt, are logged to OUT/harness.jsonl.
 
@@ -126,6 +127,7 @@ def main() -> int:
                 attempt=attempt + 1,
                 stop=rec.stop,
                 elisions=elisions,
+                quota_waits_s=[round(w) for w in limits[-1].quota_waits] if limits else [],
             )
             print(
                 f"seed {seed} attempt {attempt + 1}: {rec.stop}, {rec.turns} turns, "
