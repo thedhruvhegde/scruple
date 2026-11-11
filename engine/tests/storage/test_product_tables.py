@@ -28,12 +28,10 @@ def test_usage_events(store: Any) -> None:
     assert [e.event_key for e in u.events("acme")] == ["a", "b"]
     assert [a.quantity for a in u.aggregate("acme", "month")] == [1, 1]
     assert u.keys("beta") == {"a"}
-    with pytest.raises(ImmutableHistoryError):
-        with store.transaction():
-            store.connection.execute("UPDATE usage_events SET quantity = 5")
-    with pytest.raises(ImmutableHistoryError):
-        with store.transaction():
-            store.connection.execute("DELETE FROM usage_events")
+    with pytest.raises(ImmutableHistoryError), store.transaction():
+        store.connection.execute("UPDATE usage_events SET quantity = 5")
+    with pytest.raises(ImmutableHistoryError), store.transaction():
+        store.connection.execute("DELETE FROM usage_events")
 
 
 def test_saved_filters(store: Any) -> None:
@@ -44,6 +42,5 @@ def test_saved_filters(store: Any) -> None:
     assert f.list("beta", "runs") == []
     f.delete("acme", filter_id("runs", "x"), "alice", T0)
     assert f.list("acme", "runs") == []
-    with pytest.raises(ImmutableHistoryError):
-        with store.transaction():
-            store.connection.execute("DELETE FROM console_filter_events")
+    with pytest.raises(ImmutableHistoryError), store.transaction():
+        store.connection.execute("DELETE FROM console_filter_events")
