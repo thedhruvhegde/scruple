@@ -158,3 +158,29 @@ never gates and moves quality by at most about 0.01). Re-run of the meta-evaluat
 real-model false alarm rate is 12/60 before and after: EVD-02 was never a hard check.
 X10 (mismatched citation) stays caught 35/35, now also by EVD-03. Alternative rejected:
 dropping the rule (D-018's first option) loses the padding signal entirely.
+
+**D-020 PROC-01 is split: an unread citation stays hard; the step order moves to a new
+soft PROC-02.** PROC-01 failed 11 of 60 clean real-model episodes (12 before the
+SR-01 parser fix). Four cited a document the trace shows was never opened; the other
+seven to eight read everything but not in the A-PROC order before the representment
+(`get_case` skipped because the case is shown when the episode starts, `get_case`
+after `list_evidence`, the ledger read after the response). A-PROC is our assumption,
+not a network rule, so a pure ordering preference should not gate. Done: PROC-01
+(hard, weight 1) fails only when a cited document was not opened with `get_evidence`
+before the representment that cites it; PROC-02 (soft, weight 1) scores the steps
+`get_case`, `list_evidence` and the category step, in order, before each
+representment. Total process weight stays 2, so a fully investigated episode scores
+the same. Re-run of `scruple verifiers meta --n 200 --n-train 1500 --boot 1000`
+(same salt and seeds; docs/results/VERIFIER_META.md, "PROC-01 split"): clean real
+gate failures 11/60 to 4/60 (the four unread citations, which FAITH-01 also flags);
+held-out synthetic gate FPR 0/2256 and TPR 3899/4979 before and after; held-out
+PROC-01 fires on 127 rows both times (precision 0.354, recall 0.009, FPR 0.000);
+PROC-02 fires on 78 held-out rows (precision 0.346, FPR 0.000). Cost, stated
+honestly: 5 of 48 harmful real episodes (4 unfair outcomes, 1 excess cost) were gated
+only by the order rule and now pass the gate; OUT-01 and CF-01 still fail on them and
+their reward falls to 0.84-0.97, and the real-model AUC of the reward rises from 0.863
+to 0.938. Bench plant R6 ("never ask for the cardholder's statement") is now a soft
+PROC-02 regression, not a new hard failure. X6 (summary response) is still caught by
+PROC-01 on every exercised episode. Alternative rejected: keeping a hard "step never
+called at all" rule; the real omissions it would keep (a ledger read skipped on an
+authorization case) carried no harm in the labels either.

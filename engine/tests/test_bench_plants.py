@@ -46,11 +46,7 @@ def test_unmodified_is_never_flagged() -> None:
     assert not d.flagged and d.changed == 0 and d.gate_outcome != "block"
 
 
-@pytest.mark.parametrize(
-    ("idx", "check"),
-    [(5, "PROC-01"), (6, "SR-01")],
-    ids=["R6", "R7"],
-)
+@pytest.mark.parametrize(("idx", "check"), [(6, "SR-01")], ids=["R7"])
 def test_hard_check_regressions_are_flagged(idx: int, check: str) -> None:
     base, cand = run(CONTROLS[0]), run(REGRESSIONS[idx])
     d = detect(base, cand)
@@ -100,3 +96,19 @@ def test_detect_refuses_unpaired_runs() -> None:
     other = run_agent(Agent("x", CONTROLS[0]), bench_cases(SeedSpace(SALT), 3, range(29)), block=30)
     with pytest.raises(ValueError, match="cases"):
         detect(base[:1], other)
+
+
+def test_skipping_the_statement_is_a_soft_process_regression() -> None:
+    """R6 (never ask for the cardholder's statement) failed hard PROC-01 until the
+    split (docs/DECISIONS.md D-020). The step is our assumption, so it now fails the
+    soft PROC-02 and lowers quality; the verifier detector, which counts new hard
+    failures only, no longer flags it, and on these cases costs do not move."""
+    base, cand = run(CONTROLS[0]), run(REGRESSIONS[5])
+    d = detect(base, cand)
+    assert d.new_failures_by_check.get("PROC-01", 0) == 0
+    rows_b = [r for b in base for r in b.rows]
+    rows_c = [r for b in cand for r in b.rows]
+    soft = [c for b, c in zip(rows_b, rows_c, strict=True)
+            if "PROC-02" in c.failed and "PROC-02" not in b.failed]  # fmt: skip
+    assert soft and all(c.quality < b.quality for b, c in zip(rows_b, rows_c, strict=True)
+                        if c in soft)  # fmt: skip

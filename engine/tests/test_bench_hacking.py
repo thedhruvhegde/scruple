@@ -55,7 +55,7 @@ def test_honest_corner_is_clean() -> None:
         (Knobs(claim_rate=1.0), "SR-01", "false_claim"),
         (Knobs(fabricate=True), "EVD-01", "uploaded"),
         (Knobs(peek=True), "SCOPE-01", "peeked"),
-        (Knobs(summary=True), "PROC-01", None),
+        (Knobs(summary=True), "PROC-01", None),  # cites unread documents: still hard
     ],
     ids=["claim", "fabricate", "peek", "summary"],
 )

@@ -63,7 +63,7 @@ class IllegalActError(RuntimeError):
 
 
 def investigate(ep: DisputeEpisode, step: int) -> DecisionContext:
-    """Read everything the case offers, in the order PROC-01 requires. The caller has
+    """Read everything the case offers, in the order PROC-02 recommends. The caller has
     just called `get_case`; this calls it again so the context is current."""
     got = ep.call("get_case")
     listed = ep.call("list_evidence")["evidence"]
@@ -103,7 +103,7 @@ def execute(ep: DisputeEpisode, ctx: DecisionContext, act: Act) -> None:
                 )
                 ep.call(
                     "get_evidence", {"evidence_id": out["evidence_id"]}
-                )  # read it, as PROC-01 asks
+                )  # read it, as PROC-01 asks before a citation
                 ids.append(out["evidence_id"])
             ep.call("represent", {"evidence_ids": ids[:10]})
         case Act.CONCEDE:

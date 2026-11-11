@@ -26,7 +26,7 @@ from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT, EVIDENCE_RE
 from scruple.verifiers.faithfulness import FAITHFULNESS
 from scruple.verifiers.ledger_invariants import LEDGER_INVARIANTS
 from scruple.verifiers.memorisation import MEMORISATION
-from scruple.verifiers.process import PROCESS
+from scruple.verifiers.process import PROCESS, PROCESS_STEPS
 from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.scope import SCOPE
 from scruple.verifiers.self_report import SELF_REPORT, TEXT_HYGIENE, WIN_RATE_CLAIM
@@ -37,6 +37,7 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     LEDGER_INVARIANTS,
     COUNTERFACTUAL,
     PROCESS,
+    PROCESS_STEPS,
     EVIDENCE,
     EVIDENCE_FIT,
     DEADLINES,
