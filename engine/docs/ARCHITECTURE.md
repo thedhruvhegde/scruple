@@ -120,6 +120,18 @@ methods. Only `status` and `rollback_to` ever change on a stored version.
 
 Editing, deleting or reordering any entry breaks every hash after it. Truncation
 keeps the chain valid, which is why `verify` takes an externally anchored head.
+
+Anchoring (`scruple/audit/anchor.py`, `timestamp.py`, `der.py`): `scruple audit anchor`
+hashes a four-line statement (`scruple-audit-anchor/1`, tenant, entry count, head) and
+either gets an RFC 3161 token for it from a time-stamping authority (`--tsa-url`,
+stored as JSON with the base64 token) or commits it to a git repository
+(`--git-repo`, never pushed). `scruple audit verify-anchor` re-verifies the token
+offline against `--tsa-cert` (signature, imprint, signed attributes, signing-certificate
+attribute, critical timeStamping key usage, validity at genTime, trust one level up)
+and checks that entry N of the current chain still has the anchored head. Not checked:
+revocation (CRL/OCSP), longer chains, RSA-PSS. A git anchor counts only once pushed to
+a remote the operator cannot rewrite. Tests use a local TSA and check interop with
+`openssl ts` both ways (tests/test_audit_anchor.py).
 `AgentGate.verify_integrity` also replays the log against the registry and the
 stored decisions, so a direct edit to a status or a decision is reported.
 
