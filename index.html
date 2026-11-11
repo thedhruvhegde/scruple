@@ -850,6 +850,53 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   });
   addEventListener("popstate", () => { if (location.hash) settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))); });
 
+  /* ---------- the hero stirs under the pointer ----------
+     Fine pointers only, never under reduced motion. While the pointer moves over the settled hero,
+     glyphs within a few cells of it gather a little energy: they re-roll toward the CODE set and
+     lean the way the pointer travels, then settle back over about a second. Energy lives in one
+     array, stepped with the 24 fps ambient tick; only cells that hold some are visited. */
+  const stir = { on: false, x: 0, y: 0, vx: 0, vy: 0, wx: 0, wy: 0, moved: false, E: null, live: [], tick: -1 };
+  function stirClear() { if (!stir.live.length) return; for (const j of stir.live) stir.E[j] = 0; stir.live.length = 0; }
+  function stirStep(s) {
+    const C = s.C, R = s.R;
+    if (!stir.E || stir.E.length !== C * R) { stir.E = new Float32Array(C * R); stir.live.length = 0; }
+    const E = stir.E, live = stir.live;
+    let n = 0;   // decay: 0.86 a tick leaves under 3% after one second
+    for (let q = 0; q < live.length; q++) { const j = live[q], v = E[j] * 0.86; if (v < 0.03) E[j] = 0; else { E[j] = v; live[n++] = j; } }
+    live.length = n;
+    stir.wx = stir.wx * 0.7 + stir.vx * 0.3; stir.wy = stir.wy * 0.7 + stir.vy * 0.3;
+    if (!stir.on || !stir.moved) { stir.vx = stir.vy = 0; return; }
+    const pc = (stir.x - s.rect.left - s.ox) / s.cw, pr = (stir.y - s.rect.top - s.oy) / s.ch, RC = 7, RR = 3.5;
+    const amt = Math.min(1, 0.4 + Math.hypot(stir.vx, stir.vy) / 90) * 0.32;
+    for (let r = Math.max(0, Math.ceil(pr - RR)); r <= Math.min(R - 1, Math.floor(pr + RR)); r++)
+      for (let c = Math.max(0, Math.ceil(pc - RC)); c <= Math.min(C - 1, Math.floor(pc + RC)); c++) {
+        const d = Math.hypot((c - pc) / RC, (r - pr) / RR); if (d >= 1) continue;
+        const j = r * C + c; if (!E[j]) live.push(j);
+        E[j] = Math.min(1, E[j] + amt * (1 - d) * (1 - d));
+      }
+    stir.vx = stir.vy = 0; stir.moved = false;
+  }
+  function drawStirred(s, t, tick) {
+    const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, E = stir.E, C = s.C;
+    const wl = Math.hypot(stir.wx, stir.wy), m = Math.min(1, wl / 30) / (wl || 1), lx = stir.wx * m * s.cw * 1.4, ly = stir.wy * m * s.ch * 0.45;
+    for (const c of cellsOf(s, t)) {
+      const j = c.r * C + c.c, e = E[j];
+      if (e < 0.04) { emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); continue; }
+      const roll = hash(j, Math.floor(tick / 3)) < e * 0.85;
+      emit(s.sz, x0 + c.c * s.cw + lx * e, y0 + c.r * s.ch + ly * e,
+        roll ? CODE.charCodeAt(Math.floor(hash(j, tick >> 2) * CODE.length)) : c.k, roll && e > 0.55 ? 5 : c.col);
+    }
+  }
+  if (!reduce && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    const el = screens[0].el;
+    el.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      if (stir.on) { stir.vx += e.clientX - stir.x; stir.vy += e.clientY - stir.y; }
+      stir.x = e.clientX; stir.y = e.clientY; stir.on = true; stir.moved = true;
+    }, { passive: true });
+    el.addEventListener("pointerleave", () => { stir.on = false; });
+  }
+
   /* ---------- per-frame ---------- */
   const T0 = performance.now();
   let lastY = -1, lastTick = -1, force = true;
@@ -868,7 +915,9 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     if (reduce) { if (p >= 0.5) i++; p = 0; }
     if (i >= screens.length) i = screens.length - 1;
     for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (!visible(s.rect)) continue; if (j) corners(s); if (!(j === i || (p > 0 && j === i + 1))) idleDots(s); }
-    if (p === 0) { const s = screens[i]; if (visible(s.rect)) drawScreen(s, ta); }
+    if (i === 0 && p === 0 && I.done && tick !== stir.tick) { stir.tick = tick; stirStep(screens[0]); }
+    else if (i !== 0 || p > 0) stirClear();
+    if (p === 0) { const s = screens[i]; if (visible(s.rect)) { if (i === 0 && stir.live.length) drawStirred(s, ta, tick); else drawScreen(s, ta); } }
     else {
       const A = screens[i], B = screens[i + 1], ca = cellsOf(A, ta), cb = cellsOf(B, ta);
       const ax = A.rect.left + A.ox, ay = A.rect.top + A.oy, bx = B.rect.left + B.ox, by = B.rect.top + B.oy;
