@@ -290,6 +290,18 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 .toc .pg { flex: none; width: 3ch; text-align: right; }
 .toc a:hover, .toc a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .toc a:hover .no, .toc a:hover .lead, .toc a:focus-visible .no, .toc a:focus-visible .lead { color: var(--bg); }
+/* theorem boxes, framed in characters by ascii.js; the label sits on the top rule,
+   the page in the PDF and an end mark on the bottom rule */
+.thm.boxed { border-top: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 540px), 1fr)); gap: 20px 28px; }
+.thm.boxed li { position: relative; display: block; padding: 28px 3ch 30px; border-bottom: 0; }
+.thm.boxed .frame { position: absolute; inset: 0; margin: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 16px; color: var(--rule-strong); white-space: pre; overflow: hidden; pointer-events: none; }
+.thm.boxed .frame + .frame { top: auto; height: 16px; }
+.thm.boxed li b, .thm.boxed li .lab, .thm.boxed .qed { position: absolute; z-index: 1; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 16px; margin: 0; padding: 0 1ch; background: var(--bg); }
+.thm.boxed li b { top: 0; left: 3ch; }
+.thm.boxed li .lab { top: 0; right: 3ch; }
+.thm.boxed .qed { bottom: 0; right: 3ch; color: var(--muted); text-decoration: none; }
+.thm.boxed .qed:hover, .thm.boxed .qed:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.thm .qed { display: block; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; color: var(--muted); }
 /* the margin label, set sideways in the empty right margin on wide screens */
 .margin-label { display: none; }
 @media (min-width: 1400px) {
@@ -1452,13 +1464,13 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <div class="page sec">
       <h2 id="thm-h"><span class="n">06 / NEW RESULTS</span>Each one proved in full in the PDF.</h2>
       <ul class="thm">
-        <li><b>Thm 10.3</b><span>If every hacked case is flagged with probability at least rho, given all the agent knew, an accepted change has a gap of at least gamma with probability at most <span class="f">(1 - rho)^ceil(n gamma / eps)</span>, and an expected accepted gap of at most <span class="f">eps / (n e ln(1/(1 - rho)))</span>. No independence needed.<span class="lab">adaptation</span></span></li>
-        <li><b>Cor 10.5</b><span>If the agent's signal has a likelihood ratio of at least l, then <span class="f">rho = (1 - beta) q l / (q l + 1 - q)</span>. An agent that can see the audits defeats any spot check.<span class="lab">adaptation</span></span></li>
-        <li><b>Thm 10.6</b><span>With a verifier that misses a share beta of hacks and flags a share phi of honest cases, hacking stops paying exactly at <span class="f">q* = g / ((1 - beta)(K + g) - phi K)</span>.<span class="lab">candidate novel, framing</span></span></li>
-        <li><b>Cor 10.7</b><span>No audit rate deters unless <span class="f">beta g &lt;= (1 - beta - phi) K</span>. False alarms raise the rate you need.<span class="lab">candidate novel, framing</span></span></li>
-        <li><b>Prop 7.1</b><span>Averaging bets over a grid of J sizes gives a valid test whose wealth is within <span class="f">log J</span> of the best fixed bet on every path.<span class="lab">adaptation</span></span></li>
-        <li><b>Prop 7.2</b><span>The best fixed-bet growth rate <span class="f">g*</span> of the observed costs equals a KL distance to a harmless law, so any valid test needs at least <span class="f">kl(1 - beta || alpha) / g*</span> cases.<span class="lab">adaptation</span></span></li>
-        <li><b>Thm 9.1</b><span>The promote decision carries the smallest level among the checks that cover a harm. False blocks add up. Harms no check covers carry no guarantee.<span class="lab">standard, applied</span></span></li>
+        <li><b>Thm 10.3</b><span>If every hacked case is flagged with probability at least rho, given all the agent knew, an accepted change has a gap of at least gamma with probability at most <span class="f">(1 - rho)^ceil(n gamma / eps)</span>, and an expected accepted gap of at most <span class="f">eps / (n e ln(1/(1 - rho)))</span>. No independence needed.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=14">p. 14 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Cor 10.5</b><span>If the agent's signal has a likelihood ratio of at least l, then <span class="f">rho = (1 - beta) q l / (q l + 1 - q)</span>. An agent that can see the audits defeats any spot check.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=15">p. 15 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Thm 10.6</b><span>With a verifier that misses a share beta of hacks and flags a share phi of honest cases, hacking stops paying exactly at <span class="f">q* = g / ((1 - beta)(K + g) - phi K)</span>.<span class="lab">candidate novel, framing</span></span><a class="qed" href="scruple_paper.pdf#page=15">p. 15 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Cor 10.7</b><span>No audit rate deters unless <span class="f">beta g &lt;= (1 - beta - phi) K</span>. False alarms raise the rate you need.<span class="lab">candidate novel, framing</span></span><a class="qed" href="scruple_paper.pdf#page=15">p. 15 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Prop 7.1</b><span>Averaging bets over a grid of J sizes gives a valid test whose wealth is within <span class="f">log J</span> of the best fixed bet on every path.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=9">p. 9 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Prop 7.2</b><span>The best fixed-bet growth rate <span class="f">g*</span> of the observed costs equals a KL distance to a harmless law, so any valid test needs at least <span class="f">kl(1 - beta || alpha) / g*</span> cases.<span class="lab">adaptation</span></span><a class="qed" href="scruple_paper.pdf#page=10">p. 10 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
+        <li><b>Thm 9.1</b><span>The promote decision carries the smallest level among the checks that cover a harm. False blocks add up. Harms no check covers carry no guarantee.<span class="lab">standard, applied</span></span><a class="qed" href="scruple_paper.pdf#page=13">p. 13 <span aria-hidden="true">[]</span><span class="sr">, opens the PDF</span></a></li>
       </ul>
     </div>
   </section>
@@ -1561,5 +1573,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 </main>
 
 <script src="../nav.js" defer></script>
+<script src="ascii.js" defer></script>
 </body>
 </html>
