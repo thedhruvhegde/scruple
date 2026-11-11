@@ -7,10 +7,11 @@
  *                          the one in view gets aria-current="location"
  *   nav#nav > ul.nav-pg    pages, the page you are on carries aria-current="page" in the html
  *   button#nav-menu        [ MENU ], shown under 1000px; opens nav#nav as a small terminal list
- *   span.bar-rule > i, b   the bottom edge: i is the ====> fill, b the keys hint and percent read
+ *   span.bar-rule > i, b   the bottom edge: i is the ====> fill, b the percent read
  *   a.skip                 first in the body, href="#top" pointing at main; shown only on focus
  *
- * keys 1-9 jump to the sections, unless you are typing or holding a modifier.
+ * keys 1-9 jump to the sections, unless you are typing or holding a modifier (no hint on screen;
+ * each link carries aria-keyshortcuts).
  * to add it to a page: link site.css (tokens and bar css), copy the bar markup, then
  *   <script src="nav.js" defer></script>   (or ../nav.js one level down)
  *
@@ -26,7 +27,6 @@
   const crumb = bar.querySelector(".crumb"), rule = bar.querySelector(".bar-rule");
   const fill = rule && rule.querySelector("i"), info = rule && rule.querySelector("b");
   const page = crumb ? crumb.dataset.page || "" : "";
-  const fine = matchMedia("(hover: hover) and (pointer: fine)"), wide = matchMedia("(min-width: 1001px)");
   links.forEach((a, i) => { if (i < 9) a.setAttribute("aria-keyshortcuts", String(i + 1)); });
 
   /* ---------- the section in view, the crumb and the reading ruler ---------- */
@@ -59,8 +59,7 @@
     }
     if (!fill || !cw) return;
     const max = document.documentElement.scrollHeight - innerHeight, p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
-    const keys = links.length && fine.matches && wide.matches ? `keys 1-${Math.min(9, links.length)}   ` : "";
-    const txt = max > 0 ? `${keys}${String(Math.round(p * 100)).padStart(3, "0")}%` : "";
+    const txt = max > 0 ? `${String(Math.round(p * 100)).padStart(3, "0")}%` : "";
     if (txt !== lastInfo && info) { info.textContent = txt; lastInfo = txt; }
     // whole characters only, so the ====> lands on the ruler's own grid and stops short of the label
     const room = Math.floor(rule.clientWidth / cw) - (txt ? txt.length + 2 : 0);
