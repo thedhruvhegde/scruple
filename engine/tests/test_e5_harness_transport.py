@@ -94,10 +94,36 @@ def test_413_with_nothing_left_to_elide_returns_the_413() -> None:
     assert all(m["content"] != HT.ELIDED for m in kept)
 
 
+def test_daily_quota_with_a_stated_short_wait_sleeps_and_resends() -> None:
+    calls: list[int] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        if len(calls) == 1:
+            msg = "tokens per day (TPD): Limit 200000. Please try again in 1m30.5s. Need more"
+            return httpx.Response(429, json={"error": {"message": msg}})
+        return httpx.Response(200, json={"ok": True})
+
+    slept: list[float] = []
+    t = HT.LimitTransport(httpx.MockTransport(handler), sleep=slept.append)
+    assert _post(t, _body(1)).status_code == 200
+    assert slept == [95.5]
+    assert t.quota_waits == [90.5]
+
+
+@pytest.mark.parametrize(
+    ("text", "seconds"),
+    [("try again in 26m31.48s.", 1591.48), ("try again in 2h1m", 7260.0), ("no hint", None)],
+)
+def test_stated_wait(text: str, seconds: float | None) -> None:
+    assert HT.stated_wait(text) == seconds
+
+
 @pytest.mark.parametrize(
     ("message", "daily"),
     [
         ("Rate limit reached on tokens per day (TPD): Limit 200000", True),
+        ("tokens per day (TPD). Please try again in 3h2m1s.", True),
         ("Rate limit exceeded: free-models-per-day", True),
         ("Rate limit reached on input tokens per minute (ITPM): Limit 7000", False),
     ],
