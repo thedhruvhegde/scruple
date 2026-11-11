@@ -72,7 +72,7 @@ jobs:
             --description 'ci zap baseline (throwaway database)')"
           echo "::add-mask::${key}"
           echo "ZAP_KEY=${key}" >> "$GITHUB_ENV"
-          for path in /rules /console/; do
+          for path in /rules /console/dashboard; do
             test "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer ${key}" \
               "http://127.0.0.1:8000${path}")" = 200
           done
