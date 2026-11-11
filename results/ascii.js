@@ -122,6 +122,51 @@
     stampKey = key;
   }
 
+  /* ---------- CFPB results as character bars ---------- */
+  const TASKS = [["regime-2015", "Regime", "accuracy"], ["outcome-2015", "Relief", "auroc"], ["routing-2025", "Routing", "accuracy"]];
+  const SYS = [["majority", "majority"], ["keywords", "keywords"], ["tfidf_lr", "tf-idf+lr"], ["haiku", "haiku"], ["sonnet", "sonnet"]];
+  const sg = (x) => (x < 0 ? "-" : "+") + Math.abs(x).toFixed(3);
+  let REAL = null, barsW = 0;
+  function bars() {
+    const pre = $("#real-bars");
+    if (!REAL || pre.hidden) return;
+    const W = cols(pre), bw = Math.max(10, Math.min(60, W - 18));
+    barsW = W;
+    const L = [];
+    for (const [key, label, metric] of TASKS) {
+      const t = REAL[key];
+      L.push([[label, "Bf"], [`  ${metric === "auroc" ? "AUROC, 0.5 is chance" : "accuracy"}, n=${t.n}`, "d"]]);
+      for (const [k, name] of SYS) {
+        const v = t.entries[k][metric], n = Math.round(v * bw), half = Math.round(0.5 * bw);
+        const b = Array.from({ length: bw }, (_, i) => (i < n ? "#" : "."));
+        if (metric === "auroc") b[half] = "|";
+        const model = k === "haiku" || k === "sonnet";
+        L.push([[name.padEnd(10), model ? "f" : "d"], [b.slice(0, n).join(""), model ? "f" : "d"], [b.slice(n).join(""), "r"], [" " + v.toFixed(3), "f"]]);
+      }
+      for (const m of ["haiku", "sonnet"]) {
+        const d = t.entries[m].vs_tfidf_lr;
+        L.push([[`  ${m} minus tf-idf `, "d"], [sg(d.diff), "f"], [` [${sg(d.ci95[0])}, ${sg(d.ci95[1])}]`, "d"]]);
+      }
+      L.push([]);
+    }
+    L.pop();
+    pre.textContent = "";
+    for (const l of L) {
+      for (const [x, ink] of l) { const n = document.createElement(ink === "Bf" ? "b" : "span"); if (ink !== "f" && ink !== "Bf") n.className = ink; n.textContent = x; pre.append(n); }
+      pre.append("\n");
+    }
+  }
+  function view(b) {
+    $("#v-table").setAttribute("aria-pressed", String(!b));
+    $("#v-bars").setAttribute("aria-pressed", String(b));
+    $("#real-table").hidden = b;
+    $("#real-bars").hidden = !b;
+    bars();
+  }
+  $("#v-table").addEventListener("click", () => view(false));
+  $("#v-bars").addEventListener("click", () => view(true));
+  fetch(new URL("data/real_models.json", document.baseURI)).then((r) => r.json()).then((j) => { REAL = j; bars(); }).catch(() => {});
+
   let last = null, lastW = 0;
   function render(d) {
     last = d;
@@ -134,9 +179,9 @@
   document.addEventListener("replay", (e) => render(e.detail));
   let queued = false;
   addEventListener("resize", () => {
-    if (queued || !last) return;
+    if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { queued = false; if (cols($("#casefile")) !== lastW) render(last); });
+    requestAnimationFrame(() => { queued = false; if (last && cols($("#casefile")) !== lastW) render(last); if (!$("#real-bars").hidden && cols($("#real-bars")) !== barsW) bars(); });
   });
   if (document.fonts) document.fonts.ready.then(() => { if (last) render(last); });
 })();
