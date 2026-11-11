@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="only light">
+<meta name="robots" content="noindex">
+<title>Scruple pilot, one page</title>
+<link rel="icon" type="image/svg+xml" href="../assets/logos/bone-on-night/mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<link rel="stylesheet" href="../site.css">
+<style>
+/* The one-page leave-behind. Source of pilot/scruple-pilot.pdf: render it with
+   NODE_PATH=/opt/node22/lib/node_modules node tools/leave-behind.js
+   Every result is quoted from engine/docs/results/*.md. A4, one page, the site's bands. */
+@page { size: A4; margin: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+html { background: #2a2d2b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: var(--f-body); color: var(--fg); font-size: 9.4pt; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+p, h1, h2, ul, ol { margin: 0; }
+a { color: inherit; text-decoration: none; }
+.sheet { width: 210mm; height: 297mm; margin: 0 auto; display: grid; grid-template-rows: auto auto 1fr auto; overflow: hidden; background: var(--bg); }
+@media screen { .sheet { margin: 16px auto; } }
+.band { padding: 0 14mm; }
+.mono { font-family: var(--f-mono); font-variation-settings: "wdth" 80; }
+.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 7pt; font-weight: 600; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+.rule { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 6.5pt; line-height: 1; color: var(--rule-strong); white-space: nowrap; overflow: hidden; }
+.rule::before { content: var(--ruler); }
+
+/* head */
+.top { padding-top: 8mm; padding-bottom: 5mm; display: grid; gap: 4mm; }
+.mast { display: flex; justify-content: space-between; align-items: center; gap: 8mm; }
+.brand { display: flex; align-items: center; gap: 2.5mm; }
+.brand svg { width: 7mm; height: 7mm; }
+.brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 14pt; letter-spacing: -0.01em; }
+.mast .mono { font-size: 7.5pt; color: var(--muted); text-align: right; }
+h1 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 17pt; line-height: 1.12; letter-spacing: -0.02em; max-width: 34ch; }
+.lede { font-size: 10pt; line-height: 1.42; max-width: 70ch; }
+
+/* body: two columns */
+.mid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 7mm; padding-top: 5mm; padding-bottom: 5mm; }
+h2 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 11pt; line-height: 1.2; letter-spacing: -0.01em; margin: 1mm 0 2.5mm; }
+.list { list-style: none; padding: 0; display: grid; gap: 1.3mm; }
+.list li { display: grid; grid-template-columns: 3ch minmax(0, 1fr); }
+.list li::before { content: "-"; font-family: var(--f-mono); color: var(--muted); }
+.list b { font-weight: 600; }
+.screen { background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: inset 0 0 0 3px var(--scr-deep); color: var(--c-mute); padding: 4mm 4.5mm; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 7.4pt; line-height: 1.5; }
+.screen p + p { margin-top: 2mm; }
+.screen b { color: var(--c-fg); font-weight: 600; }
+.screen .g { color: var(--c-pine); } .screen .v { color: var(--c-verm); } .screen .y { color: var(--c-brass); } .screen .s { color: var(--c-sky); }
+.src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 6.5pt; color: var(--muted); line-height: 1.5; margin-top: 2.5mm; }
+
+/* pilot band */
+.pilot { padding-top: 5mm; padding-bottom: 5mm; display: grid; gap: 3mm; align-content: start; }
+.pilot .k { color: var(--accent); }
+.weeks { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-top: 1px solid var(--rule-strong); }
+.weeks div { padding: 2.5mm 2.5mm 0 0; border-right: 1px solid var(--rule); }
+.weeks div + div { padding-left: 2.5mm; }
+.weeks div:last-child { border-right: 0; }
+.weeks b { display: block; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 7pt; color: var(--brass); font-weight: 600; }
+.weeks span { display: block; font-weight: 600; margin: 0.6mm 0 0.8mm; }
+.weeks i { font-style: normal; color: var(--muted); font-size: 8.2pt; line-height: 1.35; display: block; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 7mm; }
+.two .list { gap: 0.8mm; font-size: 8.8pt; }
+.two .list li::before { color: var(--muted); }
+
+/* foot */
+.foot { padding-top: 4mm; padding-bottom: 7mm; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4mm 8mm; align-items: end; }
+.foot .rule { grid-column: 1 / -1; }
+.sec { font-size: 8.6pt; color: var(--muted); line-height: 1.45; }
+.sec b { color: var(--fg); font-weight: 600; }
+.contact { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 8.5pt; text-align: right; line-height: 1.6; }
+.contact .btn { margin: 0 0 1mm; padding: 1.5mm 2mm; font-size: 9pt; background: var(--fg); color: var(--bg); }
+.contact span { color: var(--muted); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="0 0 24 24">
+      <g transform="rotate(-6 12 11)">
+        <rect x="1.5" y="10" width="21" height="2.4" fill="currentColor"/>
+        <rect x="3" y="5.4" width="4.6" height="4.6" fill="var(--brass)"/>
+      </g>
+      <path d="M12 12.6L17.5 21.5H6.5Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+<main class="sheet">
+  <section class="band top">
+    <div class="mast">
+      <span class="brand"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></span>
+      <span class="mono">pilot offer, card disputes<br>draft, November 2026</span>
+    </div>
+    <h1>Verifiers and a release gate for software that decides card disputes.</h1>
+    <p class="lede">Dispute logic changes often. Outcomes arrive weeks later. An average hides the reason code that got worse, and agents report their own wins. Scruple scores each change from ledger postings and policy constraints, never from what the agent says about itself, and blocks the release when it regresses.</p>
+  </section>
+
+  <section class="band band-night mid" style="--bg: #0C1424">
+    <div>
+      <p class="k" style="color: var(--accent)">What exists today</p>
+      <h2>Tested, on published fixtures and synthetic histories.</h2>
+      <ul class="list">
+        <li><span>Replays a change on held-out cases and on your imported history, and checks <b>every reason code separately</b>.</span></li>
+        <li><span>Scores cost from <b>balance movements</b>; checks deadlines, evidence and the agent's own report against the ledger.</span></li>
+        <li><span><b>Blocks the pull request</b> in GitHub or GitLab, with a scorecard comment and a status check.</span></li>
+        <li><span>A named approver who is not the rule's owner; a <b>hash-chained audit trail</b>; an evidence pack per decision.</span></li>
+        <li><span>Stripe, Adyen and CSV ingest with redaction, card tokenisation and field encryption before storage.</span></li>
+      </ul>
+      <p class="src">None of it has yet run on a partner's data. That is what the pilot is for.</p>
+    </div>
+    <div>
+      <p class="k" style="color: var(--accent)">Real models, measured</p>
+      <h2>They know the rules. They misjudge the cases.</h2>
+      <div class="screen">
+        <p><span class="s">CFPB complaints, 100 held out, graded by code</span><br>
+        <b>Sonnet</b> named the right regulation <span class="g">93%</span> of the time, Haiku <span class="g">90%</span>, a TF-IDF classifier 87%.<br>
+        Predicting relief, Sonnet scored AUROC <span class="v">0.61</span>, below the classifier's <b>0.70</b>.</p>
+        <p><span class="s">12 simulated disputes each, every call the model's own</span><br>
+        <b>Sonnet</b> cut the merchant's loss most, <span class="g">-$32.77</span> a case against an evidence policy [95% -64.01 to -4.33].<br>
+        <span class="v">4 of its 10 wins</span> were on claims the cardholder was right about.</p>
+        <p><span class="s">open models through the API, same 12 cases</span><br>
+        <b>gpt-oss-120b</b> claimed a net cost of 0 on <span class="v">5</span> cases that lost money.<br>
+        <b>gpt-oss-20b</b> passed the gate on <span class="v">0 of 12</span>: it represented on documents it never read.</p>
+      </div>
+      <p class="src" style="color: var(--muted)">engine/docs/results/REAL_MODELS.md, MODEL_EPISODES.md. Small samples, wide intervals. Cases are synthetic; the model behaviour is real.</p>
+    </div>
+  </section>
+
+  <section class="band band-pine pilot" style="--bg: #0F2D1E">
+    <p class="k">The pilot</p>
+    <h2 style="margin: 0">Six weeks, one workflow, one change. Criteria signed before any data.</h2>
+    <div class="weeks">
+      <div><b>WEEK 1</b><span>Kickoff</span><i>Success criteria signed. Export agreed.</i></div>
+      <div><b>WEEK 2</b><span>Export</span><i>Ingest report: rows read, rejected and why.</i></div>
+      <div><b>WEEK 3</b><span>Backtest</span><i>The candidate on your history, per reason code.</i></div>
+      <div><b>WEEK 4</b><span>Shadow</span><i>Live traffic. Scruple acts on nothing.</i></div>
+      <div><b>WEEK 5</b><span>Gate</span><i>In your CI, scorecards on real pull requests.</i></div>
+      <div><b>WEEK 6</b><span>Readout</span><i>Pass, fail or not enough data. Your data deleted.</i></div>
+    </div>
+    <div class="two">
+      <div>
+        <p class="k" style="margin-bottom: 1.5mm">You provide</p>
+        <ul class="list">
+          <li><span>A few thousand resolved disputes, read-only: Stripe API, Adyen or CSV.</span></li>
+          <li><span>One change: a new rule, a prompt edit or a model swap.</span></li>
+          <li><span>An owner, an engineer, a dispute expert, a reviewer: about 45 hours in all.</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="k" style="margin-bottom: 1.5mm">You get</p>
+        <ul class="list">
+          <li><span>A backtest, a shadow summary and a gate on one repository.</span></li>
+          <li><span>A self-report check: claimed wins against the balance transactions.</span></li>
+          <li><span>Evidence packs and a readout, reported whether it passes or fails.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band foot">
+    <p class="rule" aria-hidden="true"></p>
+    <p class="sec"><b>Security.</b> Runs inside your environment, or on a scruple machine with tokenised, redacted data only. Card numbers are tokenised and chosen fields encrypted before anything is stored. No SOC 2 yet; the security answers say what is not built.<br><b>Pricing</b> is set per pilot.</p>
+    <p class="contact"><a class="btn" href="mailto:dhegde@umich.edu?subject=Scruple%20pilot">dhegde@umich.edu</a><br>Dhruv Hegde, founder<br><a href="https://thedhruvhegde.github.io/scruple/pilot/"><span>thedhruvhegde.github.io/scruple/pilot/</span></a></p>
+  </section>
+</main>
+<script>
+/* on a narrow screen, shrink the A4 sheet to fit the width; printing and the pdf are unaffected */
+(() => {
+  const fit = () => { const w = innerWidth, s = 794 + 32; document.body.style.zoom = w < s ? String(w / s) : ""; };
+  const print = matchMedia("print");
+  addEventListener("resize", fit); fit();
+  print.addEventListener("change", (m) => { if (m.matches) document.body.style.zoom = ""; else fit(); });
+})();
+</script>
+</body>
+</html>
