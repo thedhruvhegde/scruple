@@ -615,3 +615,58 @@ Run 17:00-17:40 UTC; 6 of the 50 free-model requests counted (`/api/v1/key`). Up
   that the free tier could not serve a scored run this session.
 - Raw data: `results/real/open_models/episodes_e5b/`. The rows are in
   `E5_EPISODES.md`, marked `api-openrouter-e5b-exploratory`.
+
+## Session 3 addendum: continuation (written before any session-3 run)
+
+Written on 2026-11-11 at about 22:20 UTC, before any scored request of the third
+session. Same protocol, same seeds and item ids, same analysis code. The
+provider-limit rules of deviation 4 are unchanged. Nothing above is rewritten.
+
+### Before this addendum
+
+- One tiny chat request per Groq model ("Say ok", 8 max tokens), to read the
+  rate-limit header values. All three answered 200: 1,000 requests per day and
+  8,000 tokens per minute each. The headers do not report the per-day token cap.
+- OpenRouter: `/api/v1/key` reports free tier, $0 spent, 43 of 50 free-model
+  requests left today. `/api/v1/models` was listed (it is not a model request).
+- Neither step is scored.
+
+### What session 3 runs
+
+Each Groq model has its own quota, so the three run side by side, each in the
+pre-registered order:
+
+- qwen/qwen3.8-27b: (a) seeds 5009-5012, then `regime-2015`, `outcome-2015`,
+  `routing-2025` (n=100, 100, 50).
+  - Seed 5009's abandoned session-2 attempt stays in its transcript; it is played
+    from the start.
+- openai/gpt-oss-20b: `outcome-2015` items 76-100, then `routing-2025` (n=50).
+- openai/gpt-oss-120b: `routing-2025` items 14-50.
+
+The drivers resume from the stored answers and records, so nothing already
+answered is asked again.
+
+### When session 3 stops
+
+- A daily quota with a stated wait under an hour is waited out (deviation 4).
+- The session ends at 2026-11-12 02:30 UTC at the latest, or earlier if every
+  item is done. Anything still not run then is reported as not run, by count,
+  and never graded. Items in flight are logged and not graded.
+- Grading again uses the first k items in prompt order that every graded system
+  answered (deviation 6), now with the new answers.
+
+### E5b retry (exploratory, not part of any hypothesis)
+
+- Seeds 5001-5004 only, zero-shot, the E5 loop, played in the order 5001 (model
+  1), 5001 (model 2), 5002 (model 1), ... until the free-model request cap stops
+  it (`DailyQuota`, no stated wait).
+- Models, chosen by a fixed rule from the `:free` models whose
+  `supported_parameters` list `tools` on 2026-11-11: the two most recently added,
+  skipping models under 5B parameters and the three tried in session 2.
+  - baidu/ernie-5.5-flash-preview:free
+  - thinkingmachines/inkling-2-small:free
+  - If a model's first scored episode lapses on upstream 429s, the next model by
+    the same rule replaces it from that seed on (recursive/flint-v1.0:free, then
+    nvidia/nemotron-3.5-super-vl:free), and the swap is reported.
+- New run directories under `episodes_e5b/`; the session-2 E5b rows stay as they
+  are. Scored by `analyse_e5.py`, as before.
