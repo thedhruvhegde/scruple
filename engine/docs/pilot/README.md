@@ -112,6 +112,7 @@ Proposals common to all three:
 | SUCCESS_CRITERIA.md | pre-registration template with a worked sample-size example |
 | DATA_CHECKLIST.md | exact fields to export, volume, PII handling, deletion |
 | SECURITY.md | security questionnaire answers from controls that exist in the code |
+| RUNBOOK.md | day 0 to readout, both sides, with the exact commands |
 | DEMO_SCRIPT.md | 20-minute live demo with commands that run today |
 | READOUT_TEMPLATE.md | the report we hand over in week 6 |
 | TERMS_DRAFT.md | draft pilot terms and DPA outline, for counsel review |
