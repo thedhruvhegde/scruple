@@ -36,6 +36,24 @@ def cmd_pilot_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_pilot_readout(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from scruple.pilot.readout import build_readout, write_readout
+
+    readout = build_readout(Path(args.run), Path(args.criteria))
+    files = write_readout(readout, Path(args.out))
+    tag = " [SYNTHETIC DATA]" if readout.data == "synthetic" else ""
+    print(
+        f"readout{tag}: passed {', '.join(readout.ids('pass')) or 'none'}; "
+        f"failed {', '.join(readout.ids('fail')) or 'none'}; "
+        f"not enough data {', '.join(readout.ids('not enough data')) or 'none'}"
+    )
+    for f in files:
+        print(f"wrote {f}")
+    return 0
+
+
 def _guard(fn: Any) -> Any:
     def run(args: argparse.Namespace) -> int:
         try:
@@ -64,6 +82,11 @@ def add_pilot_parser(sub: Any) -> None:
     r.add_argument("--n-cases", type=int, default=2_000, help="synthetic gate cases")
     r.add_argument("--currency", default=None, help="default: the most common currency")
     r.set_defaults(fn=_guard(cmd_pilot_run))
+    ro = psub.add_parser("readout", help="fill the readout template from a pilot run")
+    ro.add_argument("--run", required=True, help="a `scruple pilot run` output directory")
+    ro.add_argument("--criteria", required=True, help="pre-registered criteria (.json or .toml)")
+    ro.add_argument("--out", required=True, help="directory for readout.md, .pdf and .json")
+    ro.set_defaults(fn=_guard(cmd_pilot_readout))
 
 
 __all__ = ["add_pilot_parser"]
