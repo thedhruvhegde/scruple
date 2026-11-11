@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% import "_charts.html" as ch with context %}
+{% import "_dash.html" as dsh with context %}
+{% set section = "dashboard" %}
+{% block title %}runs and compute{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/dashboard?period={{ ctx.win.period }}">dashboard</a><span>/</span><span>runs and compute</span></p>
+<h1>Runs and compute</h1>
+<p class="lede">The job queue and its workers, every gate evaluation with the cases it replayed, model runs with their tokens and estimated cost where recorded, and the health of the audit chain. {{ ctx.win.label | capitalize }}.</p>
+{{ dsh.subnav("compute", ctx.win.period) }}
+{{ dsh.periods("compute", ctx.win.period) }}
+{{ dsh.banner(ctx) }}
+{% endblock %}
+{% block body %}
+<div class="sec" id="jobs">
+  <h2><span class="n">01 / JOBS</span>The queue</h2>
+  <div class="stats">{% for s, n in cp.by_status.items() %}<div class="stat"><span>{{ s | capitalize }}</span><b>{{ n }}</b></div>{% endfor %}</div>
+  <div class="grid2">
+    <div>{{ ch.chart(cp.charts["status"]) }}</div>
+    <div>{{ ch.chart(cp.charts["durations"]) }}</div>
+  </div>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Job</th><th>Kind</th><th>Status</th><th>Version</th><th class="r">Attempts</th><th>Created</th><th class="r">Duration</th><th class="r">Cases</th><th>Worker / error</th></tr></thead>
+    <tbody>{% for r in cp.jobs %}{% set j = r.job %}
+      <tr>
+        <td class="m" data-label="Job">{{ j.job_id }}</td>
+        <td class="m" data-label="Kind">{{ j.kind }}</td>
+        <td data-label="Status"><span class="tag {{ {'succeeded': 'pass', 'failed': 'block', 'running': 'hold', 'queued': 'dim', 'cancelled': 'dim'}[j.status.value] }}">{{ j.status.value }}</span></td>
+        <td class="m" data-label="Version">{% if j.rule_id %}{{ j.rule_id }}@v{{ j.version }}{% else %}<span class="dim">n/a</span>{% endif %}</td>
+        <td class="m r" data-label="Attempts">{{ j.attempts }}/{{ j.max_attempts }}</td>
+        <td class="m" data-label="Created">{{ j.created_at | when }}</td>
+        <td class="m r" data-label="Duration">{% if r.duration_s is not none %}{{ r.duration_s | num(2) }} s{% else %}<span class="dim">n/a</span>{% endif %}</td>
+        <td class="m r" data-label="Cases">{{ r.cases | num if r.cases is not none else "" }}</td>
+        <td class="k wrap" data-label="Worker / error">{% if j.error %}<span class="no">{{ j.error }}</span>{% elif j.lease_owner %}{{ j.lease_owner }}{% endif %}</td>
+      </tr>
+    {% else %}<tr><td colspan="9" class="dim">No jobs in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <p class="note">Duration is from the job's last claim to its finish, from the queue's own events. Cases is the history size a backtest replayed.</p>
+</div>
+
+<div class="sec" id="workers">
+  <h2><span class="n">02 / WORKERS</span>Seen in this tenant's job events</h2>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Worker</th><th>Status</th><th>Last seen</th><th class="r">Succeeded</th><th class="r">Failed</th><th>Holding</th></tr></thead>
+    <tbody>{% for w in cp.workers %}
+      <tr><td class="m" data-label="Worker">{{ w.worker }}</td><td data-label="Status"><span class="tag {{ 'hold' if w.running else 'dim' }}">{{ w.status }}</span></td><td class="m" data-label="Last seen">{{ w.last_seen | when }}</td><td class="m r" data-label="Succeeded">{{ w.finished }}</td><td class="m r" data-label="Failed">{{ w.failed }}</td><td class="m" data-label="Holding">{% if w.running %}{{ w.running }} until {{ w.lease_expires_at | when }}{% endif %}</td></tr>
+    {% else %}<tr><td colspan="6" class="dim">No worker has claimed a job for this tenant.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="gate">
+  <h2><span class="n">03 / GATE RUNS</span>Evaluations and the cases they replayed</h2>
+  <p class="note">{{ cp.gate_runs | length }} runs replayed <b>{{ cp.cases_replayed | num }}</b> cases (shadow: held-out cases; canary: live cases, simulated in this build). Duration is known when a job ran the evaluation.</p>
+  {{ ch.chart(cp.charts["cases"]) }}
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Decision</th><th>Stage</th><th>Outcome</th><th>Version</th><th class="r">Cases</th><th class="r">Duration</th><th>When</th></tr></thead>
+    <tbody>{% for g in cp.gate_runs[:50] %}{% set d = g.rec.decision %}
+      <tr><td class="m" data-label="Decision">{{ d.decision_id }}</td><td class="m" data-label="Stage">{{ d.stage.value }}</td><td data-label="Outcome">{{ m.outcome(d.outcome) }}</td><td class="m" data-label="Version"><a href="{{ P }}/rules/{{ d.rule_id }}/versions/{{ d.version }}">{{ d.rule_id }}@v{{ d.version }}</a></td><td class="m r" data-label="Cases">{{ g.cases | num }}</td><td class="m r" data-label="Duration">{% if g.duration_s is not none %}{{ g.duration_s | num(2) }} s <span class="k">{{ g.job }}</span>{% else %}<span class="dim">not recorded</span>{% endif %}</td><td class="m" data-label="When">{{ d.created_at | when }}</td></tr>
+    {% else %}<tr><td colspan="7" class="dim">No gate runs in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="evals">
+  <h2><span class="n">04 / MODEL RUNS</span>Eval runs, tokens and estimated model cost</h2>
+  <p class="note">From eval run directories in this tenant's data folder. Tokens and requests are what the run recorded; cost is estimated from the price the run was given (scruple ships no price list), so it is blank when no price was set. Every eval case is synthetic; a fake transport is a harness check, not a real model.</p>
+  <div class="stats">
+    <div class="stat"><span>Input tokens</span><b>{{ cp.tokens[0] | num }}</b></div>
+    <div class="stat"><span>Output tokens</span><b>{{ cp.tokens[1] | num }}</b></div>
+    <div class="stat"><span>Estimated model cost</span><b>{{ "$%.4f" | format(cp.cost_usd) if cp.cost_usd is not none else "not recorded" }}</b></div>
+  </div>
+  {{ ch.chart(cp.charts["tokens"]) }}
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Agent / run</th><th>Provider / model / strategy</th><th>Transport</th><th class="r">Episodes</th><th class="r">Input tokens</th><th class="r">Output tokens</th><th class="r">Requests</th><th class="r">Est. cost</th><th class="r">Mean reward</th></tr></thead>
+    <tbody>{% for e in cp.evals %}{% set mf = e.run.manifest %}
+      <tr><td class="m" data-label="Agent / run">{{ e.run.agent }}<br><span class="k">{{ e.run.name }}</span></td><td class="m" data-label="Provider / model">{{ mf.provider }} / {{ mf.model }} / {{ mf.strategy }}</td><td data-label="Transport">{% if mf.real_model %}<span class="tag pass">{{ mf.transport }}</span>{% else %}<span class="tag hold">fake</span>{% endif %}</td><td class="m r" data-label="Episodes">{{ e.episodes }}</td><td class="m r" data-label="Input tokens">{{ e.input_tokens | num }}</td><td class="m r" data-label="Output tokens">{{ e.output_tokens | num }}</td><td class="m r" data-label="Requests">{{ e.requests | num }}</td><td class="m r" data-label="Est. cost">{{ "$%.4f" | format(e.cost_usd) if e.cost_usd is not none else "n/a" }}</td><td class="m r" data-label="Mean reward">{{ e.mean_reward | num(3) }}</td></tr>
+    {% else %}<tr><td colspan="9" class="dim">No eval runs in this tenant's data folder.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="audit">
+  <h2><span class="n">05 / AUDIT CHAIN</span>Health and the last anchor</h2>
+  {% set i = cp.integrity %}
+  <dl class="kv">
+    <dt>integrity</dt><dd>{% if i.ok %}<span class="tag pass">intact</span> hash chain, rule table and every stored decision match the log{% else %}<span class="tag block">failed</span>{% endif %}</dd>
+    <dt>entries</dt><dd>{{ i.chain.entries }}</dd>
+    <dt>head</dt><dd><code>{{ i.chain.head_hash | short(24) }}</code></dd>
+    {% for p in i.problems[:10] %}<dt>problem</dt><dd class="no">{{ p }}</dd>{% endfor %}
+    {% if cp.anchor %}{% set a = cp.anchor %}
+    <dt>last anchor</dt><dd>{{ a.kind }}: {{ a.statement.entries }} entries, head <code>{{ a.statement.head | short(16) }}</code>{% if a.kind == "rfc3161" %}, TSA time {{ a.gen_time | when }}{% else %}, commit <code>{{ a.commit | short(12) }}</code> at {{ a.committed_at }}{% endif %}</dd>
+    <dt>anchor check</dt><dd>{% if cp.anchor_check.ok %}<span class="tag pass">ok</span> the chain still holds the anchored head; {{ cp.anchor_check.current_entries - cp.anchor_check.anchored_entries }} entries since{% else %}<span class="tag block">failed</span> {{ cp.anchor_check.problem }}{% endif %}. The statement is checked here; verify the signature or commit with <code>scruple audit verify-anchor</code>.</dd>
+    {% else %}
+    <dt>last anchor</dt><dd>none on record. Anchor the head with <code>scruple audit anchor</code> and keep the JSON in <code>&lt;data&gt;/{{ ctx.tenant }}/anchors/</code>.</dd>
+    {% endif %}
+  </dl>
+</div>
+{% endblock %}

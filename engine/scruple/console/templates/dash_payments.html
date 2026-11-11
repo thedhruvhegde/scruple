@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% import "_charts.html" as ch with context %}
+{% import "_dash.html" as dsh with context %}
+{% set section = "dashboard" %}
+{% block title %}stripe and payments{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/dashboard?period={{ ctx.win.period }}">dashboard</a><span>/</span><span>stripe and payments</span></p>
+<h1>Stripe and payments</h1>
+<p class="lede">The disputes ingested into this tenant's case store (Stripe and Adyen), as exported: amounts, reason codes, outcomes, fees, refunds and evidence deadlines. Then this tenant's own scruple usage and what was pushed to Stripe billing. {{ ctx.win.label | capitalize }}, by the day each dispute opened.</p>
+{{ dsh.subnav("payments", ctx.win.period) }}
+{{ dsh.periods("payments", ctx.win.period) }}
+{{ dsh.banner(ctx) }}
+{% endblock %}
+{% block body %}
+<div class="sec" id="disputes">
+  <h2><span class="n">01 / DISPUTES</span>Ingested cases</h2>
+  {% if not pay.store %}
+  <p class="note">No case store for this tenant. Ingest an export with <code>scruple ingest --store &lt;data&gt;/{{ ctx.tenant }}/cases.db</code> and start the console with <code>--data &lt;data&gt;</code>.</p>
+  {% else %}
+  <p class="note">Every figure is <b>observed</b>: read from the stored cases and ledger movements, latest version of each case.{% if pay.kind == "synthetic" %} This store holds <b>synthetic</b> Stripe-shaped records (the store says so), not a real export.{% endif %}{% if pay.livemode %} {{ pay.livemode }} case(s) came from live mode.{% else %} No case came from live mode.{% endif %}</p>
+  <div class="stats">
+    <div class="stat"><span>Disputes</span><b>{{ pay.cases | num }}</b></div>
+    {% for s, n in pay.by_state %}<div class="stat"><span>{{ s | capitalize }}</span><b>{{ n | num }}</b></div>{% endfor %}
+    <div class="stat"><span>Win rate (won / won + lost)</span><b>{{ pay.win_rate | pct }}</b></div>
+    {% for src, n in pay.by_source %}<div class="stat"><span>From {{ src }}</span><b>{{ n | num }}</b></div>{% endfor %}
+  </div>
+  <div class="grid2">
+    <div>{{ ch.chart(pay.charts["weekly"]) }}</div>
+    <div>{{ ch.chart(pay.charts["amounts"]) }}</div>
+    <div>{{ ch.chart(pay.charts["reasons"]) }}</div>
+    <div>{{ ch.chart(pay.charts["states"]) }}</div>
+  </div>
+  <h3>Money, per currency</h3>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Currency</th><th class="r">Disputes</th><th class="r">Disputed</th><th class="r">Withdrawn</th><th class="r">Reinstated</th><th class="r">Dispute fees</th><th class="r">Refunded</th></tr></thead>
+    <tbody>{% for t in pay.totals %}
+      <tr><td class="m" data-label="Currency">{{ t.currency }}</td><td class="m r" data-label="Disputes">{{ t.disputes | num }}</td><td class="m r" data-label="Disputed">{{ t.amount | minor(t.currency) }}</td><td class="m r" data-label="Withdrawn">{{ t.withdrawn | minor(t.currency) }}</td><td class="m r" data-label="Reinstated">{{ t.reinstated | minor(t.currency) }}</td><td class="m r" data-label="Dispute fees">{{ t.fees | minor(t.currency) }}</td><td class="m r" data-label="Refunded">{{ t.refunded | minor(t.currency) }}</td></tr>
+    {% else %}<tr><td colspan="7" class="dim">No disputes in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <p class="note">Withdrawn and reinstated are the dispute debits and credits on the ledger; fees are the fees those movements carry; refunded is the refund amount the export reports per payment.</p>
+  {% endif %}
+</div>
+
+{% if pay.store %}
+<div class="sec" id="deadlines">
+  <h2><span class="n">02 / DEADLINES</span>Evidence due dates met and missed</h2>
+  <div class="grid2">
+    <div>{{ ch.chart(pay.charts["deadlines"]) }}</div>
+    <div><dl class="kv">{% for k, label in deadline_labels.items() %}<dt>{{ k | replace("_", " ") }}</dt><dd>{{ pay.deadlines[k] }}: {{ label }}</dd>{% endfor %}</dl></div>
+  </div>
+  <h3>Due in the next 7 days</h3>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Case</th><th>Reason</th><th class="r">Amount</th><th>Evidence due</th><th>Evidence fields</th></tr></thead>
+    <tbody>{% for c in pay.due_soon %}
+      <tr><td class="m" data-label="Case">{{ c.case_id }}</td><td class="m" data-label="Reason">{{ c.source_reason }}</td><td class="m r" data-label="Amount">{{ c.amount_minor | minor(c.currency) }}</td><td class="m" data-label="Evidence due">{{ c.evidence_due_at | when }}</td><td class="k wrap" data-label="Evidence fields">{{ c.evidence_fields | join(", ") or "none" }}</td></tr>
+    {% else %}<tr><td colspan="5" class="dim">Nothing due in the next 7 days.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endif %}
+
+<div class="sec" id="usage">
+  <h2><span class="n">03 / USAGE AND BILLING</span>What this tenant used, and what was billed</h2>
+  <p class="note">Usage is metered from this tenant's own gate decisions (<code>scruple usage sync</code>): one gate run per shadow, canary or assurance step, the cases each replayed, one rollout per activation. Billing pushes are the meter events Stripe accepted (<code>scruple billing push</code>); the ledger records each once. Not yet pushed = metered minus pushed in this period.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Meter</th><th class="r">Metered</th><th class="r">Pushed to Stripe</th><th class="r">Not yet pushed</th></tr></thead>
+    <tbody>{% for meter, q in pay.usage_totals | dictsort %}
+      <tr><td class="m">{{ meter }}</td><td class="m r">{{ q | num }}</td><td class="m r">{{ pay.pushed_totals.get(meter, 0) | num }}</td><td class="m r">{{ pay.unpushed.get(meter, 0) | num }}</td></tr>
+    {% else %}<tr><td colspan="4" class="dim">No usage recorded. Run <code>scruple usage sync</code>.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if pay.usage %}
+  <div class="multiples">{% for key, c in pay.charts | dictsort %}{% if key.startswith("usage:") %}<div>{{ ch.chart(c) }}</div>{% endif %}{% endfor %}</div>
+  {% endif %}
+  <h3>Pushes to Stripe billing</h3>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Day</th><th>Meter</th><th class="r">Sent</th><th class="r">Day total</th><th>Event name</th><th>Mode</th><th>Pushed at</th></tr></thead>
+    <tbody>{% for p in pay.pushes | reverse %}
+      <tr><td class="m" data-label="Day">{{ p.period_start }}</td><td class="m" data-label="Meter">{{ p.meter }}</td><td class="m r" data-label="Sent">{{ p.delta | num }}</td><td class="m r" data-label="Day total">{{ p.cumulative | num }}</td><td class="m" data-label="Event name">{{ p.event_name }}</td><td data-label="Mode">{% if p.livemode %}<span class="tag pass">live</span>{% else %}<span class="tag hold">test</span>{% endif %}</td><td class="m" data-label="Pushed at">{{ p.pushed_at }}</td></tr>
+    {% else %}<tr><td colspan="7" class="dim">Nothing pushed in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

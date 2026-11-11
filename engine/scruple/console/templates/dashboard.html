@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% import "_charts.html" as ch with context %}
+{% import "_dash.html" as dsh with context %}
+{% set section = "dashboard" %}
+{% block title %}dashboard{% endblock %}
+{% block head %}
+<p class="crumbs"><span>console</span><span>/</span><span>dashboard</span></p>
+<h1>Dashboard</h1>
+<p class="lede">What the gate did for {{ ctx.tenant }}: money saved or kept at risk, the disputes behind it, which agent and rule handle each case type, and the work it ran. {{ ctx.win.label | capitalize }}.</p>
+{{ dsh.subnav("overview", ctx.win.period) }}
+{{ dsh.periods("overview", ctx.win.period) }}
+{{ dsh.banner(ctx) }}
+{% endblock %}
+{% block body %}
+{% set sv = o.savings %}{% set pay = o.payments %}{% set rt = o.routing %}{% set cp = o.compute %}
+<div class="sec">{{ dsh.legend() }}</div>
+
+<div class="sec" id="savings">
+  <h2><span class="n">01 / SAVINGS</span>Money saved or at risk from gated changes</h2>
+  <div class="stats">
+    <div class="stat"><span>Avoided by {{ sv.blocked | length }} blocked change{{ "" if sv.blocked | length == 1 else "s" }} {{ dsh.basis("estimated") }}</span><b>{{ sv.avoided | usd }}</b></div>
+    <div class="stat"><span>Promoted changes on the held-out replay {{ dsh.basis("synthetic") }}</span><b>{{ sv.shadow_net | signed_usd }}</b></div>
+    <div class="stat"><span>Backtests: candidate minus history {{ dsh.basis("estimated") }}</span><b>{{ sv.backtest_estimated | signed_usd }}</b></div>
+    <div class="stat"><span>Backtests: history's realised cost {{ dsh.basis("observed") }}</span><b>{{ sv.backtest_observed | usd }}</b></div>
+    <div class="stat"><span>Imported shadow: candidate minus production {{ dsh.basis(sv.imported_basis) }}</span><b>{{ sv.imported_net | signed_usd if sv.imported_net is not none else "none yet" }}</b></div>
+  </div>
+  <div class="grid2">
+    <div>{{ ch.chart(sv.charts["avoided"]) }}</div>
+    <div>{{ ch.chart(sv.charts["shadow"]) }}</div>
+  </div>
+  <p class="actions"><a class="btn" href="{{ P }}/dashboard/savings?period={{ ctx.win.period }}">Savings in detail</a></p>
+</div>
+
+<div class="sec" id="payments">
+  <h2><span class="n">02 / STRIPE AND PAYMENTS</span>Disputes ingested, outcomes, deadlines, usage</h2>
+  {% if pay.store %}
+  <div class="stats">
+    <div class="stat"><span>Disputes {% if pay.kind == "synthetic" %}{{ dsh.basis("synthetic") }}{% else %}{{ dsh.basis("observed") }}{% endif %}</span><b>{{ pay.cases | num }}</b></div>
+    <div class="stat"><span>Win rate (won / won + lost)</span><b>{{ pay.win_rate | pct }}</b></div>
+    {% for t in pay.totals[:1] %}
+    <div class="stat"><span>Disputed ({{ t.currency }})</span><b>{{ t.amount | minor(t.currency) }}</b></div>
+    <div class="stat"><span>Dispute fees ({{ t.currency }})</span><b>{{ t.fees | minor(t.currency) }}</b></div>
+    {% endfor %}
+    <div class="stat"><span>Deadlines missed</span><b>{{ pay.deadlines["missed"] + pay.deadlines["open_overdue"] }}</b></div>
+    <div class="stat"><span>Due in the next 7 days</span><b>{{ pay.due_soon | length }}</b></div>
+  </div>
+  <div class="grid2">
+    <div>{{ ch.chart(pay.charts["weekly"]) }}</div>
+    <div>{{ ch.chart(pay.charts["reasons"]) }}</div>
+  </div>
+  {% else %}
+  <p class="note">No case store for this tenant. Ingest an export with <code>scruple ingest --store</code> into <code>&lt;data&gt;/{{ ctx.tenant }}/cases.db</code> and start the console with <code>--data</code>.</p>
+  {% endif %}
+  <div class="stats">
+    {% for meter, q in pay.usage_totals | dictsort %}<div class="stat"><span>Metered {{ meter | replace("_", " ") }}</span><b>{{ q | num }}</b></div>{% endfor %}
+    {% for meter, q in pay.pushed_totals | dictsort %}<div class="stat"><span>Pushed to Stripe billing: {{ meter | replace("_", " ") }}</span><b>{{ q | num }}</b></div>{% endfor %}
+    {% if not pay.usage_totals %}<div class="stat"><span>Metered usage</span><b>none</b></div>{% endif %}
+  </div>
+  <p class="actions"><a class="btn" href="{{ P }}/dashboard/payments?period={{ ctx.win.period }}">Payments in detail</a></p>
+</div>
+
+<div class="sec" id="routing">
+  <h2><span class="n">03 / AI ROUTING</span>Who handles which case type right now</h2>
+  <div class="stats">
+    <div class="stat"><span>Policy in force</span><b>{% if rt.policy %}{{ rt.policy.policy.name }} #{{ rt.policy.number }}{% else %}none{% endif %}</b></div>
+    <div class="stat"><span>Active rules</span><b>{{ rt.active | length }}</b></div>
+    <div class="stat"><span>Canary ramps</span><b>{{ rt.ramps | length }}</b></div>
+    <div class="stat"><span>Agents</span><b>{{ rt.agents | length }}</b></div>
+  </div>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Case type</th><th>Decided by (share of replayed cases)</th></tr></thead>
+    <tbody>{% for r in rt.routes %}
+      <tr><td class="m" data-label="Case type">{{ r.case_type }}</td><td class="k wrap" data-label="Decided by">{% for rule, n in r.by_rule[:3] %}<span class="m">{{ rule }}</span> {{ (100 * n / r.n) | round(0) | int }}%{% if not loop.last %}, {% endif %}{% endfor %}{% if r.by_rule | length > 3 %}, +{{ r.by_rule | length - 3 }} more{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  <p class="actions"><a class="btn" href="{{ P }}/dashboard/routing?period={{ ctx.win.period }}">Routing in detail</a></p>
+</div>
+
+<div class="sec" id="compute">
+  <h2><span class="n">04 / RUNS AND COMPUTE</span>Jobs, gate runs, model runs, audit chain</h2>
+  <div class="stats">
+    {% for s in ["queued", "running", "succeeded", "failed"] %}<div class="stat"><span>Jobs {{ s }}</span><b>{{ cp.by_status[s] }}</b></div>{% endfor %}
+    <div class="stat"><span>Gate runs / cases replayed</span><b>{{ cp.gate_runs | length }} / {{ cp.cases_replayed | num }}</b></div>
+    <div class="stat"><span>Model tokens (in / out)</span><b>{{ cp.tokens[0] | num }} / {{ cp.tokens[1] | num }}</b></div>
+    <div class="stat"><span>Audit chain</span><b class="{{ 'ok' if cp.integrity.ok else 'no' }}">{{ "intact" if cp.integrity.ok else "FAILED" }}, {{ cp.integrity.chain.entries }} entries</b></div>
+    <div class="stat"><span>Last anchor</span><b>{% if cp.anchor %}{{ cp.anchor.statement.entries }} entries, {{ cp.anchor.kind }}{% else %}none on record{% endif %}</b></div>
+  </div>
+  <div class="grid2">
+    <div>{{ ch.chart(cp.charts["status"]) }}</div>
+    <div>{{ ch.chart(cp.charts["cases"]) }}</div>
+  </div>
+  <p class="actions"><a class="btn" href="{{ P }}/dashboard/compute?period={{ ctx.win.period }}">Compute in detail</a></p>
+</div>
+{% endblock %}

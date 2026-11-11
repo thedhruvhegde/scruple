@@ -56,6 +56,12 @@ LISTS = {
     "/usage/events",
     # console pages that list the caller's own tenant (or the shared synthetic runs)
     "/console/",
+    "/console/rules",
+    "/console/dashboard",
+    "/console/dashboard/savings",
+    "/console/dashboard/payments",
+    "/console/dashboard/routing",
+    "/console/dashboard/compute",
     "/console/runs",
     "/console/approvals",
     "/console/diff/rules",

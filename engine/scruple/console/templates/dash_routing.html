@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% import "_charts.html" as ch with context %}
+{% import "_dash.html" as dsh with context %}
+{% set section = "dashboard" %}
+{% block title %}ai routing{% endblock %}
+{% block head %}
+<p class="crumbs"><a href="{{ P }}/dashboard?period={{ ctx.win.period }}">dashboard</a><span>/</span><span>ai routing</span></p>
+<h1>AI routing</h1>
+<p class="lede">Which rule version, agent and model handle each case type right now, from the policy in force and the registry; canary splits and ramp stages; and every routing change in the audit chain with who approved it.</p>
+{{ dsh.subnav("routing", ctx.win.period) }}
+{{ dsh.periods("routing", ctx.win.period) }}
+{{ dsh.banner(ctx) }}
+{% endblock %}
+{% block body %}
+<div class="sec" id="policy">
+  <h2><span class="n">01 / POLICY</span>The gate policy in force</h2>
+  {% if rt.policy %}{% set p = rt.policy.policy %}
+  <dl class="kv">
+    <dt>policy</dt><dd>{{ p.name }} #{{ rt.policy.number }}, set by {{ rt.policy.actor }} at {{ rt.policy.created_at | when }}</dd>
+    <dt>sha256</dt><dd><code>{{ rt.policy.policy_sha256 | short(16) }}</code></dd>
+    {% if p.description %}<dt>description</dt><dd>{{ p.description }}</dd>{% endif %}
+    <dt>statistics</dt><dd>{{ p.stats.provider }}{% if p.stats.alpha %}, alpha {{ p.stats.alpha }}{% endif %}</dd>
+    <dt>verifier profile</dt><dd>{{ p.fairness.profile.value }}</dd>
+    <dt>canary ramp</dt><dd>{{ p.ramp().stages | map("string") | join("% / ") }}%</dd>
+    <dt>case-type thresholds</dt><dd>{% for k, v in p.case_types | dictsort %}{{ k }}: tolerance {{ v.tolerance_usd_minor | usd }}{% if not loop.last %}; {% endif %}{% else %}none{% endfor %}</dd>
+  </dl>
+  {% else %}<p class="note">No policy file in force; the gate runs on its default configuration. Put one in force with <code>scruple policy apply</code>.</p>{% endif %}
+  {% if rt.approval %}
+  <p class="note">Approval: <b>{{ rt.approval.required }}</b> of {{ rt.approval.approvers | length }} named approvers{% if rt.approval.required_role %}, at least one with role <b>{{ rt.approval.required_role }}</b>{% endif %}: {% for a in rt.approval.approvers %}{{ a.name }}{% if a.roles %} ({{ a.roles | join(", ") }}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+  {% else %}<p class="note">Approval: one approver from the gate's configured list (no approval policy).</p>{% endif %}
+</div>
+
+<div class="sec" id="rules">
+  <h2><span class="n">02 / LIVE RULES</span>Active rule versions, first match wins</h2>
+  <div class="tw"><table class="stack">
+    <thead><tr><th class="r">Priority</th><th>Version</th><th>Action</th><th>When</th><th>Agent</th><th>Owner</th></tr></thead>
+    <tbody>{% for rv in rt.active %}
+      <tr><td class="m r" data-label="Priority">{{ rv.spec.priority }}</td><td class="m" data-label="Version"><a href="{{ P }}/rules/{{ rv.rule_id }}/versions/{{ rv.version }}">{{ rv.ref }}</a></td><td class="m" data-label="Action">{{ rv.spec.action.value }}</td><td class="k wrap" data-label="When">{% for c in rv.spec.conditions %}{{ c.describe() }}{% if not loop.last %} and {% endif %}{% endfor %}</td><td class="m" data-label="Agent">{{ rv.provenance.agent_id }}</td><td class="k" data-label="Owner">{{ rv.owner }}</td></tr>
+    {% else %}<tr><td colspan="6" class="dim">No active rules.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="case-types">
+  <h2><span class="n">03 / BY CASE TYPE</span>Which rule decides each case type</h2>
+  <p class="note">The live policy replayed on the public replay set ({{ rt.replay_cases | num }} synthetic cases, replay seed {{ rt.replay_seed }}; not the gate's held-out set). The case type is the simulator's hidden label; rules never see it. "default" is the policy's fallback when no rule matches.</p>
+  <div class="multiples">{% for r in rt.routes %}<div>{{ ch.chart(rt.charts["route:" ~ r.case_type]) }}</div>{% endfor %}</div>
+</div>
+
+<div class="sec" id="canary">
+  <h2><span class="n">04 / CANARY</span>Versions taking live traffic</h2>
+  {% for r in rt.ramps %}
+  <div class="grid2">
+    <div>
+      <h3><a href="{{ P }}/rules/{{ r.rv.rule_id }}/versions/{{ r.rv.version }}">{{ r.rv.ref }}</a></h3>
+      <dl class="kv">
+        {% if r.state %}
+        <dt>ramp</dt><dd>{{ r.state.status }}, stage {{ r.state.stage_index + 1 }} of {{ r.state.schedule.stages | length }}</dd>
+        <dt>split now</dt><dd>candidate {{ r.percent }}% / baseline {{ 100 - r.percent }}%</dd>
+        {% else %}<dt>ramp</dt><dd>passed the one-shot canary; no ramp started (candidate 0% of traffic)</dd>{% endif %}
+        <dt>agent</dt><dd>{{ r.rv.provenance.agent_id }}</dd>
+        <dt>does</dt><dd>{{ r.rv.spec.describe() }}</dd>
+      </dl>
+    </div>
+    <div>{% if r.chart %}{{ ch.chart(r.chart) }}{% endif %}</div>
+  </div>
+  {% else %}<p class="note">No version is in canary.</p>{% endfor %}
+</div>
+
+<div class="sec" id="agents">
+  <h2><span class="n">05 / AGENTS AND MODELS</span>Provider and model per agent</h2>
+  <p class="note">Agents are the proposers named in each rule's provenance, plus the agents with eval runs in this tenant's data folder (<code>evals/&lt;agent&gt;/&lt;run&gt;/</code>). A model is listed only where a run recorded it; "fake" transport means a harness check, not a real model.</p>
+  <div class="tw"><table class="stack">
+    <thead><tr><th>Agent</th><th>Rule versions live or in flight</th><th>Provider / model / strategy</th><th>Transport</th></tr></thead>
+    <tbody>{% for a in rt.agents %}
+      <tr><td class="m" data-label="Agent">{{ a.agent }}</td><td class="k wrap" data-label="Rule versions">{{ a.rules | join(", ") or "none" }}</td>
+        <td class="m" data-label="Provider / model">{% for r in a.runs %}{{ r.manifest.provider }} / {{ r.manifest.model }} / {{ r.manifest.strategy }}{% if not loop.last %}<br>{% endif %}{% else %}<span class="dim">not recorded</span>{% endfor %}</td>
+        <td data-label="Transport">{% for r in a.runs %}{% if r.manifest.real_model %}<span class="tag pass">{{ r.manifest.transport }}</span>{% else %}<span class="tag hold">fake</span>{% endif %}{% if not loop.last %}<br>{% endif %}{% else %}<span class="dim">n/a</span>{% endfor %}</td></tr>
+    {% else %}<tr><td colspan="4" class="dim">No agents.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+
+<div class="sec" id="changes">
+  <h2><span class="n">06 / CHANGES</span>Recent routing changes, from the audit chain</h2>
+  <div class="tw"><table class="stack">
+    <thead><tr><th class="r">Seq</th><th>When</th><th>Event</th><th>Version</th><th>What</th><th>By</th><th>Approved by</th></tr></thead>
+    <tbody>{% for c in rt.changes %}
+      <tr><td class="m r" data-label="Seq">{{ c.entry.seq }}</td><td class="m" data-label="When">{{ c.entry.at | when }}</td><td class="m" data-label="Event">{{ c.entry.event_type }}</td><td class="m" data-label="Version">{{ c.ref or "n/a" }}</td><td class="k wrap" data-label="What">{{ c.what }}</td><td class="k" data-label="By">{{ c.entry.actor }}</td><td class="k" data-label="Approved by">{{ c.approvers | join(", ") or "" }}</td></tr>
+    {% else %}<tr><td colspan="7" class="dim">No routing changes in this period.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

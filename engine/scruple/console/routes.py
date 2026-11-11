@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from scruple.api.strict import RAW_BODY
 from scruple.auth import public
+from scruple.console import dashboard as dash
 from scruple.console import fmt
 from scruple.console.listing import (
     APPROVALS,
@@ -93,6 +94,7 @@ FacetValue = Annotated[str | None, Query(max_length=64, pattern=VALUE_PATTERN)]
 PageNo = Annotated[int | None, Query(ge=1, le=1_000_000)]
 PerPage = Annotated[int | None, Query(ge=1, le=100)]
 FilterId = Annotated[str, Path(pattern=r"^flt-[0-9a-f]{12}$")]
+PeriodQ = Annotated[Literal["30d", "90d", "365d", "all"], Query()]
 
 
 class _Form(BaseModel):
@@ -246,7 +248,99 @@ def console_router(
                 continue
         return out
 
-    @router.get("/", response_class=HTMLResponse)
+    @router.get("/")
+    def landing(principal: Annotated[Principal, requires("read")]) -> Response:
+        """The console opens on the dashboard."""
+        return apply_headers(RedirectResponse(f"{PREFIX}/dashboard", status_code=307))
+
+    # --- the purchaser's dashboard (read-only) --------------------------------------
+
+    routes_cache: OrderedDict[tuple[str, ...], tuple[dash.RouteRow, ...]] = OrderedDict()
+
+    def route_rows(gate: AgentGate, tenant: str) -> tuple[dash.RouteRow, ...]:
+        active = sorted(f"{v.ref}:{v.content_hash}" for v in gate.registry.active_rules())
+        key = (tenant, str(gate.config.profile), *active)
+        found = routes_cache.get(key)
+        if found is None:
+            found = dash.route_table(gate, src.replay_seed, src.replay_cases)
+            routes_cache[key] = found
+            while len(routes_cache) > 16:
+                routes_cache.popitem(last=False)
+        return found
+
+    def dash_page(
+        request: Request, principal: Principal, template: str, period: dash.Period, **ctx: Any
+    ) -> HTMLResponse:
+        return render(
+            request,
+            template,
+            principal,
+            period_options=dash.PERIODS,
+            period_labels=dash.PERIOD_LABEL,
+            deadline_labels=dash.DEADLINE_LABELS,
+            **ctx,
+        )
+
+    @router.get("/dashboard", response_class=HTMLResponse)
+    def dashboard(
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        period: PeriodQ = "all",
+    ) -> HTMLResponse:
+        gate = gate_of(principal)
+        c = dash.context(gate, principal.tenant, src, period)
+        jobs = dash.tenant_jobs(gate)
+        o = dash.Overview(
+            savings=dash.savings(c, jobs),
+            payments=dash.payments(c),
+            routing=dash.routing(c, src, route_rows(gate, principal.tenant)),
+            compute=dash.compute(c, jobs),
+        )
+        return dash_page(request, principal, "dashboard.html", period, ctx=c, o=o)
+
+    @router.get("/dashboard/savings", response_class=HTMLResponse)
+    def dashboard_savings(
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        period: PeriodQ = "all",
+    ) -> HTMLResponse:
+        c = dash.context(gate_of(principal), principal.tenant, src, period)
+        return dash_page(request, principal, "dash_savings.html", period, ctx=c, sv=dash.savings(c))
+
+    @router.get("/dashboard/payments", response_class=HTMLResponse)
+    def dashboard_payments(
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        period: PeriodQ = "all",
+    ) -> HTMLResponse:
+        c = dash.context(gate_of(principal), principal.tenant, src, period)
+        return dash_page(
+            request, principal, "dash_payments.html", period, ctx=c, pay=dash.payments(c)
+        )
+
+    @router.get("/dashboard/routing", response_class=HTMLResponse)
+    def dashboard_routing(
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        period: PeriodQ = "all",
+    ) -> HTMLResponse:
+        gate = gate_of(principal)
+        c = dash.context(gate, principal.tenant, src, period)
+        rt = dash.routing(c, src, route_rows(gate, principal.tenant))
+        return dash_page(request, principal, "dash_routing.html", period, ctx=c, rt=rt)
+
+    @router.get("/dashboard/compute", response_class=HTMLResponse)
+    def dashboard_compute(
+        request: Request,
+        principal: Annotated[Principal, requires("read")],
+        period: PeriodQ = "all",
+    ) -> HTMLResponse:
+        c = dash.context(gate_of(principal), principal.tenant, src, period)
+        return dash_page(request, principal, "dash_compute.html", period, ctx=c, cp=dash.compute(c))
+
+    # --- rule versions, agent versions, latest decisions ------------------------------
+
+    @router.get("/rules", response_class=HTMLResponse)
     def overview(
         request: Request,
         principal: Annotated[Principal, requires("read")],
@@ -548,7 +642,7 @@ def console_router(
 
     # --- saved filters: shared by the tenant, so curating them is `admin` ------------
 
-    list_paths = {"versions": "/", "runs": "/runs", "approvals": "/approvals"}
+    list_paths = {"versions": "/rules", "runs": "/runs", "approvals": "/approvals"}
 
     def list_path(list_: str, agent: str | None) -> str | None:
         if list_ == "cases":

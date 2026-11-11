@@ -156,11 +156,11 @@ def test_overview_search_and_status_filter(web: TestClient) -> None:
     def rules_table(url: str) -> str:
         return web.get(url).text.split('id="agents"')[0]
 
-    t = rules_table(f"/console/?q={BAD_RULE_ID}")
+    t = rules_table(f"/console/rules?q={BAD_RULE_ID}")
     assert f">{BAD_RULE_ID}@v1<" in t and f">{GOOD_RULE_ID}@v1<" not in t
-    t = rules_table("/console/?status=rejected")
+    t = rules_table("/console/rules?status=rejected")
     assert f">{BAD_RULE_ID}@v1<" in t and f">{GOOD_RULE_ID}@v1<" not in t
-    assert "No rule versions match this filter." in rules_table("/console/?status=retired")
+    assert "No rule versions match this filter." in rules_table("/console/rules?status=retired")
 
 
 def test_cases_page_pages_and_filters(web: TestClient) -> None:
@@ -198,7 +198,7 @@ def test_pager_links_keep_the_filter(gate: AgentGate) -> None:
 @pytest.mark.parametrize(
     "path",
     [
-        "/console/?q={x}",
+        "/console/rules?q={x}",
         "/console/runs?q={x}",
         "/console/agents/evidence?q={x}",
         "/console/approvals?q={x}",
@@ -224,12 +224,12 @@ def test_search_terms_are_escaped(web: TestClient, path: str, term: str) -> None
     ["status=%3Cb%3E", "per=7", "page=0", "nope=1", "q=" + "x" * 101],
 )
 def test_bad_filter_inputs_are_refused(web: TestClient, query: str) -> None:
-    r = web.get(f"/console/?{query}")
+    r = web.get(f"/console/rules?{query}")
     assert r.status_code == 422
 
 
 def test_listing_pages_share_the_console_structure(web: TestClient) -> None:
-    for path in ("/console/runs", "/console/?q=x", "/console/agents/evidence?gate=fail"):
+    for path in ("/console/runs", "/console/rules?q=x", "/console/agents/evidence?gate=fail"):
         h = web.get(path)
         s = structure(h.text)
         assert s.h1 == 1 and s.inline_scripts == 0
