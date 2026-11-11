@@ -1,0 +1,73 @@
+{
+  "note": "Real CFPB data; models answered blind; see SUMMARY.md",
+  "regime-2015": {
+    "entries": {
+      "claude-haiku": {
+        "accuracy": 0.9,
+        "kind": "model",
+        "valid_format": 100,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.03,
+            0.09
+          ],
+          "diff": 0.03,
+          "n_boot": 2000
+        }
+      },
+      "claude-sonnet": {
+        "accuracy": 0.93,
+        "kind": "model",
+        "valid_format": 100,
+        "vs_tfidf_lr": {
+          "ci95": [
+            0.0,
+            0.12
+          ],
+          "diff": 0.06,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-120b": {
+        "accuracy": 0.91,
+        "kind": "model",
+        "valid_format": 100,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.01,
+            0.1
+          ],
+          "diff": 0.04,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-20b": {
+        "accuracy": 0.84,
+        "kind": "model",
+        "valid_format": 97,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.1,
+            0.04
+          ],
+          "diff": -0.03,
+          "n_boot": 2000
+        }
+      },
+      "keywords": {
+        "accuracy": 0.8,
+        "kind": "baseline"
+      },
+      "majority": {
+        "accuracy": 0.63,
+        "kind": "baseline"
+      },
+      "tfidf_lr": {
+        "accuracy": 0.87,
+        "kind": "baseline"
+      }
+    },
+    "metric": "accuracy",
+    "n": 100
+  }
+}

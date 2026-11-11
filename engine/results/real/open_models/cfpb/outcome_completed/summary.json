@@ -1,0 +1,73 @@
+{
+  "note": "Real CFPB data; models answered blind; see SUMMARY.md",
+  "outcome-2015": {
+    "entries": {
+      "claude-haiku": {
+        "auroc": 0.606,
+        "kind": "model",
+        "valid_format": 75,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.300752,
+            0.053792
+          ],
+          "diff": -0.1212,
+          "n_boot": 2000
+        }
+      },
+      "claude-sonnet": {
+        "auroc": 0.6048,
+        "kind": "model",
+        "valid_format": 75,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.260212,
+            0.012436
+          ],
+          "diff": -0.1224,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-120b": {
+        "auroc": 0.4524,
+        "kind": "model",
+        "valid_format": 75,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.463636,
+            -0.085455
+          ],
+          "diff": -0.2748,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-20b": {
+        "auroc": 0.4224,
+        "kind": "model",
+        "valid_format": 75,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.4824,
+            -0.116296
+          ],
+          "diff": -0.3048,
+          "n_boot": 2000
+        }
+      },
+      "keywords": {
+        "auroc": 0.56,
+        "kind": "baseline"
+      },
+      "majority": {
+        "auroc": 0.5,
+        "kind": "baseline"
+      },
+      "tfidf_lr": {
+        "auroc": 0.7272,
+        "kind": "baseline"
+      }
+    },
+    "metric": "auroc",
+    "n": 75
+  }
+}
