@@ -9,6 +9,10 @@ first use and cached; every one is synthetic.
 
 Backtest reports. JSON files written by `scruple backtest run` (`report.json`), read
 from a directory the operator names. Each report says whether it is synthetic.
+
+Tenant data. `data` names a root of per-tenant folders (case store, eval runs,
+anchors, backtests, pilot run) that the dashboard reads for the caller's tenant only
+(`scruple.console.tenant_files`).
 """
 
 from __future__ import annotations
@@ -151,6 +155,7 @@ class ConsoleSources:
     reports: Mapping[str, ReportEntry] = field(default_factory=dict)
     replay_seed: int = 4_242  # public replay set for rule diffs; not the held-out seed
     replay_cases: int = 1_000
+    data: Path | None = None  # per-tenant folders (scruple.console.tenant_files)
 
     @classmethod
     def build(
@@ -161,11 +166,12 @@ class ConsoleSources:
         reports: Path | None = None,
         replay_seed: int = 4_242,
         replay_cases: int = 1_000,
+        data: Path | None = None,
     ) -> ConsoleSources:
         agents = baseline_runs(seeds)
         if episodes is not None:
             agents["episode-store"] = store_run(episodes)
-        return cls(agents, report_entries(reports), replay_seed, replay_cases)
+        return cls(agents, report_entries(reports), replay_seed, replay_cases, data)
 
 
 __all__ = [
