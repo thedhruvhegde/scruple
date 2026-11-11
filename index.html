@@ -76,7 +76,7 @@ a { color: inherit; }
 .page { max-width: 1240px; margin: 0 auto; }
 
 /* ---------- bar ----------
-   Shared by every page: copy this block. ul.nav-sec holds in-page anchors,
+   Shared by every page: copy this block with nav.js. ul.nav-sec holds in-page anchors,
    ul.nav-pg holds the pages (arrow suffix, aria-current="page" on the page you are on). */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
 .bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 24px; height: 60px; position: relative; }
@@ -91,6 +91,10 @@ a { color: inherit; }
 .nav-pg a { color: var(--fg); }
 .nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
 .nav-pg a[aria-current="page"] { font-weight: 600; }
+.nav-sec a[aria-current] { color: var(--fg); }
+.nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { position: absolute; top: 6px; }
+.nav-sec a[aria-current]::before { content: "["; left: 1px; }
+.nav-sec a[aria-current]::after { content: "]"; right: 1px; }
 .nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
 .toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
@@ -390,6 +394,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   </footer>
 </main>
 
+<script src="nav.js" defer></script>
 <script src="wonders.js"></script>
 
 <script>
