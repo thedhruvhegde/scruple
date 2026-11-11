@@ -1,0 +1,7 @@
+10010	FAIL	(Cookie No HttpOnly Flag: the API sets no cookies, so any cookie is new)
+10011	WARN	(Cookie Without Secure Flag: CI is plain HTTP; the console sets Secure when the scheme is https)
+10054	FAIL	(Cookie without SameSite Attribute)
+10024	FAIL	(Information Disclosure - Sensitive Information in URL: keys go in headers only)
+10037	FAIL	(Server Leaks Information via X-Powered-By)
+10023	FAIL	(Information Disclosure - Debug Error Messages)
+90022	FAIL	(Application Error Disclosure: no stack traces in responses)
