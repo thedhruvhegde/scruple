@@ -130,11 +130,13 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 .sw { display: inline-block; width: 10px; height: 10px; }
 .sw.k-pine { background: var(--c-pine); } .sw.k-verm { background: var(--c-verm); } .sw.k-brass { background: var(--c-brass); } .sw.k-dim { background: var(--c-dim); } .sw.k-sky { background: var(--c-sky); } .sw.k-blue { background: var(--c-blue); }
 .fig-cap { font-size: 15px; margin-top: 18px; max-width: 70ch; }
-.fig-cap .src { display: block; margin-top: 6px; }
+.fig-cap .src { display: block; margin-top: 6px; overflow-wrap: anywhere; }
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px 48px; }
 .two > * { min-width: 0; }
 @media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } }
 .sec { padding-block: 88px; display: grid; gap: 40px; scroll-margin-top: 64px; }
+/* grid items may shrink below their longest line, so a pre or a long path never widens the page */
+.sec > * { min-width: 0; }
 @media (max-width: 900px) { .sec { padding-block: 60px; } }
 .sec h2 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: 28px; line-height: 1.12; letter-spacing: -0.02em; display: grid; gap: 10px; max-width: 30ch; }
 .sec h2 .n { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; }
