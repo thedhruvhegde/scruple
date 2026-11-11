@@ -10,6 +10,9 @@ Retry-After honoured). A prompt whose request still fails is retried up to 3
 times; a prompt that never succeeds is written with an empty answer and an
 `error`, so the grader counts it as malformed, never dropped. Resumable: ids
 already answered without error are skipped. Raw bodies go to OUT.log.jsonl.
+A daily provider quota (harness_transport.py) stops the driver with exit code 3
+and leaves the current item unanswered, so the next run asks it again; it is
+never written as an error.
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ from typing import Any
 import httpx
 
 sys.path.insert(0, str(Path(__file__).parent))
+from harness_transport import DailyQuota, LimitTransport
 from logging_transport import LoggingTransport
 
 from scruple.agents.providers import make_provider
@@ -56,13 +60,20 @@ def main() -> int:
     client = ProviderClient(
         base_url=provider.base_url,
         headers=provider.headers(),
-        transport=LoggingTransport(out.with_suffix(".log.jsonl")),
+        transport=LimitTransport(LoggingTransport(out.with_suffix(".log.jsonl"))),
         max_retries=6,
         backoff_s=4.0,
         limiter=RateLimiter(a.rpm),
     )
     rows: list[dict[str, Any]] = []
     prompts = [json.loads(x) for x in Path(a.prompts).read_text().splitlines() if x.strip()]
+
+    def save(rows: list[dict[str, Any]]) -> None:
+        """Write the answers so far plus earlier answers to later items (none dropped)."""
+        have = {r["id"] for r in rows}
+        later = [done[q["id"]] for q in prompts if q["id"] in done and q["id"] not in have]
+        out.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows + later))
+
     for p in prompts:
         if p["id"] in done:
             rows.append(done[p["id"]])
@@ -73,6 +84,11 @@ def main() -> int:
         for attempt in range(ATTEMPTS):
             try:
                 turn = provider.parse(client.post(provider.path(a.model), body), 1)
+            except DailyQuota as exc:
+                save(rows)
+                print(f"{p['id']}: daily quota, stopping; rerun to resume ({str(exc)[:120]})")
+                client.close()
+                return 3
             except (httpx.HTTPError, ProviderError, ValueError, LookupError, TypeError) as exc:
                 row["error"] = f"attempt {attempt + 1}: {str(exc)[:300]}"
                 continue
@@ -87,7 +103,7 @@ def main() -> int:
             }
             break
         rows.append(row)
-        out.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows))
+        save(rows)
         print(p["id"], row.get("error") or repr(row["answer"][:60]), flush=True)
     client.close()
     errors = sum(1 for r in rows if r.get("error"))
