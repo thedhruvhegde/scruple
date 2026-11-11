@@ -1,0 +1,96 @@
+# Hosted demo: one small VM, one region, synthetic data only (deploy/demo/README.md).
+#
+#   cd deploy/demo && cp demo.env.example demo.env   # set DEMO_DOMAIN and ACME_EMAIL
+#   docker compose --env-file demo.env build
+#   ./reset.sh                                       # seeds the demo tenant, starts it
+#
+# Two long-running services: the API (SQLite on a volume, never published on the
+# host) and Caddy (TLS from Let's Encrypt, read-only method allowlist). `seed` is a
+# one-shot job that reset.sh runs nightly; it is behind a profile so `up` never runs it.
+name: scruple-demo
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  api:
+    build:
+      context: ../..
+      args:
+        BUILD_COMMIT: ${BUILD_COMMIT:-unknown}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+    image: scruple-demo:local
+    <<: *hardening
+    environment:
+      SCRUPLE_DATABASE_URL: /data/demo.db
+      SCRUPLE_LOG_LEVEL: INFO
+      SCRUPLE_WEB_WORKERS: "1"
+      # Visitors share one key; keep its budget small. The per-minute counters live in
+      # the one worker's memory (docs/DEPLOY.md "Known gaps"), which is exact here.
+      SCRUPLE_RATE_LIMIT_PER_MINUTE: ${DEMO_RATE_PER_MINUTE:-60}
+      SCRUPLE_RATE_LIMIT_BURST: "20"
+      SCRUPLE_RATE_LIMIT_ANONYMOUS_PER_MINUTE: "30"
+      SCRUPLE_RATE_LIMIT_ANONYMOUS_BURST: "10"
+      SCRUPLE_MAX_BODY_BYTES: "16384"
+      # /metrics stays closed: no token is set and it is not public.
+    tmpfs:
+      - /tmp
+    volumes:
+      - demo-data:/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+    mem_limit: 768m
+
+  caddy:
+    # Pin by digest before the first deploy (docker buildx imagetools inspect
+    # caddy:2.8.4-alpine); the registry rate-limited the lookup when this was written.
+    image: caddy:2.8.4-alpine
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    environment:
+      DEMO_DOMAIN: ${DEMO_DOMAIN:?set DEMO_DOMAIN in demo.env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in demo.env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+    mem_limit: 256m
+
+  seed:
+    image: scruple-demo:local
+    profiles: ["tools"]
+    <<: *hardening
+    entrypoint: ["/bin/sh", "/seed/seed.sh"]
+    command: ["build"]
+    environment:
+      DEMO_KEY_DAYS: ${DEMO_KEY_DAYS:-2}
+    tmpfs:
+      - /tmp
+    volumes:
+      - demo-data:/data
+      - ./seed.sh:/seed/seed.sh:ro
+      - ../../docs/pilot/demo:/seed/rules:ro
+      # The one place the plaintext visitor key is written (host only, mode 0600).
+      - ./out:/out
+
+volumes:
+  demo-data:
+  caddy-data:
+  caddy-config:

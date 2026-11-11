@@ -1,0 +1,37 @@
+# Hosted demo edge: TLS (Let's Encrypt via ACME), read-only allowlist, no metrics.
+# Validate: caddy validate --config deploy/demo/Caddyfile --adapter caddyfile
+# (needs DEMO_DOMAIN and ACME_EMAIL in the environment).
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$DEMO_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		X-Frame-Options DENY
+		-Server
+	}
+
+	# The demo is read only at the edge as well as by the key's role: only GET and
+	# HEAD reach the API. Writes are refused here before any credential is checked.
+	@write not method GET HEAD
+	respond @write "the hosted demo is read only" 405
+
+	# Never served from the demo: metrics, and the key admin listing.
+	@closed path /metrics /metrics/* /auth/keys /auth/keys/*
+	respond @closed 404
+
+	reverse_proxy {$DEMO_UPSTREAM:api:8000} {
+		header_up X-Request-ID {http.request.uuid}
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
