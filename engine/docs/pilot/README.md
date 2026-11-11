@@ -165,3 +165,13 @@ printed in the readout. Each criterion is pass, fail or not enough data by a fix
 Each plant and each rerun is its own `scruple pilot run` directory (paths relative to
 the criteria file). Names, signatures, the outcome model and the deletion table stay
 as `[...]` for people to fill in.
+
+## A sealed benchmark per partner
+
+`scruple bench seal --partner acme-pay --out handover/acme-pay` draws a new held-out
+salt for that partner, writes it to `~/.scruple/partners/acme-pay.salt` (mode 0600,
+refused inside any git work tree, never overwritten), checks that the partner's seeds
+are disjoint from every other sealed partner's and from the house salt when
+`SCRUPLE_HELDOUT_SALT` is set, and writes `manifest.json` (public: no salt, no seeds)
+and `HANDOVER.md` (hashes, how to verify and score, how the salt travels). The cases
+are synthetic. `--reference` also scores the reference agents (three full runs).
