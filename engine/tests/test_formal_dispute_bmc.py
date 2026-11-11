@@ -86,13 +86,12 @@ class MerchantPrevails:
         return True
 
 
-@pytest.mark.xfail(strict=True, reason="bug: debit on top of a settled refund is not flagged")
 def test_debit_on_top_of_a_settled_refund_is_flagged() -> None:
     """Counterexample (depth 0): a partial dispute whose refund of the disputed amount
     settled before filing opens as a chargeback. The debit posts on top of the refund
     (the network forces it), so the cardholder holds the dispute twice, but because
-    that is still within the capture the ledger records no violation and the engine no
-    incident. A generated case (FULL_MIX, seed 3) does exactly this."""
+    that is still within the capture the ledger recorded no violation and the engine
+    no incident. A generated case (FULL_MIX, seed 3) does exactly this."""
     case = generate_cases(seed=3, n=106, mix=FULL_MIX)[105]
     rf = case.refund_in_flight
     assert rf is not None and rf.settles_on <= case.opened_on
