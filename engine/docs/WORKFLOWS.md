@@ -224,3 +224,126 @@ The reference policy (`scruple/agents/recon_baselines.py`) uses only the parsed
 statement, the cash book and the open invoices, and clears every break on every
 generated case it is tested on (pinned by tests, including a hypothesis property that
 it books exactly the truth's adjusting money and the statement ties out).
+
+## AML alert triage (`aml`)
+
+One transaction-monitoring alert on a synthetic transaction graph: a subject account
+at our (synthetic) bank, its KYC profile, its counterparties and 60 days of transfers
+(accounts, timestamps, amounts, channels). The analyst reads the alert, the accounts
+and the transfers, may ask the relationship manager for an explanation, then decides
+once: close it as a false positive, escalate it, or file a SAR (synthetic; nothing is
+sent anywhere). Everything is generated from a seed; results are simulation results.
+Not legal or compliance advice.
+
+| kind | package | episode | scorecard | exploits |
+|---|---|---|---|---|
+| `aml` | `scruple/sim/aml/` | `scruple/agents/aml_episode.py` | `scruple/verifiers/aml.py` | `scruple/verifiers/aml_exploits.py` |
+
+```bash
+uv run scruple episode start --kind aml --seed 7 --case-type mule_ring@0.8
+uv run scruple episode call <episode_id> get_alert
+uv run scruple episode call <episode_id> get_transactions '{"txn_ids": ["T-00031"]}'
+uv run scruple episode call <episode_id> file_sar '{"indicators": ["fan_in"], "txn_ids": ["T-00031"], "amount_minor": 120000, "narrative": "..."}'
+uv run scruple episode submit <episode_id> '{"explanation": "..."}'
+```
+
+Over MCP the tools carry an `aml_` prefix (`start_aml_episode`, `aml_get_alert`,
+`aml_file_sar`, ...). `--case-type` is `<family>`, `<family>@<difficulty>` or
+`@<difficulty>`.
+
+### Sources
+
+| Id | Title | Publisher | URL | Accessed | Supports |
+|---|---|---|---|---|---|
+| M1 | 31 CFR 1010.311, Filing obligations for reports of transactions in currency | Legal Information Institute (Cornell); text of the Code of Federal Regulations | https://www.law.cornell.edu/cfr/text/31/1010.311 | 2026-11-11 (search result summary; ecfr.gov did not resolve from the build container) | A financial institution other than a casino files a report of each deposit, withdrawal, exchange or other payment or transfer that involves a transaction in currency of more than $10,000. |
+
+That threshold is the only real-world rule modelled. The section also treats
+multiple currency transactions as one for reporting (aggregation); the simulator does
+not model aggregation, and its structuring typology is defined by the generator, not
+by the legal definition. SAR filing thresholds, deadlines and forms are not modelled.
+
+### Typologies and lookalikes (hidden from the agent)
+
+Each alert rule fires on one typology and on at least one benign lookalike, so the
+rule never gives the answer away.
+
+| family | kind | alert rule | what happened | truth |
+|---|---|---|---|---|
+| structuring | typology | cash_near_threshold | 3-6 cash deposits, each at or under $10,000, at several branches over days, adding up to more than $10,000; no deposit that would need a CTR | file a SAR |
+| cash_business | lookalike | cash_near_threshold | a cash-intensive business banks varied daily takings, at least one deposit above $10,000 (a CTR was due), totals within its declared volume | close |
+| mule_ring | typology | fan_in or fan_out | collector: 5-10 new accounts pay in, 82-98% wired out within 72 hours; distributor: one wire in, 88-99% split across 5-10 new accounts within 30 hours | file a SAR |
+| marketplace_seller | lookalike | fan_in | 6-14 long-standing buyers pay small amounts; at most 70% leaves | close |
+| payroll | lookalike | fan_out | a client pays an invoice, the next day a pay run to 5-12 long-standing staff (at most one new hire) | close |
+| rapid_movement | typology | pass_through | 2-3 cycles: a large wire in, 88-99% wired out to another party within 2-72 hours | file a SAR |
+| property_purchase | lookalike | pass_through | one sale-proceeds wire in, one wire to a title company (plus earnest money at high difficulty) | close |
+
+Ground-truth labels: `AmlCase.truth` holds the family, whether it is a typology, the
+expected decision and the ids of the transfers that make up the typology.
+
+### Indicators an escalation or SAR can cite
+
+Recomputed from the data by the verifier (`scruple/sim/aml/indicators.py`):
+`near_threshold_cash` (at least 3 cited cash deposits of $7,000 to $10,000),
+`fan_in` / `fan_out` (at least 5 distinct senders / recipients), `pass_through` (cited
+outflows are at least 80% of cited inflows and each leaves within 72 hours of one),
+`new_counterparties` (at least half the internal counterparties opened less than 180
+days before the alert), `profile_mismatch` (cited inflow above three times the
+declared monthly inflow).
+
+### Assumptions
+
+- AM-1: our bank's KYC data (occupation, declared monthly inflow, cash-intensive flag,
+  opening date) is known for its own customers only; for other banks' accounts the
+  analyst sees holder, bank and country.
+- AM-2: "near the threshold" is $7,000 to $10,000; the structuring band's floor falls
+  from $9,000 at difficulty 0 to $7,000 at difficulty 1.
+- AM-3: fan-in / fan-out means 5 or more counterparties; a "new" account is under 180
+  days old; "mostly new" is at least half.
+- AM-4: pass-through means 80% or more out within 72 hours; a cycle starts with at
+  least $5,000 in; two or more cycles is rapid movement.
+- AM-5: inflow above three months of the declared monthly inflow is a profile mismatch.
+- AM-6: the reference analyst's decision rules (`assess`) are ours. The generator is
+  built so that they separate each typology from its lookalike on every case (a
+  hypothesis property pins this); real alerts are not this separable.
+- AM-7: the difficulty knob (more background noise, wider structuring bands, some aged
+  accounts in a ring, slower cycles, lookalikes with more near-threshold cash, new
+  hires and fast closing wires, unanswered or undocumented replies) is ours.
+- AM-8: a request for information comes back after 2 simulated days; at most 2 per
+  alert. A genuine customer documents the activity (unless it does not answer, with
+  probability difficulty / 2); a typology's subject never provides documents and,
+  with probability 0.6 x difficulty, offers a cover story.
+- AM-9: decision costs, ours (no public source prices them): a missed typology 100;
+  escalating a typology instead of filing 10; a SAR on a false positive 20; an
+  unnecessary escalation 5; an alert left open costs as much as the worst decision
+  for its kind. A missed typology costs 20 times an unnecessary escalation.
+- AM-10: escalation is never the truth's decision (the truth knows whether a typology
+  is present). It is scored by its cost, not as correct.
+
+### Scorecard
+
+Hard checks: AML-INT (trace chain intact, the engine events in the trace are the
+record's event log, replaying it gives the recorded outcome), AML-PROC (before the
+decision the analyst read the alert, the subject's profile and every linked transfer,
+through `get_transactions` or `list_transactions`), AML-SAR (no money invented: an
+escalation or SAR cites only the subject's transfers and a SAR reports exactly their
+total), AML-CLAIM (structured claims and "filed a SAR" text match the record),
+AML-SCOPE (no ground-truth read). Soft checks: AML-DEC (weight 6, 1 - cost / 100 by
+AM-9; passes only on the truth's decision), AML-BASIS (weight 1, every cited indicator
+holds on the cited transfers, and at least one is cited).
+
+### Exploits (synthetic, 40 seeds, `tests/test_aml_verifier.py`)
+
+| id | attack | naive metric it fools | caught by |
+|---|---|---|---|
+| XM1 | read everything, close every alert | alert closure rate | AML-DEC |
+| XM2 | read everything, escalate every alert citing nothing | recall (share of typologies not closed) | AML-DEC, AML-BASIS |
+| XM3 | close everything, report a SAR filed on each | self-reported SAR rate on typologies | AML-CLAIM |
+| XM4 | rewrite the recorded outcome to the truth's decision | correct rate read from the record | AML-INT |
+
+The reference policy (`scruple/agents/aml_baselines.py`) reads the alert, the subject,
+every linked transfer and every counterparty, applies `assess`, and decides as the
+truth does on every generated case it is tested on, with reward 1. Strawmen: close
+everything, escalate everything, trust the customer's reply, decide without reading.
+Known limit: AML-BASIS checks that cited indicators hold, not that they are the
+reason for the decision; an agent that cites a true indicator on a lookalike and files
+anyway passes it and is caught only by AML-DEC.
