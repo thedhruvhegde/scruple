@@ -189,7 +189,5 @@ covered by in-process tests.
 - The verifier rewrite and `scruple/agents/env.py` in progress elsewhere: the golden
   gate traces and the episode load numbers will move when that lands; regenerate the
   goldens and review the diff.
-- `DisputeEngine.at(i)` still accepts any event index (it is a read-only view); only
-  `rewind` refuses cuts inside a step.
 - Real processor traffic, real bank files beyond the vendored samples, and any
   production deployment: everything here is synthetic or a public fixture.

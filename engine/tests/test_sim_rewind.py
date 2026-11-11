@@ -95,7 +95,8 @@ def test_at_index_matches_the_prefix_and_leaves_the_engine_alone(
 ) -> None:
     e, _, cases = _play(seed, n, plan)
     whole = e.state_digest()
-    for k in (0, len(e.events) // 2, len(e.events)):
+    bounds = e.boundaries()
+    for k in (bounds[0], bounds[len(bounds) // 2], len(e.events)):
         assert (
             e.at(k).state_digest()
             == DisputeEngine.replay(cases, e.events[:k], ManualClock()).state_digest()
@@ -214,3 +215,53 @@ def test_every_step_boundary_is_a_state_the_engine_can_continue_from(
             e.at(len(e.events)).act(c.case_id, acts[kind])
     drain(e, clock)  # and time always runs the case to resolution
     assert e.is_resolved(c.case_id)
+
+
+@settings(max_examples=25)
+@given(st.integers(0, 2**32), st.integers(1, 5), plans)
+def test_at_accepts_exactly_the_global_step_boundaries(seed: int, n: int, plan: Plan) -> None:
+    e, _, cases = _play(seed, n, plan)
+    bounds = set(e.boundaries())
+    assert len(e.events) in bounds
+    opened = sum(e.opening_events(c.case_id) for c in cases)
+    assert min(bounds) >= opened  # never a prefix with a case half opened
+    for i in range(len(e.events) + 1):
+        if i in bounds:
+            e.at(i)
+        else:
+            with pytest.raises(ValueError, match="inside a step"):
+                e.at(i)
+    # a global boundary leaves every case at one of its own step boundaries
+    for i in bounds:
+        for c in cases:
+            mine = sum(1 for ev in e.events[:i] if ev.case_id == c.case_id)
+            assert mine in e.step_boundaries(c.case_id)
+
+
+@settings(max_examples=20)
+@given(st.integers(0, 2**32), st.integers(1, 4), plans, st.data())
+def test_every_global_boundary_is_a_state_the_engine_can_continue_from(
+    seed: int, n: int, plan: Plan, data: st.DataObject
+) -> None:
+    e, clock, cases = _play(seed, n, plan)
+    k = data.draw(st.sampled_from(e.boundaries()))
+    f = e.at(k, clock)
+    acts: dict[str, AgentAction] = {
+        "accept": Accept(),
+        "represent": Represent(),
+        "request_info": RequestInfo(),
+    }
+    for c in cases:
+        for kind in f.allowed_actions(c.case_id):
+            if kind in acts:
+                f.act(c.case_id, acts[kind])
+                break
+    drain(f, clock)
+    assert not f.open_cases()
+
+
+def test_one_case_boundaries_are_its_step_boundaries() -> None:
+    e, _, cases = _play(3, 1, [(0, 5, 1.0, 1), (0, 0, 1.0, 2)])
+    assert e.boundaries() == e.step_boundaries(cases[0].case_id)
+    with pytest.raises(ValueError, match="inside a step"):
+        e.at(0)  # before the case opened: a state the engine never rests in
