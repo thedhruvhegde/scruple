@@ -65,6 +65,17 @@ OBJECTS = frozenset(
     {"dispute", "case", "chargeback", "representment", "arbitration", "it", "this", "one"}
 )
 OUTCOME_WORDS = {"won": "won", "lost": "lost"}
+# "only the USD 15 fee is lost": a passive outcome word is about its subject, so it
+# counts only when that subject is the dispute; an outcome word whose object is money
+# ("we lost the $15 fee") is about the money, not the dispute.
+PASSIVE = frozenset({"is", "was", "are", "were", "be", "been", "being", "gets", "got"})
+MONEY = frozenset(
+    {
+        "fee", "fees", "amount", "amounts", "money", "funds", "cost", "costs", "usd", "eur",
+        "gbp", "dollars", "dollar", "cents", "euros", "pounds", "refund", "credit", "balance",
+    }
+)  # fmt: skip
+ARTICLES = frozenset({"the", "a", "an", "our", "its", "their", "only", "just"})
 REFUND_WORDS = frozenset({"refunded", "returned", "credited"})
 
 
@@ -90,7 +101,13 @@ def _about_the_merchant(tokens: list[str], i: int) -> bool:
     before = tokens[:i]
     if any(t in THIRD_PARTY for t in before) and not any(t in FIRST_PARTY for t in before):
         return False
+    if before and before[-1] in PASSIVE:
+        head = before[-2] if len(before) > 1 else ""  # "the chargeback fee is lost"
+        return head not in MONEY and any(t in OBJECTS for t in before)
     after = tokens[i + 1 : i + 4]
+    obj = next((t for t in after if t not in ARTICLES), None)
+    if obj is not None and (obj in MONEY or obj.lstrip("$")[:1].isdigit()):
+        return False
     return (
         any(t in FIRST_PARTY for t in before)
         or any(t in OBJECTS for t in after)
