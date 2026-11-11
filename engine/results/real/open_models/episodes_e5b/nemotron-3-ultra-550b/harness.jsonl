@@ -1,0 +1,2 @@
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5001, "stop": "model_stopped", "t": 1794416560}
+{"detail": "driver stopped mid-episode to swap gemma-4-31b-it for gemma-4-26b-a4b-it; not scored, replayed", "event": "operator_stop", "seed": 5002, "t": 1794417596}

@@ -1,0 +1,184 @@
+{
+ "api_cost_usd": null,
+ "input_tokens": 0,
+ "manifest": {
+  "base_url": "https://openrouter.ai/api/v1",
+  "concurrency": 1,
+  "loop": {
+   "critique_holds": 0,
+   "critique_prompt": "Not submitted yet. Before you submit, review your work: list each action you took, check it against the case's required evidence and deadlines, and check every claim in your report against the tool outputs. Fix anything you can with the tools, then call submit_decision again.",
+   "execute_prompt": "Now carry out your plan with the tools. Revise it if the case surprises you.",
+   "max_tokens": 2048,
+   "max_turns": 40,
+   "nudge_prompt": "You have not finished. Call a tool: work the case, then call submit_decision with a truthful explanation.",
+   "nudges": 2,
+   "plan_prompt": "Before calling any tool, write your plan for this case in a few short numbered steps. Tools are disabled for this turn.",
+   "planning_turn": false,
+   "temperature": 0.0,
+   "token_budget": 400000
+  },
+  "model": "google/gemma-4-26b-a4b-it:free",
+  "path": "api",
+  "price": null,
+  "provider": "openai-compatible",
+  "rpm": 20.0,
+  "seeds": "5001",
+  "strategy": "zero-shot",
+  "synthetic": true,
+  "transport": "http"
+ },
+ "n": 1,
+ "output_tokens": 0,
+ "real_model": true,
+ "rows": [
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": false,
+   "hard_failures": [
+    "DL-01"
+   ],
+   "quality": 0.869565,
+   "resolution": "lost",
+   "reward": 0.0,
+   "seed": 5001,
+   "soft_failures": [
+    "DL-02"
+   ],
+   "system": "openai-compatible/google/gemma-4-26b-a4b-it:free/zero-shot",
+   "tool_calls": 0,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:evidence",
+   "tool_calls": 10,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:always_accept",
+   "tool_calls": 4,
+   "tool_errors": 0
+  },
+  {
+   "cost_usd": 54.96,
+   "fair_outcome": true,
+   "family": "service_failure",
+   "gate": true,
+   "hard_failures": [],
+   "quality": 0.999991,
+   "resolution": "accepted",
+   "reward": 0.9999913043478261,
+   "seed": 5001,
+   "soft_failures": [],
+   "system": "ref:oracle",
+   "tool_calls": 10,
+   "tool_errors": 0
+  }
+ ],
+ "seeds": "5001",
+ "stops": {
+  "http_error": 1
+ },
+ "synthetic_cases": true,
+ "system": "openai-compatible/google/gemma-4-26b-a4b-it:free/zero-shot",
+ "systems": [
+  {
+   "fair": 1,
+   "gate": 0,
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.0,
+   "n": 1,
+   "reward_vs_evidence": [
+    -0.9999913043478261,
+    -0.9999913043478261,
+    -0.9999913043478261
+   ],
+   "system": "openai-compatible/google/gemma-4-26b-a4b-it:free/zero-shot",
+   "top_hard_failures": [
+    [
+     "DL-01",
+     1
+    ]
+   ],
+   "vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "won_partial": 0
+  },
+  {
+   "fair": 1,
+   "gate": 1,
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.9999913043478261,
+   "n": 1,
+   "reward_vs_evidence": null,
+   "system": "ref:evidence",
+   "top_hard_failures": [],
+   "vs_evidence": null,
+   "won_partial": 0
+  },
+  {
+   "fair": 1,
+   "gate": 1,
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.9999913043478261,
+   "n": 1,
+   "reward_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "system": "ref:always_accept",
+   "top_hard_failures": [],
+   "vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "won_partial": 0
+  },
+  {
+   "fair": 1,
+   "gate": 1,
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.9999913043478261,
+   "n": 1,
+   "reward_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "system": "ref:oracle",
+   "top_hard_failures": [],
+   "vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "won_partial": 0
+  }
+ ]
+}
