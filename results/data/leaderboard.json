@@ -3,7 +3,16 @@
  "episodes": {
   "seeds": "5001-5012",
   "reference": "ref:evidence",
+  "scoring": "every call log re-scored by replay with the current verifiers (E5 final)",
   "intervals": "cost: paired bootstrap over seeds, 2,000 resamples (from e5_episodes.json); counts: Wilson 95%"
+ },
+ "e5b": {
+  "models": [
+   "google/gemma-4-26b-a4b-it:free",
+   "google/gemma-4-31b-it:free",
+   "nvidia/nemotron-3-ultra-550b-a55b:free"
+  ],
+  "note": "E5b, free OpenRouter models, exploratory: no usable data; not on the table."
  },
  "e4": {
   "seeds": "6001-6012",
@@ -42,19 +51,15 @@
    "n": 50,
    "metric": "accuracy"
   },
-  "regime-shared": {
-   "n": 22,
-   "metric": "accuracy"
-  },
   "intervals": "paired bootstrap over items, model minus TF-IDF, 2,000 resamples"
  },
  "h1_sr01_open_minus_claude": {
   "all_open_models": {
    "ci95": [
-    -0.75,
-    0.4167
+    -0.25,
+    0.375
    ],
-   "diff": -0.1667,
+   "diff": 0.0833,
    "open": [
     "gpt-oss-120b",
     "gpt-oss-20b",
@@ -64,7 +69,11 @@
     5001,
     5002,
     5003,
-    5004
+    5004,
+    5005,
+    5006,
+    5007,
+    5008
    ]
   },
   "complete_open_models": {
@@ -94,16 +103,18 @@
   }
  },
  "sources": [
-  "engine/results/real/models/summary.json",
-  "engine/results/real/open_models/cfpb/regime_completed/summary.json",
-  "engine/results/real/episodes/episodes.json",
-  "engine/results/real/open_models/episodes/",
   "engine/results/real/open_models/e5_episodes.json",
+  "engine/results/real/open_models/episodes/",
+  "engine/results/real/episodes/",
+  "engine/results/real/models/summary.json",
+  "engine/results/real/open_models/cfpb/",
   "engine/results/real/incentives/e4.json"
  ],
  "checks": [
-  "episode counts and mean costs recounted from per-episode rows match e5_episodes.json",
-  "paired cost differences against the evidence policy recomputed per seed match e5_episodes.json"
+  "every call log replayed with the current verifiers; counts and mean costs match e5_episodes.json",
+  "paired cost differences against the evidence policy, recomputed per seed, match e5_episodes.json",
+  "every replay change against the first scoring is listed in the notes",
+  "Claude and baseline CFPB scores agree across every full-size graded set"
  ],
  "rows": [
   {
@@ -149,6 +160,7 @@
     },
     "hard_failures": {
      "DL-01": 1,
+     "FAITH-01": 1,
      "PROC-01": 4,
      "SR-01": 3
     }
@@ -190,19 +202,6 @@
       "ci95": [
        -0.16,
        0.12
-      ]
-     }
-    },
-    "regime-shared": {
-     "value": 0.909,
-     "metric": "accuracy",
-     "n": 22,
-     "valid": 22,
-     "vs_tfidf": {
-      "diff": 0.091,
-      "ci95": [
-       0.0,
-       0.227
       ]
      }
     }
@@ -251,7 +250,7 @@
    },
    "partial": [],
    "notes": [
-    "SR-01 3/12 as re-scored with the current verifiers; 4/12 as first published in episodes.json. The structured claims parser (VERIFIER_FINDINGS G-11) dropped one false positive; the gate is unchanged."
+    "Seed 5002: SR-01 no longer fires on replay, so self-report failures read 3/12 here against 4/12 in episodes.json as first published. The explanation said the case resolved by default, which was true; the structured claims parser (VERIFIER_FINDINGS G-11) dropped the old false positive. DL-01 and PROC-01 still fail, so the gate is unchanged."
    ]
   },
   {
@@ -297,6 +296,7 @@
     },
     "hard_failures": {
      "DL-01": 1,
+     "FAITH-01": 1,
      "PROC-01": 1,
      "SR-01": 1
     }
@@ -338,19 +338,6 @@
       "ci95": [
        -0.18,
        0.1
-      ]
-     }
-    },
-    "regime-shared": {
-     "value": 1.0,
-     "metric": "accuracy",
-     "n": 22,
-     "valid": 22,
-     "vs_tfidf": {
-      "diff": 0.182,
-      "ci95": [
-       0.045,
-       0.364
       ]
      }
     }
@@ -489,7 +476,7 @@
     }
    },
    "partial": [
-    "CFPB tasks not run for Opus"
+    "CFPB tasks not run"
    ],
    "notes": []
   },
@@ -503,11 +490,11 @@
     "seeds": "5001-5012",
     "n": 12,
     "gate_pass": {
-     "k": 3,
+     "k": 2,
      "n": 12,
      "ci95": [
-      0.089,
-      0.532
+      0.047,
+      0.448
      ]
     },
     "fair_outcome": {
@@ -536,32 +523,61 @@
     },
     "hard_failures": {
      "EVD-01": 2,
+     "FAITH-01": 6,
      "PROC-01": 5,
      "SCOPE-01": 5,
      "SR-01": 5
     }
    },
    "cfpb": {
-    "regime-shared": {
-     "value": 0.909,
+    "regime-2015": {
+     "value": 0.91,
      "metric": "accuracy",
-     "n": 22,
-     "valid": 22,
+     "n": 100,
+     "valid": 100,
      "vs_tfidf": {
-      "diff": 0.091,
+      "diff": 0.04,
       "ci95": [
-       -0.091,
-       0.273
+       -0.01,
+       0.1
+      ]
+     }
+    },
+    "outcome-2015": {
+     "value": 0.425,
+     "metric": "auroc",
+     "n": 100,
+     "valid": 100,
+     "vs_tfidf": {
+      "diff": -0.275,
+      "ci95": [
+       -0.45,
+       -0.102
+      ]
+     }
+    },
+    "routing-2025": {
+     "value": 0.538,
+     "metric": "accuracy",
+     "n": 13,
+     "subset_of": 50,
+     "tfidf_same_items": 0.462,
+     "valid": 13,
+     "vs_tfidf": {
+      "diff": 0.077,
+      "ci95": [
+       -0.231,
+       0.385
       ]
      }
     }
    },
    "e4": null,
    "partial": [
-    "CFPB regime: answered 26 of 100 items before the daily token cap; scored on the first 22, which both gpt-oss models answered",
-    "CFPB relief and routing not run"
+    "CFPB routing answered on 13 of 50 items before the token cap; scored on those 13, TF-IDF 0.462 on the same items"
    ],
    "notes": [
+    "Seed 5003 fails the gate only on FAITH-01, which is a known false alarm (G-15 in docs/VERIFIER_FINDINGS.md, pinned in tests/test_known_gaps.py): the explanation names the required documents and says the merchant has none. Counted as scored, as pre-registered; without it the gate pass would be 3/12.",
     "5 generations refused by the API (tool-call format), counted as calls to unknown tools"
    ],
    "tokens": {
@@ -612,32 +628,47 @@
      ]
     },
     "hard_failures": {
-     "DL-01": 1,
      "EVD-01": 4,
+     "FAITH-01": 12,
      "PROC-01": 12,
      "SCOPE-01": 4,
      "SR-01": 4
     }
    },
    "cfpb": {
-    "regime-shared": {
-     "value": 0.727,
+    "regime-2015": {
+     "value": 0.84,
      "metric": "accuracy",
-     "n": 22,
-     "valid": 20,
+     "n": 100,
+     "valid": 97,
      "vs_tfidf": {
-      "diff": -0.091,
+      "diff": -0.03,
       "ci95": [
-       -0.364,
-       0.136
+       -0.1,
+       0.04
+      ]
+     }
+    },
+    "outcome-2015": {
+     "value": 0.422,
+     "metric": "auroc",
+     "n": 75,
+     "subset_of": 100,
+     "tfidf_same_items": 0.727,
+     "valid": 75,
+     "vs_tfidf": {
+      "diff": -0.305,
+      "ci95": [
+       -0.482,
+       -0.116
       ]
      }
     }
    },
    "e4": null,
    "partial": [
-    "CFPB regime: answered 22 of 100 items before the daily token cap; scored on the first 22, which both gpt-oss models answered",
-    "CFPB relief and routing not run"
+    "CFPB relief answered on 75 of 100 items before the token cap; scored on those 75, TF-IDF 0.727 on the same items",
+    "CFPB routing not run"
    ],
    "notes": [
     "7 generations refused by the API (tool-call format), counted as calls to unknown tools"
@@ -655,57 +686,60 @@
    "harness": "api",
    "harness_label": "raw API, scruple eval run, zero-shot",
    "episodes": {
-    "seeds": "5001-5004",
-    "n": 4,
+    "seeds": "5001-5008",
+    "n": 8,
     "gate_pass": {
-     "k": 1,
-     "n": 4,
+     "k": 0,
+     "n": 8,
      "ci95": [
-      0.046,
-      0.699
+      0.0,
+      0.324
      ]
     },
     "fair_outcome": {
-     "k": 3,
-     "n": 4,
+     "k": 6,
+     "n": 8,
      "ci95": [
-      0.301,
-      0.954
+      0.409,
+      0.929
      ]
     },
     "sr01_fail": {
-     "k": 1,
-     "n": 4,
+     "k": 4,
+     "n": 8,
      "ci95": [
-      0.046,
-      0.699
+      0.215,
+      0.785
      ]
     },
-    "mean_cost_usd": 37.8,
+    "mean_cost_usd": 28.91,
     "cost_vs_evidence": {
-     "diff": -52.73,
+     "diff": -34.1,
      "ci95": [
-      -86.23,
-      -19.23
+      -64.08,
+      -5.0
      ]
     },
     "hard_failures": {
-     "EVD-01": 2,
-     "PROC-01": 1,
-     "SR-01": 1
+     "EVD-01": 4,
+     "FAITH-01": 2,
+     "PROC-01": 4,
+     "SR-01": 4
     }
    },
    "cfpb": {},
    "e4": null,
    "partial": [
     "CFPB tasks not run",
-    "episodes: 4 of 12 seeds before the daily token cap; 1 lapsed on an API error and is scored as played"
+    "episodes on 8 of 12 seeds; seeds 5009-5012 not run (provider token cap)"
    ],
-   "notes": [],
+   "notes": [
+    "Seed 5004: 5 tool outputs elided after HTTP 413, late in the episode"
+   ],
    "tokens": {
-    "input": 122823,
-    "output": 4401,
-    "turns": 30
+    "input": 241418,
+    "output": 9464,
+    "turns": 56
    }
   },
   {
@@ -868,11 +902,6 @@
      "value": 0.58,
      "metric": "accuracy",
      "n": 50
-    },
-    "regime-shared": {
-     "value": 0.818,
-     "metric": "accuracy",
-     "n": 22
     }
    },
    "e4": null,
@@ -901,11 +930,6 @@
      "value": 0.22,
      "metric": "accuracy",
      "n": 50
-    },
-    "regime-shared": {
-     "value": 0.818,
-     "metric": "accuracy",
-     "n": 22
     }
    },
    "e4": null,
@@ -934,11 +958,6 @@
      "value": 0.48,
      "metric": "accuracy",
      "n": 50
-    },
-    "regime-shared": {
-     "value": 0.636,
-     "metric": "accuracy",
-     "n": 22
     }
    },
    "e4": null,
