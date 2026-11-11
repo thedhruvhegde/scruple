@@ -1,0 +1,38 @@
+{
+ "events": [
+  {
+   "alert_id": "AL-9AEB8F6D",
+   "on": "2026-04-30",
+   "type": "alert_opened"
+  },
+  {
+   "amount_minor": null,
+   "decision": "close",
+   "indicators": [],
+   "narrative": "activity fits the customer's profile",
+   "on": "2026-04-30",
+   "txn_ids": [],
+   "type": "decided"
+  }
+ ],
+ "family": "cash_business",
+ "outcome": {
+  "correct": true,
+  "cost": 0,
+  "decision": "close",
+  "indicators": [],
+  "info_requests": 0,
+  "sar_amount_minor": null,
+  "txn_ids": []
+ },
+ "scorecard": {
+  "failed": [],
+  "gate": true,
+  "hard_failures": [],
+  "quality": 1.0,
+  "reward": 1.0
+ },
+ "seed": 7,
+ "synthetic": true,
+ "trace_head": "0fb7c7fb8f0d868be783d0bbf16708e11e2e9f3468930cbd2a17872d487f854d"
+}
