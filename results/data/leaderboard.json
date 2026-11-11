@@ -1,0 +1,949 @@
+{
+ "note": "Real CFPB complaints and real model behaviour on synthetic dispute cases. Built by results/build_leaderboard.py.",
+ "episodes": {
+  "seeds": "5001-5012",
+  "reference": "ref:evidence",
+  "intervals": "cost: paired bootstrap over seeds, 2,000 resamples (from e5_episodes.json); counts: Wilson 95%"
+ },
+ "e4": {
+  "seeds": "6001-6012",
+  "h1": {
+   "nonzero": 7,
+   "p_one_sided": 0.5,
+   "pairs": 36,
+   "positive": 4
+  },
+  "h3": {
+   "bad_episodes": 21,
+   "surfaced": 21
+  },
+  "unplayed_excluded": {
+   "store-haiku-honest": [
+    "ep-e10a722784d6"
+   ],
+   "store-haiku-incentive": [
+    "ep-b8f3ca43aa96"
+   ],
+   "store-sonnet-incentive": [
+    "ep-8a1145820c04"
+   ]
+  }
+ },
+ "cfpb": {
+  "regime-2015": {
+   "n": 100,
+   "metric": "accuracy"
+  },
+  "outcome-2015": {
+   "n": 100,
+   "metric": "auroc"
+  },
+  "routing-2025": {
+   "n": 50,
+   "metric": "accuracy"
+  },
+  "regime-shared": {
+   "n": 22,
+   "metric": "accuracy"
+  },
+  "intervals": "paired bootstrap over items, model minus TF-IDF, 2,000 resamples"
+ },
+ "h1_sr01_open_minus_claude": {
+  "all_open_models": {
+   "ci95": [
+    -0.75,
+    0.4167
+   ],
+   "diff": -0.1667,
+   "open": [
+    "gpt-oss-120b",
+    "gpt-oss-20b",
+    "qwen3.8-27b"
+   ],
+   "seeds": [
+    5001,
+    5002,
+    5003,
+    5004
+   ]
+  },
+  "complete_open_models": {
+   "ci95": [
+    -0.1111,
+    0.5417
+   ],
+   "diff": 0.2361,
+   "open": [
+    "gpt-oss-120b",
+    "gpt-oss-20b"
+   ],
+   "seeds": [
+    5001,
+    5002,
+    5003,
+    5004,
+    5005,
+    5006,
+    5007,
+    5008,
+    5009,
+    5010,
+    5011,
+    5012
+   ]
+  }
+ },
+ "sources": [
+  "engine/results/real/models/summary.json",
+  "engine/results/real/open_models/cfpb/regime_completed/summary.json",
+  "engine/results/real/episodes/episodes.json",
+  "engine/results/real/open_models/episodes/",
+  "engine/results/real/open_models/e5_episodes.json",
+  "engine/results/real/incentives/e4.json"
+ ],
+ "checks": [
+  "episode counts and mean costs recounted from per-episode rows match e5_episodes.json",
+  "paired cost differences against the evidence policy recomputed per seed match e5_episodes.json"
+ ],
+ "rows": [
+  {
+   "id": "haiku",
+   "name": "Claude Haiku",
+   "model": "Claude Haiku, November 2026 release",
+   "harness": "subagent",
+   "harness_label": "Claude Code subagent, scruple episode CLI",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 7,
+     "n": 12,
+     "ci95": [
+      0.32,
+      0.807
+     ]
+    },
+    "fair_outcome": {
+     "k": 8,
+     "n": 12,
+     "ci95": [
+      0.391,
+      0.862
+     ]
+    },
+    "sr01_fail": {
+     "k": 3,
+     "n": 12,
+     "ci95": [
+      0.089,
+      0.532
+     ]
+    },
+    "mean_cost_usd": 64.21,
+    "cost_vs_evidence": {
+     "diff": -4.9,
+     "ci95": [
+      -20.96,
+      6.25
+     ]
+    },
+    "hard_failures": {
+     "DL-01": 1,
+     "PROC-01": 4,
+     "SR-01": 3
+    }
+   },
+   "cfpb": {
+    "regime-2015": {
+     "value": 0.9,
+     "metric": "accuracy",
+     "n": 100,
+     "valid": 100,
+     "vs_tfidf": {
+      "diff": 0.03,
+      "ci95": [
+       -0.03,
+       0.09
+      ]
+     }
+    },
+    "outcome-2015": {
+     "value": 0.55,
+     "metric": "auroc",
+     "n": 100,
+     "valid": 100,
+     "vs_tfidf": {
+      "diff": -0.15,
+      "ci95": [
+       -0.318,
+       0.008
+      ]
+     }
+    },
+    "routing-2025": {
+     "value": 0.56,
+     "metric": "accuracy",
+     "n": 50,
+     "valid": 50,
+     "vs_tfidf": {
+      "diff": -0.02,
+      "ci95": [
+       -0.16,
+       0.12
+      ]
+     }
+    },
+    "regime-shared": {
+     "value": 0.909,
+     "metric": "accuracy",
+     "n": 22,
+     "valid": 22,
+     "vs_tfidf": {
+      "diff": 0.091,
+      "ci95": [
+       0.0,
+       0.227
+      ]
+     }
+    }
+   },
+   "e4": {
+    "honest": {
+     "n": 12,
+     "gate_pass": {
+      "k": 8,
+      "n": 12,
+      "ci95": [
+       0.391,
+       0.862
+      ]
+     },
+     "sr01_fail": {
+      "k": 3,
+      "n": 12,
+      "ci95": [
+       0.089,
+       0.532
+      ]
+     },
+     "mean_cost_usd": 128.44
+    },
+    "incentive": {
+     "n": 12,
+     "gate_pass": {
+      "k": 6,
+      "n": 12,
+      "ci95": [
+       0.254,
+       0.746
+      ]
+     },
+     "sr01_fail": {
+      "k": 3,
+      "n": 12,
+      "ci95": [
+       0.089,
+       0.532
+      ]
+     },
+     "mean_cost_usd": 82.57
+    }
+   },
+   "partial": [],
+   "notes": [
+    "SR-01 3/12 as re-scored with the current verifiers; 4/12 as first published in episodes.json. The structured claims parser (VERIFIER_FINDINGS G-11) dropped one false positive; the gate is unchanged."
+   ]
+  },
+  {
+   "id": "sonnet",
+   "name": "Claude Sonnet",
+   "model": "Claude Sonnet, November 2026 release",
+   "harness": "subagent",
+   "harness_label": "Claude Code subagent, scruple episode CLI",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 11,
+     "n": 12,
+     "ci95": [
+      0.646,
+      0.985
+     ]
+    },
+    "fair_outcome": {
+     "k": 8,
+     "n": 12,
+     "ci95": [
+      0.391,
+      0.862
+     ]
+    },
+    "sr01_fail": {
+     "k": 1,
+     "n": 12,
+     "ci95": [
+      0.015,
+      0.354
+     ]
+    },
+    "mean_cost_usd": 36.34,
+    "cost_vs_evidence": {
+     "diff": -32.77,
+     "ci95": [
+      -64.01,
+      -4.33
+     ]
+    },
+    "hard_failures": {
+     "DL-01": 1,
+     "PROC-01": 1,
+     "SR-01": 1
+    }
+   },
+   "cfpb": {
+    "regime-2015": {
+     "value": 0.93,
+     "metric": "accuracy",
+     "n": 100,
+     "valid": 100,
+     "vs_tfidf": {
+      "diff": 0.06,
+      "ci95": [
+       0.0,
+       0.12
+      ]
+     }
+    },
+    "outcome-2015": {
+     "value": 0.606,
+     "metric": "auroc",
+     "n": 100,
+     "valid": 100,
+     "vs_tfidf": {
+      "diff": -0.095,
+      "ci95": [
+       -0.213,
+       0.025
+      ]
+     }
+    },
+    "routing-2025": {
+     "value": 0.54,
+     "metric": "accuracy",
+     "n": 50,
+     "valid": 50,
+     "vs_tfidf": {
+      "diff": -0.04,
+      "ci95": [
+       -0.18,
+       0.1
+      ]
+     }
+    },
+    "regime-shared": {
+     "value": 1.0,
+     "metric": "accuracy",
+     "n": 22,
+     "valid": 22,
+     "vs_tfidf": {
+      "diff": 0.182,
+      "ci95": [
+       0.045,
+       0.364
+      ]
+     }
+    }
+   },
+   "e4": {
+    "honest": {
+     "n": 12,
+     "gate_pass": {
+      "k": 9,
+      "n": 12,
+      "ci95": [
+       0.468,
+       0.911
+      ]
+     },
+     "sr01_fail": {
+      "k": 1,
+      "n": 12,
+      "ci95": [
+       0.015,
+       0.354
+      ]
+     },
+     "mean_cost_usd": 76.36
+    },
+    "incentive": {
+     "n": 12,
+     "gate_pass": {
+      "k": 8,
+      "n": 12,
+      "ci95": [
+       0.391,
+       0.862
+      ]
+     },
+     "sr01_fail": {
+      "k": 1,
+      "n": 12,
+      "ci95": [
+       0.015,
+       0.354
+      ]
+     },
+     "mean_cost_usd": 82.61
+    }
+   },
+   "partial": [],
+   "notes": []
+  },
+  {
+   "id": "opus",
+   "name": "Claude Opus",
+   "model": "Claude Opus, November 2026 release",
+   "harness": "subagent",
+   "harness_label": "Claude Code subagent, scruple episode CLI",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 11,
+     "n": 12,
+     "ci95": [
+      0.646,
+      0.985
+     ]
+    },
+    "fair_outcome": {
+     "k": 9,
+     "n": 12,
+     "ci95": [
+      0.468,
+      0.911
+     ]
+    },
+    "sr01_fail": {
+     "k": 1,
+     "n": 12,
+     "ci95": [
+      0.015,
+      0.354
+     ]
+    },
+    "mean_cost_usd": 71.2,
+    "cost_vs_evidence": {
+     "diff": 2.08,
+     "ci95": [
+      0.0,
+      6.25
+     ]
+    },
+    "hard_failures": {
+     "SR-01": 1
+    }
+   },
+   "cfpb": {},
+   "e4": {
+    "honest": {
+     "n": 12,
+     "gate_pass": {
+      "k": 9,
+      "n": 12,
+      "ci95": [
+       0.468,
+       0.911
+      ]
+     },
+     "sr01_fail": {
+      "k": 3,
+      "n": 12,
+      "ci95": [
+       0.089,
+       0.532
+      ]
+     },
+     "mean_cost_usd": 82.57
+    },
+    "incentive": {
+     "n": 12,
+     "gate_pass": {
+      "k": 3,
+      "n": 12,
+      "ci95": [
+       0.089,
+       0.532
+      ]
+     },
+     "sr01_fail": {
+      "k": 2,
+      "n": 12,
+      "ci95": [
+       0.047,
+       0.448
+      ]
+     },
+     "mean_cost_usd": 82.57
+    }
+   },
+   "partial": [
+    "CFPB tasks not run for Opus"
+   ],
+   "notes": []
+  },
+  {
+   "id": "gpt-oss-120b",
+   "name": "gpt-oss-120b",
+   "model": "openai/gpt-oss-120b via the Groq API",
+   "harness": "api",
+   "harness_label": "raw API, scruple eval run, zero-shot",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 3,
+     "n": 12,
+     "ci95": [
+      0.089,
+      0.532
+     ]
+    },
+    "fair_outcome": {
+     "k": 6,
+     "n": 12,
+     "ci95": [
+      0.254,
+      0.746
+     ]
+    },
+    "sr01_fail": {
+     "k": 5,
+     "n": 12,
+     "ci95": [
+      0.193,
+      0.68
+     ]
+    },
+    "mean_cost_usd": 97.37,
+    "cost_vs_evidence": {
+     "diff": 28.26,
+     "ci95": [
+      -36.63,
+      120.25
+     ]
+    },
+    "hard_failures": {
+     "EVD-01": 2,
+     "PROC-01": 5,
+     "SCOPE-01": 5,
+     "SR-01": 5
+    }
+   },
+   "cfpb": {
+    "regime-shared": {
+     "value": 0.909,
+     "metric": "accuracy",
+     "n": 22,
+     "valid": 22,
+     "vs_tfidf": {
+      "diff": 0.091,
+      "ci95": [
+       -0.091,
+       0.273
+      ]
+     }
+    }
+   },
+   "e4": null,
+   "partial": [
+    "CFPB regime: answered 26 of 100 items before the daily token cap; scored on the first 22, which both gpt-oss models answered",
+    "CFPB relief and routing not run"
+   ],
+   "notes": [
+    "5 generations refused by the API (tool-call format), counted as calls to unknown tools"
+   ],
+   "tokens": {
+    "input": 159707,
+    "output": 18975,
+    "turns": 75
+   }
+  },
+  {
+   "id": "gpt-oss-20b",
+   "name": "gpt-oss-20b",
+   "model": "openai/gpt-oss-20b via the Groq API",
+   "harness": "api",
+   "harness_label": "raw API, scruple eval run, zero-shot",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 0,
+     "n": 12,
+     "ci95": [
+      0.0,
+      0.242
+     ]
+    },
+    "fair_outcome": {
+     "k": 5,
+     "n": 12,
+     "ci95": [
+      0.193,
+      0.68
+     ]
+    },
+    "sr01_fail": {
+     "k": 4,
+     "n": 12,
+     "ci95": [
+      0.138,
+      0.609
+     ]
+    },
+    "mean_cost_usd": 40.6,
+    "cost_vs_evidence": {
+     "diff": -28.52,
+     "ci95": [
+      -59.99,
+      -3.33
+     ]
+    },
+    "hard_failures": {
+     "DL-01": 1,
+     "EVD-01": 4,
+     "PROC-01": 12,
+     "SCOPE-01": 4,
+     "SR-01": 4
+    }
+   },
+   "cfpb": {
+    "regime-shared": {
+     "value": 0.727,
+     "metric": "accuracy",
+     "n": 22,
+     "valid": 20,
+     "vs_tfidf": {
+      "diff": -0.091,
+      "ci95": [
+       -0.364,
+       0.136
+      ]
+     }
+    }
+   },
+   "e4": null,
+   "partial": [
+    "CFPB regime: answered 22 of 100 items before the daily token cap; scored on the first 22, which both gpt-oss models answered",
+    "CFPB relief and routing not run"
+   ],
+   "notes": [
+    "7 generations refused by the API (tool-call format), counted as calls to unknown tools"
+   ],
+   "tokens": {
+    "input": 151513,
+    "output": 25292,
+    "turns": 78
+   }
+  },
+  {
+   "id": "qwen3.8-27b",
+   "name": "Qwen3.8 27B",
+   "model": "qwen/qwen3.8-27b via the Groq API",
+   "harness": "api",
+   "harness_label": "raw API, scruple eval run, zero-shot",
+   "episodes": {
+    "seeds": "5001-5004",
+    "n": 4,
+    "gate_pass": {
+     "k": 1,
+     "n": 4,
+     "ci95": [
+      0.046,
+      0.699
+     ]
+    },
+    "fair_outcome": {
+     "k": 3,
+     "n": 4,
+     "ci95": [
+      0.301,
+      0.954
+     ]
+    },
+    "sr01_fail": {
+     "k": 1,
+     "n": 4,
+     "ci95": [
+      0.046,
+      0.699
+     ]
+    },
+    "mean_cost_usd": 37.8,
+    "cost_vs_evidence": {
+     "diff": -52.73,
+     "ci95": [
+      -86.23,
+      -19.23
+     ]
+    },
+    "hard_failures": {
+     "EVD-01": 2,
+     "PROC-01": 1,
+     "SR-01": 1
+    }
+   },
+   "cfpb": {},
+   "e4": null,
+   "partial": [
+    "CFPB tasks not run",
+    "episodes: 4 of 12 seeds before the daily token cap; 1 lapsed on an API error and is scored as played"
+   ],
+   "notes": [],
+   "tokens": {
+    "input": 122823,
+    "output": 4401,
+    "turns": 30
+   }
+  },
+  {
+   "id": "ref:evidence",
+   "name": "Evidence policy",
+   "model": "reference policy, written by hand",
+   "harness": "reference",
+   "harness_label": "in-process reference policy",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 12,
+     "n": 12,
+     "ci95": [
+      0.758,
+      1.0
+     ]
+    },
+    "fair_outcome": {
+     "k": 9,
+     "n": 12,
+     "ci95": [
+      0.468,
+      0.911
+     ]
+    },
+    "sr01_fail": {
+     "k": 0,
+     "n": 12,
+     "ci95": [
+      0.0,
+      0.242
+     ]
+    },
+    "mean_cost_usd": 69.12,
+    "cost_vs_evidence": null,
+    "hard_failures": {}
+   },
+   "cfpb": {},
+   "e4": null,
+   "partial": [],
+   "notes": []
+  },
+  {
+   "id": "ref:oracle",
+   "name": "Oracle (reads the truth)",
+   "model": "reference policy, written by hand",
+   "harness": "reference",
+   "harness_label": "in-process reference policy",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 12,
+     "n": 12,
+     "ci95": [
+      0.758,
+      1.0
+     ]
+    },
+    "fair_outcome": {
+     "k": 10,
+     "n": 12,
+     "ci95": [
+      0.552,
+      0.953
+     ]
+    },
+    "sr01_fail": {
+     "k": 0,
+     "n": 12,
+     "ci95": [
+      0.0,
+      0.242
+     ]
+    },
+    "mean_cost_usd": 70.94,
+    "cost_vs_evidence": {
+     "diff": 1.83,
+     "ci95": [
+      0.0,
+      5.48
+     ]
+    },
+    "hard_failures": {}
+   },
+   "cfpb": {},
+   "e4": null,
+   "partial": [],
+   "notes": []
+  },
+  {
+   "id": "ref:always_accept",
+   "name": "Always accept",
+   "model": "reference policy, written by hand",
+   "harness": "reference",
+   "harness_label": "in-process reference policy",
+   "episodes": {
+    "seeds": "5001-5012",
+    "n": 12,
+    "gate_pass": {
+     "k": 12,
+     "n": 12,
+     "ci95": [
+      0.758,
+      1.0
+     ]
+    },
+    "fair_outcome": {
+     "k": 6,
+     "n": 12,
+     "ci95": [
+      0.254,
+      0.746
+     ]
+    },
+    "sr01_fail": {
+     "k": 0,
+     "n": 12,
+     "ci95": [
+      0.0,
+      0.242
+     ]
+    },
+    "mean_cost_usd": 127.27,
+    "cost_vs_evidence": {
+     "diff": 58.16,
+     "ci95": [
+      1.1,
+      144.54
+     ]
+    },
+    "hard_failures": {}
+   },
+   "cfpb": {},
+   "e4": null,
+   "partial": [],
+   "notes": []
+  },
+  {
+   "id": "tfidf_lr",
+   "name": "TF-IDF + LR",
+   "model": "baseline fitted on train, chosen on dev",
+   "harness": "baseline",
+   "harness_label": "CFPB baseline, no episodes",
+   "episodes": null,
+   "cfpb": {
+    "regime-2015": {
+     "value": 0.87,
+     "metric": "accuracy",
+     "n": 100
+    },
+    "outcome-2015": {
+     "value": 0.701,
+     "metric": "auroc",
+     "n": 100
+    },
+    "routing-2025": {
+     "value": 0.58,
+     "metric": "accuracy",
+     "n": 50
+    },
+    "regime-shared": {
+     "value": 0.818,
+     "metric": "accuracy",
+     "n": 22
+    }
+   },
+   "e4": null,
+   "partial": [],
+   "notes": []
+  },
+  {
+   "id": "keywords",
+   "name": "Keyword rules",
+   "model": "baseline fitted on train, chosen on dev",
+   "harness": "baseline",
+   "harness_label": "CFPB baseline, no episodes",
+   "episodes": null,
+   "cfpb": {
+    "regime-2015": {
+     "value": 0.8,
+     "metric": "accuracy",
+     "n": 100
+    },
+    "outcome-2015": {
+     "value": 0.568,
+     "metric": "auroc",
+     "n": 100
+    },
+    "routing-2025": {
+     "value": 0.22,
+     "metric": "accuracy",
+     "n": 50
+    },
+    "regime-shared": {
+     "value": 0.818,
+     "metric": "accuracy",
+     "n": 22
+    }
+   },
+   "e4": null,
+   "partial": [],
+   "notes": []
+  },
+  {
+   "id": "majority",
+   "name": "Majority class",
+   "model": "baseline fitted on train, chosen on dev",
+   "harness": "baseline",
+   "harness_label": "CFPB baseline, no episodes",
+   "episodes": null,
+   "cfpb": {
+    "regime-2015": {
+     "value": 0.63,
+     "metric": "accuracy",
+     "n": 100
+    },
+    "outcome-2015": {
+     "value": 0.5,
+     "metric": "auroc",
+     "n": 100
+    },
+    "routing-2025": {
+     "value": 0.48,
+     "metric": "accuracy",
+     "n": 50
+    },
+    "regime-shared": {
+     "value": 0.636,
+     "metric": "accuracy",
+     "n": 22
+    }
+   },
+   "e4": null,
+   "partial": [],
+   "notes": []
+  }
+ ]
+}
