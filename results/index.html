@@ -71,8 +71,8 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; padding: 14px 0 4px; }
 
 /* ---------- screens (always dark) ---------- */
-.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); color: var(--c-fg); }
-@media (max-width: 760px) { .screen { box-shadow: 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
+.screen { position: relative; background: var(--scr-bg); border: 1px solid var(--scr-edge); box-shadow: inset 0 0 0 4px var(--scr-deep), 0 0 0 8px var(--panel), 0 0 0 9px var(--rule); color: var(--c-fg); }
+@media (max-width: 760px) { .screen { box-shadow: inset 0 0 0 3px var(--scr-deep), 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
 .scr-cap { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); margin-top: 18px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .scr-cap b { color: var(--fg); font-weight: 600; }
 .term { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.65; padding: 16px 18px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }

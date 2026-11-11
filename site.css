@@ -5,7 +5,8 @@
 :root {
   --bg: #EDEAE1; --panel: #E4E0D5; --fg: #121513; --muted: #565B57; --rule: #D3D0C5; --rule-strong: #9C9F98;
   --accent: #1D4A3A; --on-accent: #EDEAE1; --brass: #7A5C20; --block: #A63A1D;
-  --scr-bg: #0A1120; --scr-edge: #24324F;
+  /* screens: the glass, its lit edge, and a darker bezel just inside it for depth (hard edged, no blur) */
+  --scr-bg: #0A1120; --scr-edge: #24324F; --scr-deep: #050912;
   --f-mono: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --f-body: "IBM Plex Sans Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   /* screen ink; --c-mute is the night band's muted tone, for secondary text on screens */
