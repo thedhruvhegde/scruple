@@ -880,7 +880,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   const T0 = performance.now();
   let lastY = -1, lastTick = -1, force = true;
   function frame(now) {
-    const t = (now - T0) / 1000, tick = Math.floor(t * 24), busy = !I.done || screens.some((x) => x.dragging);
+    const t = (now - T0) / 1000, tick = reduce ? 0 : Math.floor(t * 24), busy = !I.done || screens.some((x) => x.dragging);
     if (!busy && !force && scrollY === lastY && tick === lastTick) { requestAnimationFrame(frame); return; }
     lastY = scrollY; lastTick = tick; force = false; frameNo++;
     const ta = I.done ? tick / 24 : t;   // ambient animation advances in 24 fps steps
