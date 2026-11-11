@@ -283,6 +283,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.billing.cli import add_billing_parser
 
     add_billing_parser(sub, DEFAULT_DB)
+    from scruple.policy.cli import add_policy_parser
+
+    add_policy_parser(sub, DEFAULT_DB)
     return p
 
 

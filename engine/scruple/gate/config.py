@@ -104,13 +104,20 @@ class GateConfig(BaseModel):
     # Who may approve activation or roll back (segregation of duties enforced too).
     approvers: tuple[str, ...] = ("model-risk@demo.bank",)
 
+    # The tenant policy file this configuration was compiled from (scruple.policy),
+    # if any: its SHA-256, so every decision, scorecard and evidence pack names it.
+    policy_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
     @model_serializer(mode="wrap")
     def _stable_dump(self, handler: SerializerFunctionWrapHandler) -> dict[str, object]:
-        """Leave the evalue_vr setting out at its default, so the content hash of every
-        configuration that existed before it (audit, CI evidence) does not change."""
+        """Leave the evalue_vr setting out at its default, and the policy hash when there
+        is no policy, so the content hash of every configuration that existed before
+        them (audit, CI evidence) does not change."""
         out: dict[str, object] = handler(self)
         if out.get("evalue_vr_stratified_share") == VR_SHARE_DEFAULT:
             out.pop("evalue_vr_stratified_share", None)
+        if out.get("policy_sha256") is None:
+            out.pop("policy_sha256", None)
         return out
 
     @field_validator("evalue_band_edges_usd_minor")

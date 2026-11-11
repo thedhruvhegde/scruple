@@ -37,7 +37,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, SerializerFunctionWrapHandler, model_serializer
 
 from scruple.audit.log import compute_hash
 from scruple.audit.models import GENESIS_HASH, AuditEntry
@@ -152,6 +152,16 @@ class EvidencePack(BaseModel):
     config_sha256: str
     seed_commitments: dict[str, str]
     audit: AuditSegment
+    # The tenant policy in force when the pack was built (scruple.policy); omitted
+    # without one, so packs without a policy are byte-identical to before.
+    policy_sha256: str | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if data.get("policy_sha256") is None:
+            data.pop("policy_sha256", None)
+        return data
 
     @property
     def pack_sha256(self) -> str:
@@ -412,6 +422,7 @@ def build_evidence_pack(
             "canary": seed_commitment(gate.config.canary_seed),
         },
         audit=AuditSegment(entries=tuple(segment), proof=proof),
+        policy_sha256=gate.config.policy_sha256,
     )
 
 

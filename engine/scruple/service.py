@@ -640,7 +640,7 @@ class AgentGate:
 
     # --- runtime events (jobs, retention): audited, never a state change ---------
 
-    RUNTIME_EVENT_PREFIXES = ("job.", "retention.")
+    RUNTIME_EVENT_PREFIXES = ("job.", "retention.", "policy.", "integration.")
 
     def record_runtime_event(self, event_type: str, actor: str, payload: dict[str, Any]) -> Any:
         """Append an audit entry for work around the gate (a finished job, a retention
@@ -823,6 +823,8 @@ class AgentGate:
                     "version": rv.version,
                     "content_hash": rv.content_hash,
                     "decision_sha256": sha,
+                    # the tenant policy file in force (scruple.policy), when there is one
+                    **({"policy_sha256": p} if (p := self.config.policy_sha256) else {}),
                 },
             )
             rec = DecisionRecord(
