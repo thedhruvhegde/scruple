@@ -165,6 +165,9 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
 .scr-cap b { color: var(--fg); font-weight: 600; }
 .term { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 1.65; padding: 16px 18px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
 @media (max-width: 760px) { .term { font-size: 11px; padding: 12px; } #overview { font-size: 10px; } }
+/* replay drawn in characters (ascii.js) */
+.casefile { padding-bottom: 0; color: var(--c-mute); white-space: pre; overflow: hidden; }
+.casefile b { font-weight: 600; }
 .spk { display: block; line-height: 1.15; margin-bottom: 7px; }
 .c-f { color: var(--c-fg); } .c-d { color: var(--c-mute); } .c-g { color: var(--c-pine); } .c-b { color: var(--c-brass); } .c-v { color: var(--c-verm); } .c-s { color: var(--c-sky); }
 
@@ -388,6 +391,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <div>
           <div class="screen" data-head="replay">
             <div class="scr-head"><span id="scr-title"><b>loading</b></span><span id="scr-day"></span></div>
+            <pre class="term casefile" id="casefile" aria-hidden="true"></pre>
             <div id="trace" tabindex="0" aria-label="Replay of tool calls"><pre class="term trace" id="trace-pre"></pre></div>
           </div>
           <div class="ctrl">
@@ -480,5 +484,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 
 <script src="../nav.js" defer></script>
 <script src="results.js"></script>
+<script src="ascii.js"></script>
 </body>
 </html>

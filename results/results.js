@@ -251,6 +251,8 @@
     $("#b-prev").disabled = pos <= 0; $("#b-next").disabled = pos >= N; $("#b-all").disabled = pos >= N;
     $("#b-play").textContent = timer ? "Pause" : pos >= N ? "Replay" : "Play";
     renderSide(pos >= N);
+    // ascii.js draws the case file, ledger rules, timeline and stamp from this
+    document.dispatchEvent(new CustomEvent("replay", { detail: { ep, pos, notes } }));
   }
 
   function fact(k, ...v) { return el("li", {}, el("span", { text: k }), el("span", {}, ...v)); }
