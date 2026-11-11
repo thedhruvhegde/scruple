@@ -1,0 +1,52 @@
+# Public docs site. Build with `make docs` (docs-site/build.py assembles build/docs
+# from docs/ and the OpenAPI schema, then runs `mkdocs build --strict`).
+site_name: scruple docs
+site_description: Simulation and verifiers for agents that move money. Card disputes first.
+docs_dir: build/docs
+site_dir: build/site
+use_directory_urls: true
+strict: true
+theme:
+  name: material
+  font: false            # self-hosted Martian Mono and IBM Plex Sans Condensed (brand.css)
+  palette:
+    scheme: default
+    primary: custom
+    accent: custom
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+  icon:
+    logo: material/scale-balance
+extra_css:
+  - assets/brand.css
+markdown_extensions:
+  - tables
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.highlight
+validation:
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: info
+    unrecognized_links: info
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Concepts: concepts.md
+  - Install: install.md
+  - Pilot:
+      - Overview: pilot/README.md
+      - Scope: pilot/SCOPE.md
+      - Success criteria: pilot/SUCCESS_CRITERIA.md
+      - Data checklist: pilot/DATA_CHECKLIST.md
+      - Security: pilot/SECURITY.md
+  - Reference:
+      - HTTP API: api.md
+      - Console: console.md
+      - Architecture: architecture.md

@@ -81,6 +81,7 @@ make demo                     # e-value gate on 30k synthetic cases
 uv run scruple serve          # http://127.0.0.1:8000, SQLite at ./agent-gate.db
 make lint typecheck test      # what every commit must pass
 make test-slow                # slow suites, including the wheel install test
+make docs                     # the public docs site, strict, into docs-site/build/site
 ```
 
 ## Setting up a new partner: `scruple init`
