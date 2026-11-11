@@ -1,0 +1,111 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-17029774c77667a7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-036244fe7117fccd"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-0e61a15de1e92a83"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b2efa667d63620b7"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-24d88cfb1e4968b9"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-85b8ca6158861668"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_ids": [
+     "ev-17029774c77667a7",
+     "ev-036244fe7117fccd",
+     "ev-0e61a15de1e92a83",
+     "ev-b2efa667d63620b7",
+     "ev-24d88cfb1e4968b9",
+     "ev-85b8ca6158861668"
+    ],
+    "narrative": "Merchant disputes this 4853 chargeback. The transaction was properly authorized (auth code 783849, approved Y) on 2026-01-16 for $23.35. The goods were delivered via USPS on 2026-01-20 (delivery proof on file). The product description provided to the cardholder at purchase accurately described the item, and the cardholder accepted the merchant's terms of sale at the time of purchase. A communication log shows the merchant engaged with the cardholder regarding the order. The cardholder received exactly what was described and delivered; there is no evidence the goods were defective or materially different from the product description. The merchant stands behind the accuracy of the product description and the terms acceptance, and requests the chargeback be reversed."
+   },
+   "tool": "represent"
+  },
+  {
+   "args": {
+    "days": 30
+   },
+   "tool": "wait"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "represent",
+      "wait",
+      "submit_decision"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-17029774c77667a7",
+      "ev-036244fe7117fccd",
+      "ev-0e61a15de1e92a83",
+      "ev-b2efa667d63620b7",
+      "ev-24d88cfb1e4968b9",
+      "ev-85b8ca6158861668"
+     ],
+     "outcome": "won",
+     "refunded_minor": 0,
+     "win_rate": 1
+    },
+    "confidence": 0.95,
+    "explanation": "Goods/Services Not as Described or Defective"
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5008
+}

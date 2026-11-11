@@ -19,7 +19,7 @@
  "price": null,
  "provider": "groq",
  "rpm": 20.0,
- "seeds": "5001-5004",
+ "seeds": "5001-5009",
  "strategy": "zero-shot",
  "synthetic": true,
  "transport": "http"
