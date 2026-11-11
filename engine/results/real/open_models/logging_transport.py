@@ -5,7 +5,7 @@ is reduced to the messages added since the previous request when that request is
 a prefix of this one (the full history is resent every turn), so the log reads as
 a transcript: what the harness sent, what the model answered. Credentials live
 in headers, which are never read here; the proxy in front of the API injects them
-anyway. Account ids in error messages are redacted.
+anyway. Account and user ids in error messages are redacted.
 """
 
 from __future__ import annotations
@@ -30,6 +30,7 @@ def env_transport() -> httpx.HTTPTransport:
 
 
 ORG_ID = re.compile(r"org_[A-Za-z0-9]+")  # account ids appear in 429 messages
+USER_ID = re.compile(r"user_[A-Za-z0-9]{20,}")  # OpenRouter puts the account's user id in 429s
 
 
 class LoggingTransport(httpx.BaseTransport):
@@ -66,7 +67,7 @@ class LoggingTransport(httpx.BaseTransport):
         response.read()
         with self._lock, self.path.open("a") as f:
             line = json.dumps(self._entry(request, response), sort_keys=True)
-            f.write(ORG_ID.sub("org_REDACTED", line) + "\n")
+            f.write(USER_ID.sub("user_REDACTED", ORG_ID.sub("org_REDACTED", line)) + "\n")
         return response
 
     def close(self) -> None:
