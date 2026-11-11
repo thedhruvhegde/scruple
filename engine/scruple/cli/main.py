@@ -260,6 +260,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.storage.retention import add_retention_parser
 
     add_retention_parser(sub, DEFAULT_DB)
+    from scruple.cli.shadow import add_shadow_parser
+
+    add_shadow_parser(sub, DEFAULT_DB)
     return p
 
 
