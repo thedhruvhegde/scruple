@@ -38,6 +38,7 @@ the role that runs retention (docs/ARCHITECTURE.md).
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Collection
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -277,8 +278,10 @@ def apply_retention(
     case_stores: dict[str, CaseStore] | None = None,
     actor: str = "retention",
     now: datetime | None = None,
+    tenants: Collection[str] | None = None,
 ) -> list[PurgeResult]:
-    """Apply every tenant's current policy. `case_stores` maps a tenant to its case
+    """Apply every tenant's current policy (only `tenants`' when given: a scheduled
+    job applies its own tenant's). `case_stores` maps a tenant to its case
     store (a case store is one partner's file). Each purge is one transaction with its
     audit entry, so a purge is never on the record without having happened, nor the
     other way round (the case store is a separate file: its purge commits first and
@@ -287,6 +290,8 @@ def apply_retention(
     at = now or gate.clock.now()
     out: list[PurgeResult] = []
     for policy in repo.policies():
+        if tenants is not None and policy.tenant_id not in tenants:
+            continue
         cutoff = at - timedelta(days=policy.days)
         with gate.storage.transaction():
             n, dig = repo.purge_imported_shadow(policy.tenant_id, cutoff)
@@ -371,6 +376,31 @@ def cmd_retention(args: Any) -> int:
             pols = retention_for(gate.storage).policies()
             print(json.dumps([p.model_dump() for p in pols], sort_keys=True))
             return 0
+        if args.retention_cmd == "schedule":
+            from datetime import date
+
+            from scruple.jobs.queue import queue_for
+            from scruple.jobs.retention import schedule_retention
+
+            day = date.fromisoformat(args.day) if args.day else gate.clock.now().date()
+            queue = queue_for(gate.storage)
+            try:
+                jobs = schedule_retention(queue, gate.storage, day, actor=args.actor)
+            finally:
+                from scruple.storage.sqlite import SQLiteStorage
+
+                if not isinstance(gate.storage, SQLiteStorage):  # its own connection
+                    queue.close()
+            print(
+                json.dumps(
+                    [
+                        {"tenant_id": j.tenant_id, "job_id": j.job_id, "created": created}
+                        for j, created in jobs
+                    ],
+                    sort_keys=True,
+                )
+            )
+            return 0
         stores: dict[str, CaseStore] = {}
         if args.case_store:
             from scruple.ingest.store import CaseStore
@@ -392,6 +422,7 @@ def add_retention_parser(sub: Any, default_db: str) -> None:
         ("set", "set a tenant's policy (days to keep row-level case data)"),
         ("show", "print every tenant's current policy"),
         ("apply", "delete what the policies say is expired (audited)"),
+        ("schedule", "queue today's retention_apply job per tenant (once per day)"),
     ):
         sp = rs.add_parser(name, help=help_)
         sp.set_defaults(fn=cmd_retention)
@@ -408,6 +439,8 @@ def add_retention_parser(sub: Any, default_db: str) -> None:
             sp.add_argument("--days", type=int, required=True)
         if name == "apply":
             sp.add_argument("--case-store", default=None, help="the tenant's case store file")
+        if name == "schedule":
+            sp.add_argument("--day", default=None, help="YYYY-MM-DD (default: today, UTC)")
 
 
 __all__ = [

@@ -162,6 +162,7 @@ class Worker:
         heartbeat_s: float | None = None,
         poll_s: float = 1.0,
         isolation: Isolation = "process",
+        tick: Callable[[], None] | None = None,
     ) -> None:
         if handlers is None:
             from scruple.jobs.handlers import HANDLERS
@@ -171,6 +172,7 @@ class Worker:
             raise ValueError("lease_s must be positive and poll_s not negative")
         self.queue = queue
         self.ctx = ctx
+        self.tick = tick  # called before every claim (e.g. the daily retention schedule)
         self.handlers = dict(handlers)
         self.worker_id = worker_id or default_worker_id()
         self.lease_s = lease_s
@@ -193,6 +195,8 @@ class Worker:
         ran = 0
         stop = stop or threading.Event()
         while not stop.is_set() and (max_jobs is None or ran < max_jobs):
+            if self.tick is not None:
+                self.tick()
             if self.run_once() is None:
                 stop.wait(self.poll_s)
             else:

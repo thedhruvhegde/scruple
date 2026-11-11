@@ -501,7 +501,7 @@ def test_bench_score_without_the_salt_fails_permanently(
     q.submit(JobSubmit(kind=JobKind.BENCH_SCORE, params={"agent": "always_accept", "limit": 10}))
     done = Worker(q, JobContext(database=str(tmp_path / "gate.db")), isolation="thread").run_once()
     assert done is not None and done.status is JobStatus.FAILED and done.attempts == 1
-    assert set(HANDLERS) == {k.value for k in JobKind}
+    assert set(HANDLERS) == {k.value for k in JobKind} | {"retention_apply"}  # operator-only
     q.close()
 
 

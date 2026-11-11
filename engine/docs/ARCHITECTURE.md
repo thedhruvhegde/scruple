@@ -399,12 +399,18 @@ retention (`app_role_grants` does not grant it).
 
 Commands: `scruple worker [--db URL] [--case-store FILE] [--once]`,
 `scruple retention set --tenant T --days N`, `scruple retention apply [--case-store FILE]`,
+`scruple retention schedule [--day D]`, `scruple worker --schedule-retention`,
 `scruple mcp sim --episode-db URL`.
+
+Scheduled retention (`scruple/jobs/retention.py`): one `retention_apply` job per tenant
+with a policy per UTC day, idempotency key `retention-apply:<day>`, so any number of
+workers or cron runs queue it once. The job applies its tenant's policy as of 00:00 UTC
+that day (a retry deletes nothing more), refuses a future day, and is not submittable
+over HTTP (not a `JobKind`).
 
 Known limits: decisions re-sent for a case whose imported-shadow events were purged
 are accepted as new (the case ids went with the rows); re-importing an old export
 file brings purged cases back; a case store is one tenant's file, so its `cases` rows
 carry no tenant column. Retention does not cover episodes (synthetic) or job results
-(no case rows by construction), and nothing schedules `retention apply` yet (run it
-from cron, or submit it as a job once that kind exists). Migrations 0004-0007 follow
+(no case rows by construction). Migrations 0004-0007 follow
 auth (0002 api keys, 0003 tenancy) in one linear chain with a single head.

@@ -1,4 +1,5 @@
-"""The built-in job kinds: gate evaluation, backtest, bench score.
+"""The built-in job kinds: gate evaluation, backtest, bench score, and the scheduled
+`retention_apply` (scruple.jobs.retention; not submittable over HTTP).
 
 Each handler opens what it needs from the `JobContext` (it may run in a fresh child
 process), does the work that used to run inline in a request or CLI call, and returns
@@ -162,10 +163,18 @@ def bench_score(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def retention_apply(ctx: JobContext, params: dict[str, Any]) -> dict[str, Any]:
+    """Scheduled retention for the job's tenant (scruple.jobs.retention)."""
+    from scruple.jobs.retention import retention_apply as run
+
+    return run(ctx, params)
+
+
 HANDLERS: dict[str, Handler] = {
     JobKind.GATE_EVALUATION.value: gate_evaluation,
     JobKind.BACKTEST.value: backtest,
     JobKind.BENCH_SCORE.value: bench_score,
+    "retention_apply": retention_apply,
 }
 
-__all__ = ["HANDLERS", "backtest", "bench_score", "gate_evaluation"]
+__all__ = ["HANDLERS", "backtest", "bench_score", "gate_evaluation", "retention_apply"]

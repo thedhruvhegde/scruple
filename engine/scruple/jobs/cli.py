@@ -18,6 +18,16 @@ def cmd_worker(args: argparse.Namespace) -> int:
     db = args.db or load_settings().database_dsn()
     cfg = Path(args.gate_config).read_text(encoding="utf-8") if args.gate_config else None
     queue = open_queue(db)
+    tick = None
+    sched_storage: Any = None
+    if args.schedule_retention:
+        from scruple.clock import SystemClock
+        from scruple.jobs.retention import DailyScheduler
+        from scruple.storage import open_storage
+
+        sched_storage = open_storage(db)
+        scheduler = DailyScheduler(queue, sched_storage, SystemClock())
+        tick = scheduler.tick
     worker = Worker(
         queue,
         JobContext(
@@ -30,12 +40,15 @@ def cmd_worker(args: argparse.Namespace) -> int:
         lease_s=args.lease,
         poll_s=args.poll,
         isolation=args.isolation,
+        tick=tick,
     )
     stop = threading.Event()
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: stop.set())  # finish the current job, then exit
     try:
         if args.once:
+            if tick is not None:
+                tick()
             job = worker.run_once()
             print(
                 json.dumps(
@@ -50,6 +63,8 @@ def cmd_worker(args: argparse.Namespace) -> int:
             print(json.dumps({"ran": ran}))
     finally:
         queue.close()
+        if sched_storage is not None:
+            sched_storage.close()
     return 0
 
 
@@ -75,6 +90,11 @@ def add_worker_parser(sub: Any, default_db: str) -> None:
     p.add_argument("--isolation", choices=["process", "thread"], default="process")
     p.add_argument("--once", action="store_true", help="run at most one job, then exit")
     p.add_argument("--max-jobs", type=int, default=None, help="exit after this many jobs")
+    p.add_argument(
+        "--schedule-retention",
+        action="store_true",
+        help="queue one retention_apply job per tenant per UTC day (idempotent)",
+    )
 
 
 __all__ = ["add_worker_parser", "cmd_worker"]
