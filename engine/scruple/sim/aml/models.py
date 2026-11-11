@@ -30,6 +30,10 @@ WINDOW_DAYS = 14
 
 
 class AmlFamily(StrEnum):
+    # typologies (suspicious: the truth expects a SAR)
+    STRUCTURING = "structuring"  # sub-threshold cash deposits that avoid a CTR
+    MULE_RING = "mule_ring"  # fan-in from, or fan-out to, new accounts, passed straight on
+    RAPID_MOVEMENT = "rapid_movement"  # large wires in and out within hours, repeatedly
     # benign lookalikes (false positives: the truth expects the alert closed)
     CASH_BUSINESS = "cash_business"  # a cash-intensive business banking its takings
     MARKETPLACE_SELLER = "marketplace_seller"  # many small buyer payments, money stays
@@ -38,7 +42,7 @@ class AmlFamily(StrEnum):
 
 
 FAMILIES: tuple[AmlFamily, ...] = tuple(AmlFamily)
-TYPOLOGIES: frozenset[AmlFamily] = frozenset()
+TYPOLOGIES = frozenset({AmlFamily.STRUCTURING, AmlFamily.MULE_RING, AmlFamily.RAPID_MOVEMENT})
 BENIGN = frozenset(FAMILIES) - TYPOLOGIES
 
 
