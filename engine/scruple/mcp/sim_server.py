@@ -11,30 +11,66 @@ engine instead (lifecycle stages, deadlines, evidence documents, issuer replies)
 shared read tools work for both kinds; `accept`, `wait`, `upload_evidence`,
 `refund(amount_minor=...)` and `submit_dispute` are for dispute episodes.
 
+`start_ach_episode`, `start_recon_episode` and `start_scenario_episode` start the other
+episode kinds the API and CLI serve. ACH and recon episodes have their own tool sets,
+exposed with an `ach_` or `recon_` prefix (`ach_get_case`, `recon_match`, ...) and
+refused on episodes of another kind; a scenario episode is a dispute episode on a
+real CFPB-grounded scenario and plays the dispute tools above.
+
 Run it with `scruple mcp sim` (or `uv run scruple mcp sim`).
 """
 
 from __future__ import annotations
 
+import inspect
 import threading
+from collections.abc import Callable, Collection
 from typing import Annotated, Any
 
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import Field
+from pydantic_core import to_jsonable_python
 
+from scruple.agents.ach_episode import ACH_TASK, AchEpisode
+from scruple.agents.ach_tools import ACH_TOOLS
 from scruple.agents.dispute_episode import DISPUTE_TASK, DisputeEpisode
-from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME
+from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME, DisputeToolSpec
 from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironment
 from scruple.agents.episode import Episode, EpisodeError
 from scruple.agents.models import TASK
+from scruple.agents.recon_episode import FORMATS, RECON_TASK, ReconEpisode
+from scruple.agents.recon_tools import RECON_TOOLS
+from scruple.agents.store import new_episode
 from scruple.agents.tools import TOOL_BY_NAME
+from scruple.sim.ach.models import AchFamily
+from scruple.sim.recon.models import BreakKind
 from scruple.version import package_version
 
 MAX_EPISODES = 10_000
 
 EpisodeId = Annotated[str, Field(description="The id returned by start_episode.")]
 Reason = Annotated[str, Field(description="Why, in a sentence.", max_length=1_000)]
+Seed = Annotated[int, Field(description="Seed; same seed, same case.")]
+WorkflowCaseType = Annotated[
+    str | None, Field(description="Optional case type from list_workflow_case_types.")
+]
+
+
+AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode
+# Episode kinds the unprefixed tools serve (a scenario episode is a dispute episode).
+LEGACY_KINDS = frozenset({"simple", "dispute"})
+WORKFLOW_PREFIX = {"ach": "ach_", "recon": "recon_"}
+
+
+def episode_kind(ep: Any) -> str:
+    return str(getattr(ep, "kind", "simple"))
+
+
+def wrong_kind_message(episode_id: str, kind: str) -> str:
+    prefix = WORKFLOW_PREFIX.get(kind)
+    hint = f"; use the {prefix}* tools" if prefix else ""
+    return f"episode {episode_id!r} is a {kind} episode{hint}"
 
 
 class EpisodeTable:
@@ -45,9 +81,10 @@ class EpisodeTable:
     """
 
     def __init__(self) -> None:
-        self.episodes: dict[str, Episode | DisputeEpisode] = {}
+        self.episodes: dict[str, AnyEpisode] = {}
         self._starts: dict[tuple[int, str | None], int] = {}
         self._dispute_starts: dict[tuple[int, str | None], int] = {}
+        self._kind_starts: dict[tuple[str, int, str | None], int] = {}
         self._lock = threading.Lock()
 
     def start(self, seed: int, case_type: str | None) -> Episode:
@@ -81,14 +118,43 @@ class EpisodeTable:
             self.episodes[ep.episode_id] = ep
             return ep
 
-    def call(self, episode_id: str, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+    def start_kind(self, kind: str, seed: int, case_type: str | None) -> AnyEpisode:
+        """Start an `ach`, `recon` or `scenario` episode (`case_type` is the scenario
+        id for `scenario`). Same (kind, seed, case type) again: same case, new id."""
         with self._lock:
-            return self._call(episode_id, tool, args)
+            if len(self.episodes) >= MAX_EPISODES:
+                raise ToolError(f"episode limit reached ({MAX_EPISODES}); restart the server")
+            key = (kind, seed, case_type)
+            nonce = self._kind_starts.get(key, 0)
+            try:
+                ep = new_episode(kind, seed, case_type, nonce)
+            except (ValueError, KeyError) as exc:
+                raise ToolError(str(exc).strip("'\"")) from exc
+            self._kind_starts[key] = nonce + 1
+            self.episodes[ep.episode_id] = ep
+            return ep
 
-    def _call(self, episode_id: str, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+    def call(
+        self,
+        episode_id: str,
+        tool: str,
+        args: dict[str, Any],
+        kinds: Collection[str] = LEGACY_KINDS,
+    ) -> dict[str, Any]:
+        """Run `tool` on the episode. `kinds` are the episode kinds the calling MCP tool
+        serves; another kind is refused, so `accept` never reaches an ach episode."""
+        with self._lock:
+            return self._call(episode_id, tool, args, kinds)
+
+    def _call(
+        self, episode_id: str, tool: str, args: dict[str, Any], kinds: Collection[str]
+    ) -> dict[str, Any]:
         ep = self.episodes.get(episode_id)
         if ep is None:
             raise ToolError(f"unknown episode {episode_id!r}; call start_episode first")
+        kind = episode_kind(ep)
+        if kind not in kinds:
+            raise ToolError(wrong_kind_message(episode_id, kind))
         try:
             return ep.call(tool, args)
         except EpisodeError as exc:
@@ -97,6 +163,50 @@ class EpisodeTable:
 
 def _desc(name: str) -> str:
     return TOOL_BY_NAME[name].description
+
+
+def _workflow_tool(
+    t: EpisodeTable, kind: str, spec: DisputeToolSpec
+) -> Callable[..., dict[str, Any]]:
+    """An MCP tool function for one ach/recon tool, with one typed parameter per field
+    of the tool's argument model (plus `episode_id`), so clients see a real schema.
+    The episode validates the arguments again with the full model (constraints and
+    all) and counts a refusal as a tool error, as on every other surface."""
+
+    fields = spec.args.model_fields
+    defaults = {
+        n: to_jsonable_python(f.get_default()) for n, f in fields.items() if not f.is_required()
+    }
+
+    def fn(episode_id: str, **kwargs: Any) -> dict[str, Any]:
+        # Arguments left at their default are dropped, so the episode logs the same
+        # call as from the API or CLI and the trace head matches across surfaces.
+        args = {
+            n: v
+            for n, v in to_jsonable_python(kwargs).items()
+            if n not in defaults or v != defaults[n]
+        }
+        return t.call(episode_id, spec.name, args, kinds={kind})
+
+    params = [
+        inspect.Parameter(
+            "episode_id",
+            inspect.Parameter.KEYWORD_ONLY,
+            annotation=Annotated[str, Field(description=f"The id from start_{kind}_episode.")],
+        )
+    ]
+    for name, f in fields.items():
+        params.append(
+            inspect.Parameter(
+                name,
+                inspect.Parameter.KEYWORD_ONLY,
+                default=inspect.Parameter.empty if f.is_required() else f.get_default(),
+                annotation=Annotated[f.annotation, Field(description=f.description)],
+            )
+        )
+    fn.__signature__ = inspect.Signature(params, return_annotation=dict[str, Any])  # type: ignore[attr-defined]
+    fn.__name__ = WORKFLOW_PREFIX[kind] + spec.name
+    return fn
 
 
 def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
@@ -267,6 +377,61 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
         if claims:
             args["claims"] = claims
         return t.call(episode_id, "submit_decision", args)
+
+    # --- ach, recon and real-scenario episodes (additive) ------------------------------
+    @server.tool(
+        description="List the case types for ach and recon episodes and the real "
+        "scenario ids for scenario episodes."
+    )
+    def list_workflow_case_types() -> dict[str, Any]:
+        from scruple.realdata.scenarios import load_real_scenarios
+
+        return {
+            "ach": {
+                "families": [f.value for f in AchFamily],
+                "format": "family, family@difficulty or @difficulty (difficulty in [0, 1])",
+            },
+            "recon": {
+                "break_kinds": [k.value for k in BreakKind],
+                "formats": list(FORMATS),
+                "format": "kinds and a file format joined by +, then optionally @difficulty",
+            },
+            "scenario": {"scenario_ids": [rs.id for rs in load_real_scenarios()]},
+            "data": "ach and recon cases are synthetic; scenario cases are built from "
+            "public CFPB complaints (docs/data/CFPB.md)",
+        }
+
+    @server.tool(
+        description="Start an ach episode: one returned ACH debit to work through. " + ACH_TASK
+    )
+    def start_ach_episode(seed: Seed, case_type: WorkflowCaseType = None) -> dict[str, Any]:
+        ep = t.start_kind("ach", seed, case_type)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
+    @server.tool(
+        description="Start a recon episode: reconcile one bank statement against the cash "
+        "book. " + RECON_TASK
+    )
+    def start_recon_episode(seed: Seed, case_type: WorkflowCaseType = None) -> dict[str, Any]:
+        ep = t.start_kind("recon", seed, case_type)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
+    @server.tool(
+        description="Start a scenario episode: a dispute episode on a real scenario "
+        "grounded in public CFPB complaints. Play it with the dispute tools (accept, wait, "
+        "upload_evidence, refund, submit_dispute and the shared read tools)."
+    )
+    def start_scenario_episode(
+        scenario_id: Annotated[str, Field(description="An id from list_workflow_case_types.")],
+        seed: Annotated[int, Field(description="Enters the episode id only.")] = 0,
+    ) -> dict[str, Any]:
+        ep = t.start_kind("scenario", seed, scenario_id)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
+    for kind, specs in (("ach", ACH_TOOLS), ("recon", RECON_TOOLS)):
+        for spec in specs:
+            fn = _workflow_tool(t, kind, spec)
+            server.add_tool(fn, name=fn.__name__, description=spec.description)
 
     return server
 

@@ -11,6 +11,8 @@ import pytest
 from mcp import Client
 
 from scruple.agents import Episode
+from scruple.agents.ach_tools import ACH_TOOL_NAMES
+from scruple.agents.recon_tools import RECON_TOOL_NAMES
 from scruple.agents.tools import TOOL_NAMES
 from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 
@@ -39,7 +41,10 @@ def test_lists_episode_tools() -> None:
     tools = {t.name: t for t in session(fn)}
     dispute = {"start_dispute_episode", "list_case_families", "accept", "wait"}
     dispute |= {"upload_evidence", "submit_dispute"}
-    assert set(tools) == {*TOOL_NAMES, "start_episode", "list_case_types", *dispute}
+    workflow = {"list_workflow_case_types", "start_scenario_episode"}
+    for kind, names in (("ach", ACH_TOOL_NAMES), ("recon", RECON_TOOL_NAMES)):
+        workflow |= {f"start_{kind}_episode", *(f"{kind}_{n}" for n in names)}
+    assert set(tools) == {*TOOL_NAMES, "start_episode", "list_case_types", *dispute, *workflow}
     for name in TOOL_NAMES:
         assert "episode_id" in tools[name].input_schema["required"]
     assert tools["represent"].input_schema["properties"]["evidence_ids"]["type"] == "array"
