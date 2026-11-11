@@ -10,16 +10,29 @@ that tenant's decisions first, so the answer includes every decision made so far
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
+from pydantic import BeforeValidator
 
 from scruple.auth import Permission, Principal, require
 from scruple.usage.meter import Period, UsageAggregate, UsageEvent, UsageStore, usage_store_for
 
 Admin = Annotated[Principal, require(Permission.ADMIN)]
-Day = Annotated[date | None, Query()]
+
+
+def _iso_day(v: object) -> object:
+    """Only YYYY-MM-DD: pydantic would otherwise read "0" as a Unix timestamp."""
+    if v is None or isinstance(v, date):
+        return v
+    if isinstance(v, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+        return v
+    raise ValueError("expected a date as YYYY-MM-DD")
+
+
+Day = Annotated[date | None, BeforeValidator(_iso_day), Query()]
 MAX_PAGE = 1_000
 
 

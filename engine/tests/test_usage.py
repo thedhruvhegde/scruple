@@ -235,6 +235,8 @@ def test_api_is_admin_only_and_tenant_scoped(evaluated: tuple[SQLiteStorage, Age
     r = c.get("/usage/events?limit=2", headers=admin)
     assert r.status_code == 200 and len(r.json()) == 2 and r.headers["x-total-count"] == "5"
     assert c.get("/usage?period=week", headers=admin).status_code == 422
+    for bad in ("0", "1700000000", "2026-13-01", "11/11/2026"):
+        assert c.get(f"/usage?start={bad}", headers=admin).status_code == 422, bad
     assert c.get("/usage?tenant=other", headers=admin).status_code == 422
     other = hdr(["risk_admin"], tenant="other-bank")
     assert c.get("/usage", headers=other).json() == []  # its own (empty) usage only
