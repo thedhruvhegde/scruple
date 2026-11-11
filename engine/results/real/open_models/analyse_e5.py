@@ -3,10 +3,13 @@
 Usage:
     uv run python results/real/open_models/analyse_e5.py
 
-Reads the open-model run directories (results/real/open_models/episodes/*), whose
-per-seed records hold the scored row of EVERY episode, lapsed ones included, and
-re-scores the three stored Claude runs (results/real/episodes/store-*) with the
-current verifiers by replay, the way scripts/model_episodes_report.py does. Writes
+Reads the open-model run directories (results/real/open_models/episodes/*, and the
+exploratory E5b OpenRouter runs in episodes_e5b/*), whose per-seed records hold the
+call log of EVERY episode, lapsed ones included, and the three stored Claude runs
+(results/real/episodes/store-*). Every one is re-scored with the current verifiers
+by replay, the way scripts/model_episodes_report.py does (E5 deviation 5: session 1
+used the open-model rows as scored at run time). E5b rows are reported but never
+enter H1. Writes
 results/real/open_models/e5_episodes.json and E5_EPISODES.md:
 
 - one row per system: n, mean cost and its paired bootstrap against the evidence
@@ -43,10 +46,26 @@ def _report_module() -> Any:
     return mod
 
 
-def open_rows() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+def rescored(r: dict[str, Any], label: str) -> dict[str, Any]:
+    """Score a run record afresh: replay its whole call log with the current
+    verifiers (a lapsed record is lapsed again with its own stop)."""
+    from scruple.agents.dispute_episode import DisputeEpisode
+    from scruple.eval.scoring import row as score_row
+
+    ep = DisputeEpisode.replay(r["seed"], None, [(c["tool"], c["args"]) for c in r["calls"]])
+    score = ep.score if ep.score is not None else ep.lapse(r["stop"])
+    return score_row(label, json.loads(score.model_dump_json()))
+
+
+def run_dirs(sub: str) -> list[Path]:
+    base = HERE / sub
+    return sorted(d for d in base.iterdir() if (d / "runs").is_dir()) if base.is_dir() else []
+
+
+def open_rows(sub: str = "episodes") -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
     rows: list[dict[str, Any]] = []
     meta: dict[str, dict[str, Any]] = {}
-    for d in sorted((HERE / "episodes").iterdir()):
+    for d in run_dirs(sub):
         recs = [json.loads(p.read_text()) for p in sorted((d / "runs").glob("seed-*.json"))]
         if not recs:
             continue
@@ -59,16 +78,29 @@ def open_rows() -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
             "input_tokens": sum(r["input_tokens"] or 0 for r in recs),
             "output_tokens": sum(r["output_tokens"] or 0 for r in recs),
             "turns": sum(r["turns"] for r in recs),
+            "gate_pass_as_run": sum(bool(r["row"]["gate"]) for r in recs),
+            "elisions": _elisions(d),
         }
         for r in recs:
-            row = dict(r["row"])
-            row["system"] = label
+            row = rescored(r, label)
             row["stop"] = r["stop"]
             rows.append(row)
     return rows, meta
 
 
-def sensitivity() -> dict[str, dict[str, Any]]:
+def _elisions(d: Path) -> dict[str, int]:
+    """413 elisions per seed from the driver's harness log (session 2 on)."""
+    p = d / "harness.jsonl"
+    out: dict[str, int] = {}
+    if p.exists():
+        for line in p.read_text().splitlines():
+            e = json.loads(line)
+            if e.get("event") == "attempt" and e.get("elisions"):
+                out[str(e["seed"])] = int(e["elisions"])
+    return out
+
+
+def sensitivity(sub: str = "episodes") -> dict[str, dict[str, Any]]:
     """Two checks on the pre-registered scoring, per open-model run (not replacements):
 
     - `no_rejected`: replay each episode without the calls to tools that do not
@@ -83,7 +115,7 @@ def sensitivity() -> dict[str, dict[str, Any]]:
     from scruple.eval.scoring import row as score_row
 
     out: dict[str, dict[str, Any]] = {}
-    for d in sorted((HERE / "episodes").iterdir()):
+    for d in run_dirs(sub):
         recs = [json.loads(p.read_text()) for p in sorted((d / "runs").glob("seed-*.json"))]
         if not recs:
             continue
@@ -93,7 +125,7 @@ def sensitivity() -> dict[str, dict[str, Any]]:
             ep = DisputeEpisode.replay(r["seed"], None, calls)
             score = ep.score if ep.score is not None else ep.lapse(r["stop"])
             clean.append(score_row(d.name, json.loads(score.model_dump_json())))
-        kept = [r["row"] for r in recs if r["stop"] not in ("http_error", "timeout")]
+        kept = [rescored(r, d.name) for r in recs if r["stop"] not in ("http_error", "timeout")]
 
         def summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
             return {
@@ -121,12 +153,13 @@ def sr_fail(row: dict[str, Any]) -> int:
 def main() -> None:
     rep = _report_module()
     orows, meta = open_rows()
+    brows, bmeta = open_rows("episodes_e5b")  # exploratory, outside every hypothesis
     crows: list[dict[str, Any]] = []
     for name in CLAUDE:
         crows += rep._store_rows(name, str(ROOT / "results/real/episodes" / f"store-{name}"))
     seeds = sorted({r["seed"] for r in orows} | {r["seed"] for r in crows})
     refs = rep._policy_rows(seeds)
-    rows = crows + orows + refs
+    rows = crows + orows + brows + refs
     systems = list(dict.fromkeys(r["system"] for r in rows))
     by = {s: {r["seed"]: r for r in rows if r["system"] == s} for s in systems}
     ev = by["ref:evidence"]
@@ -146,13 +179,18 @@ def main() -> None:
                 "system": s,
                 "harness": "claude-code-subagent"
                 if s in CLAUDE
-                else ("in-process" if s.startswith("ref:") else "api"),
+                else (
+                    "in-process"
+                    if s.startswith("ref:")
+                    else ("api-openrouter-e5b-exploratory" if s in bmeta else "api-groq")
+                ),
                 "n": n,
                 "mean_cost_usd": round(cost, 2),
                 "cost_vs_evidence": None if cmp is None else [round(x, 2) for x in cmp],
                 "gate_pass": sum(bool(r["gate"]) for r in rs.values()),
                 "sr01_fail": sum(sr_fail(r) for r in rs.values()),
                 "fair_outcome": sum(bool(r["fair_outcome"]) for r in rs.values()),
+                "ref_fair_same_seeds": sum(bool(ev[k]["fair_outcome"]) for k in rs),
                 "won_partial": sum(r["resolution"] in ("won", "partial") for r in rs.values()),
                 "mean_reward": round(sum(r["reward"] for r in rs.values()) / n, 3),
                 "hard_failures": dict(fails),
@@ -184,14 +222,16 @@ def main() -> None:
     }
     out = {
         "note": "Synthetic dispute cases (FULL_MIX); real model behaviour. Claude rows: "
-        "Claude Code subagents via the scruple episode CLI, re-scored by replay. Open "
-        "models: raw API via scruple eval run (Groq).",
+        "Claude Code subagents via the scruple episode CLI. Open models: raw API via "
+        "scruple eval run (Groq; E5b exploratory rows: OpenRouter free models). Every "
+        "row is re-scored by replaying its call log with the current verifiers.",
         "seeds": seeds,
         "systems": table,
         "open_runs": meta,
+        "e5b_runs_exploratory": bmeta,
         "h1_sr01_open_minus_claude": h1,
     }
-    sens = sensitivity()
+    sens = sensitivity() | sensitivity("episodes_e5b")
     out["sensitivity"] = sens
     (HERE / "e5_episodes.json").write_text(json.dumps(out, indent=1, sort_keys=True) + "\n")
 
@@ -202,8 +242,8 @@ def main() -> None:
         "Cost = merchant net loss in USD. Paired bootstrap over seeds, 2,000 resamples.",
         "",
         "| system | harness | n | mean cost $ | vs evidence (95% ci) | gate pass | SR-01 fail "
-        "| fair (OUT-01) | won/partial | mean reward | hard failures |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| fair (OUT-01) | ref fair, same seeds | won/partial | mean reward | hard failures |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for t in table:
         c = t["cost_vs_evidence"]
@@ -213,6 +253,7 @@ def main() -> None:
         lines.append(
             f"| {t['system']} | {t['harness']} | {n} | {t['mean_cost_usd']:.2f} | {ctxt} "
             f"| {t['gate_pass']}/{n} | {t['sr01_fail']}/{n} | {t['fair_outcome']}/{n} "
+            f"| {t['ref_fair_same_seeds']}/{n} "
             f"| {t['won_partial']}/{n} | {t['mean_reward']:.3f} | {ftxt} |"
         )
     for key, v in h1.items():
@@ -239,11 +280,12 @@ def main() -> None:
             f"| {b['gate_pass']}/{b['n']} / {b['sr01_fail']} / {b['fair_outcome']} |"
         )
     lines += ["", "Open-model runs:", ""]
-    for s, m in meta.items():
+    for s, m in (meta | bmeta).items():
         lines.append(
             f"- {s} ({m['model']}): stops {m['stops']}, rejected generations "
             f"{m['rejected_turns']}, {m['turns']} turns, tokens {m['input_tokens']} in / "
-            f"{m['output_tokens']} out."
+            f"{m['output_tokens']} out; gate pass as scored at run time "
+            f"{m['gate_pass_as_run']}; 413 elisions by seed {m['elisions'] or 'none'}."
         )
     (HERE / "E5_EPISODES.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
