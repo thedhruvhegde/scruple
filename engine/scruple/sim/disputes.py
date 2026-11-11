@@ -58,9 +58,11 @@ is the fold of the log over the cases' opening state: `DisputeEngine.replay(case
 events, clock)` rebuilds it exactly without consulting the issuer, and
 `state_digest()` / `case_digest(id)` hash it. `events_json()` / `events_from_json()`
 serialise the log. Rewind (037): `engine.at(i)` is a new engine after the first `i`
-events; `engine.rewind(case_id, k)` restores one case to its state after its first `k`
-events (other cases untouched); `rewind_before_action(case_id, k)` goes back to just
-before that case's k-th action, e.g. to try a different one.
+events, for `i` in `engine.boundaries()` (every case at one of its step boundaries,
+as for `rewind`; `replay` folds any raw prefix); `engine.rewind(case_id, k)` restores
+one case to its state after its first `k` events (other cases untouched);
+`rewind_before_action(case_id, k)` goes back to just before that case's k-th action,
+e.g. to try a different one.
 
 Extending (032 onwards): add an optional `CaseMix` field whose default draws no extra
 randomness (so existing seeds stay byte-identical), any new observable field on
@@ -1104,9 +1106,17 @@ class DisputeEngine:
 
     def at(self, index: int, clock: Clock | None = None) -> DisputeEngine:
         """A new engine holding the state after the first `index` events (all cases).
-        This engine is unchanged."""
+        This engine is unchanged.
+
+        `index` must be one of `boundaries()`: every case opened and at the end of a
+        step, the states the engine rests in. A prefix that cuts a step (a ruling
+        without its reversal, a case half opened) is refused for the same reason
+        `rewind` refuses one: acting from it can crash. `replay` still folds any raw
+        prefix, for inspection."""
         if not 0 <= index <= len(self._events):
             raise ValueError(f"event index must be in [0, {len(self._events)}]")
+        if index not in self.boundaries():
+            raise ValueError(f"event {index} is inside a step; use one of boundaries()")
         return DisputeEngine.replay(
             self._cases_in, self._events[:index], clock or self.clock, **self._settings()
         )
@@ -1140,6 +1150,28 @@ class DisputeEngine:
         for ev in kept:
             self._emit(ev)
         return removed
+
+    def boundaries(self) -> tuple[int, ...]:
+        """The global event indices `at` accepts: prefixes after which every case has
+        opened and stands at one of its `step_boundaries`. Always includes the full
+        log; never a prefix inside the opening of the cases."""
+        per_case = {cid: set(self.step_boundaries(cid)) for cid in self._cases}
+        counts = dict.fromkeys(self._cases, 0)
+        off = sum(1 for cid in self._cases if 0 not in per_case[cid])
+        out: list[int] = [0] if off == 0 else []
+        for i, ev in enumerate(self._events, start=1):
+            cid = ev.case_id
+            if cid is None:  # an engine-wide event (a fine) belongs to the step it ends
+                if i == len(self._events) and off == 0:
+                    out.append(i)
+                continue
+            was = counts[cid] in per_case[cid]
+            counts[cid] += 1
+            now = counts[cid] in per_case[cid]
+            off += int(was) - int(now)
+            if off == 0:
+                out.append(i)
+        return tuple(out)
 
     def step_boundaries(self, case_id: str) -> tuple[int, ...]:
         """The event counts `rewind` accepts for this case: the end of the opening and
