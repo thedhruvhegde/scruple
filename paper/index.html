@@ -54,10 +54,6 @@ h1.big { font-size: clamp(30px, 4vw, 44px); }
 .full { grid-column: 1 / -1; }
 @media (max-width: 900px) { .row { grid-template-columns: minmax(0, 1fr); padding-block: 60px; } }
 
-.btn { display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; padding: 10px 14px; border: 1px solid var(--fg); color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; }
-.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
-.btn[disabled] { opacity: 0.45; cursor: default; }
-.btn[disabled]:hover { background: transparent; color: var(--fg); }
 
 .tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -103,8 +99,6 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
 /* ---------- paper ---------- */
 .abs { font-size: 18px; line-height: 1.55; max-width: 68ch; display: grid; gap: 14px; }
 .cta { display: flex; flex-wrap: wrap; gap: 10px; }
-.cta .btn.solid { background: var(--fg); color: var(--bg); }
-.cta .btn.solid:hover, .cta .btn.solid:focus-visible { background: transparent; color: var(--fg); }
 .meta-line { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); }
 .thm { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule-strong); }
 .thm li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 4px 20px; padding: 14px 0; border-bottom: 1px solid var(--rule); font-size: 16px; }

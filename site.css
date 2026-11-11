@@ -25,6 +25,19 @@
 /* every band: its own ground, printed with the grid, which runs from the page's centre line */
 .band { background: var(--bg) var(--tex) center top / 96px 96px; color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 
+/* ---------- buttons ----------
+   Bracketed words, [ Edit entry 14 ]: the [ sits on the text edge (hence the -10px), hover is an
+   instant inversion. .solid starts inverted; aria-pressed turns vermilion. */
+.btn { display: inline-flex; align-items: center; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; line-height: 16px; padding: 12px 10px; margin-left: -10px; border: 0; color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; white-space: pre; }
+.btn::before { content: "[ "; content: "[ " / ""; font-weight: 700; }
+.btn::after { content: " ]"; content: " ]" / ""; font-weight: 700; }
+.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+.btn[aria-pressed="true"] { background: var(--block); color: var(--bg); }
+.btn.solid { background: var(--fg); color: var(--bg); }
+.btn.solid:hover, .btn.solid:focus-visible { background: transparent; color: var(--fg); }
+.btn[disabled] { color: var(--muted); cursor: default; }
+.btn[disabled]:hover { background: transparent; color: var(--muted); }
+
 /* ---------- bar ----------
    Shared by every page: link site.css, copy the header markup, load nav.js. ul.nav-sec holds in-page
    anchors (a[data-g] carries each one's glyph; keys 1-9 jump to them), ul.nav-pg holds the pages (aria-current="page"

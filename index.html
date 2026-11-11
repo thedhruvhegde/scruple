@@ -143,12 +143,6 @@ body { counter-reset: fig; }
 .tri { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border: 1px solid var(--rule-strong); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 14px; }
 .tri span { padding: 8px 16px; border-right: 1px solid var(--rule-strong); }
 .tri span:last-child { border-right: 0; background: var(--accent); color: var(--on-accent); }
-/* buttons are bracketed words, [ Edit entry 14 ]; the brackets sit on the text edge, hover inverts */
-.btn { display: inline-flex; align-items: center; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; line-height: 16px; padding: 12px 10px; margin-left: -10px; border: 0; color: var(--fg); background: transparent; text-decoration: none; cursor: pointer; border-radius: 0; width: fit-content; white-space: pre; }
-.btn::before { content: "[ "; content: "[ " / ""; font-weight: 700; }
-.btn::after { content: " ]"; content: " ]" / ""; font-weight: 700; }
-.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
-.btn[aria-pressed="true"] { background: var(--block); color: var(--bg); }
 @media (max-width: 600px) { .tri { flex-direction: column; width: 100%; } .tri span { border-right: 0; border-bottom: 1px solid var(--rule-strong); } .tri span:last-child { border-bottom: 0; } }
 
 .tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }

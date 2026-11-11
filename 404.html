@@ -22,12 +22,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 96px 0; display: grid; gap: 2
 .code { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); margin: 0; }
 h1 { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: clamp(32px, 6vw, 56px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
 p { margin: 0; max-width: 46ch; color: var(--muted); }
-/* buttons as on the home page: bracketed words, the brackets on the text edge, hover inverts */
-.btn { display: inline-flex; align-items: center; font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-size: 13px; font-weight: 500; line-height: 16px; padding: 12px 10px; border: 0; color: var(--fg); background: transparent; text-decoration: none; width: fit-content; white-space: pre; }
-.btn::before { content: "[ "; content: "[ " / ""; font-weight: 700; }
-.btn::after { content: " ]"; content: " ]" / ""; font-weight: 700; }
-.btn:hover, .btn:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
-.links { display: flex; flex-wrap: wrap; gap: 4px 16px; max-width: none; margin-left: -10px; }
+.links { display: flex; flex-wrap: wrap; gap: 4px 16px; max-width: none; }
 .links .btn { margin-top: 0; }
 /* a receipt for the request, with the missing line, and the mark tipped over */
 .scene { display: flex; flex-wrap: wrap; align-items: end; gap: 32px 56px; margin-top: 40px; }
