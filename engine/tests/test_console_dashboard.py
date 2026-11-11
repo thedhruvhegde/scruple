@@ -379,3 +379,50 @@ def test_period_window() -> None:
     w = window("30d", now)
     assert w.has(now - timedelta(days=29)) and not w.has(now - timedelta(days=31))
     assert window("all", now).has(datetime(2000, 1, 1, tzinfo=UTC))
+
+
+# --- the demo seed ------------------------------------------------------------------------------
+
+
+def test_demo_seed_refuses_a_tenant_with_history(tmp_path: Path) -> None:
+    from scruple.console.demo_seed import seed_demo
+
+    db = tmp_path / "gate.db"
+    s = SQLiteStorage(str(db))
+    AgentGate(s.for_tenant("demo"), SteppingClock()).bootstrap_baseline()
+    s.close()
+    with pytest.raises(ValueError, match="already has history"):
+        seed_demo(str(db), tmp_path / "data", "demo", say=lambda _m: None)
+
+
+@pytest.mark.slow
+def test_demo_seed_fills_every_panel_with_labelled_synthetic_data(tmp_path: Path) -> None:
+    from scruple.console.demo_seed import seed_demo
+
+    db = str(tmp_path / "gate.db")
+    rep = seed_demo(db, tmp_path / "data", "demo", say=lambda _m: None)
+    assert rep.jobs["succeeded"] >= 4 and rep.jobs["failed"] == 1 and rep.jobs["queued"] == 1
+    assert rep.disputes > 0 and rep.imported > 0 and rep.pushes > 0 and rep.eval_runs == 2
+    s = SQLiteStorage(db)
+    g = AgentGate(s.for_tenant("demo"))
+    assert g.verify_integrity().ok
+    web = _clients(s, {"demo": g}, tmp_path / "data")["demo"]
+    sav, pay, rt, cp = (web.get(p).text for p in PAGES[1:])
+    for text in (sav, pay, rt, cp):
+        assert 'class="banner"><b>SYNTHETIC</b>' in text
+    assert "inr-delivered-contest-fast@v1" in sav and "No change was blocked" not in sav
+    assert "synthetic" in pay and "No case store" not in pay and "[" in pay
+    assert "demo-disputes" in rt and "ramping" in rt and "alice@demo.example" in rt
+    assert "demo-worker-1" in cp and "demo-fake-model" in cp and "anchor check" in cp
+    assert "intact" in cp
+    files = tenant_files(tmp_path / "data", "demo")
+    marker = files.marker() if files is not None else None
+    assert marker is not None and marker.synthetic
+    s.close()
+
+
+def test_demo_seed_command_line(tmp_path: Path) -> None:
+    from scruple.cli.main import main
+
+    with pytest.raises(SystemExit, match="--data"):
+        main(["console", "demo-seed", "--db", str(tmp_path / "g.db")])
