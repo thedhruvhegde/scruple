@@ -1,7 +1,9 @@
 # v1 plan: from pilot-ready to a paid pilot and a v1
 
-Status on 2026-11-11: 351 engine commits, 7,414 tests, a live site with results and a
-31-page paper. Nothing below is started. Each line is one planned commit
+Status on 2026-11-11: groups B (except B05 hosting, recipe only), D, E and F are built and merged
+(405 engine commits, 8,361 tests). C01 (leaderboard) and B06/B07 (pilot page, one-page pdf)
+are live on the site. Open: group A (owner decisions), C02-C06 (more model runs), and real
+services (stripe live pull, slack, jira, linear) never exercised against the real apis. Each line is one planned commit
 (key + ten words or fewer). Groups A and B need decisions from the owner first.
 
 ## A. owner decisions (no code until decided)

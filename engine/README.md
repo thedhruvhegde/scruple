@@ -4,7 +4,7 @@ simulation and hack-resistant verifiers for agents that move money. card dispute
 
 - the same verifier is three things: a reward for training, an eval for choosing a model, a gate for releasing a change.
 - scores come from the ledger and a hash-chained trace. never from what the agent says it did.
-- python 3.12, uv, pydantic v2, mypy strict. 7,414 tests.
+- python 3.12, uv, pydantic v2, mypy strict. 8,361 tests.
 - paper: [docs/paper/scruple_paper.pdf](docs/paper/scruple_paper.pdf), dhruv hegde, 31 pages, every proof written out.
 
 ## run it
@@ -110,7 +110,10 @@ scruple/eval         provider registry, strategies, batch runs, leaderboard
 scruple/formal       z3 models of the money rules, with conformance tests
 scruple/auth         api keys, oidc, roles, tenancy, rate limits
 scruple/jobs         durable job queue and worker
-scruple/console      web console: runs, cases, diffs, approvals
+scruple/console      web console: runs, cases, diffs, approvals, search, saved filters
+scruple/policy       per-tenant policy files: thresholds, profiles, approvals, canary ramp
+scruple/integrations slack approvals, jira and linear tickets, signed webhooks
+scruple/pilot        one command: ingest, backtest, shadow, gate, evidence pack, readout
 scruple/observability prometheus metrics, tracing, readiness
 deploy/              helm chart, terraform skeleton, release workflows
 sdk/typescript       typed client
@@ -127,7 +130,7 @@ docs/pilot           offer, scope, success criteria, data checklist, security, d
 ## not yet
 
 - no partner data has run through it. every real result above uses public data or real models on synthetic cases.
-- no soc 2, no pen test. api keys, oidc, roles and tenancy are built and tested; never run against real users.
+- no soc 2 audit and no external pen test yet. readiness policies, a questionnaire pack, a pen test scope and a weekly zap scan exist ([docs/trust](docs/trust)). api keys, oidc, saml, roles and tenancy are built and tested; never run against real users.
 - no hosted deployment. image, helm chart and terraform exist; the chart and terraform have never touched a real cluster or account.
 - claude runs used claude code subagents. open models ran through real apis on free tiers, so their samples are small.
 - no licence chosen yet, so nothing is published to pypi.
