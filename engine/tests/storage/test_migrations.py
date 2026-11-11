@@ -69,7 +69,7 @@ def _tables(url: str) -> set[str]:
 
 
 def test_single_linear_head() -> None:
-    assert m.head() == "0007"
+    assert m.head() == "0008"
 
 
 @pytest.mark.parametrize(
@@ -148,6 +148,7 @@ def test_upgrade_is_idempotent_and_downgrade_removes_everything(empty_db: str) -
         "job_events",
         "retention_policies",
         "retention_purges",
+        "rate_limit_buckets",
     }
     m.downgrade(empty_db)
     assert _tables(empty_db) == {"alembic_version"}

@@ -160,3 +160,17 @@ def test_non_owner_cannot_bypass_append_only(app_role: tuple[str, str], sql: str
 def test_app_role_grants_validates_identifiers() -> None:
     with pytest.raises(ValueError, match="invalid identifier"):
         app_role_grants("x; drop role y")
+
+
+def test_non_owner_can_use_the_shared_rate_limit_buckets(app_role: tuple[str, str]) -> None:
+    from scruple.auth.ratelimit import Limit
+    from scruple.auth.ratelimit_db import buckets_for
+
+    url, schema = app_role
+    s = PostgresStorage(url, schema=schema, create_schema=False)
+    b = buckets_for(s, now=lambda: 0.0)
+    lim = Limit(per_minute=1, burst=2)
+    assert [b.take("k", lim).allowed for _ in range(3)] == [True, True, False]
+    assert b.prune() == 1
+    b.close()
+    s.close()

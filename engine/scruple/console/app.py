@@ -50,7 +50,11 @@ def create_console_app(
         from scruple.auth.config import build_authenticator
 
         auth = build_authenticator(settings, gate.storage)
-    app.add_middleware(AuthMiddleware, authenticator=auth, limits=Limits.from_settings(settings))
+    app.add_middleware(
+        AuthMiddleware,
+        authenticator=auth,
+        limits=Limits.from_settings(settings, storage=gate.storage),
+    )
     app.add_middleware(RequestIDMiddleware)
     app.include_router(console_router(gate, sources, secret=secret))
 

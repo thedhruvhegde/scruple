@@ -11,7 +11,7 @@ import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from scruple.storage import episodes, imported_shadow, jobs, retention
+from scruple.storage import episodes, imported_shadow, jobs, ratelimit, retention
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -113,6 +113,7 @@ SCHEMA = (
     + episodes.SQLITE_DDL
     + jobs.SQLITE_DDL
     + retention.SQLITE_DDL
+    + ratelimit.SQLITE_DDL
 )
 
 _HISTORY_MESSAGES = ("append-only", "immutable")

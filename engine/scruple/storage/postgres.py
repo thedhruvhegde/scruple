@@ -27,7 +27,7 @@ from psycopg import errors
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 
-from scruple.storage import episodes, imported_shadow, jobs, retention
+from scruple.storage import episodes, imported_shadow, jobs, ratelimit, retention
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
 from scruple.storage.sql import Params, Row, SQLStorage
 
@@ -210,6 +210,7 @@ SCHEMA = (
     + episodes.POSTGRES_DDL
     + jobs.POSTGRES_DDL
     + retention.POSTGRES_DDL
+    + ratelimit.POSTGRES_DDL
 )
 
 
@@ -340,4 +341,5 @@ GRANT SELECT, INSERT ON {schema}.imported_shadow_events, {schema}.imported_shado
 GRANT SELECT, INSERT, UPDATE ON {schema}.jobs TO {role};
 GRANT USAGE ON SEQUENCE {schema}.jobs_id_seq, {schema}.job_events_id_seq TO {role};
 GRANT SELECT, INSERT ON {schema}.retention_policies, {schema}.retention_purges TO {role};
+GRANT SELECT, INSERT, UPDATE, DELETE ON {schema}.rate_limit_buckets TO {role};
 """
