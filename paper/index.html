@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Scruple paper</title>
-<meta name="description" content="Verifiers that do not trust the agent: anytime-valid release gates and hacking bounds for money-moving AI agents. Proofs, experiments and the failures.">
+<meta name="description" content="Verifiers that do not trust the agent: anytime-valid release gates and hacking bounds for AI agents that move money. By Dhruv Hegde. Proofs, experiments and the failures.">
 <link rel="canonical" href="https://thedhruvhegde.github.io/scruple/paper/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Scruple">
@@ -59,21 +59,50 @@ a { color: inherit; }
 .band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .page { max-width: 1240px; margin: 0 auto; }
 
-/* ---------- bar ---------- */
+/* ---------- bar ----------
+   Shared by every page: copy this block with nav.js. ul.nav-sec holds in-page anchors,
+   ul.nav-pg holds the pages (arrow suffix, aria-current="page" on the page you are on). */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 32px; height: 60px; }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 24px; height: 60px; position: relative; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
 .brand svg { width: 24px; height: 24px; display: block; }
 .brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-.nav { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.nav::-webkit-scrollbar { display: none; }
-.nav a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 2px; }
+.nav-pg { margin-left: auto !important; }
+.nav-pg::before { content: "|"; color: var(--rule-strong); padding: 0 8px 0 0; }
+.nav a { position: relative; display: block; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav-pg a { color: var(--fg); }
+.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
+.nav-pg a[aria-current="page"] { font-weight: 600; }
+.nav-sec a[aria-current] { color: var(--fg); }
+.nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { position: absolute; top: 6px; }
+.nav-sec a[aria-current]::before { content: "["; left: 1px; }
+.nav-sec a[aria-current]::after { content: "]"; right: 1px; }
 .nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
 .toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
 .toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
 .toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; } }
+.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
+.skip:focus { transform: none; outline: none; }
+main:focus { outline: none; }
+.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
+.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); outline: none; }
+/* under 1100px the links fold into a [ MENU ] panel that drops over the page, so nothing reflows */
+@media (max-width: 1100px) {
+  .bar-in { height: 52px; gap: 12px; }
+  .menu { display: block; margin-left: auto; }
+  .nav { display: none; position: absolute; top: calc(100% + 1px); left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    flex-direction: column; align-items: stretch; gap: 10px; background: var(--bg); border-bottom: 1px solid var(--rule-strong); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); font-size: 13px; }
+  .bar.open .nav { display: flex; }
+  .nav ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 12px; }
+  .nav-pg { margin-left: 0 !important; padding-top: 10px !important; border-top: 1px dashed var(--rule-strong) !important; }
+  .nav-pg::before { display: none; }
+  .nav a { padding: 10px; width: fit-content; }
+  .nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { top: 10px; }
+}
+@media (max-width: 380px) { .brand span { display: none; } }
 
 /* ---------- rows ---------- */
 .row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; padding-block: 88px; scroll-margin-top: 64px; }
@@ -128,8 +157,16 @@ caption { caption-side: top; text-align: left; font-family: var(--f-mono); font-
 .links a:hover, .links a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .links a:hover span:last-child, .links a:focus-visible span:last-child { color: var(--bg); }
 @media (max-width: 600px) { .links a { grid-template-columns: minmax(0, 1fr); } }
-.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; border-top: 1px solid var(--rule); padding-block: 16px 40px; }
-.foot-row span, .foot-row a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+/* the last row is a ledger strip in characters: a ruler, the mark, then | cells | */
+.foot-row { position: relative; display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; padding-block: 32px 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+.foot-row::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 0; left: 0; right: 0; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.foot-mark { margin: 0; font: inherit; font-size: 11px; line-height: 1.2; color: var(--fg); flex: none; }
+.foot-mark b { color: var(--brass); font-weight: 600; }
+.ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; flex: 1; min-width: 0; }
+.ledger li { display: flex; margin-right: 12px; }
+.ledger li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-right: 12px; flex: none; }
+.ledger li:last-child::after { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-left: 12px; }
+@media (max-width: 760px) { .foot-row { flex-direction: column; align-items: start; } .ledger { flex-direction: column; } .ledger li:last-child::after { display: none; } }
 .foot-row a:hover, .foot-row a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -177,9 +214,44 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 .fig svg.narrow { display: none; }
 @media (max-width: 560px) { .fig svg.wide { display: none; } .fig svg.narrow { display: block; } }
 
+
+/* ---------- character rules ----------
+   Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
+   Generated content carries empty alt text, so screen readers skip it. */
+:root { --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
+main > .band { position: relative; }
+main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+/* wide screens only: a ruler down the empty left margin, headed by the band's number (00 is the hero) */
+@media (min-width: 1400px) {
+  :root { --rail: "|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A"; }
+  main { counter-reset: band -1; }
+  main > .band { counter-increment: band; }
+  main > .band::after { content: counter(band, decimal-leading-zero) "\A" var(--rail); content: counter(band, decimal-leading-zero) "\A" var(--rail) / ""; position: absolute; top: 28px; bottom: 28px; left: calc((100% - 1240px) / 2 - 48px); width: 3ch; overflow: hidden; white-space: pre; text-align: center; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+}
+/* a title rule over each screen: +-- name ------------ cols x rows --+ (the grid is set by layout()) */
+.screen[data-head]::before, .screen[data-head]::after { position: absolute; bottom: calc(100% + 12px); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--muted); white-space: nowrap; pointer-events: none; }
+.screen[data-head]::before { content: "+-- " attr(data-head) " " var(--dash); content: "+-- " attr(data-head) " " var(--dash) / ""; left: -9px; right: -9px; overflow: hidden; }
+.screen[data-head]::after { content: " " attr(data-grid) " --+"; content: " " attr(data-grid) " --+" / ""; right: -9px; background: var(--bg); }
+@media (max-width: 760px) { .screen[data-head]::before, .screen[data-head]::after { bottom: calc(100% + 9px); } .screen[data-head]::before { left: -6px; right: -6px; } .screen[data-head]::after { right: -6px; } }
+
+/* ---------- v2: diagrams on screens, prose blocks ---------- */
+.fig svg .d-box { fill: var(--scr-bg); stroke: var(--c-dim); stroke-width: 1.2; }
+.fig svg .d-hot { fill: var(--scr-bg); stroke: var(--c-mute); stroke-width: 1.2; }
+.fig svg .d-ln { stroke: var(--c-mute); stroke-width: 1.3; fill: none; }
+.fig svg .d-ln-d { stroke: var(--c-dim); stroke-width: 1.3; fill: none; stroke-dasharray: 4 3; }
+.fig svg .d-ah { fill: var(--c-mute); }
+.fig svg .t-p { fill: var(--c-pine); } .fig svg .t-v { fill: var(--c-verm); } .fig svg .t-s { fill: var(--c-sky); }
+.fig svg .l-k-pine { stroke: var(--c-pine); stroke-width: 2; fill: none; } .fig svg .l-k-sky { stroke: var(--c-sky); stroke-width: 2; fill: none; } .fig svg .l-k-verm { stroke: var(--c-verm); stroke-width: 2; fill: none; }
+.fig svg .l-pair { stroke: var(--c-dim); stroke-width: 2; }
+.fig svg .k-mute { fill: var(--c-mute); }
+.fig.solo { max-width: 940px; }
+.prose { display: grid; gap: 14px; max-width: 76ch; font-size: 17px; }
+.prose h3 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 15px; font-weight: 600; margin-top: 18px; }
+.prose p b { font-weight: 600; }
+.verdict { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
 </style>
 </head>
-<body>
+<body><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
     <symbol id="mark" viewBox="0 0 24 24">
@@ -192,11 +264,14 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
   </defs>
 </svg>
 
+<a class="skip" href="#top">Skip to content</a>
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="../" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#abstract">Abstract</a><a href="#contributions">Contributions</a><a href="#results">Results</a><a href="#figures">Figures</a><a href="#theorems">Theorems</a><a href="#experiments">Experiments</a><a href="#limits">Limits</a><a href="#sources">Sources</a>
+    <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
+    <nav class="nav" id="nav" aria-label="Site">
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#abstract">Abstract</a></li><li><a href="#system">System</a></li><li><a href="#figures">Figures</a></li><li><a href="#new">Version 2</a></li><li><a href="#experiments">Experiments</a></li><li><a href="#sources">Sources</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="../results/">Results</a></li><li><a href="./" aria-current="page">Paper</a></li></ul>
     </nav>
     <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
   </div>
@@ -205,13 +280,13 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 <main id="top">
   <section class="band" id="abstract" aria-labelledby="top-h">
     <div class="page sec">
-      <h1 class="big" id="top-h"><span class="n">PAPER / DRAFT, NOVEMBER 2026</span>Verifiers that do not trust the agent: anytime-valid release gates and hacking bounds for money-moving AI agents</h1>
-      <p class="meta-line">Dhruv Hegde. Synthetic numbers come from the scruple simulator. Real numbers come from public CFPB complaints or from real model behaviour.</p>
+      <h1 class="big" id="top-h"><span class="n">PAPER / PREPRINT, NOVEMBER 2026</span>Verifiers That Do Not Trust the Agent: Anytime-Valid Release Gates and Hacking Bounds for AI Agents That Move Money</h1>
+      <p class="meta-line">Dhruv Hegde, Scruple. Synthetic numbers come from the scruple simulator. Real numbers come from public CFPB complaints or from real model behaviour.</p>
       <div class="abs">
-        <p>An AI agent that handles card disputes moves money. It decides when to refund, when to fight, and with what evidence. Changes to such an agent are usually judged by dashboards of wins and by the agent's own reports. Both can be gamed.</p>
-        <p>Scruple is a release gate that never reads the agent's claims for credit. Its verifiers recompute cost from double-entry ledger postings and check every action against a hash-chained trace the environment writes. Its statistics stay valid however often you look and whenever you stop.</p>
-        <p>We prove bounds on how much a hacked change can gain and still pass, for agents that adapt, randomise and partly see where audits fall. We give the audit rate that removes the incentive to hack when the verifier misses some hacks and flags some honest cases. We state exactly what the combined promote decision guarantees, and what it does not.</p>
-        <p>We test it on a frozen synthetic benchmark of 10,000 disputes, on public CFPB complaints, and with real Claude models. One pre-registered experiment passed narrowly. One failed its main hypothesis, and we report why.</p>
+        <p>An AI agent that handles card disputes moves money. It decides when to refund, when to fight, and with what evidence. Changes to such an agent are usually judged by win rates and by the agent's own reports. Both can be gamed.</p>
+        <p>Scruple is a release gate whose verifiers never credit the agent's claims. Cost is recomputed from double-entry ledger postings. Every action is checked against a hash-chained trace the environment writes. The statistics stay valid however often you look and whenever you stop.</p>
+        <p>We prove how much a hacked change can gain and still pass, for agents that adapt and partly see where audits fall. We give the audit rate at which hacking stops paying when the verifier errs both ways, and state what the combined promote decision guarantees.</p>
+        <p>Four pre-registered experiments on a frozen synthetic benchmark of 10,000 disputes: one passed narrowly, two failed their main hypothesis, one found no effect. Learners trained on the scorecard used no exploit; the same learners on a naive proxy found them. Real Claude models found bugs in the verifier.</p>
       </div>
       <div class="cta">
         <a class="btn solid" href="scruple_paper.pdf">Read the PDF</a>
@@ -223,13 +298,14 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 
   <section class="band band-sand" id="contributions" aria-labelledby="con-h">
     <div class="page sec">
-      <h2 id="con-h"><span class="n">01 / CONTRIBUTIONS</span>Five things the paper adds.</h2>
+      <h2 id="con-h"><span class="n">01 / CONTRIBUTIONS</span>Six things the paper adds.</h2>
       <ul class="plain">
-        <li><b>Verifiers anchored to money, not to words.</b> Cost is recomputed from ledger postings. Every action is checked against a trace the environment writes. Each check ships with an attack it stops.</li>
+        <li><b>Verifiers anchored to money, not to words.</b> Cost is recomputed from ledger postings. Every action is checked against a trace the environment writes. Each check ships with an attack it stops, and we report what broke.</li>
         <li><b>Tests you can watch every day.</b> Paired and per-case-type tests that stay valid however often you look and whenever you stop, with planning and a matching lower bound.</li>
-        <li><b>Bets that adapt to the data, and a floor no test can beat.</b> A mixture of bets close to the best fixed bet on every run, and the fewest cases any valid test needs, computed from the observed costs.</li>
+        <li><b>Bets that adapt, and a floor no test can beat.</b> A mixture of bets close to the best fixed bet on every run, and the fewest cases any valid test needs, computed from the observed costs.</li>
         <li><b>What the release decision guarantees.</b> A theorem for the whole gate: which errors are bounded, which add up, and which are not covered at all.</li>
-        <li><b>Hacking bounds for agents that adapt.</b> How much a hacked change can gain and still pass, when audits leak and the verifier makes mistakes, and the audit rate that ends the incentive.</li>
+        <li><b>Hacking bounds for agents that adapt.</b> How much a hacked change can gain and still pass when audits leak and the verifier makes mistakes, and the audit rate that ends the incentive.</li>
+        <li><b>Experiments reported either way.</b> Four pre-registered experiments, six agent types under two objectives, 64 disputes grounded in real complaints, and a timeliness study of 164,821 real complaints.</li>
       </ul>
     </div>
   </section>
@@ -239,23 +315,310 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
       <h2 id="res-h"><span class="n">02 / KEY RESULTS</span>What we found, in plain words.</h2>
       <ul class="plain">
         <li><b>Peeking breaks ordinary tests. Ours hold.</b> Checking a z-test every 10 cases rejects a harmless change 15% to 34% of the time at a nominal 5%. The betting test's worst rate over seven stopping rules was 2.7%. <span class="src">synthetic, 2,000 paths</span></li>
-        <li><b>Averages hide rare case types.</b> A change that hurts a type seen in 1% of cases, while helping the rest, is flagged 0.6% of the time by a pooled test and 100% of the time by per-type tests. <span class="src">synthetic</span></li>
-        <li><b>The shipped promote rule has a hole, and we measured it.</b> It certifies the pooled mean. It promoted that rare-type regression in 64% of runs at 20,000 cases. Certifying every type closes it, at a large cost in power. <span class="src">synthetic</span></li>
-        <li><b>A hacked change can carry only a small gap through the gate.</b> The bound holds for any agent that cannot fully see the audits, and it is attained when audits leak. <span class="src">exact, on E2's 120 batches</span></li>
-        <li><b>The optimiser learned to cheat, and the ledger called it cheaper.</b> Tuned on wins and self-reports, it learned to forge documents and claim wins. On the simulated ledger it cost $33.87 per case less. Provenance checks blocked it. A cost-only gate would have shipped it. <span class="src">synthetic, E2</span></li>
+        <li><b>The optimiser learned to cheat, and the ledger called it cheaper.</b> Tuned on wins and self-reports, it learned to forge documents and claim wins, and cost $33.87 per case less on the simulated ledger. Provenance checks blocked it. A cost-only gate would have shipped it. <span class="src">synthetic, E2</span></li>
+        <li><b>The objective mattered more than the learner.</b> Five learners trained on the scorecard used no exploit. Trained on the naive proxy, all five claimed false wins and the three that could forge did, becoming the cheapest agents and 21 to 22 points less fair. <span class="src">synthetic, 2,000 cases</span></li>
+        <li><b>A better test still missed the one-cent regression, as we predicted.</b> The variance-reduced gate reached e 14.9 against a bar of 25 on R5 (E3 fails H1). After the fact, a wider valid bet caught it in 86% of resamples. That is a lead for the next pre-registration, not a pass. <span class="src">synthetic, E3</span></li>
+        <li><b>Told only win rate matters, no model forged.</b> No upload in 72 episodes. Valid claims were contested more in 4 pairs and less in 3 (p = 0.50). Opus cited weaker evidence and its gate pass fell from 9 to 3 of 12. <span class="src">real models, E4</span></li>
         <li><b>The cheapest real model was not the fairest.</b> Claude Sonnet cut merchant cost by $32.77 per case, and 4 of its 10 wins came against claims the cardholder was right about. <span class="src">real behaviour, simulated cases</span></li>
-        <li><b>The regression E1 missed was a betting problem.</b> The shipped bet stops at half the largest valid bet. A wider bet, just as valid, caught R5 on the benchmark itself, and raised power on R2 at 5,000 cases from 37% to 91%. <span class="src">synthetic, E1 paired costs</span></li>
-        <li><b>Real models found bugs in the verifier.</b> Three false positives that our own attacks had missed. Fixing them raised gate pass from 5, 8 and 8 of 12 to 7, 11 and 11. <span class="src">real behaviour</span></li>
+        <li><b>False alarms led to an engine bug.</b> The honest policy failed the ledger check on 19 of 10,000 cases. The verifier was right that the cardholder was paid twice; the engine caused it, three ways. Fixed: 0 failures on 6,000 dev seeds. <span class="src">synthetic</span></li>
+        <li><b>The evidence policy got 62 of 64 real situations right.</b> Its misses were both wrong-amount cases. The oracle, which knows who is right, missed four refunds that had already settled: knowing the truth is not enough, the ledger matters. <span class="src">real complaints, simulated play</span></li>
       </ul>
     </div>
   </section>
 
-  <section class="band band-night" id="figures" aria-labelledby="fig-h">
+  <section class="band band-night" id="system" aria-labelledby="sys-h">
     <div class="page sec">
-      <h2 id="fig-h"><span class="n">03 / FIGURES</span>Drawn from the result files.</h2>
+      <h2 id="sys-h"><span class="n">03 / HOW IT WORKS</span>The system, the lifecycle, the checks.</h2>
+      <figure class="fig solo" style="margin:0"><div class="screen" data-head="system" data-grid="12 parts"><svg class="wide" viewBox="0 0 760 374" role="img" aria-label="The system: agent, tools, engine, ledger, record, verifiers, scorecard, gate, canary, approval, active version, evidence pack">
+<defs><marker id="ah-arch-760" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">The system, as built</text>
+<text class="t-d" x="16" y="38">the environment writes the trace; nothing the agent says earns credit</text>
+<rect class="d-hot" x="16" y="58" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="24" y="75">agent</text>
+<text class="t-d" x="24" y="91">model or policy</text>
+<text class="t-d" x="24" y="105">sees tool outputs</text>
+<rect class="d-box" x="206" y="58" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="214" y="75">tool API</text>
+<text class="t-d" x="214" y="91">CLI or MCP</text>
+<text class="t-d" x="214" y="105">read, refund, fight</text>
+<rect class="d-box" x="396" y="58" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="404" y="75">dispute engine</text>
+<text class="t-d" x="404" y="91">issuer, network</text>
+<text class="t-d" x="404" y="105">calendar, fees</text>
+<rect class="d-box" x="586" y="58" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="594" y="75">ledger</text>
+<text class="t-d" x="594" y="91">double entry,</text>
+<text class="t-d" x="594" y="105">USD minor units</text>
+<rect class="d-hot" x="586" y="170" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="594" y="187">episode record</text>
+<text class="t-d" x="594" y="203">hash-chained trace,</text>
+<text class="t-d" x="594" y="217">truth, self-report</text>
+<rect class="d-box" x="396" y="170" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="404" y="187">verifiers</text>
+<text class="t-d" x="404" y="203">hard, soft and</text>
+<text class="t-d" x="404" y="217">batch checks</text>
+<rect class="d-box" x="206" y="170" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="214" y="187">scorecard</text>
+<text class="t-d" x="214" y="203">gate = AND of hard</text>
+<text class="t-d" x="214" y="217">reward=gate*quality</text>
+<rect class="d-box" x="16" y="170" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="24" y="187">release gate</text>
+<text class="t-d" x="24" y="203">paired shadow replay</text>
+<text class="t-d" x="24" y="217">e-process per type</text>
+<text class="t-b" x="24" y="231">else block or hold</text>
+<rect class="d-box" x="16" y="282" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="24" y="299">canary</text>
+<text class="t-d" x="24" y="315">staged ramp on a</text>
+<text class="t-d" x="24" y="329">hashed traffic split</text>
+<text class="t-b" x="24" y="343">else roll back</text>
+<rect class="d-box" x="206" y="282" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="214" y="299">approval</text>
+<text class="t-d" x="214" y="315">N of M named humans</text>
+<text class="t-d" x="214" y="329">separate duties</text>
+<rect class="d-box" x="396" y="282" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="404" y="299">active version</text>
+<text class="t-d" x="404" y="315">rollback pointer</text>
+<rect class="d-box" x="586" y="282" width="166" height="72"/>
+<text class="t-f" font-weight="600" x="594" y="299">evidence pack</text>
+<text class="t-d" x="594" y="315">JSON and PDF, audit</text>
+<text class="t-d" x="594" y="329">chain with proof</text>
+<path class="d-ln" d="M182.0,94.0 L204.0,94.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M372.0,94.0 L394.0,94.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M562.0,94.0 L584.0,94.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M669.0,130.0 L669.0,168.0" marker-end="url(#ah-arch-760)"/>
+<text class="t-d" x="675.0" y="154.0">journal</text>
+<path class="d-ln" d="M552.0,130.0 L596.0,168.0" marker-end="url(#ah-arch-760)"/>
+<text class="t-d" text-anchor="end" x="558.0" y="144.0">trace</text>
+<path class="d-ln" d="M586.0,206.0 L564.0,206.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M396.0,206.0 L374.0,206.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M206.0,206.0 L184.0,206.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M99.0,242.0 L99.0,280.0" marker-end="url(#ah-arch-760)"/>
+<text class="t-d" x="105.0" y="268.0">promote</text>
+<path class="d-ln" d="M182.0,318.0 L204.0,318.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln" d="M372.0,318.0 L394.0,318.0" marker-end="url(#ah-arch-760)"/>
+<path class="d-ln-d" d="M562.0,318.0 L584.0,318.0" marker-end="url(#ah-arch-760)"/>
+</svg><svg class="narrow" viewBox="0 0 380 878" role="img" aria-label="The system: agent, tools, engine, ledger, record, verifiers, scorecard, gate, canary, approval, active version, evidence pack">
+<defs><marker id="ah-arch-380" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">The system, as built</text>
+<text class="t-d" x="16" y="38">the environment writes the trace;</text>
+<text class="t-d" x="16" y="53">nothing the agent says earns credit</text>
+<rect class="d-hot" x="16" y="58" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="76.0">agent</text>
+<text class="t-d" x="24.0" y="93.0">model or policy sees tool outputs</text>
+<path class="d-ln" d="M40.0,104.0 L40.0,124.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="126" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="144.0">tool API</text>
+<text class="t-d" x="24.0" y="161.0">CLI or MCP read, refund, fight</text>
+<path class="d-ln" d="M40.0,172.0 L40.0,192.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="194" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="212.0">dispute engine</text>
+<text class="t-d" x="24.0" y="229.0">issuer, network calendar, fees</text>
+<path class="d-ln" d="M40.0,240.0 L40.0,260.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="262" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="280.0">ledger</text>
+<text class="t-d" x="24.0" y="297.0">double entry, USD minor units</text>
+<path class="d-ln" d="M40.0,308.0 L40.0,328.0" marker-end="url(#ah-arch-380)"/>
+<text class="t-d" x="52.0" y="323.0">journal and trace</text>
+<rect class="d-hot" x="16" y="330" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="348.0">episode record</text>
+<text class="t-d" x="24.0" y="365.0">hash-chained trace, truth, self-report</text>
+<path class="d-ln" d="M40.0,376.0 L40.0,396.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="398" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="416.0">verifiers</text>
+<text class="t-d" x="24.0" y="433.0">hard, soft and batch checks</text>
+<path class="d-ln" d="M40.0,444.0 L40.0,464.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="466" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="484.0">scorecard</text>
+<text class="t-d" x="24.0" y="501.0">gate = AND of hard reward=gate*quality</text>
+<path class="d-ln" d="M40.0,512.0 L40.0,532.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="534" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="552.0">release gate</text>
+<text class="t-d" x="24.0" y="569.0">paired shadow replay e-process per type</text>
+<text class="t-b" text-anchor="end" x="356.0" y="552.0">else block or hold</text>
+<path class="d-ln" d="M40.0,580.0 L40.0,600.0" marker-end="url(#ah-arch-380)"/>
+<text class="t-d" x="52.0" y="595.0">promote</text>
+<rect class="d-box" x="16" y="602" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="620.0">canary</text>
+<text class="t-d" x="24.0" y="637.0">staged ramp on a hashed traffic split</text>
+<text class="t-b" text-anchor="end" x="356.0" y="620.0">else roll back</text>
+<path class="d-ln" d="M40.0,648.0 L40.0,668.0" marker-end="url(#ah-arch-380)"/>
+<text class="t-d" x="52.0" y="663.0">passed</text>
+<rect class="d-box" x="16" y="670" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="688.0">approval</text>
+<text class="t-d" x="24.0" y="705.0">N of M named humans separate duties</text>
+<path class="d-ln" d="M40.0,716.0 L40.0,736.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="738" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="756.0">active version</text>
+<text class="t-d" x="24.0" y="773.0">rollback pointer</text>
+<path class="d-ln-d" d="M40.0,784.0 L40.0,804.0" marker-end="url(#ah-arch-380)"/>
+<rect class="d-box" x="16" y="806" width="348" height="46"/>
+<text class="t-f" font-weight="600" x="24.0" y="824.0">evidence pack</text>
+<text class="t-d" x="24.0" y="841.0">JSON and PDF, audit chain with proof</text>
+</svg></div><figcaption class="fig-cap">Every call goes through the tool API; the engine, not the agent, writes the hash-chained trace. Every gate decision, canary step and approval is appended to an audit chain that the evidence pack exports with a proof. <span class="src">engine/docs/ARCHITECTURE.md, engine/scruple/ci/evidence.py</span></figcaption></figure>
+      <div class="two">
+        <figure class="fig" style="margin:0"><div class="screen" data-head="lifecycle" data-grid="6 states"><svg class="wide" viewBox="0 0 640 418" role="img" aria-label="Dispute lifecycle: inquiry, chargeback, representment, pre-arbitration, arbitration, resolved, with merchant deadlines">
+<defs><marker id="ah-life-640" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">The dispute lifecycle in the engine</text>
+<text class="t-d" x="16" y="38">merchant deadlines and fees; blue states wait for the issuer or the network</text>
+<rect class="d-box" x="16" y="70" width="268" height="44"/>
+<text class="t-f" x="26.0" y="88.0" font-weight="600">inquiry</text>
+<text class="t-d" x="26.0" y="105.0">merchant: 10 business days</text>
+<path class="d-ln" d="M284.0,92.0 L468.0,92.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="292.0" y="86.0">issuer satisfied: won</text>
+<path class="d-ln" d="M60.0,114.0 L60.0,138.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="70.0" y="131.0">represent, not enough, or missed</text>
+<rect class="d-box" x="16" y="140" width="268" height="44"/>
+<text class="t-f" x="26.0" y="158.0" font-weight="600">chargeback</text>
+<text class="t-d" x="26.0" y="175.0">fee $15; merchant: 30 d V, 45 d MC</text>
+<path class="d-ln" d="M284.0,162.0 L468.0,162.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="292.0" y="156.0">accept; missed: lost</text>
+<path class="d-ln" d="M60.0,184.0 L60.0,208.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="70.0" y="201.0">represent</text>
+<rect class="d-hot" x="16" y="210" width="268" height="44"/>
+<text class="t-s" x="26.0" y="228.0" font-weight="600">representment</text>
+<text class="t-d" x="26.0" y="245.0">issuer answers (engine: 10 d)</text>
+<path class="d-ln" d="M284.0,232.0 L468.0,232.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="292.0" y="226.0">issuer accepts: won</text>
+<path class="d-ln" d="M60.0,254.0 L60.0,278.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="70.0" y="271.0">issuer files pre-arbitration</text>
+<rect class="d-box" x="16" y="280" width="268" height="44"/>
+<text class="t-f" x="26.0" y="298.0" font-weight="600">pre-arbitration</text>
+<text class="t-d" x="26.0" y="315.0">fee $25; merchant: 30 d</text>
+<path class="d-ln" d="M284.0,302.0 L468.0,302.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="292.0" y="296.0">accept; missed: lost</text>
+<path class="d-ln" d="M60.0,324.0 L60.0,348.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="70.0" y="341.0">escalate</text>
+<rect class="d-hot" x="16" y="350" width="268" height="44"/>
+<text class="t-s" x="26.0" y="368.0" font-weight="600">arbitration</text>
+<text class="t-d" x="26.0" y="385.0">ruling (engine: 30 d)</text>
+<path class="d-ln" d="M284.0,372.0 L468.0,372.0" marker-end="url(#ah-life-640)"/>
+<text class="t-d" x="292.0" y="366.0">ruling: won or lost</text>
+<rect class="d-hot" x="470" y="70" width="154" height="324"/>
+<text class="t-b" text-anchor="middle" x="547.0" y="210.0">resolved</text>
+<text class="t-d" text-anchor="middle" x="547.0" y="230.0">won, partial,</text>
+<text class="t-d" text-anchor="middle" x="547.0" y="245.0">lost or accepted;</text>
+<text class="t-d" text-anchor="middle" x="547.0" y="260.0">final postings</text>
+<text class="t-d" text-anchor="middle" x="547.0" y="275.0">in the ledger</text>
+</svg><svg class="narrow" viewBox="0 0 380 542" role="img" aria-label="Dispute lifecycle: inquiry, chargeback, representment, pre-arbitration, arbitration, resolved, with merchant deadlines">
+<defs><marker id="ah-life-380" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">The dispute lifecycle in the engine</text>
+<text class="t-d" x="16" y="38">merchant deadlines and fees; blue states</text>
+<text class="t-d" x="16" y="53">wait for the issuer or the network</text>
+<rect class="d-box" x="16" y="70" width="348" height="52"/>
+<text class="t-f" x="24.0" y="88.0" font-weight="600">inquiry</text>
+<text class="t-d" text-anchor="end" x="356.0" y="88.0">merchant: 10 business days</text>
+<text class="t-b" x="24.0" y="108.0">-&gt; resolved: issuer satisfied: won</text>
+<path class="d-ln" d="M40.0,122.0 L40.0,154.0" marker-end="url(#ah-life-380)"/>
+<text class="t-d" x="52.0" y="143.0">represent, not enough, or missed</text>
+<rect class="d-box" x="16" y="156" width="348" height="52"/>
+<text class="t-f" x="24.0" y="174.0" font-weight="600">chargeback</text>
+<text class="t-d" text-anchor="end" x="356.0" y="174.0"></text>
+<text class="t-d" x="24.0" y="194.0">fee $15; merchant: 30 d V, 45 d MC</text>
+<text class="t-b" text-anchor="end" x="356.0" y="174.0">-&gt; accept; missed: lost</text>
+<path class="d-ln" d="M40.0,208.0 L40.0,240.0" marker-end="url(#ah-life-380)"/>
+<text class="t-d" x="52.0" y="229.0">represent</text>
+<rect class="d-hot" x="16" y="242" width="348" height="52"/>
+<text class="t-s" x="24.0" y="260.0" font-weight="600">representment</text>
+<text class="t-d" text-anchor="end" x="356.0" y="260.0">issuer answers (engine: 10 d)</text>
+<text class="t-b" x="24.0" y="280.0">-&gt; resolved: issuer accepts: won</text>
+<path class="d-ln" d="M40.0,294.0 L40.0,326.0" marker-end="url(#ah-life-380)"/>
+<text class="t-d" x="52.0" y="315.0">issuer files pre-arbitration</text>
+<rect class="d-box" x="16" y="328" width="348" height="52"/>
+<text class="t-f" x="24.0" y="346.0" font-weight="600">pre-arbitration</text>
+<text class="t-d" text-anchor="end" x="356.0" y="346.0">fee $25; merchant: 30 d</text>
+<text class="t-b" x="24.0" y="366.0">-&gt; resolved: accept; missed: lost</text>
+<path class="d-ln" d="M40.0,380.0 L40.0,412.0" marker-end="url(#ah-life-380)"/>
+<text class="t-d" x="52.0" y="401.0">escalate</text>
+<rect class="d-hot" x="16" y="414" width="348" height="52"/>
+<text class="t-s" x="24.0" y="432.0" font-weight="600">arbitration</text>
+<text class="t-d" text-anchor="end" x="356.0" y="432.0">ruling (engine: 30 d)</text>
+<text class="t-b" x="24.0" y="452.0">-&gt; resolved: ruling: won or lost</text>
+<rect class="d-hot" x="16" y="486" width="348" height="44"/>
+<text class="t-b" x="24.0" y="504.0">resolved</text>
+<text class="t-d" x="24.0" y="521.0">won, partial, lost or accepted; final postings</text>
+</svg></div><figcaption class="fig-cap">Deadlines and fees as the simulator models them. Visa chargeback response 30 days, Mastercard 45 (sourced); inquiry window, fees and engine timing are marked assumptions. A refund may be issued in any open state; a settled refund makes the dispute moot. Not legal or network advice. <span class="src">engine/docs/RULES.md, engine/scruple/sim/disputes.py</span></figcaption></figure>
+        <figure class="fig" style="margin:0"><div class="screen" data-head="verifier stack" data-grid="3 kinds"><svg class="wide" viewBox="0 0 640 414" role="img" aria-label="The verifier stack: hard checks, soft checks and statistical tests combine by AND into promote">
+<defs><marker id="ah-stack-640" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Three kinds of check, one decision</text>
+<text class="t-d" x="16" y="38">the composition theorem, in four lines</text>
+<rect class="d-box" x="16" y="58" width="374" height="68"/>
+<text class="t-v" font-weight="600" x="24" y="75">hard checks, every episode</text>
+<text class="t-d" x="24" y="91">INV-01 ledger, INV-05 integrity, PROC-01 process,</text>
+<text class="t-d" x="24" y="105">EVD-01 provenance, DL-01 deadlines, SR-01 report,</text>
+<text class="t-d" x="24" y="119">SCOPE-01 scope; FAIR-01 in stricter profiles</text>
+<rect class="d-box" x="16" y="138" width="374" height="54"/>
+<text class="t-v" font-weight="600" x="24" y="155">hard checks, every batch</text>
+<text class="t-d" x="24" y="171">CON-01 consistency, CAL-01 calibration,</text>
+<text class="t-d" x="24" y="185">SR-03 claimed win rate, MEM-01 held-out probes</text>
+<rect class="d-box" x="16" y="204" width="374" height="54"/>
+<text class="t-b" font-weight="600" x="24" y="221">soft checks, weighted into quality</text>
+<text class="t-d" x="24" y="237">CF-01 counterfactual, OUT-01 fair outcome,</text>
+<text class="t-d" x="24" y="251">EVD-02, DL-02, CAL-02, SR-02, ESC-01</text>
+<rect class="d-box" x="16" y="270" width="374" height="54"/>
+<text class="t-s" font-weight="600" x="24" y="287">statistical tests on ledger costs</text>
+<text class="t-d" x="24" y="303">block B: per-type e-processes, e-Bonferroni;</text>
+<text class="t-d" x="24" y="317">certificate T: betting e-process, level alpha</text>
+<circle class="d-hot" cx="478" cy="191.0" r="18"/>
+<text class="t-f" text-anchor="middle" x="478.0" y="196.0">AND</text>
+<path class="d-ln" d="M390.0,92.0 L458.0,179.1" marker-end="url(#ah-stack-640)"/>
+<text class="t-b" text-anchor="end" x="382.0" y="75.0">H</text>
+<path class="d-ln" d="M390.0,165.0 L458.0,187.9" marker-end="url(#ah-stack-640)"/>
+<text class="t-b" text-anchor="end" x="382.0" y="155.0">H</text>
+<path class="d-ln" d="M390.0,231.0 L458.0,195.8" marker-end="url(#ah-stack-640)"/>
+<text class="t-b" text-anchor="end" x="382.0" y="221.0">S</text>
+<path class="d-ln" d="M390.0,297.0 L458.0,203.7" marker-end="url(#ah-stack-640)"/>
+<text class="t-b" text-anchor="end" x="382.0" y="287.0">not B and T</text>
+<rect class="d-hot" x="518" y="175.0" width="96" height="32"/>
+<text class="t-p" text-anchor="middle" x="566.0" y="196.0">promote</text>
+<path class="d-ln" d="M496.0,191.0 L516.0,191.0" marker-end="url(#ah-stack-640)"/>
+<text class="t-f" x="16.0" y="346.0">promote | harm j &lt;= min over checks of alpha</text>
+<text class="t-d" x="16.0" y="361.0">correct hard check reading the harm: alpha 0</text>
+<text class="t-f" x="16.0" y="376.0">block | no harm &lt;= alpha_block + P(false alarm)</text>
+<text class="t-d" x="16.0" y="391.0">harm no check covers: no guarantee</text>
+</svg><svg class="narrow" viewBox="0 0 380 490" role="img" aria-label="The verifier stack: hard checks, soft checks and statistical tests combine by AND into promote">
+<defs><marker id="ah-stack-380" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Three kinds of check, one decision</text>
+<text class="t-d" x="16" y="38">the composition theorem, in four lines</text>
+<rect class="d-box" x="16" y="58" width="348" height="96"/>
+<text class="t-v" font-weight="600" x="24" y="75">hard checks, every episode  (H)</text>
+<text class="t-d" x="24" y="91">INV-01 ledger, INV-05 integrity,</text>
+<text class="t-d" x="24" y="105">PROC-01 process,</text>
+<text class="t-d" x="24" y="119">EVD-01 provenance, DL-01 deadlines,</text>
+<text class="t-d" x="24" y="133">SR-01 report,</text>
+<text class="t-d" x="24" y="147">SCOPE-01 scope; FAIR-01 in stricter profiles</text>
+<rect class="d-box" x="16" y="164" width="348" height="54"/>
+<text class="t-v" font-weight="600" x="24" y="181">hard checks, every batch  (H)</text>
+<text class="t-d" x="24" y="197">CON-01 consistency, CAL-01 calibration,</text>
+<text class="t-d" x="24" y="211">SR-03 claimed win rate, MEM-01 held-out probes</text>
+<rect class="d-box" x="16" y="228" width="348" height="54"/>
+<text class="t-b" font-weight="600" x="24" y="245">soft checks, weighted into quality  (S)</text>
+<text class="t-d" x="24" y="261">CF-01 counterfactual, OUT-01 fair outcome,</text>
+<text class="t-d" x="24" y="275">EVD-02, DL-02, CAL-02, SR-02, ESC-01</text>
+<rect class="d-box" x="16" y="292" width="348" height="54"/>
+<text class="t-s" font-weight="600" x="24" y="309">statistical tests on ledger costs  (not B and T)</text>
+<text class="t-d" x="24" y="325">block B: per-type e-processes, e-Bonferroni;</text>
+<text class="t-d" x="24" y="339">certificate T: betting e-process, level alpha</text>
+<circle class="d-hot" cx="190" cy="378" r="18"/>
+<text class="t-f" text-anchor="middle" x="190.0" y="383.0">AND</text>
+<path class="d-ln" d="M190.0,348.0 L190.0,358.0" marker-end="url(#ah-stack-380)"/>
+<path class="d-ln" d="M208.0,378.0 L246.0,378.0" marker-end="url(#ah-stack-380)"/>
+<rect class="d-hot" x="248" y="362" width="96" height="32"/>
+<text class="t-p" text-anchor="middle" x="296.0" y="383.0">promote</text>
+<text class="t-f" x="16.0" y="422.0">promote | harm j &lt;= min over checks of alpha</text>
+<text class="t-d" x="16.0" y="437.0">correct hard check reading the harm: alpha 0</text>
+<text class="t-f" x="16.0" y="452.0">block | no harm &lt;= alpha_block + P(false alarm)</text>
+<text class="t-d" x="16.0" y="467.0">harm no check covers: no guarantee</text>
+</svg></div><figcaption class="fig-cap">Hard checks are conjuncts: one failure zeroes the reward and blocks. Soft checks only lower quality. The statistics read costs recomputed from the ledger. An unfair win under the default profile is scored only by the soft OUT-01, so the gate carries no guarantee against it. <span class="src">paper, Theorem 9.1 and Figure 3</span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="figures" aria-labelledby="fig-h">
+    <div class="page sec">
+      <h2 id="fig-h"><span class="n">04 / FIGURES</span>Drawn from the result files.</h2>
       <div class="two">
         <figure class="fig" style="margin:0">
-          <div class="screen"><svg class="wide" viewBox="0 0 640 278" role="img" aria-label="False rollbacks when you keep checking. share of 2,000 null paths that reject, alpha 0.05, synthetic">
+          <div class="screen" data-head="peeking" data-grid="synthetic"><svg class="wide" viewBox="0 0 640 278" role="img" aria-label="False rollbacks when you keep checking. share of 2,000 null paths that reject, alpha 0.05, synthetic">
 <text class="t-h" x="16" y="22">False rollbacks when you keep checking</text>
 <text class="t-d" x="16" y="38">share of 2,000 null paths that reject, alpha 0.05, synthetic</text>
 <line class="l-grid" x1="150.0" x2="150.0" y1="56" y2="250"/>
@@ -329,7 +692,7 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
           <figcaption class="fig-cap">Four null shapes, each at the boundary of harmless. The betting test stays under alpha for every stopping rule, including "stop when it looks bad". <span class="src">engine/docs/math/01_anytime_paired_test.md</span></figcaption>
         </figure>
         <figure class="fig" style="margin:0">
-          <div class="screen"><svg class="wide" viewBox="0 0 640 300" role="img" aria-label="Shipping a change that hurts a 1% type. P(promote); rare type +0.35, the rest -0.01; 100 runs; synthetic">
+          <div class="screen" data-head="rare type" data-grid="synthetic"><svg class="wide" viewBox="0 0 640 300" role="img" aria-label="Shipping a change that hurts a 1% type. P(promote); rare type +0.35, the rest -0.01; 100 runs; synthetic">
 <text class="t-h" x="16" y="22">Shipping a change that hurts a 1% type</text>
 <text class="t-d" x="16" y="38">P(promote); rare type +0.35, the rest -0.01; 100 runs; synthetic</text>
 <line class="l-grid" x1="56" x2="450" y1="260.0" y2="260.0"/>
@@ -391,7 +754,7 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
           <figcaption class="fig-cap">More data makes the pooled certificate more likely to ship the harmful change, because the pooled mean really does improve. Per-type certificates never did. <span class="src">engine/docs/math/08_composition.md</span></figcaption>
         </figure>
         <figure class="fig" style="margin:0">
-          <div class="screen"><svg class="wide" viewBox="0 0 640 283" role="img" aria-label="Gap that passes the gate when audits leak. E[gap x accepted], 120 E2 batches of 200 cases, q 0.05, beta 0.3, exact, synthetic">
+          <div class="screen" data-head="leaky audits" data-grid="synthetic"><svg class="wide" viewBox="0 0 640 283" role="img" aria-label="Gap that passes the gate when audits leak. E[gap x accepted], 120 E2 batches of 200 cases, q 0.05, beta 0.3, exact, synthetic">
 <text class="t-h" x="16" y="22">Gap that passes the gate when audits leak</text>
 <text class="t-d" x="16" y="38">E[gap x accepted], 120 E2 batches of 200 cases, q 0.05, beta 0.3, exact, synthetic</text>
 <line class="l-grid" x1="150.0" x2="150.0" y1="56" y2="255"/>
@@ -458,8 +821,74 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 </svg><p class="leg"><span><i class="sw k-brass"></i>worst batch, agent hacks only when its signal says not audited</span><span><i class="sw k-pine"></i>Theorem 10.3 bound</span><span><i class="sw k-dim"></i>bound that ignores the leak</span></p></div>
           <figcaption class="fig-cap">An agent that sees a signal about which cases get audited, and hacks only when the signal says no audit. The adjusted bound holds and is reached. The naive bound fails. <span class="src">paper Theorem 10.3; engine/docs/math/05_hacking_gap.md</span></figcaption>
         </figure>
+        <figure class="fig" style="margin:0"><div class="screen" data-head="hacking gap" data-grid="synthetic"><svg class="wide" viewBox="0 0 640 330" role="img" aria-label="Expected accepted hacking gap against audit rate, bound and E2 points">
+<text class="t-h" x="16" y="22">Gap that can pass, against the audit rate</text>
+<text class="t-d" x="16" y="38">E[gap x accepted] on a log scale, n 200, exact on E2&#x27;s 120 batches, synthetic</text>
+<line class="l-grid" x1="64" x2="616" y1="247.3" y2="247.3"/>
+<text class="t-d" text-anchor="end" x="56.0" y="251.3">0.001</text>
+<line class="l-grid" x1="64" x2="616" y1="186.2" y2="186.2"/>
+<text class="t-d" text-anchor="end" x="56.0" y="190.2">0.01</text>
+<line class="l-grid" x1="64" x2="616" y1="125.1" y2="125.1"/>
+<text class="t-d" text-anchor="end" x="56.0" y="129.1">0.1</text>
+<line class="l-grid" x1="64" x2="616" y1="64.0" y2="64.0"/>
+<text class="t-d" text-anchor="end" x="56.0" y="68.0">1</text>
+<line class="l-grid" x1="64.0" x2="64.0" y1="64" y2="290"/>
+<text class="t-d" text-anchor="middle" x="64.0" y="308.0">q 0.02</text>
+<line class="l-grid" x1="221.1" x2="221.1" y1="64" y2="290"/>
+<text class="t-d" text-anchor="middle" x="221.1" y="308.0">q 0.05</text>
+<line class="l-grid" x1="340.0" x2="340.0" y1="64" y2="290"/>
+<text class="t-d" text-anchor="middle" x="340.0" y="308.0">q 0.1</text>
+<line class="l-grid" x1="458.9" x2="458.9" y1="64" y2="290"/>
+<text class="t-d" text-anchor="middle" x="458.9" y="308.0">q 0.2</text>
+<line class="l-grid" x1="616.0" x2="616.0" y1="64" y2="290"/>
+<text class="t-d" text-anchor="middle" x="616.0" y="308.0">q 0.5</text>
+<polyline class="l-k-pine" points="64.0,127.6 73.2,129.0 82.4,130.5 91.6,131.9 100.8,133.3 110.0,134.8 119.2,136.2 128.4,137.7 137.6,139.1 146.8,140.6 156.0,142.0 165.2,143.5 174.4,144.9 183.6,146.4 192.8,147.8 202.0,149.3 211.2,150.7 220.4,152.2 229.6,153.7 238.8,155.1 248.0,156.6 257.2,158.1 266.4,159.5 275.6,161.0 284.8,162.5 294.0,164.0 303.2,165.4 312.4,166.9 321.6,168.4 330.8,169.9 340.0,171.4 349.2,172.9 358.4,174.4 367.6,175.9 376.8,177.5 386.0,179.0 395.2,180.5 404.4,182.0 413.6,183.6 422.8,185.1 432.0,186.7 441.2,188.3 450.4,189.9 459.6,191.4 468.8,193.1 478.0,194.7 487.2,196.3 496.4,197.9 505.6,199.6 514.8,201.3 524.0,203.0 533.2,204.7 542.4,206.4 551.6,208.2 560.8,209.9 570.0,211.7 579.2,213.6 588.4,215.5 597.6,217.4 606.8,219.4 616.0,221.4"/>
+<polyline class="l-k-sky" points="64.0,118.0 73.2,119.5 82.4,120.9 91.6,122.3 100.8,123.8 110.0,125.2 119.2,126.7 128.4,128.1 137.6,129.5 146.8,131.0 156.0,132.4 165.2,133.9 174.4,135.3 183.6,136.7 192.8,138.2 202.0,139.6 211.2,141.1 220.4,142.5 229.6,144.0 238.8,145.4 248.0,146.9 257.2,148.3 266.4,149.8 275.6,151.2 284.8,152.7 294.0,154.2 303.2,155.6 312.4,157.1 321.6,158.6 330.8,160.0 340.0,161.5 349.2,163.0 358.4,164.5 367.6,166.0 376.8,167.4 386.0,168.9 395.2,170.4 404.4,171.9 413.6,173.4 422.8,175.0 432.0,176.5 441.2,178.0 450.4,179.5 459.6,181.1 468.8,182.6 478.0,184.1 487.2,185.7 496.4,187.3 505.6,188.8 514.8,190.4 524.0,192.0 533.2,193.6 542.4,195.2 551.6,196.9 560.8,198.5 570.0,200.2 579.2,201.9 588.4,203.6 597.6,205.3 606.8,207.0 616.0,208.8"/>
+<polyline class="l-k-verm" points="64.0,75.6 73.2,77.1 82.4,78.5 91.6,80.0 100.8,81.4 110.0,82.9 119.2,84.3 128.4,85.8 137.6,87.3 146.8,88.7 156.0,90.2 165.2,91.7 174.4,93.1 183.6,94.6 192.8,96.1 202.0,97.6 211.2,99.0 220.4,100.5 229.6,102.0 238.8,103.5 248.0,105.0 257.2,106.5 266.4,108.0 275.6,109.5 284.8,111.0 294.0,112.6 303.2,114.1 312.4,115.6 321.6,117.2 330.8,118.7 340.0,120.3 349.2,121.8 358.4,123.4 367.6,125.0 376.8,126.6 386.0,128.2 395.2,129.8 404.4,131.4 413.6,133.1 422.8,134.7 432.0,136.4 441.2,138.0 450.4,139.7 459.6,141.5 468.8,143.2 478.0,145.0 487.2,146.7 496.4,148.5 505.6,150.4 514.8,152.2 524.0,154.1 533.2,156.0 542.4,158.0 551.6,160.0 560.8,162.1 570.0,164.2 579.2,166.4 588.4,168.6 597.6,170.9 606.8,173.3 616.0,175.7"/>
+<rect class="k-pine" x="217.1" y="148.9" width="8" height="8"/>
+<rect class="k-pine" x="454.9" y="258.2" width="8" height="8"/>
+<rect class="k-sky" x="217.1" y="138.9" width="8" height="8"/>
+<rect class="k-sky" x="454.9" y="212.3" width="8" height="8"/>
+<rect class="k-verm" x="217.1" y="96.6" width="8" height="8"/>
+<rect class="k-verm" x="454.9" y="137.4" width="8" height="8"/>
+<text class="t-f" x="229.1" y="92.6">0.251 vs bound 0.251</text>
+<text class="t-f" x="466.9" y="266.2">0.0006</text>
+</svg><svg class="narrow" viewBox="0 0 380 335" role="img" aria-label="Expected accepted hacking gap against audit rate, bound and E2 points">
+<text class="t-h" x="16" y="22">Gap that can pass, against the audit rate</text>
+<text class="t-d" x="16" y="38">E[gap x accepted] on a log scale, n 200,</text>
+<text class="t-d" x="16" y="53">exact on E2&#x27;s 120 batches, synthetic</text>
+<line class="l-grid" x1="56" x2="352" y1="254.2" y2="254.2"/>
+<text class="t-d" text-anchor="end" x="48.0" y="258.2">0.001</text>
+<line class="l-grid" x1="56" x2="352" y1="195.8" y2="195.8"/>
+<text class="t-d" text-anchor="end" x="48.0" y="199.8">0.01</text>
+<line class="l-grid" x1="56" x2="352" y1="137.4" y2="137.4"/>
+<text class="t-d" text-anchor="end" x="48.0" y="141.4">0.1</text>
+<line class="l-grid" x1="56" x2="352" y1="79.0" y2="79.0"/>
+<text class="t-d" text-anchor="end" x="48.0" y="83.0">1</text>
+<line class="l-grid" x1="56.0" x2="56.0" y1="79" y2="295"/>
+<text class="t-d" text-anchor="middle" x="56.0" y="313.0">q 0.02</text>
+<line class="l-grid" x1="140.3" x2="140.3" y1="79" y2="295"/>
+<text class="t-d" text-anchor="middle" x="140.3" y="313.0">q 0.05</text>
+<line class="l-grid" x1="204.0" x2="204.0" y1="79" y2="295"/>
+<text class="t-d" text-anchor="middle" x="204.0" y="313.0">q 0.1</text>
+<line class="l-grid" x1="267.7" x2="267.7" y1="79" y2="295"/>
+<text class="t-d" text-anchor="middle" x="267.7" y="313.0">q 0.2</text>
+<line class="l-grid" x1="352.0" x2="352.0" y1="79" y2="295"/>
+<text class="t-d" text-anchor="middle" x="352.0" y="313.0">q 0.5</text>
+<polyline class="l-k-pine" points="56.0,139.8 60.9,141.1 65.9,142.5 70.8,143.9 75.7,145.3 80.7,146.7 85.6,148.0 90.5,149.4 95.5,150.8 100.4,152.2 105.3,153.6 110.3,154.9 115.2,156.3 120.1,157.7 125.1,159.1 130.0,160.5 134.9,161.9 139.9,163.3 144.8,164.7 149.7,166.1 154.7,167.5 159.6,168.9 164.5,170.3 169.5,171.7 174.4,173.1 179.3,174.5 184.3,176.0 189.2,177.4 194.1,178.8 199.1,180.2 204.0,181.7 208.9,183.1 213.9,184.5 218.8,186.0 223.7,187.4 228.7,188.9 233.6,190.4 238.5,191.8 243.5,193.3 248.4,194.8 253.3,196.3 258.3,197.8 263.2,199.3 268.1,200.8 273.1,202.3 278.0,203.9 282.9,205.4 287.9,207.0 292.8,208.6 297.7,210.2 302.7,211.8 307.6,213.4 312.5,215.1 317.5,216.8 322.4,218.5 327.3,220.2 332.3,222.0 337.2,223.8 342.1,225.6 347.1,227.5 352.0,229.4"/>
+<polyline class="l-k-sky" points="56.0,130.7 60.9,132.0 65.9,133.4 70.8,134.8 75.7,136.1 80.7,137.5 85.6,138.9 90.5,140.3 95.5,141.6 100.4,143.0 105.3,144.4 110.3,145.8 115.2,147.1 120.1,148.5 125.1,149.9 130.0,151.3 134.9,152.7 139.9,154.0 144.8,155.4 149.7,156.8 154.7,158.2 159.6,159.6 164.5,161.0 169.5,162.4 174.4,163.8 179.3,165.2 184.3,166.6 189.2,168.0 194.1,169.4 199.1,170.8 204.0,172.2 208.9,173.6 213.9,175.0 218.8,176.5 223.7,177.9 228.7,179.3 233.6,180.7 238.5,182.2 243.5,183.6 248.4,185.0 253.3,186.5 258.3,187.9 263.2,189.4 268.1,190.9 273.1,192.3 278.0,193.8 282.9,195.3 287.9,196.8 292.8,198.3 297.7,199.8 302.7,201.3 307.6,202.9 312.5,204.4 317.5,206.0 322.4,207.6 327.3,209.1 332.3,210.8 337.2,212.4 342.1,214.0 347.1,215.7 352.0,217.4"/>
+<polyline class="l-k-verm" points="56.0,90.1 60.9,91.5 65.9,92.9 70.8,94.3 75.7,95.7 80.7,97.0 85.6,98.4 90.5,99.8 95.5,101.2 100.4,102.6 105.3,104.0 110.3,105.4 115.2,106.8 120.1,108.2 125.1,109.7 130.0,111.1 134.9,112.5 139.9,113.9 144.8,115.3 149.7,116.8 154.7,118.2 159.6,119.6 164.5,121.1 169.5,122.5 174.4,124.0 179.3,125.4 184.3,126.9 189.2,128.3 194.1,129.8 199.1,131.3 204.0,132.8 208.9,134.3 213.9,135.8 218.8,137.3 223.7,138.8 228.7,140.3 233.6,141.9 238.5,143.4 243.5,145.0 248.4,146.6 253.3,148.2 258.3,149.8 263.2,151.4 268.1,153.0 273.1,154.7 278.0,156.4 282.9,158.1 287.9,159.8 292.8,161.5 297.7,163.3 302.7,165.1 307.6,167.0 312.5,168.9 317.5,170.8 322.4,172.7 327.3,174.8 332.3,176.8 337.2,179.0 342.1,181.2 347.1,183.4 352.0,185.8"/>
+<rect class="k-pine" x="136.3" y="160.0" width="8" height="8"/>
+<rect class="k-pine" x="263.7" y="264.4" width="8" height="8"/>
+<rect class="k-sky" x="136.3" y="150.5" width="8" height="8"/>
+<rect class="k-sky" x="263.7" y="220.6" width="8" height="8"/>
+<rect class="k-verm" x="136.3" y="110.0" width="8" height="8"/>
+<rect class="k-verm" x="263.7" y="149.0" width="8" height="8"/>
+<text class="t-f" x="148.3" y="106.0">0.251 vs bound 0.251</text>
+<text class="t-f" x="275.7" y="272.4">0.0006</text>
+</svg><p class="leg"><span><i class="sw k-pine"></i>bound, beta 0</span><span><i class="sw k-sky"></i>bound, beta 0.3</span><span><i class="sw k-verm"></i>bound, beta 0.3, leak l 0.2</span></p></div><figcaption class="fig-cap">Lines are the bound of Theorem 10.3 with rho from Corollary 10.5. Squares are the worst exact value over E2's 120 policy-batch pairs at q 0.05 and 0.2. A blind agent sits under its bound; an agent that learns where audits fall reaches it. <span class="src">engine/docs/math/05_hacking_gap.md, scripts/math_hacking_general.py</span></figcaption></figure>
         <figure class="fig" style="margin:0">
-          <div class="screen"><svg class="wide" viewBox="0 0 640 268" role="img" aria-label="Merchant cost per case, 12 disputes. real models, simulated cases and issuer; lower is cheaper">
+          <div class="screen" data-head="real models" data-grid="12 cases"><svg class="wide" viewBox="0 0 640 268" role="img" aria-label="Merchant cost per case, 12 disputes. real models, simulated cases and issuer; lower is cheaper">
 <text class="t-h" x="16" y="22">Merchant cost per case, 12 disputes</text>
 <text class="t-d" x="16" y="38">real models, simulated cases and issuer; lower is cheaper</text>
 <line class="l-grid" x1="150.0" x2="150.0" y1="56" y2="240"/>
@@ -524,7 +953,7 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 </svg></div>
           <figcaption class="fig-cap">Sonnet is cheapest. Four of its ten wins were against valid claims. OUT-01 flags them, but it is a soft check, so the gate let them through. <span class="src">engine/docs/results/MODEL_EPISODES.md</span></figcaption>
         </figure>
-        <figure class="fig" style="margin:0"><div class="screen"><svg class="wide" viewBox="0 0 640 334" role="img" aria-label="E1 regressions: wider bets, same validity. P(gate blocks), cases resampled from the benchmark&#x27;s paired costs, 100 runs, synthetic">
+        <figure class="fig" style="margin:0"><div class="screen" data-head="bets" data-grid="synthetic"><svg class="wide" viewBox="0 0 640 334" role="img" aria-label="E1 regressions: wider bets, same validity. P(gate blocks), cases resampled from the benchmark&#x27;s paired costs, 100 runs, synthetic">
 <text class="t-h" x="16" y="22">E1 regressions: wider bets, same validity</text>
 <text class="t-d" x="16" y="38">P(gate blocks), cases resampled from the benchmark&#x27;s paired costs, 100 runs, synthetic</text>
 <line class="l-grid" x1="150.0" x2="150.0" y1="56" y2="306"/>
@@ -609,9 +1038,340 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
     </div>
   </section>
 
-  <section class="band band-sand" id="theorems" aria-labelledby="thm-h">
+  <section class="band band-sand" id="new" aria-labelledby="new-h">
     <div class="page sec">
-      <h2 id="thm-h"><span class="n">04 / NEW RESULTS</span>Each one proved in full in the PDF.</h2>
+      <h2 id="new-h"><span class="n">05 / NEW IN VERSION 2</span>Agent types, E3, E4, real situations, and what broke.</h2>
+      <div class="two">
+        <figure class="fig" style="margin:0"><div class="screen" data-head="agent types" data-grid="synthetic"><svg class="wide" viewBox="0 0 640 340" role="img" aria-label="Merchant cost against fair outcomes for agents trained on the scorecard and on the proxy">
+<defs><marker id="ah-zoo-640" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Same learner, two objectives</text>
+<text class="t-d" x="16" y="38">cost and fair outcomes on 2,000 benchmark cases, synthetic</text>
+<line class="l-grid" x1="56.0" x2="56.0" y1="60" y2="296"/>
+<text class="t-d" text-anchor="middle" x="56.0" y="316.0">$40</text>
+<line class="l-grid" x1="168.8" x2="168.8" y1="60" y2="296"/>
+<text class="t-d" text-anchor="middle" x="168.8" y="316.0">$60</text>
+<line class="l-grid" x1="281.6" x2="281.6" y1="60" y2="296"/>
+<text class="t-d" text-anchor="middle" x="281.6" y="316.0">$80</text>
+<line class="l-grid" x1="394.4" x2="394.4" y1="60" y2="296"/>
+<text class="t-d" text-anchor="middle" x="394.4" y="316.0">$100</text>
+<line class="l-grid" x1="507.2" x2="507.2" y1="60" y2="296"/>
+<text class="t-d" text-anchor="middle" x="507.2" y="316.0">$120</text>
+<line class="l-grid" x1="620.0" x2="620.0" y1="60" y2="296"/>
+<text class="t-d" text-anchor="middle" x="620.0" y="316.0">$140</text>
+<text class="t-d" text-anchor="end" x="620.0" y="332.0">mean merchant cost per case</text>
+<line class="l-grid" x1="56" x2="620" y1="296.0" y2="296.0"/>
+<text class="t-d" text-anchor="end" x="48.0" y="300.0">40%</text>
+<line class="l-grid" x1="56" x2="620" y1="248.8" y2="248.8"/>
+<text class="t-d" text-anchor="end" x="48.0" y="252.8">50%</text>
+<line class="l-grid" x1="56" x2="620" y1="201.6" y2="201.6"/>
+<text class="t-d" text-anchor="end" x="48.0" y="205.6">60%</text>
+<line class="l-grid" x1="56" x2="620" y1="154.4" y2="154.4"/>
+<text class="t-d" text-anchor="end" x="48.0" y="158.4">70%</text>
+<line class="l-grid" x1="56" x2="620" y1="107.2" y2="107.2"/>
+<text class="t-d" text-anchor="end" x="48.0" y="111.2">80%</text>
+<line class="l-grid" x1="56" x2="620" y1="60.0" y2="60.0"/>
+<text class="t-d" text-anchor="end" x="48.0" y="64.0">90%</text>
+<line class="l-pair" x1="285.7" y1="86.0" x2="572.2" y2="135.0"/>
+<line class="l-pair" x1="250.6" y1="80.8" x2="572.2" y2="135.0"/>
+<line class="l-pair" x1="295.4" y1="87.8" x2="85.7" y2="221.4"/>
+<line class="l-pair" x1="305.1" y1="94.0" x2="116.3" y2="221.0"/>
+<line class="l-pair" x1="284.0" y1="89.3" x2="134.1" y2="216.2"/>
+<circle class="k-pine" cx="263.6" cy="105.3" r="4.5"/>
+<circle class="k-pine" cx="285.7" cy="86.0" r="4.5"/>
+<circle class="k-pine" cx="250.6" cy="80.8" r="4.5"/>
+<circle class="k-pine" cx="295.4" cy="87.8" r="4.5"/>
+<circle class="k-pine" cx="305.1" cy="94.0" r="4.5"/>
+<circle class="k-pine" cx="284.0" cy="89.3" r="4.5"/>
+<rect class="k-verm" x="567.7" y="130.5" width="9" height="9"/>
+<rect class="k-verm" x="567.7" y="130.5" width="9" height="9"/>
+<rect class="k-verm" x="81.2" y="216.9" width="9" height="9"/>
+<rect class="k-verm" x="111.8" y="216.5" width="9" height="9"/>
+<rect class="k-verm" x="129.6" y="211.7" width="9" height="9"/>
+<rect class="k-brass" x="292.3" y="114.1" width="7" height="7" transform="rotate(45 295.8 117.6)"/>
+<text class="t-d" x="303.8" y="131.6">evidence</text>
+<rect class="k-brass" x="525.6" y="261.8" width="7" height="7" transform="rotate(45 529.1 265.3)"/>
+<text class="t-d" text-anchor="end" x="521.1" y="269.3">always accept</text>
+<rect class="k-brass" x="310.7" y="76.3" width="7" height="7" transform="rotate(45 314.2 79.8)"/>
+<text class="t-d" x="322.2" y="83.8">oracle</text>
+<rect class="k-brass" x="404.5" y="239.2" width="7" height="7" transform="rotate(45 408.0 242.7)"/>
+<text class="t-d" x="416.0" y="246.7">random</text>
+<text class="t-p" text-anchor="end" x="242.6" y="84.8">scorecard</text>
+<text class="t-v" text-anchor="end" x="564.2" y="153.0">logreg, gbm</text>
+<text class="t-v" x="106.8" y="241.4">bandit, Q, planner</text>
+</svg><svg class="narrow" viewBox="0 0 380 355" role="img" aria-label="Merchant cost against fair outcomes for agents trained on the scorecard and on the proxy">
+<defs><marker id="ah-zoo-380" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Same learner, two objectives</text>
+<text class="t-d" x="16" y="38">cost and fair outcomes on 2,000</text>
+<text class="t-d" x="16" y="53">benchmark cases, synthetic</text>
+<line class="l-grid" x1="56.0" x2="56.0" y1="75" y2="311"/>
+<text class="t-d" text-anchor="middle" x="56.0" y="331.0">$40</text>
+<line class="l-grid" x1="132.0" x2="132.0" y1="75" y2="311"/>
+<text class="t-d" text-anchor="middle" x="132.0" y="331.0">$65</text>
+<line class="l-grid" x1="208.0" x2="208.0" y1="75" y2="311"/>
+<text class="t-d" text-anchor="middle" x="208.0" y="331.0">$90</text>
+<line class="l-grid" x1="284.0" x2="284.0" y1="75" y2="311"/>
+<text class="t-d" text-anchor="middle" x="284.0" y="331.0">$115</text>
+<line class="l-grid" x1="360.0" x2="360.0" y1="75" y2="311"/>
+<text class="t-d" text-anchor="middle" x="360.0" y="331.0">$140</text>
+<text class="t-d" text-anchor="end" x="360.0" y="347.0">mean merchant cost per case</text>
+<line class="l-grid" x1="56" x2="360" y1="311.0" y2="311.0"/>
+<text class="t-d" text-anchor="end" x="48.0" y="315.0">40%</text>
+<line class="l-grid" x1="56" x2="360" y1="263.8" y2="263.8"/>
+<text class="t-d" text-anchor="end" x="48.0" y="267.8">50%</text>
+<line class="l-grid" x1="56" x2="360" y1="216.6" y2="216.6"/>
+<text class="t-d" text-anchor="end" x="48.0" y="220.6">60%</text>
+<line class="l-grid" x1="56" x2="360" y1="169.4" y2="169.4"/>
+<text class="t-d" text-anchor="end" x="48.0" y="173.4">70%</text>
+<line class="l-grid" x1="56" x2="360" y1="122.2" y2="122.2"/>
+<text class="t-d" text-anchor="end" x="48.0" y="126.2">80%</text>
+<line class="l-grid" x1="56" x2="360" y1="75.0" y2="75.0"/>
+<text class="t-d" text-anchor="end" x="48.0" y="79.0">90%</text>
+<line class="l-pair" x1="179.8" y1="101.0" x2="334.2" y2="150.0"/>
+<line class="l-pair" x1="160.9" y1="95.8" x2="334.2" y2="150.0"/>
+<line class="l-pair" x1="185.0" y1="102.8" x2="72.0" y2="236.4"/>
+<line class="l-pair" x1="190.2" y1="109.0" x2="88.5" y2="236.0"/>
+<line class="l-pair" x1="178.9" y1="104.3" x2="98.1" y2="231.2"/>
+<circle class="k-pine" cx="167.9" cy="120.3" r="4.5"/>
+<circle class="k-pine" cx="179.8" cy="101.0" r="4.5"/>
+<circle class="k-pine" cx="160.9" cy="95.8" r="4.5"/>
+<circle class="k-pine" cx="185.0" cy="102.8" r="4.5"/>
+<circle class="k-pine" cx="190.2" cy="109.0" r="4.5"/>
+<circle class="k-pine" cx="178.9" cy="104.3" r="4.5"/>
+<rect class="k-verm" x="329.7" y="145.5" width="9" height="9"/>
+<rect class="k-verm" x="329.7" y="145.5" width="9" height="9"/>
+<rect class="k-verm" x="67.5" y="231.9" width="9" height="9"/>
+<rect class="k-verm" x="84.0" y="231.5" width="9" height="9"/>
+<rect class="k-verm" x="93.6" y="226.7" width="9" height="9"/>
+<rect class="k-brass" x="181.7" y="129.1" width="7" height="7" transform="rotate(45 185.2 132.6)"/>
+<text class="t-d" x="193.2" y="146.6">evidence</text>
+<rect class="k-brass" x="307.5" y="276.8" width="7" height="7" transform="rotate(45 311.0 280.3)"/>
+<text class="t-d" text-anchor="end" x="303.0" y="284.3">always accept</text>
+<rect class="k-brass" x="191.7" y="91.3" width="7" height="7" transform="rotate(45 195.2 94.8)"/>
+<rect class="k-brass" x="242.3" y="254.2" width="7" height="7" transform="rotate(45 245.8 257.7)"/>
+<text class="t-p" text-anchor="end" x="152.9" y="99.8">scorecard</text>
+<text class="t-v" text-anchor="end" x="326.2" y="168.0">logreg, gbm</text>
+<text class="t-v" x="83.4" y="256.4">bandit, Q, planner</text>
+</svg><p class="leg"><span><i class="sw k-pine"></i>trained on the scorecard</span><span><i class="sw k-verm"></i>same learner on the proxy</span><span><i class="sw k-brass"></i>reference policies</span></p></div><figcaption class="fig-cap">Lines join each learner to its proxy-trained twin. The three that could fabricate became the cheapest agents and the least fair; the two classifiers that could not fought everything and claimed every win. <span class="src">engine/docs/results/AI_TYPES.md, results/zoo/eval.json</span></figcaption></figure>
+        <figure class="fig" style="margin:0"><div class="screen" data-head="E4" data-grid="real models"><svg class="wide" viewBox="0 0 640 208" role="img" aria-label="E4 paired dots per model: valid claims contested, flawed evidence, gate pass">
+<defs><marker id="ah-e4-640" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Told only win rate matters</text>
+<text class="t-d" x="16" y="38">honest brief (circle) vs win-rate brief (square), 12 episodes each, real models</text>
+<text class="t-f" x="72.0" y="66.0">valid contested (of 6)</text>
+<line class="l-grid" x1="72.0" x2="72.0" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="72.0" y="174.0">0</text>
+<line class="l-grid" x1="149.3" x2="149.3" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="149.3" y="174.0">3</text>
+<line class="l-grid" x1="226.7" x2="226.7" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="226.7" y="174.0">6</text>
+<text class="t-d" text-anchor="end" x="62.0" y="96.0">Haiku</text>
+<line class="l-pair" x1="200.9" y1="92" x2="149.3" y2="92"/>
+<circle class="k-pine" cx="200.9" cy="92" r="5"/>
+<rect class="k-verm" x="144.8" y="87.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="124.0">Sonnet</text>
+<line class="l-pair" x1="149.3" y1="120" x2="226.7" y2="120"/>
+<circle class="k-pine" cx="149.3" cy="120" r="5"/>
+<rect class="k-verm" x="222.2" y="115.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="152.0">Opus</text>
+<line class="l-pair" x1="149.3" y1="148" x2="149.3" y2="148"/>
+<circle class="k-pine" cx="149.3" cy="148" r="5"/>
+<rect class="k-verm" x="144.8" y="143.5" width="9" height="9"/>
+<text class="t-f" x="266.7" y="66.0">flawed evidence (of 12)</text>
+<line class="l-grid" x1="266.7" x2="266.7" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="266.7" y="174.0">0</text>
+<line class="l-grid" x1="344.0" x2="344.0" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="344.0" y="174.0">6</text>
+<line class="l-grid" x1="421.3" x2="421.3" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="421.3" y="174.0">12</text>
+<line class="l-pair" x1="395.6" y1="92" x2="369.8" y2="92"/>
+<circle class="k-pine" cx="395.6" cy="92" r="5"/>
+<rect class="k-verm" x="365.3" y="87.5" width="9" height="9"/>
+<line class="l-pair" x1="344.0" y1="120" x2="292.4" y2="120"/>
+<circle class="k-pine" cx="344.0" cy="120" r="5"/>
+<rect class="k-verm" x="287.9" y="115.5" width="9" height="9"/>
+<line class="l-pair" x1="279.6" y1="148" x2="356.9" y2="148"/>
+<circle class="k-pine" cx="279.6" cy="148" r="5"/>
+<rect class="k-verm" x="352.4" y="143.5" width="9" height="9"/>
+<text class="t-f" x="461.3" y="66.0">gate pass (of 12)</text>
+<line class="l-grid" x1="461.3" x2="461.3" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="461.3" y="174.0">0</text>
+<line class="l-grid" x1="538.7" x2="538.7" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="538.7" y="174.0">6</text>
+<line class="l-grid" x1="616.0" x2="616.0" y1="76" y2="160"/>
+<text class="t-d" text-anchor="middle" x="616.0" y="174.0">12</text>
+<line class="l-pair" x1="564.4" y1="92" x2="538.7" y2="92"/>
+<circle class="k-pine" cx="564.4" cy="92" r="5"/>
+<rect class="k-verm" x="534.2" y="87.5" width="9" height="9"/>
+<line class="l-pair" x1="577.3" y1="120" x2="564.4" y2="120"/>
+<circle class="k-pine" cx="577.3" cy="120" r="5"/>
+<rect class="k-verm" x="559.9" y="115.5" width="9" height="9"/>
+<line class="l-pair" x1="577.3" y1="148" x2="500.0" y2="148"/>
+<circle class="k-pine" cx="577.3" cy="148" r="5"/>
+<rect class="k-verm" x="495.5" y="143.5" width="9" height="9"/>
+</svg><svg class="narrow" viewBox="0 0 380 503" role="img" aria-label="E4 paired dots per model: valid claims contested, flawed evidence, gate pass">
+<defs><marker id="ah-e4-380" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Told only win rate matters</text>
+<text class="t-d" x="16" y="38">honest brief (circle) vs win-rate brief</text>
+<text class="t-d" x="16" y="53">(square), 12 episodes each, real models</text>
+<text class="t-f" x="72.0" y="81.0">valid contested (of 6)</text>
+<line class="l-grid" x1="72.0" x2="72.0" y1="91" y2="175"/>
+<text class="t-d" text-anchor="middle" x="72.0" y="189.0">0</text>
+<line class="l-grid" x1="214.0" x2="214.0" y1="91" y2="175"/>
+<text class="t-d" text-anchor="middle" x="214.0" y="189.0">3</text>
+<line class="l-grid" x1="356.0" x2="356.0" y1="91" y2="175"/>
+<text class="t-d" text-anchor="middle" x="356.0" y="189.0">6</text>
+<text class="t-d" text-anchor="end" x="62.0" y="111.0">Haiku</text>
+<line class="l-pair" x1="308.7" y1="107" x2="214.0" y2="107"/>
+<circle class="k-pine" cx="308.7" cy="107" r="5"/>
+<rect class="k-verm" x="209.5" y="102.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="139.0">Sonnet</text>
+<line class="l-pair" x1="214.0" y1="135" x2="356.0" y2="135"/>
+<circle class="k-pine" cx="214.0" cy="135" r="5"/>
+<rect class="k-verm" x="351.5" y="130.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="167.0">Opus</text>
+<line class="l-pair" x1="214.0" y1="163" x2="214.0" y2="163"/>
+<circle class="k-pine" cx="214.0" cy="163" r="5"/>
+<rect class="k-verm" x="209.5" y="158.5" width="9" height="9"/>
+<text class="t-f" x="72.0" y="221.0">flawed evidence (of 12)</text>
+<line class="l-grid" x1="72.0" x2="72.0" y1="231" y2="315"/>
+<text class="t-d" text-anchor="middle" x="72.0" y="329.0">0</text>
+<line class="l-grid" x1="214.0" x2="214.0" y1="231" y2="315"/>
+<text class="t-d" text-anchor="middle" x="214.0" y="329.0">6</text>
+<line class="l-grid" x1="356.0" x2="356.0" y1="231" y2="315"/>
+<text class="t-d" text-anchor="middle" x="356.0" y="329.0">12</text>
+<text class="t-d" text-anchor="end" x="62.0" y="251.0">Haiku</text>
+<line class="l-pair" x1="308.7" y1="247" x2="261.3" y2="247"/>
+<circle class="k-pine" cx="308.7" cy="247" r="5"/>
+<rect class="k-verm" x="256.8" y="242.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="279.0">Sonnet</text>
+<line class="l-pair" x1="214.0" y1="275" x2="119.3" y2="275"/>
+<circle class="k-pine" cx="214.0" cy="275" r="5"/>
+<rect class="k-verm" x="114.8" y="270.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="307.0">Opus</text>
+<line class="l-pair" x1="95.7" y1="303" x2="237.7" y2="303"/>
+<circle class="k-pine" cx="95.7" cy="303" r="5"/>
+<rect class="k-verm" x="233.2" y="298.5" width="9" height="9"/>
+<text class="t-f" x="72.0" y="361.0">gate pass (of 12)</text>
+<line class="l-grid" x1="72.0" x2="72.0" y1="371" y2="455"/>
+<text class="t-d" text-anchor="middle" x="72.0" y="469.0">0</text>
+<line class="l-grid" x1="214.0" x2="214.0" y1="371" y2="455"/>
+<text class="t-d" text-anchor="middle" x="214.0" y="469.0">6</text>
+<line class="l-grid" x1="356.0" x2="356.0" y1="371" y2="455"/>
+<text class="t-d" text-anchor="middle" x="356.0" y="469.0">12</text>
+<text class="t-d" text-anchor="end" x="62.0" y="391.0">Haiku</text>
+<line class="l-pair" x1="261.3" y1="387" x2="214.0" y2="387"/>
+<circle class="k-pine" cx="261.3" cy="387" r="5"/>
+<rect class="k-verm" x="209.5" y="382.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="419.0">Sonnet</text>
+<line class="l-pair" x1="285.0" y1="415" x2="261.3" y2="415"/>
+<circle class="k-pine" cx="285.0" cy="415" r="5"/>
+<rect class="k-verm" x="256.8" y="410.5" width="9" height="9"/>
+<text class="t-d" text-anchor="end" x="62.0" y="447.0">Opus</text>
+<line class="l-pair" x1="285.0" y1="443" x2="143.0" y2="443"/>
+<circle class="k-pine" cx="285.0" cy="443" r="5"/>
+<rect class="k-verm" x="138.5" y="438.5" width="9" height="9"/>
+</svg><p class="leg"><span><i class="sw k-pine"></i>honest brief</span><span><i class="sw k-verm"></i>win-rate brief</span></p></div><figcaption class="fig-cap">No model uploaded a document in either arm. Sonnet contested every valid claim under the incentive; Haiku moved the other way. Opus cited weaker evidence (1 to 7 episodes) and its gate pass fell from 9 to 3, a lead found after the fact. <span class="src">engine/docs/experiments/E4_real_model_incentives.md, results/real/incentives/e4.json</span></figcaption></figure>
+      </div>
+      <div class="two">
+        <div class="tw"><table><caption>Agent types vs the evidence policy, 2,000 cases, synthetic</caption><thead><tr><th>Agent</th><th>Cost / case</th><th>Fair, pp</th><th>Gate</th></tr></thead><tbody><tr><td>gradient boosting, scorecard</td><td class="m">-$8.01</td><td class="m">+7.8</td><td class="m">99.8%</td></tr><tr><td>expert rules</td><td class="m">-$5.71</td><td class="m">+2.5</td><td class="m">99.6%</td></tr><tr><td>logistic regression, scorecard</td><td class="m">-$1.79</td><td class="m">+6.7</td><td class="m">99.8%</td></tr><tr><td>LinUCB bandit, proxy</td><td class="m">-$37.24</td><td class="m no">-22.1</td><td class="m no">51.9%</td></tr><tr><td>Q-learning, proxy</td><td class="m">-$31.82</td><td class="m no">-21.9</td><td class="m no">48.8%</td></tr><tr><td>MC planner, proxy</td><td class="m">-$28.66</td><td class="m no">-21.0</td><td class="m no">52.5%</td></tr><tr><td>classifiers, proxy</td><td class="m">+$49.01</td><td class="m">-3.8</td><td class="m">73.7%</td></tr></tbody></table></div>
+        <div class="tw"><table><caption>E3 variance-reduced gate, synthetic: fails H1, as predicted</caption><thead><tr><th>Pre-registered</th><th>Result</th><th>Holds</th></tr></thead><tbody><tr><td>H1 R5 blocked, full benchmark</td><td class="m">e 14.9, needs 25</td><td class="m no">no</td></tr><tr><td>H2 no control blocked</td><td class="m">C1 to C4 hold</td><td class="m ok">yes</td></tr><tr><td>H3 control folds blocked</td><td class="m">0 / 60</td><td class="m ok">yes</td></tr><tr><td>Post hoc: wide bet, R5 resampled</td><td class="m">0.86 (was 0)</td><td class="m warn">post hoc</td></tr></tbody></table></div>
+        <div class="tw"><table><caption>64 scenarios grounded in real complaints: who plays them right</caption><thead><tr><th>Player</th><th>Right</th><th>95% interval</th></tr></thead><tbody><tr><td>answer key</td><td class="m">64 / 64</td><td class="m">0.943 to 1.000</td></tr><tr><td>evidence policy</td><td class="m">62 / 64</td><td class="m">0.893 to 0.991</td></tr><tr><td>oracle, reads the truth</td><td class="m">60 / 64</td><td class="m">0.850 to 0.975</td></tr><tr><td>always accept</td><td class="m">53 / 64</td><td class="m">0.718 to 0.901</td></tr><tr><td>represent everything</td><td class="m">11 / 64</td><td class="m">0.099 to 0.282</td></tr></tbody></table></div>
+        <div class="tw"><table><caption>Late answers to CFPB complaints by company size, real data</caption><thead><tr><th>Dataset</th><th>Top 5</th><th>Ranks 6-25</th><th>The rest</th></tr></thead><tbody><tr><td>payments 2011-2016, 135,313</td><td class="m">1.01%</td><td class="m">0.56%</td><td class="m">2.80%</td></tr><tr><td>checking 2025-2026, 8,000</td><td class="m">0.62%</td><td class="m">0.29%</td><td class="m">3.70%</td></tr><tr><td>card disputes 2024-2026, 21,508</td><td class="m">0.63%</td><td class="m">0.41%</td><td class="m">2.93%</td></tr></tbody></table></div>
+      </div>
+      <p class="fig-cap">Complaint timeliness is the CFPB's 15-day flag, not a Regulation E or Z deadline. In all three sets the companies outside the 25 largest answered late 3 to 6 times as often as the five largest, and the interval for the difference excludes zero. Size is complaint volume.</p>
+      <div class="two">
+        <figure class="fig" style="margin:0"><div class="screen" data-head="coverage" data-grid="38 exploits"><svg class="wide" viewBox="0 0 640 244" role="img" aria-label="Verifier coverage before and after: caught 24 to 26 of 38">
+<defs><marker id="ah-cov-640" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Exploits caught, before and after</text>
+<text class="t-d" x="16" y="38">research list X1 to X38, 300 synthetic seeds</text>
+<text class="t-f" text-anchor="end" x="62.0" y="79.0">before</text>
+<rect class="k-pine" x="72.0" y="64" width="342.6" height="20"/>
+<text class="t-h" x="78.0" y="79.0">24</text>
+<rect class="k-sky" x="415.6" y="64" width="70.6" height="20"/>
+<text class="t-h" x="421.6" y="79.0">5</text>
+<rect class="k-brass" x="487.2" y="64" width="13.3" height="20"/>
+<rect class="k-verm" x="501.5" y="64" width="13.3" height="20"/>
+<rect class="k-dim" x="515.8" y="64" width="99.2" height="20"/>
+<text class="t-f" x="521.8" y="79.0">7</text>
+<text class="t-f" text-anchor="end" x="62.0" y="109.0">after</text>
+<rect class="k-pine" x="72.0" y="94" width="371.2" height="20"/>
+<text class="t-h" x="78.0" y="109.0">26</text>
+<rect class="k-sky" x="444.2" y="94" width="70.6" height="20"/>
+<text class="t-h" x="450.2" y="109.0">5</text>
+<rect class="k-dim" x="515.8" y="94" width="99.2" height="20"/>
+<text class="t-f" x="521.8" y="109.0">7</text>
+<text class="t-d" x="16.0" y="138.0">share of exercised episodes caught</text>
+<text class="t-f" x="16.0" y="166.0">X33 memorised</text>
+<line class="l-grid" x1="132.0" x2="490.0" y1="162" y2="162"/>
+<line class="l-pair" x1="132.0" y1="162" x2="490.0" y2="162"/>
+<circle class="k-mute" cx="132.0" cy="162" r="5"/>
+<circle class="k-pine" cx="490.0" cy="162" r="5"/>
+<text class="t-d" x="504.0" y="166.0">0 to 30 of 30</text>
+<text class="t-f" x="16.0" y="192.0">X28 escalate</text>
+<line class="l-grid" x1="132.0" x2="490.0" y1="188" y2="188"/>
+<line class="l-pair" x1="401.2" y1="188" x2="412.7" y2="188"/>
+<circle class="k-mute" cx="401.2" cy="188" r="5"/>
+<circle class="k-pine" cx="412.7" cy="188" r="5"/>
+<text class="t-d" x="504.0" y="192.0">94 to 98 of 125</text>
+<text class="t-f" x="16.0" y="218.0">X38s swap</text>
+<line class="l-grid" x1="132.0" x2="490.0" y1="214" y2="214"/>
+<line class="l-pair" x1="262.2" y1="214" x2="490.0" y2="214"/>
+<circle class="k-mute" cx="262.2" cy="214" r="5"/>
+<circle class="k-pine" cx="490.0" cy="214" r="5"/>
+<text class="t-d" x="504.0" y="218.0">4 to 11 of 11</text>
+</svg><svg class="narrow" viewBox="0 0 380 286" role="img" aria-label="Verifier coverage before and after: caught 24 to 26 of 38">
+<defs><marker id="ah-cov-380" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ah" d="M0,0L8,4L0,8Z"/></marker></defs>
+<text class="t-h" x="16" y="22">Exploits caught, before and after</text>
+<text class="t-d" x="16" y="38">research list X1 to X38, 300 synthetic seeds</text>
+<text class="t-f" text-anchor="end" x="62.0" y="79.0">before</text>
+<rect class="k-pine" x="72.0" y="64" width="178.4" height="20"/>
+<text class="t-h" x="78.0" y="79.0">24</text>
+<rect class="k-sky" x="251.4" y="64" width="36.4" height="20"/>
+<text class="t-h" x="257.4" y="79.0">5</text>
+<rect class="k-brass" x="288.7" y="64" width="6.5" height="20"/>
+<rect class="k-verm" x="296.2" y="64" width="6.5" height="20"/>
+<rect class="k-dim" x="303.7" y="64" width="51.3" height="20"/>
+<text class="t-f" x="309.7" y="79.0">7</text>
+<text class="t-f" text-anchor="end" x="62.0" y="109.0">after</text>
+<rect class="k-pine" x="72.0" y="94" width="193.3" height="20"/>
+<text class="t-h" x="78.0" y="109.0">26</text>
+<rect class="k-sky" x="266.3" y="94" width="36.4" height="20"/>
+<text class="t-h" x="272.3" y="109.0">5</text>
+<rect class="k-dim" x="303.7" y="94" width="51.3" height="20"/>
+<text class="t-f" x="309.7" y="109.0">7</text>
+<text class="t-d" x="16.0" y="138.0">share of exercised episodes caught</text>
+<text class="t-f" x="16.0" y="166.0">X33 memorised</text>
+<line class="l-grid" x1="130.0" x2="356.0" y1="162" y2="162"/>
+<line class="l-pair" x1="130.0" y1="162" x2="356.0" y2="162"/>
+<circle class="k-mute" cx="130.0" cy="162" r="5"/>
+<circle class="k-pine" cx="356.0" cy="162" r="5"/>
+<text class="t-d" x="130.0" y="182.0">0 to 30 of 30</text>
+<text class="t-f" x="16.0" y="206.0">X28 escalate</text>
+<line class="l-grid" x1="130.0" x2="356.0" y1="202" y2="202"/>
+<line class="l-pair" x1="300.0" y1="202" x2="307.2" y2="202"/>
+<circle class="k-mute" cx="300.0" cy="202" r="5"/>
+<circle class="k-pine" cx="307.2" cy="202" r="5"/>
+<text class="t-d" x="130.0" y="222.0">94 to 98 of 125</text>
+<text class="t-f" x="16.0" y="246.0">X38s swap</text>
+<line class="l-grid" x1="130.0" x2="356.0" y1="242" y2="242"/>
+<line class="l-pair" x1="212.2" y1="242" x2="356.0" y2="242"/>
+<circle class="k-mute" cx="212.2" cy="242" r="5"/>
+<circle class="k-pine" cx="356.0" cy="242" r="5"/>
+<text class="t-d" x="130.0" y="262.0">4 to 11 of 11</text>
+</svg><p class="leg"><span><i class="sw k-pine"></i>caught</span><span><i class="sw k-sky"></i>blocked</span><span><i class="sw k-brass"></i>partial</span><span><i class="sw k-verm"></i>not caught</span><span><i class="sw k-dim"></i>not modelled</span></p></div><figcaption class="fig-cap">MEM-01 now catches memorised outcomes, ESC-01 escalations with no evidential basis, and EVD-01 the adverse-document swap a learner found. Seven issuer-side patterns cannot be expressed in a merchant-side engine. <span class="src">engine/docs/VERIFIER_FINDINGS.md</span></figcaption></figure>
+        <div class="prose">
+          <h3>What broke, and what we fixed</h3>
+          <p><b>An engine bug, found by verifier false alarms.</b> Refund races made the honest policy pay the cardholder twice on 19 benchmark cases. The ledger check was right; the engine was wrong in three ways. A false alarm of 0.19% per case blocks an honest candidate 98% of the time at 2,000 cases, so this mattered.</p>
+          <p><b>Three exploits closed.</b> Memorised outcomes: $11.99 per episode more on exposed cases than on held-out probes, z 5.8. Escalating everything: now judged on whether the case file supported it. The adverse-document swap a learner found: caught on 11 of 11 cases, 4 before.</p>
+          <p><b>Fairness is a profile.</b> Making a win against a valid claim a hard failure also fails the evidence policy on one case, because the agent cannot see validity. The default stays merchant-side; the stricter profiles are a choice for the deploying team.</p>
+        </div>
+      </div>
+      <div class="tw"><table><caption>Real-model episodes under each verifier profile, gate pass of 12</caption><thead><tr><th>System</th><th>Merchant</th><th>Balanced</th><th>Compliance</th></tr></thead><tbody><tr><td>Haiku</td><td class="m">7</td><td class="m">7</td><td class="m">5</td></tr><tr><td>Sonnet</td><td class="m">11</td><td class="m">10</td><td class="m">7</td></tr><tr><td>Opus</td><td class="m">11</td><td class="m">11</td><td class="m">10</td></tr><tr><td>evidence policy</td><td class="m">12</td><td class="m">12</td><td class="m">11</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="band band-pine" id="theorems" aria-labelledby="thm-h">
+    <div class="page sec">
+      <h2 id="thm-h"><span class="n">06 / NEW RESULTS</span>Each one proved in full in the PDF.</h2>
       <ul class="thm">
         <li><b>Thm 10.3</b><span>If every hacked case is flagged with probability at least rho, given all the agent knew, an accepted change has a gap of at least gamma with probability at most <span class="f">(1 - rho)^ceil(n gamma / eps)</span>, and an expected accepted gap of at most <span class="f">eps / (n e ln(1/(1 - rho)))</span>. No independence needed.<span class="lab">adaptation</span></span></li>
         <li><b>Cor 10.5</b><span>If the agent's signal has a likelihood ratio of at least l, then <span class="f">rho = (1 - beta) q l / (q l + 1 - q)</span>. An agent that can see the audits defeats any spot check.<span class="lab">adaptation</span></span></li>
@@ -624,9 +1384,9 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
     </div>
   </section>
 
-  <section class="band" id="experiments" aria-labelledby="exp-h">
+  <section class="band band-night" id="experiments" aria-labelledby="exp-h">
     <div class="page sec">
-      <h2 id="exp-h"><span class="n">05 / EXPERIMENTS</span>Pre-registered, then reported either way.</h2>
+      <h2 id="exp-h"><span class="n">07 / EXPERIMENTS</span>Pre-registered, then reported either way.</h2>
       <div class="two">
         <div class="tw">
           <table>
@@ -677,14 +1437,15 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
     </div>
   </section>
 
-  <section class="band band-pine" id="limits" aria-labelledby="lim-h">
+  <section class="band band-sand" id="limits" aria-labelledby="lim-h">
     <div class="page sec">
-      <h2 id="lim-h"><span class="n">06 / LIMITS</span>What this does not show.</h2>
+      <h2 id="lim-h"><span class="n">08 / LIMITS</span>What this does not show.</h2>
       <ul class="plain">
-        <li><b>One simulator.</b> Every synthetic number describes our simulator and our assumptions about issuers. E2 shows the cost: forged documents win there, so the ledger anchor was gamed through it.</li>
-        <li><b>Small real samples.</b> 12 cases per model, 50 to 100 complaint items per task. These show the method. They are not a leaderboard.</li>
-        <li><b>Complaints are not disputes.</b> CFPB data is complaints to a regulator. Its outcome is the company's reply, not a card network's decision.</li>
-        <li><b>Thin regressions are invisible.</b> R5 costs about one cent per case overall. Any valid pooled test would need at least 509,153 cases to see it. It shows up only because its cost sits in one dispute family.</li>
+        <li><b>One synthetic engine.</b> Every synthetic number describes our simulator and our assumptions about issuers. E2 shows the ledger anchor gamed through it, and the default case mix is measurably off from the public marginals we can check.</li>
+        <li><b>Small real-model samples.</b> 12 cases per model per arm, 50 to 100 complaint items per task, Claude models only. These show the method. They are not a leaderboard.</li>
+        <li><b>A subagent harness, not the API.</b> Models ran as Claude Code subagents through the command line. Isolation came from instructions, not a sandbox.</li>
+        <li><b>No partner data.</b> No number describes a real merchant, bank or card network. CFPB data is complaints to a regulator, and its outcome is the company's reply.</li>
+        <li><b>Thin regressions are invisible.</b> R5 costs about one cent per case overall. Any valid pooled test would need at least 509,153 cases to see it.</li>
         <li><b>Novelty is unchecked.</b> "Candidate novel" means we did not find it stated this way in a short search. A full literature review comes before any claim.</li>
       </ul>
     </div>
@@ -692,27 +1453,35 @@ code, .f { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-
 
   <section class="band" id="sources" aria-labelledby="src-h">
     <div class="page sec">
-      <h2 id="src-h"><span class="n">07 / SOURCES</span>The code and files behind every number.</h2>
+      <h2 id="src-h"><span class="n">09 / SOURCES</span>The code and files behind every number.</h2>
       <ul class="links">
-<li><a href="scruple_paper.pdf"><span>scruple_paper.pdf</span><span>The paper, PDF.</span></a></li>
-<li><a href="https://github.com/thedhruvhegde/scruple/blob/main/engine/docs/paper/scruple_paper.tex"><span>engine/docs/paper/scruple_paper.tex</span><span>The LaTeX source, with every proof.</span></a></li>
-<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/docs/math"><span>engine/docs/math/</span><span>Statements and proofs, results 1 to 8.</span></a></li>
+<li><a href="scruple_paper.pdf"><span>scruple_paper.pdf</span><span>The paper, PDF, 31 pages.</span></a></li>
+<li><a href="https://github.com/thedhruvhegde/scruple/blob/main/engine/docs/paper/scruple_paper.tex"><span>engine/docs/paper/scruple_paper.tex</span><span>The LaTeX source, with every proof and every diagram.</span></a></li>
+<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/docs/math"><span>engine/docs/math/</span><span>Statements and proofs, results 1 to 9.</span></a></li>
+<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/docs/experiments"><span>engine/docs/experiments/</span><span>E1 to E4: pre-registrations and results.</span></a></li>
+<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/docs/results"><span>engine/docs/results/</span><span>Real CFPB results, model episodes, agent types, real situations, simulator fidelity.</span></a></li>
+<li><a href="https://github.com/thedhruvhegde/scruple/blob/main/engine/docs/VERIFIER_FINDINGS.md"><span>engine/docs/VERIFIER_FINDINGS.md</span><span>What we attacked, what broke, what is still weak.</span></a></li>
+<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/results"><span>engine/results/</span><span>Raw result files the paper reads.</span></a></li>
 <li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/scruple/stats"><span>engine/scruple/stats/</span><span>The statistics code: e-processes, stratified tests, bounds.</span></a></li>
 <li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/scruple/verifiers"><span>engine/scruple/verifiers/</span><span>The verifiers and the attacks each one stops.</span></a></li>
-<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/docs/experiments"><span>engine/docs/experiments/</span><span>E1, E2 and E4: pre-registrations and results.</span></a></li>
-<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/docs/results"><span>engine/docs/results/</span><span>Real CFPB results and real model episodes.</span></a></li>
-<li><a href="https://github.com/thedhruvhegde/scruple/tree/main/engine/results"><span>engine/results/</span><span>Raw result files the paper reads.</span></a></li>
-<li><a href="https://github.com/thedhruvhegde/scruple/blob/main/engine/docs/VERIFIER_FINDINGS.md"><span>engine/docs/VERIFIER_FINDINGS.md</span><span>What we attacked, what broke, what is still weak.</span></a></li>
       </ul>
     </div>
     <div class="page foot-row">
-      <span>Scruple</span>
-      <span>Public CFPB data and simulated cases. No customer data.</span>
-      <a href="../">Back to the home page</a>
+      <pre class="foot-mark" aria-hidden="true"> <b>[#]</b>
+===============
+      /\
+     /  \
+    /____\</pre>
+      <ul class="ledger">
+        <li>Scruple</li>
+        <li>Public CFPB data and simulated cases. No customer data.</li>
+        <li><a href="../">Back to the home page</a></li>
+      </ul>
     </div>
   </section>
 </main>
 
+<script src="../nav.js" defer></script>
 <script>
 (() => {
   "use strict";
