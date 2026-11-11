@@ -75,11 +75,37 @@
     pre.textContent = Array.from({ length: n }, (_, i) => line(i)).join("\n");
   }
 
+  /* ---------- timeline: the stages a dispute can pass through ---------- */
+  const STAGES = ["inquiry", "chargeback", "representment", "pre_arbitration", "arbitration", "resolved"];
+  const LONG = ["inquiry", "chargeback", "representment", "pre-arb", "arbitration", "resolved"];
+  const SHORT = ["inq", "chgbk", "repr", "pre-arb", "arb", "closed"];
+  function timeline(ep, pos) {
+    const pre = $("#timeline"), W = cols(pre), N = ep.steps.length;
+    const now = pos < N ? ep.steps[pos].stage : ep.result.path[ep.result.path.length - 1];
+    const seen = new Set([ep.case.opening_stage, now, ...ep.steps.slice(0, pos + 1).map((s) => s.stage)]);
+    let names = LONG, sep = " -- ";
+    const width = (n, s) => n.reduce((a, x) => a + x.length + 2, 0) + s.length * (n.length - 1);
+    if (width(names, sep) > W) sep = "-";
+    if (width(names, sep) > W) { names = SHORT; sep = " - "; }
+    if (width(names, sep) > W) sep = "-";
+    const top = [], at = [0];
+    STAGES.forEach((st, i) => {
+      if (i) top.push([sep, seen.has(st) && seen.has(STAGES[i - 1]) ? "g" : "d"]);
+      const x = len(top);
+      if (st === now) { top.push([" " + names[i] + " ", "Bnow"]); at[0] = x; }
+      else top.push([" " + names[i] + " ", seen.has(st) ? "g" : "d"]);
+    });
+    const note = pos >= N ? "closed, scored" : pos ? `after call ${pos} of ${N}, ${ep.steps[pos - 1].day}` : `opened ${ep.case.opened_on}`;
+    const cx = Math.max(0, Math.min(at[0] + 1, W - note.length - 2));
+    draw(pre, [top, [[" ".repeat(cx) + "^ ", "f"], [note, "d"]]]);
+  }
+
   let last = null, lastW = 0;
   function render(d) {
     last = d;
     caseFile(d.ep);
     rules();
+    timeline(d.ep, d.pos);
     lastW = cols($("#casefile"));
   }
   document.addEventListener("replay", (e) => render(e.detail));
