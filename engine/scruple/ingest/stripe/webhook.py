@@ -23,7 +23,7 @@ import hashlib
 import hmac
 import re
 from collections import OrderedDict
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
@@ -125,6 +125,33 @@ def verify_signature(
     return t
 
 
+def signing_tenant(
+    payload: bytes, header: str | None, secrets_by_tenant: Mapping[str, Sequence[str]]
+) -> str:
+    """The tenant whose endpoint secret produced a `v1` signature in `header`.
+
+    Every (tenant, secret, signature) triple is compared, with no early exit. The
+    timestamp is not checked here: the tenant's receiver verifies again in full. A
+    secret must belong to one tenant only (`ingest_router` refuses a shared one), so at
+    most one tenant matches unless the header carries signatures under two tenants'
+    secrets, which is refused. Raises `SignatureError` if none or several match."""
+    t, sigs = parse_signature_header(header or "")
+    found: list[str] = []
+    for tenant, secrets in sorted(secrets_by_tenant.items()):
+        hit = False
+        for secret in secrets:
+            expected = compute_signature(secret, t, payload)
+            for sig in sigs:
+                hit |= hmac.compare_digest(expected, sig)
+        if hit:
+            found.append(tenant)
+    if not found:
+        raise SignatureError("no v1 signature matches the payload")
+    if len(found) > 1:  # signed with two tenants' secrets: refuse rather than pick one
+        raise SignatureError("the payload is signed for more than one tenant")
+    return found[0]
+
+
 class WebhookResult(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -196,6 +223,11 @@ class StripeWebhookReceiver:
             del self.received[: -self._remember]
         return result
 
+    @property
+    def secrets(self) -> tuple[str, ...]:
+        """The endpoint secrets this receiver accepts (for tenant routing)."""
+        return self._secrets
+
     def forget(self, event_id: str) -> None:
         """Drop an id from the duplicate cache (its batch could not be persisted, so the
         provider's redelivery must be processed again)."""
@@ -212,5 +244,6 @@ __all__ = [
     "compute_signature",
     "parse_signature_header",
     "sign_header",
+    "signing_tenant",
     "verify_signature",
 ]
