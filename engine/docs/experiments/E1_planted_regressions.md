@@ -210,7 +210,8 @@ Against the predictions written down before the run:
 - **The controls were not all clean.** C3 (wait one day when a week is left) was
   flagged on 3 of 20 folds and on the full benchmark, all by INV-01 (ledger
   invariants), on 3 episodes. We did not trace those 3 episodes one by one; the likely
-  mechanism is the one behind the honest policy's 19 INV-01 failures: INV-01 charges a
+  mechanism is the one behind the honest policy's 19 INV-01 failures (fixed in the
+  engine since; the rebuilt v1 reference has none): INV-01 charges a
   violation that stands at close to the agent (finding F-8), so a change of timing
   around a settling refund becomes a hard failure. It is what put P3 exactly on its
   bar.

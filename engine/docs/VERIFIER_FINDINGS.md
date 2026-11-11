@@ -274,9 +274,9 @@ Reading the table honestly:
   the reference policy's document check; `INV-01` itself is unchanged and still
   charges an agent that double-credits (X13, X35). After the fix: 0 honest failures
   on seeds 0-5999. Regression tests: `tests/test_verifiers_ledger_invariants.py`
-  (`RACE_*`). The published v1 reference scores (`INV-01 19`) were computed by the
-  engine before this fix; the cases are unchanged (block digests still verify), the
-  outcomes are not, so the v1 reference row is stale until the manifest is rebuilt.
+  (`RACE_*`). The v1 reference scores published before this fix read `INV-01 19`;
+  rebuilt on 2026-11-11 with the same cases (identical manifest hash and block
+  digests), the evidence row has no hard failures (gate 1.000 on 10,000 cases).
 
 - **F-12** Found while writing boundary tests for mutation testing: `CAL-01`'s ECE
   sorted (probability, outcome) pairs and cut at fixed ranks, so tied statements were
