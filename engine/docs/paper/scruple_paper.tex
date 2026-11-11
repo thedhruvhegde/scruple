@@ -986,15 +986,18 @@ oracle & 0 (0) & 12 & 12 & 12\\
 
 \paragraph{Mutation testing.} Mutation testing of the 18 verifier modules (2{,}173 mutants) gave a score of 63.8\%, and 64.7\% after 15 targeted tests. A partial rerun of the 604 survivors in unchanged code (453 reached) raised an estimate to 74.2\%; that is an estimate under stated assumptions, not a fresh full run, and the new memorisation, escalation and profile modules are not yet mutated (\texttt{docs/TESTING\_MUTATION.md}).
 
-\section{Limitations}
+\section{Limitations}\label{sec:limits}
 
 \begin{itemize}
-\item \textbf{One simulator.} Every synthetic number describes our simulator and our assumptions about issuers; E2 shows the ledger anchor gamed through it.
-\item \textbf{Small real samples.} 12 cases per model per arm; 50 to 100 complaint items per model task. Models ran as subagents isolated by instruction, not a sandbox.
-\item \textbf{CFPB is not dispute data.} Complaints to a regulator, self-selected; the outcome is the company's response.
-\item \textbf{Power.} A cost-only regression spread thinly over all cases is invisible to every valid test at 10{,}000 cases: R5's pooled floor is 509{,}153 cases (\cref{prop:floor}). Concentrated regressions are visible to per-type tests, but no strategy detected anything on 500-case folds.
-\item \textbf{Pooled certificate.} The shipped promote rule certifies the pooled mean; \cref{cor:pertype} closes the gap at a large power cost.
-\item \textbf{Audits.} \Cref{thm:general} needs the floor $\rho$; an agent that sees the audits defeats any spot-check scheme.
+\item \textbf{One synthetic engine.} Every synthetic number describes our simulator and our assumptions about issuers, networks and documents. E2 shows the ledger anchor gamed through it (forged documents win there), and several real-model results (Sonnet's wins on valid claims, E4's constant unfair wins) are partly statements about the simulated issuer. Against the few public marginals that can be compared, the default case mix is measurably off (fraud share total variation 0.152, relief on fraud 0.219, several times the sampling floor); a calibrated profile brings them to the floor but hit a boundary (it contains no true fraud), and amounts, reason codes, deadlines, fees, win rates and arbitration cannot be checked against public data at all (\texttt{docs/results/SIM\_FIDELITY.md}).
+\item \textbf{Shared world model.} The verifiers read the same issuer, calendar and ledger the agent plays against. A bug in the engine affects agent and verifier alike; the refund-race bug of \cref{sec:improve} was found only because the verifier and the engine disagreed.
+\item \textbf{Small real-model samples.} 12 cases per model per arm in the episode runs and E4, 50 to 100 complaint items per model task. Intervals are wide; these demonstrate the method and are not a leaderboard. Only Claude models were run.
+\item \textbf{Subagent harness, not the API.} Models ran as Claude Code subagents through the command-line interface, with the same prompt text as the API runner but different system scaffolding. Isolation came from instructions and file layout, not a sandbox; agents disclosed small deviations (a pipe into a no-op command, output saved to scratch files), none touching case data.
+\item \textbf{No partner data.} No number describes a real merchant, bank or network. CFPB data are complaints to a regulator, self-selected, and their outcome is the company's response, not a network decision; scenario ground truth is the narrative at face value.
+\item \textbf{Power.} A cost-only regression spread thinly over all cases is invisible to every valid test at 10{,}000 cases: R5's pooled floor is 509{,}153 cases (\cref{prop:floor}) and its pooled budget 0.67 (\cref{sec:e3}). Concentrated regressions are visible to stratified tests; nothing detected anything on 500-case folds.
+\item \textbf{Pooled certificate.} The shipped promote rule certifies the pooled mean; \cref{cor:pertype} closes the gap at a large power cost and is opt-in.
+\item \textbf{Audits and resubmission.} \Cref{thm:general} needs the floor $\rho$; an agent that sees the audits defeats any spot-check scheme, and free resubmission defeats any audit rate (\cref{cor:infeasible}). There is no submission budget yet.
+\item \textbf{Stale or partial runs.} The v1 reference row predates the refund-race fix; the agent comparison used 2{,}000 of 10{,}000 benchmark cases, one training seed and small grids; the mutation score after the latest fixes is an estimate.
 \item \textbf{Literature.} ``Candidate novel'' labels rest on short searches. \citet{gans2026} study randomised oversight of agents that can conceal; we found it by search, could not read it, and it may overlap with \cref{thm:qstar}.
 \end{itemize}
 
