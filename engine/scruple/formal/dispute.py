@@ -53,6 +53,7 @@ MER, ISS, NET, NOB = range(4)
 AWAITING = ("merchant", "issuer", "network", "nobody")
 NONE, ACCEPTED, WON, PARTIAL, LOST = range(5)
 RESOLUTIONS = (None, "accepted", "won", "partial", "lost")
+MAX_DAY = 3_652_059  # date.max.toordinal()
 
 PARAMS: dict[str, type] = {
     "C": int,  # captured
@@ -95,6 +96,8 @@ STATE: dict[str, type] = {
     "last": int,
     "mono": bool,
     "agent_ref": bool,
+    "refd": int,
+    "rev": int,
     "crash": bool,
 }
 INPUTS: dict[str, type] = {"d": int, "x": int, "w": int, "dl": int}
@@ -117,6 +120,9 @@ def param_constraints(p: Params, ops: Any) -> list[Any]:
         p["f_loss"] >= 0,
         p["iss_days"] >= 1,
         p["arb_days"] >= 1,
+        p["processed"] >= 1,  # days are real dates: date.min .. date.max ordinals
+        p["opened"] <= MAX_DAY,
+        p["race_day"] <= MAX_DAY,
     ]
 
 
@@ -162,6 +168,7 @@ def _to_merchant(s: State, ops: Any, amount: Any, day: Any) -> State:
         s,
         crash=ops.or_(s["crash"], amount > s["returned"]),
         returned=s["returned"] - amount,
+        rev=s["rev"] + amount,
         ch=s["ch"] - posted,
         m=s["m"] + posted,
     )
@@ -207,6 +214,7 @@ def _refund(s: State, p: Params, ops: Any, amount: Any, day: Any) -> State:
     """`_post_refund` once the ledger has accepted it."""
     s = _at(s, ops, day)
     s = _to_cardholder(s, ops, amount, day)
+    s = _set(s, refd=s["refd"] + amount)
     return _maybe_close_inquiry(s, p, ops, day)
 
 
@@ -270,10 +278,13 @@ def init(p: Params, i: Inputs, ops: Any) -> State:
         "last": p["processed"],
         "mono": True,
         "agent_ref": False,
+        "refd": 0,
+        "rev": 0,
         "crash": False,
     }
     pre = ops.and_(p["race"], p["race_day"] <= p["opened"])
     s = merge(ops, pre, _refund(s, p, ops, p["R"], p["race_day"]), s)
+    s = _at(s, ops, p["opened"])  # the dispute is filed
     as_cb = _on_chargeback(s, p, ops, i)
     as_inq = merge(ops, s["res"] == NONE, _set(s, dl=ops.deadline(i, INQ, p["opened"], False)), s)
     return merge(ops, p["opens_cb"], as_cb, as_inq)
@@ -569,9 +580,9 @@ def _step_terminal(s: State, s2: State, p: Params, i: Inputs, ops: Any, took: An
 
 
 def _inv_race(s: State, p: Params, ops: Any) -> Any:
-    """Without agent refunds, the cardholder never holds more than the disputed amount
-    unless the over-credit was flagged as an incident when it happened."""
-    return ops.or_(s["agent_ref"], s["returned"] <= p["A"], s["inc_dbl"] > 0)
+    """Without agent refunds the cardholder holds the merchant's refunds or the
+    chargeback, never both, unless the over-credit was flagged as an incident."""
+    return ops.or_(s["agent_ref"], s["returned"] <= imax(ops, s["refd"], p["A"]), s["inc_dbl"] > 0)
 
 
 def _step_race(s: State, s2: State, p: Params, i: Inputs, ops: Any, took: Any) -> Any:
@@ -583,11 +594,53 @@ def _step_race(s: State, s2: State, p: Params, i: Inputs, ops: Any, took: Any) -
     )
 
 
+def _inv_well_formed(s: State, p: Params, ops: Any) -> Any:
+    """The shape of a reachable state (what the other invariants lean on)."""
+    st, aw, open_ = s["stage"], s["aw"], s["res"] == NONE
+    live = ops.or_(st == CB, st == REP, st == PRE, st == ARB)
+    return ops.and_(
+        st >= INQ,
+        st <= RES,
+        aw >= MER,
+        aw <= NOB,
+        s["res"] >= NONE,
+        s["res"] <= LOST,
+        ops.or_(ops.not_(live), s["debited"]),
+        ops.or_(st != INQ, ops.not_(s["debited"])),
+        ops.or_(ops.not_(open_), ops.not_(s["debited"]), s["returned"] >= p["A"]),
+        ops.or_(aw != ISS, st == REP, st == PRE),
+        ops.or_(aw != NET, st == ARB),
+        ops.or_(aw != MER, ops.not_(open_), st == INQ, st == CB, st == PRE),
+        ops.or_(ops.not_(s["declined"]), st == PRE, st == ARB, st == RES),
+        ops.or_(ops.not_(s["pending"]), ops.and_(p["race"], p["race_day"] > s["last"])),
+        ops.or_(ops.not_(open_), aw == MER, s["due"] >= s["last"]),
+        ops.or_(ops.not_(open_), aw != MER, s["dl"] + 1 >= s["last"]),
+        s["entered"] <= s["last"],
+        s["entered"] >= p["opened"],
+        s["last"] >= p["processed"],
+        s["fees"] >= 0,
+        s["refd"] >= 0,
+        s["returned"] == s["refd"] + ops.ite(s["debited"], p["A"], 0) - s["rev"],
+        s["rev"] >= 0,
+        s["rev"] <= ops.ite(s["debited"], p["A"], 0),
+        ops.or_(s["rev"] == 0, s["res"] == WON, s["res"] == PARTIAL),
+        s["viol"] >= 0,
+        s["inc_dbl"] >= s["viol"],
+        s["inc_blk"] >= 0,
+    )
+
+
 def _inv_no_crash(s: State, p: Params, ops: Any) -> Any:
     return ops.not_(s["crash"])
 
 
 INVARIANTS = (
+    Invariant(
+        "well_formed",
+        "stage, who acts and resolution agree; a debit precedes every later stage and "
+        "keeps the disputed amount returned until resolution; pending steps lie ahead",
+        _inv_well_formed,
+    ),
     Invariant(
         "double_entry",
         "every step's postings sum to zero and all balances net to zero",
@@ -629,8 +682,8 @@ INVARIANTS = (
     ),
     Invariant(
         "refund_race_safety",
-        "with no agent refund the cardholder never silently holds more than the "
-        "disputed amount, and a refund after the debit never pays the dispute twice",
+        "with no agent refund the cardholder never silently holds both a refund and "
+        "the chargeback, and a refund after the debit never pays the dispute twice",
         _inv_race,
         _step_race,
     ),
