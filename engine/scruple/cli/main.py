@@ -260,6 +260,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.storage.retention import add_retention_parser
 
     add_retention_parser(sub, DEFAULT_DB)
+    from scruple.verifiers.meta import add_verifiers_parser
+
+    add_verifiers_parser(sub)
     return p
 
 
