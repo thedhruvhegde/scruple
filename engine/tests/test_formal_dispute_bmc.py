@@ -22,7 +22,7 @@ from scruple.sim.evidence import EvidenceDocument
 from scruple.sim.models import Stage
 
 FAST_DEPTH = 8  # the slow suite and `make formal` go to scruple.formal.run's depth
-SAFE = tuple(i.name for i in dm.INVARIANTS if i.name != "refund_race_safety")
+SAFE = tuple(i.name for i in dm.INVARIANTS)
 
 
 @pytest.fixture(scope="module")
@@ -49,21 +49,6 @@ def test_invariants_are_inductive() -> None:
     assert set(ind.inductive) == set(SAFE), ind.dropped
 
 
-@pytest.mark.xfail(strict=True, reason="engine bugs found by the model checker, fixed next")
-def test_refund_race_safety_holds(report: Report) -> None:
-    r = next(x for x in report.results if x.invariant == "refund_race_safety")
-    assert r.holds, r.counterexample.text() if r.counterexample else ""
-
-
-def test_counterexamples_replay_on_the_concrete_model() -> None:
-    """A z3 counterexample is a real run of the Python model (not a solver artefact)."""
-    rep = check(dm.MODEL, 4, only=("refund_race_safety",))
-    for r in rep.results:
-        if r.counterexample is not None:
-            _, broken = r.counterexample.replay(dm.MODEL)
-            assert r.invariant in broken
-
-
 def test_a_broken_invariant_is_found(monkeypatch: pytest.MonkeyPatch) -> None:
     """The checker finds a planted bug: a reversal that forgets to update `returned`."""
     real = dm._to_merchant
@@ -73,7 +58,11 @@ def test_a_broken_invariant_is_found(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(dm, "_to_merchant", leaky)
     rep = check(dm.MODEL, 4, only=("conservation",))
-    assert not rep.results[0].holds
+    r = rep.results[0]
+    assert not r.holds and r.counterexample is not None
+    # the z3 trace is a real run of the Python model, not a solver artefact
+    _, broken = r.counterexample.replay(dm.MODEL)
+    assert "conservation" in broken
 
 
 # --- engine bugs from the counterexamples ---------------------------------------------
@@ -127,12 +116,11 @@ def split_race_case() -> CardDispute:
     return CardDispute.model_validate(data)
 
 
-@pytest.mark.xfail(strict=True, reason="bug: a racing refund pays a partly won dispute twice")
 def test_racing_refund_does_not_pay_a_partly_won_dispute_twice() -> None:
     """Counterexample (depth 3): represent, the issuer awards the merchant part of a
     split order and reverses that part, then a refund in flight settles. The engine
     blocked such a refund only while the chargeback still returned the whole dispute,
-    so here the cardholder keeps the lost parcel's chargeback and gets the refund too."""
+    so the cardholder kept the lost parcel's chargeback and got the refund too."""
     case = split_race_case()
     clock = ManualClock()
     clock.set_date(case.opened_on)

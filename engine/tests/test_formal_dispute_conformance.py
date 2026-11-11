@@ -43,14 +43,15 @@ def _cases(seed: int, n: int, mix: CaseMix) -> list[CardDispute]:
 def test_engine_steps_are_model_steps(seed: int, mix: str) -> None:
     seen: collections.Counter[str] = collections.Counter()
     for i, case in enumerate(_cases(seed, 250, MIXES[mix])):
-        seen.update(run_dispute(case, i, invariants=False).commands)
+        # every invariant of the model also holds on each state the engine reaches
+        seen.update(run_dispute(case, i).commands)
     assert sum(seen.values()) > 500
 
 
 def test_every_model_command_is_exercised() -> None:
     seen: collections.Counter[str] = collections.Counter()
     for i, case in enumerate(_cases(11, 600, HARD_MIX)):
-        seen.update(run_dispute(case, i, invariants=False).commands)
+        seen.update(run_dispute(case, i).commands)
     assert set(seen) == {c.name for c in dm.COMMANDS}
 
 

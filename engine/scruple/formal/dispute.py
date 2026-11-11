@@ -248,8 +248,13 @@ def quiet_by(s: State, p: Params, ops: Any, d: Any) -> Any:
 
 
 def race_blocked(s: State, p: Params, ops: Any) -> Any:
-    """`_settle_race`: refused after the debit returned the dispute, or by the ledger."""
-    return ops.or_(s["returned"] >= p["A"], p["R"] > p["C"] - s["returned"])
+    """`_settle_race`: refused once the cardholder holds the dispute, after a debit
+    whenever it would go above the dispute, and by the ledger above the capture."""
+    return ops.or_(
+        s["returned"] >= p["A"],
+        ops.and_(s["debited"], s["returned"] + p["R"] > p["A"]),
+        p["R"] > p["C"] - s["returned"],
+    )
 
 
 def env_ready(s: State, p: Params, ops: Any) -> Any:

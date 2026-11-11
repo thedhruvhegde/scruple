@@ -1577,9 +1577,13 @@ class DisputeEngine:
         """A refund racing the dispute settles after it opened. If the chargeback debit
         already returned the disputed amount the processor refuses it as a double
         refund (A-23), whether or not the capture has headroom left (a partial dispute
-        leaves some): the cardholder is never paid twice for the same dispute."""
+        leaves some): the cardholder is never paid twice for the same dispute. Once a
+        chargeback was debited, that holds after a partial reversal too: the refund
+        may not take the cardholder above the disputed amount."""
         c = st.case
-        if self.ledger.returned(c.txn_id) >= c.amount_minor:
+        back = self.ledger.returned(c.txn_id)
+        debited = Stage.CHARGEBACK in st.life.path
+        if back >= c.amount_minor or (debited and back + amount > c.amount_minor):
             self._emit(
                 IncidentRecorded(
                     case_id=c.case_id,
