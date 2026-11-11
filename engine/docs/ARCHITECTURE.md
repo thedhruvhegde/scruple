@@ -319,6 +319,9 @@ wrote. A fresh process rebuilds by replay: `record` and `observe` are determinis
 and all-or-nothing, so replay reproduces the state exactly. A failed write drops the
 in-memory recorder, so memory can never run ahead of storage. API:
 `GET /shadow/rules/{id}/versions/{v}/imported/history` lists the stored summaries.
+CLI on the same store: `scruple shadow imported record|observe RULE V FILE --actor A`
+(the API's batch bodies, `-` for stdin) and `scruple shadow imported summary|history
+RULE V [--json]`; reads never write.
 
 **Webhooks** (`scruple/ingest/api.py`, `CaseStore.write_webhook`). An accepted Stripe
 or Adyen delivery becomes one ingest run. Idempotent by (tenant, source, event id):

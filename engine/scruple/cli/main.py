@@ -263,6 +263,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.verifiers.meta import add_verifiers_parser
 
     add_verifiers_parser(sub)
+    from scruple.cli.shadow import add_shadow_parser
+
+    add_shadow_parser(sub, DEFAULT_DB)
     return p
 
 
