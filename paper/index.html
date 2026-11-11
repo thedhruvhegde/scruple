@@ -268,6 +268,18 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 .prose h3 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 15px; font-weight: 600; margin-top: 18px; }
 .prose p b { font-weight: 600; }
 .verdict { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+
+/* ---------- v3: the paper set in characters ---------- */
+/* title block: rules and a running head, like the top of a typeset preprint */
+.pp { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; line-height: 1.6; color: var(--muted); display: grid; }
+.pp .rule { white-space: nowrap; overflow: hidden; color: var(--rule-strong); }
+.pp .run { display: flex; justify-content: space-between; gap: 4px 24px; flex-wrap: wrap; }
+.pp .run b { color: var(--fg); font-weight: 600; }
+/* the margin label, set sideways in the empty right margin on wide screens */
+.margin-label { display: none; }
+@media (min-width: 1400px) {
+  .margin-label { display: block; position: absolute; top: 96px; right: calc((100% - 1240px) / 2 - 64px); writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 22px; font-weight: 500; letter-spacing: 0.04em; color: var(--rule-strong); white-space: nowrap; pointer-events: none; }
+}
 </style>
 </head>
 <body><body>
@@ -299,7 +311,14 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 
 <main id="top">
   <section class="band" id="abstract" aria-labelledby="top-h">
+    <p class="margin-label" aria-hidden="true">scruple preprint / nov 2026 / 31 pp</p>
     <div class="page sec">
+      <div class="pp" aria-hidden="true">
+        <span class="rule">================================================================================================================================================================================================================================================================================================================================================================================================================</span>
+        <div class="run"><span><b>scruple</b> / preprint</span><span>november 2026</span></div>
+        <div class="run"><span>16 sections, appendix A, 31 pages</span><span>proofs in full</span></div>
+        <span class="rule">----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+      </div>
       <h1 class="big" id="top-h"><span class="n">PAPER / PREPRINT, NOVEMBER 2026</span>Verifiers That Do Not Trust the Agent: Anytime-Valid Release Gates and Hacking Bounds for AI Agents That Move Money</h1>
       <p class="meta-line">Dhruv Hegde, Scruple. Synthetic numbers come from the scruple simulator. Real numbers come from public CFPB complaints or from real model behaviour.</p>
       <div class="abs">
