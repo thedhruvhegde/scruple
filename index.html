@@ -65,7 +65,7 @@
 :root[data-theme="dark"] .band-sand { --bg: #17140D; --panel: #1E1A11; --fg: #EAE3D0; --muted: #B5AB91; --rule: #2B261A; --rule-strong: #4B4331; --accent: #5AAE88; --on-accent: #17140D; --brass: #D8B25E; --block: #EA6B45; }
 
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
-body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
 ::selection { background: var(--accent); color: var(--on-accent); }
 h1, h2, h3, p { margin: 0; }
@@ -75,21 +75,50 @@ a { color: inherit; }
 .band { background: var(--bg); color: var(--fg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .page { max-width: 1240px; margin: 0 auto; }
 
-/* ---------- bar ---------- */
+/* ---------- bar ----------
+   Shared by every page: copy this block with nav.js. ul.nav-sec holds in-page anchors,
+   ul.nav-pg holds the pages (arrow suffix, aria-current="page" on the page you are on). */
 .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; border-bottom: 1px solid var(--rule); }
-.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 32px; height: 60px; }
+.bar-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 24px; height: 60px; position: relative; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); flex: none; }
 .brand svg { width: 24px; height: 24px; display: block; }
 .brand span { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
-.nav { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.nav::-webkit-scrollbar { display: none; }
-.nav a { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav { display: flex; align-items: center; flex: 1; min-width: 0; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; }
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 2px; }
+.nav-pg { margin-left: auto !important; }
+.nav-pg::before { content: "|"; color: var(--rule-strong); padding: 0 8px 0 0; }
+.nav a { position: relative; display: block; text-decoration: none; color: var(--muted); padding: 6px 10px; white-space: nowrap; }
+.nav-pg a { color: var(--fg); }
+.nav-pg a:not([aria-current])::after { content: " ->"; content: " ->" / ""; }
+.nav-pg a[aria-current="page"] { font-weight: 600; }
+.nav-sec a[aria-current] { color: var(--fg); }
+.nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { position: absolute; top: 6px; }
+.nav-sec a[aria-current]::before { content: "["; left: 1px; }
+.nav-sec a[aria-current]::after { content: "]"; right: 1px; }
 .nav a:hover, .nav a:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
 .toggle { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--muted); white-space: nowrap; flex: none; }
 .toggle button { font: inherit; background: none; border: 0; color: var(--muted); padding: 6px; cursor: pointer; letter-spacing: 0.04em; }
 .toggle button[aria-pressed="true"] { color: var(--fg); font-weight: 600; }
 .toggle button:hover, .toggle button:focus-visible { background: var(--accent); color: var(--on-accent); outline: none; }
-@media (max-width: 760px) { .bar-in { height: auto; flex-wrap: wrap; gap: 0 16px; padding-top: 10px; } .toggle { margin-left: auto; } .nav { order: 3; flex-basis: 100%; margin: 6px -10px 0; } }
+.skip { position: fixed; left: 16px; top: 8px; z-index: 50; transform: translateY(-300%); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; padding: 8px 12px; background: var(--fg); color: var(--bg); text-decoration: none; }
+.skip:focus { transform: none; outline: none; }
+main:focus { outline: none; }
+.menu { display: none; flex: none; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; letter-spacing: 0.04em; background: none; border: 0; color: var(--fg); padding: 6px; cursor: pointer; }
+.menu:hover, .menu:focus-visible, .menu[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); outline: none; }
+/* under 1100px the links fold into a [ MENU ] panel that drops over the page, so nothing reflows */
+@media (max-width: 1100px) {
+  .bar-in { height: 52px; gap: 12px; }
+  .menu { display: block; margin-left: auto; }
+  .nav { display: none; position: absolute; top: calc(100% + 1px); left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    flex-direction: column; align-items: stretch; gap: 10px; background: var(--bg); border-bottom: 1px solid var(--rule-strong); padding: 10px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); font-size: 13px; }
+  .bar.open .nav { display: flex; }
+  .nav ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 12px; }
+  .nav-pg { margin-left: 0 !important; padding-top: 10px !important; border-top: 1px dashed var(--rule-strong) !important; }
+  .nav-pg::before { display: none; }
+  .nav a { padding: 10px; width: fit-content; }
+  .nav-sec a[aria-current]::before, .nav-sec a[aria-current]::after { top: 10px; }
+}
+@media (max-width: 380px) { .brand span { display: none; } }
 
 /* ---------- messages ---------- */
 .msg { background: var(--panel); border: 1px solid var(--rule-strong); padding: 16px 18px 18px; display: grid; gap: 10px; min-width: 0; }
@@ -103,7 +132,7 @@ a { color: inherit; }
 .msg.them p.say { color: var(--fg); }
 .msg.us p.say b { color: var(--brass); font-weight: 700; }
 .struck { background-image: linear-gradient(var(--block), var(--block)); background-repeat: no-repeat; background-position: 0 58%; background-size: 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; color: var(--muted); }
-.msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px 32px; align-items: stretch; }
+.msgs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding-block: 40px; align-items: stretch; }
 @media (max-width: 760px) { .msgs { grid-template-columns: minmax(0, 1fr); padding-block: 24px; } }
 
 /* intro chat screen */
@@ -181,8 +210,34 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 .def ol { margin: 16px 0 0; padding-left: 22px; display: grid; gap: 6px; font-size: 17px; max-width: 46ch; }
 .def ol li::marker { font-family: var(--f-mono); color: var(--muted); font-size: 13px; }
 @media (max-width: 900px) { .def { grid-template-columns: minmax(0, 1fr); } }
-.foot-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; border-top: 1px solid var(--rule); padding-block: 16px 40px; }
-.foot-row span { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+/* the last row is a ledger strip in characters: a ruler, the mark, then | cells | */
+.foot-row { position: relative; display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; padding-block: 32px 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+.foot-row::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 0; left: 0; right: 0; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.foot-mark { margin: 0; font: inherit; font-size: 11px; line-height: 1.2; color: var(--fg); flex: none; }
+.foot-mark b { color: var(--brass); font-weight: 600; }
+.ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; flex: 1; min-width: 0; }
+.ledger li { display: flex; margin-right: 12px; }
+.ledger li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-right: 12px; flex: none; }
+.ledger li:last-child::after { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-left: 12px; }
+@media (max-width: 760px) { .foot-row { flex-direction: column; align-items: start; } .ledger { flex-direction: column; } .ledger li:last-child::after { display: none; } }
+/* ---------- character rules ----------
+   Drawn in text and absolutely placed, so they never move the layout (or the screen anchors).
+   Generated content carries empty alt text, so screen readers skip it. */
+:root { --dash: "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"; --ruler: "+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----+----:----"; }
+main > .band { position: relative; }
+main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+/* wide screens only: a ruler down the empty left margin, headed by the band's number (00 is the hero) */
+@media (min-width: 1400px) {
+  :root { --rail: "|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A|\A|\A|\A|\A+\A"; }
+  main { counter-reset: band -1; }
+  main > .band { counter-increment: band; }
+  main > .band::after { content: counter(band, decimal-leading-zero) "\A" var(--rail); content: counter(band, decimal-leading-zero) "\A" var(--rail) / ""; position: absolute; top: 28px; bottom: 28px; left: calc((100% - 1240px) / 2 - 48px); width: 3ch; overflow: hidden; white-space: pre; text-align: center; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+}
+/* a title rule over each screen: +-- name ------------ cols x rows --+ (the grid is set by layout()) */
+.screen[data-head]::before, .screen[data-head]::after { position: absolute; bottom: calc(100% + 12px); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--muted); white-space: nowrap; pointer-events: none; }
+.screen[data-head]::before { content: "+-- " attr(data-head) " " var(--dash); content: "+-- " attr(data-head) " " var(--dash) / ""; left: -9px; right: -9px; overflow: hidden; }
+.screen[data-head]::after { content: " " attr(data-grid) " --+"; content: " " attr(data-grid) " --+" / ""; right: -9px; background: var(--bg); }
+@media (max-width: 760px) { .screen[data-head]::before, .screen[data-head]::after { bottom: calc(100% + 9px); } .screen[data-head]::before { left: -6px; right: -6px; } .screen[data-head]::after { right: -6px; } }
 </style>
 </head>
 <body>
@@ -208,11 +263,14 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
 
 <canvas id="field" aria-hidden="true"></canvas>
 
+<a class="skip" href="#top">Skip to content</a>
 <header class="bar band">
   <div class="bar-in">
     <a class="brand" href="#top" aria-label="Scruple, back to top"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#how">How it works</a><a href="#proof">Proof</a><a href="#redteam">Red team</a><a href="#who">Who it's for</a><a href="#audit">Audit trail</a><a href="#status">Status</a><a href="results/">Results</a><a href="paper/">Paper</a>
+    <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
+    <nav class="nav" id="nav" aria-label="Site">
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li></ul>
     </nav>
     <div class="toggle" role="group" aria-label="Color theme">[ <button type="button" id="t-light" aria-pressed="false">LIGHT</button>|<button type="button" id="t-dark" aria-pressed="false">DARK</button> ]</div>
   </div>
@@ -232,7 +290,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
           <p class="say">No. You filed <b>128</b> disputes you could never win.</p>
         </div>
       </div>
-      <div class="screen hero" data-screen="wonder" role="img" id="hero-scr" aria-label="One of the new seven wonders of the world, drawn in moving text characters."></div>
+      <div class="screen hero" data-screen="wonder" data-head="wonder" role="img" id="hero-scr" aria-label="One of the new seven wonders of the world, drawn in moving text characters."></div>
       <div class="hero-cap"><p><b id="w-name">a wonder</b> <span id="w-place"></span><span class="sep">/</span>drawn in characters, a different wonder each visit</p><button type="button" class="btn" id="w-next">Another wonder</button></div>
     </div>
   </section>
@@ -250,7 +308,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         <p class="tri" aria-label="Train on it. Evaluate on it. Ship through it."><span>Train on it.</span><span>Evaluate on it.</span><span>Ship through it.</span></p>
       </div>
       <div>
-        <div class="screen panel" data-screen="terminal" role="img" aria-label="Terminal: scruple demo. Good rule promoted, bad rule blocked, audit integrity OK."></div>
+        <div class="screen panel" data-screen="terminal" data-head="terminal" role="img" aria-label="Terminal: scruple demo. Good rule promoted, bad rule blocked, audit integrity OK."></div>
         <p class="scr-cap"><span><b>scruple demo</b>, abridged</span><span>synthetic data</span></p>
       </div>
     </div>
@@ -263,7 +321,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         <p class="sum">Two learned rules with the same condition. The bad one lowered the average loss by $10.94 a case, and made late-evidence disputes worse. Blocked.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="bars" role="img" aria-label="Bar chart of mean loss per case by case type. Item not received falls from 71.42 to 31.77 dollars. Late evidence rises from 0 to 10.79 dollars."></div>
+        <div class="screen panel" data-screen="bars" data-head="loss by case type" role="img" aria-label="Bar chart of mean loss per case by case type. Item not received falls from 71.42 to 31.77 dollars. Late evidence rises from 0 to 10.79 dollars."></div>
         <p class="scr-cap"><span><b>Mean loss per case</b>, current policy against the bad rule</span><span>3,000 held-out cases</span></p>
       </div>
       <div class="full tw">
@@ -299,7 +357,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         <p class="src">Still open, and pinned as tests: many submissions probing one held-out set, live drift, harm across case-type boundaries.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="wall" role="img" aria-label="Animation: attacks stream in from the left and break against a wall. The ledger on the right stays untouched."></div>
+        <div class="screen panel" data-screen="wall" data-head="red team" role="img" aria-label="Animation: attacks stream in from the left and break against a wall. The ledger on the right stays untouched."></div>
         <p class="scr-cap"><span><b>7 attacks, 0 through</b></span><span>scruple redteam</span></p>
       </div>
     </div>
@@ -318,7 +376,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         <p class="src">Today: simulator, verifiers, gate for learned rules. Next: step-by-step RL environments, model and prompt changes.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="torus" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
+        <div class="screen panel" data-screen="torus" data-head="one loop" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
         <p class="scr-cap"><span><b>One loop</b>: train, evaluate, ship</span><span>same verifiers each time</span></p>
       </div>
     </div>
@@ -333,7 +391,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         <p class="src" id="chain-v" aria-live="polite">Integrity OK. 20 entries, head f83678b2730cb21c.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="chain" role="img" aria-label="Audit chain, entries 12 to 17, each storing the hash of the one before."></div>
+        <div class="screen panel" data-screen="chain" data-head="audit chain" role="img" aria-label="Audit chain, entries 12 to 17, each storing the hash of the one before."></div>
         <p class="scr-cap"><span><b>Audit chain</b>, entries 12 to 17 from the same run</span><span>SHA-256</span></p>
       </div>
     </div>
@@ -354,7 +412,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         <p class="src">Reference implementation v0.1.0, 93 tests. The CLI answers to scruple and agent-gate.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
+        <div class="screen panel" data-screen="rain" data-head="ledger rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
         <p class="scr-cap"><span><b>Ledger rain</b>, debits and credits in replay</span><span>synthetic</span></p>
       </div>
     </div>
@@ -363,7 +421,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   <footer class="band band-night">
     <div class="page">
       <div class="def">
-        <div class="screen panel drag" data-screen="mark" role="img" aria-label="The Scruple mark in 3D: a beam on a fulcrum, tipped by one small brass weight. Drag to rotate."></div>
+        <div class="screen panel drag" data-screen="mark" data-head="the mark" role="img" aria-label="The Scruple mark in 3D: a beam on a fulcrum, tipped by one small brass weight. Drag to rotate."></div>
         <div>
           <p class="word">scruple</p>
           <p class="pron">/ˈskruː.pəl/ noun</p>
@@ -374,14 +432,22 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
         </div>
       </div>
       <div class="foot-row">
-        <span>Scruple</span>
-        <span>Synthetic data only. No customer data.</span>
-        <span>Hero art: the new seven wonders of the world, drawn in characters.</span>
+        <pre class="foot-mark" aria-hidden="true"> <b>[#]</b>
+===============
+      /\
+     /  \
+    /____\</pre>
+        <ul class="ledger">
+          <li>Scruple</li>
+          <li>Synthetic data only. No customer data.</li>
+          <li>Hero art: the new seven wonders of the world, drawn in characters.</li>
+        </ul>
       </div>
     </div>
   </footer>
 </main>
 
+<script src="nav.js" defer></script>
 <script src="wonders.js"></script>
 
 <script>
@@ -619,6 +685,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
       const r = s.el.getBoundingClientRect();
       s.sz = TEXT[s.kind] ? 1 : 0; s.cw = SIZES[s.sz] * RATIO; s.ch = Math.round(SIZES[s.sz] * 1.22);
       s.C = Math.max(10, Math.floor((r.width - 20) / s.cw)); s.R = Math.max(5, Math.floor((r.height - 20) / s.ch));
+      s.el.dataset.grid = `${s.C} x ${s.R}`;
       s.ox = (r.width - s.C * s.cw) / 2; s.oy = (r.height - s.R * s.ch) / 2; s.cache = null; s.static = null; s.grid = null; s.poses = null;
     }
     buildAtlas();
@@ -667,6 +734,8 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   }
   const visible = (r) => r.bottom > -40 && r.top < H + 40;
   function drawScreen(s, t) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (const c of cellsOf(s, t)) emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); }
+  // corner ticks frame every screen but the hero, settled or in flight: four atlas glyphs each
+  function corners(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, x1 = x0 + (s.C - 1) * s.cw, y1 = y0 + (s.R - 1) * s.ch; emit(s.sz, x0, y0, 43, 1); emit(s.sz, x1, y0, 43, 1); emit(s.sz, x0, y1, 43, 1); emit(s.sz, x1, y1, 43, 1); }
   function idleDots(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (let r = 1; r < s.R; r += 4) for (let c = 2; c < s.C; c += 8) emit(s.sz, x0 + c * s.cw, y0 + r * s.ch, 46, 1); }
 
   /* ---------- intro: a chat, then the wonder takes the screen ---------- */
@@ -811,7 +880,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
   const T0 = performance.now();
   let lastY = -1, lastTick = -1, force = true;
   function frame(now) {
-    const t = (now - T0) / 1000, tick = Math.floor(t * 24), busy = !I.done || screens.some((x) => x.dragging);
+    const t = (now - T0) / 1000, tick = reduce ? 0 : Math.floor(t * 24), busy = !I.done || screens.some((x) => x.dragging);
     if (!busy && !force && scrollY === lastY && tick === lastTick) { requestAnimationFrame(frame); return; }
     lastY = scrollY; lastTick = tick; force = false; frameNo++;
     const ta = I.done ? tick / 24 : t;   // ambient animation advances in 24 fps steps
@@ -824,7 +893,7 @@ td.k { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size
     if (p >= 1) { i++; p = 0; }   // fully arrived: draw the next screen itself, not the flight
     if (reduce) { if (p >= 0.5) i++; p = 0; }
     if (i >= screens.length) i = screens.length - 1;
-    for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (visible(s.rect) && !(j === i || (p > 0 && j === i + 1))) idleDots(s); }
+    for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (!visible(s.rect)) continue; if (j) corners(s); if (!(j === i || (p > 0 && j === i + 1))) idleDots(s); }
     if (p === 0) { const s = screens[i]; if (visible(s.rect)) drawScreen(s, ta); }
     else {
       const A = screens[i], B = screens[i + 1], ca = cellsOf(A, ta), cb = cellsOf(B, ta);
