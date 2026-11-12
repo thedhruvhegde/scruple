@@ -82,8 +82,17 @@ as finished until it is merged with tests.
   arrive, `GET .../imported` returns the summary. Every metric is labelled observed
   (agreement, changed decisions, findings, realised cost) or estimated (cost of a
   changed decision). `docs/pilot/demo/shadow_imported.py` runs the same from a store.
-- Not built: the recorder lives in the API process's memory; a restart loses it, and
-  decisions are not persisted (by design they never touch storage). Re-send the batch.
+- **Exists**: imported decisions and outcomes are stored in the gate database
+  (SQLite or Postgres), per tenant, and replayed on start, so a restart of
+  `scruple serve` loses nothing (`scruple/storage/imported_shadow.py`). Re-sending a
+  batch is refused with 409 and stores nothing, after a restart too. Cases are
+  redacted as `scruple ingest` redacts them before they are scored or stored, and a
+  batch holding a card number is refused. Retention purges the row-level events and
+  keeps only a SHA-256 key per purged decision, so a re-sent purged case is still
+  refused. Tests: tests/storage/test_imported_shadow.py
+  (`test_api_imported_shadow_survives_a_restart`: two app instances on one SQLite or
+  Postgres database), tests/storage/test_imported_shadow_redaction.py,
+  tests/storage/test_imported_shadow_purged_keys.py, tests/test_tenancy_api.py.
 - Outcomes lag. Decisions shadowed in week 4 mostly resolve after week 6; the planner's
   `--outcome-lag-weeks` says by how much. The readout reports agreement and constraint
   results from week 4 and states which cost results are still open.
