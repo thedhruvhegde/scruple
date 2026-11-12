@@ -126,6 +126,24 @@ class Settings(BaseModel):
         "send Strict-Transport-Security",
     )
     hsts_max_age_seconds: int = Field(default=31_536_000, ge=0, le=63_072_000)
+    # Hosted read-only demo (scruple.demo): `scruple serve --demo` or SCRUPLE_DEMO=1.
+    demo: bool = Field(
+        default=False,
+        description="serve the public read-only demo: seed synthetic data at start, no "
+        "login, every write refused (run with `scruple serve`, not gunicorn)",
+    )
+    demo_dir: str | None = Field(
+        default=None, description="where the demo seeds its database (default: a temp dir)"
+    )
+    demo_reset_utc_hour: int = Field(
+        default=4, ge=0, le=23, description="hour (UTC) the demo re-seeds itself each day"
+    )
+    demo_client_ip_header: str | None = Field(
+        default=None,
+        pattern=r"^[A-Za-z0-9-]{1,64}$",
+        description="header the proxy in front sets to the client address (Fly-Client-IP); "
+        "rate limits count per that address",
+    )
 
     def database_dsn(self) -> str:
         """`database_url` with `database_password` merged in (postgres URLs only)."""
