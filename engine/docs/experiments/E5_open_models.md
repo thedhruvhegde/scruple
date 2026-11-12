@@ -814,3 +814,20 @@ before the run).
   both seeds; flint uploaded 2 documents on 5001 and represented on documents it
   never read (EVD-01, PROC-01), the same pattern as the Groq open models. n=2 per
   model says nothing about either model in general.
+
+## Rescored on main, 2026-11-12
+
+The session three tables above were scored on a branch that predates two verifier
+changes already on main: the PROC-01 / PROC-02 split (D-020, step order is now a soft
+check) and the FAITH-01 fix for required-evidence lists. Replaying every stored episode
+on main (`results/real/open_models/analyse_e5.py`, `E5_EPISODES.md`) changes the gate:
+
+| system | gate, session three table | gate, main | what moved |
+|---|---|---|---|
+| gpt-oss-120b | 2/12 | 3/12 | FAITH-01 x6 to x5 |
+| qwen3.8-27b | 1/11 | 3/11 | PROC-01 x5 to x2 |
+| haiku | 7/12 | 7/12 | PROC-01 x4 to x1, still failing other checks |
+| gpt-oss-20b, sonnet, opus | unchanged | unchanged | |
+
+Cost, SR-01, OUT-01 and H1 (+0.273 [-0.061, +0.545]) do not change. H2 still holds:
+the best open models pass 3 of 12 and 3 of 11; sonnet and opus pass 11 of 12.

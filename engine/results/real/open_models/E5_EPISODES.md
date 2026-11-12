@@ -4,21 +4,21 @@ Seeds 5001-5012. Synthetic cases; real model behaviour. Cost = merchant net loss
 
 | system | harness | n | mean cost $ | vs evidence (95% ci) | gate pass | SR-01 fail | fair (OUT-01) | ref fair, same seeds | won/partial | mean reward | hard failures |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| haiku | claude-code-subagent | 12 | 64.21 | -4.90 [-20.96, +6.25] | 7/12 | 3/12 | 8/12 | 9/12 | 6/12 | 0.555 | PROC-01 x4, SR-01 x3, DL-01 x1, FAITH-01 x1 |
-| sonnet | claude-code-subagent | 12 | 36.34 | -32.77 [-64.01, -4.33] | 11/12 | 1/12 | 8/12 | 9/12 | 10/12 | 0.853 | DL-01 x1, FAITH-01 x1, PROC-01 x1, SR-01 x1 |
-| opus | claude-code-subagent | 12 | 71.20 | +2.08 [+0.00, +6.25] | 11/12 | 1/12 | 9/12 | 9/12 | 5/12 | 0.872 | SR-01 x1 |
-| gpt-oss-120b | api-groq | 12 | 97.37 | +28.26 [-36.63, +120.25] | 2/12 | 5/12 | 6/12 | 9/12 | 4/12 | 0.143 | FAITH-01 x6, PROC-01 x5, SR-01 x5, SCOPE-01 x5, EVD-01 x2 |
+| haiku | claude-code-subagent | 12 | 64.21 | -4.90 [-20.96, +6.25] | 7/12 | 3/12 | 8/12 | 9/12 | 6/12 | 0.557 | SR-01 x3, DL-01 x1, FAITH-01 x1, PROC-01 x1 |
+| sonnet | claude-code-subagent | 12 | 36.34 | -32.77 [-64.01, -4.33] | 11/12 | 1/12 | 8/12 | 9/12 | 10/12 | 0.860 | DL-01 x1, FAITH-01 x1, PROC-01 x1, SR-01 x1 |
+| opus | claude-code-subagent | 12 | 71.20 | +2.08 [+0.00, +6.25] | 11/12 | 1/12 | 9/12 | 9/12 | 5/12 | 0.876 | SR-01 x1 |
+| gpt-oss-120b | api-groq | 12 | 97.37 | +28.26 [-36.63, +120.25] | 3/12 | 5/12 | 6/12 | 9/12 | 4/12 | 0.227 | FAITH-01 x5, PROC-01 x5, SR-01 x5, SCOPE-01 x5, EVD-01 x2 |
 | gpt-oss-20b | api-groq | 12 | 40.60 | -28.52 [-59.99, -3.33] | 0/12 | 4/12 | 5/12 | 9/12 | 9/12 | 0.000 | FAITH-01 x12, PROC-01 x12, EVD-01 x4, SCOPE-01 x4, SR-01 x4 |
-| qwen3.8-27b | api-groq | 11 | 35.50 | -24.80 [-48.99, -2.41] | 1/11 | 5/11 | 9/11 | 8/11 | 8/11 | 0.090 | EVD-01 x5, SR-01 x5, PROC-01 x5, FAITH-01 x2 |
+| qwen3.8-27b | api-groq | 11 | 35.50 | -24.80 [-48.99, -2.41] | 3/11 | 5/11 | 9/11 | 8/11 | 8/11 | 0.270 | EVD-01 x5, SR-01 x5, FAITH-01 x2, PROC-01 x2 |
 | ernie-5.5-flash-preview | api-openrouter-e5b-exploratory | 2 | 79.21 | +12.50 [+0.00, +25.00] | 0/2 | 2/2 | 1/2 | 1/2 | 0/2 | 0.000 | SR-01 x2, DL-01 x1 |
 | flint-v1.0 | api-openrouter-e5b-exploratory | 2 | 46.73 | -19.98 [-39.96, +0.00] | 0/2 | 0/2 | 0/2 | 1/2 | 1/2 | 0.000 | EVD-01 x1, PROC-01 x1, DL-01 x1 |
 | gemma-4-26b-a4b-it | api-openrouter-e5b-exploratory | 1 | 54.96 | +0.00 [+0.00, +0.00] | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 | 0.000 | DL-01 x1 |
 | gemma-4-31b-it | api-openrouter-e5b-exploratory | 1 | 54.96 | +0.00 [+0.00, +0.00] | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 | 0.000 | DL-01 x1 |
 | inkling-2-small | api-openrouter-e5b-exploratory | 1 | 54.96 | +0.00 [+0.00, +0.00] | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 | 0.000 | DL-01 x1 |
 | nemotron-3-ultra-550b | api-openrouter-e5b-exploratory | 1 | 54.96 | +0.00 [+0.00, +0.00] | 0/1 | 0/1 | 1/1 | 1/1 | 0/1 | 0.000 | DL-01 x1 |
-| ref:evidence | in-process | 12 | 69.12 |  | 12/12 | 0/12 | 9/12 | 9/12 | 5/12 | 0.964 | none |
-| ref:always_accept | in-process | 12 | 127.27 | +58.16 [+1.10, +144.54] | 12/12 | 0/12 | 6/12 | 9/12 | 0/12 | 0.885 | none |
-| ref:oracle | in-process | 12 | 70.94 | +1.83 [+0.00, +5.48] | 12/12 | 0/12 | 10/12 | 9/12 | 4/12 | 0.960 | none |
+| ref:evidence | in-process | 12 | 69.12 |  | 12/12 | 0/12 | 9/12 | 9/12 | 5/12 | 0.965 | none |
+| ref:always_accept | in-process | 12 | 127.27 | +58.16 [+1.10, +144.54] | 12/12 | 0/12 | 6/12 | 9/12 | 0/12 | 0.887 | none |
+| ref:oracle | in-process | 12 | 70.94 | +1.83 [+0.00, +5.48] | 12/12 | 0/12 | 10/12 | 9/12 | 4/12 | 0.964 | none |
 
 H1 (all_open_models: gpt-oss-120b, gpt-oss-20b, qwen3.8-27b), SR-01 failure rate, pooled open minus pooled Claude, paired over 11 seeds: +0.273 [-0.061, +0.545].
 
@@ -28,9 +28,9 @@ Sensitivity (not the pre-registered scoring): gate pass / SR-01 fail / OUT-01 pa
 
 | system | as scored | without calls to non-existent tools | quota lapses excluded |
 |---|---|---|---|
-| gpt-oss-120b | 2/12 / 5 / 6 | 3/12 / 5 / 6 | 2/12 / 5 / 6 |
+| gpt-oss-120b | 3/12 / 5 / 6 | 4/12 / 5 / 6 | 3/12 / 5 / 6 |
 | gpt-oss-20b | 0/12 / 4 / 5 | 0/12 / 4 / 5 | 0/12 / 4 / 5 |
-| qwen3.8-27b | 1/11 / 5 / 9 | 1/11 / 5 / 9 | 1/11 / 5 / 9 |
+| qwen3.8-27b | 3/11 / 5 / 9 | 3/11 / 5 / 9 | 3/11 / 5 / 9 |
 | ernie-5.5-flash-preview | 0/2 / 2 / 1 | 0/2 / 2 / 1 | 0/2 / 2 / 1 |
 | flint-v1.0 | 0/2 / 0 / 0 | 0/2 / 0 / 0 | 0/2 / 0 / 0 |
 | gemma-4-26b-a4b-it | 0/1 / 0 / 1 | 0/1 / 0 / 1 | 0/0 / 0 / 0 |

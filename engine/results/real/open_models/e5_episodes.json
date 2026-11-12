@@ -266,10 +266,10 @@
   "gpt-oss-120b": {
    "no_quota_lapses": {
     "fair_outcome": 6,
-    "gate_pass": 2,
+    "gate_pass": 3,
     "hard_failures": {
      "EVD-01": 2,
-     "FAITH-01": 6,
+     "FAITH-01": 5,
      "PROC-01": 5,
      "SCOPE-01": 5,
      "SR-01": 5
@@ -279,10 +279,10 @@
    },
    "no_rejected": {
     "fair_outcome": 6,
-    "gate_pass": 3,
+    "gate_pass": 4,
     "hard_failures": {
      "EVD-01": 2,
-     "FAITH-01": 6,
+     "FAITH-01": 5,
      "PROC-01": 5,
      "SR-01": 5
     },
@@ -360,11 +360,11 @@
   "qwen3.8-27b": {
    "no_quota_lapses": {
     "fair_outcome": 9,
-    "gate_pass": 1,
+    "gate_pass": 3,
     "hard_failures": {
      "EVD-01": 5,
      "FAITH-01": 2,
-     "PROC-01": 5,
+     "PROC-01": 2,
      "SR-01": 5
     },
     "n": 11,
@@ -372,11 +372,11 @@
    },
    "no_rejected": {
     "fair_outcome": 9,
-    "gate_pass": 1,
+    "gate_pass": 3,
     "hard_failures": {
      "EVD-01": 5,
      "FAITH-01": 2,
-     "PROC-01": 5,
+     "PROC-01": 2,
      "SR-01": 5
     },
     "n": 11,
@@ -396,12 +396,12 @@
    "hard_failures": {
     "DL-01": 1,
     "FAITH-01": 1,
-    "PROC-01": 4,
+    "PROC-01": 1,
     "SR-01": 3
    },
    "harness": "claude-code-subagent",
    "mean_cost_usd": 64.21,
-   "mean_reward": 0.555,
+   "mean_reward": 0.557,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 3,
@@ -424,7 +424,7 @@
    },
    "harness": "claude-code-subagent",
    "mean_cost_usd": 36.34,
-   "mean_reward": 0.853,
+   "mean_reward": 0.86,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 1,
@@ -444,7 +444,7 @@
    },
    "harness": "claude-code-subagent",
    "mean_cost_usd": 71.2,
-   "mean_reward": 0.872,
+   "mean_reward": 0.876,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 1,
@@ -458,17 +458,17 @@
     120.25
    ],
    "fair_outcome": 6,
-   "gate_pass": 2,
+   "gate_pass": 3,
    "hard_failures": {
     "EVD-01": 2,
-    "FAITH-01": 6,
+    "FAITH-01": 5,
     "PROC-01": 5,
     "SCOPE-01": 5,
     "SR-01": 5
    },
    "harness": "api-groq",
    "mean_cost_usd": 97.37,
-   "mean_reward": 0.143,
+   "mean_reward": 0.227,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 5,
@@ -506,16 +506,16 @@
     -2.41
    ],
    "fair_outcome": 9,
-   "gate_pass": 1,
+   "gate_pass": 3,
    "hard_failures": {
     "EVD-01": 5,
     "FAITH-01": 2,
-    "PROC-01": 5,
+    "PROC-01": 2,
     "SR-01": 5
    },
    "harness": "api-groq",
    "mean_cost_usd": 35.5,
-   "mean_reward": 0.09,
+   "mean_reward": 0.27,
    "n": 11,
    "ref_fair_same_seeds": 8,
    "sr01_fail": 5,
@@ -652,7 +652,7 @@
    "hard_failures": {},
    "harness": "in-process",
    "mean_cost_usd": 69.12,
-   "mean_reward": 0.964,
+   "mean_reward": 0.965,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 0,
@@ -670,7 +670,7 @@
    "hard_failures": {},
    "harness": "in-process",
    "mean_cost_usd": 127.27,
-   "mean_reward": 0.885,
+   "mean_reward": 0.887,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 0,
@@ -688,7 +688,7 @@
    "hard_failures": {},
    "harness": "in-process",
    "mean_cost_usd": 70.94,
-   "mean_reward": 0.96,
+   "mean_reward": 0.964,
    "n": 12,
    "ref_fair_same_seeds": 9,
    "sr01_fail": 0,
