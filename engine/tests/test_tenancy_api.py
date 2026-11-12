@@ -53,6 +53,7 @@ LISTS = {
     "/openapi.json",
     "/jobs",
     "/usage",
+    "/tenant",  # the caller's own tenant record
     "/usage/events",
     # console pages that list the caller's own tenant (or the shared synthetic runs)
     "/console/",

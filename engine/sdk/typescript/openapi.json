@@ -2027,6 +2027,26 @@
         "title": "Provenance",
         "type": "object"
       },
+      "Quota": {
+        "additionalProperties": false,
+        "properties": {
+          "gate_runs_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10000000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gate Runs Per Day"
+          }
+        },
+        "title": "Quota",
+        "type": "object"
+      },
       "Readiness": {
         "properties": {
           "checks": {
@@ -2462,6 +2482,101 @@
           "contributions"
         ],
         "title": "StratifiedEvidence",
+        "type": "object"
+      },
+      "TenantOut": {
+        "properties": {
+          "gate_runs_today": {
+            "title": "Gate Runs Today",
+            "type": "integer"
+          },
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRecord"
+          }
+        },
+        "required": [
+          "tenant",
+          "gate_runs_today"
+        ],
+        "title": "TenantOut",
+        "type": "object"
+      },
+      "TenantRecord": {
+        "description": "A tenant's state, folded from its events.",
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "explicit": {
+            "title": "Explicit",
+            "type": "boolean"
+          },
+          "offboarded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offboarded At"
+          },
+          "offboarded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offboarded By"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/Quota",
+            "default": {}
+          },
+          "status": {
+            "enum": [
+              "active",
+              "offboarded"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant": {
+            "title": "Tenant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant",
+          "status",
+          "explicit"
+        ],
+        "title": "TenantRecord",
         "type": "object"
       },
       "TypeEvidence": {
@@ -4141,6 +4256,28 @@
           }
         },
         "summary": "Shadow Observe Imported"
+      }
+    },
+    "/tenant": {
+      "get": {
+        "description": "The caller's tenant: status, quota and gate runs used today (UTC).",
+        "operationId": "tenant_tenant_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Tenant",
+        "tags": [
+          "tenancy"
+        ]
       }
     },
     "/usage": {

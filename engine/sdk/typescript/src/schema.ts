@@ -437,6 +437,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tenant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tenant
+         * @description The caller's tenant: status, quota and gate runs used today (UTC).
+         */
+        get: operations["tenant_tenant_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/usage": {
         parameters: {
             query?: never;
@@ -1241,6 +1261,11 @@ export interface components {
              */
             notes?: string;
         };
+        /** Quota */
+        Quota: {
+            /** Gate Runs Per Day */
+            gate_runs_per_day?: number | null;
+        };
         /** Readiness */
         Readiness: {
             /** Checks */
@@ -1411,6 +1436,37 @@ export interface components {
             share: number;
             /** Threshold */
             threshold: number;
+        };
+        /** TenantOut */
+        TenantOut: {
+            /** Gate Runs Today */
+            gate_runs_today: number;
+            tenant: components["schemas"]["TenantRecord"];
+        };
+        /**
+         * TenantRecord
+         * @description A tenant's state, folded from its events.
+         */
+        TenantRecord: {
+            /** Created At */
+            created_at?: string | null;
+            /** Created By */
+            created_by?: string | null;
+            /** Explicit */
+            explicit: boolean;
+            /** Offboarded At */
+            offboarded_at?: string | null;
+            /** Offboarded By */
+            offboarded_by?: string | null;
+            /** @default {} */
+            quota?: components["schemas"]["Quota"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "offboarded";
+            /** Tenant */
+            tenant: string;
         };
         /**
          * TypeEvidence
@@ -2397,6 +2453,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    tenant_tenant_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TenantOut"];
                 };
             };
         };

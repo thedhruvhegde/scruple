@@ -292,6 +292,9 @@ def create_app(
     from scruple.usage.api import usage_router
 
     app.include_router(usage_router())  # GET /usage, /usage/events (admin)
+    from scruple.tenancy.api import tenancy_router
+
+    app.include_router(tenancy_router())  # GET /tenant (admin), the caller's own
     # Tenant policy files (scruple.policy): read, history, and admin-only apply.
     from scruple.policy.api import policy_router
 
