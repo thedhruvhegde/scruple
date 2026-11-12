@@ -39,7 +39,7 @@ URL = "/ingest/adyen/webhook"
 FAST = ScryptParams(n=2**4)
 
 # Adyen's library item vector (test/UtilTest.py): this key signs this item to this value.
-LIB_ITEM = {
+LIB_ITEM: dict[str, Any] = {
     "pspReference": "7914073381342284",
     "merchantReference": "TestPayment-1407325143704",
     "merchantAccountCode": "TestMerchant",
