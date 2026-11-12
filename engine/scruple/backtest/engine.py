@@ -41,9 +41,10 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from scruple.backtest.candidate import Candidate
+from scruple.backtest.candidate import Candidate, CandidateDecision
 from scruple.backtest.history import FEE_ACCOUNT, HistoricalCase, History
-from scruple.backtest.view import DEFAULTED_RULE_FIELDS, PaymentIndex, build_view
+from scruple.backtest.llm import AgentUsage
+from scruple.backtest.view import DEFAULTED_RULE_FIELDS, DecisionView, PaymentIndex, build_view
 from scruple.calibration import (
     CalibrationConfig,
     CalibrationProfile,
@@ -73,6 +74,11 @@ Method = Literal[
     "escalate_historical_plus_cost",
 ]
 Verdict = Literal["better", "worse", "no change", "insufficient evidence"]
+# A case whose agent reply was malformed, failed or timed out has no decision.
+# exclude: leave it out of the comparison (counted under `excluded`); escalate: price
+# it as an escalation (what a production fallback to an analyst would cost);
+# historical: keep what history did. Every such case is counted in `agent_outcomes`.
+OnAgentError = Literal["exclude", "escalate", "historical"]
 
 ASSUMPTIONS = (
     "Exports do not timestamp evidence submission or the outcome; both are treated as "
@@ -108,6 +114,7 @@ class BacktestConfig(BaseModel):
     calibration_seed: int = 0
     n_synthetic: int = Field(default=5_000, ge=100, le=200_000)
     include_cases: bool = False
+    on_agent_error: OnAgentError = "exclude"
 
 
 class CaseLine(BaseModel):
@@ -128,6 +135,18 @@ class CaseLine(BaseModel):
     candidate_cost_high: float  # pessimistic end
     cap: float
     defaulted: tuple[str, ...] = ()  # rule fields filled with a default for this case
+    agent_outcome: str = "ok"  # the reply outcome (scruple.backtest.llm), "ok" for rules
+
+
+class AgentFailure(BaseModel):
+    """A case whose agent reply gave no decision (listed with `include_cases`)."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    case_id: str
+    outcome: str
+    detail: str | None
+    handled: OnAgentError
 
 
 class StatsRun(BaseModel):
@@ -212,6 +231,10 @@ class BacktestReport(BaseModel):
     calibration: CalibrationReport | None
     assumptions: tuple[str, ...] = ASSUMPTIONS
     cases: tuple[CaseLine, ...] = ()
+    # reply outcome -> included cases (every outcome, "ok" too); empty for rules
+    agent_outcomes: dict[str, int] = {}
+    agent: AgentUsage | None = None  # calls, cache hits, tokens, cost and latency
+    agent_failures: tuple[AgentFailure, ...] = ()  # with include_cases only
 
 
 # --- costs --------------------------------------------------------------------------
@@ -298,20 +321,34 @@ def price_action(
     )
 
 
+def _decide_all(
+    candidate: Candidate, items: Sequence[tuple[str, DecisionView]]
+) -> list[CandidateDecision]:
+    """Every decision; a candidate with `decide_many` (an LLM agent) gets them at once."""
+    many = getattr(candidate, "decide_many", None)
+    if callable(many):
+        out = list(many(items))
+        if len(out) != len(items):
+            raise ValueError(f"{candidate.name}: decide_many returned {len(out)} decisions")
+        return out
+    return [candidate.decide(view) for _, view in items]
+
+
 def _line(
     hc: HistoricalCase,
     history: History,
-    candidate: Candidate,
+    decision: CandidateDecision,
+    view: DecisionView,
     profile: CalibrationProfile,
-    index: PaymentIndex,
     cfg: BacktestConfig,
 ) -> CaseLine:
     c = hc.case
-    at = c.opened_at + timedelta(hours=cfg.decision_delay_hours)
-    view = build_view(hc, index, at, history.merchant_account)
-    decision = candidate.decide(view)
+    at = view.decided_at
     hist = Action.CONTEST if contested(c) else Action.ACCEPT
-    action = decision.action or hist
+    if decision.outcome != "ok" and cfg.on_agent_error == "escalate":
+        action = Action.ESCALATE
+    else:
+        action = decision.action or hist
     pr = price_action(hc, hist, action, at, profile, cfg, history.merchant_account)
     baseline = pr.baseline
     cap = float(c.amount_minor + _fees(hc) + cfg.contest_fee_minor + cfg.escalation_cost_minor)
@@ -332,6 +369,7 @@ def _line(
         candidate_cost_high=pr.high,
         cap=cap,
         defaulted=view.defaulted_rule_fields(),
+        agent_outcome=decision.outcome,
     )
 
 
@@ -480,7 +518,38 @@ def run_backtest(
         else:
             included.append(hc)
     index = PaymentIndex(history.cases)
-    lines = [_line(hc, history, candidate, profile, index, cfg) for hc in included]
+    views = [
+        build_view(
+            hc,
+            index,
+            hc.case.opened_at + timedelta(hours=cfg.decision_delay_hours),
+            history.merchant_account,
+        )
+        for hc in included
+    ]
+    keyed = [(hc.case.case_id, v) for hc, v in zip(included, views, strict=True)]
+    decisions = _decide_all(candidate, keyed)
+    lines: list[CaseLine] = []
+    failures: list[AgentFailure] = []
+    for hc, view, d in zip(included, views, decisions, strict=True):
+        if d.outcome != "ok":
+            failures.append(
+                AgentFailure(
+                    case_id=hc.case.case_id,
+                    outcome=d.outcome,
+                    detail=d.detail,
+                    handled=cfg.on_agent_error,
+                )
+            )
+            if cfg.on_agent_error == "exclude":
+                excluded[f"agent reply {d.outcome} (no decision)"] += 1
+                continue
+        lines.append(_line(hc, history, d, view, profile, cfg))
+    usage_fn = getattr(candidate, "usage", None)
+    agent_usage = usage_fn() if callable(usage_fn) else None
+    agent_outcomes: dict[str, int] = {}
+    if agent_usage is not None or failures:
+        agent_outcomes = dict(sorted(Counter(d.outcome for d in decisions).items()))
 
     led = history.ledger()
     in_ccy = [hc for hc in history.cases if hc.case.currency == currency and hc.ledger]
@@ -587,4 +656,7 @@ def run_backtest(
         planning_note=planning_note,
         calibration=calib,
         cases=tuple(lines) if cfg.include_cases else (),
+        agent_outcomes=agent_outcomes,
+        agent=agent_usage if isinstance(agent_usage, AgentUsage) else None,
+        agent_failures=tuple(failures) if cfg.include_cases else (),
     )

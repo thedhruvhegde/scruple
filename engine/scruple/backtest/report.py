@@ -125,6 +125,7 @@ def to_markdown(r: BacktestReport) -> str:
         r.planning_note,
         "",
     ]
+    out += _agent_section(r)
     if r.calibration is not None:
         c = r.calibration
         out += [
@@ -150,6 +151,51 @@ def to_markdown(r: BacktestReport) -> str:
         "",
     ]
     return "\n".join(out)
+
+
+def _ms(x: float | None) -> str:
+    return "n/a" if x is None else f"{x:,.0f} ms"
+
+
+def _usd(x: float | None) -> str:
+    return "not priced (no --price-in/--price-out)" if x is None else f"USD {x:,.4f}"
+
+
+def _agent_section(r: BacktestReport) -> list[str]:
+    if r.agent is None and not r.agent_outcomes:
+        return []
+    out = ["## Agent calls", ""]
+    handled = {
+        "exclude": "left out of the comparison",
+        "escalate": "priced as escalations",
+        "historical": "kept the historical action",
+    }[r.config.on_agent_error]
+    out.append(
+        "- reply outcomes: "
+        + ", ".join(f"{k} {v}" for k, v in r.agent_outcomes.items())
+        + f"; cases without a decision {handled}"
+    )
+    a = r.agent
+    if a is not None:
+        out += [
+            f"- agent: {a.agent_id} ({a.kind}); models reported: {', '.join(a.models) or 'none'}",
+            f"- cases asked: {a.cases}; calls made this run: {a.calls_made}; "
+            f"answered from the cache: {a.cache_hits}",
+            f"- tokens: {a.input_tokens:,} in, {a.output_tokens:,} out "
+            f"(this run: {a.input_tokens_this_run:,} in, {a.output_tokens_this_run:,} out)",
+            f"- cost: {_usd(a.cost_usd)}"
+            + ("" if a.cost_usd is None else f" (this run: {_usd(a.cost_usd_this_run)})"),
+            f"- latency per call, as recorded when made: mean {_ms(a.latency_ms_mean)}, "
+            f"p50 {_ms(a.latency_ms_p50)}, p95 {_ms(a.latency_ms_p95)}, "
+            f"max {_ms(a.latency_ms_max)}; total {_ms(a.latency_ms_total)}",
+            "- free text sent: "
+            + ("yes (opted in, after redaction)" if a.free_text_sent else "no (withheld)"),
+        ]
+    out += [
+        f"- no decision, {f.case_id}: {f.outcome}" + (f" ({f.detail})" if f.detail else "")
+        for f in r.agent_failures
+    ]
+    return [*out, ""]
 
 
 def pdf_available() -> bool:
