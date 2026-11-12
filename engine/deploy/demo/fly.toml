@@ -1,0 +1,60 @@
+# Hosted read-only demo on Fly.io: one small machine in one region, no login,
+# SYNTHETIC data only, every write refused. NOT DEPLOYED YET: written without a Fly
+# account and never run against Fly. Commands and limits: docs/DEPLOY.md, "Hosted demo".
+#
+# From the repository root:
+#   fly apps create scruple-demo
+#   fly deploy . --config deploy/demo/fly.toml --dockerfile Dockerfile --ha=false \
+#     --build-arg BUILD_COMMIT=$(git rev-parse HEAD)
+#
+# The image is the repository's Dockerfile. `scruple serve --demo` seeds the data at
+# start (about 40 s on a laptop), so the health check has a long grace period.
+
+app = "scruple-demo"
+primary_region = "iad"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[env]
+  SCRUPLE_DEMO = "true"
+  # Each generation is seeded here and deleted on the next reset or restart.
+  SCRUPLE_DEMO_DIR = "/data/demo"
+  SCRUPLE_DEMO_RESET_UTC_HOUR = "4"
+  # Set by Fly's proxy to the visitor's address; a client cannot set it.
+  SCRUPLE_DEMO_CLIENT_IP_HEADER = "Fly-Client-IP"
+  # Per visitor address: 120 requests a minute, bursts of 30 (the anonymous bucket).
+  SCRUPLE_RATE_LIMIT_ANONYMOUS_PER_MINUTE = "120"
+  SCRUPLE_RATE_LIMIT_ANONYMOUS_BURST = "30"
+  SCRUPLE_MAX_BODY_BYTES = "16384"
+  SCRUPLE_TLS_TERMINATED = "true"
+  SCRUPLE_LOG_FORMAT = "json"
+
+# The image's entrypoint runs `scruple <args>` for anything but gunicorn.
+[processes]
+  app = "serve --demo --host 0.0.0.0 --port 8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # Always on: a stopped machine would re-seed on every cold start.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 20
+    hard_limit = 40
+
+  [[http_service.checks]]
+    grace_period = "180s"
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["app"]

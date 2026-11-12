@@ -164,3 +164,28 @@ def test_swap_without_a_build_fails(tmp_path: Path) -> None:
         check=False,
     )
     assert done.returncode == 1 and "nothing to swap" in done.stderr
+
+
+def test_fly_config_runs_the_read_only_demo_on_one_small_machine() -> None:
+    import shlex
+    import tomllib
+
+    from scruple.cli.main import build_parser
+
+    fly = tomllib.loads((DEMO / "fly.toml").read_text())
+    assert fly["primary_region"] and "regions" not in fly
+    args = build_parser().parse_args(shlex.split(fly["processes"]["app"]))
+    assert args.cmd == "serve" and args.demo and args.db is None
+    assert args.host == "0.0.0.0"  # inside the machine, behind Fly's proxy
+    svc = fly["http_service"]
+    assert svc["internal_port"] == args.port and svc["force_https"]
+    assert svc["min_machines_running"] == 1 and svc["auto_stop_machines"] == "off"
+    (check,) = svc["checks"]
+    assert check["path"] == "/health" and check["method"] == "GET"
+    (vm,) = fly["vm"]
+    assert vm["size"] == "shared-cpu-1x" and vm["memory"] == "512mb"
+    # every variable is a real setting, and none is a secret
+    s = load_settings(env=fly["env"])
+    assert s.demo and s.demo_client_ip_header == "Fly-Client-IP" and s.tls_terminated
+    assert s.max_body_bytes <= 16 * 1024
+    assert not any(k.endswith(("TOKEN", "PASSWORD", "SALT", "SECRET")) for k in fly["env"])
