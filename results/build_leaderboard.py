@@ -50,14 +50,7 @@ NAME = {
 }
 # Known verifier false alarms, documented in docs/VERIFIER_FINDINGS.md. Each must match a
 # real difference between a run-time row and its replay, or the build stops.
-KNOWN = {
-    ("gpt-oss-120b", 5003, "FAITH-01"): (
-        "Seed 5003 fails the gate only on FAITH-01, which is a known false alarm (G-15 in "
-        "docs/VERIFIER_FINDINGS.md, pinned in tests/test_known_gaps.py): the explanation names the "
-        "required documents and says the merchant has none. Counted as scored, as pre-registered; "
-        "without it the gate pass would be {alt}."
-    ),
-}
+KNOWN: dict[tuple[str, int, str], str] = {}
 # Why the replay changed a Claude row (MODEL_EPISODES.md, VERIFIER_FINDINGS.md); checked like KNOWN.
 WHY = {
     ("haiku", 5002): (
