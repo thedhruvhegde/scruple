@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
 
-from scruple.backtest.candidate import load_candidate
+from scruple.agents.providers import Price, make_provider, provider_names
+from scruple.backtest.candidate import Candidate, load_candidate
 from scruple.backtest.engine import BacktestConfig, run_backtest
 from scruple.backtest.history import History, load_adyen, load_store, load_stripe, load_tabular
+from scruple.backtest.llm import AgentBackend, HttpAgent, LLMCandidate, ModelAgent
 from scruple.backtest.report import write_report
 from scruple.calibration import (
     DEFAULT_PROFILE,
@@ -45,7 +48,56 @@ def _history(args: argparse.Namespace) -> History:
     return load_tabular(data, cfg, label=label, jsonl=path.suffix == ".jsonl")
 
 
+def _price(args: argparse.Namespace) -> Price | None:
+    if args.price_in is None and args.price_out is None:
+        return None
+    if args.price_in is None or args.price_out is None:
+        raise ValueError("give both --price-in and --price-out (USD per million tokens)")
+    return Price(input_per_mtok=args.price_in, output_per_mtok=args.price_out)
+
+
+def _agent(args: argparse.Namespace) -> LLMCandidate:
+    common: dict[str, Any] = {
+        "timeout_s": args.agent_timeout,
+        "max_retries": args.agent_retries,
+        "backoff_s": args.agent_backoff,
+        "rpm": args.agent_rpm,
+    }
+    backend: AgentBackend
+    if args.agent_url:
+        headers: dict[str, str] = {}
+        if args.agent_auth_env:
+            token = os.environ.get(args.agent_auth_env, "")
+            if not token:
+                raise ValueError(f"--agent-auth-env: {args.agent_auth_env} is not set")
+            headers["authorization"] = f"Bearer {token}"
+        backend = HttpAgent(args.agent_url, agent_id=args.agent_id, headers=headers, **common)
+    else:
+        if not args.agent_model or not args.agent_prompt:
+            raise ValueError("--agent-provider needs --agent-model and --agent-prompt")
+        provider = make_provider(args.agent_provider, base_url=args.agent_base_url)
+        prompt = Path(args.agent_prompt).read_text(encoding="utf-8")
+        backend = ModelAgent(
+            provider,
+            args.agent_model,
+            prompt,
+            max_tokens=args.agent_max_tokens,
+            agent_id=args.agent_id,
+            **common,
+        )
+    cache = Path(args.agent_cache) if args.agent_cache else Path(args.out) / "agent-cache"
+    return LLMCandidate(
+        backend,
+        cache_dir=cache,
+        concurrency=args.agent_concurrency,
+        allow_free_text=args.agent_send_free_text,
+        price=_price(args),
+    )
+
+
 def cmd_run(args: argparse.Namespace) -> int:
+    if sum(map(bool, (args.candidate, args.agent_url, args.agent_provider))) != 1:
+        raise ValueError("give exactly one of --candidate, --agent-url, --agent-provider")
     history = _history(args)
     profile = None
     if args.profile:
@@ -56,14 +108,31 @@ def cmd_run(args: argparse.Namespace) -> int:
         include_cases=args.include_cases,
         escalation_cost_minor=args.escalation_cost,
         contest_fee_minor=args.contest_fee,
+        on_agent_error=args.on_agent_error,
     )
-    report = run_backtest(history, load_candidate(args.candidate), config=cfg, profile=profile)
+    candidate: Candidate
+    candidate = _agent(args) if not args.candidate else load_candidate(args.candidate)
+    try:
+        report = run_backtest(history, candidate, config=cfg, profile=profile)
+    finally:
+        if isinstance(candidate, LLMCandidate):
+            candidate.close()
     files = write_report(report, Path(args.out), pdf=False if args.no_pdf else None)
     tag = " [SYNTHETIC DATA]" if report.synthetic else ""
     print(
         f"{report.verdict}{tag}: {report.n_included} cases "
         f"({report.n_observed} observed, {report.n_estimated} estimated)"
     )
+    if report.agent is not None:
+        a = report.agent
+        cost = "unpriced" if a.cost_usd is None else f"USD {a.cost_usd:.4f}"
+        print(
+            "agent: "
+            + ", ".join(f"{k} {v}" for k, v in a.outcomes.items())
+            + f"; {a.calls_made} calls, {a.cache_hits} cached; "
+            f"{a.input_tokens + a.output_tokens} tokens, {cost}; "
+            f"latency total {a.latency_ms_total:.0f} ms"
+        )
     for f in files:
         print(f"wrote {f}")
     return 0
@@ -115,7 +184,37 @@ def add_backtest_parser(sub: Any) -> None:
     bsub = bt.add_subparsers(dest="backtest_cmd", required=True)
     run = bsub.add_parser("run", help="backtest a rule or agent on an exported history")
     _input_args(run)
-    run.add_argument("--candidate", required=True, help="rule .json, agent .py or module[:attr]")
+    run.add_argument("--candidate", default=None, help="rule .json, agent .py or module[:attr]")
+    ag = run.add_argument_group(
+        "LLM agent", "backtest a partner's LLM agent instead of --candidate (docs/BACKTEST.md)"
+    )
+    ag.add_argument("--agent-url", default=None, help="the partner's endpoint (POST JSON)")
+    ag.add_argument("--agent-auth-env", default=None, help="env var holding a bearer token")
+    ag.add_argument("--agent-provider", default=None, choices=provider_names())
+    ag.add_argument("--agent-model", default=None, help="model id for --agent-provider")
+    ag.add_argument("--agent-prompt", default=None, help="the partner's system prompt file")
+    ag.add_argument("--agent-base-url", default=None, help="override the provider's endpoint")
+    ag.add_argument("--agent-max-tokens", type=int, default=512)
+    ag.add_argument("--agent-id", default=None, help="cache identity; change it with the agent")
+    ag.add_argument("--agent-cache", default=None, help="reply cache dir (default OUT/agent-cache)")
+    ag.add_argument("--agent-concurrency", type=int, default=4, help="calls in flight at once")
+    ag.add_argument("--agent-timeout", type=float, default=30.0, help="seconds per request")
+    ag.add_argument("--agent-retries", type=int, default=3, help="retries on 429, 5xx, transport")
+    ag.add_argument("--agent-backoff", type=float, default=1.0, help="first retry wait, seconds")
+    ag.add_argument("--agent-rpm", type=float, default=None, help="max requests per minute")
+    ag.add_argument(
+        "--agent-send-free-text",
+        action="store_true",
+        help="opt in: send free-text fields (redacted) instead of withholding them",
+    )
+    ag.add_argument(
+        "--on-agent-error",
+        choices=["exclude", "escalate", "historical"],
+        default="exclude",
+        help="cases whose reply was malformed, failed or timed out (default exclude)",
+    )
+    ag.add_argument("--price-in", type=float, default=None, help="USD per million input tokens")
+    ag.add_argument("--price-out", type=float, default=None, help="USD per million output tokens")
     run.add_argument("--out", required=True, help="report directory")
     run.add_argument("--profile", default=None, help="use this CalibrationProfile JSON")
     run.add_argument("--currency", default=None, help="default: the most common currency")
