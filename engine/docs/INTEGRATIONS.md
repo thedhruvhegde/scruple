@@ -120,8 +120,32 @@ Rules every adapter follows:
   verbatim (funding is not inferred from it), `defendable` and `autoDefended` (the
   strings "true"/"false"; anything else is None). The Webhooks-v1 dispute schema has no
   3-D Secure, AVS/CVC, MCC, shipping or refund fields, so those are None.
-- Not done: an HTTP route for Adyen (the adapter is a function), Basic auth on the
-  endpoint, the `[accepted]` acknowledgement, the Disputes API client.
+- Route: `POST /ingest/adyen/webhook`, next to the Stripe route in `scruple.ingest.api`,
+  calling `ingest_notification` on the raw body. Keys from `SCRUPLE_ADYEN_HMAC_KEYS`
+  (comma separated hex; `tenant=key` maps a key to a tenant, a bare key is
+  `SCRUPLE_INGEST_TENANT`'s); unset means 503. The tenant is the one whose keys verify
+  every item; items verified by two tenants' keys reject the delivery.
+- Answers: 200 with the body `[accepted]` (text/plain), what Adyen's standard
+  notifications expect; the counts are in headers (`X-Scruple-Cases`,
+  `X-Scruple-Skipped`, `X-Scruple-Duplicates`, `X-Scruple-Stale`, `X-Scruple-Stored`).
+  400 bad or missing `hmacSignature` on any item, 413 body over 2 MiB (from
+  `Content-Length` or while streaming), 422 signed but unmappable, 503 the case store
+  write failed. Anything but 200 makes Adyen retry.
+- No API key: the signature is the credential. Requests count against the anonymous
+  rate limit of the client address (120 a minute, burst 30 by default), as Stripe's do.
+- Persisted to the verifying tenant's case store when one is configured, one webhook
+  event per case, idempotent by `pspReference:eventCode:eventDate` (an ASSUMPTION:
+  Adyen documents no event id). Without a store, nothing is remembered, so a redelivery
+  is accepted again.
+- Tests over HTTP (tests/test_ingest_adyen_endpoint.py): the library's item vector
+  (`coqCmt/...`) and its four mock notifications through the full app, each accepted
+  and reported as skipped (they are AUTHORISATION items); one tampered item rejects the
+  batch; dispute items signed with a test key are stored once; size and rate limits.
+  Adyen's documentation site could not be reached from this environment, so no
+  vector from the docs pages themselves is used; the library's vectors are Adyen's.
+- Not done: Basic auth on the endpoint (Adyen can send a username and password as
+  well as the HMAC), header-signed (`verify_payload_hmac`) webhook routes, the
+  Disputes API client.
 
 ## CSV and JSONL case import (`scruple.ingest.tabular`)
 
@@ -524,14 +548,15 @@ def verify(secret: str, header: str, body: bytes, tolerance: int = 300) -> bool:
 ## Policy and integration tables, and the API schema
 
 - `tenant_policies` and the integration tables (`integration_*`, `webhook_*`,
-  `ticket_*`, `link_nonces`): on Postgres they are part of the schema (alembic 0014,
+  `ticket_*`, `link_nonces`), and `tenant_events` (alembic 0015, `scruple tenant`):
+  on Postgres they are part of the schema (alembic 0014 and 0015,
   and `PostgresStorage` on open), and `app_role_grants` covers them (INSERT and SELECT
   on history; UPDATE on the cursor, endpoints and deliveries; UPDATE and DELETE on
   ticket claims). On SQLite they are created with `CREATE TABLE IF NOT EXISTS` on first
   use (`scruple.storage.lazy`), so a dev database that never used them is unchanged.
-- Append-only on both backends, by trigger: `tenant_policies`, `integration_settings`,
-  `integration_events`, `webhook_attempts`, `ticket_updates`, `link_nonces`. The
-  others hold mutable state (cursor, endpoint active flag and secrets, delivery status,
+- Append-only on both backends, by trigger: `tenant_policies`, `tenant_events`,
+  `integration_settings`, `integration_events`, `webhook_attempts`, `ticket_updates`,
+  `link_nonces`. The others hold mutable state (cursor, endpoint active flag and secrets, delivery status,
   in-progress ticket claims).
 - `/policy` and `/integrations/*` routes are left out of the OpenAPI schema, like the
   console: they are operator configuration, not part of the SDKs generated from it.
