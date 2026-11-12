@@ -304,6 +304,9 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.integrations.cli import add_integrations_parser
 
     add_integrations_parser(sub, DEFAULT_DB)
+    from scruple.tenancy.cli import add_tenant_parser
+
+    add_tenant_parser(sub, DEFAULT_DB)
     return p
 
 
