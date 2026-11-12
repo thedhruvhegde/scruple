@@ -272,7 +272,8 @@ def main() -> None:
         if n < total:
             played = {r["seed"] for r in replayed[s]}
             missing = [x for x in e5["seeds"] if x not in played]
-            out.append(f"episodes on {n} of {total} seeds; seeds {missing[0]}-{missing[-1]} not run (provider token cap)")
+            span = f"seed {missing[0]}" if len(missing) == 1 else f"seeds {missing[0]}-{missing[-1]}"
+            out.append(f"episodes on {n} of {total} seeds; {span} not run (provider token cap)")
         return out
 
     for s in CLAUDE:
