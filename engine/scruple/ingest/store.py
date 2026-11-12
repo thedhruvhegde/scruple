@@ -534,6 +534,30 @@ class CaseStore:
             )
         return out
 
+    def row_counts(self, tenant_id: str = DEFAULT_TENANT) -> dict[str, int]:
+        """Rows a full purge for `tenant_id` would delete, per table (a dry run)."""
+        with self._lock:
+            one = self._db.execute
+            return {
+                "cases": int(one("SELECT COUNT(*) FROM cases").fetchone()[0]),
+                "movements": int(one("SELECT COUNT(*) FROM movements").fetchone()[0]),
+                "webhook_case_events": int(
+                    one(
+                        "SELECT COUNT(*) FROM webhook_case_events WHERE tenant_id = ?",
+                        (tenant_id,),
+                    ).fetchone()[0]
+                ),
+            }
+
+    def webhook_tenants(self) -> set[str]:
+        """Every tenant a stored webhook delivery was written for."""
+        with self._lock:
+            rows = self._db.execute(
+                "SELECT tenant_id FROM webhook_events UNION SELECT tenant_id FROM "
+                "webhook_case_events"
+            ).fetchall()
+        return {str(r[0]) for r in rows}
+
     def purges(self) -> list[dict[str, Any]]:
         rows = self._db.execute(
             "SELECT key, value FROM store_meta WHERE key LIKE 'purge:%'"

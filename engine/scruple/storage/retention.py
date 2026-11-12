@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Collection
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -313,40 +313,66 @@ def apply_retention(
         if tenants is not None and policy.tenant_id not in tenants:
             continue
         cutoff = at - timedelta(days=policy.days)
-        with gate.storage.transaction():
-            n, dig = repo.purge_imported_shadow(policy.tenant_id, cutoff)
-            if n:
-                out.append(
-                    _record(
-                        gate,
-                        repo,
-                        policy,
-                        "gate",
-                        "imported_shadow_events",
-                        cutoff,
-                        n,
-                        dig,
-                        at,
-                        actor,
-                    )
-                )
         store = (case_stores or {}).get(policy.tenant_id)
-        if store is not None:
-            for table, (n, dig) in store.purge(cutoff, tenant_id=policy.tenant_id).items():
-                if n:
-                    with gate.storage.transaction():
-                        out.append(
-                            _record(
-                                gate, repo, policy, "case_store", table, cutoff, n, dig, at, actor
-                            )
-                        )
+        out += _purge(gate, repo, policy.tenant_id, cutoff, store, at, actor, days=policy.days)
+    return out
+
+
+# Offboarding purges everything: a cutoff after any time a row can carry.
+END_OF_TIME = datetime(9999, 12, 31, 23, 59, 59, tzinfo=UTC)
+
+
+def purge_tenant(
+    gate: AgentGate,
+    tenant_id: str,
+    *,
+    case_store: CaseStore | None = None,
+    actor: str = "offboarding",
+    now: datetime | None = None,
+) -> list[PurgeResult]:
+    """Delete all of one tenant's row-level case data, whatever its age (offboarding),
+    by the same path and with the same audit entries as a policy purge; the entries'
+    payload says `reason: offboarding` and has no `days`."""
+    repo = retention_for(gate.storage)
+    at = now or gate.clock.now()
+    return _purge(gate, repo, tenant_id, END_OF_TIME, case_store, at, actor, reason="offboarding")
+
+
+def _purge(
+    gate: AgentGate,
+    repo: SQLRetention,
+    tenant_id: str,
+    cutoff: datetime,
+    store: CaseStore | None,
+    at: datetime,
+    actor: str,
+    *,
+    days: int | None = None,
+    reason: str | None = None,
+) -> list[PurgeResult]:
+    out: list[PurgeResult] = []
+
+    def record(where: str, table: str, n: int, dig: str) -> None:
+        out.append(
+            _record(gate, repo, tenant_id, where, table, cutoff, n, dig, at, actor, days, reason)
+        )
+
+    with gate.storage.transaction():
+        n, dig = repo.purge_imported_shadow(tenant_id, cutoff)
+        if n:
+            record("gate", "imported_shadow_events", n, dig)
+    if store is not None:
+        for table, (n, dig) in store.purge(cutoff, tenant_id=tenant_id).items():
+            if n:
+                with gate.storage.transaction():
+                    record("case_store", table, n, dig)
     return out
 
 
 def _record(
     gate: AgentGate,
     repo: SQLRetention,
-    policy: RetentionPolicy,
+    tenant_id: str,
     store: str,
     table: str,
     cutoff: datetime,
@@ -354,22 +380,24 @@ def _record(
     dig: str,
     at: datetime,
     actor: str,
+    days: int | None,
+    reason: str | None,
 ) -> PurgeResult:
-    entry = tenant_gate(gate, policy.tenant_id).record_runtime_event(
-        EVENT_PURGED,
-        actor,
-        {
-            "tenant_id": policy.tenant_id,
-            "days": policy.days,
-            "store": store,
-            "table": table,
-            "cutoff": cutoff.isoformat(),
-            "rows": n,
-            "digest_sha256": dig,
-        },
-    )
+    payload: dict[str, Any] = {
+        "tenant_id": tenant_id,
+        "store": store,
+        "table": table,
+        "cutoff": cutoff.isoformat(),
+        "rows": n,
+        "digest_sha256": dig,
+    }
+    if days is not None:
+        payload["days"] = days
+    if reason is not None:
+        payload["reason"] = reason
+    entry = tenant_gate(gate, tenant_id).record_runtime_event(EVENT_PURGED, actor, payload)
     res = PurgeResult(
-        tenant_id=policy.tenant_id,
+        tenant_id=tenant_id,
         store=store,
         table=table,
         cutoff=cutoff,
@@ -465,6 +493,7 @@ def add_retention_parser(sub: Any, default_db: str) -> None:
 
 __all__ = [
     "DEFAULT_TENANT",
+    "END_OF_TIME",
     "EVENT_POLICY",
     "EVENT_PURGED",
     "POSTGRES_DDL",
@@ -475,6 +504,7 @@ __all__ = [
     "add_retention_parser",
     "apply_retention",
     "digest",
+    "purge_tenant",
     "retention_for",
     "set_policy",
     "tenant_gate",
