@@ -44,6 +44,14 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     settings = load_settings()
     configure_logging(settings.log_level, settings.log_format)
+    if args.demo or settings.demo:
+        if args.db:
+            raise SystemExit(
+                "--db does not apply to --demo: the demo seeds its own database (SCRUPLE_DEMO_DIR)"
+            )
+        from scruple.demo.host import serve_demo
+
+        return serve_demo(settings.model_copy(update={"demo": True}), args.host, args.port)
     # log_config=None: uvicorn's loggers propagate to our JSON handler; the
     # request-id middleware writes the access line.
     uvicorn.run(
@@ -193,6 +201,12 @@ def build_parser() -> argparse.ArgumentParser:
     s = add("serve", cmd_serve, "run the HTTP API")
     s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8000)
+    s.add_argument(
+        "--demo",
+        action="store_true",
+        help="public read-only demo: seed SYNTHETIC data, no login, refuse every write "
+        "(also SCRUPLE_DEMO=1)",
+    )
     add("rules", cmd_rules, "list rule versions")
     pr = add("propose", cmd_propose, "register a candidate rule from a JSON file")
     pr.add_argument("file")
