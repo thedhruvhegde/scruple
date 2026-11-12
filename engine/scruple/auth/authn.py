@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -76,8 +76,10 @@ class Authenticator:
         *,
         dev_actor_header: bool = False,
         sessions: SessionSigner | None = None,
+        tenant_refused: Callable[[str], bool] | None = None,
     ) -> None:
         self.keys = keys
+        self.tenant_refused = tenant_refused
         self.tokens = tokens
         self.dev_actor_header = dev_actor_header
         self.sessions = sessions
@@ -88,7 +90,23 @@ class Authenticator:
         self, headers: Mapping[str, str], path: str | None = None
     ) -> Authenticated | None:
         """`headers` is case-insensitive (Starlette `Headers`) or lower-cased keys;
-        `path` decides whether a session cookie may count (console paths only)."""
+        `path` decides whether a session cookie may count (console paths only).
+
+        A credential whose tenant `tenant_refused` names (an offboarded tenant,
+        `scruple.tenancy`) is refused like any other bad credential."""
+        who = self._authenticate(headers, path)
+        if who is None or self.tenant_refused is None or who.principal.method == "dev_header":
+            return who
+        if not self.tenant_refused(who.principal.tenant):
+            return who
+        if who.principal.method == "saml":
+            return None  # a session cookie that does not check out is ignored
+        # The same answer as any other refused credential of that kind.
+        raise AuthError("invalid API key" if who.key is not None else "invalid bearer token")
+
+    def _authenticate(
+        self, headers: Mapping[str, str], path: str | None = None
+    ) -> Authenticated | None:
         api_key = headers.get("x-api-key")
         authz = headers.get("authorization")
         bearer: str | None = None

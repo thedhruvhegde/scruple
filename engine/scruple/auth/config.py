@@ -105,12 +105,16 @@ def saml_setup(
 def build_authenticator(
     settings: Settings, storage: Storage, clock: Clock | None = None
 ) -> Authenticator:
+    from scruple.tenancy.directory import directory_for
+
     saml = saml_setup(settings)
+    directory = directory_for(storage, clock)
     return Authenticator(
         key_service(settings, storage, clock),
         oidc_verifier(settings),
         dev_actor_header=settings.auth_dev_actor_header,
         sessions=saml[1] if saml is not None else None,
+        tenant_refused=directory.is_offboarded if directory is not None else None,
     )
 
 

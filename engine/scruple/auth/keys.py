@@ -198,6 +198,11 @@ class ApiKeyService:
         )
         if not self._permissions_for(rec):
             raise ValueError("a key needs at least one scope or role")
+        from scruple.tenancy.directory import directory_for
+
+        directory = directory_for(self._storage)
+        if directory is not None and directory.is_offboarded(tenant):
+            raise ValueError(f"tenant {tenant} was offboarded; it gets no new keys")
         store = self._tenant_store(tenant)
         with store.transaction():
             store.insert_api_key(rec)
