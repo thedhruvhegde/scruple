@@ -149,3 +149,36 @@ What it shows:
   reasoning. They are graded as wrong.
 - **The harnesses differ.** Claude ran as subagents reading a prompt file; the open
   models got one API completion per item. The text was the same.
+
+### E5 continuation (added 2026-11-12, session 3)
+
+This replaces the session-2 E5 table above. Same item ids, grader and prompt text.
+Real CFPB data. Reproduce with `uv run python scripts/compare_real_models.py
+results/real/open_models/cfpb/<dir>`, dir one of `regime_full`, `outcome_full`,
+`routing_full` or `routing_completed_s3`.
+
+| task | n | majority | keywords | tf-idf + lr | claude haiku | claude sonnet | gpt-oss-120b | gpt-oss-20b |
+|---|---|---|---|---|---|---|---|---|
+| regime-2015 (accuracy) | 100 | 0.630 | 0.800 | 0.870 | 0.900 | 0.930 | 0.910 | 0.840 |
+| outcome-2015 (auroc) | 100 | 0.500 | 0.568 | 0.701 | 0.550 | 0.606 | 0.425 | 0.399 |
+| routing-2025 (issue acc.) | 50 | 0.480 | 0.220 | 0.580 | 0.560 | 0.540 | 0.540 | not complete |
+| routing-2025 (issue acc.) | 41 | 0.488 | 0.220 | 0.561 | 0.585 | 0.561 | 0.537 | 0.561 |
+
+Against TF-IDF + LR (95% CI):
+
+- gpt-oss-120b: regime +0.040 [-0.010, +0.100]; outcome -0.275 [-0.450, -0.102];
+  routing (n=50) -0.040 [-0.220, +0.140].
+- gpt-oss-20b: regime -0.030 [-0.100, +0.040]; outcome (n=100) -0.302 [-0.471,
+  -0.131]; routing (n=41) +0.000 [-0.195, +0.195].
+
+What changed:
+
+- **Outcome is now complete for both gpt-oss models.** Both rank complaints below
+  chance (AUROC 0.425 and 0.399) with every reply parsed, and both are below
+  TF-IDF with CIs wholly below 0.
+- **Routing:** gpt-oss-120b answered all 50; gpt-oss-20b 41 of 50 before the Groq
+  daily cap stopped the session. Both are level with TF-IDF and Claude.
+  gpt-oss-20b had 3 invalid routing replies (one empty after 2,048 reasoning
+  tokens, two with labels outside the list), graded as wrong.
+- **Not run:** gpt-oss-20b routing items 42-50 and every qwen/qwen3.8-27b item.
+  Counted, never graded.

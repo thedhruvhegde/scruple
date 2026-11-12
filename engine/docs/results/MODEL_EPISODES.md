@@ -221,3 +221,31 @@ docs/experiments/E5_open_models.md. Synthetic cases, real model behaviour.
 - **Not in the table:** E5b OpenRouter free models. They are exploratory, and
   free-tier upstream limits stopped them; see the E5 file.
 - **The harnesses still differ** (see above): compare within each group first.
+
+### E5 continuation (added 2026-11-12, session 3)
+
+This replaces the session-2 E5 table above for qwen; every other row is unchanged.
+Re-scored by replay with the current verifiers. Details and verdicts are in
+docs/experiments/E5_open_models.md. Synthetic cases, real model behaviour.
+
+| system | harness | n | mean cost $ | vs evidence (95% ci) | gate pass | SR-01 fail | fair (OUT-01) | ref fair, same seeds | won/partial |
+|---|---|---|---|---|---|---|---|---|---|
+| haiku | Claude Code subagent, CLI | 12 | 64.21 | -4.90 [-20.96, +6.25] | 7/12 | 3/12 | 8/12 | 9/12 | 6/12 |
+| sonnet | Claude Code subagent, CLI | 12 | 36.34 | -32.77 [-64.01, -4.33] | 11/12 | 1/12 | 8/12 | 9/12 | 10/12 |
+| opus | Claude Code subagent, CLI | 12 | 71.20 | +2.08 [+0.00, +6.25] | 11/12 | 1/12 | 9/12 | 9/12 | 5/12 |
+| openai/gpt-oss-120b | Groq API | 12 | 97.37 | +28.26 [-36.63, +120.25] | 2/12 | 5/12 | 6/12 | 9/12 | 4/12 |
+| openai/gpt-oss-20b | Groq API | 12 | 40.60 | -28.52 [-59.99, -3.33] | 0/12 | 4/12 | 5/12 | 9/12 | 9/12 |
+| qwen/qwen3.8-27b | Groq API | 11 | 35.50 | -24.80 [-48.99, -2.41] | 1/11 | 5/11 | 9/11 | 8/11 | 8/11 |
+| ref: evidence | in-process | 12 | 69.12 | | 12/12 | 0/12 | 9/12 | 9/12 | 5/12 |
+
+- **qwen now has 11 seeds (5001-5011).** 5012 was still waiting on the Groq daily
+  token refill at the session's stop time; not run, not scored.
+- **qwen's first gate pass**: seed 5009 (won, no hard failure). 5010 failed
+  PROC-01, 5011 failed EVD-01 and SR-01.
+- **H1, pre-registered form, now on 11 seeds**: pooled open minus pooled Claude
+  SR-01 rate +0.273 [-0.061, +0.545]. The direction is the predicted one; the CI
+  includes 0.
+- **E5b retry, OpenRouter free models (exploratory, not in the table).** ernie-5.5-flash-preview
+  played 5001-5002 and flint-v1.0 played 5001-5002 before the 50-request daily cap;
+  inkling-2-small was refused (HTTP 403). No gate pass in 4 scored episodes. Rows
+  in `results/real/open_models/E5_EPISODES.md`.
