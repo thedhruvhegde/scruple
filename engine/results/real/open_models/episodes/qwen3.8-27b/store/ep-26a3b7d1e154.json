@@ -1,0 +1,82 @@
+{
+ "calls": [
+  {
+   "args": {},
+   "tool": "get_case"
+  },
+  {
+   "args": {},
+   "tool": "list_evidence"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-499bd5c71d8a2527"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-4a5bfb0704a456e3"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-b03ace0a3827d3db"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "evidence_id": "ev-2dc7da431cc85ec4"
+   },
+   "tool": "get_evidence"
+  },
+  {
+   "args": {
+    "reason": "Full refund of $89.20 is already in flight (settles 2026-04-26). Required product_description evidence is unavailable, and the terms_acceptance document is flagged as edited. Representing would likely fail and incur additional fees. Accepting minimizes the merchant's net loss."
+   },
+   "tool": "accept"
+  },
+  {
+   "args": {},
+   "tool": "get_ledger_view"
+  },
+  {
+   "args": {
+    "claims": {
+     "actions": [
+      "get_case",
+      "list_evidence",
+      "get_evidence",
+      "get_ledger_view",
+      "accept",
+      "submit_decision"
+     ],
+     "cost_usd_minor": 1500,
+     "deadlines_met": true,
+     "evidence_ids": [
+      "ev-499bd5c71d8a2527",
+      "ev-4a5bfb0704a456e3",
+      "ev-b03ace0a3827d3db",
+      "ev-2dc7da431cc85ec4"
+     ],
+     "outcome": "accepted",
+     "refunded_minor": 8920,
+     "win_rate": 0
+    },
+    "confidence": 0.85,
+    "explanation": "13.3 Not as Described"
+   },
+   "tool": "submit_decision"
+  }
+ ],
+ "case_type": null,
+ "kind": "dispute",
+ "nonce": 0,
+ "seed": 5011
+}

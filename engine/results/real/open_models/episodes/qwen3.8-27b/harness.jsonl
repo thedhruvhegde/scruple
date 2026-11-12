@@ -5,3 +5,7 @@
 {"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5007, "stop": "submitted", "t": 1794417320}
 {"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5008, "stop": "submitted", "t": 1794417534}
 {"detail": "stopped while waiting for the per-day token refill; seeds 5009-5012 not run", "event": "quota_stop_session_end", "seed": 5009, "t": 1794417684}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [], "seed": 5009, "stop": "submitted", "t": 1794435406}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [1678, 40, 1971, 65, 2108, 202], "seed": 5010, "stop": "submitted", "t": 1794441591}
+{"attempt": 1, "elisions": 0, "event": "attempt", "quota_waits_s": [1020, 1350, 1834, 95, 2139, 2189], "seed": 5011, "stop": "submitted", "t": 1794450259}
+{"detail": "session 3 stop time 02:30 UTC reached while waiting for the per-day token refill; seed 5012 not run", "event": "quota_stop_session_end", "seed": 5012, "t": 1794450771}
