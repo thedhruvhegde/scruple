@@ -64,6 +64,7 @@ class _B:
     receipts: list[Receipt] = field(default_factory=list)
     history: list[PaidInvoice] = field(default_factory=list)
     used_numbers: set[tuple[str, str]] = field(default_factory=set)
+    subscriptions: dict[str, int] = field(default_factory=dict)
     n: int = 0
 
     def nid(self, prefix: str) -> str:
@@ -182,12 +183,17 @@ def _make(
         case K.RECURRING:
             month = b.run_on.replace(day=1)
             amount = rng.randint(80, 3_000) * 100
+            # A vendor's second subscription in one case is its own line, numbered apart,
+            # so the duplicate control does not read it as a copy of the first.
+            line = b.subscriptions.get(v.vendor_id, 0)
+            b.subscriptions[v.vendor_id] = line + 1
+            sub = "SUB" if line == 0 else f"SUB{line + 1}"
             for back in (1, 2, 3):
                 prev = (month - timedelta(days=28 * back)).replace(day=1)
                 b.history.append(
                     PaidInvoice(
                         vendor_id=v.vendor_id,
-                        number=f"SUB-{prev:%Y-%m}",
+                        number=f"{sub}-{prev:%Y-%m}",
                         amount_minor=amount,
                         paid_on=prev + timedelta(days=20),
                     )
@@ -195,7 +201,7 @@ def _make(
             inv = Invoice(
                 invoice_id=iid,
                 vendor_id=v.vendor_id,
-                number=f"SUB-{month:%Y-%m}",
+                number=f"{sub}-{month:%Y-%m}",
                 po_id=None,
                 description="monthly service subscription",
                 qty=1,

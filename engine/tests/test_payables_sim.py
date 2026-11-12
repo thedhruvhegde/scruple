@@ -43,6 +43,16 @@ def test_recurring_numbers_stay_distinct() -> None:
     assert invoice_key("SUB-2026-03") != invoice_key("SUB-2026-04")
 
 
+def test_two_subscriptions_from_one_vendor_are_not_duplicates() -> None:
+    # Found by hypothesis: seed 3962 gave one vendor three subscriptions in one month.
+    c = generate_payables_case(3962, 0.0, [])
+    subs = [i for i in c.invoices if c.truth.of(i.invoice_id).kind is K.RECURRING]
+    assert len({(i.vendor_id, invoice_key(i.number)) for i in subs}) == len(subs)
+    for i, inv in enumerate(c.invoices):
+        if c.truth.of(inv.invoice_id).kind is K.RECURRING:
+            assert observable_reading(c, inv, list(c.invoices[:i])) == "paid"
+
+
 @pytest.mark.parametrize("kind", INVOICE_KINDS)
 @pytest.mark.parametrize("difficulty", [0.0, 1.0])
 def test_cases_are_deterministic_and_carry_the_kind(kind: InvoiceKind, difficulty: float) -> None:
