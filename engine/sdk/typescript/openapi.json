@@ -10,44 +10,6 @@
         "title": "Action",
         "type": "string"
       },
-      "AdyenAck": {
-        "properties": {
-          "cases": {
-            "title": "Cases",
-            "type": "integer"
-          },
-          "duplicates": {
-            "title": "Duplicates",
-            "type": "integer"
-          },
-          "received": {
-            "title": "Received",
-            "type": "boolean"
-          },
-          "skipped": {
-            "title": "Skipped",
-            "type": "integer"
-          },
-          "stale": {
-            "title": "Stale",
-            "type": "integer"
-          },
-          "stored": {
-            "title": "Stored",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "received",
-          "cases",
-          "skipped",
-          "duplicates",
-          "stale",
-          "stored"
-        ],
-        "title": "AdyenAck",
-        "type": "object"
-      },
       "ArmStats": {
         "properties": {
           "accuracy": {
@@ -3211,9 +3173,10 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
+              "text/plain": {
+                "example": "[accepted]",
                 "schema": {
-                  "$ref": "#/components/schemas/AdyenAck"
+                  "type": "string"
                 }
               }
             },

@@ -148,6 +148,20 @@ def adyen_client(store: CaseStore, monkeypatch: pytest.MonkeyPatch) -> TestClien
     return TestClient(app)
 
 
+def adyen_ack(r: Any) -> dict[str, Any]:
+    """An accepted Adyen delivery: `[accepted]`, with what was done in headers."""
+    assert r.status_code == 200, r.text
+    assert r.text == "[accepted]" and r.headers["content-type"].startswith("text/plain")
+    h = r.headers
+    return {
+        "cases": int(h["x-scruple-cases"]),
+        "skipped": int(h["x-scruple-skipped"]),
+        "duplicates": int(h["x-scruple-duplicates"]),
+        "stale": int(h["x-scruple-stale"]),
+        "stored": h["x-scruple-stored"] == "true",
+    }
+
+
 def adyen_body(**item: Any) -> dict[str, Any]:
     env = example(CHARGEBACK)
     env["notificationItems"][0]["NotificationRequestItem"].update(item)
@@ -159,11 +173,10 @@ def test_adyen_notification_is_stored_and_deduplicated(
 ) -> None:
     c = adyen_client(store, monkeypatch)
     body = adyen_body()
-    r = c.post("/ingest/adyen/webhook", json=body)
-    assert r.status_code == 200, r.text
-    assert r.json()["cases"] == 1 and r.json()["duplicates"] == 0 and r.json()["stored"]
-    again = c.post("/ingest/adyen/webhook", json=body)
-    assert again.json()["duplicates"] == 1 and len(store.runs()) == 1
+    ack = adyen_ack(c.post("/ingest/adyen/webhook", json=body))
+    assert ack["cases"] == 1 and ack["duplicates"] == 0 and ack["stored"]
+    again = adyen_ack(c.post("/ingest/adyen/webhook", json=body))
+    assert again["duplicates"] == 1 and len(store.runs()) == 1
 
 
 def test_adyen_late_event_does_not_overwrite_a_newer_one(
@@ -172,8 +185,8 @@ def test_adyen_late_event_does_not_overwrite_a_newer_one(
     c = adyen_client(store, monkeypatch)
     newer = adyen_body(eventCode="CHARGEBACK_REVERSED", eventDate="2030-01-02T00:00:00+00:00")
     older = adyen_body(eventDate="2030-01-01T00:00:00+00:00")
-    assert c.post("/ingest/adyen/webhook", json=newer).json()["stale"] == 0
-    assert c.post("/ingest/adyen/webhook", json=older).json()["stale"] == 1
+    assert adyen_ack(c.post("/ingest/adyen/webhook", json=newer))["stale"] == 0
+    assert adyen_ack(c.post("/ingest/adyen/webhook", json=older))["stale"] == 1
     [sc] = store.cases()
     assert sc.case.state is CaseState.WON and sc.case.source_reason == "CHARGEBACK_REVERSED"
 

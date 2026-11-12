@@ -7,7 +7,16 @@ the route answers 503 rather than accepting unsigned data.
 
 POST /ingest/adyen/webhook verifies every notification item's `hmacSignature` with
 the keys in `SCRUPLE_ADYEN_HMAC_KEYS` (comma separated hex, for rotation); one bad
-item rejects the delivery. Without a key the route answers 503.
+item rejects the delivery. Without a key the route answers 503. An accepted delivery
+answers 200 with the body `[accepted]` (text/plain), which is what Adyen's standard
+notifications expect; what was done is in headers (`X-Scruple-Cases`,
+`X-Scruple-Skipped`, `X-Scruple-Duplicates`, `X-Scruple-Stale`, `X-Scruple-Stored`).
+A refused delivery gets a 4xx or 5xx with a JSON `detail`, so Adyen retries it.
+
+Limits, the same for both routes: bodies over `MAX_JSON_BYTES` get 413 (from
+`Content-Length` or while streaming), and the requests count against the anonymous
+rate limit of the client address (`scruple.auth.middleware`), since a webhook
+carries no API key.
 
 Tenancy: webhooks authenticate by the provider's signature, not an API key, so the
 signing secret decides the tenant. Each entry of `SCRUPLE_STRIPE_WEBHOOK_SECRETS` and
@@ -45,6 +54,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 
 from scruple.api.strict import RAW_BODY
@@ -79,12 +89,26 @@ class WebhookAck(BaseModel):
 
 
 class AdyenAck(BaseModel):
+    """What an accepted Adyen delivery did; sent as headers next to `[accepted]`."""
+
     received: bool
     cases: int
     skipped: int
     duplicates: int
     stale: int
     stored: bool
+
+    def headers(self) -> dict[str, str]:
+        return {
+            "X-Scruple-Cases": str(self.cases),
+            "X-Scruple-Skipped": str(self.skipped),
+            "X-Scruple-Duplicates": str(self.duplicates),
+            "X-Scruple-Stale": str(self.stale),
+            "X-Scruple-Stored": "true" if self.stored else "false",
+        }
+
+
+ADYEN_ACCEPTED = "[accepted]"  # the body Adyen's standard notifications expect
 
 
 def _split(env: str) -> list[str]:
@@ -264,9 +288,13 @@ def ingest_router(
         )
 
     @router.post(
-        "/adyen/webhook", openapi_extra={RAW_BODY: True}, dependencies=[signed("adyen-hmac")]
+        "/adyen/webhook",
+        openapi_extra={RAW_BODY: True},
+        dependencies=[signed("adyen-hmac")],
+        response_class=PlainTextResponse,
+        responses={200: {"content": {"text/plain": {"example": ADYEN_ACCEPTED}}}},
     )
-    async def adyen_webhook(request: Request) -> AdyenAck:
+    async def adyen_webhook(request: Request) -> PlainTextResponse:
         if not adyen:
             raise HTTPException(503, "Adyen HMAC key is not configured")
         body = await _body(request)
@@ -301,7 +329,7 @@ def ingest_router(
                     raise HTTPException(503, f"could not store the event: {str(e)[:200]}") from None
                 dupes += w.duplicate
                 stale += w.stale
-        return AdyenAck(
+        ack = AdyenAck(
             received=True,
             cases=len(res.cases),
             skipped=len(res.skipped),
@@ -309,5 +337,6 @@ def ingest_router(
             stale=stale,
             stored=cases is not None,
         )
+        return PlainTextResponse(ADYEN_ACCEPTED, headers=ack.headers())
 
     return router

@@ -35,7 +35,7 @@ from scruple.ingest.stripe.webhook import (
 )
 from tests.test_ingest_adyen import OTHER_KEY, TEST_KEY, signed
 from tests.test_ingest_stripe_webhook import OTHER, SECRET, T0, FixedClock
-from tests.test_ingest_webhook_store import adyen_body, stripe_event
+from tests.test_ingest_webhook_store import adyen_ack, adyen_body, stripe_event
 
 A, B = "bank-a", "bank-b"
 SECRETS = {A: SECRET, B: OTHER}
@@ -181,12 +181,12 @@ def test_adyen_delivery_lands_in_the_verifying_tenants_store(
     c = app_for(stores)
     a = signed(adyen_body(), TEST_KEY)
     b = signed(adyen_body(pspReference="9915555555555555"), OTHER_KEY)
-    assert c.post("/ingest/adyen/webhook", json=a).json()["stored"]
-    assert c.post("/ingest/adyen/webhook", json=b).json()["stored"]
+    assert adyen_ack(c.post("/ingest/adyen/webhook", json=a))["stored"]
+    assert adyen_ack(c.post("/ingest/adyen/webhook", json=b))["stored"]
     assert {t for t, _ in events(stores[A])} == {A} and len(events(stores[A])) == 1
     assert {t for t, _ in events(stores[B])} == {B} and len(events(stores[B])) == 1
     # A's notification redelivered is a duplicate only in A's store.
-    assert c.post("/ingest/adyen/webhook", json=a).json()["duplicates"] == 1
+    assert adyen_ack(c.post("/ingest/adyen/webhook", json=a))["duplicates"] == 1
     assert len(stores[B].webhook_events()) == 1
 
 

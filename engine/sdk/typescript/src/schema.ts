@@ -503,21 +503,6 @@ export interface components {
          * @enum {string}
          */
         Action: "accept" | "contest" | "escalate";
-        /** AdyenAck */
-        AdyenAck: {
-            /** Cases */
-            cases: number;
-            /** Duplicates */
-            duplicates: number;
-            /** Received */
-            received: boolean;
-            /** Skipped */
-            skipped: number;
-            /** Stale */
-            stale: number;
-            /** Stored */
-            stored: boolean;
-        };
         /** ArmStats */
         ArmStats: {
             /** Accuracy */
@@ -1801,7 +1786,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdyenAck"];
+                    /** @example [accepted] */
+                    "text/plain": string;
                 };
             };
         };
