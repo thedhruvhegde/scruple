@@ -39,7 +39,10 @@ ALL_PERMISSIONS: frozenset[Permission] = frozenset(Permission)
 
 # "slack" and "approval_link": an approver acting from Slack (scruple.integrations.slack),
 # mapped by the tenant's settings to a subject with the approve permission.
-AuthMethod = Literal["api_key", "oidc", "local", "dev_header", "saml", "slack", "approval_link"]
+# "demo": the anonymous visitor of the hosted read-only demo (scruple.demo), read only.
+AuthMethod = Literal[
+    "api_key", "oidc", "local", "dev_header", "saml", "slack", "approval_link", "demo"
+]
 
 
 class Principal(BaseModel):

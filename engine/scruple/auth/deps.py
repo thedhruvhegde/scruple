@@ -128,7 +128,8 @@ def iter_routes(app: FastAPI) -> Iterator[Any]:
             yield item
 
 
-def _effective_route(request: Request) -> Any:
+def effective_route(request: Request) -> Any:
+    """The route (or FastAPI route context) a request matched, or None."""
     ctx = (request.scope.get("fastapi") or {}).get("effective_route_context")
     if ctx is not None and isinstance(getattr(ctx, "dependant", None), Dependant):
         return ctx
@@ -143,7 +144,7 @@ def guard_route(request: Request) -> None:
 
     Fail closed: a route added without `require(...)`, `public()` or `signed(...)`
     is unreachable until it declares one, instead of being open by accident."""
-    route = _effective_route(request)
+    route = effective_route(request)
     if route is None:  # pragma: no cover - mounts and plain routes
         return
     declared = protection_of(route)

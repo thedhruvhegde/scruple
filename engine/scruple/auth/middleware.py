@@ -16,6 +16,9 @@ in the `Authorization` header (`GET /metrics` and its scrape token, declared
 token is never mistaken for an API key or OIDC token; they count as anonymous for
 rate limits.
 
+The hosted demo's visitor (`scruple.demo`, method "demo") is one principal shared by
+everyone, so its requests are counted per client address in the anonymous bucket.
+
 `unlimited` names exact paths that are never rate limited: the liveness and
 readiness probes (`/health`, `/ready`), which an orchestrator calls from one address
 on a fixed schedule and must never see 429 (it would restart a healthy pod or take it
@@ -140,7 +143,9 @@ class AuthMiddleware:
 
     @staticmethod
     def _bucket(who: Authenticated | None, address: str, lim: Limits) -> tuple[str, Limit]:
-        if who is None:
+        # The hosted demo's visitor is one shared principal: count it per address,
+        # like an anonymous caller, so one visitor cannot use up everyone's bucket.
+        if who is None or who.principal.method == "demo":
             return f"anonymous:{address}", lim.anonymous
         rec = who.key
         if rec is not None and (rec.rate_per_minute or rec.burst):
