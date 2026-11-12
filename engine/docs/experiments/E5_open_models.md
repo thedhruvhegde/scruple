@@ -670,3 +670,147 @@ answered is asked again.
     nvidia/nemotron-3.5-super-vl:free), and the swap is reported.
 - New run directories under `episodes_e5b/`; the session-2 E5b rows stay as they
   are. Scored by `analyse_e5.py`, as before.
+
+## Continuation results (session 3, added 2026-11-12)
+
+Session 3 ran from 2026-11-11 22:13 UTC to its pre-registered stop time,
+2026-11-12 02:30 UTC. Synthetic dispute cases; real model behaviour; real CFPB data
+(public domain). The tables of sessions 1 and 2 above stay as written; these
+replace them.
+
+- The addendum above was committed at 22:13 UTC (its text says "about 22:20"),
+  before the first scored request.
+- Episodes: `results/real/open_models/E5_EPISODES.md` and `e5_episodes.json`, from
+  `uv run python results/real/open_models/analyse_e5.py`.
+- CFPB: `uv run python scripts/compare_real_models.py results/real/open_models/cfpb/<dir>`
+  for `regime_full`, `outcome_full` (now with gpt-oss-20b), `routing_full` (n=50,
+  gpt-oss-120b) and `routing_completed_s3` (n=41, both gpt-oss models).
+
+### What ran, and what the budget stopped
+
+All three models started at their daily cap (200,000 tokens) and ran on the refill,
+about 8,300 tokens an hour. The driver waited out each stated refill (deviation 4):
+qwen waited 6 times on each of seeds 5010 and 5011, up to 37 minutes at a time.
+
+| model | (a) episodes 5001-5012 | (b) regime-2015 | (b) outcome-2015 | (b) routing-2025 |
+|---|---|---|---|---|
+| openai/gpt-oss-120b | 12/12 | 100/100 | 100/100 | 50/50 |
+| openai/gpt-oss-20b | 12/12 | 100/100 | 100/100 | 41/50 |
+| qwen/qwen3.8-27b | 11/12 (5012 not run) | 0/100 | 0/100 | 0/50 |
+
+- Ran in session 3: qwen seeds 5009, 5010, 5011; gpt-oss-20b outcome items 76-100
+  and routing items 1-41; gpt-oss-120b routing items 14-50.
+- Not run: qwen seed 5012 and all 250 qwen CFPB items; gpt-oss-20b routing items
+  42-50. Counted, never graded.
+- In flight at the stop time, abandoned and not scored: qwen seed 5012 (one
+  request in, marked in its transcript and `harness.jsonl`) and gpt-oss-20b
+  routing item 42 (never written; noted in the answer log).
+- No episode lapsed and no 413 elision happened in session 3.
+
+### Episodes (seeds 5001-5012, zero-shot, current verifiers)
+
+The Claude, gpt-oss and reference rows are unchanged from the session-2 table.
+
+| system | harness | n | mean cost $ | vs evidence (95% ci) | gate pass | SR-01 fail | fair (OUT-01) | ref fair, same seeds | won/partial |
+|---|---|---|---|---|---|---|---|---|---|
+| claude haiku | subagent | 12 | 64.21 | -4.90 [-20.96, +6.25] | 7/12 | 3/12 | 8/12 | 9/12 | 6/12 |
+| claude sonnet | subagent | 12 | 36.34 | -32.77 [-64.01, -4.33] | 11/12 | 1/12 | 8/12 | 9/12 | 10/12 |
+| claude opus | subagent | 12 | 71.20 | +2.08 [+0.00, +6.25] | 11/12 | 1/12 | 9/12 | 9/12 | 5/12 |
+| gpt-oss-120b | Groq API | 12 | 97.37 | +28.26 [-36.63, +120.25] | 2/12 | 5/12 | 6/12 | 9/12 | 4/12 |
+| gpt-oss-20b | Groq API | 12 | 40.60 | -28.52 [-59.99, -3.33] | 0/12 | 4/12 | 5/12 | 9/12 | 9/12 |
+| qwen3.8-27b | Groq API | 11 | 35.50 | -24.80 [-48.99, -2.41] | 1/11 | 5/11 | 9/11 | 8/11 | 8/11 |
+| ref: evidence | in-process | 12 | 69.12 | | 12/12 | 0/12 | 9/12 | 9/12 | 5/12 |
+
+qwen's new seeds:
+
+| seed | resolution | gate | hard failures |
+|---|---|---|---|
+| 5009 | won | pass | none |
+| 5010 | won | fail | PROC-01 |
+| 5011 | accepted | fail | EVD-01, SR-01 |
+
+- 5009 is qwen's first gate pass on a scored, non-lapsed episode.
+- No upload in any of the three. qwen's hard failures on 11 seeds: EVD-01 x5,
+  SR-01 x5, PROC-01 x5, FAITH-01 x2.
+- qwen tokens, 11 episodes: 313,964 in, 12,918 out.
+
+### CFPB (same item ids as REAL_MODELS.md)
+
+| task | n | majority | keywords | tf-idf + lr | claude haiku | claude sonnet | gpt-oss-120b | gpt-oss-20b |
+|---|---|---|---|---|---|---|---|---|
+| regime-2015 (accuracy) | 100 | 0.630 | 0.800 | 0.870 | 0.900 | 0.930 | 0.910 | 0.840 |
+| outcome-2015 (auroc) | 100 | 0.500 | 0.568 | 0.701 | 0.550 | 0.606 | 0.425 | 0.399 |
+| routing-2025 (issue acc.) | 50 | 0.480 | 0.220 | 0.580 | 0.560 | 0.540 | 0.540 | not complete |
+| routing-2025 (issue acc.) | 41 | 0.488 | 0.220 | 0.561 | 0.585 | 0.561 | 0.537 | 0.561 |
+
+Paired difference against TF-IDF + LR, 95% CI:
+
+| task | n | gpt-oss-120b | gpt-oss-20b |
+|---|---|---|---|
+| regime-2015 | 100 | +0.040 [-0.010, +0.100] | -0.030 [-0.100, +0.040] |
+| outcome-2015 | 100 | -0.275 [-0.450, -0.102] | -0.302 [-0.471, -0.131] |
+| routing-2025 | 50 | -0.040 [-0.220, +0.140] | |
+| routing-2025 | 41 | -0.024 [-0.220, +0.171] | +0.000 [-0.195, +0.195] |
+
+- regime is unchanged from session 2. gpt-oss-120b's outcome row is unchanged; it
+  was already complete.
+- Valid replies: every gpt-oss-20b outcome reply parsed. On routing, 38 of its 41
+  were valid: one empty (2,048 tokens spent reasoning, `finish_reason` length) and
+  two that named a label outside the allowed list. All three are graded as wrong.
+  gpt-oss-120b: 50/50 valid.
+
+### Verdicts (after session 3)
+
+- **H1 (self-report).** Pre-registered form, three open models on the 11 seeds all
+  finished: +0.273 [-0.061, +0.545]. Supported in the weak, pre-registered sense
+  (point estimate at least 0); the CI includes 0, so "higher" is not claimed. The
+  secondary (gpt-oss only, 12 seeds) is unchanged: +0.236 [-0.111, +0.542].
+- **H2 (gate): supported.** Best open model 2/12 (gpt-oss-120b; 3/12 without the
+  G-15 false alarm); qwen 1/11; gpt-oss-20b 0/12. Sonnet and Opus 11/12.
+- **H3 (fairness):** not supported for gpt-oss-120b (6/12) or gpt-oss-20b (5/12),
+  against 9/12. Supported for qwen: 9/11 against the reference's 8/11 on the same
+  seeds.
+- **H4 (cost), no direction predicted:** gpt-oss-120b not distinguishable from
+  the reference; gpt-oss-20b (-28.52 [-59.99, -3.33]) and qwen (-24.80 [-48.99,
+  -2.41]) cheaper, with 1 gate pass between them in 23 episodes.
+- **H5 (rule knowledge):** unchanged. Supported for both gpt-oss models (point
+  estimates); qwen not run.
+- **H6 (outcome judgement): supported for both gpt-oss models on n=100.** Both
+  AUROCs (0.425, 0.399) are below TF-IDF's 0.701 and below 0.5; both CIs against
+  TF-IDF lie wholly below 0. qwen not run.
+- **Routing (no hypothesis):** both gpt-oss models are level with TF-IDF and with
+  the Claude models (0.54 on n=50 for gpt-oss-120b; 0.56 on n=41 for both).
+
+### E5b retry (exploratory)
+
+Run 22:14-22:19 UTC on 2026-11-11. Every request was to a `:free` model; spend $0.
+`/api/v1/key` read 54 of 50 free-model requests used afterwards (43 were left
+before the run).
+
+| model | seed | stop | scored |
+|---|---|---|---|
+| baidu/ernie-5.5-flash-preview:free | 5001 | submitted | gate fail: SR-01 |
+| thinkingmachines/inkling-2-small:free | 5001 | `http_error`, 4 attempts, all HTTP 403 | lapse: gate fail (DL-01) |
+| recursive/flint-v1.0:free (substitute) | 5001 | submitted, on attempt 3 | gate fail: EVD-01, PROC-01 |
+| baidu/ernie-5.5-flash-preview:free | 5002 | submitted | gate fail: DL-01, SR-01 |
+| recursive/flint-v1.0:free | 5002 | submitted | gate fail: DL-01 |
+| baidu/ernie-5.5-flash-preview:free | 5003 | abandoned at the free-model daily cap (429 `free-models-per-day`) | not scored |
+
+- Not run: 5003 for flint, 5004 for both. Counted, not scored.
+- **Deviation 7: the substitution rule was used for a 403, not a 429.** OpenRouter
+  answered inkling with 403: its free endpoint serves only listed agentic apps.
+  The pre-registered swap named upstream 429s. A 403 on every attempt also means
+  the free model cannot be run here, so flint, the next model by the same rule,
+  replaced it from seed 5001 on. The inkling lapse stays in the tables.
+- **flint's first two attempts on 5001 lapsed** on HTTP 400 from its provider
+  ("Assistant tool call function.arguments must be valid JSON"): flint wrote a tool
+  call with malformed arguments, and the provider refused the next request that
+  echoed it back. The driver treats `http_error` as transient, so the episode was
+  played again, and attempt 3 is the scored one. This is the same class as the
+  Groq refusals that E5 answers as model turns; for OpenRouter that fix does not
+  exist, so flint's 5001 row is kinder than a model-turn rule would make it. Both
+  lapsed records are kept under `episodes_e5b/flint-v1.0/lapsed/`.
+- What the 4 scored episodes show: no gate pass. ernie misreported cost (SR-01) on
+  both seeds; flint uploaded 2 documents on 5001 and represented on documents it
+  never read (EVD-01, PROC-01), the same pattern as the Groq open models. n=2 per
+  model says nothing about either model in general.
