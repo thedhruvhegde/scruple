@@ -56,6 +56,13 @@ roles:
 No single credential may hold both propose and approve. Every route declares the
 permission it needs; a route that declares none is closed.
 
+Tenants exist once anything is stored for them. The operator's command line lists
+and records them (`scruple tenant list|show|create`), caps a tenant's shadow replays
+per UTC day (`scruple tenant quota T --gate-runs-per-day N`; a refused evaluation is a
+429) and offboards one (`scruple tenant offboard T`, a dry run until `--yes`): its keys
+are revoked, its imported-shadow rows and case store are purged through the retention
+path, each step goes into its audit chain, and the id is never served again.
+
 ## Usage and billing
 
 Usage is metered from the gate's own decisions: gate runs, cases replayed, rollouts,

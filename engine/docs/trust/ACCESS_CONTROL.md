@@ -31,11 +31,13 @@ system is added. Not legal advice; see README.md for what "code", "process" and
 | roles | proposer, service, approver, risk_admin, auditor (`scruple/auth/rbac.py`); every route declares a permission; undeclared routes are refused | code |
 | separation of duties | one credential may not hold propose and approve; owner, proposer and learning agent cannot approve; N of M approvals (`scruple/gate/approval.py`, tests/test_gate_approval.py) | code |
 | tenant isolation | tenant from the credential; every row and query carries it; separate audit chains (tests/test_tenancy_api.py, tests/test_tenancy_storage.py) | code |
+| tenant offboarding | `scruple tenant offboard T` is a dry run; with `--yes` it records the offboarding, revokes every key of T, purges its imported-shadow rows and case store, each step in T's audit chain; afterwards new keys for T and any token or session naming T are refused (`scruple/tenancy/`, tests/test_tenancy_admin.py) | code |
+| tenant list and quota | `scruple tenant list`, `show`, `create`; `scruple tenant quota T --gate-runs-per-day N` caps shadow replays per UTC day (429 when used up); `GET /tenant` shows the caller's own tenant to `admin` | code |
 | brute force | per-address limit on refused credentials, then 429 before hashing (`scruple/auth/ratelimit.py`) | code |
 | database role cannot rewrite history | Postgres: service runs as a non-owner role with column grants (`scruple.storage.postgres.app_role_grants`); triggers refuse UPDATE/DELETE/TRUNCATE on history | code; granting the role is a deploy step (process) |
 | metrics closed by default | `/metrics` 404 unless a token or explicit public flag (docs/DEPLOY.md) | code |
 | keys per person, least role, expiry set | the operator chooses role and `--expires-days` | process |
-| quarterly key review | `scruple keys list --tenant T` per tenant; revoke unused (`last used never` or old) | process, not yet done |
+| quarterly key review | `scruple tenant list`, then `scruple keys list --tenant T` per tenant; revoke unused (`last used never` or old) | process, not yet done |
 | SAML, mTLS, SCIM provisioning | | not yet |
 
 ## Company systems

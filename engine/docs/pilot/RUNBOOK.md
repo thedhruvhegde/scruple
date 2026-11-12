@@ -219,18 +219,19 @@ uv run scruple audit verify-anchor anchor.json --db pilot.db --tsa-cert tsa.pem
 ### Deletion
 
 ```bash
-uv run scruple keys revoke --db pilot.db <key_id>      # every pilot key; takes effect on the next request
-uv run scruple retention set --db pilot.db --days 1 --actor <S operator>   # optional, audited purge first (1 is the minimum)
-uv run scruple retention apply --db pilot.db --case-store cases.db --actor <S operator>
+uv run scruple tenant offboard --db pilot.db default --case-store cases.db   # dry run: prints what would go
+uv run scruple tenant offboard --db pilot.db default --case-store cases.db --actor <S operator> --yes
 rm cases.db pilot.db ingest.json export.jsonl* && rm -r backtest* evidence out
 # P: delete SCRUPLE_FIELD_KEYS and SCRUPLE_TOKEN_KEYS from the secret manager (crypto-shredding)
 ```
 
 The audit log and decisions are append-only; deleting pilot data means deleting the
 whole pilot database and case store, not rows. Keep the anchor repository and the
-readout only as the terms allow. `retention apply` records each purge in the audit log
-(rows, cutoff, digest) before the files go; it is optional when the files are deleted
-anyway.
+readout only as the terms allow. `tenant offboard --yes` revokes every key of the
+tenant, purges its imported-shadow rows and case store through the retention path and
+records each step in the tenant's audit chain (rows, digest) before the files go; it
+is optional when the files are deleted anyway. Use the pilot's tenant id in place of
+`default` if it has one.
 
 ## If something goes wrong
 

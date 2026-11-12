@@ -45,6 +45,7 @@ port). The API and the console authenticate with API keys, OIDC bearer tokens, o
 ## 4. Propose and evaluate a rule
 
 ```bash
+uv run scruple tenant create acme      # optional: record the tenant explicitly
 uv run scruple keys create --tenant acme --subject agent-1 --role proposer
 uv run scruple propose rule.json        # the same model as POST /rules
 uv run scruple evaluate <rule_id> 1     # shadow, then canary if it passes
