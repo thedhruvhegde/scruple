@@ -14,3 +14,4 @@ Paired bootstrap over items, 2000 resamples, seed 0.
 | claude-haiku | 0.550 | -0.150 [-0.318, +0.008] |
 | claude-sonnet | 0.606 | -0.095 [-0.213, +0.025] |
 | gpt-oss-120b | 0.425 | -0.275 [-0.450, -0.102] |
+| gpt-oss-20b | 0.399 | -0.302 [-0.471, -0.131] |

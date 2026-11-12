@@ -41,6 +41,19 @@
           "n_boot": 2000
         }
       },
+      "gpt-oss-20b": {
+        "auroc": 0.39925198690977093,
+        "kind": "model",
+        "valid_format": 100,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.471081,
+            -0.130942
+          ],
+          "diff": -0.301543,
+          "n_boot": 2000
+        }
+      },
       "keywords": {
         "auroc": 0.5680224403927069,
         "kind": "baseline"

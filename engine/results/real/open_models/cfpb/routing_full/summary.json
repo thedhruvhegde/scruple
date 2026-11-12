@@ -1,0 +1,60 @@
+{
+  "note": "Real CFPB data; models answered blind; see SUMMARY.md",
+  "routing-2025": {
+    "entries": {
+      "claude-haiku": {
+        "accuracy": 0.56,
+        "kind": "model",
+        "valid_format": 50,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.16,
+            0.12
+          ],
+          "diff": -0.02,
+          "n_boot": 2000
+        }
+      },
+      "claude-sonnet": {
+        "accuracy": 0.54,
+        "kind": "model",
+        "valid_format": 50,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.18,
+            0.1
+          ],
+          "diff": -0.04,
+          "n_boot": 2000
+        }
+      },
+      "gpt-oss-120b": {
+        "accuracy": 0.54,
+        "kind": "model",
+        "valid_format": 50,
+        "vs_tfidf_lr": {
+          "ci95": [
+            -0.22,
+            0.14
+          ],
+          "diff": -0.04,
+          "n_boot": 2000
+        }
+      },
+      "keywords": {
+        "accuracy": 0.22,
+        "kind": "baseline"
+      },
+      "majority": {
+        "accuracy": 0.48,
+        "kind": "baseline"
+      },
+      "tfidf_lr": {
+        "accuracy": 0.58,
+        "kind": "baseline"
+      }
+    },
+    "metric": "accuracy",
+    "n": 50
+  }
+}
