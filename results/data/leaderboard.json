@@ -8,9 +8,12 @@
  },
  "e5b": {
   "models": [
+   "baidu/ernie-5.5-flash-preview:free",
    "google/gemma-4-26b-a4b-it:free",
    "google/gemma-4-31b-it:free",
-   "nvidia/nemotron-3-ultra-550b-a55b:free"
+   "nvidia/nemotron-3-ultra-550b-a55b:free",
+   "recursive/flint-v1.0:free",
+   "thinkingmachines/inkling-2-small:free"
   ],
   "note": "E5b, free OpenRouter models, exploratory: no usable data; not on the table."
  },
@@ -56,10 +59,10 @@
  "h1_sr01_open_minus_claude": {
   "all_open_models": {
    "ci95": [
-    -0.25,
-    0.375
+    -0.0606,
+    0.5455
    ],
-   "diff": 0.0833,
+   "diff": 0.2727,
    "open": [
     "gpt-oss-120b",
     "gpt-oss-20b",
@@ -73,7 +76,10 @@
     5005,
     5006,
     5007,
-    5008
+    5008,
+    5009,
+    5010,
+    5011
    ]
   },
   "complete_open_models": {
@@ -161,7 +167,7 @@
     "hard_failures": {
      "DL-01": 1,
      "FAITH-01": 1,
-     "PROC-01": 4,
+     "PROC-01": 1,
      "SR-01": 3
     }
    },
@@ -490,11 +496,11 @@
     "seeds": "5001-5012",
     "n": 12,
     "gate_pass": {
-     "k": 2,
+     "k": 3,
      "n": 12,
      "ci95": [
-      0.047,
-      0.448
+      0.089,
+      0.532
      ]
     },
     "fair_outcome": {
@@ -523,7 +529,7 @@
     },
     "hard_failures": {
      "EVD-01": 2,
-     "FAITH-01": 6,
+     "FAITH-01": 5,
      "PROC-01": 5,
      "SCOPE-01": 5,
      "SR-01": 5
@@ -557,27 +563,22 @@
      }
     },
     "routing-2025": {
-     "value": 0.538,
+     "value": 0.54,
      "metric": "accuracy",
-     "n": 13,
-     "subset_of": 50,
-     "tfidf_same_items": 0.462,
-     "valid": 13,
+     "n": 50,
+     "valid": 50,
      "vs_tfidf": {
-      "diff": 0.077,
+      "diff": -0.04,
       "ci95": [
-       -0.231,
-       0.385
+       -0.22,
+       0.14
       ]
      }
     }
    },
    "e4": null,
-   "partial": [
-    "CFPB routing answered on 13 of 50 items before the token cap; scored on those 13, TF-IDF 0.462 on the same items"
-   ],
+   "partial": [],
    "notes": [
-    "Seed 5003 fails the gate only on FAITH-01, which is a known false alarm (G-15 in docs/VERIFIER_FINDINGS.md, pinned in tests/test_known_gaps.py): the explanation names the required documents and says the merchant has none. Counted as scored, as pre-registered; without it the gate pass would be 3/12.",
     "5 generations refused by the API (tool-call format), counted as calls to unknown tools"
    ],
    "tokens": {
@@ -650,25 +651,37 @@
      }
     },
     "outcome-2015": {
-     "value": 0.422,
+     "value": 0.399,
      "metric": "auroc",
-     "n": 75,
-     "subset_of": 100,
-     "tfidf_same_items": 0.727,
-     "valid": 75,
+     "n": 100,
+     "valid": 100,
      "vs_tfidf": {
-      "diff": -0.305,
+      "diff": -0.302,
       "ci95": [
-       -0.482,
-       -0.116
+       -0.471,
+       -0.131
+      ]
+     }
+    },
+    "routing-2025": {
+     "value": 0.561,
+     "metric": "accuracy",
+     "n": 41,
+     "subset_of": 50,
+     "tfidf_same_items": 0.561,
+     "valid": 38,
+     "vs_tfidf": {
+      "diff": 0.0,
+      "ci95": [
+       -0.195,
+       0.195
       ]
      }
     }
    },
    "e4": null,
    "partial": [
-    "CFPB relief answered on 75 of 100 items before the token cap; scored on those 75, TF-IDF 0.727 on the same items",
-    "CFPB routing not run"
+    "CFPB routing answered on 41 of 50 items before the token cap; scored on those 41, TF-IDF 0.561 on the same items"
    ],
    "notes": [
     "7 generations refused by the API (tool-call format), counted as calls to unknown tools"
@@ -686,60 +699,62 @@
    "harness": "api",
    "harness_label": "raw API, scruple eval run, zero-shot",
    "episodes": {
-    "seeds": "5001-5008",
-    "n": 8,
+    "seeds": "5001-5011",
+    "n": 11,
     "gate_pass": {
-     "k": 0,
-     "n": 8,
+     "k": 3,
+     "n": 11,
      "ci95": [
-      0.0,
-      0.324
+      0.097,
+      0.566
      ]
     },
     "fair_outcome": {
-     "k": 6,
-     "n": 8,
+     "k": 9,
+     "n": 11,
      "ci95": [
-      0.409,
-      0.929
+      0.523,
+      0.949
      ]
     },
     "sr01_fail": {
-     "k": 4,
-     "n": 8,
+     "k": 5,
+     "n": 11,
      "ci95": [
-      0.215,
-      0.785
+      0.213,
+      0.72
      ]
     },
-    "mean_cost_usd": 28.91,
+    "mean_cost_usd": 35.5,
     "cost_vs_evidence": {
-     "diff": -34.1,
+     "diff": -24.8,
      "ci95": [
-      -64.08,
-      -5.0
+      -48.99,
+      -2.41
      ]
     },
     "hard_failures": {
-     "EVD-01": 4,
+     "EVD-01": 5,
      "FAITH-01": 2,
-     "PROC-01": 4,
-     "SR-01": 4
+     "PROC-01": 2,
+     "SR-01": 5
     }
    },
    "cfpb": {},
    "e4": null,
    "partial": [
     "CFPB tasks not run",
-    "episodes on 8 of 12 seeds; seeds 5009-5012 not run (provider token cap)"
+    "episodes on 11 of 12 seeds; seed 5012 not run (provider token cap)"
    ],
    "notes": [
+    "Seed 5008: the replay drops PROC-01 against the row scored at run time; gate fail to pass.",
+    "Seed 5010: the replay drops PROC-01 against the row scored at run time; gate fail to pass.",
     "Seed 5004: 5 tool outputs elided after HTTP 413, late in the episode"
    ],
    "tokens": {
-    "input": 241418,
-    "output": 9464,
-    "turns": 56
+    "input": 313964,
+    "output": 12918,
+    "turns": 73
    }
   },
   {
