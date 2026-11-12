@@ -4,6 +4,10 @@ A public, read-only scruple API that prospects can query with a shared key, rebu
 from scratch every night. Nothing in it comes from a partner or a customer: every case,
 decision and audit entry is produced by the simulator from `docs/pilot/demo/*.json`.
 
+The other recipe in this folder, `fly.toml`, is a console anyone can open without a
+key: `scruple serve --demo` on one Fly.io machine, not deployed yet. See docs/DEPLOY.md,
+"Hosted demo".
+
 ## Status
 
 | piece | checked here | not checked |

@@ -22,6 +22,7 @@ account**; the release workflow passes actionlint and has never run on GitHub.
 | `deploy/scripts/backup.sh`, `restore.sh` | logical backup and verified restore |
 | `scripts/smoke.sh` | post-deploy smoke test against any base URL |
 | `deploy/demo/` | hosted demo: one VM, docker compose plus Caddy, synthetic data, nightly reset, read-only key |
+| `deploy/demo/fly.toml`, `scruple/demo/` | hosted demo without login: `scruple serve --demo` on one Fly.io machine (see "Hosted demo"), not deployed yet |
 | `scruple/api/health.py` | `/health`, `/ready` |
 | `scruple/observability/` | `/metrics`, request and gate metrics, optional tracing |
 | docs/SLOs.md | proposed SLOs and alerts |
@@ -98,6 +99,10 @@ All from `scruple.settings` (env `SCRUPLE_*` or the `SCRUPLE_CONFIG` TOML file):
 | `SCRUPLE_OTEL_SERVICE_NAME` | scruple-engine | |
 | `SCRUPLE_DATABASE_URL` | image: `/data/scruple.db` | postgres URL without a password in every shared environment |
 | `SCRUPLE_DATABASE_PASSWORD`, `SCRUPLE_HELDOUT_SALT` | none | env only (secrets) |
+| `SCRUPLE_DEMO` | false | the hosted read-only demo; only `scruple serve` can run it (see "Hosted demo") |
+| `SCRUPLE_DEMO_DIR` | a new temp dir | where the demo seeds its database and tenant files |
+| `SCRUPLE_DEMO_RESET_UTC_HOUR` | 4 | hour (UTC) the demo re-seeds itself each day |
+| `SCRUPLE_DEMO_CLIENT_IP_HEADER` | none | header the proxy in front sets to the client address (Fly: `Fly-Client-IP`) |
 
 Secrets are refused from the TOML file and never appear in the chart, compose
 file, Terraform variables or image.
@@ -115,6 +120,119 @@ file, Terraform variables or image.
 
 Local Postgres: `POSTGRES_PASSWORD=... docker compose up --build`, or `make db-up`
 and `make db-migrate` with `make serve`.
+
+## Hosted demo
+
+**Not deployed yet.** No Fly.io account was used to write this; `deploy/demo/fly.toml`
+has never been run against Fly. What was run is listed under "Checked here" below.
+
+A public, read-only console a prospect can click through without signing up: the
+link for a cold email is the bare host (`/` redirects to `/console/`).
+
+### What `scruple serve --demo` does
+
+`scruple serve --demo`, or `scruple serve` with `SCRUPLE_DEMO=1` (`scruple/demo/`):
+
+- **Seeds at start.** Tenant `demo` gets the `scruple console demo-seed` data
+  (`scruple/console/demo_seed.py`): simulated agents, a synthetic held-out set,
+  synthetic Stripe-shaped disputes, a stub billing endpoint, a fake model transport.
+  Each start deletes earlier copies under `SCRUPLE_DEMO_DIR` and seeds a new one. It
+  took 39 s on the machine this was written on; the server listens once it is done.
+- **No login.** Every request is one fixed visitor: tenant `demo`, role `auditor`,
+  permission `read`. Credentials a visitor sends are ignored, never checked.
+- **Refuses every write.** Any method but GET and HEAD gets 403 before authentication
+  or the body is read:
+  `{"detail": "the hosted demo is read only: writes are refused (...)"}`. GET routes
+  that need more than `read`, or check a signature of their own (`/metrics`,
+  `/auth/keys`, `/usage`, `/usage/events`, signed approval links, webhook delivery
+  logs), also get 403. So approvals, rollbacks, proposals, shadow and ingest batches,
+  webhooks, jobs and key creation are all off. The console hides its approval forms.
+  `tests/test_demo_host.py` walks every registered route and checks each write is
+  refused, both through the demo server and by the app on its own.
+- **Banner.** Every console page starts with a strip: "Demo. Synthetic data. Read
+  only." Same stylesheet, same strict CSP, no scripts.
+- **Resets itself.** Every day at `SCRUPLE_DEMO_RESET_UTC_HOUR` (default 4, UTC) a new
+  copy is seeded in a background thread while the old one keeps serving, then swapped
+  in; the old database is closed and deleted a minute later. A failed seed keeps the
+  old copy. A restart or a deploy also re-seeds. The seed's dates end on the day it
+  runs, so the dashboard's twelve weeks always end today.
+- **Limits for a public box.** Rate limits per visitor address: the anonymous bucket,
+  `SCRUPLE_RATE_LIMIT_ANONYMOUS_PER_MINUTE` (120) and `_BURST` (30). Behind a proxy,
+  `SCRUPLE_DEMO_CLIENT_IP_HEADER` names the header that carries the visitor's address
+  (Fly sets `Fly-Client-IP`). Request bodies are capped by `SCRUPLE_MAX_BODY_BYTES`
+  (16 KB in `fly.toml`). uvicorn answers 503 past 64 open connections. No job worker
+  runs. `/health` and `/ready` are never rate limited.
+- **No secrets.** None are read. The console's CSRF key is random per process.
+- **Only `scruple serve`.** With `SCRUPLE_DEMO` set, `create_app` refuses to build
+  (so the image's default gunicorn command fails at start instead of serving a
+  writable app); `--db` is refused too, since the demo seeds its own database.
+
+Run it locally:
+
+```bash
+SCRUPLE_DEMO_DIR=/tmp/scruple-demo uv run scruple serve --demo --port 8000
+# wait for "Uvicorn running", then open http://127.0.0.1:8000/
+curl -s -X POST http://127.0.0.1:8000/rules     # 403, read only
+```
+
+### Deploy on Fly.io (one machine, one region)
+
+`deploy/demo/fly.toml`: the repository's `Dockerfile`, one `shared-cpu-1x` machine with
+512 MB in `iad`, always on, HTTPS forced, health check `GET /health` with a 180 s grace
+period (the seed runs before the server listens), the demo settings above in `[env]`.
+The process command is `serve --demo --host 0.0.0.0 --port 8000`; the image's
+entrypoint runs it as `scruple serve ...`.
+
+```bash
+# once
+fly auth login
+fly apps create scruple-demo        # names are global: if taken, pick another and
+                                    # change `app` in deploy/demo/fly.toml to match
+
+# every deploy, from the repository root
+fly deploy . --config deploy/demo/fly.toml --dockerfile Dockerfile --ha=false \
+  --build-arg BUILD_COMMIT=$(git rev-parse HEAD)
+
+# check it
+fly status --config deploy/demo/fly.toml
+curl -sf https://scruple-demo.fly.dev/health
+curl -s -o /dev/null -w '%{http_code}\n' https://scruple-demo.fly.dev/console/dashboard  # 200
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://scruple-demo.fly.dev/rules      # 403
+
+# re-seed now, read logs, take it down
+fly apps restart scruple-demo
+fly logs --config deploy/demo/fly.toml
+fly apps destroy scruple-demo
+```
+
+`--ha=false` keeps it to one machine (Fly otherwise starts two for a new app). For a
+domain of your own: `fly certs add demo.example.com --config deploy/demo/fly.toml`,
+then the DNS records it prints.
+
+Not checked, because nothing here ran on Fly: the flyctl flags above, Fly's remote
+builder with the Dockerfile's BuildKit cache mounts, that `Fly-Client-IP` arrives as
+documented, and how long the seed takes on a shared CPU (the 180 s grace period is a
+guess with room to spare).
+
+### Checked here
+
+- `tests/test_demo_host.py`: every write route refused (through the server and the
+  app alone), GET routes beyond `read` closed, banner and no write forms on the
+  console pages, credentials ignored, rate limit per client address header, body
+  cap, 503 before the first seed, reset swaps and deletes the old copy, a failed
+  reset keeps the old one, restart wipes earlier copies. A slow test serves the real
+  seed (`make test-slow`).
+- `tests/test_deploy_demo.py`: `fly.toml` parses, its process command is a valid
+  `scruple serve --demo`, its port matches, every `[env]` key is a real setting and
+  none is a secret.
+- By hand: `scruple serve --demo` with the `[env]` of `fly.toml`; 162 console pages
+  reached by following links from `/console/` all answered 200 with the banner and no
+  POST form; POST, PUT, PATCH, DELETE and OPTIONS answered 403; screenshots at desktop
+  and phone width. The process stayed near 240 MB resident across two resets.
+
+The VM recipe in `deploy/demo/README.md` (compose, Caddy, a read-only API key) is the
+other way to host a demo: it serves the JSON API to someone holding the key, not a
+console without login.
 
 ## AWS (Terraform skeleton, UNTESTED)
 
