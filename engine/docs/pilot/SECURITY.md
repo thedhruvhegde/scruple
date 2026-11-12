@@ -37,7 +37,7 @@ penetration test.
 | Encryption in transit | Not terminated by scruple; run it behind the partner's TLS proxy or load balancer. |
 | Test mode first | Stripe live keys and live objects, and Adyen `live: "true"` notifications, are refused unless the code sets `allow_live=True` explicitly. |
 | Data used for training? | No. scruple trains no models on partner data. |
-| Retention and deletion | Manual and documented (DATA_CHECKLIST.md). Pilot data is deleted by deleting the pilot database and keys. No retention-policy code yet. |
+| Retention and deletion | Per-tenant retention policies purge row-level case data after N days, audited (`scruple retention`; "Not yet" below). `scruple tenant offboard T --yes` revokes a tenant's keys and purges all of its row-level case data the same way. Pilot data is otherwise deleted by deleting the pilot database and keys (DATA_CHECKLIST.md). |
 
 ## 3. Input validation
 
@@ -142,14 +142,14 @@ recorded in docs/DESIGN.md.
 | Penetration test | None yet, internal or external. Scope for one: docs/trust/PENTEST_SCOPE.md. |
 | SAML, mTLS | Not built. Authentication is API keys and OIDC bearer tokens. |
 | Shared rate limit store | Done: `SCRUPLE_RATE_LIMIT_BACKEND=database` keeps the buckets in the gate database (`scruple/auth/ratelimit_db.py`); on Postgres a row lock per bucket gives every replica one limit (tests/test_auth_ratelimit_db.py, two app instances on one Postgres). Default stays in memory per process. Output below. |
-| Tenant administration | Tenants are created implicitly by the first key or token for them; there is no tenant list, quota or offboarding command. Webhook deliveries are routed by the signing secret: `tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS` map each secret to one tenant, and each tenant writes its own case store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`); a tenant with secrets but no store refuses to start (tests/test_ingest_webhook_tenants.py). |
+| Tenant administration | Built: `scruple tenant list\|show\|create\|quota\|offboard` (`scruple/tenancy/`). Every change is a row in the append-only `tenant_events` table (alembic 0015) and an entry in the tenant's own audit chain. `offboard` is a dry run unless `--yes`: it records the offboarding, revokes every key, purges the tenant's imported-shadow rows and case store through the retention purge path (`retention.purged`, `reason: offboarding`), and from then on refuses new keys and any token or session naming the tenant (tests/test_tenancy_admin.py). Quota: `gate_runs_per_day`, the usage meter's `gate_run` count per UTC day, checked before a shadow replay (429 with `Retry-After`); assurance checks are never refused. `GET /tenant` shows the caller's own tenant to `admin`. Tenants still also appear implicitly with their first key or token. Webhook deliveries are routed by the signing secret: `tenant=secret` entries in `SCRUPLE_STRIPE_WEBHOOK_SECRETS` / `SCRUPLE_ADYEN_HMAC_KEYS` map each secret to one tenant, and each tenant writes its own case store (`SCRUPLE_CASE_STORE`, `SCRUPLE_CASE_STORES`); a tenant with secrets but no store refuses to start (tests/test_ingest_webhook_tenants.py). Not built: webhook secrets of an offboarded tenant are not refused automatically; remove them from the environment. Output below. |
 | Per-tenant genesis | Done: each tenant's chain starts from its own genesis, so a copy of one tenant's rows into another tenant fails verification. Tenant `default` keeps the old all-zero genesis (chains from before tenancy still verify), so a default chain copied into another database's default tenant is caught only by an anchored head. |
 | Key management | No KMS integration, no key-encryption keys, no per-tenant keys; keys are supplied by the operator. Nothing counts encryptions per key yet (NIST SP 800-38D limit noted in docs/INTEGRATIONS.md). |
 | Field encryption, redaction and tokenisation wired into storage and ingest | Done for imported cases (`scruple ingest`, case store; docs/INTEGRATIONS.md). The gate database holds partner case rows in one place, imported shadow batches (`imported_shadow_events`): they get the same redaction as ingest before they are scored or stored, a batch with a card number anywhere or an id holding a card number or email is refused (tests/storage/test_imported_shadow_redaction.py), and retention purges them. They are not field-encrypted: the batch carries no raw columns to seal, and replay needs the redacted case in the clear. Rules, decisions and audit hold no partner case data. |
 | External anchoring or signing of the audit head | Built, on demand: `scruple audit anchor` (RFC 3161 or git). A consistent rewrite of the whole chain is detected only against an anchor made before it (docs/VERIFIER_FINDINGS.md G-6). Not scheduled; RFC 3161 checks do not include revocation. |
 | Retention policies | Built: per-tenant policies, audited purges in the purged tenant's chain (`scruple retention`, docs/ARCHITECTURE.md section 11). Scheduled: `scruple worker --schedule-retention` (or `scruple retention schedule` from cron) queues one `retention_apply` job per tenant per UTC day, idempotent by day. A decision re-sent for a purged case is refused by its key hash. |
 | Persisting ingested webhook batches | Done with a case store configured: every accepted Stripe or Adyen delivery is written to the signing tenant's case store, idempotent by event id (`CaseStore.write_webhook`). Without one, the receiver verifies and acknowledges only. |
-| Adyen HTTP endpoint | Not built; the adapter is a function. |
+| Adyen HTTP endpoint | Done: `POST /ingest/adyen/webhook` (`scruple/ingest/api.py`) verifies every item's `hmacSignature` with the keys in `SCRUPLE_ADYEN_HMAC_KEYS` (constant-time compare, several keys for rotation, `tenant=key` entries), rejects the whole delivery on one bad item, stores each case in the verifying tenant's case store idempotently, and answers `[accepted]`. 2 MiB body limit and the anonymous rate limit, as for Stripe. Tested over HTTP with the vectors from Adyen's Python library (tests/test_ingest_adyen_endpoint.py). Not built: Basic auth on the endpoint. Output below. |
 | Secrets from a vault | Not built (ROADMAP 156); environment variables only. |
 | Helm chart, Terraform module | Written and checked statically, never installed or applied (docs/DEPLOY.md "Validation status"). |
 | Backups and restore runbook | Built: `deploy/scripts/backup.sh` and `restore.sh`, tested against a local Postgres (docs/DEPLOY.md). No restore drill against a real backup yet. |
@@ -192,3 +192,70 @@ $ python -c "import sqlite3; print(sqlite3.connect('a.db').execute('SELECT count
 0
 bank-b|evt_demo_1
 ```
+
+The Adyen endpoint (run 2026-11-12; `SCRUPLE_ADYEN_HMAC_KEYS="bank-a=<test key 00...00>,default=<the key from Adyen's library tests>"`,
+one case store per tenant). `chargeback.json` is the vendored Adyen spec example re-signed
+with the test key; `library-vector.json` is the item from Adyen's library test
+(`coqCmt/...`), an AUTHORISATION item, so it verifies and is skipped. Security headers
+left out:
+
+```
+$ curl -si -X POST -H "content-type: application/json" --data-binary @chargeback.json localhost:18451/ingest/adyen/webhook
+HTTP/1.1 200 OK
+x-scruple-cases: 1
+x-scruple-skipped: 0
+x-scruple-duplicates: 0
+x-scruple-stale: 0
+x-scruple-stored: true
+content-length: 10
+content-type: text/plain; charset=utf-8
+
+[accepted]
+$ (the same delivery again)
+HTTP/1.1 200 OK
+x-scruple-duplicates: 1
+[accepted]
+$ (library-vector.json)
+HTTP/1.1 200 OK
+x-scruple-cases: 0
+x-scruple-skipped: 1
+[accepted]
+$ (chargeback.json with the amount changed by one)
+HTTP/1.1 400 Bad Request
+{"detail":"signature rejected: hmacSignature does not match"}
+$ python -c "..."   # webhook_events in bank-a's store
+bank-a|adyen|QFQTPCQ8HXSKGK82:CHARGEBACK:2021-01-01T01:00:00+01:00
+```
+
+Tenant administration on the same database, with two keys for bank-a (JSON output
+shortened to the fields shown):
+
+```
+$ scruple tenant list
+bank-a  active      implicit  gate runs/day unlimited
+default  active      implicit  gate runs/day unlimited
+$ scruple tenant create bank-a
+$ scruple tenant quota bank-a --gate-runs-per-day 50
+$ scruple tenant list
+bank-a  active      created   gate runs/day 50
+default  active      implicit  gate runs/day unlimited
+$ scruple tenant offboard bank-a --case-store a.db
+{"dry_run": true, "keys_to_revoke": ["scr_4c50eb178827dc76", "scr_8f083715d2d41930"],
+ "case_store_rows": {"cases": 1, "movements": 0, "webhook_case_events": 1}, "gate_rows": {"imported_shadow_events": 0}}
+dry run: nothing changed. Run again with --yes to offboard bank-a.
+$ scruple tenant offboard bank-a --case-store a.db --yes
+{"dry_run": false, "keys_revoked": ["scr_4c50eb178827dc76", "scr_8f083715d2d41930"], "audit_head_seq": 9, ...}
+offboarded bank-a: 2 keys revoked, 2 rows purged in 2 tables; audit chain head seq 9.
+$ curl -si -H "X-API-Key: $BANK_A_KEY" localhost:18451/auth/whoami
+HTTP/1.1 401 Unauthorized
+{"detail": "invalid API key"}
+$ scruple keys create --tenant bank-a --subject again --role auditor
+error: tenant bank-a was offboarded; it gets no new keys
+$ SCRUPLE_TENANT=bank-a scruple audit verify
+audit chain: OK (9 entries, head 54a231137585304e)
+INTEGRITY OK
+```
+
+bank-a's chain then reads: `auth.key_created` (2), `tenant.created`, `tenant.quota_set`,
+`tenant.offboarded`, `auth.key_revoked` (2), `retention.purged` (2: cases,
+webhook_case_events).
