@@ -42,8 +42,10 @@ real data and real models are labelled real. everything else is synthetic, and s
 
 **open models through real apis** ([docs/experiments/E5_open_models.md](docs/experiments/E5_open_models.md))
 
-- gpt-oss 120b and 20b and qwen 3.8 27b via groq, same 12 seeds as the claude runs. partial: the free tier capped tokens per day, so qwen ran 4 cases.
-- gate pass: gpt-oss 120b 3/12, gpt-oss 20b 0/12. claude: haiku 7/12, sonnet 11/12, opus 11/12.
+- gpt-oss 120b and 20b and qwen 3.8 27b via groq, same 12 seeds as the claude runs. the free tier capped tokens per day: qwen ran 11 cases and none of the cfpb tasks.
+- gate pass: gpt-oss 120b 3/12, qwen 3/11, gpt-oss 20b 0/12. claude: haiku 7/12, sonnet 11/12, opus 11/12.
+- predicting relief from a real complaint, auroc on 100: gpt-oss 120b 0.43, 20b 0.40, a trained classifier 0.70. routing is level with it.
+- openrouter free models: 4 scored episodes before the free cap, none passed the gate.
 - the open models uploaded documents of their own under the honest brief, 8 uploads in 7 episodes. every one was caught. no claude run ever uploaded.
 
 **many kinds of agents** ([docs/results/AI_TYPES.md](docs/results/AI_TYPES.md))
