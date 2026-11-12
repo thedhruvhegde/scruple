@@ -25,6 +25,15 @@ the key of every purged decision goes to `imported_shadow_keys`: the SHA-256 of
 (tenant, rule, version, case id), never the case id itself. `record` refuses a batch
 naming a case whose key is there ("already recorded (purged by retention)"), so a
 re-sent decision is not counted twice. The table is append-only and is not purged.
+
+What is stored. Batches come straight from the API or CLI, not through `scruple
+ingest`, so the same rules are applied here before a batch is scored or stored: the
+kept free-text fields of every case are redacted (`scruple.ingest.pipeline.redact_case`:
+`merchant_ref`, `network`, `network_reason_code`, `source_reason`, the shipping
+carrier), a case whose id holds a card number or an email address refuses the batch,
+and a batch whose stored body would still hold a card number anywhere (a movement
+field, an evidence field name) is refused. The recorder scores the redacted batch, so
+a replay reproduces exactly what was answered.
 """
 
 from __future__ import annotations
@@ -34,7 +43,7 @@ import threading
 from collections.abc import Callable, Iterator, Sequence
 from contextlib import AbstractContextManager, contextmanager
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
@@ -303,6 +312,26 @@ class SQLImportedShadow:
         return found
 
 
+def _redacted(
+    items: Sequence[ImportedDecision] | Sequence[ImportedOutcome],
+) -> list[ImportedDecision] | list[ImportedOutcome]:
+    """Each item with its case redacted as ingest redacts it (ValueError on a bad id)."""
+    from scruple.ingest.pipeline import redact_case
+
+    out: list[Any] = []
+    for item in items:
+        case, _ = redact_case(item.case)  # SchemaMismatchError is a ValueError
+        out.append(item if case is item.case else item.model_copy(update={"case": case}))
+    return out
+
+
+def _refuse_pans(body: str) -> None:
+    from scruple.ingest.store import find_pans
+
+    if find_pans(body):
+        raise ValueError("the batch contains a card number; refused to store it")
+
+
 def _sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -398,7 +427,9 @@ class DurableImportedShadow:
     ) -> ImportedBatchResult:
         from scruple.gate.shadow_imported import ImportedDecisionBatch
 
+        decisions = cast("list[ImportedDecision]", _redacted(decisions))
         body = ImportedDecisionBatch(decisions=tuple(decisions)).model_dump_json()
+        _refuse_pans(body)
         with self._lock, self._writing():
             rec = self._catch_up()
             keys = {
@@ -421,7 +452,9 @@ class DurableImportedShadow:
     ) -> ImportedObserveResult:
         from scruple.gate.shadow_imported import ImportedOutcomeBatch
 
+        outcomes = cast("list[ImportedOutcome]", _redacted(outcomes))
         body = ImportedOutcomeBatch(outcomes=tuple(outcomes)).model_dump_json()
+        _refuse_pans(body)
         with self._lock, self._writing():
             rec = self._catch_up()
             out = rec.observe(outcomes)  # ValueError: refused, nothing changed
