@@ -8,6 +8,9 @@ for that tenant, rows older than `now - N days`:
 - case store (optional, `CaseStore.purge`): every version of each case opened before
   the cutoff, its ledger movements and the webhook case bodies that carried it.
 
+Offboarding a tenant (`purge_tenant`, `scruple tenant offboard`) runs the same purge
+with a cutoff after any stored time, so all of that tenant's row-level data goes.
+
 It keeps everything that is not row-level case data: the audit log, gate decisions,
 rule versions, imported-shadow summary snapshots (the aggregates at every point),
 ingest run reports and their counts, webhook event ids and payload hashes (still

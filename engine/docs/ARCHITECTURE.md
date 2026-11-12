@@ -482,6 +482,13 @@ A decision re-sent for a case whose imported-shadow events were purged is refuse
 the purge keeps each decision's key as a SHA-256 of (tenant, rule, version, case id)
 in the append-only `imported_shadow_keys` (alembic 0009), never the case id.
 
+Offboarding (`scruple tenant offboard`, `scruple/tenancy/offboard.py`) uses the same
+purge with a cutoff after any stored time (`END_OF_TIME`), so all of one tenant's
+imported-shadow rows and, when given, its case store go; each purge entry carries
+`reason: offboarding` and no `days`. The tenant's keys are revoked first, and
+`tenant_events` (append-only, alembic 0015) marks the id as offboarded, which
+authentication and key creation check.
+
 Known limits: re-importing an old export
 file brings purged cases back; a case store is one tenant's file, so its `cases` rows
 carry no tenant column. Retention does not cover episodes (synthetic) or job results
