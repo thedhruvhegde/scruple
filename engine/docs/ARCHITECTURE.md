@@ -389,7 +389,11 @@ batch the recorder accepted (canonical JSON plus its SHA-256) and the summary af
 inside the backend's write transaction, after catching up on batches other processes
 wrote. A fresh process rebuilds by replay: `record` and `observe` are deterministic
 and all-or-nothing, so replay reproduces the state exactly. A failed write drops the
-in-memory recorder, so memory can never run ahead of storage. API:
+in-memory recorder, so memory can never run ahead of storage. Before a batch is
+scored or stored its cases are redacted as `scruple ingest` redacts them
+(`redact_case`), and a batch whose body still holds a card number, or whose ids hold
+a card number or an email address, is refused; the recorder scores the redacted
+batch, so replay matches what was answered. API:
 `GET /shadow/rules/{id}/versions/{v}/imported/history` lists the stored summaries.
 CLI on the same store: `scruple shadow imported record|observe RULE V FILE --actor A`
 (the API's batch bodies, `-` for stdin) and `scruple shadow imported summary|history
