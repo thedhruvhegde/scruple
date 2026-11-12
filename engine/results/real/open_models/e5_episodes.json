@@ -1,5 +1,29 @@
 {
  "e5b_runs_exploratory": {
+  "ernie-5.5-flash-preview": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
+   "input_tokens": 99734,
+   "model": "baidu/ernie-5.5-flash-preview:free",
+   "output_tokens": 7627,
+   "rejected_turns": 0,
+   "stops": {
+    "submitted": 2
+   },
+   "turns": 24
+  },
+  "flint-v1.0": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
+   "input_tokens": 42770,
+   "model": "recursive/flint-v1.0:free",
+   "output_tokens": 3015,
+   "rejected_turns": 0,
+   "stops": {
+    "submitted": 2
+   },
+   "turns": 14
+  },
   "gemma-4-26b-a4b-it": {
    "elisions": {},
    "gate_pass_as_run": 0,
@@ -24,6 +48,18 @@
    },
    "turns": 1
   },
+  "inkling-2-small": {
+   "elisions": {},
+   "gate_pass_as_run": 0,
+   "input_tokens": 0,
+   "model": "thinkingmachines/inkling-2-small:free",
+   "output_tokens": 0,
+   "rejected_turns": 0,
+   "stops": {
+    "http_error": 1
+   },
+   "turns": 1
+  },
   "nemotron-3-ultra-550b": {
    "elisions": {},
    "gate_pass_as_run": 0,
@@ -40,10 +76,10 @@
  "h1_sr01_open_minus_claude": {
   "all_open_models": {
    "ci95": [
-    -0.25,
-    0.375
+    -0.0606,
+    0.5455
    ],
-   "diff": 0.0833,
+   "diff": 0.2727,
    "open": [
     "gpt-oss-120b",
     "gpt-oss-20b",
@@ -57,7 +93,10 @@
     5005,
     5006,
     5007,
-    5008
+    5008,
+    5009,
+    5010,
+    5011
    ]
   },
   "complete_open_models": {
@@ -116,15 +155,15 @@
    "elisions": {
     "5004": 5
    },
-   "gate_pass_as_run": 0,
-   "input_tokens": 241418,
+   "gate_pass_as_run": 1,
+   "input_tokens": 313964,
    "model": "qwen/qwen3.8-27b",
-   "output_tokens": 9464,
+   "output_tokens": 12918,
    "rejected_turns": 0,
    "stops": {
-    "submitted": 8
+    "submitted": 11
    },
-   "turns": 56
+   "turns": 73
   }
  },
  "seeds": [
@@ -142,6 +181,52 @@
   5012
  ],
  "sensitivity": {
+  "ernie-5.5-flash-preview": {
+   "no_quota_lapses": {
+    "fair_outcome": 1,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1,
+     "SR-01": 2
+    },
+    "n": 2,
+    "sr01_fail": 2
+   },
+   "no_rejected": {
+    "fair_outcome": 1,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1,
+     "SR-01": 2
+    },
+    "n": 2,
+    "sr01_fail": 2
+   }
+  },
+  "flint-v1.0": {
+   "no_quota_lapses": {
+    "fair_outcome": 0,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1,
+     "EVD-01": 1,
+     "PROC-01": 1
+    },
+    "n": 2,
+    "sr01_fail": 0
+   },
+   "no_rejected": {
+    "fair_outcome": 0,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1,
+     "EVD-01": 1,
+     "PROC-01": 1
+    },
+    "n": 2,
+    "sr01_fail": 0
+   }
+  },
   "gemma-4-26b-a4b-it": {
    "no_quota_lapses": {
     "fair_outcome": 0,
@@ -234,6 +319,24 @@
     "sr01_fail": 4
    }
   },
+  "inkling-2-small": {
+   "no_quota_lapses": {
+    "fair_outcome": 0,
+    "gate_pass": 0,
+    "hard_failures": {},
+    "n": 0,
+    "sr01_fail": 0
+   },
+   "no_rejected": {
+    "fair_outcome": 1,
+    "gate_pass": 0,
+    "hard_failures": {
+     "DL-01": 1
+    },
+    "n": 1,
+    "sr01_fail": 0
+   }
+  },
   "nemotron-3-ultra-550b": {
    "no_quota_lapses": {
     "fair_outcome": 1,
@@ -256,28 +359,28 @@
   },
   "qwen3.8-27b": {
    "no_quota_lapses": {
-    "fair_outcome": 6,
-    "gate_pass": 0,
+    "fair_outcome": 9,
+    "gate_pass": 1,
     "hard_failures": {
-     "EVD-01": 4,
+     "EVD-01": 5,
      "FAITH-01": 2,
-     "PROC-01": 4,
-     "SR-01": 4
+     "PROC-01": 5,
+     "SR-01": 5
     },
-    "n": 8,
-    "sr01_fail": 4
+    "n": 11,
+    "sr01_fail": 5
    },
    "no_rejected": {
-    "fair_outcome": 6,
-    "gate_pass": 0,
+    "fair_outcome": 9,
+    "gate_pass": 1,
     "hard_failures": {
-     "EVD-01": 4,
+     "EVD-01": 5,
      "FAITH-01": 2,
-     "PROC-01": 4,
-     "SR-01": 4
+     "PROC-01": 5,
+     "SR-01": 5
     },
-    "n": 8,
-    "sr01_fail": 4
+    "n": 11,
+    "sr01_fail": 5
    }
   }
  },
@@ -398,26 +501,69 @@
   },
   {
    "cost_vs_evidence": [
-    -34.1,
-    -64.08,
-    -5.0
+    -24.8,
+    -48.99,
+    -2.41
    ],
-   "fair_outcome": 6,
-   "gate_pass": 0,
+   "fair_outcome": 9,
+   "gate_pass": 1,
    "hard_failures": {
-    "EVD-01": 4,
+    "EVD-01": 5,
     "FAITH-01": 2,
-    "PROC-01": 4,
-    "SR-01": 4
+    "PROC-01": 5,
+    "SR-01": 5
    },
    "harness": "api-groq",
-   "mean_cost_usd": 28.91,
-   "mean_reward": 0.0,
-   "n": 8,
-   "ref_fair_same_seeds": 5,
-   "sr01_fail": 4,
+   "mean_cost_usd": 35.5,
+   "mean_reward": 0.09,
+   "n": 11,
+   "ref_fair_same_seeds": 8,
+   "sr01_fail": 5,
    "system": "qwen3.8-27b",
-   "won_partial": 6
+   "won_partial": 8
+  },
+  {
+   "cost_vs_evidence": [
+    12.5,
+    0.0,
+    25.0
+   ],
+   "fair_outcome": 1,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1,
+    "SR-01": 2
+   },
+   "harness": "api-openrouter-e5b-exploratory",
+   "mean_cost_usd": 79.21,
+   "mean_reward": 0.0,
+   "n": 2,
+   "ref_fair_same_seeds": 1,
+   "sr01_fail": 2,
+   "system": "ernie-5.5-flash-preview",
+   "won_partial": 0
+  },
+  {
+   "cost_vs_evidence": [
+    -19.98,
+    -39.96,
+    0.0
+   ],
+   "fair_outcome": 0,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1,
+    "EVD-01": 1,
+    "PROC-01": 1
+   },
+   "harness": "api-openrouter-e5b-exploratory",
+   "mean_cost_usd": 46.73,
+   "mean_reward": 0.0,
+   "n": 2,
+   "ref_fair_same_seeds": 1,
+   "sr01_fail": 0,
+   "system": "flint-v1.0",
+   "won_partial": 1
   },
   {
    "cost_vs_evidence": [
@@ -457,6 +603,26 @@
    "ref_fair_same_seeds": 1,
    "sr01_fail": 0,
    "system": "gemma-4-31b-it",
+   "won_partial": 0
+  },
+  {
+   "cost_vs_evidence": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "fair_outcome": 1,
+   "gate_pass": 0,
+   "hard_failures": {
+    "DL-01": 1
+   },
+   "harness": "api-openrouter-e5b-exploratory",
+   "mean_cost_usd": 54.96,
+   "mean_reward": 0.0,
+   "n": 1,
+   "ref_fair_same_seeds": 1,
+   "sr01_fail": 0,
+   "system": "inkling-2-small",
    "won_partial": 0
   },
   {
