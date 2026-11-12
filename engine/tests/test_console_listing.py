@@ -136,6 +136,13 @@ def test_any_search_term_survives_a_round_trip(q: str) -> None:
     assert Filter.parse(RUNS, f.canonical()).q == f.q
 
 
+def test_a_longest_search_of_wide_characters_still_parses() -> None:
+    f = Filter.build(RUNS, "\U0001f600" * MAX_Q, {})
+    assert Filter.parse(RUNS, f.canonical()).q == f.q
+    with pytest.raises(FilterError):
+        Filter.parse(RUNS, "q=" + "a" * (13 * MAX_Q))
+
+
 # --- pages ----------------------------------------------------------------------------
 
 

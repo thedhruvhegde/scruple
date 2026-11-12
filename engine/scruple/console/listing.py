@@ -111,7 +111,8 @@ class Filter:
     @classmethod
     def parse(cls, spec: ListSpec, query: str) -> Filter:
         """A filter from a (saved) query string; only q and facet keys."""
-        if len(query) > 2 * MAX_Q + 80 * len(spec.facets):
+        # A character percent-encodes to at most 12 bytes (4 UTF-8 bytes as %XX).
+        if len(query) > 12 * MAX_Q + 80 * len(spec.facets):
             raise FilterError("filter too long")
         pairs = parse_qsl(query, keep_blank_values=False)
         seen: dict[str, str] = {}
