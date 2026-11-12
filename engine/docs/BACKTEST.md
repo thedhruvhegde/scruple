@@ -193,6 +193,111 @@ cannot be calibrated: HOLD, estimates from the synthetic default profile, said s
 overall verdict is the worse of the two sources. Same inputs, same scorecard bytes (the
 history is identified by a content hash, not a path; tested, also with shuffled input).
 
+## Backtesting an LLM agent
+
+A partner's LLM agent is a candidate like a rule file or a Python `decide(view)`
+module. Two forms, both in `scruple/backtest/llm.py`:
+
+```bash
+# (a) the partner hosts an endpoint: one POST per case
+uv run scruple backtest run --history cases.db --format store \
+    --agent-url https://agent.partner.example/decide --agent-id dispute-agent-v7 \
+    --agent-auth-env PARTNER_AGENT_TOKEN --out report/
+# (b) scruple calls a model with the partner's prompt (provider registry of scruple eval)
+uv run scruple backtest run --history cases.db --format store \
+    --agent-provider anthropic --agent-model MODEL_ID --agent-prompt partner_prompt.txt \
+    --price-in IN_USD_PER_MTOK --price-out OUT_USD_PER_MTOK --out report/
+```
+
+Give exactly one of `--candidate`, `--agent-url`, `--agent-provider`. Keys come from the
+provider's environment variable (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, ...;
+`scruple eval providers` lists them); the endpoint's bearer token comes from the
+variable named by `--agent-auth-env`. Neither is written to the report or the cache.
+
+**What the agent receives** (`AgentRequest`, JSON; for a model, the same JSON after a
+fixed instruction in the user message, with the partner's prompt file as the system
+prompt):
+
+```json
+{
+  "version": "scruple.backtest.agent_request.v1",
+  "agent_id": "dispute-agent-v7",
+  "case_ref": "<sha256 of the case id>",
+  "decided_at": "2026-01-03T00:00:00+00:00",
+  "actions": ["accept", "contest", "escalate"],
+  "case": {"amount_minor": 2000, "currency": "USD", "reason": "fraudulent",
+           "reason_code": "fraud", "evidence_due_at": "...", "ledger": [...], "...": "..."},
+  "withheld_text": []
+}
+```
+
+`case` holds exactly the facts of the decision-time view (the no-look-ahead section
+above) that a `decide(view)` policy gets: the same keys, the same values, no outcome
+facts (tested: `tests/test_backtest_llm.py`). Dates are ISO 8601; ledger postings are
+`{occurred_at, merchant_net_minor, fee_minor}` up to the decision time. A fact the
+export lacks is `null`. The case id and payment id are not sent; `case_ref` is a hash
+of the case id, stable across runs, so the partner can match its own logs.
+
+**What the agent answers** (`AgentReply`):
+
+```json
+{"action": "contest", "reason": "optional, up to 4000 characters",
+ "model": "optional model id", "usage": {"input_tokens": 0, "output_tokens": 0}}
+```
+
+`action` is required and must be `accept`, `contest` or `escalate`. Unknown keys are
+ignored. A model's reply may be wrapped in a code fence or surrounded by text; the
+first-to-last brace span is parsed.
+
+**Privacy.** On top of the ingest redaction (card numbers tokenised, the store refuses
+clear PANs), every string in `case` is sent only if it is a short code: one token of
+letters, digits and `_.:/-`, at most 64 characters and at most 6 digits, which
+`scruple.security.redact` leaves unchanged (reason values, network reason codes, card
+brands, check results, MCCs). Any other string is free text: it is sent as `null` and
+its field is named in `withheld_text`. `--agent-send-free-text` is the partner's
+explicit opt-in: free text is then sent after `redact_text`, so card numbers, emails,
+phone numbers, addresses and cued names become placeholders. Redaction has the limits
+stated in `scruple/security/redact.py` (a bare name with no cue is not found).
+
+**HTTP behaviour.** `--agent-timeout` seconds per request (default 30),
+`--agent-retries` (default 3) on 408, 409, 429, 5xx and transport errors, waiting
+`Retry-After` when sent, else `--agent-backoff * 2**attempt` seconds, `--agent-rpm` for
+a request-rate cap, and at most `--agent-concurrency` requests in flight (default 4).
+The model runner uses the same client (`scruple.agents.providers.http`).
+
+**Reply outcomes.** Every case gets one of `ok`, `malformed` (an answer arrived but is
+not a valid `AgentReply`, is not JSON, or the model refused), `failed` (an HTTP error
+status or a transport failure after the retries) or `timeout`. The report counts them
+(`agent_outcomes`) and never turns a bad reply into a decision silently.
+`--on-agent-error` says what happens to cases without a decision: `exclude` (default;
+left out of the comparison and counted under `excluded`), `escalate` (priced as an
+escalation, the cost of a fallback to an analyst) or `historical` (the historical
+action is kept). With `--include-cases` each such case is listed with its outcome and
+the error.
+
+**Cache.** Replies are cached by (agent id, case key hash, view hash), one JSON file
+per call in `--agent-cache` (default `OUT/agent-cache`). A rerun with the same agent id
+on the same history makes no calls and gives the same decisions. `ok` and `malformed`
+replies are cached; `failed` and `timeout` are not, so a rerun asks again. Change
+`--agent-id` when the endpoint's agent changes (it defaults to the URL). The model
+runner's id is built from the provider, the model, a hash of the prompt file and the
+sampling settings (temperature 0, `--agent-max-tokens`), so editing the prompt starts a
+new cache by itself. Changing `BacktestConfig.decision_delay_hours` or
+`--agent-send-free-text` changes the view hash.
+
+**Cost and latency.** Each call records the model id (the reply's `model`, else the
+API's), latency in milliseconds including retries, and token usage as the API or the
+partner reports it. The report's `agent` section gives cases asked, calls made this
+run, cache hits, tokens, latency (mean, p50, p95, max, total, as recorded when each
+call was made) and cost. Cost is computed only from `--price-in` and `--price-out`
+(USD per million tokens); scruple ships no prices, and without them the report says
+"not priced".
+
+Limits: one request per case, no tool use and no multi-turn conversation in the
+model runner; an agent that needs documents or tools has to be hosted behind the
+endpoint. A model at temperature 0 can still answer differently on a rerun without the
+cache; the cache is what makes a report reproducible.
+
 ## Privacy
 
 - Free text is never kept: Stripe evidence is reduced to the names of the fields
@@ -203,7 +308,9 @@ history is identified by a content hash, not a path; tested, also with shuffled 
 - Calibration sees aggregates only (above). The profile and the calibration report can
   leave the partner's environment; the backtest report holds per-reason totals, and
   per-case lines (case ids) only with `--include-cases`.
-- The backtest itself runs where the data is. Nothing calls a network.
+- The backtest itself runs where the data is. Nothing calls a network unless an LLM
+  agent is backtested (`--agent-url` or `--agent-provider`, above); then each case's
+  decision-time view leaves, with free text withheld unless the partner opts in.
 
 ## Limits
 
