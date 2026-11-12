@@ -17,7 +17,7 @@ from collections.abc import Callable
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request, Response
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.api.health import PROBE_PATHS, health_router
@@ -35,6 +35,7 @@ from scruple.auth.authn import Authenticator
 from scruple.auth.limits import Limits
 from scruple.auth.middleware import AuthMiddleware
 from scruple.console import console_router
+from scruple.console.sources import ConsoleSources
 from scruple.domain import RuleSpec
 from scruple.gate.models import Decision, Outcome, Stage
 from scruple.gate.shadow import BatchResult, LiveDecisionBatch, ShadowRecorder, ShadowSummary
@@ -60,7 +61,7 @@ from scruple.registry import (
 )
 from scruple.registry.models import ACTOR_PATTERN, RULE_ID_PATTERN
 from scruple.service import AgentGate, ApprovalError, IntegrityReport
-from scruple.settings import Settings
+from scruple.settings import Settings, SettingsError
 from scruple.storage.imported_shadow import DurableImportedShadow, imported_shadows
 from scruple.version import BuildInfo, build_info, package_version
 
@@ -192,6 +193,8 @@ def create_app(
     *,
     auth: Authenticator | None = None,
     limits: Limits | None = None,
+    console_sources: ConsoleSources | None = None,
+    demo: bool = False,
 ) -> FastAPI:
     """The API over `gate`. `auth` defaults to one built from settings (API keys in
     the gate's database; `X-Actor` trust only if `auth_dev_actor_header` is on).
@@ -202,21 +205,36 @@ def create_app(
     route reads and writes only the caller's tenant: another tenant's rules,
     decisions, reports and shadow state answer 404 as if they did not exist.
 
-    `limits` (rate and body size per caller) defaults to the settings' values."""
+    `limits` (rate and body size per caller) defaults to the settings' values.
+
+    `demo=True` is the hosted read-only demo (`scruple.demo.host` builds it): every
+    route but a `read` one answers 403 and the console prints the demo banner. With
+    the `demo` setting on, only that builder may make the app, so a server started
+    some other way (gunicorn) refuses to start instead of serving a writable demo."""
+    if settings is None:
+        from scruple.settings import load_settings
+
+        settings = load_settings()
+    if settings.demo and not demo:
+        raise SettingsError(
+            "SCRUPLE_DEMO is on: start the demo with `scruple serve --demo`, which seeds "
+            "synthetic data and refuses every write"
+        )
+    guards = [Depends(guard_route), Depends(reject_unknown_inputs)]
+    if demo:
+        from scruple.demo.guard import demo_guard
+
+        guards.insert(0, Depends(demo_guard))
     app = FastAPI(
         title="agent-gate",
         version=package_version(),
         description="Change control for agent learning (synthetic demo).",
-        dependencies=[Depends(guard_route), Depends(reject_unknown_inputs)],
+        dependencies=guards,
         # The schema lists every route: served below to authenticated readers only.
         openapi_url=None,
         docs_url=None,
         redoc_url=None,
     )
-    if settings is None:
-        from scruple.settings import load_settings
-
-        settings = load_settings()
     if gate is None:
         # AGENT_GATE_DB is the pre-rename variable; SCRUPLE_DATABASE_URL replaces it.
         gate = AgentGate.open(os.environ.get("AGENT_GATE_DB") or settings.database_dsn())
@@ -258,7 +276,7 @@ def create_app(
     app.include_router(ingest_router())
     app.include_router(health_router(root, settings))
     # HTML console at /console (scruple/console): the caller's tenant only, like the API.
-    app.include_router(console_router(app.state.gates.get))
+    app.include_router(console_router(app.state.gates.get, console_sources, demo=demo))
     from scruple.auth.config import install_saml
 
     install_saml(app, settings)  # /auth/saml/* when SAML sign-on is configured
@@ -283,6 +301,12 @@ def create_app(
     from scruple.integrations.approvals_api import approvals_router
 
     app.include_router(approvals_router(app.state.gates.get, root.storage))
+
+    if demo:
+        # The link a demo visitor is given is the bare host: send them to the console.
+        @app.get("/", dependencies=[public()], include_in_schema=False)
+        def demo_root() -> RedirectResponse:
+            return RedirectResponse("/console/", status_code=307)
 
     @app.get("/version", dependencies=[public()])
     def version() -> BuildInfo:

@@ -42,7 +42,9 @@
     <dt>approvals</dt><dd>{% if p.status %}{{ p.status.counted | length }} of {{ box.policy.required }}{% if p.status.counted %} ({{ p.status.counted | join(", ") }}){% endif %}{% if p.status.reasons %}; {{ p.status.reasons | join("; ") }}{% endif %}{% endif %}</dd>
     {% endif %}
   </dl>
-  {% if not p.actionable %}
+  {% if demo %}
+  <p class="note">Approvals are off in the read-only demo.</p>
+  {% elif not p.actionable %}
   <p class="note warn">Not actionable yet: {{ p.blocker }}.</p>
   {% else %}
   <div class="grid2">

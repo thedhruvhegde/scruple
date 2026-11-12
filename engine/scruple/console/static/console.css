@@ -35,6 +35,10 @@ a:hover, a:focus-visible { background: var(--fg); color: var(--bg); text-decorat
 .page { max-width: 1240px; margin: 0 auto; }
 .mono, code, pre, kbd, th, .k, .tag, .btn, .nav, code { font-size: 0.86em; overflow-wrap: anywhere; }
 
+/* ---------- hosted demo strip (scruple.demo) ---------- */
+.demo-strip { border-bottom: 1px solid var(--rule-strong); }
+.demo-strip p { font-family: var(--f-mono); font-variation-settings: "wdth" 87.5; font-weight: 600; font-size: 12.5px; letter-spacing: 0.02em; padding-block: 9px; }
+
 /* ---------- bar ---------- */
 .bar { border-bottom: 1px solid var(--rule); }
 .bar-in { max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; min-height: 60px; padding-block: 10px; }

@@ -57,6 +57,7 @@ from scruple.console.views import (
     version_detail,
     version_rows,
 )
+from scruple.demo import BANNER as DEMO_BANNER
 from scruple.gate.approval import ApprovalError
 from scruple.registry import InvalidTransitionError, RuleNotFoundError, RuleVersion
 from scruple.registry.models import RULE_ID_PATTERN
@@ -154,7 +155,10 @@ def console_router(
     sources: ConsoleSources | None = None,
     *,
     secret: bytes | None = None,
+    demo: bool = False,
 ) -> APIRouter:
+    """`demo=True`: the hosted read-only demo (`scruple.demo`): every page carries the
+    demo banner and the approval forms are not shown."""
     gates: Callable[[str], AgentGate] = _single(gate) if isinstance(gate, AgentGate) else gate
 
     def gate_of(principal: Principal) -> AgentGate:
@@ -179,6 +183,8 @@ def console_router(
             csrf_token=csrf.token_for(sid),
             principal=principal,
             path=request.url.path,
+            demo=demo,
+            demo_banner=DEMO_BANNER,
             **ctx,
         )
         resp = HTMLResponse(html, status_code=status)

@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="{{ P }}/static/console.css">
 </head>
 <body>
+{% if demo %}<div class="band band-sand demo-strip" role="note"><p class="page">{{ demo_banner }}</p></div>{% endif %}
 {% set nav = [
   (P ~ "/dashboard", "Dashboard", "dashboard"),
   (P ~ "/rules", "Rules", "runs"),
