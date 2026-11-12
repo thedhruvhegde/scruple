@@ -25,9 +25,16 @@ as finished until it is merged with tests.
   (`scruple.domain.RuleSpec`: conditions over whitelisted fields, action accept,
   contest or escalate). **Exists** for structured rules. An LLM agent or natural-language
   memory cannot be expressed this way. The backtest also takes a Python module whose
-  `decide(view)` returns an action (`--candidate agent.py`, docs/BACKTEST.md); wrapping
-  a real LLM agent that way has not been tried, so replaying one on history is still
-  **planned** (docs/DESIGN.md "Next", item 1) and would extend the pilot.
+  `decide(view)` returns an action (`--candidate agent.py`), and an LLM agent
+  (**exists**, docs/BACKTEST.md "Backtesting an LLM agent"): either the partner's own
+  endpoint (`--agent-url`; one POST per case with the decision-time view as JSON, free
+  text withheld unless the partner opts in) or a model called with the partner's prompt
+  (`--agent-provider`, `--agent-model`, `--agent-prompt`). Replies are cached, so a
+  rerun makes no calls; malformed, failed and timed-out replies are counted separately;
+  the report gives tokens, latency and, with prices supplied, cost. Tested against a
+  local fake endpoint and fake model APIs only; not yet run against a partner's agent
+  or a real model. Week 1 work is the endpoint contract (`AgentRequest`, `AgentReply`)
+  or the prompt file.
 - Agree the export (DATA_CHECKLIST.md) and who runs it.
 - The ingest command **exists**: `scruple ingest stripe|adyen|csv|jsonl --in FILE
   --store cases.db --report ingest.json` validates every record, redacts, tokenises card
@@ -169,8 +176,9 @@ criterion: it is a result, and it is reported.
   disputes to the candidate) is not part of the six weeks; it needs the partner's
   approval, a delayed-outcome canary that is not built (docs/math/README.md), and more
   time than outcome lag allows.
-- Replaying an LLM agent on history (planned; would extend the pilot). Python agents
-  with a `decide(view)` function can already be backtested.
+- Replaying an LLM agent with tools or several turns per case. One request per case
+  **exists** (week 1 above); an agent that needs documents or tools has to answer
+  behind the partner's endpoint.
 - SSO, role-based access control, multi-tenancy, a web console (ROADMAP 157-158, 181-185;
   not built).
 - Training any model on partner data. scruple does not.
