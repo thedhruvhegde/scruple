@@ -37,6 +37,7 @@ from scruple.storage import (
     policies,
     ratelimit,
     retention,
+    tenants,
     usage,
 )
 from scruple.storage.base import DuplicateKeyError, ImmutableHistoryError, StorageError
@@ -227,6 +228,7 @@ SCHEMA = (
     + billing.POSTGRES_DDL
     + policies.POSTGRES_DDL
     + integrations.POSTGRES_DDL
+    + tenants.POSTGRES_DDL
 )
 
 
@@ -371,4 +373,5 @@ GRANT SELECT, INSERT ON {schema}.tenant_policies, {schema}.integration_settings,
 GRANT SELECT, INSERT, UPDATE ON {schema}.integration_cursor, {schema}.webhook_endpoints,
     {schema}.webhook_deliveries TO {role};
 GRANT SELECT, INSERT, UPDATE, DELETE ON {schema}.ticket_links TO {role};
+GRANT SELECT, INSERT ON {schema}.tenant_events TO {role};
 """
