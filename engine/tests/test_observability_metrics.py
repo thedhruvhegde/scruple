@@ -254,8 +254,12 @@ def test_gunicorn_workers_share_metrics_through_the_multiproc_dir(tmp_path: Path
         before = _health_count(base)
         for _ in range(30):
             urllib.request.urlopen(f"{base}/health", timeout=10).close()
-        # Every worker's requests, whichever worker served the scrape.
-        assert _health_count(base) == before + 30
+        # Every worker's requests, whichever worker served the scrape. A worker may count a
+        # request just after its response is sent, so wait briefly for the last ones.
+        want, seen, until = before + 30, before, time.monotonic() + 10
+        while (seen := _health_count(base)) < want and time.monotonic() < until:
+            time.sleep(0.1)
+        assert seen == want
     finally:
         proc.send_signal(signal.SIGTERM)
         try:
