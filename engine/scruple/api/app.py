@@ -272,6 +272,15 @@ def create_app(
     app.add_exception_handler(DuplicateContentError, _err(409))
     app.add_exception_handler(InvalidTransitionError, _err(409))
     app.add_exception_handler(ApprovalError, _err(403))
+    from scruple.tenancy.directory import QuotaExceededError, TenantOffboardedError
+
+    async def _quota(_r: Request, exc: Exception) -> JSONResponse:
+        assert isinstance(exc, QuotaExceededError)
+        headers = {"Retry-After": str(exc.retry_after)}
+        return JSONResponse(status_code=429, content={"detail": str(exc)}, headers=headers)
+
+    app.add_exception_handler(QuotaExceededError, _quota)
+    app.add_exception_handler(TenantOffboardedError, _err(403))
     # Webhooks declare `signed(...)` per route; health and readiness are public.
     app.include_router(ingest_router())
     app.include_router(health_router(root, settings))

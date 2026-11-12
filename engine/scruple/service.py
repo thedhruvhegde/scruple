@@ -117,10 +117,16 @@ class AgentGate:
 
         The verdicts are pure, so both are computed first; every write (the status
         changes, decisions and audit entries) then happens in one transaction, so a
-        failure part-way leaves the version a candidate with nothing recorded."""
+        failure part-way leaves the version a candidate with nothing recorded.
+
+        Refused before any work, with nothing recorded, when the tenant was
+        offboarded or has used its daily gate-run quota (`scruple.tenancy`)."""
+        from scruple.tenancy.directory import check_gate_quota
+
         rv = self.registry.get(rule_id, version)
         if rv.status is not RuleStatus.CANDIDATE:
             raise InvalidTransitionError(f"{rv.ref} is {rv.status.value}, not candidate")
+        check_gate_quota(self)
         active = self.registry.active_rules()  # candidate replaces its own rule_id, if any
         shadow = evaluate_shadow(rv, active, self.config)
         canary = (
@@ -650,7 +656,7 @@ class AgentGate:
 
     # --- runtime events (jobs, retention): audited, never a state change ---------
 
-    RUNTIME_EVENT_PREFIXES = ("job.", "retention.", "policy.", "integration.")
+    RUNTIME_EVENT_PREFIXES = ("job.", "retention.", "policy.", "integration.", "tenant.")
 
     def record_runtime_event(self, event_type: str, actor: str, payload: dict[str, Any]) -> Any:
         """Append an audit entry for work around the gate (a finished job, a retention
