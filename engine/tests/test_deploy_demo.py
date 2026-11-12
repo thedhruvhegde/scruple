@@ -66,7 +66,10 @@ def test_compose_config_is_valid_and_hardened() -> None:
 
 @pytest.mark.skipif(shutil.which("docker") is None, reason="docker CLI not installed")
 def test_compose_refuses_to_start_without_a_domain() -> None:
+    # Only the domain is missing: compose versions differ in which unset required
+    # variable they report first, so every other one is provided.
     env = {k: v for k, v in os.environ.items() if k not in ENV}
+    env["ACME_EMAIL"] = ENV["ACME_EMAIL"]
     out = subprocess.run(
         ["docker", "compose", "-f", "compose.yaml", "config", "--quiet"],
         cwd=DEMO,
