@@ -185,7 +185,12 @@ def _get_path(obj: Mapping[str, Any], path: str) -> Any:
     return cur
 
 
-def _redact_case(case: ExternalCase, acc: _Acc) -> ExternalCase:
+def redact_case(case: ExternalCase) -> tuple[ExternalCase, dict[str, int]]:
+    """The case with its kept free-text fields redacted, and what was found by kind.
+
+    Raises `SchemaMismatchError` when an id holds a card number or an email address:
+    ids cannot be redacted without breaking joins. Used by ingest and by the
+    imported-shadow store (`scruple.storage.imported_shadow`)."""
     for f in ID_FIELDS:
         found = redact_text(getattr(case, f)).counts()
         bad = sorted(k for k in found if k in ("PAN", "EMAIL"))
@@ -193,6 +198,7 @@ def _redact_case(case: ExternalCase, acc: _Acc) -> ExternalCase:
             raise SchemaMismatchError(
                 f"{f} holds {'/'.join(bad).lower()} data; ids cannot be redacted"
             )
+    counts: Counter[str] = Counter()
     update: dict[str, Any] = {}
     for f in TEXT_FIELDS:
         v = getattr(case, f)
@@ -201,15 +207,21 @@ def _redact_case(case: ExternalCase, acc: _Acc) -> ExternalCase:
         r = redact_text(v)
         if r.text != v:
             update[f] = r.text
-            acc.redactions.update(r.counts())
+            counts.update(r.counts())
     if case.facts is not None and case.facts.shipping_carrier:
         r = redact_text(case.facts.shipping_carrier)
         if r.text != case.facts.shipping_carrier:
-            acc.redactions.update(r.counts())
+            counts.update(r.counts())
             update["facts"] = case.facts.model_copy(update={"shipping_carrier": r.text})
     if not update:
-        return case
-    return case.model_copy(update=update)
+        return case, {}
+    return case.model_copy(update=update), dict(counts)
+
+
+def _redact_case(case: ExternalCase, acc: _Acc) -> ExternalCase:
+    out, counts = redact_case(case)
+    acc.redactions.update(counts)
+    return out
 
 
 def _seal(
@@ -516,5 +528,6 @@ __all__ = [
     "IngestReport",
     "RawPanRefusedError",
     "ingest",
+    "redact_case",
     "stored_cases",
 ]
