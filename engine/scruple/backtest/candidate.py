@@ -33,6 +33,10 @@ from scruple.domain import Action, RuleSpec
 from scruple.sim.policy import Policy, PolicyRule
 
 HISTORICAL = "historical"
+# How a decision was obtained. Rules and Python agents always give "ok"; an LLM agent's
+# reply can also be malformed, fail or time out (scruple.backtest.llm). Only "ok"
+# carries a decision; the backtest applies `BacktestConfig.on_agent_error` to the rest.
+DecisionOutcome = Literal["ok", "malformed", "failed", "timeout"]
 
 
 class CandidateDecision(BaseModel):
@@ -40,6 +44,8 @@ class CandidateDecision(BaseModel):
 
     action: Action | None  # None: keep the historical action
     ref: str  # which rule (or agent) decided
+    outcome: DecisionOutcome = "ok"
+    detail: str | None = None  # why there is no decision (outcome other than "ok")
 
 
 class Candidate(Protocol):
