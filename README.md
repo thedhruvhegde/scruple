@@ -30,7 +30,7 @@ train on it. evaluate on it. ship through it.
 
 - one html file and one script. no build step, no framework, no tracking, no cookies.
 - opens on a chat. the agent says it wins 97% of disputes. scruple answers: 128 it could never win. the claim gets struck.
-- one of the new seven wonders then fills the screen, and settles into the first panel. a different wonder each visit.
+- an underwater scene then fills the screen, and settles into the first panel: a whale shark, dolphins and a reef school. a different scene each visit.
 - scrolling carries the characters from panel to panel. they scramble in flight, then decode into the next panel.
 - every number on the page comes from the engine's synthetic demo.
 
@@ -38,7 +38,7 @@ train on it. evaluate on it. ship through it.
 
 | panel | shows | kind |
 |---|---|---|
-| hero | one of the seven wonders, moving | art |
+| hero | an ocean scene, moving: whale shark, dolphins, reef fish | art |
 | 01 how it works | `scruple demo`, abridged | terminal |
 | 02 proof | loss per case by case type, good rule against bad | chart |
 | 03 red team | attacks breaking on a wall, the ledger untouched | art |
@@ -47,14 +47,13 @@ train on it. evaluate on it. ship through it.
 | 06 status | ledger rain, debits and credits | art |
 | footer | the mark in 3d, drag to turn | art |
 
-## the seven wonders
+## the ocean
 
-- taj mahal, colosseum, great wall, petra, christ the redeemer, machu picchu, chichen itza.
-- each one is vector shapes on a hidden canvas. every shape carries a material and a brightness.
-- read back one cell at a time: brightness picks the glyph, edges inside a cell become line glyphs, material picks the colour.
-- lit faces, shadow faces, cast shadows and fading ridges give depth without a 3d engine.
-- motion follows the material. water ripples and reflects. clouds and birds drift. foliage sways in gusts. stars and city lights twinkle. stone shimmers.
-- `another wonder` under the hero cycles through all seven.
+- three scenes: a whale shark with a reef school and dolphins, a dolphin pod, and a reef school. `another scene` under the hero cycles through them.
+- every creature is a swimming silhouette: a dorsal and a ventral outline along the body, bent by a wave that grows toward the tail.
+- read back one cell at a time: how far inside a body the cell sits picks the glyph from a ramp sorted by ink, and a flicker keeps the bodies shimmering.
+- species and markings pick the colour: clownfish bands, a blue tang's stripe, the whale shark's spots, a dolphin's pale belly.
+- marine snow drifts down, bubbles rise and light shafts sweep through the water. `ocean.js` keeps the same api as `wonders.js`, which still drives the social images in `tools/`.
 
 ## speed
 
