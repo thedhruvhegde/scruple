@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://thedhruvhegde.github.io/scruple/sitemap.xml
+Sitemap: https://www.scrumple.org/sitemap.xml
