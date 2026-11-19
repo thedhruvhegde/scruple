@@ -51,7 +51,7 @@
       `Current tooling: ${block(v["f-stack"])}`,
       `Change to test: ${block(v["f-change"])}`,
       "",
-      "Sent from the form at thedhruvhegde.github.io/scruple/pilot/",
+      "Sent from the form at www.scrumple.org/pilot/",
     ];
     const body = lines.join("\n");
     // RFC 6068: percent-encode everything, line breaks as CRLF

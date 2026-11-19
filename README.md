@@ -4,7 +4,7 @@
 
 verifiers for agents that move money. this repo holds the website and the engine.
 
-site: [thedhruvhegde.github.io/scruple](https://thedhruvhegde.github.io/scruple/) · [results](https://thedhruvhegde.github.io/scruple/results/) · [paper](https://thedhruvhegde.github.io/scruple/paper/) · [pilot](https://thedhruvhegde.github.io/scruple/pilot/)
+site: [www.scrumple.org](https://www.scrumple.org/) · [results](https://www.scrumple.org/results/) · [paper](https://www.scrumple.org/paper/) · [pilot](https://www.scrumple.org/pilot/)
 
 train on it. evaluate on it. ship through it.
 
@@ -23,7 +23,7 @@ train on it. evaluate on it. ship through it.
 - claude haiku, sonnet and opus working simulated disputes: [engine/docs/results/MODEL_EPISODES.md](engine/docs/results/MODEL_EPISODES.md).
 - pre-registered experiments, e1 to e5, failures published: [engine/docs/experiments](engine/docs/experiments).
 - the maths: [engine/docs/math](engine/docs/math). the paper, by dhruv hegde: [engine/docs/paper/scruple_paper.pdf](engine/docs/paper/scruple_paper.pdf).
-- on the site: [results](https://thedhruvhegde.github.io/scruple/results/), with replays of every real model case and a leaderboard, [the paper](https://thedhruvhegde.github.io/scruple/paper/), and [the pilot](https://thedhruvhegde.github.io/scruple/pilot/).
+- on the site: [results](https://www.scrumple.org/results/), with replays of every real model case and a leaderboard, [the paper](https://www.scrumple.org/paper/), and [the pilot](https://www.scrumple.org/pilot/).
 - open models through real apis, many kinds of agents, z3 proofs of the money rules: [engine/README.md](engine/README.md).
 
 ## the site
