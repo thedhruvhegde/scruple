@@ -38,7 +38,7 @@ train on it. evaluate on it. ship through it.
 
 | panel | shows | kind |
 |---|---|---|
-| hero | an ocean scene, moving: whale shark, dolphins, reef fish | art |
+| hero | the earth from space, turning: three views | art |
 | 01 how it works | `scruple demo`, abridged | terminal |
 | 02 proof | loss per case by case type, good rule against bad | chart |
 | 03 red team | attacks breaking on a wall, the ledger untouched | art |
@@ -47,13 +47,13 @@ train on it. evaluate on it. ship through it.
 | 06 status | ledger rain, debits and credits | art |
 | footer | the mark in 3d, drag to turn | art |
 
-## the ocean
+## the earth
 
-- three scenes: a whale shark with a reef school and dolphins, a dolphin pod, and a reef school. `another scene` under the hero cycles through them.
-- every creature is a swimming silhouette: a dorsal and a ventral outline along the body, bent by a wave that grows toward the tail.
-- read back one cell at a time: how far inside a body the cell sits picks the glyph from a ramp sorted by ink, and a flicker keeps the bodies shimmering.
-- species and markings pick the colour: clownfish bands, a blue tang's stripe, the whale shark's spots, a dolphin's pale belly.
-- marine snow drifts down, bubbles rise and light shafts sweep through the water. `ocean.js` keeps the same api as `wonders.js`, which still drives the social images in `tools/`.
+- three views: the blue marble with the moon, the night side from low orbit with city lights and aurora, and an orbital sunrise. `another view` under the hero cycles through them.
+- the sphere is ray-cast once per character cell at layout time: each cell keeps its latitude, its longitude and how the sun and the eye see it. a frame only adds the spin, so turning the planet is a texture lookup per cell.
+- textures are built once at load: land from natural earth (public domain, via world-atlas, rasterised to 1024x512 and run-length packed into `globe.js`), biomes, city lights, and a domain-warped cloud deck that drifts slower than the ground.
+- light: lambert shading, a sun glint on the sea, a sunset band on the terminator, a blue atmosphere that glows past the limb. stars twinkle and drift, meteors fall, a satellite orbits and passes behind the planet.
+- the glyph ramp has no letters, so the planet reads as an image, not as text. `globe.js` keeps the same api as `ocean.js` and `wonders.js`; `wonders.js` still drives the social images in `tools/`.
 
 ## speed
 
