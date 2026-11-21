@@ -145,8 +145,6 @@
   // r: radius in U, where U is the screen's short side (capped for wide screens).
   const LIST = [
     { name: "the blue marble", place: "earth from 35,000 km, turning", r: 0.47, cx: 0.57, cy: 0.5, sun: [0.62, 0.38, 0.69], tilt: 0.38, pitch: 0.22, lon0: 25, spin: TAU / 48, halo: 0.05, moon: true, sat: true, meteors: true, aurora: true },
-    { name: "the night side", place: "city lights and aurora from low orbit", r: 1.0, cx: 0.63, cy: 1.12, sun: [0.95, 0.35, -0.3], tilt: 0.2, pitch: 0.5, lon0: 70, spin: TAU / 70, halo: 0.06, moon: false, sat: true, meteors: true, aurora: true },
-    { name: "orbital sunrise", place: "the terminator, from the space station's height", r: 2.3, cx: 0.46, top: 0.5, sunAt: [0.66, -0.04], tilt: -0.1, pitch: 0.3, lon0: 150, spin: TAU / 110, halo: 0.07, moon: false, sat: false, meteors: true },
   ];
 
   function make(index, C, R, cw, ch) {
