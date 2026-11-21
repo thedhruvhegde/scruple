@@ -106,9 +106,6 @@ body { counter-reset: fig; }
 .hero-cap { position: relative; z-index: 3; display: flex; align-items: center; gap: 8px 24px; flex-wrap: wrap; margin: 24px 0 0; padding-bottom: 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 16px; color: var(--muted); }
 .hero-cap .w-id { display: flex; align-items: baseline; gap: 1ch; flex-wrap: wrap; }
 .hero-cap .w-id b { color: var(--fg); font-weight: 600; font-size: 13px; text-transform: capitalize; }
-.w-pips { white-space: pre; color: var(--rule-strong); }
-.w-pips b { color: var(--brass) !important; font-size: inherit !important; }
-.w-pips i { font-style: normal; color: var(--fg); }
 /* the note keeps its line whole: when the row is too narrow it drops below the name, never cut off */
 .hero-cap .w-note { flex: 1 0 auto; display: flex; gap: 1ch; white-space: nowrap; }
 .hero-cap .w-note::before { content: "/"; content: "/" / ""; color: var(--rule-strong); }
@@ -267,9 +264,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       </div>
       <div class="screen hero" data-screen="wonder" data-head="wonder" role="img" id="hero-scr" aria-label="The earth seen from space, turning, drawn in moving text characters."></div>
       <div class="hero-cap">
-        <p class="w-id" aria-live="polite"><span class="w-pips" id="w-pips" aria-hidden="true"></span><b id="w-name">the blue marble</b> <span id="w-place"></span></p>
-        <p class="w-note">drawn in characters, a different view each visit</p>
-        <button type="button" class="btn" id="w-next">Another view</button>
+        <p class="w-id" aria-live="polite"><b id="w-name">the blue marble</b> <span id="w-place"></span></p>
+        <p class="w-note">drawn in characters</p>
       </div>
     </div>
   </section>
@@ -950,13 +946,9 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   function showWonder() {
     const w = Globe.list[WI];
     $("#w-name").textContent = w.name; $("#w-place").textContent = w.place;
-    // 01/03 [#--]: which scene is on the screen
-    const n = Globe.list.length, two = (x) => String(x).padStart(2, "0"), pips = $("#w-pips"), mk = (tag, txt) => { const e = document.createElement(tag); e.textContent = txt; return e; };
-    pips.replaceChildren(mk("i", `${two(WI + 1)}/${two(n)} `), "[" + "-".repeat(WI), mk("b", "#"), "-".repeat(n - 1 - WI) + "]");
     $("#hero-scr").setAttribute("aria-label", `${w.name}, ${w.place}, drawn in moving text characters.`);
   }
   showWonder();
-  $("#w-next").addEventListener("click", () => { WI = (WI + 1) % Globe.list.length; showWonder(); force = true; });
   $("#tamper").addEventListener("click", (e) => {
     tampered = !tampered; const b = e.currentTarget;
     b.setAttribute("aria-pressed", String(tampered)); b.textContent = tampered ? "Restore entry 14" : "Edit entry 14";

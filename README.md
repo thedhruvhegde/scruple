@@ -38,7 +38,7 @@ train on it. evaluate on it. ship through it.
 
 | panel | shows | kind |
 |---|---|---|
-| hero | the earth from space, turning: three views | art |
+| hero | the earth and the moon from space, turning | art |
 | 01 how it works | `scruple demo`, abridged | terminal |
 | 02 proof | loss per case by case type, good rule against bad | chart |
 | 03 red team | attacks breaking on a wall, the ledger untouched | art |
@@ -49,7 +49,7 @@ train on it. evaluate on it. ship through it.
 
 ## the earth
 
-- three views: the blue marble with the moon, the night side from low orbit with city lights and aurora, and an orbital sunrise. `another view` under the hero cycles through them.
+- one view: the blue marble with the moon, turning.
 - the sphere is ray-cast once per character cell at layout time: each cell keeps its latitude, its longitude and how the sun and the eye see it. a frame only adds the spin, so turning the planet is a texture lookup per cell.
 - textures are built once at load: land from natural earth (public domain, via world-atlas, rasterised to 1024x512 and run-length packed into `globe.js`), biomes, city lights, and a domain-warped cloud deck that drifts slower than the ground.
 - light: lambert shading, a sun glint on the sea, a sunset band on the terminator, a blue atmosphere that glows past the limb. stars twinkle and drift, meteors fall, a satellite orbits and passes behind the planet.
