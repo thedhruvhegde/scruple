@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Scruple</title>
+<title>Scruple: RL environments for agents that move money</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="color-scheme" content="only light">
-<meta name="description" content="Scruple: a simulator and verifiers for agents that move money.">
+<meta name="description" content="Scruple: RL environments and release gates for AI agents that move money. Seeded card disputes, ledger-graded verifiers, a CI gate.">
 <link rel="canonical" href="https://www.scrumple.org/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Scruple">
 <meta property="og:title" content="Scruple">
-<meta property="og:description" content="Scruple: a simulator and verifiers for agents that move money.">
+<meta property="og:description" content="Scruple: RL environments and release gates for AI agents that move money. Seeded card disputes, ledger-graded verifiers, a CI gate.">
 <meta property="og:url" content="https://www.scrumple.org/">
 <meta property="og:image" content="https://www.scrumple.org/assets/banners/og-1200x630.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Scruple">
-<meta name="twitter:description" content="Scruple: a simulator and verifiers for agents that move money.">
+<meta name="twitter:description" content="Scruple: RL environments and release gates for AI agents that move money. Seeded card disputes, ledger-graded verifiers, a CI gate.">
 <meta name="twitter:image" content="https://www.scrumple.org/assets/banners/og-1200x630.png">
 <link rel="icon" type="image/svg+xml" href="assets/logos/bone-on-night/mark.svg">
 <link rel="icon" type="image/png" sizes="1024x1024" href="assets/logos/bone-on-night/mark.png">
@@ -31,8 +31,8 @@
     var d = document.documentElement, run = false;
     try {
       run = !matchMedia("(prefers-reduced-motion: reduce)").matches && !navigator.webdriver && (window.scrollY || 0) < 40
-        && sessionStorage.getItem("scruple-intro") !== "seen";
-      if (run) sessionStorage.setItem("scruple-intro", "seen");
+        && sessionStorage.getItem("scruple-intro") !== "seen" && localStorage.getItem("scruple-intro") !== "seen";
+      if (run) { sessionStorage.setItem("scruple-intro", "seen"); localStorage.setItem("scruple-intro", "seen"); }
     } catch (e) { run = false; }
     if (run) d.classList.add("intro");
   })();
@@ -41,7 +41,7 @@
 <style>
 /* Layout: full-bleed bands that alternate bone, deep pine, night blue and sand. Each band
    has a second, inset tone for panels so surfaces layer. Inside each band: words left (5/12),
-   a mounted screen right (7/12). One character field flies between screens as you scroll. */
+   a mounted screen right (7/12). One character field draws every screen in view. */
 
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased; }
@@ -53,6 +53,17 @@ a { color: inherit; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .page { max-width: 1240px; margin: 0 auto; }
 
+
+/* ---------- the top: what it is, who it is for, two ways in; the exchange beside it ---------- */
+.hero-top { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 32px 48px; align-items: center; padding-block: 48px 40px; }
+.hero-txt { display: grid; gap: 18px; }
+.hero-txt .kick { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.hero-txt h1 { font-family: var(--f-body); font-weight: 600; font-size: clamp(34px, 4.4vw, 56px); line-height: 1.04; letter-spacing: -0.015em; max-width: 17ch; }
+.hero-sub { font-size: 19px; line-height: 1.5; max-width: 52ch; color: var(--muted); }
+.hero-acts { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.hero-top .msgs { grid-template-columns: minmax(0, 1fr); padding-block: 0; gap: 12px; }
+.hero-top .msg p.say { font-size: clamp(17px, 1.55vw, 22px); }
+@media (max-width: 900px) { .hero-top { grid-template-columns: minmax(0, 1fr); padding-block: 32px 28px; } }
 
 /* ---------- messages ---------- */
 .msg { background: var(--panel); border: 1px solid var(--rule-strong); padding: 16px 18px 18px; display: grid; gap: 10px; min-width: 0; }
@@ -121,11 +132,11 @@ body { counter-reset: fig; }
 .row > * { min-width: 0; }
 .first .row { padding-top: 96px; }
 .lhs { display: grid; gap: 24px; align-content: start; }
-.lhs h2 { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-weight: 500; font-size: clamp(26px, 2.4vw, 32px); line-height: 1.125; letter-spacing: -0.02em; display: grid; gap: 16px; }
+.lhs h2 { font-family: var(--f-body); font-weight: 600; font-size: clamp(28px, 2.6vw, 36px); line-height: 1.08; letter-spacing: -0.01em; display: grid; gap: 16px; }
 /* the section label runs on as a character rule to the edge of its column: 02 / PROOF -------- */
-.lhs h2 .n { display: flex; gap: 1ch; font-size: 12px; line-height: 16px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; }
+.lhs h2 .n { font-family: var(--f-mono); font-variation-settings: "wdth" 80; display: flex; gap: 1ch; font-size: 12px; line-height: 16px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; }
 .lhs h2 .n::after { content: var(--dash); content: var(--dash) / ""; flex: 1; min-width: 0; overflow: hidden; color: var(--rule-strong); font-weight: 400; letter-spacing: 0; }
-.lhs .sum { font-size: 18px; line-height: 28px; max-width: 42ch; }
+.lhs .sum { font-size: 18px; line-height: 28px; max-width: 44ch; }
 .lhs .src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); }
 .kv { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); }
 .kv li { padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 15px; line-height: 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; }
@@ -185,6 +196,8 @@ ol.fl a::before { content: counter(fl, decimal-leading-zero) "  "; content: coun
 /* the last row is a ledger strip in characters: a ruler, the mark, then | cells | */
 .foot-row { position: relative; display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; padding-block: 32px 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
 .foot-row::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 0; left: 0; right: 0; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.foot-row a { text-decoration: none; }
+.foot-row a:hover, .foot-row a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
 .foot-mark { margin: 0; font: inherit; font-size: 11px; line-height: 1.2; color: var(--fg); flex: none; }
 .foot-mark b { color: var(--brass); font-weight: 600; }
 .ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; flex: 1; min-width: 0; }
@@ -242,7 +255,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
       <ul class="nav-sec" aria-label="On this page"><li><a href="#how" aria-label="How it works">How</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who" aria-label="Who it's for">Who</a></li><li><a href="#audit" aria-label="Audit trail">Audit</a></li><li><a href="#status">Status</a></li></ul>
-      <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li><li><a href="pilot/">Pilot</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="environments/">Environments</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li><li><a href="pilot/">Pilot</a></li></ul>
     </nav>
   </div>
   <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>
@@ -251,7 +264,13 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
 <main id="top">
   <section class="band" aria-labelledby="dlg-h">
     <div class="page">
-      <h1 id="dlg-h" class="sr">An agent says: I win 97% of disputes. Promote my new rule. Scruple answers: No. You filed 128 disputes you could never win.</h1>
+      <div class="hero-top">
+      <div class="hero-txt">
+        <p class="kick">RL environments · verifiers · release gate</p>
+        <h1 id="dlg-h">RL environments and release gates for AI agents that move money.</h1>
+        <p class="hero-sub">A seeded card-dispute simulator, 17 verifiers that score from the ledger instead of the agent's own report, and a CI gate that blocks a release if any case type gets worse.</p>
+        <p class="hero-acts"><a class="btn solid" href="environments/">Run the environment</a><a class="btn" href="pilot/">Book a pilot</a><a class="btn" href="paper/">Read the paper</a></p>
+      </div>
       <div class="msgs" aria-hidden="true">
         <div class="msg them" id="m-them">
           <div class="meta"><span class="av">A1</span><b>dispute-agent-01</b><time>14:02</time></div>
@@ -261,6 +280,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
           <div class="meta"><span class="av">S</span><b>scruple</b><time>14:02</time></div>
           <p class="say">No. You filed <b>128</b> disputes you could never win.</p>
         </div>
+      </div>
       </div>
       <div class="screen hero" data-screen="wonder" data-head="wonder" role="img" id="hero-scr" aria-label="The earth seen from space, turning, drawn in moving text characters."></div>
       <div class="hero-cap">
@@ -276,8 +296,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <h2 id="how-h"><span class="n">01 / HOW IT WORKS</span>Test what an agent learned before it touches money.</h2>
         <p class="sum">A simulator and a set of verifiers for agents that move money. Every stage is deterministic and leaves a record.</p>
         <ul class="kv wide">
-          <li><b>Simulate</b><span>Seeded disputes and a double-entry ledger, 8 case types.</span></li>
-          <li><b>Verify</b><span>Cost read from ledger postings, scored per case type.</span></li>
+          <li><b>Simulate</b><span>Seeded disputes on a double-entry ledger: 6 hidden case types across Visa and Mastercard reason codes.</span></li>
+          <li><b>Verify</b><span>17 checks score cost from ledger postings, per case type, never from the agent's report.</span></li>
           <li><b>Gate</b><span>Replay, canary, a named approver, rollback.</span></li>
         </ul>
         <p class="tri" aria-label="Train on it. Evaluate on it. Ship through it."><span>Train on it.</span><span>Evaluate on it.</span><span>Ship through it.</span></p>
@@ -348,7 +368,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
           <li><b>Builders</b><span>Test every release of a finance agent against the same cases.</span></li>
           <li><b>Banks</b><span>Approve agent changes with evidence a model-risk reviewer can read.</span></li>
         </ul>
-        <p class="src">Today: simulator, verifiers, gate for learned rules. Next: step-by-step RL environments, model and prompt changes.</p>
+        <p class="src">Today: the dispute RL environment, 17 verifiers and the release gate. Next: more money workflows, and gating model and prompt changes end to end.</p>
       </div>
       <div>
         <div class="screen panel" data-screen="torus" data-head="one loop" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
@@ -377,14 +397,14 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       <div class="lhs">
         <h2 id="st-h"><span class="n">06 / STATUS</span>Running today, next on the bench.</h2>
         <ul class="kv">
-          <li><span>Dispute simulator, 8 case types, double-entry ledger</span><b class="ok">shipped</b></li>
-          <li><span>Ledger, outcome and policy verifiers, 10 attack tests</span><b class="ok">shipped</b></li>
-          <li><span>Replay, canary, approval, rollback, audit, reports</span><b class="ok">shipped</b></li>
-          <li><span>Step-by-step environments for RL training</span><b>next</b></li>
-          <li><span>Reconciliation workflow</span><b>next</b></li>
-          <li><span>Gate model, prompt and tool changes</span><b>next</b></li>
+          <li><span>Dispute RL environment: 6 case types, 12 agent tools, double-entry ledger</span><b class="ok">shipped</b></li>
+          <li><span>17 episode verifiers, 12 exploit suites, published findings</span><b class="ok">shipped</b></li>
+          <li><span>Python API, MCP server, harness for 9 model providers</span><b class="ok">shipped</b></li>
+          <li><span>Replay, canary, approval, rollback, audit, evidence packs</span><b class="ok">shipped</b></li>
+          <li><span>ACH, reconciliation and AML environments</span><b>beta</b></li>
+          <li><span>Gymnasium and rubric adapters, model and prompt gating</span><b>next</b></li>
         </ul>
-        <p class="src">Reference implementation v0.1.0, 93 tests. The CLI answers to scruple and agent-gate.</p>
+        <p class="src">Reference implementation v0.1.0, 8,500+ tests. The CLI answers to scruple and agent-gate.</p>
       </div>
       <div>
         <div class="screen panel" data-screen="rain" data-head="ledger rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
@@ -408,7 +428,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       </div>
       <nav class="foot-nav" aria-label="Footer">
         <div><p class="fh">on this page</p><ol class="fl"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ol></div>
-        <div><p class="fh">pages</p><ul class="fl"><li><a class="pg" href="results/">Results</a></li><li><a class="pg" href="paper/">Paper</a></li><li><a class="pg" href="pilot/">Pilot</a></li></ul></div>
+        <div><p class="fh">pages</p><ul class="fl"><li><a class="pg" href="environments/">Environments</a></li><li><a class="pg" href="results/">Results</a></li><li><a class="pg" href="paper/">Paper</a></li><li><a class="pg" href="pilot/">Pilot</a></li></ul></div>
         <div><p class="fh">back</p><ul class="fl"><li><a href="#top">Top of the page</a></li></ul></div>
       </nav>
       <div class="foot-row">
@@ -419,6 +439,9 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     /____\</pre>
         <ul class="ledger">
           <li>Scruple</li>
+          <li>Built by Dhruv Hegde, CS and Math, University of Michigan</li>
+          <li><a href="mailto:dhegde@umich.edu">dhegde@umich.edu</a></li>
+          <li><a href="https://github.com/thedhruvhegde/scruple">GitHub</a></li>
           <li>Synthetic data only. No customer data.</li>
           <li>Hero art: the earth from space, turning, drawn in characters. Land outlines from Natural Earth (public domain).</li>
         </ul>
@@ -657,6 +680,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       s.ox = (r.width - s.C * s.cw) / 2; s.oy = (r.height - s.R * s.ch) / 2; s.cache = null; s.static = null; s.grid = null; s.poses = null;
     }
     buildAtlas();
+    if (screens[0] && screens[0].kind === "wonder") atmosphere(screens[0]);
   }
   let frameNo = 0;
   const PRESORTED = { wonder: 1 };
@@ -703,12 +727,30 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   function drawScreen(s, t) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (const c of cellsOf(s, t)) emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); }
   // corner ticks frame every screen but the hero, settled or in flight: four atlas glyphs each
   function corners(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, x1 = x0 + (s.C - 1) * s.cw, y1 = y0 + (s.R - 1) * s.ch; emit(s.sz, x0, y0, 43, 1); emit(s.sz, x1, y0, 43, 1); emit(s.sz, x0, y1, 43, 1); emit(s.sz, x1, y1, 43, 1); }
-  function idleDots(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (let r = 1; r < s.R; r += 4) for (let c = 2; c < s.C; c += 8) emit(s.sz, x0 + c * s.cw, y0 + r * s.ch, 46, 1); }
+  /* ---------- the hero glows: a soft bloom of its own glyphs, and an atmosphere behind the globe ---------- */
+  const GLOW = "filter" in ctx;
+  function glow(s) {
+    if (!GLOW || !visible(s.rect)) return;
+    const r = s.rect, dpr = cv.width / W;
+    const x = Math.max(0, r.left), y = Math.max(0, r.top), w = Math.min(W, r.right) - x, h = Math.min(H, r.bottom) - y;
+    if (w <= 0 || h <= 0) return;
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.beginPath(); ctx.rect(x * dpr, y * dpr, w * dpr, h * dpr); ctx.clip();
+    ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.32; ctx.filter = `blur(${Math.round(5 * dpr)}px)`;
+    ctx.drawImage(cv, x * dpr, y * dpr, w * dpr, h * dpr, x * dpr, y * dpr, w * dpr, h * dpr);
+    ctx.restore();
+  }
+  function atmosphere(s) {
+    // where globe.js puts the blue marble: centre (0.57, 0.5) of the grid, radius 0.47 U
+    const Wp = s.C * s.cw, Hp = s.R * s.ch, U = Math.min(Hp, Wp / 1.7), r = 0.47 * U;
+    const gx = s.ox + 0.57 * Wp, gy = s.oy + 0.5 * Hp;
+    s.el.style.background = `radial-gradient(circle at ${gx.toFixed(0)}px ${gy.toFixed(0)}px, rgba(40, 110, 230, 0.07) 0, rgba(40, 110, 230, 0.07) ${(r * 0.82).toFixed(0)}px, rgba(70, 165, 255, 0.2) ${(r * 1.01).toFixed(0)}px, rgba(50, 120, 240, 0.07) ${(r * 1.14).toFixed(0)}px, transparent ${(r * 1.4).toFixed(0)}px), var(--scr-bg)`;
+  }
 
   /* ---------- intro: a chat, then the earth takes the screen ---------- */
   const introOn = root.classList.contains("intro");
   const I = { t0: 0, done: !introOn, full: null, stage: -1 };
-  const TL = { typingA: 0.35, msgA: 1.25, typingB: 2.15, msgB: 2.95, strike: 4.15, take: 4.85, sweep: 1.0, hold: 6.35, collapse: 1.3 };
+  const TL = { typingA: 0.15, msgA: 0.55, typingB: 1.05, msgB: 1.4, strike: 2.1, take: 2.5, sweep: 0.7, hold: 3.4, collapse: 0.9 };
   const T_END = TL.hold + TL.collapse + 0.1;
   const chatBody = $("#chat-body");
   const themMsg = $("#m-them").cloneNode(true), usMsg = $("#m-us").cloneNode(true);
@@ -810,13 +852,6 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     for (let j = last; j > 0 && anchors[j] > max; j--) anchors[j] = Math.max(anchors[j - 1] + 1, max - (last - j));
     return anchors;
   }
-  function progress() {
-    const sy = scrollY, anchors = anchorsAt(sy), last = screens.length - 1;
-    if (sy >= anchors[last]) return [last, 0];
-    if (sy <= anchors[0]) return [0, 0];
-    let i = 0; while (i < last - 1 && sy >= anchors[i + 1]) i++;
-    return [i, clamp01((sy - anchors[i]) / (anchors[i + 1] - anchors[i]))];
-  }
 
   /* ---------- nav jumps land where the target screen has fully settled ---------- */
   // A plain anchor jump stops the scroll between two screens, mid-flight. Land at the
@@ -903,35 +938,16 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     for (const s of screens) s.rect = s.el.getBoundingClientRect();
     if (!I.done && introFrame(now)) { flush(); requestAnimationFrame(frame); return; }
     if (!I.done) { flush(); requestAnimationFrame(frame); return; }
-    let [i, p] = progress();
-    p = clamp01((p - 0.1) / 0.8);
-    if (p >= 1) { i++; p = 0; }   // fully arrived: draw the next screen itself, not the flight
-    if (reduce) { if (p >= 0.5) i++; p = 0; }
-    if (i >= screens.length) i = screens.length - 1;
-    for (let j = 0; j < screens.length; j++) { const s = screens[j]; if (!visible(s.rect)) continue; if (j) corners(s); if (!(j === i || (p > 0 && j === i + 1))) idleDots(s); }
-    if (i === 0 && p === 0 && I.done && tick !== stir.tick) { stir.tick = tick; stirStep(screens[0]); }
-    else if (i !== 0 || p > 0) stirClear();
-    if (p === 0) { const s = screens[i]; if (visible(s.rect)) { if (i === 0 && stir.live.length) drawStirred(s, ta, tick); else drawScreen(s, ta); } }
-    else {
-      const A = screens[i], B = screens[i + 1], ca = cellsOf(A, ta), cb = cellsOf(B, ta);
-      const ax = A.rect.left + A.ox, ay = A.rect.top + A.oy, bx = B.rect.left + B.ox, by = B.rect.top + B.oy;
-      const n = Math.max(ca.length, cb.length), na = ca.length, nb = cb.length, stride = Math.max(1, Math.ceil(n / 4500));
-      for (let k = 0; k < n; k += stride) {
-        // map indices proportionally so both screens drain and fill across their full width
-        const a = na ? ca[Math.floor(k * na / n)] : null, b = nb ? cb[Math.floor(k * nb / n)] : null;
-        const shareA = na >= nb || k * na / n % 1 < na / n, shareB = nb >= na || k * nb / n % 1 < nb / n;
-        const u = a ? a.u : b.u, e = ease(clamp01((p - u * 0.35) / 0.65));
-        if ((!shareA && e < 0.5) || (!shareB && e > 0.5)) continue;
-        const pa = [ax + a.c * A.cw, ay + a.r * A.ch], pb = [bx + b.c * B.cw, by + b.r * B.ch];
-        const arc = Math.sin(Math.PI * e) * (hash(k, 7) - 0.5) * 160, x = pa[0] + (pb[0] - pa[0]) * e + arc, y = pa[1] + (pb[1] - pa[1]) * e;
-        if (y < -20 || y > H + 20) continue;
-        let kk, col, sz = e < 0.5 ? A.sz : B.sz;
-        if (e < 0.14) { kk = a.k; col = a.col; } else if (e > 0.86) { kk = b.k; col = b.col; }
-        else { kk = CODE.charCodeAt(Math.floor(hash(k, Math.floor(e * 14)) * CODE.length)); col = hash(k, 3) < 0.15 ? 3 : hash(k, 4) < 0.5 ? 5 : 2; }
-        emit(sz, x, y, kk, col);
-      }
+    // every screen in view draws itself; the hero stirs under the pointer and glows
+    const hero = screens[0];
+    if (visible(hero.rect) && !reduce) { if (tick !== stir.tick) { stir.tick = tick; stirStep(hero); } } else stirClear();
+    for (let j = 0; j < screens.length; j++) {
+      const s = screens[j]; if (!visible(s.rect)) continue;
+      if (j) corners(s);
+      if (j === 0 && stir.live.length) drawStirred(s, ta, tick); else drawScreen(s, ta);
     }
     flush();
+    glow(hero);
     requestAnimationFrame(frame);
   }
 

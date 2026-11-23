@@ -133,6 +133,12 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 /* ---------- character rules between bands, as results/ ---------- */
 main > .band { position: relative; }
 main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+
+/* headings in the body face, labels stay mono (matches home and environments/) */
+.lhs h2, h1.big { font-family: var(--f-body); font-weight: 600; letter-spacing: -0.01em; }
+h1.big { font-size: clamp(32px, 4.2vw, 48px); line-height: 1.06; }
+.lhs h2 { font-size: clamp(26px, 2.6vw, 34px); }
+.lhs h2 .n, h1.big .n { font-family: var(--f-mono); font-variation-settings: "wdth" 80; }
 </style>
 </head>
 <body>
@@ -156,7 +162,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
       <ul class="nav-sec" aria-label="On this page"><li><a href="#get" aria-label="What you get">Get</a></li><li><a href="#weeks" aria-label="Six weeks">Weeks</a></li><li><a href="#give" aria-label="What you provide">Provide</a></li><li><a href="#contact">Contact</a></li></ul>
-      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="../results/">Results</a></li><li><a href="../paper/">Paper</a></li><li><a href="./" aria-current="page">Pilot</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="../environments/">Environments</a></li><li><a href="../results/">Results</a></li><li><a href="../paper/">Paper</a></li><li><a href="./" aria-current="page">Pilot</a></li></ul>
     </nav>
   </div>
   <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>

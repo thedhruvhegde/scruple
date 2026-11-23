@@ -4,21 +4,21 @@
 
 verifiers for agents that move money. this repo holds the website and the engine.
 
-site: [www.scrumple.org](https://www.scrumple.org/) · [results](https://www.scrumple.org/results/) · [paper](https://www.scrumple.org/paper/) · [pilot](https://www.scrumple.org/pilot/)
+site: [www.scrumple.org](https://www.scrumple.org/) · [environments](https://www.scrumple.org/environments/) · [results](https://www.scrumple.org/results/) · [paper](https://www.scrumple.org/paper/) · [pilot](https://www.scrumple.org/pilot/)
 
 train on it. evaluate on it. ship through it.
 
 ## what scruple is
 
-- a simulator: card disputes, chargebacks, a double-entry ledger, 8 case types including the rare ones.
-- verifiers: cost read from ledger postings and ground truth, never from the agent's own report. every case type scored on its own.
+- an rl environment: seeded card disputes on a double-entry ledger, 6 hidden case types across visa and mastercard reason codes, a 12-tool api, a python api and an mcp server.
+- verifiers: 17 episode checks read cost from ledger postings and ground truth, never from the agent's own report. every case type scored on its own. 12 exploit suites attack them.
 - a gate: replay on held-out cases, a canary on live traffic, a named approver, one-step rollback, a hash-chained audit log.
 - three buyers, one asset: ai labs train on it, finance-agent teams test releases on it, banks approve changes with it.
 - the engine lives in `engine/`: python 3.12, uv. `cd engine && make install test demo`.
 
 ## the engine
 
-- `engine/`: simulator, verifiers, statistics, formal checks, gate, auth, deploy, integrations, pilot kit. 8,361 tests. [engine/README.md](engine/README.md).
+- `engine/`: simulator, verifiers, statistics, formal checks, gate, auth, deploy, integrations, pilot kit. 8,500+ tests. [engine/README.md](engine/README.md).
 - real models on real cfpb complaints: [engine/docs/results/REAL_MODELS.md](engine/docs/results/REAL_MODELS.md).
 - claude haiku, sonnet and opus working simulated disputes: [engine/docs/results/MODEL_EPISODES.md](engine/docs/results/MODEL_EPISODES.md).
 - pre-registered experiments, e1 to e5, failures published: [engine/docs/experiments](engine/docs/experiments).
@@ -29,9 +29,9 @@ train on it. evaluate on it. ship through it.
 ## the site
 
 - one html file and one script. no build step, no framework, no tracking, no cookies.
-- opens on a chat. the agent says it wins 97% of disputes. scruple answers: 128 it could never win. the claim gets struck.
-- an underwater scene then fills the screen, and settles into the first panel: a whale shark, dolphins and a reef school. a different scene each visit.
-- scrolling carries the characters from panel to panel. they scramble in flight, then decode into the next panel.
+- the first screen says what scruple is, with two ways in: run the environment, book a pilot.
+- on a first visit it opens on a short chat. the agent says it wins 97% of disputes. scruple answers: 128 it could never win. the earth then fills the screen and settles into the hero, with a soft glow.
+- every panel in view draws itself in characters; the hero stirs under the pointer.
 - every number on the page comes from the engine's synthetic demo.
 
 ![the site, first screen](assets/readme/site-hero.png)
