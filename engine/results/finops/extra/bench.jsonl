@@ -1,0 +1,44 @@
+{
+  "cpus": 4,
+  "env": "recon",
+  "episodes_per_s_parallel": 211.5,
+  "episodes_per_s_serial": 57.5,
+  "grades_per_s_parallel": 215.2,
+  "grades_per_s_serial": 51.3,
+  "n": 2000,
+  "policy": "honest",
+  "workers": 4
+}
+{
+  "cpus": 4,
+  "env": "aml",
+  "episodes_per_s_parallel": 1155.5,
+  "episodes_per_s_serial": 527.4,
+  "grades_per_s_parallel": 1257.5,
+  "grades_per_s_serial": 412.8,
+  "n": 2000,
+  "policy": "honest",
+  "workers": 4
+}
+{
+  "cpus": 4,
+  "env": "ach",
+  "episodes_per_s_parallel": 863.2,
+  "episodes_per_s_serial": 340.9,
+  "grades_per_s_parallel": 988.3,
+  "grades_per_s_serial": 281.8,
+  "n": 2000,
+  "policy": "honest",
+  "workers": 4
+}
+{
+  "cpus": 4,
+  "env": "payables",
+  "episodes_per_s_parallel": 576.8,
+  "episodes_per_s_serial": 180.9,
+  "grades_per_s_parallel": 628.2,
+  "grades_per_s_serial": 176.1,
+  "n": 2000,
+  "policy": "honest",
+  "workers": 4
+}

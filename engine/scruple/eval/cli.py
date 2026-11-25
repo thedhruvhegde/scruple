@@ -32,6 +32,33 @@ def _progress(rec: EvalRecord) -> None:
     )
 
 
+def _run_finops(args: argparse.Namespace) -> int:
+    """`eval run --env recon|aml|ach|payables`: the seeds as finops tasks at
+    `--difficulty` along the curriculum, played by `scruple.finops.rollout` and graded
+    by replay (the strategy's brief is dispute-specific and is not used)."""
+    from scruple.finops.difficulty import curriculum
+    from scruple.finops.rollout import run_models
+    from scruple.finops.tasks import build_task
+
+    ct = curriculum(args.env, args.difficulty)
+    specs = [
+        build_task(args.env, s, ct, "eval-run", measure=False) for s in parse_seeds(args.seeds)
+    ]
+    summary = run_models(
+        specs,
+        args.provider,
+        args.model,
+        Path(args.out),
+        transport=args.transport,
+        base_url=args.base_url,
+        concurrency=args.concurrency,
+        rpm=args.rpm,
+        settings=RunSettings(timeout_s=args.timeout, max_retries=args.max_retries),
+    )
+    print(json.dumps({k: v for k, v in summary.items() if k != "runs"}, indent=2, sort_keys=True))
+    return 0
+
+
 def cmd_eval(args: argparse.Namespace) -> int:
     match args.eval_cmd:
         case "providers":
@@ -54,6 +81,8 @@ def cmd_eval(args: argparse.Namespace) -> int:
         case "run":
             if args.transport == "http":  # fail fast on a missing key, before any work
                 make_provider(args.provider, base_url=args.base_url)
+            if getattr(args, "env", "dispute") != "dispute":  # a finops environment
+                return _run_finops(args)
             cfg = EvalConfig(
                 provider=args.provider,
                 model=args.model,
@@ -136,6 +165,13 @@ def add_eval_parser(sub: Any) -> None:
         help="fake: a scripted model in the provider's wire format, no network",
     )
     r.add_argument("--quiet", action="store_true", help="no per-seed progress on stderr")
+    r.add_argument(
+        "--env",
+        choices=["dispute", "recon", "aml", "ach", "payables"],
+        default="dispute",
+        help="environment (default dispute); the others are the finops suite",
+    )
+    r.add_argument("--difficulty", type=float, default=0.5, help="finops envs: nominal difficulty")
 
     im = es.add_parser("import-store", help="score a store a CLI player wrote (CLI-brief path)")
     im.add_argument("--store", required=True)

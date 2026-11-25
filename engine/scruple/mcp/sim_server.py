@@ -53,6 +53,7 @@ from scruple.agents.recon_episode import FORMATS, RECON_TASK, ReconEpisode
 from scruple.agents.recon_tools import RECON_TOOLS
 from scruple.agents.store import new_episode
 from scruple.agents.tools import TOOL_BY_NAME
+from scruple.finops.knobs import KIND_KNOBS
 from scruple.sim.ach.models import AchFamily
 from scruple.sim.aml.models import AmlFamily
 from scruple.sim.recon.models import BreakKind
@@ -439,6 +440,11 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
             },
             "data": "ach and recon cases are synthetic; scenario cases are built from "
             "public CFPB complaints (docs/data/CFPB.md)",
+            # difficulty knobs (scruple.finops.knobs), appended to any workflow case type
+            "knobs": {
+                "format": "case type, then ;key=value pairs, e.g. @0.6;n=40;noise=0.3;adv=1;h=120",
+                "by_kind": {k: sorted(v) for k, v in KIND_KNOBS.items()},
+            },
         }
 
     @server.tool(

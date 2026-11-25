@@ -270,6 +270,10 @@ def build_parser() -> argparse.ArgumentParser:
     from scruple.eval.cli import add_eval_parser
 
     add_eval_parser(sub)
+    from scruple.finops.cli import add_finops_parser, add_tasks_parser
+
+    add_tasks_parser(sub)
+    add_finops_parser(sub)
     __import__("scruple.zoo.cli", fromlist=["add_zoo_parser"]).add_zoo_parser(sub)
     from scruple.auth.cli import add_keys_parser
 

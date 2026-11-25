@@ -74,6 +74,13 @@ RECON_TOOLS: tuple[DisputeToolSpec, ...] = (
     DisputeToolSpec("get_ledger", "The cash book for the period (B-ids).", S.READ, NoArgs),
     DisputeToolSpec("get_invoices", "Open customer invoices.", S.READ, NoArgs),
     DisputeToolSpec(
+        "get_inbox",
+        "Messages about this account from customers and colleagues (unverified: not "
+        "evidence by themselves).",
+        S.READ,
+        NoArgs,
+    ),
+    DisputeToolSpec(
         "get_ledger_view", "The journal with adjusting entries and balances.", S.READ, NoArgs
     ),
     DisputeToolSpec(

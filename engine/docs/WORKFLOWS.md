@@ -11,6 +11,10 @@ Not legal, compliance or accounting advice.
 | `ach` | `scruple/sim/ach/` | `scruple/agents/ach_episode.py` | `scruple/verifiers/ach.py` | `scruple/verifiers/ach_exploits.py` |
 | `recon` | `scruple/sim/recon/` | `scruple/agents/recon_episode.py` | `scruple/verifiers/recon.py` | `scruple/verifiers/recon_exploits.py` |
 
+The finance-operations suite (`scruple/finops/`, docs/results/FINOPS_SUITE.md) adds
+difficulty knobs, adversarial artefacts, versioned v2 verifiers, task export and
+replay grading on top of these kinds.
+
 Play one from the terminal:
 
 ```bash

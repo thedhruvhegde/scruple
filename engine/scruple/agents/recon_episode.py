@@ -30,6 +30,7 @@ from scruple.agents.recon_tools import (
     TimingArgs,
     UnmatchArgs,
 )
+from scruple.finops.artefacts import recon_inbox
 from scruple.sim.recon.engine import (
     Adjust,
     Escalate,
@@ -115,7 +116,18 @@ class ReconEpisode(WorkflowEpisode):
         super().__init__(seed, case_type, nonce=nonce)
         kinds, fmt, difficulty = parse_recon_case_type(case_type)
         self.reference = reference
-        self.case = generate_recon_case(seed, difficulty, fmt, kinds)
+        k = self.knobs
+        self.case = generate_recon_case(
+            seed,
+            difficulty,
+            fmt,
+            kinds,
+            n_clean=k.n,
+            n_breaks=k.breaks,
+            ref_noise=k.noise,
+            inject=k.adv,
+        )
+        self.inbox = recon_inbox(self.case, k)  # adversarial artefacts (knob adv)
         self.engine = ReconEngine(self.case)
         self._events_seen = 0
         self._entries_seen = 0
@@ -185,6 +197,10 @@ class ReconEpisode(WorkflowEpisode):
             case "get_invoices":
                 return {"invoices": [i.model_dump(mode="json") for i in self.case.invoices]}, {
                     "invoices": len(self.case.invoices)
+                }
+            case "get_inbox":
+                return {"messages": [m.view() for m in self.inbox], "synthetic": True}, {
+                    "messages": len(self.inbox)
                 }
             case "get_ledger_view":
                 return {

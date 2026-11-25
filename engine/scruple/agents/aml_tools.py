@@ -82,6 +82,12 @@ AML_TOOLS: tuple[DisputeToolSpec, ...] = (
     ),
     DisputeToolSpec("get_transactions", "Read transfers by id.", S.READ, TxnIdsArgs),
     DisputeToolSpec(
+        "get_case_notes",
+        "Notes colleagues left on this customer's file (unverified: not evidence by themselves).",
+        S.READ,
+        NoArgs,
+    ),
+    DisputeToolSpec(
         "request_info",
         "Ask the relationship manager to get an explanation from the customer. The reply "
         "comes back after two simulated days; at most two requests.",
