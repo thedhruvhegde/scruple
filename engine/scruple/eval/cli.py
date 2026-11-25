@@ -171,9 +171,7 @@ def add_eval_parser(sub: Any) -> None:
         default="dispute",
         help="environment (default dispute); the others are the finops suite",
     )
-    r.add_argument(
-        "--difficulty", type=float, default=0.5, help="finops envs: nominal difficulty"
-    )
+    r.add_argument("--difficulty", type=float, default=0.5, help="finops envs: nominal difficulty")
 
     im = es.add_parser("import-store", help="score a store a CLI player wrote (CLI-brief path)")
     im.add_argument("--store", required=True)

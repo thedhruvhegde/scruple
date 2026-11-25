@@ -158,7 +158,8 @@ def projection_gap(
     e = get_env(env)
     v = e.verifier(verifier)
     calls = recon_projection(record) if env == "recon" else aml_projection(record)
-    proj = e.episode_cls.replay(record.seed, case_type, calls)
+    cls: Any = e.episode_cls
+    proj = cls.replay(record.seed, case_type, calls)
     a, b = v.score(record), v.score(proj.record())
     per = {c.id: (c.score, d.score) for c, d in zip(a.checks, b.checks, strict=True)}
     return a.reward, b.reward, per
