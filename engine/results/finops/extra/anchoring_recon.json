@@ -1,0 +1,9 @@
+{
+  "check_decreases_on_projection": {},
+  "env": "recon",
+  "episodes": 12800,
+  "episodes_reward_above_projection": 0,
+  "max_gap": 0.0,
+  "mean_gap": -0.189114,
+  "policies": 128
+}

@@ -211,9 +211,10 @@ truth-endorsed entries, but its matches may be unendorsed.
 
 **Conjecture 4c.** On the generator's support, REC-TIE2 is anchored too, so the
 recon@2 gap is 0. Evidence: the honest projection was computed for every policy of
-the knob grid (128 recon policies, exploit knobs included) on the dev seeds; see
-"Anchoring check" in FINOPS_SUITE.md for the largest observed `reward(R) -
-reward(pi(R))` and the per-check violations.
+the knob grid except `peek` (128 recon policies, exploit knobs included) on dev seeds
+0-99: 12,800 episodes, largest observed `reward(R) - reward(pi(R))` = 0, and REC-TIE2
+never scored lower on a projection (FINOPS_SUITE.md, section 3.7). On aml@2 (proved
+gap 0) the same check over 256 policies x 300 seeds found gap 0, as it must.
 
 What Theorem 4 says operationally: **abstention weakly dominates guessing**. A policy
 that cannot justify an entry loses nothing (beyond the `N` share) by escalating
@@ -267,13 +268,15 @@ The same holds for the recon `noise` knob (each statement line is mangled iff
 "artefact-blind" replaced by "reference-normalising": the normalising honest policy's
 reward is invariant in `noise` (Proposition 5(2) with the mangling undone).
 
-Hypothesis 3's monotonicity is a property of the policy, not of the environment. The
-results file reports, for the credulous policy, how often it fails on individual
-seeds when `adv` steps up.
+Hypothesis 3's monotonicity is a property of the policy, not of the environment. On
+1,000 seeds the recon credulous policy satisfied it on every seed (0 of 4,000 steps
+up); the aml credulous policy did not (296 of 4,000 steps up; its mean rises from
+adv 0.75 to 1), so part (3) says nothing about it.
 
 **Conjecture 6 (nominal difficulty orders imperfect policies).** For the panel of
 imperfect honest policies (`scruple/finops/difficulty.py:PANELS`), mean reward is
-non-increasing in nominal difficulty along the curriculum. *Status:* not provable
+non-increasing in nominal difficulty along the curriculum. *Status:* **refuted** for
+the recon novice (flat to rising, Spearman +0.08 on 1,000 seeds) and not provable
 from the construction (the counts `n` and `breaks` change the main generator stream,
 so there is no coupling). Evidence and counterexamples (the novice recon policy's
 reward is flat or rising with difficulty, because more clean pairs raise its

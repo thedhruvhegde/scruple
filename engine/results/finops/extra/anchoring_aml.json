@@ -1,0 +1,9 @@
+{
+  "check_decreases_on_projection": {},
+  "env": "aml",
+  "episodes": 76800,
+  "episodes_reward_above_projection": 0,
+  "max_gap": 0.0,
+  "mean_gap": -0.102127,
+  "policies": 256
+}
