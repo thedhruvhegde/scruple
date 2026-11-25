@@ -112,7 +112,9 @@ body { counter-reset: fig; }
 .scr-cap > span:last-child { order: 3; flex: none; white-space: nowrap; }
 .scr-cap::after { content: var(--dots); content: var(--dots) / ""; order: 2; flex: 1; min-width: 2ch; overflow: hidden; white-space: nowrap; color: var(--rule-strong); }
 .scr-cap b { color: var(--fg); font-weight: 600; }
-@media (max-width: 760px) { .scr-cap { flex-wrap: wrap; } .scr-cap::after { display: none; } .scr-cap > span:first-child::before { display: block; } .scr-cap > span:last-child { flex-basis: 100%; } }
+/* narrower: the caption and its source stack, rather than squeezing the dot leader into a broken line */
+@media (max-width: 1200px) { .scr-cap { flex-wrap: wrap; } .scr-cap::after { display: none; } .scr-cap > span:last-child { flex-basis: 100%; } }
+@media (max-width: 760px) { .scr-cap > span:first-child::before { display: block; } }
 /* under the hero: 01/03 [#--] whale shark ningaloo reef, australia .... drawn in characters ....... [ Another scene ] */
 .hero-cap { position: relative; z-index: 3; display: flex; align-items: center; gap: 8px 24px; flex-wrap: wrap; margin: 24px 0 0; padding-bottom: 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; line-height: 16px; color: var(--muted); }
 .hero-cap .w-id { display: flex; align-items: baseline; gap: 1ch; flex-wrap: wrap; }
@@ -154,7 +156,8 @@ body { counter-reset: fig; }
 .tri { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; border: 1px solid var(--rule-strong); font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 14px; }
 .tri span { padding: 8px 16px; border-right: 1px solid var(--rule-strong); }
 .tri span:last-child { border-right: 0; background: var(--accent); color: var(--on-accent); }
-@media (max-width: 600px) { .tri { flex-direction: column; width: 100%; } .tri span { border-right: 0; border-bottom: 1px solid var(--rule-strong); } .tri span:last-child { border-bottom: 0; } }
+/* stacked where the row would wrap into an uneven second line: phones, and the narrow two-column layout */
+@media (max-width: 600px), (min-width: 901px) and (max-width: 1200px) { .tri { flex-direction: column; width: 100%; } .tri span { border-right: 0; border-bottom: 1px solid var(--rule-strong); } .tri span:last-child { border-bottom: 0; } }
 
 .tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); padding: 4px 20px 8px; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -258,7 +261,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
     <nav class="nav" id="nav" aria-label="Site">
       <ul class="nav-sec" aria-label="On this page"><li><a href="#how" aria-label="How it works">How</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who" aria-label="Who it's for">Who</a></li><li><a href="#audit" aria-label="Audit trail">Audit</a></li><li><a href="#status">Status</a></li></ul>
-      <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="environments/">Environments</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li><li><a href="pilot/">Pilot</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="./" aria-current="page">Home</a></li><li><a href="environments/">Environments</a></li><li><a href="results/">Results</a></li><li><a href="paper/">Paper</a></li><li><a href="pilot/">Pilot</a></li><li><a href="deck/">Deck</a></li></ul>
     </nav>
   </div>
   <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>
@@ -431,7 +434,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       </div>
       <nav class="foot-nav" aria-label="Footer">
         <div><p class="fh">on this page</p><ol class="fl"><li><a href="#how">How it works</a></li><li><a href="#proof">Proof</a></li><li><a href="#redteam">Red team</a></li><li><a href="#who">Who it's for</a></li><li><a href="#audit">Audit trail</a></li><li><a href="#status">Status</a></li></ol></div>
-        <div><p class="fh">pages</p><ul class="fl"><li><a class="pg" href="environments/">Environments</a></li><li><a class="pg" href="results/">Results</a></li><li><a class="pg" href="paper/">Paper</a></li><li><a class="pg" href="pilot/">Pilot</a></li></ul></div>
+        <div><p class="fh">pages</p><ul class="fl"><li><a class="pg" href="environments/">Environments</a></li><li><a class="pg" href="results/">Results</a></li><li><a class="pg" href="paper/">Paper</a></li><li><a class="pg" href="pilot/">Pilot</a></li><li><a class="pg" href="deck/">Deck</a></li></ul></div>
         <div><p class="fh">back</p><ul class="fl"><li><a href="#top">Top of the page</a></li></ul></div>
       </nav>
       <div class="foot-row">
@@ -733,8 +736,9 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     const h = (k) => hash(n * 7 + lane, k);
     if (lane === 0) {
       const ct = CTYPES[Math.floor(h(1) * CTYPES.length)], rw = 0.2 + h(2) * 0.79, flag = h(3) > 0.82;
-      return [T(`ep-${hex(n, 11)}  `, 14), T(pad(w ? ct : ct.replace(/_/g, " ").slice(0, 11), w ? 17 : 12)), T("reward ", 14), T(rw.toFixed(2), flag ? 4 : 2),
-        T(flag ? (w ? "  flag: claimed_cost_mismatch" : "  flagged") : (w ? "  17/17 verifiers, ledger ok" : "  ledger ok"), flag ? 4 : 14)];
+      // narrow screens keep the case name whole and drop the "ledger ok" column, so the line has air
+      return [T(`ep-${hex(n, 11)}  `, 14), T(pad(w ? ct : ct === "not_as_described" ? "not as descr." : ct.replace(/_/g, " "), w ? 17 : 16)), T("reward ", 14), T(rw.toFixed(2), flag ? 4 : 2),
+        T(flag ? (w ? "  flag: claimed_cost_mismatch" : "  flag") : (w ? "  17/17 verifiers, ledger ok" : ""), flag ? 4 : 14)];
     }
     if (lane === 1) {
       const bad = h(4) > 0.78, worst = bad ? (1 + h(5) * 11).toFixed(2) : "0.00";
@@ -847,7 +851,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   function ledger(s, t) {
     const C = s.C, R = s.R, w = C >= 80, g = sheet(C, R), lt = since(s, t), x = reduce ? 30 : lt;
     const jw = w ? 52 : C - 3, side = w ? 1 + jw + 3 : 0, body = R - 4;
-    const rows = body + Math.floor(x * 4), last = Math.floor(rows / 3);   // a new posting line every quarter second
+    const rows = body + Math.floor(x * 4), last = Math.floor(rows / 4);   // a new posting line every quarter second
     // totals so far, kept incrementally
     const L = s.led || (s.led = { n: 0, D: 0, Cr: 0, bal: [0, 0, 0, 0], cache: new Map() });
     if (L.n > last + 1) { L.n = 0; L.D = 0; L.Cr = 0; L.bal = [0, 0, 0, 0]; }
@@ -855,13 +859,14 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     const amtW = w ? 10 : 9, aw = jw - 9 - amtW * 2;
     g.line(2, 0, [T(pad("entry / account", aw + 3), 1), T(lpad("debit", amtW), 1), T(lpad("credit", amtW), 1), T(lpad("sum", 4), 1)]);
     g.put(1, 1, "-".repeat(jw), 1);
-    // the visible window: the last `body` posting lines, three per entry
+    // the visible window: the last `body` lines, four per entry (heading, debit, credit, a blank line for air)
     const end = rows, start = Math.max(0, end - body);
     for (let q = start; q < end; q++) {
-      const e = journalEntry(Math.floor(q / 3)), part = q % 3, r = 2 + q - start, fresh = q === end - 1 && !reduce;
+      const e = journalEntry(Math.floor(q / 4)), part = q % 4, r = 2 + q - start, fresh = q === end - 1 && !reduce;
+      if (part === 3) continue;
       if (part === 0) { g.line(1, r, [T(e.id + " ", 14), T(e.kind, fresh ? 0 : 3)]); }
       else if (part === 1) { g.line(3, r, [T("Dr ", 1), T(pad(e.dr, aw - 1), fresh ? 0 : 14), T(lpad(money(e.a), amtW), fresh ? 0 : 5)]); }
-      else { g.line(3, r, [T("Cr ", 1), T(pad(e.cr, aw - 1), fresh ? 0 : 14), T(" ".repeat(amtW)), T(lpad(money(e.a), amtW), fresh ? 0 : 2)]); g.put(jw - 1, r, "0", 2); }
+      else if (part === 2) { g.line(3, r, [T("Cr ", 1), T(pad(e.cr, aw - 1), fresh ? 0 : 14), T(" ".repeat(amtW)), T(lpad(money(e.a), amtW), fresh ? 0 : 2)]); g.put(jw - 1, r, "0", 2); }
     }
     g.put(1, R - 2, "-".repeat(jw), 1);
     g.line(2, R - 1, [T(pad("totals", aw + 3), 14), T(lpad(money(L.D), amtW), 5), T(lpad(money(L.Cr), amtW), 2)]);
@@ -960,6 +965,25 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   }
   // corner ticks frame every screen but the hero: four atlas glyphs each
   function corners(s) { const x0 = s.ox, y0 = s.oy, x1 = x0 + (s.C - 1) * s.cw, y1 = y0 + (s.R - 1) * s.ch; emit(s.sz, x0, y0, 43, 1); emit(s.sz, x1, y0, 43, 1); emit(s.sz, x0, y1, 43, 1); emit(s.sz, x1, y1, 43, 1); }
+  /* ---------- scroll motion blur: a vertical smear of the screen's own pixels ----------
+     While the page scrolls fast, each panel is redrawn as three copies of itself, offset up and
+     down by 0.6 x MB px and summed with weights 0.25 0.5 0.25: a small vertical blur. It is done in the
+     canvas on the screen's own 24 fps redraw, so it costs three image copies and no filter pass;
+     at rest MB is 0 and nothing extra runs. The hero keeps its glow instead. MB is set by the
+     scroll handler further down. */
+  let MB = 0;
+  const TAPS = [[-0.6, 0.25], [0.6, 0.25]];
+  function smear(s) {
+    const w = s.cv.width, h = s.cv.height, d = MB * DPR;
+    if (!s.scv) { s.scv = document.createElement("canvas"); s.sx = s.scv.getContext("2d"); }
+    if (s.scv.width !== w || s.scv.height !== h) { s.scv.width = w; s.scv.height = h; } else s.sx.clearRect(0, 0, w, h);
+    s.sx.drawImage(s.cv, 0, 0);
+    // the canvas keeps half of itself and gains a quarter of the copy shifted up and a quarter shifted down
+    const x = s.ctx; x.save(); x.globalCompositeOperation = "copy"; x.globalAlpha = 0.5; x.drawImage(s.scv, 0, 0);
+    x.globalCompositeOperation = "lighter";
+    for (const [k, a] of TAPS) { x.globalAlpha = a; x.drawImage(s.scv, 0, Math.round(k * d)); }
+    x.restore();
+  }
   function drawScreen(s, t, tick) {
     const x = s.ctx; x.clearRect(0, 0, s.cv.width, s.cv.height);
     if (s === screens[0] && stir.live.length) drawStirred(s, t, tick);
@@ -967,6 +991,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     if (s.kind !== "wonder") corners(s);
     flush(x);
     if (s.kind === "wonder") glow(s);
+    if (MB && s.kind !== "wonder") smear(s);
   }
   /* ---------- the hero glows: a soft bloom of its own glyphs, and an atmosphere behind the globe ---------- */
   // the bloom is blurred at a quarter of the resolution and scaled back up: the same soft glow
@@ -1178,6 +1203,33 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     $("#chain-v").innerHTML = tampered ? '<span class="no">Tampering detected at entry 14.</span> Every later link now fails.' : `Integrity OK. 20 entries, head ${HEAD}.`;
     const s = screens.find((x) => x.kind === "chain"); s.scanFrom = null; s.dirty = true; kick();
   });
+
+  /* ---------- scroll motion blur: how much ----------
+     The smear (see smear()) follows scroll speed, up to 3px, and settles back to sharp within
+     about 150ms of the page stopping. It moves in half-pixel steps and is picked up by each
+     panel's next ambient redraw; when it returns to 0 the visible panels redraw sharp at once.
+     Off under reduced motion. */
+  if (!reduce) {
+    const MAXB = 3;
+    let lastY = scrollY, lastT = performance.now(), vel = 0, amt = 0, lastScroll = 0, mraf = 0;
+    const mstep = (now) => {
+      mraf = 0;
+      const idle = now - lastScroll;
+      if (idle > 50) vel *= Math.pow(0.5, (now - (mstep.t || now)) / 20);   // held through short gaps between scroll events, then halves every 20ms
+      mstep.t = now;
+      const target = Math.min(MAXB, vel * 0.45);                             // px/ms of scroll -> px of blur
+      amt += (target - amt) * (target > amt ? 0.5 : 0.35);
+      const q = amt < 0.4 ? 0 : Math.round(amt * 2) / 2;
+      if (q !== MB) { const was = MB; MB = q; if (!q && was) { for (const s of screens) if (s.vis) s.dirty = true; kick(); } }
+      if (MB || vel > 0.05) mraf = requestAnimationFrame(mstep); else { vel = 0; amt = 0; mstep.t = 0; }
+    };
+    addEventListener("scroll", () => {
+      const now = performance.now(), y = scrollY, dt = Math.max(8, now - lastT);
+      const v = Math.abs(y - lastY) / dt;
+      vel = vel * 0.5 + v * 0.5; lastY = y; lastT = now; lastScroll = now;
+      if (!mraf) mraf = requestAnimationFrame(mstep);
+    }, { passive: true });
+  }
 
   /* ---------- boot ---------- */
   const go = () => {

@@ -1,4 +1,4 @@
-/* site.css: shared by every page (home, results, paper, pilot, 404).
+/* site.css: shared by every page (home, environments, results, paper, pilot, deck, 404).
    The tokens live here and only here: the bone page, its three other bands, the screen ink
    (read by the canvas on the home page) and the character rules. Then the top bar, which
    nav.js drives. Page styles follow in each page's own <style>. */
