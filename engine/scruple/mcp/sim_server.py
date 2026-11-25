@@ -12,10 +12,11 @@ shared read tools work for both kinds; `accept`, `wait`, `upload_evidence`,
 `refund(amount_minor=...)` and `submit_dispute` are for dispute episodes.
 
 `start_ach_episode`, `start_recon_episode`, `start_aml_episode`,
-`start_payables_episode` and `start_scenario_episode` start the other episode kinds
-the API and CLI serve. ACH, recon, AML and payables episodes have their own tool
-sets, exposed with an `ach_`, `recon_`, `aml_` or `payables_` prefix (`ach_get_case`,
-`recon_match`, `aml_file_sar`, `payables_pay`, ...) and refused on
+`start_payables_episode`, `start_commerce_episode` and `start_scenario_episode` start
+the other episode kinds the API and CLI serve. ACH, recon, AML, payables and commerce
+episodes have their own tool sets, exposed with an `ach_`, `recon_`, `aml_`,
+`payables_` or `commerce_` prefix (`ach_get_case`, `recon_match`, `aml_file_sar`,
+`payables_pay`, `commerce_checkout`, ...) and refused on
 episodes of another kind; a scenario episode is a dispute episode on a
 real CFPB-grounded scenario and plays the dispute tools above.
 
@@ -38,6 +39,9 @@ from scruple.agents.ach_episode import ACH_TASK, AchEpisode
 from scruple.agents.ach_tools import ACH_TOOLS
 from scruple.agents.aml_episode import AML_TASK, AmlEpisode
 from scruple.agents.aml_tools import AML_TOOLS
+from scruple.agents.commerce_episode import COMMERCE_TASK, CommerceEpisode
+from scruple.agents.commerce_episode import TOKENS as COMMERCE_TOKENS
+from scruple.agents.commerce_tools import COMMERCE_TOOLS
 from scruple.agents.dispute_episode import DISPUTE_TASK, DisputeEpisode
 from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME, DisputeToolSpec
 from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironment
@@ -64,10 +68,24 @@ WorkflowCaseType = Annotated[
 ]
 
 
-AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode | PayablesEpisode
+AnyEpisode = (
+    Episode
+    | DisputeEpisode
+    | AchEpisode
+    | ReconEpisode
+    | AmlEpisode
+    | PayablesEpisode
+    | CommerceEpisode
+)
 # Episode kinds the unprefixed tools serve (a scenario episode is a dispute episode).
 LEGACY_KINDS = frozenset({"simple", "dispute"})
-WORKFLOW_PREFIX = {"ach": "ach_", "recon": "recon_", "aml": "aml_", "payables": "payables_"}
+WORKFLOW_PREFIX = {
+    "ach": "ach_",
+    "recon": "recon_",
+    "aml": "aml_",
+    "payables": "payables_",
+    "commerce": "commerce_",
+}
 
 
 def episode_kind(ep: Any) -> str:
@@ -414,6 +432,11 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
                 "format": "invoice kinds joined by +, then optionally @difficulty",
                 "data": "synthetic invoices, POs, receipts and vendors",
             },
+            "commerce": {
+                "tokens": list(COMMERCE_TOKENS),
+                "format": "scenarios joined by +, optionally with noguard (the ablation)",
+                "data": "synthetic merchants, offers, mandates and wallets",
+            },
             "data": "ach and recon cases are synthetic; scenario cases are built from "
             "public CFPB complaints (docs/data/CFPB.md)",
         }
@@ -461,11 +484,20 @@ def build_sim_server(table: EpisodeTable | None = None) -> MCPServer:
         ep = t.start_kind("payables", seed, case_type)
         return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
 
+    @server.tool(
+        description="Start a commerce episode: shop for the user with a wallet and a "
+        "signed mandate, paying through Scruple Guard. " + COMMERCE_TASK
+    )
+    def start_commerce_episode(seed: Seed, case_type: WorkflowCaseType = None) -> dict[str, Any]:
+        ep = t.start_kind("commerce", seed, case_type)
+        return {"episode_id": ep.episode_id, "observation": ep.observe().model_dump(mode="json")}
+
     workflows = (
         ("ach", ACH_TOOLS),
         ("recon", RECON_TOOLS),
         ("aml", AML_TOOLS),
         ("payables", PAYABLES_TOOLS),
+        ("commerce", COMMERCE_TOOLS),
     )
     for kind, specs in workflows:
         for spec in specs:

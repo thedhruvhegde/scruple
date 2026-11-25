@@ -20,8 +20,9 @@ if TYPE_CHECKING:
 _TABLES = ("episodes", "episode_calls")
 
 # Every episode kind the stores serve (`scruple.agents.store.KINDS`). Adding one
-# needs a migration (0010 added aml and payables) and the SQLite rebuild below.
-EPISODE_KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml", "payables")
+# needs a migration (0010 added aml and payables, 0016 commerce) and the SQLite
+# rebuild below.
+EPISODE_KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml", "payables", "commerce")
 KIND_CHECK = "CHECK (kind IN (" + ", ".join(f"'{k}'" for k in EPISODE_KINDS) + "))"
 
 EPISODES_TABLE = f"""CREATE TABLE IF NOT EXISTS episodes (
@@ -86,7 +87,7 @@ def sqlite_kinds_upgrade_script() -> str:
     )
 
 
-# Keep in step with migrations 0005 and 0010 (a test compares the catalogs).
+# Keep in step with migrations 0005, 0010 and 0016 (a test compares the catalogs).
 POSTGRES_DDL = _DDL + "".join(
     f"""
 CREATE OR REPLACE TRIGGER {t}_no_update BEFORE UPDATE ON {t}

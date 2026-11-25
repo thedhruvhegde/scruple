@@ -1,7 +1,7 @@
 """A local file store so an episode can span several processes (the CLI).
 
 Each episode is one JSON file holding its kind (`simple`, the default, `dispute`, `ach`,
-`recon`, `aml`, `payables`, or `scenario` for a real-life scenario whose case type is
+`recon`, `aml`, `payables`, `commerce`, or `scenario` for a real-life scenario whose case type is
 the scenario id), seed, case type (the case family for `dispute`), nonce and call log.
 An episode is rebuilt by replaying the log, which is exact because episodes are
 deterministic. Files are written atomically. One writer at a time per episode is
@@ -18,6 +18,7 @@ from typing import Any
 
 from scruple.agents.ach_episode import AchEpisode
 from scruple.agents.aml_episode import AmlEpisode
+from scruple.agents.commerce_episode import CommerceEpisode
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
 from scruple.agents.payables_episode import PayablesEpisode
@@ -35,15 +36,29 @@ class UnknownEpisodeError(KeyError):
     pass
 
 
-KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml", "payables")
-AnyEpisode = Episode | DisputeEpisode | AchEpisode | ReconEpisode | AmlEpisode | PayablesEpisode
+KINDS = ("simple", "dispute", "scenario", "ach", "recon", "aml", "payables", "commerce")
+AnyEpisode = (
+    Episode
+    | DisputeEpisode
+    | AchEpisode
+    | ReconEpisode
+    | AmlEpisode
+    | PayablesEpisode
+    | CommerceEpisode
+)
 WORKFLOW_KINDS: dict[
-    str, type[AchEpisode] | type[ReconEpisode] | type[AmlEpisode] | type[PayablesEpisode]
+    str,
+    type[AchEpisode]
+    | type[ReconEpisode]
+    | type[AmlEpisode]
+    | type[PayablesEpisode]
+    | type[CommerceEpisode],
 ] = {
     "ach": AchEpisode,
     "recon": ReconEpisode,
     "aml": AmlEpisode,
     "payables": PayablesEpisode,
+    "commerce": CommerceEpisode,
 }
 
 

@@ -18,7 +18,7 @@ from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.errors import EpisodeError
 from scruple.verifiers.base import Finding, VerifierReport
 from scruple.verifiers.checks import RECORD_INTEGRITY, from_report
-from scruple.verifiers.evidence_check import EVIDENCE
+from scruple.verifiers.evidence_check import EVIDENCE, SYSTEM_RECORDS
 from scruple.verifiers.exploits.outcome import escalate_everything
 from scruple.verifiers.ledger_invariants import _floors
 from scruple.verifiers.process import PROCESS
@@ -201,7 +201,11 @@ def test_an_upload_in_a_kind_the_code_does_not_require_is_not_fabrication() -> N
         got = ep.call("get_case")
         case, status = got["case"], got["status"]
         held = {d["kind"] for d in ep.call("list_evidence")["evidence"]}
-        extra = [k for k in case["supporting_evidence"] if k not in held]
+        # system-of-record kinds (refund record, CE 3.0 history) are never acceptable
+        # as uploads (round 4, L1); the rule under test is about the other kinds
+        extra = [
+            k for k in case["supporting_evidence"] if k not in held and k not in SYSTEM_RECORDS
+        ]
         if not extra or "represent" not in status["allowed_actions"]:
             continue
         up = ep.call(

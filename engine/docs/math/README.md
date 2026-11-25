@@ -17,6 +17,7 @@ known versus new, and simulation evidence pasted from a seeded script in `script
 | 7 | [07_variance_aware_betting.md](07_variance_aware_betting.md) | variance-adaptive bets (grid mixture within log J of the best constant bet; WSR plug-in; wider aGRAPA cap); the best constant-bet growth is a KL distance to the null, giving a sample-size floor from observed costs; re-analysis of E1 | adaptation |
 | 8 | [08_composition.md](08_composition.md) | composition: the promote decision carries the smallest level among conjuncts covering a harm (intersection-union), false blocks add up, alpha spending for resubmission, per-type certificates; what is not covered | standard, applied; adaptation |
 | 9 | [09_variance_reduction.md](09_variance_reduction.md) | variance reduction that keeps anytime validity: stratified betting on one wealth process, control variates with a predictable coefficient, centred inverse-propensity canary terms, planning, the cap tax survives | adaptation; standard, applied |
+| 10 | [10_cumulative_spend.md](10_cumulative_spend.md) | agent payments (Scruple Guard): cumulative-cap safety for any adaptive agent; gross vs claim-credited headroom (a refused-refund loop gives unbounded exposure); split purchases under the step-up threshold bounded by T per merchant per window, M*T across merchants (tight); anytime-valid certificate for the mandate-violation rate | elementary invariants; standard, applied |
 | 6 | [06_gate_adapter.md](06_gate_adapter.md) | pure adapter `evaluate_pairs` and how to wire it into the gate; results on the demo's held-out set | engineering |
 
 "Candidate novel" means we did not find it stated this way in a short search. It is not
@@ -58,6 +59,7 @@ uv run python scripts/math_sequential.py   # about 2 min
 uv run python scripts/math_stratified.py   # about 2 min
 uv run python scripts/math_planning.py     # under 1 min
 uv run python scripts/math_decision.py     # about 1 min
+uv run python scripts/math_cumulative.py   # about 10 s (file 10)
 uv run python scripts/math_hacking.py      # under 1 min
 uv run python scripts/math_hacking_general.py   # seconds
 uv run python scripts/math_gate_demo.py    # seconds
