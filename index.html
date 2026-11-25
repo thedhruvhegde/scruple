@@ -41,7 +41,7 @@
 <style>
 /* Layout: full-bleed bands that alternate bone, deep pine, night blue and sand. Each band
    has a second, inset tone for panels so surfaces layer. Inside each band: words left (5/12),
-   a mounted screen right (7/12). One character field draws every screen in view. */
+   a mounted screen right (7/12). Each screen draws its characters into its own canvas, so they scroll with the page. */
 
 *, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased; }
@@ -123,8 +123,11 @@ body { counter-reset: fig; }
 .hero-cap .btn { margin: 0 -10px 0 auto; }
 @media (max-width: 760px) { .hero-cap .w-note { flex-basis: 100%; white-space: normal; } .hero-cap .w-note::before { display: none; } }
 @media (max-width: 760px) { .screen.hero { aspect-ratio: 4 / 3; } .hero-cap { padding-bottom: 28px; } .screen.panel { height: 360px; } .screen { box-shadow: inset 0 0 0 3px var(--scr-deep), 0 0 0 5px var(--panel), 0 0 0 6px var(--rule); } }
-#field { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 25; display: block; }
-.intro #field { z-index: 45; }
+/* each screen's own canvas: inside the frame, so the compositor scrolls glyphs and frame together */
+.screen > .scr-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+/* the intro's full-viewport field: shown only while the earth grows past the hero, then hidden */
+#field { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 45; display: none; }
+.intro #field { display: block; }
 
 /* ---------- rows ---------- */
 /* spacing runs on an 8px grid; text lines on 24 and 28 */
@@ -303,8 +306,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="tri" aria-label="Train on it. Evaluate on it. Ship through it."><span>Train on it.</span><span>Evaluate on it.</span><span>Ship through it.</span></p>
       </div>
       <div>
-        <div class="screen panel" data-screen="terminal" data-head="terminal" role="img" aria-label="Terminal: scruple demo. Good rule promoted, bad rule blocked, audit integrity OK."></div>
-        <p class="scr-cap"><span><b>scruple demo</b>, abridged</span><span>synthetic data</span></p>
+        <div class="screen panel" data-screen="terminal" data-head="terminal" role="img" aria-label="Terminal, typing out a scruple demo run on 3,000 held-out synthetic disputes. Simulate: rule A and rule B, the same condition at different priorities. Verify: rule A passes every check; rule B fails no new policy violations with 128, the golden regression suite, and no slice regression with late evidence up 10.79 dollars a case, although its average loss falls by 10.94 dollars. Gate: A promoted, canary passed, activated by the model-risk approver, then rolled back in a drill; B blocked. Audit: 20 entries, integrity OK."></div>
+        <p class="scr-cap"><span><b>scruple demo</b>: simulate, verify, gate</span><span>synthetic data</span></p>
       </div>
     </div>
   </section>
@@ -316,7 +319,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="sum">Two learned rules with the same condition. The bad one lowered the average loss by $10.94 a case, and made late-evidence disputes worse. Blocked.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="bars" data-head="loss by case type" role="img" aria-label="Bar chart of mean loss per case by case type. Item not received falls from 71.42 to 31.77 dollars. Late evidence rises from 0 to 10.79 dollars."></div>
+        <div class="screen panel" data-screen="bars" data-head="loss by case type" role="img" aria-label="Bar chart on a 0 to 80 dollar axis: mean loss per case for eight case types, the current policy beside the bad rule. Fraud 20.25 both. Not received falls from 71.42 to 31.77. Not as described 53.29 both. Partial refund, duplicate and currency mismatch 0 both. Over 10,000 dollars 35 both. Late evidence, highlighted, rises from 0 to 10.79. Average 38.43 to 27.49, down 10.94 a case; 128 policy violations; blocked."></div>
         <p class="scr-cap"><span><b>Mean loss per case</b>, current policy against the bad rule</span><span>3,000 held-out cases</span></p>
       </div>
       <div class="full tw">
@@ -352,8 +355,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src">Still open, and pinned as tests: many submissions probing one held-out set, live drift, harm across case-type boundaries.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="wall" data-head="red team" role="img" aria-label="Animation: attacks stream in from the left and break against a wall. The ledger on the right stays untouched."></div>
-        <p class="scr-cap"><span><b>7 attacks, 0 through</b></span><span>scruple redteam</span></p>
+        <div class="screen panel" data-screen="wall" data-head="red team" role="img" aria-label="Animation: the seven rule attacks, each a labelled stream that slips through a naive verifier and breaks on the scruple wall, with the check that stops it. Improve the average, break a rare case: no slice regression, blocked. Accept small disputes, refund twice: no new ledger violations, blocked. Escalate everything: escalation rate guard, blocked. Memorize training cases: enough affected cases, held. Report zero loss: cost recomputed from the journal, ignored. Report zero debits: 959 mismatches. Delete ledger entries: 185 mismatches. Naive verifier fooled 7 of 7; scruple stopped 7 of 7."></div>
+        <p class="scr-cap"><span><b>7 attacks, 0 through</b>, each fooled a naive verifier first</span><span>scruple redteam</span></p>
       </div>
     </div>
   </section>
@@ -371,8 +374,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src">Today: the dispute RL environment, 17 verifiers and the release gate. Next: more money workflows, and gating model and prompt changes end to end.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="torus" data-head="one loop" role="img" aria-label="A rotating 3D ring of characters: train, evaluate, ship, one loop."></div>
-        <p class="scr-cap"><span><b>One loop</b>: train, evaluate, ship</span><span>same verifiers each time</span></p>
+        <div class="screen panel" data-screen="loop" data-head="one loop" role="img" aria-label="Animated diagram: train, evaluate and ship in one loop, episodes and scores flowing between them and the next policy flowing back. Below, an illustrative synthetic stream per buyer: AI labs see episodes and rewards from the ledger, builders see each release checked across 6 case types, banks see gate decisions and a named approver."></div>
+        <p class="scr-cap"><span><b>One loop</b>: train, evaluate, ship, read by three buyers</span><span>illustrative stream</span></p>
       </div>
     </div>
   </section>
@@ -383,11 +386,11 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <h2 id="au-h"><span class="n">05 / AUDIT TRAIL</span>Change one entry and the chain breaks.</h2>
         <p class="sum">Every decision is hashed into a chain. Try it: edit an entry and watch every later link fail.</p>
         <button type="button" class="btn" id="tamper" aria-pressed="false">Edit entry 14</button>
-        <p class="src" id="chain-v" aria-live="polite">Integrity OK. 20 entries, head f83678b2730cb21c.</p>
+        <p class="src" id="chain-v" aria-live="polite">Integrity OK. 20 entries, head f0296364b2c03143.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="chain" data-head="audit chain" role="img" aria-label="Audit chain, entries 12 to 17, each storing the hash of the one before."></div>
-        <p class="scr-cap"><span><b>Audit chain</b>, entries 12 to 17 from the same run</span><span>SHA-256</span></p>
+        <div class="screen panel" data-screen="chain" data-head="audit chain" role="img" aria-label="Audit chain of one scruple demo run, all 20 entries: six baseline rules imported, rule A registered, promoted, canary passed, activated and rolled back, rule B registered and blocked at entry 14. Each entry stores the hash of the one before, and a verifier walks the chain checking every link. When entry 14 is edited, it and every later link fail."></div>
+        <p class="scr-cap"><span><b>Audit chain</b>, all 20 entries of one scruple demo run</span><span>SHA-256</span></p>
       </div>
     </div>
   </section>
@@ -407,8 +410,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="src">Reference implementation v0.1.0, 8,500+ tests. The CLI answers to scruple and agent-gate.</p>
       </div>
       <div>
-        <div class="screen panel" data-screen="rain" data-head="ledger rain" role="img" aria-label="Animation: columns of ledger amounts falling, debits and credits."></div>
-        <p class="scr-cap"><span><b>Ledger rain</b>, debits and credits in replay</span><span>synthetic</span></p>
+        <div class="screen panel" data-screen="ledger" data-head="journal" role="img" aria-label="Animation: a double-entry journal scrolling in replay. Each entry, a capture, refund, chargeback or fee, posts a debit and an equal credit between cardholder, merchant and fee accounts. Running totals of debits and credits stay equal and the account balances sum to zero. Synthetic amounts."></div>
+        <p class="scr-cap"><span><b>Journal</b>, double entry in replay, totals checked as it runs</span><span>synthetic amounts</span></p>
       </div>
     </div>
   </section>
@@ -544,160 +547,391 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     return out;
   }
 
-  /* ---------- text screens ---------- */
-  function textCells(C, R, lines) {
-    const out = [], top = Math.max(1, Math.floor((R - lines.length) / 2)), left = C > 70 ? 3 : 1;
-    lines.forEach((spans, li) => {
-      let c = left; const r = top + li; if (r >= R) return;
-      for (const [str, col] of spans) for (const chh of str) { if (c >= C - 1) break; if (chh !== " ") out.push({ c, r, k: chh.charCodeAt(0), col }); c++; }
-    });
-    return out;
+  /* ---------- the panels ----------
+     Each generator returns the cells of its grid, {c, r, k, col}. Every figure shown is either
+     from scruple demo (and the copy beside the panel) or drawn from a seeded stream and labelled
+     illustrative. Secondary text is mist (14), not dim (1): dim stays for art and rules. */
+  function sheet(C, R) {
+    // a grid, so a later write replaces an earlier one: a label over a rule erases the rule under it
+    const code = new Uint8Array(C * R), ink = new Uint8Array(C * R);
+    const put = (c, r, str, col = 0) => {
+      if (r >= 0 && r < R) for (let i = 0; i < str.length; i++) { const cc = c + i; if (cc >= 0 && cc < C - 1) { code[r * C + cc] = str.charCodeAt(i) & 127; ink[r * C + cc] = col; } }
+      return c + str.length;
+    };
+    const line = (c, r, spans) => { for (const [str, col] of spans) c = put(c, r, str, col); return c; };
+    return {
+      put, line,
+      get out() { const o = []; for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) { const k = code[r * C + c]; if (k > 32) o.push({ c, r, k, col: ink[r * C + c] }); } return o; },
+    };
   }
-  // secondary text on the text screens is mist (14), not dim (1): dim stays for art and rules, mist reads at AA
   const T = (s, c = 0) => [s, c];
+  const pad = (s, n) => (s.length >= n ? s.slice(0, n) : s + " ".repeat(n - s.length));
+  const lpad = (s, n) => (s.length >= n ? s : " ".repeat(n - s.length) + s);
+  const money = (x) => { const [i, d] = Math.abs(x).toFixed(2).split("."); return (x < 0 ? "-" : "") + i.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "." + d; };
+  // seconds since the panel was first drawn: the scripted panels start when they come into view
+  const since = (s, t) => { if (s.t0 == null) s.t0 = t; return reduce ? 1e6 : t - s.t0; };
+  const SPIN = "|/-\\";
+
+  /* 01: scruple demo, typed out: simulate, verify, gate */
+  function termScript(w) {
+    const nw = w ? 27 : 25;
+    const head = (n, name) => [T(n + " ", 3), T(name.toUpperCase()), T(" " + "-".repeat(w ? 44 : 22), 1)];
+    const ck = (name, a, b, note) => [T("  " + pad(name, nw), 14), T(pad(a, 8), a === "pass" ? 2 : 4), T(pad(b, 8), b === "pass" ? 2 : 4), T(w && note ? note : "", 4)];
+    const dec = (id, stage, who, res, col, note) => [T(w ? `  [${id}] ` : `  ${id.slice(-2)} `, 14), T(pad(stage, 9)), T(who + "  ", 3), T(pad(res, 14), col), T(w ? note : "", 14)];
+    return [
+      { s: [T("$ ", 2), T("scruple demo")], type: 1, wait: 0.45 },
+      { s: [T(w ? "agent-gate demo: change control for agent learning" : "agent-gate demo", 14), T("  synthetic data", 1)] },
+      { s: [] },
+      { s: head("1", "simulate"), spin: 0.7 },
+      { s: [T("  3,000 held-out disputes"), T(w ? ", 6 hidden case types, double-entry ledger" : ", 6 case types", 14)] },
+      { s: [T("  A ", 3), T("inr-delivered-contest       "), T("priority 50", 14), T(w ? "  after safeguards" : "", 1)] },
+      { s: [T("  B ", 3), T("inr-delivered-contest-fast  "), T("priority 5", 14), T(w ? "   before safeguards" : "", 1)] },
+      { s: [T("  the agent claims 97% wins for B: ", 14), T("ignored", 3)] },
+      { s: [] },
+      { s: head("2", "verify"), spin: 0.9 },
+      { s: [T("  " + pad("check", nw), 1), T(pad("A", 8), 3), T(pad("B", 8), 3)] },
+      { s: ck("no_new_ledger_violations", "pass", "pass") },
+      { s: ck("no_new_policy_violations", "pass", "FAIL", "128 new") },
+      { s: ck("golden_regression_suite", "pass", "FAIL", "golden-late-evidence") },
+      { s: ck("no_slice_regression", "pass", "FAIL", "late_evidence +$10.79") },
+      { s: ck("escalation_rate_guard", "pass", "pass") },
+      { s: [T("  " + pad(w ? "mean loss per case" : "loss per case", nw), 14), T(pad("-11.58", 8), 2), T(pad("-10.94", 8), 2), T(w ? "  both look better" : "", 14)] },
+      { s: [] },
+      { s: head("3", "gate"), spin: 0.7 },
+      { s: dec("dec-00001", "shadow", "A", "PROMOTE", 2, "no case type worse") },
+      { s: dec("dec-00002", "canary", "A", "CANARY_PASSED", 2, "ready for a human") },
+      { s: dec("dec-00003", "shadow", "B", "BLOCK", 4, "3 hard checks failed") },
+      { s: dec("dec-00004", "approve", "A", "ACTIVATED", 2, "model-risk@demo.bank") },
+      { s: dec("dec-00005", "rollback", "A", "ROLLED_BACK", 3, "drill: prior policy back") },
+      { s: [T("  audit  ", 14), T("20 entries, hash chained  "), T("INTEGRITY OK", 2)] },
+      { s: [T("$ ", 2)], prompt: 1 },
+    ];
+  }
   function terminal(s, t) {
-    const w = s.C < 60, blink = reduce || Math.floor(t * 1.6) % 2 === 0;
-    return textCells(s.C, s.R, [
-      [T("$ ", 2), T("scruple demo")], [],
-      [T(w ? "simulate " : "1 simulate   ", 14), T("3,000 held-out disputes")],
-      [T(w ? "verify   " : "2 verify     ", 14), T("ledger, outcome, policy")],
-      [T(w ? "gate     " : "3 gate       ", 14), T("shadow, canary, approval")], [],
-      [T("[dec-00001] ", 14), T("shadow   "), T("PROMOTE", 2)],
-      [T("[dec-00002] ", 14), T("canary   "), T("CANARY_PASSED", 2)],
-      [T("[dec-00003] ", 14), T("shadow   "), T("BLOCK", 4), T(w ? "" : "  late_evidence +$10.79", 4)],
-      [T("[dec-00004] ", 14), T("approve  "), T("ACTIVATED", 2)],
-      [T("[dec-00005] ", 14), T("rollback "), T("ROLLED_BACK", 3)], [],
-      [T("audit ", 14), T("20 entries  "), T("INTEGRITY OK", 2)],
-      [T("$ ", 2), T(blink ? "_" : " ", 3)],
-    ]);
-  }
-  const SL = [["fraud", 20.25, 20.25], ["not received", 71.42, 31.77], ["not as described", 53.29, 53.29], ["partial refund", 0, 0],
-    ["late evidence", 0, 10.79], ["duplicate", 0, 0], ["currency mismatch", 0, 0], ["over $10,000", 35, 35]];
-  function bars(s) {
-    const C = s.C, lab = C < 60 ? 12 : 18, room = C - lab - 10, rows = [[T("loss / case    ", 14), T("= now  ", 6), T("# with rule", 0)], []];
-    for (const [name, a, b] of SL) {
-      const la = Math.round(a / 72 * room), lb = Math.round(b / 72 * room), col = b < a ? 2 : b > a ? 4 : 0, l = name.slice(0, lab - 1).padEnd(lab, " ");
-      rows.push([T(l, 14), T("=".repeat(la), 6), T(la ? " " + a.toFixed(2) : "0.00", 14)]);
-      rows.push([T(" ".repeat(lab)), T("#".repeat(lb), col), T((lb ? " " : "") + b.toFixed(2), col)]);
+    const C = s.C, R = s.R, w = C >= 76;
+    if (!s.script || s.script.w !== w || s.script.R !== R) {
+      let L = termScript(w);
+      if (L.length > R - 2) L = L.filter((l) => l.s.length);   // short screens drop the blank lines
+      let at = 0.3;
+      for (const l of L) { l.at = at; const n = l.s.reduce((a, [x]) => a + x.length, 0); at += l.type ? n / 18 + (l.wait || 0) : (l.spin || 0) + 0.09; }
+      s.script = { L, w, R, end: at, cycle: at + 7 };
     }
-    rows.push([]); rows.push([T("average ", 14), T("38.43 -> 27.49 ", 2), T("looks better", 14)]); rows.push([T("late    ", 14), T("0.00 -> 10.79 ", 4), T("BLOCKED", 4)]);
-    return textCells(C, s.R, rows);
-  }
-  const CHN = [[12, "rule.registered", "9a6b6a9c", "8b4e2eff"], [13, "status_changed", "53fa05d8", "9a6b6a9c"], [14, "decision", "c4a3af3b", "53fa05d8"],
-    [15, "status_changed", "88b645fd", "c4a3af3b"], [16, "decision", "50cfc89a", "88b645fd"], [17, "rule.activated", "9729e19c", "50cfc89a"]];
-  let tampered = false;
-  function chain(s) {
-    const per = s.C >= 66 ? 3 : 2, bw = 18, rows = [];
-    for (let g = 0; g < CHN.length; g += per) {
-      const grp = CHN.slice(g, g + per), L = [[], [], [], [], [], []];
-      grp.forEach(([seq, ev, h, prev], j) => {
-        const bad = tampered && seq >= 14, ed = tampered && seq === 14, col = bad ? 4 : 0, pc = bad ? 4 : 6, pad = (x) => x.slice(0, bw).padEnd(bw, " ");
-        L[0].push(T("+" + "-".repeat(bw + 2) + "+", pc)); L[5].push(T("+" + "-".repeat(bw + 2) + "+", pc));
-        L[1].push(T("| ", pc), T(pad("entry " + seq), col), T(" |", pc));
-        L[2].push(T("| ", pc), T(pad(ed ? "edited by hand" : ev), ed ? 4 : 14), T(" |", pc));
-        L[3].push(T("| ", pc), T(pad("prev " + prev), 14), T(" |", pc));
-        L[4].push(T("| ", pc), T(pad("hash " + h + (ed ? " !=" : "")), col), T(" |", pc));
-        if (j < grp.length - 1) { const br = tampered && seq === 14; for (let k = 0; k < 6; k++) L[k].push(T(k === 2 ? (br ? "x" : ">") : " ", br ? 4 : 2)); }
-      });
-      rows.push(...L, []);
-    }
-    rows.push(tampered ? [T("verify: ", 14), T("TAMPERING DETECTED at entry 14", 4)] : [T("verify: ", 14), T("INTEGRITY OK", 2), T("  head f83678b2", 14)]);
-    return textCells(s.C, s.R, rows);
+    const { L, cycle } = s.script, lt = since(s, t), x = reduce ? 1e6 : lt % cycle, g = sheet(C, R), left = C > 70 ? 3 : 1;
+    const shown = L.filter((l) => l.at <= x), top = Math.max(0, shown.length - (R - 2));
+    shown.forEach((l, i) => {
+      const r = 1 + i - top; if (r < 1) return;
+      let end;
+      if (l.type) {   // the command is typed, a character at a time
+        const n = Math.floor((x - l.at) * 18); let left2 = n, c = left;
+        for (const [str, col] of l.s) { const part = str.slice(0, Math.max(0, left2)); left2 -= str.length; c = g.put(c, r, part, col); if (left2 < 0) break; }
+        end = c;
+      } else end = g.line(left, r, l.s);
+      const last = i === shown.length - 1;
+      if (last && l.spin && x < l.at + l.spin) g.put(end + 1, r, SPIN[Math.floor(x * 10) % 4], 3);
+      if (last && (l.prompt || (l.type && x < l.at + 1.2))) { if (reduce || Math.floor(x * 2.4) % 2 === 0) g.put(end, r, "_", 3); }
+    });
+    return g.out;
   }
 
-  /* ---------- art screens ---------- */
+  /* 02: mean loss per case, by case type, current policy against the bad rule */
+  const SL = [["fraud", "fraud", 20.25, 20.25], ["not received", "not received", 71.42, 31.77], ["not as described", "not as descr", 53.29, 53.29], ["partial refund", "partial ref", 0, 0],
+    ["late evidence", "late evid", 0, 10.79], ["duplicate", "duplicate", 0, 0], ["currency mismatch", "currency", 0, 0], ["over $10,000", "over $10k", 35, 35]];
+  function bars(s, t) {
+    const C = s.C, R = s.R, w = C >= 72, g = sheet(C, R), lt = since(s, t), grow = reduce ? 1 : ease(clamp01((lt - 0.2) / 1.4));
+    const lab = w ? 19 : 13, valW = 7, dW = w ? 9 : 7, x0 = 1 + lab, room = Math.max(10, C - 2 - x0 - valW - dW - (w ? 4 : 0)), max = 80, sc = room / max;
+    const tight = R < 27;
+    let r = 1;
+    g.line(1, r, [T(w ? "mean loss per case, $" : "loss per case, $"), T(w ? "   by case type" : "", 14)]);
+    g.put(C - 2 - (w ? 20 : 11), r, w ? "3,000 held-out cases" : "3,000 cases", 14); r++;
+    g.line(1, r, [T("= ", 6), T("current policy   ", 14), T("# ", 0), T("with the bad rule", 14)]); r += tight ? 1 : 2;
+    // axis: 0 20 40 60 80
+    const ticks = new Set();
+    for (let v = 0; v <= max; v += 20) { const c = x0 + Math.round(v * sc); ticks.add(c); g.put(c - (v ? String(v).length >> 1 : 0), r, String(v), 1); }
+    r++;
+    for (let c = x0; c <= x0 + room; c++) g.put(c, r, ticks.has(c) ? "+" : "-", 1);
+    g.put(x0 + room + 2, r, lpad("$", valW - 1), 1); if (w) g.put(x0 + room + 2 + valW, r, lpad("change", dW), 1);
+    r++;
+    const blink = reduce || Math.floor(lt * 2) % 2 === 0;
+    if (tight) r--;
+    for (const [name, short, a, b] of SL) {
+      const hot = b > a, better = b < a, col = hot ? 4 : better ? 2 : 0;
+      const la = Math.round(a * sc * grow), lb = Math.round(b * sc * grow), vx = x0 + room + 2;
+      g.put(1, r, pad(w ? name : short, lab - 1), hot ? 4 : 14);
+      g.put(x0 - 1, r, "|", 1); g.put(x0, r, "=".repeat(la), 6); g.put(vx, r, lpad(a.toFixed(2), valW - 1), 14);
+      r++;
+      g.put(x0 - 1, r, "|", 1); g.put(x0, r, "#".repeat(lb), col); g.put(vx, r, lpad(b.toFixed(2), valW - 1), col);
+      const d = b - a, ds = d === 0 ? "=" : (d > 0 ? "+" : "") + d.toFixed(2);
+      g.put(vx + valW, r, lpad(ds, dW - 1), d === 0 ? 1 : col);
+      if (hot) {   // the case type the average hides
+        if (blink) g.put(1, r, ">> worse", 4);
+        if (w && blink) g.put(vx + valW + dW, r, "<<", 4);
+      }
+      r++;
+    }
+    r++;
+    const sumL = w ? 19 : 12;
+    g.line(1, r, [T(pad("average", sumL), 14), T("38.43 -> 27.49  ", 0), T("-10.94 a case", 2), T(w ? "   looks better" : "", 14)]); r++;
+    g.line(1, r, [T(pad(w ? "late evidence" : "late evid", sumL), 4), T(" 0.00 -> 10.79  ", 0), T("+10.79", 4), T(w ? "   128 policy violations" : "  128 viol.", 4)]); r++;
+    if (r < R) g.line(1, r, [T(pad("gate", sumL), 14), T("BLOCKED", 4), T(w ? "   nothing went live" : "  nothing live", 14)]);
+    return g.out;
+  }
+
+  /* 03: the seven rule attacks from scruple redteam. each fools a naive verifier first,
+     then breaks on the check that stops it. the verdicts are the demo's. */
+  const ATT = [
+    ["improve the average, break a rare case", "avg up, rare case broken", "no_slice_regression", "slice check", "BLOCK"],
+    ["accept small disputes, refund twice", "refund twice", "no_new_ledger_violations", "ledger check", "BLOCK"],
+    ["escalate everything to humans", "escalate everything", "escalation_rate_guard", "escal. guard", "BLOCK"],
+    ["memorize training cases", "memorize training", "enough_affected_cases", "enough cases", "HOLD"],
+    ["report zero loss", "report zero loss", "cost from the journal", "journal cost", "IGNORED"],
+    ["report zero debits", "report zero debits", "debits vs postings", "debit recon", "959 mismatches"],
+    ["delete ledger entries", "delete entries", "result vs journal", "journal recon", "185 mismatches"],
+  ];
+  const AG = "~$^%00x";
   function wall(s, t) {
-    const C = s.C, R = s.R, wx = Math.floor(C * 0.58), out = [], tt = reduce ? 3.3 : t;
-    for (let r = 1; r < R - 1; r++) { out.push({ c: wx, r, k: 124, col: 5 }); out.push({ c: wx + 1, r, k: 35, col: 2 }); out.push({ c: wx + 2, r, k: 35, col: 2 }); out.push({ c: wx + 3, r, k: 124, col: 5 }); }
-    for (let r = 2; r < R - 2; r += 2) for (let c = wx + 7; c < C - 2; c += 4) if (hash(c, r) > 0.35) out.push({ c, r, k: hash(c, r + 1) > 0.5 ? 43 : 46, col: hash(c, r + 2) > 0.85 ? 3 : 6 });
-    for (let r = 2; r < R - 2; r += 2) {
-      const sp = 12 + hash(r, 1) * 18, len = 4 + Math.floor(hash(r, 2) * 7), period = (wx + 22) / sp, ph = hash(r, 3) * period, tl = (tt + ph) % period, head = Math.floor(tl * sp) - 4;
-      for (let j = 0; j < len; j++) { const c = head - j; if (c >= 1 && c < wx) out.push({ c, r, k: j === 0 ? 62 : 45, col: 4 }); }
+    const C = s.C, R = s.R, w = C >= 72, g = sheet(C, R), tt = reduce ? 3.3 : t;
+    const wx = Math.floor(C * (w ? 0.55 : 0.56)), nx = Math.floor(wx * 0.52), rx = wx + 5, per = R >= 26 ? 3 : 2;
+    const top = Math.max(2, Math.floor((R - 3 - ATT.length * per) / 2) + 1);
+    g.line(2, 0, [T("attack", 4)]); g.put(nx - 2, 0, "naive", 1); g.put(wx - 1, 0, "scruple", 2); if (w) g.put(rx + 2, 0, "caught by", 14);
+    const names = new Set(ATT.map((_, i) => top + i * per));
+    for (let r = 1; r < R - 1; r++) {
+      if (!names.has(r)) g.put(nx, r, r % 2 ? ":" : ".", 1);
+      g.put(wx, r, "|", 5); g.put(wx + 1, r, "#", 2); g.put(wx + 2, r, "#", 2); g.put(wx + 3, r, "|", 5);
+    }
+    ATT.forEach(([name, short, check, cshort, verdict], i) => {
+      const r0 = top + i * per, r1 = r0 + 1;
+      g.line(1, r0, [T(String(i + 1), 3), T(" " + (w ? name : short).slice(0, wx - 4), 14)]);
+      const ck = w ? check : cshort; g.put(rx, r0, ck.slice(0, C - 2 - rx), 5);
+      // the stream: it slips through the naive verifier, then breaks on the wall
+      const sp = 9 + hash(i, 1) * 9, len = 5 + Math.floor(hash(i, 2) * 4), period = (wx + 18) / sp, ph = hash(i, 3) * period, tl = (tt + ph) % period, head = Math.floor(tl * sp) - 3;
+      for (let j = 0; j < len; j++) { const c = head - j; if (c >= 1 && c < wx && c !== nx) g.put(c, r1, j === 0 ? ">" : AG[i], c > nx ? 4 : 7); }
+      if (head >= nx && head - len < nx) g.put(nx, r1, "*", 3);   // fooled: it passed
       const over = head - wx;
-      if (over >= 0 && over < 16) for (let q = 0; q < 6; q++) {
-        const a = hash(r, q + 9) * Math.PI - Math.PI / 2, d = over * (0.4 + hash(r, q + 20) * 0.6);
-        const c = Math.round(wx - 1 - Math.abs(Math.cos(a)) * d), rr = Math.round(r + Math.sin(a) * d * 0.45);
-        if (c > 0 && rr > 0 && rr < R - 1) out.push({ c, r: rr, k: ".,'*`:"[q].charCodeAt(0), col: q % 2 ? 4 : 3 });
+      if (over >= 0 && over < 12) {
+        for (let q = 0; q < 5; q++) {
+          const a = hash(i, q + 9) * Math.PI - Math.PI / 2, d = over * (0.35 + hash(i, q + 20) * 0.5);
+          const c = Math.round(wx - 1 - Math.abs(Math.cos(a)) * d), rr = Math.round(r1 + Math.sin(a) * d * 0.3);
+          if (c > nx && c < wx && rr > 0 && rr < R - 1) g.put(c, rr, ".,'*`"[q], q % 2 ? 4 : 3);
+        }
+        if (over < 4) { g.put(wx + 1, r1, "#", 3); g.put(wx + 2, r1, "#", 3); }
       }
-    }
-    const lab = (c, r, str, col) => { for (let i = 0; i < str.length; i++) if (str[i] !== " ") out.push({ c: c + i, r, k: str.charCodeAt(i), col }); };
-    lab(2, 0, "attacks", 4); lab(wx + 7, 0, "ledger", 2); lab(2, R - 1, "7 tried", 1); lab(wx + 7, R - 1, "0 through", 2);
-    return out;
-  }
-  function torus(s, t) {
-    const C = s.C, R = s.R, cw = s.cw, ch = s.ch, z = new Float32Array(C * R), out = new Map(), A = (reduce ? 1 : t * 0.6) + 0.8, B = (reduce ? 0.6 : t * 0.3) + 0.4;
-    const cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B), K1 = Math.min(C * cw, R * ch * 1.6) * 0.42, LUM = ".,-~:;=!*#$@";
-    for (let th = 0; th < 6.283; th += 0.06) {
-      const ct = Math.cos(th), st = Math.sin(th);
-      for (let ph = 0; ph < 6.283; ph += 0.02) {
-        const cph = Math.cos(ph), sph = Math.sin(ph), cx = 2 + ct, cyy = st;
-        const x = cx * (cB * cph + sA * sB * sph) - cyy * cA * sB, y = cx * (sB * cph - sA * cB * sph) + cyy * cA * cB, zz = 5 + cA * cx * sph + cyy * sA, ooz = 1 / zz;
-        const c = Math.round(C / 2 + K1 * ooz * x / cw), r = Math.round(R / 2 - K1 * ooz * y / ch * 0.98);
-        if (c < 0 || r < 0 || c >= C || r >= R) continue;
-        const L = cph * ct * sB - cA * ct * sph - sA * st + cB * (cA * st - ct * sA * sph), i = r * C + c;
-        if (ooz > z[i]) { z[i] = ooz; const li = Math.max(0, Math.floor(L * 8)); out.set(i, { c, r, k: LUM.charCodeAt(Math.min(LUM.length - 1, li)), col: li > 8 ? 3 : li > 5 ? 0 : li > 2 ? 2 : li > 0 ? 6 : 1 }); }
-      }
-    }
-    const res = [...out.values()];
-    const lab = (c, r, str, col) => { for (let i = 0; i < str.length; i++) if (str[i] !== " ") res.push({ c: c + i, r, k: str.charCodeAt(i), col }); };
-    lab(2, 1, "train", 2); lab(Math.floor(C / 2) - 4, R - 2, "evaluate", 3); lab(C - 7, 1, "ship", 0);
-    return res;
-  }
-  function rain(s, t) {
-    const C = s.C, R = s.R, out = [], G = "0123456789.-+", tt = reduce ? 4 : t;
-    for (let c = 1; c < C - 1; c += 2) {
-      const sp = 7 + hash(c, 1) * 16, len = 6 + Math.floor(hash(c, 2) * 16), per = (R + len) / sp, head = Math.floor(((tt + hash(c, 3) * per) % per) * sp);
-      for (let j = 0; j < len; j++) {
-        const r = head - j; if (r < 0 || r >= R) continue;
-        let k = G.charCodeAt(Math.floor(hash(c * 31 + r, Math.floor(tt * 6) + j) * G.length));
-        if (j === 0 && hash(c, 7) > 0.8) k = (hash(c, 8) > 0.5 ? "D" : "C").charCodeAt(0);
-        out.push({ c, r, k, col: j === 0 ? 0 : j < 3 ? 5 : j < len * 0.5 ? (hash(c, 5) > 0.85 ? 3 : 2) : j < len * 0.8 ? 6 : 1 });
-      }
-    }
-    return out;
+      const flash = over >= 0 && over < 8;
+      g.put(rx, r1, verdict.slice(0, C - 2 - rx), flash ? 0 : 2);
+      if (flash && rx + verdict.length + 2 < C - 2) g.put(rx + verdict.length + 1, r1, "<", 3);
+    });
+    g.line(2, R - 1, [T("naive: ", 1), T("fooled 7/7", 4)]);
+    const tail = w ? "scruple: 7/7 stopped, ledger intact" : "stopped 7/7";
+    g.line(Math.max(wx - 1, C - 3 - tail.length), R - 1, w ? [T("scruple: ", 1), T("7/7 stopped", 2), T(", ledger intact", 14)] : [T("stopped 7/7", 2)]);
+    return g.out;
   }
 
-  /* ---------- the field ---------- */
-  const cv = $("#field"), ctx = cv.getContext("2d");
-  let W = 0, H = 0, RATIO = 0.6;
-  const SIZES = [];  // font px per size class: 0 art, 1 text
-  const fonts = [];
-  const screens = [...document.querySelectorAll("[data-screen]")].map((el) => ({ el, kind: el.dataset.screen, C: 0, R: 0, ox: 0, oy: 0, cw: 0, ch: 0, sz: 0, dYaw: 0, dPitch: 0, cache: null, cacheT: -1, static: null, rect: null }));
-  const TEXT = { terminal: 1, bars: 1, chain: 1 };
-  const GEN = { wonder: wonderCells, terminal, bars, wall, torus, chain, rain, mark: markCells };
-  const ANIM = { wonder: 1, terminal: 1, wall: 1, torus: 1, rain: 1, mark: 1 };
-  function layout() {
-    const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.font = '500 100px "Martian Mono", ui-monospace, Menlo, monospace'; RATIO = ctx.measureText("M").width / 100;
-    SIZES[0] = W < 760 ? 9 : 10; SIZES[1] = W < 760 ? 9.5 : 10.5;
-    for (let i = 0; i < 2; i++) fonts[i] = `500 ${SIZES[i]}px "Martian Mono", ui-monospace, Menlo, monospace`;
-    for (const s of screens) {
-      const r = s.el.getBoundingClientRect();
-      s.sz = TEXT[s.kind] ? 1 : 0; s.cw = SIZES[s.sz] * RATIO; s.ch = Math.round(SIZES[s.sz] * 1.22);
-      s.C = Math.max(10, Math.floor((r.width - 20) / s.cw)); s.R = Math.max(5, Math.floor((r.height - 20) / s.ch));
-      s.el.dataset.grid = `${s.C} x ${s.R}`;
-      s.ox = (r.width - s.C * s.cw) / 2; s.oy = (r.height - s.R * s.ch) / 2; s.cache = null; s.static = null; s.grid = null; s.poses = null;
+  /* 04: one loop, three buyers. the stations are the product; the lines under them are an
+     illustrative stream (seeded, synthetic) of what each buyer reads from the same verifiers. */
+  const CTYPES = ["fraud", "not_received", "not_as_described", "late_evidence", "duplicate", "partial_refund"];
+  const hex = (a, b) => (Math.floor(hash(a, b) * 65536) | 0x1000).toString(16).slice(-4);
+  function laneLine(lane, n, w) {
+    const h = (k) => hash(n * 7 + lane, k);
+    if (lane === 0) {
+      const ct = CTYPES[Math.floor(h(1) * CTYPES.length)], rw = 0.2 + h(2) * 0.79, flag = h(3) > 0.82;
+      return [T(`ep-${hex(n, 11)}  `, 14), T(pad(w ? ct : ct.replace(/_/g, " ").slice(0, 11), w ? 17 : 12)), T("reward ", 14), T(rw.toFixed(2), flag ? 4 : 2),
+        T(flag ? (w ? "  flag: claimed_cost_mismatch" : "  flagged") : (w ? "  17/17 verifiers, ledger ok" : "  ledger ok"), flag ? 4 : 14)];
     }
-    buildAtlas();
+    if (lane === 1) {
+      const bad = h(4) > 0.78, worst = bad ? (1 + h(5) * 11).toFixed(2) : "0.00";
+      return [T(`r${100 + n}  `, 14), T(w ? "6/6 case types  " : "6 types  "), T("worst ", 14), T(`+$${worst}`, bad ? 4 : 0), T("  "), T(bad ? "BLOCK" : "PASS", bad ? 4 : 2)];
+    }
+    const st = [["shadow", "PROMOTE", 2], ["canary", "CANARY_PASSED", 2], ["approve", "ACTIVATED", 2], ["shadow", "BLOCK", 4], ["rollback", "ROLLED_BACK", 3]][Math.floor(h(6) * 5)];
+    return [T(`dec-${String(10 + n).padStart(5, "0")}  `, 14), T(pad(st[0], 9)), T(pad(st[1], 14), st[2]), T(w && st[1] === "ACTIVATED" ? "named approver" : "", 14)];
+  }
+  function loop(s, t) {
+    const C = s.C, R = s.R, w = C >= 72, g = sheet(C, R), tt = reduce ? 6 : t;
+    const gap = w ? 8 : 3, bw = Math.floor((C - 3 - 2 * gap) / 3), xs = [1, 1 + bw + gap, 1 + 2 * (bw + gap)];
+    const NAMES = ["TRAIN", "EVALUATE", "SHIP"], SUB = w ? ["episodes, rewards", "17 verifiers", "gate, canary, approver"] : ["episodes", "17 checks", "the gate"];
+    const box = (x, r, name, sub, hot) => {
+      g.put(x, r, "+" + "-".repeat(bw - 2) + "+", hot ? 3 : 1); g.put(x, r + 3, "+" + "-".repeat(bw - 2) + "+", hot ? 3 : 1);
+      for (const rr of [r + 1, r + 2]) { g.put(x, rr, "|", hot ? 3 : 1); g.put(x + bw - 1, rr, "|", hot ? 3 : 1); }
+      g.put(x + Math.floor((bw - name.length) / 2), r + 1, name, hot ? 3 : 0); g.put(x + Math.max(1, Math.floor((bw - sub.length) / 2)), r + 2, sub.slice(0, bw - 2), 14);
+    };
+    const by = 1, phase = (tt * 0.5) % 3, hot = Math.floor(phase);
+    NAMES.forEach((n, i) => box(xs[i], by, n, SUB[i], hot === i));
+    // forward arrows with packets; the return path along the bottom
+    const PK = [["o", 5], ["$", 3]];
+    for (let i = 0; i < 2; i++) {
+      const a = xs[i] + bw, b = xs[i + 1] - 1, r = by + 1;
+      for (let c = a; c < b; c++) g.put(c, r, "-", 1); g.put(b - 1, r, ">", 1);
+      for (let q = 0; q < 2; q++) { const c = a + Math.floor((((tt * (w ? 5 : 3)) + q * (b - a) / 2) % (b - a))); g.put(c, r, PK[i][0], PK[i][1]); }
+    }
+    const ry = by + 5, l = xs[0] + 2, rr = xs[2] + bw - 3;
+    g.put(rr, by + 4, "|", 1); g.put(l, by + 4, "^", 1);
+    for (let c = l; c <= rr; c++) g.put(c, ry, c === l || c === rr ? "+" : "-", 1);
+    const lbl = w ? " next policy, same verifiers " : " next policy ", lx = Math.floor((l + rr - lbl.length) / 2);
+    g.put(lx, ry, lbl, 14);
+    for (let q = 0; q < 3; q++) { const span = rr - l, c = rr - Math.floor(((tt * (w ? 6 : 4)) + q * span / 3) % span); if (c < lx || c >= lx + lbl.length) g.put(c, ry, "<", 2); }
+    // the three buyers, each reading the same loop
+    const LANES = [["AI LABS", "train on it"], ["BUILDERS", "evaluate on it"], ["BANKS", "ship through it"]];
+    const rest = R - (ry + 2) - 1, per = Math.max(2, Math.min(5, Math.floor(rest / 3) - 1)), step = 1.3;
+    let r = ry + 2;
+    LANES.forEach(([who, verb], lane) => {
+      g.line(1, r, [T(pad(who, 10), lane === hot ? 3 : 0), T(verb, 14)]);
+      const n = Math.floor((tt + lane * 0.43) / step), fresh = (tt + lane * 0.43) / step - n;
+      for (let j = 0; j < per - 1; j++) {
+        const k = n - (per - 2 - j), spans = laneLine(lane, k, w);
+        const newest = j === per - 2 && fresh < 0.35 && !reduce;
+        g.line(3, r + 1 + j, newest ? spans.map(([x2, c2]) => [x2, c2 === 14 ? 0 : c2]) : spans);
+      }
+      r += per + (rest >= per * 3 + 2 ? 1 : 0);
+    });
+    if (r <= R - 1) g.put(2, R - 1, w ? "illustrative stream, synthetic: ids and rewards are not results" : "illustrative stream, synthetic", 1);
+    return g.out;
+  }
+
+  /* 05: the audit chain of one scruple demo run, all 20 entries. each entry stores the hash of
+     the one before; a verifier walks the chain. edit entry 14 and every link after it fails. */
+  const CHH = ["00000000", "908e097b", "7fe97696", "5d0520f8", "091910f8", "8e8010ce", "e6adba29", "82a72055", "581c02c9", "e3f24706", "ea17e136",
+    "55b5f84d", "142ac3bb", "7b58dc43", "8d1e1852", "545c8fb7", "0dc02c1a", "61506296", "a227c28b", "11f7633d", "f0296364"];
+  const CHE = [
+    ["baseline_imported", "high-value-escalate"], ["baseline_imported", "late-evidence-accept"], ["baseline_imported", "duplicate-contest"],
+    ["baseline_imported", "fraud-3ds-contest"], ["baseline_imported", "refund-contest"], ["baseline_imported", "fx-contest"],
+    ["registered", "rule A, candidate"], ["status_changed", "A: candidate > shadow"], ["decision", "dec-00001 promote"], ["status_changed", "A: shadow > canary"],
+    ["decision", "dec-00002 canary_passed"], ["registered", "rule B, candidate"], ["status_changed", "B: candidate > shadow"], ["decision", "dec-00003 block"],
+    ["status_changed", "B: shadow > rejected"], ["decision", "dec-00004 activated"], ["activated", "A: canary > active"], ["decision", "dec-00005 rolled_back"],
+    ["rolled_back", "A: active > retired"], ["decision", "dec-00006 healthy"]];
+  const HEAD = "f0296364b2c03143";
+  let tampered = false;
+  function chain(s, t) {
+    const C = s.C, R = s.R, w = C >= 84, g = sheet(C, R), lt = since(s, t);
+    if (s.scanFrom == null) s.scanFrom = lt;
+    const n = CHE.length, rate = 9, cyc = n / rate + 3.2, x = reduce ? 1e6 : (lt - s.scanFrom), at = reduce || tampered ? Math.min(n + 1, x * rate) : (x % cyc) * rate;
+    const scan = Math.floor(at);
+    const top = Math.max(0, Math.floor((R - n - 4) / 2)), hl = w ? 8 : 6, ex = w ? 5 : 4, ev = w ? 18 : 17, dt = w ? 24 : 0;
+    const px = ex + ev + 1 + dt, ax = px + hl + 1, hx = ax + (w ? 3 : 2), cx = hx + hl + 2;
+    g.line(1, top, [T(w ? "seq" : "#", 1)]); g.put(ex, top, "event", 1); if (w) g.put(ex + ev + 1, top, "what", 1);
+    g.put(px, top, "prev", 1); g.put(hx, top, "hash", 1); g.put(cx, top, "check", 1);
+    for (let i = 0; i < n; i++) {
+      const seq = i + 1, r = top + 1 + i, done = scan > i, cur = scan === i && !reduce;
+      const bad = tampered && seq >= 14 && done, edited = tampered && seq === 14;
+      const [e, what] = CHE[i];
+      g.put(1, r, lpad(String(seq), w ? 3 : 2), cur ? 3 : bad ? 4 : 14);
+      g.put(ex, r, e, edited ? 4 : e === "decision" ? 0 : 14);
+      if (w) g.put(ex + ev + 1, r, edited ? "dec-00003 block>promote" : what, edited ? 4 : what.includes("block") ? 4 : 14);
+      const pc = cur ? 3 : bad && !edited ? 4 : 6, hc = cur ? 3 : bad ? 4 : 0;
+      g.put(px, r, CHH[i].slice(0, hl), pc); g.put(ax, r, w ? "->" : ">", bad ? 4 : 1); g.put(hx, r, CHH[i + 1].slice(0, hl), hc);
+      // the link: this entry's prev is the hash on the row above
+      if (cur && i > 0) g.put(hx + hl, r - 1, "<", 3);
+      const st = !done ? (cur ? "..." : "") : !bad ? "ok" : edited ? (w ? "hash != body" : "EDITED") : (w ? "prev broken" : "BROKEN");
+      g.put(cx, r, st, !done ? 3 : bad ? 4 : 2);
+    }
+    const r = top + n + 2;
+    if (tampered && scan >= 14) g.line(1, r, [T("verify: ", 14), T(w ? "TAMPERING DETECTED at entry 14, 7 links fail" : "TAMPERING at entry 14", 4)]);
+    else if (scan >= n) g.line(1, r, [T("verify: ", 14), T("INTEGRITY OK", 2), T(w ? `  20 entries, head ${HEAD}` : "  head f0296364", 14)]);
+    else g.line(1, r, [T("verify: ", 14), T(`walking the chain ${String(Math.min(n, scan + 1)).padStart(2)}/${n}`, 3)]);
+    if (r + 1 < R) g.put(1, r + 1, w ? "SHA-256, from scruple demo; hashes shown to 8 of 64 hex" : "SHA-256, scruple demo", 1);
+    return g.out;
+  }
+
+  /* 06: the journal in replay, double entry. every entry posts a debit and an equal credit;
+     the totals and the account balances are checked as they run. amounts are synthetic. */
+  const KINDS = [["capture", "cardholder", "merchant"], ["refund", "merchant", "cardholder"], ["chargeback_debit", "merchant", "cardholder"],
+    ["fee:chargeback", "merchant", "processor:fees"], ["fee:arbitration_loss", "merchant", "network:fees"], ["chargeback_reversal", "cardholder", "merchant"]];
+  const ACC = ["cardholder:*", "merchant:*", "processor:fees", "network:fees"], AIX = { cardholder: 0, merchant: 1, "processor:fees": 2, "network:fees": 3 };
+  function journalEntry(n) {
+    // a case: capture, then mostly a dispute and its fee, sometimes a refund or a reversal
+    const cs = Math.floor(n / 3), j = n % 3, h = (k) => hash(cs, k), amt = Math.round((12 + h(1) * 460) * 100) / 100;
+    const txn = "t-" + hex(cs, 5), m = "m-" + String(1 + Math.floor(h(2) * 40)).padStart(2, "0");
+    let kind;
+    if (j === 0) kind = 0; else if (j === 1) kind = h(3) < 0.22 ? 1 : 2; else kind = h(4) < 0.7 ? 3 : h(4) < 0.86 ? 4 : 5;
+    const a = kind === 3 ? 15 : kind === 4 ? 25 : kind === 1 ? Math.round(amt * (0.3 + h(6) * 0.7) * 100) / 100 : amt;
+    const K = KINDS[kind], acct = (x) => (x === "cardholder" ? "cardholder:" + txn : x === "merchant" ? "merchant:" + m : x);
+    return { id: "je-" + String(n + 1).padStart(5, "0"), kind: K[0], dr: acct(K[1]), cr: acct(K[2]), dAcc: AIX[K[1]], cAcc: AIX[K[2]], a };
+  }
+  function ledger(s, t) {
+    const C = s.C, R = s.R, w = C >= 80, g = sheet(C, R), lt = since(s, t), x = reduce ? 30 : lt;
+    const jw = w ? 52 : C - 3, side = w ? 1 + jw + 3 : 0, body = R - 4;
+    const rows = body + Math.floor(x * 4), last = Math.floor(rows / 3);   // a new posting line every quarter second
+    // totals so far, kept incrementally
+    const L = s.led || (s.led = { n: 0, D: 0, Cr: 0, bal: [0, 0, 0, 0], cache: new Map() });
+    if (L.n > last + 1) { L.n = 0; L.D = 0; L.Cr = 0; L.bal = [0, 0, 0, 0]; }
+    while (L.n <= last) { const e = journalEntry(L.n); L.D += e.a; L.Cr += e.a; L.bal[e.dAcc] += e.a; L.bal[e.cAcc] -= e.a; L.n++; }
+    const amtW = w ? 10 : 9, aw = jw - 9 - amtW * 2;
+    g.line(2, 0, [T(pad("entry / account", aw + 3), 1), T(lpad("debit", amtW), 1), T(lpad("credit", amtW), 1), T(lpad("sum", 4), 1)]);
+    g.put(1, 1, "-".repeat(jw), 1);
+    // the visible window: the last `body` posting lines, three per entry
+    const end = rows, start = Math.max(0, end - body);
+    for (let q = start; q < end; q++) {
+      const e = journalEntry(Math.floor(q / 3)), part = q % 3, r = 2 + q - start, fresh = q === end - 1 && !reduce;
+      if (part === 0) { g.line(1, r, [T(e.id + " ", 14), T(e.kind, fresh ? 0 : 3)]); }
+      else if (part === 1) { g.line(3, r, [T("Dr ", 1), T(pad(e.dr, aw - 1), fresh ? 0 : 14), T(lpad(money(e.a), amtW), fresh ? 0 : 5)]); }
+      else { g.line(3, r, [T("Cr ", 1), T(pad(e.cr, aw - 1), fresh ? 0 : 14), T(" ".repeat(amtW)), T(lpad(money(e.a), amtW), fresh ? 0 : 2)]); g.put(jw - 1, r, "0", 2); }
+    }
+    g.put(1, R - 2, "-".repeat(jw), 1);
+    g.line(2, R - 1, [T(pad("totals", aw + 3), 14), T(lpad(money(L.D), amtW), 5), T(lpad(money(L.Cr), amtW), 2)]);
+    if (!w) return g.out;
+    // balances by account, and the invariant: they sum to zero
+    let r = 0;
+    g.put(side, r++, "balances", 1); g.put(side, r++, "-".repeat(C - 2 - side), 1);
+    const bw2 = C - 2 - side;
+    ACC.forEach((a, i) => { g.line(side, r, [T(pad(a, bw2 - 11), 14), T(lpad(money(L.bal[i]), 11), L.bal[i] < 0 ? 7 : 0)]); r++; });
+    g.put(side, r++, "-".repeat(bw2), 1);
+    const sum = L.bal.reduce((p, v) => p + v, 0);
+    g.line(side, r++, [T(pad("sum", bw2 - 11), 14), T(lpad(money(Math.abs(sum) < 0.005 ? 0 : sum), 11), 2)]);
+    r++;
+    g.line(side, r++, [T("entries  ", 14), T(String(L.n))]);
+    g.line(side, r++, [T("postings ", 14), T(String(L.n * 2))]);
+    g.line(side, r++, [T("debits = credits ", 14), T("ok", 2)]);
+    g.line(side, r++, [T("no money invented ", 14), T("ok", 2)]);
+    r++;
+    g.put(side, r++, "synthetic replay;", 1); g.put(side, r++, "amounts illustrative", 1);
+    return g.out;
+  }
+
+  /* ---------- the screens: each draws into its own canvas ----------
+     A canvas inside each screen scrolls with the page on the compositor, so the glyphs never
+     trail their frames. A screen redraws only while it is in view, and only when its 24 fps
+     ambient tick moves on (or when it is dragged or changed). */
+  const mcv = document.createElement("canvas").getContext("2d");
+  let RATIO = 0.6, DPR = 1;
+  const SIZES = [];  // font px per size class: 0 art, 1 text
+  const screens = [...document.querySelectorAll("[data-screen]")].map((el) => {
+    const cv = document.createElement("canvas"); cv.className = "scr-cv"; cv.setAttribute("aria-hidden", "true"); el.appendChild(cv);
+    return { el, cv, ctx: cv.getContext("2d"), kind: el.dataset.screen, C: 0, R: 0, ox: 0, oy: 0, cw: 0, ch: 0, sz: 0, w: 0, h: 0, dYaw: 0, dPitch: 0, cache: null, cacheT: -1, vis: false, dirty: true, tick: -1 };
+  });
+  const byEl = new Map(screens.map((s) => [s.el, s]));
+  const ART = { wonder: 1, mark: 1 };
+  const GEN = { wonder: wonderCells, terminal, bars, wall, loop, chain, ledger, mark: markCells };
+  const fcv = $("#field"), fctx = fcv.getContext("2d");
+  let W = innerWidth, H = innerHeight;
+  function layout() {
+    W = innerWidth; H = innerHeight;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    mcv.font = '500 100px "Martian Mono", ui-monospace, Menlo, monospace';
+    const ratio = mcv.measureText("M").width / 100, s0 = W < 760 ? 9 : 10, s1 = W < 760 ? 9.5 : 10.5;
+    const fresh = ratio !== RATIO || dpr !== DPR || s0 !== SIZES[0] || s1 !== SIZES[1] || !ATLAS.length;
+    RATIO = ratio; DPR = dpr; SIZES[0] = s0; SIZES[1] = s1;
+    if (fresh) buildAtlas();
+    for (const s of screens) {
+      const w = s.el.clientWidth, h = s.el.clientHeight;
+      if (!fresh && w === s.w && h === s.h) continue;
+      s.w = w; s.h = h;
+      s.cv.width = Math.round(w * DPR); s.cv.height = Math.round(h * DPR);
+      s.sz = ART[s.kind] ? 0 : 1; s.cw = SIZES[s.sz] * RATIO; s.ch = Math.round(SIZES[s.sz] * 1.22);
+      s.C = Math.max(10, Math.floor((w - 20) / s.cw)); s.R = Math.max(5, Math.floor((h - 20) / s.ch));
+      s.el.dataset.grid = `${s.C} x ${s.R}`;
+      s.ox = (w - s.C * s.cw) / 2; s.oy = (h - s.R * s.ch) / 2; s.cache = null; s.grid = null; s.poses = null; s.script = null; s.dirty = true;
+    }
     if (screens[0] && screens[0].kind === "wonder") atmosphere(screens[0]);
+    if (!I.done) { fcv.width = Math.round(W * DPR); fcv.height = Math.round(H * DPR); }
   }
   let frameNo = 0;
-  const PRESORTED = { wonder: 1 };
   function cellsOf(s, t) {
-    if (!ANIM[s.kind] && s.static) return s.static;
     if (s.cache && s.cacheT === frameNo) return s.cache;
-    const raw = GEN[s.kind](s, t), cells = PRESORTED[s.kind] ? raw : raw.sort((a, b) => (a.c - b.c) || (a.r - b.r));
-    for (const c of cells) c.u = c.c / s.C;
-    s.cache = cells; s.cacheT = frameNo; s.dirty = false;
-    if (!ANIM[s.kind]) s.static = cells;
-    return cells;
+    s.cache = GEN[s.kind](s, t); s.cacheT = frameNo;
+    return s.cache;
   }
   const NCOL = PAL.length, buckets = [0, 1].map(() => Array.from({ length: NCOL }, () => []));
-  // pre-rendered glyph sheets, one per size and colour (printable ASCII)
-  let ATLAS = [], GW = [], GH = [], DPR = 1;
+  // pre-rendered glyph sheets, one per size and colour (printable ASCII), shared by every canvas
+  let ATLAS = [], GW = [], GH = [];
   function buildAtlas() {
-    DPR = Math.min(devicePixelRatio || 1, 2); ATLAS = [];
+    ATLAS = [];
     for (let sz = 0; sz < 2; sz++) {
       GW[sz] = Math.ceil(SIZES[sz] * RATIO * DPR) + 2; GH[sz] = Math.ceil(SIZES[sz] * 1.3 * DPR) + 2;
       ATLAS[sz] = [];
@@ -709,36 +943,43 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       }
     }
   }
+  // glyphs are queued by size and colour, then copied from the atlas in device pixels
   const emit = (sz, x, y, k, col) => buckets[sz][col].push(x, y, k);
-  function flush() {
+  function flush(x) {
     for (let sz = 0; sz < 2; sz++) {
-      const gw = GW[sz], gh = GH[sz], dw = gw / DPR, dh = gh / DPR;
+      const gw = GW[sz], gh = GH[sz];
       for (let col = 0; col < NCOL; col++) {
         const b = buckets[sz][col]; if (!b.length) continue; const a = ATLAS[sz][col];
         for (let i = 0; i < b.length; i += 3) {
           const g = b[i + 2] - 32; if (g <= 0 || g > 94) continue;
-          ctx.drawImage(a, g * gw, 0, gw, gh, Math.round(b[i] * DPR - 1) / DPR, Math.round(b[i + 1] * DPR - 1) / DPR, dw, dh);
+          x.drawImage(a, g * gw, 0, gw, gh, Math.round(b[i] * DPR) - 1, Math.round(b[i + 1] * DPR) - 1, gw, gh);
         }
         b.length = 0;
       }
     }
   }
-  const visible = (r) => r.bottom > -40 && r.top < H + 40;
-  function drawScreen(s, t) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy; for (const c of cellsOf(s, t)) emit(s.sz, x0 + c.c * s.cw, y0 + c.r * s.ch, c.k, c.col); }
-  // corner ticks frame every screen but the hero, settled or in flight: four atlas glyphs each
-  function corners(s) { const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, x1 = x0 + (s.C - 1) * s.cw, y1 = y0 + (s.R - 1) * s.ch; emit(s.sz, x0, y0, 43, 1); emit(s.sz, x1, y0, 43, 1); emit(s.sz, x0, y1, 43, 1); emit(s.sz, x1, y1, 43, 1); }
+  // corner ticks frame every screen but the hero: four atlas glyphs each
+  function corners(s) { const x0 = s.ox, y0 = s.oy, x1 = x0 + (s.C - 1) * s.cw, y1 = y0 + (s.R - 1) * s.ch; emit(s.sz, x0, y0, 43, 1); emit(s.sz, x1, y0, 43, 1); emit(s.sz, x0, y1, 43, 1); emit(s.sz, x1, y1, 43, 1); }
+  function drawScreen(s, t, tick) {
+    const x = s.ctx; x.clearRect(0, 0, s.cv.width, s.cv.height);
+    if (s === screens[0] && stir.live.length) drawStirred(s, t, tick);
+    else for (const c of cellsOf(s, t)) emit(s.sz, s.ox + c.c * s.cw, s.oy + c.r * s.ch, c.k, c.col);
+    if (s.kind !== "wonder") corners(s);
+    flush(x);
+    if (s.kind === "wonder") glow(s);
+  }
   /* ---------- the hero glows: a soft bloom of its own glyphs, and an atmosphere behind the globe ---------- */
-  const GLOW = "filter" in ctx;
+  // the bloom is blurred at a quarter of the resolution and scaled back up: the same soft glow
+  // for a sixteenth of the pixels
+  const GLOW = "filter" in fctx, gcv = document.createElement("canvas"), gx = gcv.getContext("2d");
   function glow(s) {
-    if (!GLOW || !visible(s.rect)) return;
-    const r = s.rect, dpr = cv.width / W;
-    const x = Math.max(0, r.left), y = Math.max(0, r.top), w = Math.min(W, r.right) - x, h = Math.min(H, r.bottom) - y;
-    if (w <= 0 || h <= 0) return;
-    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.beginPath(); ctx.rect(x * dpr, y * dpr, w * dpr, h * dpr); ctx.clip();
-    ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.32; ctx.filter = `blur(${Math.round(5 * dpr)}px)`;
-    ctx.drawImage(cv, x * dpr, y * dpr, w * dpr, h * dpr, x * dpr, y * dpr, w * dpr, h * dpr);
-    ctx.restore();
+    if (!GLOW) return;
+    const q = 4, w = Math.ceil(s.cv.width / q), h = Math.ceil(s.cv.height / q);
+    if (gcv.width !== w || gcv.height !== h) { gcv.width = w; gcv.height = h; }
+    gx.clearRect(0, 0, w, h); gx.filter = `blur(${(5 * DPR / q).toFixed(2)}px)`; gx.drawImage(s.cv, 0, 0, w, h);
+    const x = s.ctx; x.save();
+    x.globalCompositeOperation = "lighter"; x.globalAlpha = 0.32; x.imageSmoothingEnabled = true;
+    x.drawImage(gcv, 0, 0, s.cv.width, s.cv.height); x.restore();
   }
   function atmosphere(s) {
     // where globe.js puts the blue marble: centre (0.57, 0.5) of the grid, radius 0.47 U
@@ -747,7 +988,9 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     s.el.style.background = `radial-gradient(circle at ${gx.toFixed(0)}px ${gy.toFixed(0)}px, rgba(40, 110, 230, 0.07) 0, rgba(40, 110, 230, 0.07) ${(r * 0.82).toFixed(0)}px, rgba(70, 165, 255, 0.2) ${(r * 1.01).toFixed(0)}px, rgba(50, 120, 240, 0.07) ${(r * 1.14).toFixed(0)}px, transparent ${(r * 1.4).toFixed(0)}px), var(--scr-bg)`;
   }
 
-  /* ---------- intro: a chat, then the earth takes the screen ---------- */
+  /* ---------- intro: a chat, then the earth takes the screen ----------
+     The one place a full-viewport canvas is right: the earth grows past the hero's frame. When
+     it has settled, the field is cleared and hidden, and the hero's own canvas takes over. */
   const introOn = root.classList.contains("intro");
   const I = { t0: 0, done: !introOn, full: null, stage: -1 };
   const TL = { typingA: 0.15, msgA: 0.55, typingB: 1.05, msgB: 1.4, strike: 2.1, take: 2.5, sweep: 0.7, hold: 3.4, collapse: 0.9 };
@@ -758,11 +1001,14 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   const chatStruck = themMsg.querySelector(".struck");
   function typingEl(right) { const d = document.createElement("div"); d.className = "typing" + (right ? " right" : ""); d.textContent = "."; return d; }
   function finishIntro() {
-    if (I.done) return; I.done = true; root.classList.remove("intro"); cv.style.zIndex = "";
-    // a link straight to a section (#proof) lands settled once the field is live
-    if (location.hash) requestAnimationFrame(() => settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))));
+    if (I.done) return; I.done = true; root.classList.remove("intro");
+    fctx.clearRect(0, 0, fcv.width, fcv.height); fcv.style.display = "none"; fcv.width = fcv.height = 0;
+    screens[0].dirty = true; kick();
+    // a link straight to a section (#proof) lands there once the intro is gone
+    if (location.hash) { const el = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (el) el.scrollIntoView(); }
   }
   if (introOn) {
+    fcv.style.display = "block";
     chatStruck.style.backgroundSize = "0% 0.09em"; chatStruck.style.color = "inherit";
     ["wheel", "touchstart", "keydown"].forEach((ev) => addEventListener(ev, finishIntro, { passive: true, once: true }));
     $("#skip").addEventListener("click", finishIntro);
@@ -789,6 +1035,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   let tyA = null, tyB = null;
   function introFrame(now) {
     const t = (now - I.t0) / 1000;
+    fctx.clearRect(0, 0, fcv.width, fcv.height);
     const dots = ".  ,.. ,...".split(",")[Math.floor(t * 4) % 3];
     if (t >= TL.typingA && !tyA) { tyA = typingEl(false); chatBody.appendChild(tyA); }
     if (tyA && t < TL.msgA) tyA.textContent = "dispute-agent-01 is typing " + dots;
@@ -802,8 +1049,8 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       const k = ease(clamp01((t - TL.strike) / 0.4)), st = themMsg.querySelector(".struck");  // re-query: the reveal rebuilds the markup
       if (st) { st.style.backgroundSize = `${(k * 100).toFixed(1)}% 0.09em`; st.style.color = k > 0.5 ? "" : "inherit"; }
     }
-    if (t < TL.take) return false;
-    // the chosen scene takes the whole screen, then settles into the first screen
+    if (t < TL.take) return;
+    // the earth takes the whole screen, then settles into the hero
     const hero = screens[0];
     if (!I.fg) {
       const cwF = SIZES[0] * RATIO, chF = Math.round(SIZES[0] * 1.22), fs = { C: Math.floor(W / cwF), R: Math.floor(H / chF), cw: cwF, ch: chF };
@@ -811,11 +1058,11 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     }
     if (!I.frozen || t < TL.hold) { I.full = cellsFromGrid(I.fg, t); I.full.forEach((c) => (c.u = c.c / I.fs.C)); if (t >= TL.hold) I.frozen = true; }
     const k = t - TL.take, grow = ease(clamp01(k / 0.35)), shrink = ease(clamp01((t - TL.hold) / TL.collapse));
-    if (shrink > 0 && root.classList.contains("intro")) { root.classList.remove("intro"); cv.style.zIndex = "45"; }
-    const hr = hero.rect, lerp = (a, b, x) => a + (b - a) * x, g = grow * (1 - shrink);
-    const centre = { l: W / 2 - 40, t: H / 2 - 20, r: W / 2 + 40, b: H / 2 + 20 }, from = shrink > 0 ? hr : centre;
-    const bx = { l: lerp(from.l ?? from.left, 0, g), t: lerp(from.t ?? from.top, 0, g), r: lerp(from.r ?? from.right, W, g), b: lerp(from.b ?? from.bottom, H, g) };
-    ctx.fillStyle = SCRBG; ctx.fillRect(bx.l, bx.t, bx.r - bx.l, bx.b - bx.t);
+    if (shrink > 0 && root.classList.contains("intro")) root.classList.remove("intro");
+    const hr = hero.el.getBoundingClientRect(), lerp = (a, b, x) => a + (b - a) * x, g = grow * (1 - shrink);
+    const centre = { left: W / 2 - 40, top: H / 2 - 20, right: W / 2 + 40, bottom: H / 2 + 20 }, from = shrink > 0 ? hr : centre;
+    const bx = { l: lerp(from.left, 0, g), t: lerp(from.top, 0, g), r: lerp(from.right, W, g), b: lerp(from.bottom, H, g) };
+    fctx.fillStyle = SCRBG; fctx.fillRect(bx.l * DPR, bx.t * DPR, (bx.r - bx.l) * DPR, (bx.b - bx.t) * DPR);
     const fs = I.fs, sweep = clamp01((k - 0.15) / TL.sweep), ox = (W - fs.C * fs.cw) / 2, oy = (H - fs.R * fs.ch) / 2;
     const at = (c) => [ox + c.c * fs.cw, oy + c.r * fs.ch];
     if (t < TL.hold) {
@@ -826,7 +1073,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         const [x, y] = at(c); emit(0, x, y, kk, col);
       }
     } else {
-      const B = cellsOf(hero, t), x1 = hero.rect.left + hero.ox, y1 = hero.rect.top + hero.oy, n = I.full.length;
+      const B = cellsOf(hero, t), x1 = hr.left + hero.el.clientLeft + hero.ox, y1 = hr.top + hero.el.clientTop + hero.oy, n = I.full.length;
       for (let i = 0; i < n; i++) {
         const a = I.full[i], b = B[Math.floor(i * B.length / n)], e = ease(clamp01((shrink - a.u * 0.3) / 0.7));
         const [sx, sy] = at(a), tx = x1 + b.c * hero.cw, ty = y1 + b.r * hero.ch, arc = Math.sin(Math.PI * e) * (hash(i, 5) - 0.5) * 120;
@@ -834,57 +1081,17 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         emit(0, sx + (tx - sx) * e + arc, sy + (ty - sy) * e, kk, e > 0.8 ? b.col : e < 0.2 ? a.col : 5);
       }
     }
-    if (t >= T_END) { finishIntro(); cv.style.zIndex = ""; }
-    return true;
+    flush(fctx);
+    if (t >= T_END) finishIntro();
   }
-
-  /* ---------- scroll position, anchored so the last screen always completes ---------- */
-  function anchorsAt(sy) {
-    const max = Math.max(0, document.documentElement.scrollHeight - H), anchors = [];
-    for (const s of screens) {
-      let a = s.rect.top + sy + s.rect.height / 2 - H / 2;
-      a = Math.max(0, Math.min(max, a));
-      if (anchors.length && a <= anchors[anchors.length - 1] + 1) a = anchors[anchors.length - 1] + 1;
-      anchors.push(a);
-    }
-    const last = screens.length - 1;
-    // if clamping pushed the last anchor past the end of the page, pull it back
-    for (let j = last; j > 0 && anchors[j] > max; j--) anchors[j] = Math.max(anchors[j - 1] + 1, max - (last - j));
-    return anchors;
-  }
-
-  /* ---------- nav jumps land where the target screen has fully settled ---------- */
-  // A plain anchor jump stops the scroll between two screens, mid-flight. Land at the
-  // point nearest the section's natural position inside the target's settled band.
-  function settleTo(target) {
-    if (!I.done || !target) return false;
-    for (const s of screens) s.rect = s.el.getBoundingClientRect();
-    const j = screens.findIndex((s) => target.contains(s.el));
-    if (j < 0) return false;
-    const sy = scrollY, a = anchorsAt(sy), last = screens.length - 1;
-    // what the bar covers once stuck: its height less the part that sticks above the top
-    const be = document.querySelector(".bar"), bar = be ? Math.max(0, be.offsetHeight + (parseFloat(getComputedStyle(be).top) || 0)) : 0;
-    const natural = target.getBoundingClientRect().top + sy - bar;
-    const lo = j > 0 ? a[j] - 0.09 * (a[j] - a[j - 1]) : 0;
-    const hi = j < last ? a[j] + 0.09 * (a[j + 1] - a[j]) : a[j];
-    scrollTo({ top: Math.round(Math.max(lo, Math.min(hi, natural))), behavior: "instant" });
-    force = true;
-    return true;
-  }
-  addEventListener("click", (e) => {
-    const link = e.target.closest && e.target.closest('a[href^="#"]');
-    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
-    const id = decodeURIComponent(link.getAttribute("href").slice(1));
-    if (id && settleTo(document.getElementById(id))) { e.preventDefault(); history.pushState(null, "", "#" + id); }
-  });
-  addEventListener("popstate", () => { if (location.hash) settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))); });
 
   /* ---------- the hero stirs under the pointer ----------
      Fine pointers only, never under reduced motion. While the pointer moves over the settled hero,
      glyphs within a few cells of it gather a little energy: they re-roll toward the CODE set and
      lean the way the pointer travels, then settle back over about a second. Energy lives in one
-     array, stepped with the 24 fps ambient tick; only cells that hold some are visited. */
-  const stir = { on: false, x: 0, y: 0, vx: 0, vy: 0, wx: 0, wy: 0, moved: false, E: null, live: [], tick: -1 };
+     array, stepped with the 24 fps ambient tick; only cells that hold some are visited.
+     The pointer is kept in the hero's own coordinates, so scrolling never moves it. */
+  const stir = { on: false, x: 0, y: 0, cx: 0, cy: 0, vx: 0, vy: 0, wx: 0, wy: 0, moved: false, E: null, live: [], tick: -1 };
   function stirClear() { if (!stir.live.length) return; for (const j of stir.live) stir.E[j] = 0; stir.live.length = 0; }
   function stirStep(s) {
     const C = s.C, R = s.R;
@@ -895,7 +1102,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     live.length = n;
     stir.wx = stir.wx * 0.7 + stir.vx * 0.3; stir.wy = stir.wy * 0.7 + stir.vy * 0.3;
     if (!stir.on || !stir.moved) { stir.vx = stir.vy = 0; return; }
-    const pc = (stir.x - s.rect.left - s.ox) / s.cw, pr = (stir.y - s.rect.top - s.oy) / s.ch, RC = 7, RR = 3.5;
+    const pc = (stir.x - s.ox) / s.cw, pr = (stir.y - s.oy) / s.ch, RC = 7, RR = 3.5;
     const amt = Math.min(1, 0.4 + Math.hypot(stir.vx, stir.vy) / 90) * 0.32;
     for (let r = Math.max(0, Math.ceil(pr - RR)); r <= Math.min(R - 1, Math.floor(pr + RR)); r++)
       for (let c = Math.max(0, Math.ceil(pc - RC)); c <= Math.min(C - 1, Math.floor(pc + RC)); c++) {
@@ -906,7 +1113,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     stir.vx = stir.vy = 0; stir.moved = false;
   }
   function drawStirred(s, t, tick) {
-    const x0 = s.rect.left + s.ox, y0 = s.rect.top + s.oy, E = stir.E, C = s.C;
+    const x0 = s.ox, y0 = s.oy, E = stir.E, C = s.C;
     const wl = Math.hypot(stir.wx, stir.wy), m = Math.min(1, wl / 30) / (wl || 1), lx = stir.wx * m * s.cw * 1.4, ly = stir.wy * m * s.ch * 0.45;
     for (const c of cellsOf(s, t)) {
       const j = c.r * C + c.c, e = E[j];
@@ -920,63 +1127,64 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
     const el = screens[0].el;
     el.addEventListener("pointermove", (e) => {
       if (e.pointerType === "touch") return;
-      if (stir.on) { stir.vx += e.clientX - stir.x; stir.vy += e.clientY - stir.y; }
-      stir.x = e.clientX; stir.y = e.clientY; stir.on = true; stir.moved = true;
+      const r = el.getBoundingClientRect();
+      if (stir.on) { stir.vx += e.clientX - stir.cx; stir.vy += e.clientY - stir.cy; }
+      stir.cx = e.clientX; stir.cy = e.clientY; stir.x = e.clientX - r.left - el.clientLeft; stir.y = e.clientY - r.top - el.clientTop;
+      stir.on = true; stir.moved = true;
     }, { passive: true });
     el.addEventListener("pointerleave", () => { stir.on = false; });
   }
 
   /* ---------- per-frame ---------- */
   const T0 = performance.now();
-  let lastY = -1, lastTick = -1, force = true;
+  let raf = 0;
+  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
   function frame(now) {
-    const t = (now - T0) / 1000, tick = reduce ? 0 : Math.floor(t * 24), busy = !I.done || screens.some((x) => x.dragging);
-    if (!busy && !force && scrollY === lastY && tick === lastTick) { requestAnimationFrame(frame); return; }
-    lastY = scrollY; lastTick = tick; force = false; frameNo++;
-    const ta = I.done ? tick / 24 : t;   // ambient animation advances in 24 fps steps
-    ctx.clearRect(0, 0, W, H);
-    for (const s of screens) s.rect = s.el.getBoundingClientRect();
-    if (!I.done && introFrame(now)) { flush(); requestAnimationFrame(frame); return; }
-    if (!I.done) { flush(); requestAnimationFrame(frame); return; }
-    // every screen in view draws itself; the hero stirs under the pointer and glows
+    raf = 0; frameNo++;
+    const tick = reduce ? 0 : Math.floor((now - T0) / 1000 * 24), ta = tick / 24;   // ambient animation advances in 24 fps steps
+    let again = false;
+    if (!I.done) { introFrame(now); again = !I.done; }
     const hero = screens[0];
-    if (visible(hero.rect) && !reduce) { if (tick !== stir.tick) { stir.tick = tick; stirStep(hero); } } else stirClear();
-    for (let j = 0; j < screens.length; j++) {
-      const s = screens[j]; if (!visible(s.rect)) continue;
-      if (j) corners(s);
-      if (j === 0 && stir.live.length) drawStirred(s, ta, tick); else drawScreen(s, ta);
+    if (I.done && hero.vis && !reduce) { if (tick !== stir.tick) { stir.tick = tick; stirStep(hero); } } else stirClear();
+    for (const s of screens) {
+      if (!s.vis || (s === hero && !I.done)) continue;
+      if (s.dirty || s.dragging || (!reduce && s.tick !== tick)) { s.tick = tick; s.dirty = false; drawScreen(s, ta, tick); }
+      if (!reduce || s.dragging) again = true;
     }
-    flush();
-    glow(hero);
-    requestAnimationFrame(frame);
+    if (again) kick();
   }
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) { const s = byEl.get(e.target); if (!s) continue; s.vis = e.isIntersecting; if (s.vis) s.dirty = true; }
+    kick();
+  }, { rootMargin: "120px 0px" });
 
   /* ---------- interaction ---------- */
   for (const s of screens) if (s.kind === "mark") {
     let on = false, x = 0, y = 0;
-    s.el.addEventListener("pointerdown", (e) => { on = true; s.dragging = true; x = e.clientX; y = e.clientY; s.el.setPointerCapture(e.pointerId); });
-    s.el.addEventListener("pointermove", (e) => { if (!on) return; s.dYaw += (e.clientX - x) * 0.008; s.dPitch += (e.clientY - y) * 0.002; x = e.clientX; y = e.clientY; });
-    const end = () => { on = false; s.dragging = false; force = true; };
+    s.el.addEventListener("pointerdown", (e) => { on = true; s.dragging = true; x = e.clientX; y = e.clientY; s.el.setPointerCapture(e.pointerId); kick(); });
+    s.el.addEventListener("pointermove", (e) => { if (!on) return; s.dYaw += (e.clientX - x) * 0.008; s.dPitch += (e.clientY - y) * 0.002; x = e.clientX; y = e.clientY; s.dirty = true; kick(); });
+    const end = () => { on = false; s.dragging = false; s.dirty = true; kick(); };
     s.el.addEventListener("pointerup", end); s.el.addEventListener("pointercancel", end);
   }
   function showWonder() {
     const w = Globe.list[WI];
     $("#w-name").textContent = w.name; $("#w-place").textContent = w.place;
-    $("#hero-scr").setAttribute("aria-label", `${w.name}, ${w.place}, drawn in moving text characters.`);
+    $("#hero-scr").setAttribute("aria-label", `${w.name}, ${w.place}: the earth and the moon seen from space, turning, drawn in moving text characters.`);
   }
   showWonder();
   $("#tamper").addEventListener("click", (e) => {
     tampered = !tampered; const b = e.currentTarget;
     b.setAttribute("aria-pressed", String(tampered)); b.textContent = tampered ? "Restore entry 14" : "Edit entry 14";
-    $("#chain-v").innerHTML = tampered ? '<span class="no">Tampering detected at entry 14.</span> Every later link now fails.' : "Integrity OK. 20 entries, head f83678b2730cb21c.";
-    screens.find((x) => x.kind === "chain").static = null; force = true;
+    $("#chain-v").innerHTML = tampered ? '<span class="no">Tampering detected at entry 14.</span> Every later link now fails.' : `Integrity OK. 20 entries, head ${HEAD}.`;
+    const s = screens.find((x) => x.kind === "chain"); s.scanFrom = null; s.dirty = true; kick();
   });
 
   /* ---------- boot ---------- */
   const go = () => {
-    layout(); I.t0 = performance.now(); requestAnimationFrame(frame);
-    if (I.done && location.hash) requestAnimationFrame(() => settleTo(document.getElementById(decodeURIComponent(location.hash.slice(1)))));
-    let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { layout(); I.fg = null; I.frozen = false; force = true; }, 120); });
+    layout(); I.t0 = performance.now();
+    for (const s of screens) io.observe(s.el);
+    kick();
+    let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { layout(); I.fg = null; I.frozen = false; kick(); }, 120); });
   };
   const fl = document.fonts && document.fonts.load ? Promise.race([document.fonts.load('500 10px "Martian Mono"'), new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
   fl.then(go, go);
