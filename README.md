@@ -31,20 +31,20 @@ train on it. evaluate on it. ship through it.
 - one html file and one script. no build step, no framework, no tracking, no cookies.
 - the first screen says what scruple is, with two ways in: run the environment, book a pilot.
 - on a first visit it opens on a short chat. the agent says it wins 97% of disputes. scruple answers: 128 it could never win. the earth then fills the screen and settles into the hero, with a soft glow.
-- every panel in view draws itself in characters; the hero stirs under the pointer.
-- every number on the page comes from the engine's synthetic demo.
+- every panel draws itself in characters, into its own canvas inside its frame, so the glyphs scroll with the page and never trail it. a panel redraws only while it is in view, at 24 frames a second. the intro alone uses a full-screen canvas, then hands the earth to the hero's own. the hero stirs under the pointer.
+- every number on the page comes from the engine's synthetic demo, or sits in a panel labelled illustrative.
 
 ![the site, first screen](assets/readme/site-hero.png)
 
 | panel | shows | kind |
 |---|---|---|
 | hero | the earth and the moon from space, turning | art |
-| 01 how it works | `scruple demo`, abridged | terminal |
-| 02 proof | loss per case by case type, good rule against bad | chart |
-| 03 red team | attacks breaking on a wall, the ledger untouched | art |
-| 04 who it's for | a spinning ring: train, evaluate, ship | art |
-| 05 audit trail | the hash chain. edit entry 14 and it breaks | data |
-| 06 status | ledger rain, debits and credits | art |
+| 01 how it works | `scruple demo` typed out: simulate, verify (each check, a and b), gate | terminal |
+| 02 proof | loss per case by case type on an axis, current policy against the bad rule, late evidence flagged | chart |
+| 03 red team | the 7 attacks, each slipping past a naive verifier and breaking on the check that stops it | data |
+| 04 who it's for | the train, evaluate, ship loop, with an illustrative stream per buyer | diagram |
+| 05 audit trail | all 20 entries of one demo run's hash chain, walked link by link. edit entry 14 and every later link fails | data |
+| 06 status | a double-entry journal in replay, totals and balances checked as it runs | data |
 | footer | the mark in 3d, drag to turn | art |
 
 ## the earth
