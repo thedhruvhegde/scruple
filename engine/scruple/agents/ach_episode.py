@@ -38,6 +38,7 @@ from scruple.agents.ach_tools import (
 from scruple.agents.dispute_tools import DisputeToolSpec
 from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
+from scruple.finops.knobs import Knobs, parse_knobs, split_case_type
 from scruple.sim.ach.engine import (
     AcceptReturn,
     AchAction,
@@ -71,7 +72,9 @@ def jsonable(x: Any) -> Any:
 
 
 def parse_case_type(case_type: str | None) -> tuple[str | None, float]:
-    """`family`, `family@0.8` or `@0.8` -> (family or None, difficulty)."""
+    """`family`, `family@0.8` or `@0.8` -> (family or None, difficulty). Knobs after
+    a `;` (`scruple.finops.knobs`) are not part of the family and are ignored here."""
+    case_type = split_case_type(case_type)[0]
     if not case_type:
         return None, DEFAULT_DIFFICULTY
     fam, _, diff = case_type.partition("@")
@@ -117,6 +120,9 @@ class WorkflowEpisode:
         self._flags: list[str] = []
         self._closed = False
         self._submit_seq: int | None = None
+        # difficulty knobs after `;` in the case type; `h` caps the tool calls
+        self.knobs: Knobs = parse_knobs(case_type, self.kind)
+        self.max_calls: int | None = self.knobs.h
 
     @classmethod
     def replay(
@@ -186,6 +192,13 @@ class WorkflowEpisode:
     def call(self, name: str, args: Any = None) -> dict[str, Any]:
         if self.closed:
             raise EpisodeClosedError("episode is closed: the decision was already submitted")
+        spec0 = self.tools.get(name)
+        is_submit = spec0 is not None and spec0.scope.value == "submit"
+        if not is_submit and self.max_calls is not None and self.tool_calls >= self.max_calls:
+            self.lapse("horizon")  # the horizon knob: the budget is spent, time is up
+            raise EpisodeClosedError(
+                f"the tool-call budget ({self.max_calls}) is spent; the episode lapsed"
+            )
         self.tool_calls += 1
         logged: dict[str, Any] | None = None
         if isinstance(args, Mapping):
