@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import date
+from functools import lru_cache
 from itertools import groupby
 from xml.sax.saxutils import escape
 
@@ -177,7 +178,15 @@ def _balance(stmt: BankStatement, kinds: tuple[str, ...]) -> int | None:
 
 
 def read_statement(fmt: str, text: str) -> ParsedStatement:
-    """Parse the bank's file with the real parsers. Raises `IngestError` on bad input."""
+    """Parse the bank's file with the real parsers. Raises `IngestError` on bad input.
+
+    Pure and the result is frozen, so parses are memoised (an episode parses its file
+    in the engine, then again in each integrity check and replay)."""
+    return _read_statement(fmt, text)
+
+
+@lru_cache(maxsize=512)
+def _read_statement(fmt: str, text: str) -> ParsedStatement:
     if fmt == "camt053":
         stmts = parse_camt053(text)
     elif fmt == "bai2":
