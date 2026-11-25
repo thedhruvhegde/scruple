@@ -17,6 +17,7 @@ Everything is synthetic, on public dev seeds (the sealed benchmark salt is not u
 
 from __future__ import annotations
 
+import itertools
 import math
 import random
 from collections import defaultdict
@@ -339,8 +340,76 @@ def caught(seeds: Sequence[int], *, workers: int = 1) -> dict[str, Any]:
     return out
 
 
+# --- anchoring check and coupling sweeps ---------------------------------------------
+
+
+def anchoring_check(env: str, seeds: Sequence[int], *, workers: int = 1) -> dict[str, Any]:
+    """Theorem 4 / Conjecture 4c: every policy of the knob grid (peek excluded) against
+    its honest projection under `env@2`."""
+    from scruple.finops.anchoring import _project_item
+    from scruple.finops.policies import knob_grid
+
+    grid = {k: v for k, v in (RECON_GRID if env == "recon" else AML_GRID).items() if k != "peek"}
+    cls = ReconKnobs if env == "recon" else AmlKnobs
+    mk = ReconPolicy if env == "recon" else AmlPolicy
+    pols = [mk(k) for k in knob_grid(cls, grid)]
+    items = [
+        (env, p, s, curriculum(env, difficulty_of(i)), f"{env}@2")
+        for p in pols
+        for i, s in enumerate(seeds)
+    ]
+    out = pmap(_project_item, items, workers=workers)
+    viol: dict[str, int] = defaultdict(int)
+    gaps = [a - b for a, b, _ in out]
+    for _, _, per in out:
+        for cid, (x, y) in per.items():
+            if y < x - 1e-9:
+                viol[cid] += 1
+    return {
+        "env": env,
+        "policies": len(pols),
+        "episodes": len(out),
+        "max_gap": round(max(gaps), 6),
+        "episodes_reward_above_projection": sum(g > 1e-9 for g in gaps),
+        "check_decreases_on_projection": dict(sorted(viol.items())),
+        "mean_gap": round(sum(gaps) / len(gaps), 6),
+    }
+
+
+def sweep(
+    env: str, policy: str, knob: str, seeds: Sequence[int], *, base: str = "@0.5", workers: int = 1
+) -> dict[str, Any]:
+    """Proposition 5: reward of one policy as one knob rises (other knobs fixed), with
+    the per-seed count of steps where reward went up."""
+    e = get_env(env)
+    pol = e.policies()[policy]
+    levels = (0.0, 0.25, 0.5, 0.75, 1.0)
+    per: dict[float, list[float]] = {}
+    vid = e.default_verifier
+    for lv in levels:
+        ct = base if lv == 0 else f"{base};{knob}={lv}"
+        rows = pmap(_row, [(env, pol, s, ct) for s in seeds], workers=workers)
+        per[lv] = [r[vid][0] for r in rows]
+    ups = sum(
+        per[b][i] > per[a][i] + 1e-12
+        for a, b in itertools.pairwise(levels)
+        for i in range(len(seeds))
+    )
+    return {
+        "env": env,
+        "policy": policy,
+        "knob": knob,
+        "verifier": vid,
+        "mean": {f"{lv:g}": round(sum(v) / len(v), 4) for lv, v in per.items()},
+        "ci95": {f"{lv:g}": [round(x, 4) for x in bootstrap_ci(v)[1:]] for lv, v in per.items()},
+        "per_seed_increases": ups,
+        "steps": (len(levels) - 1) * len(seeds),
+    }
+
+
 __all__ = [
     "BINS",
+    "anchoring_check",
     "baselines",
     "bootstrap_ci",
     "caught",
@@ -350,5 +419,6 @@ __all__ = [
     "play_many",
     "proxy",
     "spearman",
+    "sweep",
     "wilson",
 ]

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 from hypothesis import given, settings
@@ -185,3 +186,34 @@ def test_cli_carries_knobs(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -
     assert json.loads(capsys.readouterr().out)["messages"]
     ep = EpisodeStore(store).load(eid)
     assert isinstance(ep, ReconEpisode) and ep.max_calls == 3
+
+
+def test_mcp_serves_knobs_and_the_new_tools() -> None:
+    import anyio
+    from mcp import Client
+
+    from scruple.mcp.sim_server import build_sim_server
+
+    def data(result: Any) -> dict[str, Any]:
+        assert not result.is_error, result.content[0].text
+        if result.structured_content is not None:
+            return dict(result.structured_content)
+        return dict(json.loads(result.content[0].text))
+
+    async def main() -> None:
+        async with Client(build_sim_server()) as c:
+            kinds = data(await c.call_tool("list_workflow_case_types", {}))
+            assert kinds["knobs"]["by_kind"]["recon"] == ["adv", "breaks", "h", "n", "noise"]
+            ep = data(
+                await c.call_tool("start_recon_episode", {"seed": 2, "case_type": "@0.5;adv=1"})
+            )
+            eid = ep["episode_id"]
+            inbox = data(await c.call_tool("recon_get_inbox", {"episode_id": eid}))
+            assert inbox["messages"]
+            ep = data(
+                await c.call_tool("start_aml_episode", {"seed": 2, "case_type": "@0.5;adv=1"})
+            )
+            notes = data(await c.call_tool("aml_get_case_notes", {"episode_id": ep["episode_id"]}))
+            assert notes["notes"]
+
+    anyio.run(main)

@@ -106,3 +106,29 @@ def test_run_all_writes_json_and_markdown(tmp_path: Path, monkeypatch: pytest.Mo
     md = (tmp_path / "results.md").read_text()
     assert "### recon: reward by policy" in md and "| XM8 |" in md
     assert markdown(res, "").count("### Throughput") == 1
+
+
+def test_anchoring_check_and_sweep_small(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(xp, "AML_GRID", {"sar_always": (False, True)})
+    a = xp.anchoring_check("aml", range(3))
+    assert a["policies"] == 2 and a["episodes"] == 6 and a["max_gap"] <= 1e-9
+    s = xp.sweep("recon", "honest", "noise", range(3))
+    assert set(s["mean"].values()) == {1.0} and s["per_seed_increases"] == 0
+    c = xp.sweep("aml", "credulous", "adv", range(3))
+    assert c["steps"] == 12 and c["mean"]["0"] == 1.0
+
+
+def test_cli_anchoring_and_sweep(capsys: pytest.CaptureFixture[str]) -> None:
+    import argparse
+
+    from scruple.finops.cli import cmd_finops
+
+    ns = argparse.Namespace(
+        finops_cmd="sweep", env="aml", policy="honest", knob="adv", base="@0.5", seeds=2,
+        start=0, workers=1,
+    )  # fmt: skip
+    assert cmd_finops(ns) == 0
+    assert json.loads(capsys.readouterr().out)["policy"] == "honest"
+    ns = argparse.Namespace(finops_cmd="anchoring", env="aml", seeds=1, start=0, workers=1)
+    assert cmd_finops(ns) == 0
+    assert json.loads(capsys.readouterr().out)["max_gap"] <= 1e-9

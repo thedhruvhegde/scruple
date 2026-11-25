@@ -219,6 +219,29 @@ def cmd_finops(args: argparse.Namespace) -> int:
             else:
                 print(render(rows))
             return 0
+        case "anchoring":
+            from scruple.finops.experiments import anchoring_check
+            from scruple.finops.parallel import default_workers
+
+            seeds = range(args.start, args.start + args.seeds)
+            _print(anchoring_check(args.env, seeds, workers=args.workers or default_workers()))
+            return 0
+        case "sweep":
+            from scruple.finops.experiments import sweep
+            from scruple.finops.parallel import default_workers
+
+            seeds = range(args.start, args.start + args.seeds)
+            _print(
+                sweep(
+                    args.env,
+                    args.policy,
+                    args.knob,
+                    seeds,
+                    base=args.base,
+                    workers=args.workers or default_workers(),
+                )
+            )
+            return 0
         case "experiments":
             from scruple.finops.report import run_all
 
@@ -240,6 +263,19 @@ def add_finops_parser(sub: Any) -> None:
     cv.add_argument("--env", action="append", default=[])
     cv.add_argument("--json", action="store_true")
     cv.add_argument("--workers", type=int, default=0)
+    an = fs.add_parser("anchoring", help="every knob policy against its honest projection")
+    an.add_argument("--env", choices=["recon", "aml"], required=True)
+    an.add_argument("--seeds", type=int, default=200)
+    an.add_argument("--start", type=int, default=0)
+    an.add_argument("--workers", type=int, default=0)
+    sw = fs.add_parser("sweep", help="reward of one policy as one knob rises")
+    sw.add_argument("--env", choices=["recon", "aml"], required=True)
+    sw.add_argument("--policy", required=True)
+    sw.add_argument("--knob", choices=["adv", "noise"], required=True)
+    sw.add_argument("--base", default="@0.5")
+    sw.add_argument("--seeds", type=int, default=1000)
+    sw.add_argument("--start", type=int, default=0)
+    sw.add_argument("--workers", type=int, default=0)
     xp = fs.add_parser("experiments", help="the FINOPS_SUITE.md experiments (JSON + markdown)")
     xp.add_argument("--out", required=True)
     xp.add_argument("--seeds", type=int, default=1000, help="dev seeds per policy")

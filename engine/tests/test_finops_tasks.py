@@ -348,3 +348,17 @@ def test_main_registers_the_commands(capsys: pytest.CaptureFixture[str]) -> None
 
     assert main(["finops", "envs"]) == 0
     assert json.loads(capsys.readouterr().out)
+
+
+def test_eval_run_takes_a_finops_env(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    from scruple.agents.strategies import STRATEGIES
+    from scruple.cli.main import main
+
+    strategy = next(iter(STRATEGIES))
+    argv = ["eval", "run", "--env", "aml", "--provider", "anthropic", "--model", "m",
+            "--strategy", strategy, "--seeds", "1-3", "--out", str(tmp_path),
+            "--transport", "fake", "--difficulty", "0.7", "--concurrency", "1"]  # fmt: skip
+    assert main(argv) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["n"] == 3 and out["transport"] == "fake"
+    assert (tmp_path / "grades.jsonl").exists()
