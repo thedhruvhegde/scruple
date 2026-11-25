@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>Scruple deck</title>
+<meta name="description" content="The Scruple pre-seed deck: RL environments, verifiers and release gates for AI agents that move money. 17 slides, PDF.">
+<link rel="canonical" href="https://www.scrumple.org/deck/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Scruple">
+<meta property="og:title" content="Scruple pre-seed deck">
+<meta property="og:description" content="RL environments, verifiers and release gates for AI agents that move money. 17 slides, PDF.">
+<meta property="og:url" content="https://www.scrumple.org/deck/">
+<meta property="og:image" content="https://www.scrumple.org/assets/banners/og-1200x630.png">
+<link rel="icon" type="image/svg+xml" href="../assets/logos/bone-on-night/mark.svg">
+<link rel="icon" type="image/png" sizes="1024x1024" href="../assets/logos/bone-on-night/mark.png">
+<link rel="apple-touch-icon" href="../assets/logos/bone-on-night/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap">
+<link rel="stylesheet" href="../site.css">
+<style>
+/* Tokens, bands and the bar come from ../site.css; layout as environments/. */
+*, *::before, *::after { box-sizing: border-box; transition: none !important; animation: none !important; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+::selection { background: var(--accent); color: var(--on-accent); }
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.page { max-width: 1240px; margin: 0 auto; }
+
+.row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 56px; padding-block: 88px; scroll-margin-top: 64px; align-items: start; }
+.row > * { min-width: 0; }
+.lhs { display: grid; gap: 20px; align-content: start; }
+h1.big, .lhs h2 { font-family: var(--f-body); font-weight: 600; letter-spacing: -0.01em; display: grid; gap: 10px; }
+h1.big { font-size: clamp(32px, 4.2vw, 48px); line-height: 1.06; }
+.lhs h2 { font-size: clamp(26px, 2.6vw, 34px); line-height: 1.12; }
+h1.big .n, .lhs h2 .n { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; }
+.sum { font-size: 18px; line-height: 1.5; max-width: 46ch; }
+.src { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); line-height: 1.6; }
+.acts { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+@media (max-width: 900px) { .row { grid-template-columns: minmax(0, 1fr); padding-block: 60px; } }
+
+/* the big download: a solid bracket button at a larger size */
+.btn.big { font-size: 16px; line-height: 20px; padding: 18px 10px; }
+.facts { list-style: none; margin: 0; padding: 4px 16px; background: var(--panel); border: 1px solid var(--rule); }
+.facts li { display: grid; grid-template-columns: 12ch minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+.facts li:last-child { border-bottom: 0; }
+.facts b { font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+
+/* slide thumbnails on panel paper, captioned like screens */
+.thumbs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 28px; margin: 0; padding: 0; list-style: none; }
+@media (max-width: 600px) { .thumbs { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
+.thumbs a { display: block; text-decoration: none; }
+.thumbs img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--panel); border: 1px solid var(--rule-strong); box-shadow: 0 0 0 6px var(--panel), 0 0 0 7px var(--rule); }
+.thumbs a:hover img, .thumbs a:focus-visible img { border-color: var(--fg); }
+.thumbs a:focus-visible { outline: none; }
+.thumbs .cap { font-family: var(--f-mono); font-variation-settings: "wdth" 75; font-size: 11px; color: var(--muted); margin-top: 16px; display: flex; justify-content: space-between; gap: 12px; }
+.thumbs .cap b { color: var(--fg); font-weight: 600; }
+
+/* footer strip, as environments/ */
+.foot-row { position: relative; display: flex; flex-wrap: wrap; align-items: end; gap: 18px 40px; padding-block: 32px 40px; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 11.5px; color: var(--muted); }
+.foot-row::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 0; left: 0; right: 0; overflow: hidden; white-space: nowrap; font-size: 10px; line-height: 12px; color: var(--rule-strong); }
+.foot-mark { margin: 0; font: inherit; font-size: 11px; line-height: 1.2; color: var(--fg); flex: none; }
+.foot-mark b { color: var(--brass); font-weight: 600; }
+.ledger { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 0; flex: 1; min-width: 0; }
+.ledger li { display: flex; margin-right: 12px; }
+.ledger li::before { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-right: 12px; flex: none; }
+.ledger li:last-child::after { content: "|"; content: "|" / ""; color: var(--rule-strong); margin-left: 12px; }
+@media (max-width: 760px) { .foot-row { flex-direction: column; align-items: start; } .ledger { flex-direction: column; } .ledger li:last-child::after { display: none; } }
+.foot-row a:hover, .foot-row a:focus-visible { background: var(--fg); color: var(--bg); outline: none; }
+
+main > .band { position: relative; }
+main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""; position: absolute; top: 10px; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); overflow: hidden; white-space: nowrap; font-family: var(--f-mono); font-variation-settings: "wdth" 80; font-size: 10px; line-height: 12px; color: var(--rule-strong); pointer-events: none; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="0 0 24 24">
+      <g transform="rotate(-6 12 11)">
+        <rect x="1.5" y="10" width="21" height="2.4" fill="currentColor"/>
+        <rect x="3" y="5.4" width="4.6" height="4.6" fill="var(--brass)"/>
+      </g>
+      <path d="M12 12.6L17.5 21.5H6.5Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#top">Skip to content</a>
+<header class="bar band">
+  <div class="bar-in">
+    <a class="brand" href="../" aria-label="Scruple, home"><svg aria-hidden="true"><use href="#mark"/></svg><span>scruple</span></a>
+    <span class="crumb" data-page="deck" aria-hidden="true">/ deck</span>
+    <button type="button" class="menu" id="nav-menu" aria-expanded="false" aria-controls="nav">[ MENU ]</button>
+    <nav class="nav" id="nav" aria-label="Site">
+      <ul class="nav-sec" aria-label="On this page"><li><a href="#slides">Slides</a></li><li><a href="#contact">Contact</a></li></ul>
+      <ul class="nav-pg" aria-label="Pages"><li><a href="../">Home</a></li><li><a href="../environments/">Environments</a></li><li><a href="../results/">Results</a></li><li><a href="../paper/">Paper</a></li><li><a href="../pilot/">Pilot</a></li><li><a href="./" aria-current="page">Deck</a></li></ul>
+    </nav>
+  </div>
+  <span class="bar-rule" aria-hidden="true"><i></i><b></b></span>
+</header>
+
+<main id="top">
+  <section class="band" aria-labelledby="top-h">
+    <div class="page row">
+      <div class="lhs">
+        <h1 class="big" id="top-h"><span class="n">DECK</span>The Scruple pre-seed deck.</h1>
+        <p class="sum">RL environments, verifiers and release gates for AI agents that move money: what's built, the market, pricing, the plan and the raise.</p>
+        <p class="acts"><a class="btn solid big" href="scruple-pre-seed-deck.pdf" download>Download the deck (PDF)</a></p>
+        <p class="src">17 slides · 16:9 · 1.4 MB · November 2026. Pricing and the financial plan are hypotheses and a plan, not a forecast. Scruple is pre-revenue.</p>
+      </div>
+      <ul class="facts">
+        <li><b>Raising</b><span>$1.5M pre-seed on a post-money SAFE, $15M cap.</span></li>
+        <li><b>Built</b><span>17 ledger-graded verifiers, 12 exploit suites, 8,500+ tests, a 12-tool agent API, MCP server and a 31-page paper.</span></li>
+        <li><b>Proof</b><span>A scripted reward hacker caught on 94 of 94 fabricated episodes over 200 seeds.</span></li>
+        <li><b>Founder</b><span>Dhruv Hegde, CS and Math, University of Michigan.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="slides" aria-labelledby="slides-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="slides-h"><span class="n">01 / SLIDES</span>Six of the seventeen.</h2>
+        <p class="sum">Each opens the full PDF.</p>
+      </div>
+      <ul class="thumbs">
+        <li><a href="scruple-pre-seed-deck.pdf#page=1"><img src="s01-cover.webp" width="960" height="540" alt="Cover: scruple, RL environments and release gates for AI agents that move money." loading="lazy" decoding="async"></a><p class="cap"><span><b>01</b> cover</span></p></li>
+        <li><a href="scruple-pre-seed-deck.pdf#page=4"><img src="s04-proof.webp" width="960" height="540" alt="Proof: a scripted fabricator wins 96% of disputes against 43% for an honest policy, yet scruple's reward is 0.518 against 0.979; 94 of 94 fabricated episodes caught." loading="lazy" decoding="async"></a><p class="cap"><span><b>04</b> proof</span></p></li>
+        <li><a href="scruple-pre-seed-deck.pdf#page=7"><img src="s07-market.webp" width="960" height="540" alt="The RL environments market: recent rounds and per-task prices of $200 to $2,000." loading="lazy" decoding="async"></a><p class="cap"><span><b>07</b> market</span></p></li>
+        <li><a href="scruple-pre-seed-deck.pdf#page=10"><img src="s10-pricing.webp" width="960" height="540" alt="Pricing by customer size: startup, growth, enterprise, AI lab and Scruple Guard tiers." loading="lazy" decoding="async"></a><p class="cap"><span><b>10</b> pricing</span></p></li>
+        <li><a href="scruple-pre-seed-deck.pdf#page=12"><img src="s12-plan.webp" width="960" height="540" alt="Financial plan: ending ARR by segment from 2027 to 2030, with the arithmetic." loading="lazy" decoding="async"></a><p class="cap"><span><b>12</b> financial plan</span></p></li>
+        <li><a href="scruple-pre-seed-deck.pdf#page=13"><img src="s13-roadmap.webp" width="960" height="540" alt="Roadmap: what is built, in progress and planned, from the card-dispute environment to system-of-record verification." loading="lazy" decoding="async"></a><p class="cap"><span><b>13</b> roadmap</span></p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="contact" aria-labelledby="contact-h">
+    <div class="page row">
+      <div class="lhs">
+        <h2 id="contact-h"><span class="n">02 / CONTACT</span>Talk to the founder.</h2>
+        <p class="sum">Questions about the deck, the round or a pilot go to one inbox.</p>
+        <p class="acts"><a class="btn solid" href="mailto:dhegde@umich.edu?subject=Scruple%20deck">dhegde@umich.edu</a><a class="btn" href="scruple-pre-seed-deck.pdf" download>Download the PDF</a></p>
+      </div>
+    </div>
+    <div class="page foot-row">
+      <pre class="foot-mark" aria-hidden="true"> <b>[#]</b>
+===============
+      /\
+     /  \
+    /____\</pre>
+      <ul class="ledger">
+        <li>Scruple</li>
+        <li>Synthetic data only. No customer data.</li>
+        <li><a href="../">Back to the home page</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script src="../nav.js" defer></script>
+</body>
+</html>
