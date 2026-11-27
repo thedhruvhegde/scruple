@@ -20,7 +20,7 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.agents.env import ActionKind, CaseEnvironment, GroundTruth, SimEnvironment
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
-from scruple.agents.keys import Salt, stable_key
+from scruple.agents.keys import Salt, keyed_seed, stable_key
 from scruple.agents.keys import episode_id as keyed_episode_id
 from scruple.agents.models import Decision, EpisodeScore, Observation
 from scruple.agents.scoring import score_episode
@@ -70,14 +70,18 @@ class Episode:
         *,
         env: CaseEnvironment | None = None,
         nonce: int = 0,
+        salt: Salt | None = None,
     ) -> None:
         self.seed = seed
         self.case_type = case_type
         self.nonce = nonce
+        self.salt = salt
         self.env: CaseEnvironment = env or SimEnvironment()
-        self.episode_id = make_episode_id(seed, case_type, nonce)
-        self.stable_id = stable_key(seed, case_type, nonce)
-        self._case = self.env.load(seed, case_type)
+        self.episode_id = make_episode_id(seed, case_type, nonce, salt)
+        self.stable_id = stable_key(seed, case_type, nonce, salt)
+        # round 7: a keyed simple episode loads the case of HMAC(salt, seed), so the
+        # public generator and a chosen seed no longer rebuild it (m06: 200/200 before)
+        self._case = self.env.load(keyed_seed(seed, "case", salt), case_type)
         self._action: ActionKind | None = None
         self._cited: tuple[str, ...] = ()
         self._score: EpisodeScore | None = None
@@ -96,9 +100,10 @@ class Episode:
         *,
         nonce: int = 0,
         env: CaseEnvironment | None = None,
+        salt: Salt | None = None,
     ) -> Episode:
         """Rebuild an episode by replaying its call log (errors replay as errors)."""
-        ep = cls(seed, case_type, nonce=nonce, env=env)
+        ep = cls(seed, case_type, nonce=nonce, env=env, salt=salt)
         for tool, args in calls:
             with contextlib.suppress(EpisodeError):
                 ep.call(tool, args)

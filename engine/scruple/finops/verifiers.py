@@ -66,6 +66,7 @@ from scruple.verifiers.claimtext import ngram as ct_ngram
 from scruple.verifiers.claimtext import textnorm as ct_norm
 from scruple.verifiers.claimtext import v4 as ct4
 from scruple.verifiers.claimtext.v4 import deob as ct4_deob
+from scruple.verifiers.claimtext.v4 import fast as ct4_fast
 from scruple.verifiers.claimtext.v4 import lang as ct4_lang
 from scruple.verifiers.claimtext.v4 import lexicons as ct4_lex
 from scruple.verifiers.claimtext.v4 import negex4 as ct4_negex
@@ -247,7 +248,9 @@ ACH_V4 = v4.ach_v4(ACH_V3)
 PAY_V4 = v4.payables_v4(PAY_V3)
 CM_V4 = v4.commerce_v4(CM_V3)
 DISPUTE_V4 = v4.dispute_v4(dispute_v.DISPUTE_CHECKS_V3)
-_TEXT4_MODS = (v4, v3, ct4, ct4_deob, ct4_lang, ct4_lex, ct4_negex, ct_negex, ct_grammar, ct_norm)
+_TEXT4_MODS = (
+    v4, v3, ct4, ct4_deob, ct4_fast, ct4_lang, ct4_lex, ct4_negex, ct_negex, ct_grammar, ct_norm
+)
 V4_DESC = "v4 text judge (all facts, languages, obfuscation; unverifiable = flagged)"
 
 V3_DESC = "required structured claims (hard), free-text ensemble (soft), value x harm"

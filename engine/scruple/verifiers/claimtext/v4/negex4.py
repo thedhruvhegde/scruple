@@ -48,11 +48,11 @@ from scruple.verifiers.claimtext.negex import (
     WINDOW_POST,
     WINDOW_PRE,
     Frame,
-    _find,
-    _marks,
     frame,
 )
 from scruple.verifiers.claimtext.textnorm import normalise, tokens
+from scruple.verifiers.claimtext.v4.fast import find as _find
+from scruple.verifiers.claimtext.v4.fast import marks as _marks
 
 # es "no sé" (I don't know) stays a pseudo-trigger only as "no se si": folded, "no se"
 # is also the reflexive "no se presentó" (it was not filed)
@@ -706,7 +706,8 @@ def _short_frames(sents: list[list[str]], claim: Claim4) -> list[tuple[int, floa
         hits = [i for i, t in enumerate(w) if t in words]
         if not hits:
             continue
-        neg = sum(t in PRE_NEG_SET or t.endswith("n't") for t in w[: hits[0]]) % 2 == 1
+        rest = [t for i, t in enumerate(w) if i not in hits]
+        neg = sum(t in PRE_NEG_SET or t.endswith("n't") for t in rest) % 2 == 1
         out.append((-1 if neg else 1, 1.0, "short:" + " ".join(w)))
     return out
 

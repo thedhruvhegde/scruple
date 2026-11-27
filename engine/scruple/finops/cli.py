@@ -129,6 +129,7 @@ def cmd_tasks(args: argparse.Namespace) -> int:
                 port=args.port,
                 salt=salt,
                 full_grades=getattr(args, "full_grades", False),
+                operator_token=getattr(args, "operator_token", None),
             )
             return 0
         case "bench":
@@ -194,6 +195,12 @@ def add_tasks_parser(sub: Any) -> None:
     sv.add_argument("--salt", default=None, help="commitments.salt (needed for keyed tasks)")
     sv.add_argument(
         "--full-grades", action="store_true", help="operators: full grades on live episodes"
+    )
+    sv.add_argument(
+        "--operator-token",
+        default=None,
+        help="unlocks POST /v1/grade and full grades (default: $SCRUPLE_OPERATOR_TOKEN; "
+        "none set: both refused)",
     )
     bn = ts.add_parser("bench", help="throughput: episodes/s and grades/s on this machine")
     bn.add_argument("--env", required=True, choices=envs)

@@ -137,9 +137,10 @@ class ClaimJudgement:
 def judge_claim(p: Prepared, claim: Claim4, truth: bool) -> ClaimJudgement:
     texts = p.texts_v3 if claim in _V3_CLAIMS else p.texts
     a4 = _merge([negex4.read(t, claim) for t in texts])
+    # B is read only where it can count: where A4 saw no frame of the claim
     b = (
         _merge([grammar.read(t, Claim(claim.value)) for t in texts])
-        if claim in _B_CLAIMS
+        if claim in _B_CLAIMS and negex4.SEEN not in a4.evidence
         else Reading()
     )
     # B is a fallback: it counts only where A4 saw no frame of the claim at all (A4
