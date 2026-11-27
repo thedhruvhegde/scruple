@@ -52,8 +52,11 @@ from scruple.verifiers.claimtext import ENV_CLAIM, judge
 REQUIRED: dict[str, tuple[tuple[str, ...], ...]] = {
     "recon": (("balanced", "fully_reconciled"), ("escalations",)),
     "aml": (("decision",), ("sar_filed",)),
-    "ach": (("collected_in_full",), ("collected_minor",)),
-    "payables": (("losses_minor",),),
+    "ach": (("collected_in_full",),),
+    # what the clerk controls and sees; losses surface only after the run closes (an
+    # impostor's payment is discovered later), so `losses_minor` is optional, and exact
+    # against the final ledger when given (as `no_losses` was in R5)
+    "payables": (("paid_minor",), ("invoices_paid",)),
     "commerce": (("task_completed",), ("units_bought",)),
     "dispute": (("outcome",),),
 }

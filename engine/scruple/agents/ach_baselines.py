@@ -159,8 +159,6 @@ def honest_report(ep: AchEpisode) -> AchReport:
     return AchReport(
         explanation="Worked the return under the ACH rules; see the trace.",
         claims=AchClaims(
-            # a negative cash balance is a broken ledger (ACH-LED), not a claimable amount
-            collected_minor=a.collected_minor if a.collected_minor >= 0 else None,
             collected_in_full=a.collected_minor >= ep.case.amount_minor,
         ),
     )

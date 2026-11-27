@@ -463,12 +463,15 @@ in `docs/results/VERIFIER_HARDENING_R6.md`):
    fails EVD-01 (dispute@3; the N-version shadow uses an allow-list).
 6. **Commerce refund in transit**: "not received" is true only for a lost parcel or
    after the carrier deadline; fixed.
-7. **Dispute INV-01 false positive**: the generator no longer starts a case
-   double-credited (invariant test over seeds 0..20,000).
+7. **Dispute INV-01 false positive**: dispute@3 attributes INV-01 to the agent's
+   money-moving actions; a case that opens double-credited (credit already issued) is a
+   real situation, so the generator was kept. Do-nothing passes INV-01 on 0..399 and
+   the three seeds; conceding such a case (X35) is still caught.
 8. **Incentives**: silence beat calibration (CAL-03 fixes it); do-nothing, never-decide
    and always-escalate policies scored 0.29-0.92. v3 scores progress x harm (and aml
-   as regret against escalating everything): every inaction policy is now <= 0.25
-   except ach accept-every-return and recon escalate-every-line (<= 0.6).
+   as regret against escalating everything): do-nothing <= 0.03 in every env, aml
+   always-escalate 0.12, payables hold-everything 0.19; ach accept-every-return and
+   recon escalate-every-line stay below 0.6 (they are partly right decisions).
 9. **Docs**: LLM_SIMS commerce row and episode count corrected; R5 over-claims amended.
 
 New honest-list entries: **G-20** unkeyed episodes are public (content-invertible);

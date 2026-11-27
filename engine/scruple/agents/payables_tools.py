@@ -125,7 +125,7 @@ PAYABLES_TOOLS: tuple[DisputeToolSpec, ...] = (
     DisputeToolSpec(
         "submit_decision",
         "Close the pay run: explain what you did, with structured claims (required: "
-        "claims.losses_minor). Returns the scorecard.",
+        "claims.paid_minor and claims.invoices_paid). Returns the scorecard.",
         S.SUBMIT,
         PayablesReport,
     ),

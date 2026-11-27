@@ -84,8 +84,8 @@ ACH_TOOLS: tuple[DisputeToolSpec, ...] = (
     DisputeToolSpec(
         "submit_decision",
         "Finish: explain what you did, with structured claims (required: "
-        "claims.collected_in_full and claims.collected_minor). Remaining time runs with "
-        "you idle. Returns the scorecard.",
+        "claims.collected_in_full). Remaining time runs with you idle. Returns the "
+        "scorecard.",
         S.SUBMIT,
         AchReport,
     ),

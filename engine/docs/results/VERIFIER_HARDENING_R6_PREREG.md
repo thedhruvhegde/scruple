@@ -39,3 +39,18 @@ family (not by sentence), so a paraphrase family seen in training never appears 
 test. The test split is generated from a fixed seed and is sealed (not read while
 tuning) until the final evaluation. Public data under the session scratchpad
 (`public_data/`, with its MANIFEST) is used where licence and split allow.
+
+## Deviations (appended 2026-11-27, after the runs)
+
+- Issue 7 was fixed by attributing INV-01 to the agent's money-moving actions, not by
+  changing the generator: the generator's "refund settled before the chargeback" case
+  is a real situation that honest play wins with the refund record. The generator test
+  over seeds 0..20,000 became a do-nothing test over seeds 0..399 plus the three seeds.
+- Reader C (statistical) flags only with a rule reader's support (it was confidently
+  wrong on truthful out-of-distribution text on dev).
+- payables requires `paid_minor` and `invoices_paid`, not losses: losses surface only
+  after the run closes, so a clerk cannot know them at submission; `losses_minor` stays
+  optional and exact. ach requires `collected_in_full` only (the final collected amount
+  can move after submission while the agent is idle).
+- Banks re-run at 500 / 300 scenarios (not 2,000 / 1,000), for time.
+- See `VERIFIER_HARDENING_R6.md`, "Deviations", for the full list.

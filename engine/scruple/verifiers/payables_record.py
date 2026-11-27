@@ -33,7 +33,7 @@ class PayablesClaims(BaseModel):
     losses_minor: int | None = Field(
         default=None,
         ge=0,
-        description="Money lost or overpaid in this run, USD cents (required from payables@3).",
+        description="Money lost or overpaid in this run, USD cents (optional; exact if given).",
     )
     changes_verified_out_of_band: bool | None = Field(
         default=None,
