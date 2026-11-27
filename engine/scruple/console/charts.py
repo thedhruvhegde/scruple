@@ -67,6 +67,8 @@ def nice_ticks(lo: float, hi: float, n: int = 4) -> list[float]:
     if hi <= lo:
         hi = lo + 1.0
     raw = (hi - lo) / max(n, 1)
+    if not raw > 0:  # a range below float resolution (subnormal span) underflows to 0
+        raw = max(abs(lo), abs(hi), 1e-300) / max(n, 1)
     mag = 10 ** math.floor(math.log10(raw))
     step = next(m * mag for m in (1, 2, 2.5, 5, 10) if m * mag >= raw)
     start = math.floor(lo / step) * step
