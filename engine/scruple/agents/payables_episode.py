@@ -25,6 +25,7 @@ from pydantic import BaseModel, ConfigDict
 from scruple.agents.ach_episode import WorkflowEpisode, jsonable, parse_case_type
 from scruple.agents.dispute_tools import DisputeToolSpec
 from scruple.agents.errors import EpisodeError
+from scruple.agents.keys import Salt
 from scruple.agents.payables_tools import (
     PAYABLES_TOOL_BY_NAME,
     PAYABLES_TOOL_NAMES,
@@ -118,15 +119,21 @@ class PayablesEpisode(WorkflowEpisode):
     report_type = PayablesReport
 
     def __init__(
-        self, seed: int, case_type: str | None = None, *, nonce: int = 0, reference: bool = False
+        self,
+        seed: int,
+        case_type: str | None = None,
+        *,
+        nonce: int = 0,
+        reference: bool = False,
+        salt: Salt | None = None,
     ) -> None:
-        super().__init__(seed, case_type, nonce=nonce)
+        super().__init__(seed, case_type, nonce=nonce, salt=salt)
         tokens, difficulty = parse_payables_case_type(case_type)
         kinds = [t for t in tokens if t not in CHANGE_KINDS]
         changes = [t for t in tokens if t in CHANGE_KINDS]
         self.reference = reference
         self.case = generate_payables_case(
-            seed, difficulty, kinds or None, changes=changes if tokens else None
+            self.case_seed, difficulty, kinds or None, changes=changes if tokens else None
         )
         self.engine = PayablesEngine(self.case)
         self._events_seen = 0

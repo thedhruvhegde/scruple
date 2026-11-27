@@ -78,9 +78,9 @@ class Planted:
 
     def _hits_late(self, ep: DisputeEpisode, case: dict[str, Any]) -> bool:
         if self.kind == "late_rare":
-            return case["category"] == self.category and picked(ep.episode_id, self.rate, "late")
+            return case["category"] == self.category and picked(ep.stable_id, self.rate, "late")
         if self.kind == "late_any":
-            return picked(ep.episode_id, self.rate, "late")
+            return picked(ep.stable_id, self.rate, "late")
         return False
 
     def _read(self, ep: DisputeEpisode, case: dict[str, Any]) -> list[dict[str, Any]]:

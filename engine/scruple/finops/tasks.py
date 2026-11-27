@@ -30,6 +30,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from scruple.agents.keys import restoring_id
 from scruple.finops.difficulty import curriculum, measured, nominal
 from scruple.finops.envs import SUITE_VERSION, get_env
 from scruple.finops.knobs import parse_knobs
@@ -71,6 +72,9 @@ class TaskSpec(BaseModel):
     truth_commitment: str
     max_tool_calls: int | None = None
     synthetic: bool = True
+    # round 6: a keyed task's case is generated from HMAC(case salt, seed), so the
+    # public seed does not rebuild it; regenerating (grading, serving) needs the salt
+    keyed: bool = False
 
     def spec_hash(self) -> str:
         return sha256_hex(self.model_dump_json())
@@ -140,6 +144,19 @@ def truth_commitment(ep: Any, salt: str) -> str:
     return sha256_hex(salt + "|" + json.dumps(_truth(ep), sort_keys=True))
 
 
+def case_salt(salt: str) -> str:
+    """The case key of a keyed export, derived from its (private) commitments salt."""
+    return "case|" + salt
+
+
+def _episode(spec_env: str, seed: int, case_type: str | None, keyed: bool, salt: str | None) -> Any:
+    if keyed and salt is None:
+        raise GradingError("a keyed task is regenerated only with its export salt")
+    return get_env(spec_env).new_episode(
+        seed, case_type, salt=case_salt(salt) if keyed and salt is not None else None
+    )
+
+
 def task_id(env: str, seed: int, case_type: str | None) -> str:
     return f"fo-{env}-" + sha256_hex(f"{SUITE_VERSION}|{env}|{seed}|{case_type}")[:12]
 
@@ -155,10 +172,14 @@ def build_task(
     *,
     verifier: str | None = None,
     measure: bool = True,
+    keyed: bool = False,
 ) -> TaskSpec:
     e = get_env(env)
     ver = e.verifier(verifier)
-    ep = e.new_episode(seed, case_type)
+    # the spec's observation shows an episode id: keyed by the export salt, so the export
+    # is deterministic and the id says nothing about the seed (round 6)
+    with restoring_id("ep-" + sha256_hex(f"{salt}|{task_id(env, seed, case_type)}")[:12]):
+        ep = _episode(env, seed, case_type, keyed, salt)
     k = parse_knobs(case_type, env)
     diff = Difficulty(nominal=nominal(env, case_type))
     if measure:
@@ -185,6 +206,7 @@ def build_task(
         obs_hash=obs_hash(ep),
         truth_commitment=truth_commitment(ep, salt),
         max_tool_calls=k.h,
+        keyed=keyed,
     )
 
 
@@ -214,9 +236,10 @@ def plan_tasks(
     return out
 
 
-def _build_one(item: tuple[str, int, str | None, str, str | None, bool]) -> str:
-    env, seed, ct, salt, ver, measure = item
-    return build_task(env, seed, ct, salt, verifier=ver, measure=measure).model_dump_json()
+def _build_one(item: tuple[str, int, str | None, str, str | None, bool, bool]) -> str:
+    env, seed, ct, salt, ver, measure, keyed = item
+    spec = build_task(env, seed, ct, salt, verifier=ver, measure=measure, keyed=keyed)
+    return spec.model_dump_json()
 
 
 def export_tasks(
@@ -232,13 +255,14 @@ def export_tasks(
     horizon: bool = False,
     workers: int = 1,
     salt: str | None = None,
+    keyed: bool = False,
 ) -> dict[str, Any]:
     from scruple.finops.parallel import pmap
 
     out.mkdir(parents=True, exist_ok=True)
     salt = salt or secrets.token_hex(16)
     plan = plan_tasks(env, n, difficulty, seed0=seed0, case_types=case_types, horizon=horizon)
-    items = [(env, s, ct, salt, verifier, measure) for s, ct in plan]
+    items = [(env, s, ct, salt, verifier, measure, keyed) for s, ct in plan]
     lines = pmap(_build_one, items, workers=workers)
     path = out / "tasks.jsonl"
     body = "".join(line + "\n" for line in lines)
@@ -253,6 +277,7 @@ def export_tasks(
         "n": len(specs),
         "seeds": [seed0, seed0 + n - 1] if n else [],
         "seed_space": "dev (public; not the sealed benchmark)",
+        "keyed": keyed,
         "difficulty_range": list(difficulty),
         "horizon": horizon,
         "case_types": list(case_types) if case_types else None,
@@ -300,8 +325,7 @@ def replay(spec: TaskSpec, calls: Iterable[Call], *, salt: str | None = None) ->
     """The episode the calls produce, closed (lapsed if never submitted)."""
     from scruple.agents.errors import EpisodeError
 
-    e = get_env(spec.env)
-    ep = e.new_episode(spec.seed, spec.case_type)
+    ep = _episode(spec.env, spec.seed, spec.case_type, spec.keyed, salt)
     if obs_hash(ep) != spec.obs_hash:
         raise GradingError(f"{spec.task_id}: the regenerated case differs from the spec")
     if salt is not None and truth_commitment(ep, salt) != spec.truth_commitment:
@@ -406,12 +430,16 @@ def trajectory_of(ep: Any, tid: str) -> Trajectory:
     return Trajectory(task_id=tid, calls=tuple(calls))
 
 
-def rollout(spec: TaskSpec, policy: str) -> Trajectory:
-    """Play a scripted policy on a task and return its trajectory."""
+def rollout(spec: TaskSpec, policy: str, *, salt: str | None = None) -> Trajectory:
+    """Play a scripted policy on a task and return its trajectory (a keyed task needs
+    its export salt)."""
     from scruple.finops.policies import run_policy
 
     e = get_env(spec.env)
-    ep = run_policy(e.episode_cls, e.policies()[policy], spec.seed, spec.case_type)
+    if spec.keyed and salt is None:
+        raise GradingError("a keyed task is regenerated only with its export salt")
+    key = case_salt(salt) if spec.keyed and salt is not None else None
+    ep = run_policy(e.episode_cls, e.policies()[policy], spec.seed, spec.case_type, salt=key)
     return trajectory_of(ep, spec.task_id)
 
 

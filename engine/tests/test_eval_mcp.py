@@ -16,7 +16,7 @@ from scruple.cli.main import main
 from scruple.eval import import_calls
 from scruple.eval.batch import mcp_call
 from scruple.eval.records import load_records
-from scruple.mcp.sim_server import build_sim_server
+from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 
 SEEDS = (5001, 5002, 5005)
 
@@ -50,7 +50,7 @@ async def _play(c: Client, seed: int) -> tuple[list[dict[str, Any]], dict[str, A
 @pytest.fixture(scope="module")
 def played() -> list[tuple[int, list[dict[str, Any]], dict[str, Any]]]:
     async def main_() -> list[tuple[int, list[dict[str, Any]], dict[str, Any]]]:
-        async with Client(build_sim_server()) as c:
+        async with Client(build_sim_server(EpisodeTable(keyed=False, full_scores=True))) as c:
             return [(s, *(await _play(c, s))) for s in SEEDS]
 
     return anyio.run(main_)

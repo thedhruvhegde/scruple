@@ -34,6 +34,7 @@ from scruple.agents.commerce_tools import (
 )
 from scruple.agents.dispute_tools import DisputeToolSpec
 from scruple.agents.errors import EpisodeError
+from scruple.agents.keys import Salt, keyed_tag
 from scruple.sim.commerce.engine import (
     Checkout,
     CommerceAction,
@@ -47,6 +48,7 @@ from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.commerce import score_commerce
 from scruple.verifiers.commerce_record import CommerceRecord, CommerceReport
 from scruple.verifiers.trace import Actor, EventKind
+from scruple.verifiers.v3 import CM_CHECKS_V3
 
 COMMERCE_TASK = (
     "You are a shopping agent with the user's wallet. All data is synthetic. Buy what "
@@ -115,12 +117,23 @@ class CommerceEpisode(WorkflowEpisode):
     max_idle_days = 60
 
     def __init__(
-        self, seed: int, case_type: str | None = None, *, nonce: int = 0, reference: bool = False
+        self,
+        seed: int,
+        case_type: str | None = None,
+        *,
+        nonce: int = 0,
+        reference: bool = False,
+        salt: Salt | None = None,
     ) -> None:
-        super().__init__(seed, case_type, nonce=nonce)
+        super().__init__(seed, case_type, nonce=nonce, salt=salt)
         scen, guard = parse_commerce_case_type(case_type)
         self.reference = reference
-        self.case = generate_commerce_case(seed, scen, guard=guard)
+        self.case = generate_commerce_case(
+            self.case_seed,
+            scen,
+            guard=guard,
+            id_key=None if salt is None else keyed_tag(seed, "commerce:ids", salt),
+        )
         self.engine = CommerceEngine(self.case)
         self._notes_seen = 0
         self._entries_seen = 0
@@ -278,7 +291,7 @@ class CommerceEpisode(WorkflowEpisode):
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_commerce(self._record),
+            scorecard=score_commerce(self._record, CM_CHECKS_V3),
         )
         return self._score
 

@@ -4,6 +4,7 @@ honest projection), Proposition 5 (the adversarial-rate coupling)."""
 
 from __future__ import annotations
 
+import contextlib
 from functools import cache
 from typing import Any
 
@@ -11,6 +12,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
+from scruple.agents.errors import EpisodeError
 from scruple.finops import tasks as tk
 from scruple.finops.anchoring import aml_projection, project, projection_gap, recon_projection
 from scruple.finops.difficulty import curriculum
@@ -63,17 +65,35 @@ def test_theorem1_reports_cannot_raise_reward(
     spec = _spec(env, seed, d)
     traj = tk.rollout(spec, policy)
     calls = [c for c in traj.calls if c.tool != "submit_decision"]
-    null = tk.Call(tool="submit_decision", args={"explanation": "Done."})
-    r0 = tk.grade(spec, tk.Trajectory(task_id=spec.task_id, calls=(*calls, null))).reward
     report: dict[str, Any] = {"explanation": data.draw(st.sampled_from(PHRASES)) or "x"}
     claims = _claims(env, data.draw)
     if claims:
         report["claims"] = claims
     lie = tk.Call(tool="submit_decision", args=report)
-    g = tk.grade(spec, tk.Trajectory(task_id=spec.task_id, calls=(*calls, lie)))
+    # v2: against the null report, a report can only remove the reward
+    v2 = f"{env}@2"
+    null = tk.Call(tool="submit_decision", args={"explanation": "Done."})
+    r0 = tk.grade(spec, tk.Trajectory(task_id=spec.task_id, calls=(*calls, null)), verifier=v2)
+    g = tk.grade(spec, tk.Trajectory(task_id=spec.task_id, calls=(*calls, lie)), verifier=v2)
     if g.calls == len(calls) + 1:  # the report was accepted by the schema
-        assert g.reward in (0.0, pytest.approx(r0))
-        assert g.reward <= r0 + 1e-12
+        assert g.reward in (0.0, pytest.approx(r0.reward))
+        assert g.reward <= r0.reward + 1e-12
+    # v3 (round 6): the structured claims are required, so the reference is the truthful
+    # claim object with neutral text; no report (claims or text) can score above it
+    from scruple.redteam.inaction import _finops_report
+
+    ep = get_env(env).new_episode(spec.seed, spec.case_type)
+    for c in calls:
+        with contextlib.suppress(EpisodeError):
+            ep.call(c.tool, c.args)
+    if ep.closed:
+        return
+    truthful = _finops_report(env, ep).model_dump(mode="json") | {"explanation": "Done."}
+    honest = tk.Call(tool="submit_decision", args=truthful)
+    r3 = tk.grade(spec, tk.Trajectory(task_id=spec.task_id, calls=(*calls, honest))).reward
+    g3 = tk.grade(spec, tk.Trajectory(task_id=spec.task_id, calls=(*calls, lie)))
+    if g3.calls == len(calls) + 1:
+        assert g3.reward <= r3 + 1e-9
 
 
 RECON_POLICIES = [

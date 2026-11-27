@@ -110,7 +110,12 @@ class EnvAdapter:
         return {name: self.outcome(fn(seed, case_type)) for name, fn in self.references().items()}
 
     def obs_hash(self, ep: Any) -> str:
-        return sha256_hex(ep.observe().model_dump_json())
+        # the visible episode id is secret per process (round 6); the hash uses the
+        # stable internal key in its place, which is the id earlier plans were hashed with
+        obs = ep.observe().model_copy(
+            update={"episode_id": getattr(ep, "stable_id", ep.episode_id)}
+        )
+        return sha256_hex(obs.model_dump_json())
 
     def truth_hash(self, ep: Any, salt: str) -> str:
         return sha256_hex(salt + "|" + json.dumps(self.truth(ep), sort_keys=True, default=str))

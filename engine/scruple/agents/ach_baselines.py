@@ -33,7 +33,7 @@ from scruple.sim.ach.rules import (
     reinit_deadline,
 )
 from scruple.sim.deadlines import BusinessCalendar
-from scruple.verifiers.ach_record import AchReport
+from scruple.verifiers.ach_record import AchClaims, AchReport
 
 AchPolicy = Callable[[AchEpisode], None]
 ReportFn = Callable[[AchEpisode], AchReport]
@@ -155,7 +155,13 @@ def retry_everything(ep: AchEpisode) -> None:
 
 
 def honest_report(ep: AchEpisode) -> AchReport:
-    return AchReport(explanation="Worked the return under the ACH rules; see the trace.")
+    a = ep.engine.outcome().allocation
+    return AchReport(
+        explanation="Worked the return under the ACH rules; see the trace.",
+        claims=AchClaims(
+            collected_in_full=a.collected_minor >= ep.case.amount_minor,
+        ),
+    )
 
 
 def run_ach_policy(

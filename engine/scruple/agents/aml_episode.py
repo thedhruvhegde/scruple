@@ -31,6 +31,7 @@ from scruple.agents.aml_tools import (
 )
 from scruple.agents.dispute_tools import DisputeToolSpec, RequestInfoArgs
 from scruple.agents.errors import EpisodeError
+from scruple.agents.keys import Salt
 from scruple.finops.artefacts import aml_notes, aml_perturb
 from scruple.sim.aml.engine import AmlAction, AmlEngine, CloseAlert, Escalate, FileSar, RequestInfo
 from scruple.sim.aml.generator import generate_aml_case
@@ -88,16 +89,22 @@ class AmlEpisode(WorkflowEpisode):
     report_type = AmlReport
 
     def __init__(
-        self, seed: int, case_type: str | None = None, *, nonce: int = 0, reference: bool = False
+        self,
+        seed: int,
+        case_type: str | None = None,
+        *,
+        nonce: int = 0,
+        reference: bool = False,
+        salt: Salt | None = None,
     ) -> None:
-        super().__init__(seed, case_type, nonce=nonce)
+        super().__init__(seed, case_type, nonce=nonce, salt=salt)
         family, difficulty = parse_case_type(case_type)
         if family is not None and family not in {f.value for f in AmlFamily}:
             names = ", ".join(f.value for f in AmlFamily)
             raise ValueError(f"unknown aml family {family!r}; choose from {names}")
         self.reference = reference
         # knobs: background noise and adversarial artefacts (scruple.finops.artefacts)
-        self.case = aml_perturb(generate_aml_case(seed, family, difficulty), self.knobs)
+        self.case = aml_perturb(generate_aml_case(self.case_seed, family, difficulty), self.knobs)
         self.notes = aml_notes(self.case, self.knobs)
         self.engine = AmlEngine(self.case)
         self._events_seen = 0

@@ -30,7 +30,9 @@ Session = Callable[[Client], Awaitable[Any]]
 
 def session(fn: Session, server: Any = None) -> Any:
     async def main() -> Any:
-        async with Client(server or build_sim_server()) as c:
+        async with Client(
+            server or build_sim_server(EpisodeTable(keyed=False, full_scores=True))
+        ) as c:
             return await fn(c)
 
     return anyio.run(main)
@@ -129,7 +131,7 @@ def test_recon_reference_policy_replays_over_mcp(case_type: str | None) -> None:
 
 
 def test_scenario_episode_plays_dispute_tools() -> None:
-    table = EpisodeTable()
+    table = EpisodeTable(keyed=False, full_scores=True)
 
     async def fn(c: Client) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         ids = data(await c.call_tool("list_workflow_case_types", {}))["scenario"]["scenario_ids"]
@@ -186,7 +188,7 @@ def test_tools_refuse_episodes_of_another_kind() -> None:
 
 
 def test_refused_workflow_calls_count_as_tool_errors() -> None:
-    table = EpisodeTable()
+    table = EpisodeTable(keyed=False, full_scores=True)
 
     async def fn(c: Client) -> tuple[str, list[Any]]:
         eid = data(await c.call_tool("start_recon_episode", {"seed": 4}))["episode_id"]

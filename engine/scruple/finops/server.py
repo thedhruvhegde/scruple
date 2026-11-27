@@ -12,7 +12,9 @@
 - `POST /v1/episodes/{id}/call`: `{"tool", "args"}` -> the tool result (or
   `{"error"}` with status 400 when the episode refused the call)
 - `GET  /v1/episodes/{id}/grade`: the grade of the calls made so far (lapsed if not
-  submitted), computed by replay, exactly as `/v1/grade` would
+  submitted), computed by replay as `/v1/grade` would; an agent gets reward, gate and
+  pass/fail per check id only (round 6: explanations name the hidden truth), unless
+  the server runs with `full_grades`
 
 Live episodes are held in memory (at most `max_episodes`, oldest dropped). Their
 grades come from replaying the recorded calls, so a remote episode and an uploaded
@@ -31,7 +33,7 @@ from pydantic import BaseModel, Field
 
 from scruple.agents.errors import EpisodeError
 from scruple.finops.envs import ENVS, SUITE_VERSION, get_env
-from scruple.finops.tasks import Call, Grade, TaskSpec, Trajectory, grade_safe
+from scruple.finops.tasks import Call, Grade, TaskSpec, Trajectory, case_salt, grade_safe
 from scruple.version import package_version
 
 MAX_BATCH = 1_000
@@ -51,13 +53,37 @@ class CallRequest(BaseModel):
 
 
 class _Live:
-    def __init__(self, spec: TaskSpec) -> None:
+    def __init__(self, spec: TaskSpec, salt: str | None) -> None:
         self.spec = spec
-        self.episode = get_env(spec.env).new_episode(spec.seed, spec.case_type)
+        key = case_salt(salt) if spec.keyed and salt is not None else None
+        if spec.keyed and key is None:
+            raise HTTPException(409, f"{spec.task_id} is keyed; start the server with its salt")
+        self.episode = get_env(spec.env).new_episode(spec.seed, spec.case_type, salt=key)
         self.calls: list[Call] = []
 
 
-def build_app(tasks: dict[str, TaskSpec], *, max_episodes: int = 10_000) -> FastAPI:
+def agent_grade(g: Grade) -> dict[str, Any]:
+    """The live-episode grade an agent may read: reward, gate, pass/fail per check id.
+    No explanations (they name the expected decision, the family, the breaks)."""
+    return {
+        "task_id": g.task_id,
+        "reward": g.reward,
+        "gate": g.gate,
+        "submitted": g.submitted,
+        "checks": [{"id": c.id, "passed": c.passed} for c in g.checks],
+        "error": g.error,
+    }
+
+
+def build_app(
+    tasks: dict[str, TaskSpec],
+    *,
+    max_episodes: int = 10_000,
+    salt: str | None = None,
+    full_grades: bool = False,
+) -> FastAPI:
+    """`salt` (the export's commitments salt) is needed to serve keyed tasks;
+    `full_grades` gives live episodes the full grade (operators only, round 6)."""
     app = FastAPI(title="scruple finops grader", version=package_version())
     live: OrderedDict[str, _Live] = OrderedDict()
 
@@ -108,14 +134,16 @@ def build_app(tasks: dict[str, TaskSpec], *, max_episodes: int = 10_000) -> Fast
 
     @app.post("/v1/grade")
     def grade(req: GradeRequest) -> dict[str, Any]:
-        out: list[Grade] = [grade_safe(tasks.get(t.task_id), t) for t in req.trajectories]
+        out: list[Grade] = [
+            grade_safe(tasks.get(t.task_id), t, salt=salt) for t in req.trajectories
+        ]
         return {"grades": [g.model_dump(mode="json") for g in out]}
 
     @app.post("/v1/episodes")
     def start(req: StartRequest) -> dict[str, Any]:
         spec = spec_of(req.task_id)
         eid = "rep-" + secrets.token_hex(8)
-        live[eid] = _Live(spec)
+        live[eid] = _Live(spec, salt)
         while len(live) > max_episodes:
             live.popitem(last=False)
         return {
@@ -139,18 +167,23 @@ def build_app(tasks: dict[str, TaskSpec], *, max_episodes: int = 10_000) -> Fast
     @app.get("/v1/episodes/{episode_id}/grade")
     def episode_grade(episode_id: str) -> dict[str, Any]:
         x = episode_of(episode_id)
-        g = grade_safe(x.spec, Trajectory(task_id=x.spec.task_id, calls=tuple(x.calls)))
-        return g.model_dump(mode="json")
+        g = grade_safe(x.spec, Trajectory(task_id=x.spec.task_id, calls=tuple(x.calls)), salt=salt)
+        return g.model_dump(mode="json") if full_grades else agent_grade(g)
 
     return app
 
 
 def serve(
-    tasks: dict[str, TaskSpec], host: str = "127.0.0.1", port: int = 8077
+    tasks: dict[str, TaskSpec],
+    host: str = "127.0.0.1",
+    port: int = 8077,
+    *,
+    salt: str | None = None,
+    full_grades: bool = False,
 ) -> None:  # pragma: no cover
     import uvicorn
 
-    uvicorn.run(build_app(tasks), host=host, port=port)
+    uvicorn.run(build_app(tasks, salt=salt, full_grades=full_grades), host=host, port=port)
 
 
 __all__ = ["build_app", "serve"]

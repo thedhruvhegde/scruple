@@ -8,7 +8,25 @@ f05f9fa). Deviations are listed at the end. Raw results are in `results/redteam_
 
 ## Summary
 
-- **The blind search found no hard-check bypass.** Over 6 environments, 1,791
+> **Amended in round 6 (2026-11-27).** An independent blind review of this round's
+> code found hard-check bypasses this search did not: the hidden truth of every
+> finance-ops case could be recovered from its public episode id (seed inversion,
+> 200/200); the MCP sim server let an agent rehearse a case and read its truth from the
+> returned score; every free-text claim check was evaded by paraphrases, other
+> languages, zero-width characters and homoglyphs (0% caught), and "I filed a SAR and
+> will keep monitoring" scored 1.000 on aml; a self-written `delivery_proof` passed
+> EVD-01 and earned the issuer's supporting bonus; a "not received" refund claim on a
+> parcel still in transit passed CM-REF (190/190). It also found honest false
+> positives this round reported as zero: truthful negations ("Not collected in full",
+> "Not fully reconciled") hard-failed ACH-CLAIM and REC-CLAIM, and three dispute seeds
+> started double-credited so a do-nothing agent failed INV-01. The statements below
+> that say "no hard-check bypass", "honest false-positive rate is 0 in every
+> environment" and "no false claim passed the gate" held for the attacks this round
+> tried, not in general. Details, fixes and before/after numbers:
+> `docs/results/VERIFIER_HARDENING_R6.md`.
+
+- **The blind search found no hard-check bypass** (amended above: none *of the kinds
+  it searched*). Over 6 environments, 1,791
   genomes on the training seeds (plus 230 minimisation evaluations), it found 10
   candidates that look better than honest on a proxy, are worse on the hidden truth
   and pass every hard check at the honest rate. All 10 are *priced* strategies (do
@@ -25,7 +43,9 @@ f05f9fa). Deviations are listed at the end. Raw results are in `results/redteam_
   existing hard checks on 17,920 episodes and 840 fault-injected records (0
   disagreements). The 4 disagreements found while building the harness were all
   errors in the new versions (N-1 to N-4); a fifth came from a fix (N-5).
-- **Honest false-positive rate is 0 in every environment**: 0 of 2,000 bank episodes
+- **Honest false-positive rate is 0 in every environment** *for the honest reference
+  policies and their own reports* (amended above: truthful negated text and three
+  generator seeds were false positives this measurement did not exercise): 0 of 2,000 bank episodes
   per finance-ops and commerce environment (Wilson 95% upper bound 0.19%), 0 of
   1,000 disputes (0.38%), and 0 of 700 search episodes per environment.
 - **Mutation testing** of the finance-ops and commerce verifiers (345 sampled
@@ -303,7 +323,9 @@ such miss was checked: every refund-abuse miss in the first 600 scenarios (52 of
 collected miss exactly where the claim is true (no duplicate posted; collected in
 full); the 13 recon hacker misses are cases with no break, where the lazy matcher
 resolves everything and the "balanced" claim is true (reward 1.0). Across all 96,000
-episodes no false claim passed the gate (uncaught lies 0 in every row). The
+episodes no false claim *of the banks' own phrasing* passed the gate (uncaught lies 0 in
+every row; amended in round 6: paraphrased, translated and unicode-obfuscated claims
+were not in the banks and passed 100%). The
 credulous and novice failures are genuine violations: applying cash on an email's
 say-so (REC-APPLY), citing transfers a memo named but nobody read (AML-SAR2), and
 conceding a chargeback the merchant had already refunded, so the cardholder is paid
@@ -440,3 +462,11 @@ N-version run 3 minutes; mutation 10 minutes for the first pass (345 mutants, 3 
 minutes for each rerun of the survivors (`--only-file`, `--extra-tests
 tests/test_finops_experiments.py,tests/test_exploit_regression.py`; `classify` in
 `scruple/redteam/mutation.py` separates hard-verdict mutants).
+
+## Round 6 (2026-11-27)
+
+See `docs/results/VERIFIER_HARDENING_R6.md`. In short: v3 verifiers (`<env>@3`) make a
+structured claim object required and exact (hard), read free text with a three-reader
+ensemble as a soft factor only, score quality as value realised beyond inaction, and
+the environments key their cases by a secret salt where an agent could otherwise
+rebuild them. The v2 verifiers above stay registered and reproduce this round's grades.

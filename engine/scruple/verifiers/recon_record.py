@@ -28,6 +28,11 @@ class ReconClaims(BaseModel):
     )
     adjustments: int | None = Field(default=None, ge=0, description="Adjusting entries posted.")
     escalations: int | None = Field(default=None, ge=0, description="Escalations raised.")
+    fully_reconciled: bool | None = Field(
+        default=None,
+        description="Whether the statement fully ties out (required from recon@3; same "
+        "fact as `balanced`).",
+    )
 
 
 class ReconReport(BaseModel):

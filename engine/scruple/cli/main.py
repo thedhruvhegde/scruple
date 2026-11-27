@@ -177,6 +177,18 @@ def cmd_redteam_search(args: argparse.Namespace) -> int:
     from scruple.redteam.search import HOLDOUT, TRAIN, render, search
 
     envs = list(ENV_NAMES) if args.env == "all" else [args.env]
+    leaks: list[dict[str, object]] = []
+    if args.leaks:
+        from scruple.redteam.leaks import run_all
+
+        leaks = run_all(args.leaks)
+        if not args.json:
+            for row in leaks:
+                print(json.dumps(row))
+    if args.budget == 0:
+        if args.json:
+            print(json.dumps({"leaks": leaks}, indent=1, sort_keys=True))
+        return 0
     train = range(args.train_start, args.train_start + args.train)
     holdout = range(args.holdout_start, args.holdout_start + args.holdout)
     _ = TRAIN, HOLDOUT
@@ -274,6 +286,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="search: environment (default all)",
     )
     rt.add_argument("--budget", type=int, default=300, help="search: genome evaluations")
+    rt.add_argument(
+        "--leaks",
+        type=int,
+        default=0,
+        metavar="N",
+        help="search: also run the round-6 leak probes (seed inversion, MCP rehearsal) on N "
+        "episodes each; --budget 0 runs only the probes",
+    )
     rt.add_argument("--rng", type=int, default=0, help="search: RNG seed")
     rt.add_argument("--train", type=int, default=200, help="search: training seeds")
     rt.add_argument("--train-start", type=int, default=10_000, help="search: first training seed")

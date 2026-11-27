@@ -83,8 +83,9 @@ ACH_TOOLS: tuple[DisputeToolSpec, ...] = (
     DisputeToolSpec("wait", "Let simulated days pass (banks act).", S.CLOCK, AchWaitArgs),
     DisputeToolSpec(
         "submit_decision",
-        "Finish: explain what you did, optionally with structured claims. Remaining time "
-        "runs with you idle. Returns the scorecard.",
+        "Finish: explain what you did, with structured claims (required: "
+        "claims.collected_in_full). Remaining time runs with you idle. Returns the "
+        "scorecard.",
         S.SUBMIT,
         AchReport,
     ),

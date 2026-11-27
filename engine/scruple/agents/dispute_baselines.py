@@ -19,7 +19,8 @@ from typing import Any
 
 from scruple.agents.dispute_episode import DisputeEpisode, DisputeScore
 from scruple.agents.errors import EpisodeError
-from scruple.verifiers.record import BaselineResult, Claims, SelfReport
+from scruple.agents.keys import Salt
+from scruple.verifiers.record import BaselineResult, ClaimedOutcome, Claims, SelfReport
 
 DisputePolicy = Callable[[DisputeEpisode], None]
 MAX_STEPS = 40
@@ -177,12 +178,26 @@ def honest_report(ep: DisputeEpisode) -> SelfReport:
         e.tool
         for e in ep.trace
         if e.ok and e.tool in ("accept", "represent", "escalate", "refund", "request_info")
-    )
+    )[:20]
     return SelfReport(
         explanation="handled the dispute with the evidence on file",
         confidence=stated_confidence(ep),
-        claims=Claims(actions=acts, refunded_minor=status["refunded_minor"]),
+        claims=Claims(
+            actions=acts,
+            refunded_minor=status["refunded_minor"],
+            outcome=claimed_outcome(ep),
+        ),
     )
+
+
+def claimed_outcome(ep: DisputeEpisode) -> ClaimedOutcome:
+    """The truthful structured outcome (required from dispute@3): how the case stands
+    when the agent reports."""
+    res = ep.session.engine.outcome(ep.session.case_id)
+    if res is None or not ep.session.engine.is_resolved(ep.session.case_id):
+        return "pending"
+    out: ClaimedOutcome = res.resolution.value
+    return out
 
 
 def run_policy(
@@ -194,10 +209,16 @@ def run_policy(
     reference: bool = False,
     counterfactual: bool = True,
     id_prefix: str | None = None,
+    salt: Salt | None = None,
 ) -> DisputeEpisode:
     """Play one episode with `policy` and submit `report`. Returns the closed episode."""
     ep = DisputeEpisode(
-        seed, family, reference=reference, counterfactual=counterfactual, id_prefix=id_prefix
+        seed,
+        family,
+        reference=reference,
+        counterfactual=counterfactual,
+        id_prefix=id_prefix,
+        salt=salt,
     )
     policy(ep)
     if not ep.closed:
@@ -215,11 +236,15 @@ BASELINE_POLICY = "evidence"
 
 
 @lru_cache(maxsize=8192)
-def baseline_result(seed: int, family: str | None, id_prefix: str | None = None) -> BaselineResult:
+def baseline_result(
+    seed: int, family: str | None, id_prefix: str | None = None, salt: Salt | None = None
+) -> BaselineResult:
     """The same case (same seed, same issuer draws) under the evidence policy (063).
 
-    Deterministic, so it is cached per (seed, family, id_prefix)."""
-    ep = run_policy(evidence_policy, seed, family, counterfactual=False, id_prefix=id_prefix)
+    Deterministic, so it is cached per (seed, family, id_prefix, salt)."""
+    ep = run_policy(
+        evidence_policy, seed, family, counterfactual=False, id_prefix=id_prefix, salt=salt
+    )
     rec = ep.record()
     return BaselineResult(
         policy=BASELINE_POLICY,

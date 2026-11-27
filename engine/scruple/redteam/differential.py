@@ -59,7 +59,9 @@ def _one(item: tuple[str, dict[str, Any], tuple[int, ...]]) -> tuple[Counter[str
     for s in seeds:
         r = play(env, g, s)
         card = a.score(r)
-        by = {c.id: c for c in card.checks}
+        # the claim shadows are of the v2 claim checks (text reading included); v3
+        # renamed and narrowed those (`*-CLAIM3`), so they are compared with v2's card
+        by = {c.id: c for c in _v2_card(env, r).checks} | {c.id: c for c in card.checks}
         for cid, fn in shadows.items():
             ok, why = fn(r)
             ex = by[cid]
@@ -82,6 +84,20 @@ def _one(item: tuple[str, dict[str, Any], tuple[int, ...]]) -> tuple[Counter[str
                     ).model_dump(mode="json")
                 )
     return agree, diffs
+
+
+def _v2_card(env: str, r: Any) -> Any:
+    if env == "dispute":
+        from scruple.verifiers.dispute import DISPUTE_CHECKS_V2, score_record
+
+        return score_record(r, DISPUTE_CHECKS_V2)
+    if env == "commerce":
+        from scruple.verifiers.commerce import score_commerce
+
+        return score_commerce(r)
+    from scruple.finops.verifiers import get_verifier
+
+    return get_verifier(f"{env}@2").score(r)
 
 
 def run(

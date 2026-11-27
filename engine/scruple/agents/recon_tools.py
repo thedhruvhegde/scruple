@@ -101,8 +101,9 @@ RECON_TOOLS: tuple[DisputeToolSpec, ...] = (
     ),
     DisputeToolSpec(
         "submit_decision",
-        "Finish: explain the reconciliation, optionally with structured claims. Returns "
-        "the scorecard.",
+        "Finish: explain the reconciliation, with structured claims (required: "
+        "claims.balanced or claims.fully_reconciled, and claims.escalations). Returns the "
+        "scorecard.",
         S.SUBMIT,
         ReconReport,
     ),

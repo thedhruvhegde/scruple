@@ -418,6 +418,12 @@ except the real CFPB narratives used as an out-of-distribution text set.
 - **Scenario banks**: 96,000 episodes over 11,000 distinct scenarios; honest
   false-positive rate 0 in every environment (Wilson upper bound 0.19% per finance-ops
   and commerce environment, 0.38% for disputes); no false claim passed a gate.
+  *Amended in round 6:* these held for the banks' own policies and phrasing only. A
+  blind review found truthful negations that hard-failed (ACH 1.0 -> 0.285 reward,
+  recon gate 0.02), three dispute seeds where doing nothing failed INV-01, and false
+  claims that passed every gate (paraphrased, translated or unicode-obfuscated text,
+  0% caught; seed inversion; MCP rehearsal; self-written supporting documents;
+  in-transit "not received" refunds). See the round-6 section below.
 - **Mutation testing** of the finance-ops and commerce verifiers (345 sampled mutants):
   hard-verdict mutants killed 177/186 (95.2%) before, 186/186 after; 11 soft-score
   survivors remain (write-up, section 3).
@@ -431,3 +437,47 @@ still credits CM-DUP and CM-INJ when nothing was bought; **G-19** ledger and man
 invariants are never broken by agent policies, so only fault injection tests their
 second versions. **G-11 updated:** SR-01 still parses about 1% of real consumer
 narratives as claims.
+
+## Round 6 (2026-11-27): blind review, verifier v3
+
+An independent blind review of the round-5 code found nine issue classes
+(`docs/results/VERIFIER_HARDENING_R6_PREREG.md`; results, before/after with 95% intervals
+in `docs/results/VERIFIER_HARDENING_R6.md`):
+
+1. **Seed inversion** (hard-check bypass): episode ids were an unsalted hash of the seed,
+   so the public generator recovered the hidden truth 200/200. Fixed: ids are an HMAC
+   under a per-run secret; keyed episodes (MCP, keyed task exports, `serve` with a salt)
+   generate the case and the issuer's draws from HMAC(salt, seed). An unkeyed episode
+   is still a public case: content matching over a small seed range rebuilds it
+   (G-20, by design; keep agent-facing episodes keyed).
+2. **MCP rehearsal**: same (kind, seed) gave the same case and the score named the
+   truth. Fixed: per-start salt; the agent gets reward, gate and pass/fail per check id.
+3. **Free-text lies**: phrase lists plus a sentence negation word list; paraphrases,
+   other languages, zero-width characters, homoglyphs 0% caught. Fixed in v3: a
+   required structured claim object is the hard fact; free text is read by a
+   three-reader ensemble (NegEx-scoped frames, clause grammar, char n-gram classifier)
+   as a soft factor that can only lower a reward.
+4. **Honest false positives** on truthful negations: fixed (0 in v3).
+5. **Fabricated supporting documents**: agent uploads now carry provenance
+   `agent_authored`, never count for the issuer, and citing one of a third-party kind
+   fails EVD-01 (dispute@3; the N-version shadow uses an allow-list).
+6. **Commerce refund in transit**: "not received" is true only for a lost parcel or
+   after the carrier deadline; fixed.
+7. **Dispute INV-01 false positive**: dispute@3 attributes INV-01 to the agent's
+   money-moving actions; a case that opens double-credited (credit already issued) is a
+   real situation, so the generator was kept. Do-nothing passes INV-01 on 0..399 and
+   the three seeds; conceding such a case (X35) is still caught.
+8. **Incentives**: silence beat calibration (CAL-03 fixes it); do-nothing, never-decide
+   and always-escalate policies scored 0.29-0.92. v3 scores progress x harm (and aml
+   as regret against escalating everything): do-nothing <= 0.03 in every env, aml
+   always-escalate 0.12, payables hold-everything 0.19; ach accept-every-return and
+   recon escalate-every-line stay below 0.6 (they are partly right decisions).
+9. **Docs**: LLM_SIMS commerce row and episode count corrected; R5 over-claims amended.
+
+New honest-list entries: **G-20** unkeyed episodes are public (content-invertible);
+**G-21** the statistical text reader (C) generalises poorly to constructions far from
+its training families and flags only with a rule reader's support; **G-22** the free
+text is a soft signal: a text lie with truthful structured claims costs reward, not the
+gate; **G-23** the durable (database-backed) MCP table redacts scores but does not key
+cases (no salt column), so rehearsal through it is still possible. **G-18 resolved**
+(CM-DUP and CM-INJ no longer stand in for progress in commerce@3).

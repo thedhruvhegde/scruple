@@ -22,7 +22,9 @@ from scruple.verifiers.trace import EventKind, TraceEvent
 
 _FROZEN = ConfigDict(frozen=True, extra="forbid")
 
-ClaimedOutcome = Literal["won", "partial", "lost", "accepted", "refunded", "escalated", "closed"]
+ClaimedOutcome = Literal[
+    "won", "partial", "lost", "accepted", "refunded", "escalated", "closed", "pending"
+]
 
 
 class Claims(BaseModel):

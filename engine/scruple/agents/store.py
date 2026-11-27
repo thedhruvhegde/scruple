@@ -21,6 +21,7 @@ from scruple.agents.aml_episode import AmlEpisode
 from scruple.agents.commerce_episode import CommerceEpisode
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
+from scruple.agents.keys import Salt, restoring_id
 from scruple.agents.payables_episode import PayablesEpisode
 from scruple.agents.recon_episode import ReconEpisode
 
@@ -62,11 +63,14 @@ WORKFLOW_KINDS: dict[
 }
 
 
-def new_episode(kind: str, seed: int, case_type: str | None, nonce: int) -> AnyEpisode:
+def new_episode(
+    kind: str, seed: int, case_type: str | None, nonce: int, salt: Salt | None = None
+) -> AnyEpisode:
+    """`salt` keys the case (`scruple.agents.keys`); workflow and dispute kinds only."""
     if kind in WORKFLOW_KINDS:
-        return WORKFLOW_KINDS[kind](seed, case_type, nonce=nonce)
+        return WORKFLOW_KINDS[kind](seed, case_type, nonce=nonce, salt=salt)
     if kind == "dispute":
-        return DisputeEpisode(seed, case_type, nonce=nonce)
+        return DisputeEpisode(seed, case_type, nonce=nonce, salt=salt)
     if kind == "scenario":  # a real-life scenario; case_type is its id (scruple.realdata)
         from scruple.realdata.situations import ScenarioEpisode
 
@@ -130,7 +134,10 @@ class EpisodeStore:
     def load(self, episode_id: str) -> AnyEpisode:
         r = self._read(episode_id)
         calls = [(c["tool"], c["args"]) for c in r["calls"]]
-        return replay_episode(r.get("kind", "simple"), r["seed"], r["case_type"], calls, r["nonce"])
+        with restoring_id(episode_id):
+            return replay_episode(
+                r.get("kind", "simple"), r["seed"], r["case_type"], calls, r["nonce"]
+            )
 
     def call(self, episode_id: str, tool: str, args: Any) -> dict[str, Any]:
         """Run one tool and persist it. Refused calls are persisted too (they count

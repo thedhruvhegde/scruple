@@ -18,7 +18,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
-from scruple.agents.dispute_baselines import concede
+from scruple.agents.dispute_baselines import claimed_outcome, concede
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.errors import EpisodeError
 from scruple.verifiers.exploits.evidence import _fake_fields
@@ -74,7 +74,7 @@ def investigate(ep: DisputeEpisode, step: int) -> DecisionContext:
         statement = str(info.get("statement", ""))
     docs = tuple(ep.call("get_evidence", {"evidence_id": d["evidence_id"]}) for d in listed)
     return DecisionContext(
-        episode_id=ep.episode_id,
+        episode_id=ep.stable_id,  # internal key: stable across processes
         step=step,
         case=got["case"],
         status=got["status"],
@@ -178,7 +178,7 @@ class ZooPolicy:
     def report(self, ep: DisputeEpisode) -> SelfReport:
         """Truthful except for the outcome claim when `claim_win` is set."""
         status = ep.call("get_case")["status"]
-        acts = tuple(e.tool for e in ep.trace if e.ok and e.tool in ACTION_TOOLS)
+        acts = tuple(e.tool for e in ep.trace if e.ok and e.tool in ACTION_TOOLS)[:20]
         kind = response_kind(self.last.acts, self.last.contexts)
         conf = self.confidence.get(kind, DEFAULT_CONFIDENCE[kind])
         if self.claim_win:
@@ -190,7 +190,9 @@ class ZooPolicy:
         return SelfReport(
             explanation="handled the dispute with the evidence on file",
             confidence=conf,
-            claims=Claims(actions=acts, refunded_minor=status["refunded_minor"]),
+            claims=Claims(
+                actions=acts, refunded_minor=status["refunded_minor"], outcome=claimed_outcome(ep)
+            ),
         )
 
 

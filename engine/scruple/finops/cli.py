@@ -51,6 +51,7 @@ def cmd_tasks(args: argparse.Namespace) -> int:
                 measure=not args.no_measure,
                 horizon=args.horizon,
                 workers=args.workers or default_workers(),
+                keyed=getattr(args, "keyed", False),
             )
             _print({k: m[k] for k in ("env", "n", "seeds", "verifier", "files")})
             return 0
@@ -120,7 +121,15 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         case "serve":  # pragma: no cover - blocks
             from scruple.finops.server import serve
 
-            serve(tk.load_tasks(Path(args.tasks)), host=args.host, port=args.port)
+            salt_file = getattr(args, "salt", None)
+            salt = Path(salt_file).read_text().strip() if salt_file else None
+            serve(
+                tk.load_tasks(Path(args.tasks)),
+                host=args.host,
+                port=args.port,
+                salt=salt,
+                full_grades=getattr(args, "full_grades", False),
+            )
             return 0
         case "bench":
             from scruple.finops.parallel import bench
@@ -148,6 +157,11 @@ def add_tasks_parser(sub: Any) -> None:
     ex.add_argument("--horizon", action="store_true", help="also tighten the tool-call budget")
     ex.add_argument("--no-measure", action="store_true", help="skip the measured difficulty")
     ex.add_argument("--workers", type=int, default=0, help="processes (default: cores - 1)")
+    ex.add_argument(
+        "--keyed",
+        action="store_true",
+        help="key every case by the export salt: the public seed does not rebuild it",
+    )
     vf = ts.add_parser("verify", help="check an export directory against its manifest")
     vf.add_argument("dir")
     ro = ts.add_parser("rollout", help="play a scripted policy on every task (trajectories)")
@@ -177,6 +191,10 @@ def add_tasks_parser(sub: Any) -> None:
     sv.add_argument("--tasks", required=True)
     sv.add_argument("--host", default="127.0.0.1")
     sv.add_argument("--port", type=int, default=8077)
+    sv.add_argument("--salt", default=None, help="commitments.salt (needed for keyed tasks)")
+    sv.add_argument(
+        "--full-grades", action="store_true", help="operators: full grades on live episodes"
+    )
     bn = ts.add_parser("bench", help="throughput: episodes/s and grades/s on this machine")
     bn.add_argument("--env", required=True, choices=envs)
     bn.add_argument("--n", type=int, default=400)

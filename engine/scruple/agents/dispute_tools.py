@@ -161,8 +161,9 @@ DISPUTE_TOOLS: tuple[DisputeToolSpec, ...] = (
     ),
     DisputeToolSpec(
         "submit_decision",
-        "Finish: explain what you did, optionally with a stated win probability and "
-        "structured claims. Remaining time runs with you idle. Returns the scorecard.",
+        "Finish: explain what you did, with a stated win probability and structured claims "
+        "(required: claims.outcome, as the case stands now; 'pending' if undecided). "
+        "Remaining time runs with you idle. Returns the scorecard.",
         S.SUBMIT,
         SelfReport,
     ),

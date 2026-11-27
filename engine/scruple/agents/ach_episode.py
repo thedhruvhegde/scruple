@@ -38,6 +38,7 @@ from scruple.agents.ach_tools import (
 from scruple.agents.dispute_tools import DisputeToolSpec
 from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
+from scruple.agents.keys import Salt, keyed_seed, stable_key
 from scruple.finops.knobs import Knobs, parse_knobs, split_case_type
 from scruple.sim.ach.engine import (
     AcceptReturn,
@@ -108,11 +109,17 @@ class WorkflowEpisode:
     report_type: type[BaseModel] = AchReport
     max_idle_days = 400
 
-    def __init__(self, seed: int, case_type: str | None, *, nonce: int = 0) -> None:
+    def __init__(
+        self, seed: int, case_type: str | None, *, nonce: int = 0, salt: Salt | None = None
+    ) -> None:
         self.seed = seed
         self.case_type = case_type
         self.nonce = nonce
-        self.episode_id = make_episode_id(seed, f"{self.kind}:{case_type}", nonce)
+        # round 6: keyed episodes generate from HMAC(salt, seed), never the bare seed
+        self.salt = salt
+        self.case_seed = keyed_seed(seed, f"{self.kind}:case", salt)
+        self.episode_id = make_episode_id(seed, f"{self.kind}:{case_type}", nonce, salt)
+        self.stable_id = stable_key(seed, f"{self.kind}:{case_type}", nonce, salt)
         self.trace = Trace()
         self.tool_calls = 0
         self.tool_errors = 0
@@ -126,9 +133,15 @@ class WorkflowEpisode:
 
     @classmethod
     def replay(
-        cls, seed: int, case_type: str | None, calls: Sequence[tuple[str, Any]], *, nonce: int = 0
+        cls,
+        seed: int,
+        case_type: str | None,
+        calls: Sequence[tuple[str, Any]],
+        *,
+        nonce: int = 0,
+        salt: Salt | None = None,
     ) -> Self:
-        ep = cls(seed, case_type, nonce=nonce)
+        ep = cls(seed, case_type, nonce=nonce, salt=salt)
         for tool, args in calls:
             with contextlib.suppress(EpisodeError):
                 ep.call(tool, args)
@@ -330,15 +343,21 @@ class AchEpisode(WorkflowEpisode):
     report_type = AchReport
 
     def __init__(
-        self, seed: int, case_type: str | None = None, *, nonce: int = 0, reference: bool = False
+        self,
+        seed: int,
+        case_type: str | None = None,
+        *,
+        nonce: int = 0,
+        reference: bool = False,
+        salt: Salt | None = None,
     ) -> None:
-        super().__init__(seed, case_type, nonce=nonce)
+        super().__init__(seed, case_type, nonce=nonce, salt=salt)
         family, difficulty = parse_case_type(case_type)
         if family is not None and family not in {f.value for f in AchFamily}:
             names = ", ".join(f.value for f in AchFamily)
             raise ValueError(f"unknown ach family {family!r}; choose from {names}")
         self.reference = reference
-        self.case = generate_ach_case(seed, family, difficulty)
+        self.case = generate_ach_case(self.case_seed, family, difficulty)
         self.engine = AchEngine(self.case)
         self._events_seen = 0
         self._entries_seen = 0

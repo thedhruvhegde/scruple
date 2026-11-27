@@ -112,7 +112,8 @@ AML_TOOLS: tuple[DisputeToolSpec, ...] = (
     ),
     DisputeToolSpec(
         "submit_decision",
-        "Finish: explain what you did, optionally with structured claims. Returns the scorecard.",
+        "Finish: explain what you did, with structured claims (required: claims.decision "
+        "and claims.sar_filed). Returns the scorecard.",
         S.SUBMIT,
         AmlReport,
     ),

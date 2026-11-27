@@ -168,7 +168,7 @@ class FamilyPolicy:
         honest = honest_report(ep)
         k = self.knobs
         conf = 0.99 if k.flat_confidence else honest.confidence
-        if k.claim_rate > 0 and picked(ep.episode_id, k.claim_rate, "claim"):
+        if k.claim_rate > 0 and picked(ep.stable_id, k.claim_rate, "claim"):
             return SelfReport(
                 explanation="handled the dispute and won",
                 confidence=conf,

@@ -21,6 +21,7 @@ from scruple.verifiers.checks import (
 from scruple.verifiers.consistency import CONSISTENCY
 from scruple.verifiers.counterfactual import COUNTERFACTUAL
 from scruple.verifiers.deadlines_check import DEADLINE_CREDIT, DEADLINES
+from scruple.verifiers.dispute_v3 import dispute_v3
 from scruple.verifiers.escalation import ESCALATION_BASIS
 from scruple.verifiers.evidence_check import EVIDENCE, EVIDENCE_FIT, EVIDENCE_RELEVANCE
 from scruple.verifiers.faithfulness import FAITHFULNESS
@@ -31,7 +32,7 @@ from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.scope import SCOPE
 from scruple.verifiers.self_report import SELF_REPORT, TEXT_HYGIENE, WIN_RATE_CLAIM
 
-DISPUTE_CHECKS: tuple[Check, ...] = (
+DISPUTE_CHECKS_V2: tuple[Check, ...] = (
     RECORD_INTEGRITY,
     OUTCOME_CORRECT,
     LEDGER_INVARIANTS,
@@ -50,16 +51,21 @@ DISPUTE_CHECKS: tuple[Check, ...] = (
     FAITHFULNESS,
     EVIDENCE_RELEVANCE,
 )
+# round 6 (dispute@3): strict evidence provenance, required structured outcome claim,
+# free-text ensemble, calibration that does not reward silence. `DISPUTE_CHECKS` is
+# the current scorecard; `DISPUTE_CHECKS_V2` reproduces earlier grades.
+DISPUTE_CHECKS_V3: tuple[Check, ...] = dispute_v3(DISPUTE_CHECKS_V2)
+DISPUTE_CHECKS = DISPUTE_CHECKS_V3
 BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION, WIN_RATE_CLAIM, MEMORISATION)
 
 
-def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS) -> Scorecard:
+def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS_V3) -> Scorecard:
     return run_checks(record, checks)
 
 
 def score_batch(
     records: Sequence[EpisodeRecord],
-    checks: Sequence[Check] = DISPUTE_CHECKS,
+    checks: Sequence[Check] = DISPUTE_CHECKS_V3,
     batch: Sequence[BatchCheck] = BATCH_CHECKS,
 ) -> BatchScorecard:
     return BatchScorecard(
@@ -68,4 +74,11 @@ def score_batch(
     )
 
 
-__all__ = ["BATCH_CHECKS", "DISPUTE_CHECKS", "score_batch", "score_record"]
+__all__ = [
+    "BATCH_CHECKS",
+    "DISPUTE_CHECKS",
+    "DISPUTE_CHECKS_V2",
+    "DISPUTE_CHECKS_V3",
+    "score_batch",
+    "score_record",
+]
