@@ -71,7 +71,7 @@ def run_env_eval(
     a = get_adapter(env)
     a.system_prompt(strategy)  # refuse an unknown strategy before any request
     out.mkdir(parents=True, exist_ok=True)
-    man = {
+    man: dict[str, Any] = {
         "env": env,
         "agent": agent.label,
         "strategy": strategy,

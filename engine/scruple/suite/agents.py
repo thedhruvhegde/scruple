@@ -73,7 +73,9 @@ class PlayResult(BaseModel):
 
 
 class Agent(Protocol):
-    label: str
+    @property
+    def label(self) -> str: ...
+
     parallel_safe: bool
 
     def play(
@@ -256,7 +258,8 @@ class Session:
         self.log.append({"tool": tool, "args": args, "ok": True})
         if tool == "submit_decision":
             return {"submitted": True}  # the score is never shown
-        return json.loads(json.dumps(out, default=str))
+        back: dict[str, Any] = json.loads(json.dumps(out, default=str))
+        return back
 
 
 @dataclass
@@ -398,13 +401,14 @@ class ScriptedAgent:
         transcript: Path | None = None,
     ) -> PlayResult:
         refs = adapter.references()
-        if self.policy not in refs:
+        name = adapter.honest_ref if self.policy == "honest" else self.policy
+        if name not in refs:
             raise ValueError(
                 f"{adapter.name} has no scripted policy {self.policy!r}; choose from "
                 + ", ".join(refs)
             )
         t0 = time.monotonic()
-        ep = refs[self.policy](seed, case_type)
+        ep = refs[name](seed, case_type)
         licensed = any(e.kind is EventKind.PROTECTED_READ for e in ep.trace)
         return PlayResult(
             agent=self.label,

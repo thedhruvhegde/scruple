@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ r.title }}</title>
+<style>
+:root{--ink:#1b2430;--muted:#5b6675;--line:#dfe3e8;--bg:#ffffff;--panel:#f6f8fa;--accent:#24508f;
+--ok:#1f7a4d;--warn:#9a6a00;--bad:#b3261e}
+@media (prefers-color-scheme: dark){:root{--ink:#e7ebf0;--muted:#a3adba;--line:#323a45;--bg:#14181e;--panel:#1c222a;
+--accent:#8db4ef;--ok:#5fc48e;--warn:#e0b44c;--bad:#f08079}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,
+"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:36px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h3{font-size:15px;margin:18px 0 6px}.muted{color:var(--muted)}.small{font-size:13px}
+.banner{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:14px 0;font-size:13px}
+.verdict{display:flex;gap:18px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:18px 0;background:var(--panel)}
+.badge{font-weight:700;font-size:20px;padding:8px 16px;border-radius:6px;color:#fff;letter-spacing:.04em}
+.RELEASE{background:var(--ok)}.HOLD{background:var(--warn)}.BLOCK{background:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0}
+.kpi{border:1px solid var(--line);border-radius:6px;padding:12px}.kpi .v{font-size:22px;font-weight:650}
+.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13.5px;margin:6px 0 10px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:8px;background:var(--line);border-radius:4px;min-width:80px;position:relative}
+.bar>span{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:4px}
+.crit{color:var(--bad);font-weight:600}code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.err{color:var(--bad)}details{border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+</style></head><body><main>
+<h1>{{ r.title }}</h1>
+<div class="muted small">Generated {{ r.generated_at }} by scruple {{ r.scruple_version }} &middot; agent <code>{{ r.agent }}</code>
+&middot; strategy <code>{{ r.strategy }}</code> &middot; plan <code>{{ r.hashes.plan_hash[:16] }}</code></div>
+<div class="banner"><strong>Synthetic data.</strong> Every scenario is a simulated case from the scruple engine.
+{% if r.real_model %}The agent's actions are real behaviour of the system under test; outcomes are simulated.{% else %}
+The agent under test is not a real model (a scripted policy or a harness check).{% endif %} Nothing here measures real-world financial outcomes.</div>
+
+<h2>Executive summary</h2>
+<div class="verdict"><span class="badge {{ r.executive.verdict }}">{{ r.executive.verdict }}</span>
+<div>{% for x in r.executive.reasons %}<div>{{ x }}</div>{% endfor %}
+<div class="muted small">Anytime-valid release test at alpha {{ r.release_test.alpha }}, target gate pass rate at least
+{{ "%.0f"|format(100*(1-r.release_test.max_fail)) }}%{% if r.regression %}, regression tolerance {{ r.release_test.tolerance }} reward{% endif %}.</div></div></div>
+<div class="kpis">
+<div class="kpi"><div class="l">Gate pass</div><div class="v">{{ pct(r.executive.overall.gate_rate) }}</div>
+<div class="muted small">{{ r.executive.overall.gate_pass }}/{{ r.executive.overall.n }}, 95% CI {{ pct(r.executive.overall.gate_ci[0]) }}&ndash;{{ pct(r.executive.overall.gate_ci[1]) }}</div></div>
+<div class="kpi"><div class="l">Mean reward</div><div class="v">{{ "%.3f"|format(r.executive.overall.mean_reward) }}</div>
+<div class="muted small">95% CI {{ "%.3f"|format(r.executive.overall.reward_ci[0]) }}&ndash;{{ "%.3f"|format(r.executive.overall.reward_ci[1]) }}</div></div>
+<div class="kpi"><div class="l">Critical failures</div><div class="v">{{ r.executive.critical_failures }}</div>
+<div class="muted small">fabrication, injection-following or self-report lies</div></div>
+<div class="kpi"><div class="l">Scenarios graded</div><div class="v">{{ r.graded }}</div>
+<div class="muted small">of {{ r.selected }} selected, {{ r.planned }} in the plan</div></div>
+</div>
+{% if r.regression %}<p>Against baseline <code>{{ r.regression.baseline }}</code> on {{ r.regression.pairs }} paired scenarios:
+gate pass rate {{ sgn(r.regression.gate_rate_diff) }} [{{ sgn(r.regression.gate_rate_diff_ci[0]) }}, {{ sgn(r.regression.gate_rate_diff_ci[1]) }}],
+mean reward {{ sgn(r.regression.reward_diff) }} [{{ sgn(r.regression.reward_diff_ci[0]) }}, {{ sgn(r.regression.reward_diff_ci[1]) }}];
+{{ r.regression.n_new_failures }} scenarios newly failing, {{ r.regression.n_fixed }} newly passing.</p>{% endif %}
+{% if r.executive.top_failure %}<p>Most common failure mode: <strong>{{ r.executive.top_failure }}</strong>.</p>{% endif %}
+
+{% macro slices(rows, first) %}<div class="tw"><table><tr><th>{{ first }}</th><th>n</th><th>gate pass</th><th></th><th>95% CI</th><th>mean reward (95% CI)</th><th>critical</th></tr>
+{% for s in rows %}<tr><td>{{ s.title or s.name }}{% if s.title %} <span class="muted small">({{ s.name }})</span>{% endif %}</td><td class="n">{{ s.n }}</td>
+<td class="n">{{ s.gate_pass }}/{{ s.n }}</td><td><div class="bar"><span style="width:{{ 100*s.gate_rate }}%"></span></div></td>
+<td class="n">{{ pct(s.gate_ci[0]) }}&ndash;{{ pct(s.gate_ci[1]) }}</td>
+<td class="n">{{ "%.3f"|format(s.mean_reward) }} ({{ "%.3f"|format(s.reward_ci[0]) }}&ndash;{{ "%.3f"|format(s.reward_ci[1]) }})</td>
+<td class="n {% if s.critical_failures %}crit{% endif %}">{{ s.critical_failures }}</td></tr>{% endfor %}</table></div>{% endmacro %}
+
+<h2>Results by category</h2>
+<h3>By environment</h3>{{ slices(r.by_env, "environment") }}
+<h3>By difficulty band</h3>{{ slices(r.by_band, "band") }}
+<h3>Adversarial artefacts</h3>{{ slices(r.by_adversarial, "scenarios") }}
+<h3>Weakest families</h3>{{ slices(r.by_family, "environment / family") }}
+
+<h2>Top failure modes</h2>
+{% if not r.failure_modes %}<p>No hard check failed.</p>{% endif %}
+<div class="tw"><table><tr><th>failure mode</th><th>scenarios</th><th>share (95% CI)</th><th>checks</th><th>environments</th></tr>
+{% for f in r.failure_modes %}<tr><td>{% if f.critical %}<span class="crit">{{ f.title }}</span>{% else %}{{ f.title }}{% endif %}</td>
+<td class="n">{{ f.scenarios }}</td><td class="n">{{ pct(f.share) }} ({{ pct(f.share_ci[0]) }}&ndash;{{ pct(f.share_ci[1]) }})</td>
+<td>{% for k, v in f.checks.items() %}<code>{{ k }}</code>&times;{{ v }} {% endfor %}</td>
+<td>{% for k, v in f.envs.items() %}{{ k }} {{ v }} {% endfor %}</td></tr>{% endfor %}</table></div>
+{% for f in r.failure_modes[:6] %}<details{% if loop.first %} open{% endif %}><summary>{{ f.title }}: example {{ f.example.scenario_id }} ({{ f.example.env }}, {{ f.example.family }})</summary>
+<p class="small">Failed checks: {% for c in f.example.failed_checks %}<code>{{ c }}</code> {% endfor %} &middot; stop: {{ f.example.stop }} &middot; episode {{ f.example.episode_id }}.
+Other examples: {{ f.examples|join(", ") }}.</p>
+<div class="tw"><table><tr><th>#</th><th>tool</th><th>arguments</th><th>result</th></tr>
+{% for t in f.example.trace %}<tr><td class="n">{{ t.step }}</td><td><code>{{ t.tool }}</code></td><td><code>{{ t.args }}</code></td>
+<td>{% if t.ok %}ok{% else %}<span class="err">refused: {{ t.error }}</span>{% endif %}</td></tr>{% endfor %}</table></div>
+<p class="small">Replay: <code>{{ f.example.replay }}</code></p></details>{% endfor %}
+
+{% if r.regression %}<h2>Regression against the baseline</h2>
+<div class="tw"><table><tr><th>environment</th><th>pairs</th><th>candidate gate</th><th>baseline gate</th><th>reward difference (95% CI)</th></tr>
+{% for e in r.regression.per_env %}<tr><td>{{ e.env }}</td><td class="n">{{ e.pairs }}</td><td class="n">{{ e.candidate_gate }}</td><td class="n">{{ e.baseline_gate }}</td>
+<td class="n">{{ sgn(e.reward_diff) }} ({{ sgn(e.reward_diff_ci[0]) }}&ndash;{{ sgn(e.reward_diff_ci[1]) }})</td></tr>{% endfor %}</table></div>
+{% if r.regression.new_failures %}<p class="small">Newly failing: {{ r.regression.new_failures|join(", ") }}</p>{% endif %}{% endif %}
+
+<h2>Release test</h2>
+<div class="tw"><table><tr><th>hypothesis tested</th><th>n</th><th>e-value (max)</th><th>threshold</th><th>rejected</th></tr>
+<tr><td>gate pass rate &le; {{ "%.0f"|format(100*(1-r.release_test.max_fail)) }}% (rejecting it certifies the agent)</td><td class="n">{{ r.release_test.pass_rate_certificate.n }}</td><td class="n">{{ "%.2f"|format(r.release_test.pass_rate_certificate.max_e_value) }}</td><td class="n">{{ r.release_test.threshold_e }}</td><td>{{ yn(r.release_test.pass_rate_certificate.rejected) }}</td></tr>
+<tr><td>gate pass rate &ge; {{ "%.0f"|format(100*(1-r.release_test.max_fail)) }}% (rejecting it blocks)</td><td class="n">{{ r.release_test.pass_rate_failure.n }}</td><td class="n">{{ "%.2f"|format(r.release_test.pass_rate_failure.max_e_value) }}</td><td class="n">{{ r.release_test.threshold_e }}</td><td>{{ yn(r.release_test.pass_rate_failure.rejected) }}</td></tr>
+{% if r.release_test.regression %}<tr><td>reward difference &ge; &minus;{{ r.release_test.tolerance }} (rejecting it blocks: regression)</td><td class="n">{{ r.release_test.regression.n }}</td><td class="n">{{ "%.2f"|format(r.release_test.regression.max_e_value) }}</td><td class="n">{{ r.release_test.threshold_e }}</td><td>{{ yn(r.release_test.regression.rejected) }}</td></tr>
+<tr><td>reward difference &le; &minus;{{ r.release_test.tolerance }} (rejecting it shows non-inferiority)</td><td class="n">{{ r.release_test.non_inferiority.n }}</td><td class="n">{{ "%.2f"|format(r.release_test.non_inferiority.max_e_value) }}</td><td class="n">{{ r.release_test.threshold_e }}</td><td>{{ yn(r.release_test.non_inferiority.rejected) }}</td></tr>{% endif %}
+</table></div>
+{% if r.release_test.regressed_envs %}<p class="crit">e-BH flags a regression in: {{ r.release_test.regressed_envs|join(", ") }}</p>{% endif %}
+
+<h2>Operations</h2>
+<div class="tw"><table>
+<tr><td>stops</td><td>{% for k, v in r.operations.stops.items() %}{{ k }} {{ v }} {% endfor %}</td></tr>
+<tr><td>tokens</td><td>{{ r.operations.input_tokens }} in, {{ r.operations.output_tokens }} out, {{ r.operations.requests }} requests, {{ r.operations.retries }} retries</td></tr>
+<tr><td>tool calls</td><td>{{ r.operations.tool_calls }} ({{ r.operations.tool_errors }} refused)</td></tr>
+<tr><td>episode wall time</td><td>p50 {{ r.operations.episode_latency_s.p50 }} s, p90 {{ r.operations.episode_latency_s.p90 }} s</td></tr>
+<tr><td>request latency</td><td>p50 {{ r.operations.request_latency_s.p50 }} s, p90 {{ r.operations.request_latency_s.p90 }} s</td></tr>
+<tr><td>provider limits</td><td>{{ r.operations.rejected_generations }} rejected generations, {{ r.operations.elisions }} tool outputs elided</td></tr>
+</table></div>
+
+<h2>Integrity</h2>
+<ul><li>Replay determinism: {{ r.integrity.replay_mismatches }} of {{ r.graded }} graded episodes differ on replay.</li>
+<li>Cases regenerated from the plan and checked against their observable hash: {{ r.integrity.cases_regenerated }}; problems: {{ r.integrity.regeneration_problems|length }}.</li>
+<li>Truth commitments {% if r.integrity.commitments_revealed %}revealed with the plan salt and checked{% else %}not revealed (the plan salt was not supplied){% endif %}.</li></ul>
+
+<h2>Methodology</h2><ul>{% for m in r.methodology %}<li>{{ m }}</li>{% endfor %}</ul>
+<h2>Limitations</h2><ul>{% for m in r.limitations %}<li>{{ m }}</li>{% endfor %}</ul>
+<h2>Reproduce</h2><pre>{% for c in r.reproduce %}{{ c }}
+{% endfor %}</pre>
+<h2>Hashes</h2><div class="tw"><table>{% for k, v in r.hashes.items() %}<tr><td>{{ k }}</td><td><code>{{ v }}</code></td></tr>{% endfor %}</table></div>
+</main></body></html>
