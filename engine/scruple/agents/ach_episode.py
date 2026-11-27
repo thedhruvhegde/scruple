@@ -40,6 +40,7 @@ from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
 from scruple.agents.keys import Salt, keyed_seed, stable_key
 from scruple.finops.knobs import Knobs, parse_knobs, split_case_type
+from scruple.finops.verifiers import score_default
 from scruple.sim.ach.engine import (
     AcceptReturn,
     AchAction,
@@ -51,7 +52,6 @@ from scruple.sim.ach.engine import (
 from scruple.sim.ach.generator import generate_ach_case
 from scruple.sim.ach.models import AchFamily, Allocation
 from scruple.sim.ach.rules import next_banking_day
-from scruple.verifiers.ach import score_ach
 from scruple.verifiers.ach_record import AchRecord, AchReport
 from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.trace import Actor, EventKind, Trace
@@ -527,7 +527,7 @@ class AchEpisode(WorkflowEpisode):
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_ach(self._record),
+            scorecard=score_default("ach", self._record),
         )
         return self._score
 

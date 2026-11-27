@@ -40,8 +40,8 @@ from scruple.agents.env import DisputeSession, dispute_action
 from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
 from scruple.agents.keys import Salt, keyed_seed, keyed_tag, stable_key
+from scruple.finops.verifiers import score_default
 from scruple.verifiers.checks import Scorecard
-from scruple.verifiers.dispute import score_record
 from scruple.verifiers.record import BaselineResult, EpisodeRecord, SelfReport, merchant_cost
 from scruple.verifiers.trace import Actor, EventKind, Trace
 
@@ -505,7 +505,7 @@ class DisputeEpisode:
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_record(self._record),
+            scorecard=score_default("dispute", self._record),
         )
         return self._score
 
