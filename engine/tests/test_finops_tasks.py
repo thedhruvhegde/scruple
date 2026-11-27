@@ -359,6 +359,12 @@ def test_eval_run_takes_a_finops_env(tmp_path: Path, capsys: pytest.CaptureFixtu
             "--strategy", strategy, "--seeds", "1-3", "--out", str(tmp_path),
             "--transport", "fake", "--difficulty", "0.7", "--concurrency", "1"]  # fmt: skip
     assert main(argv) == 0
-    out = json.loads(capsys.readouterr().out)
-    assert out["n"] == 3 and out["transport"] == "fake"
-    assert (tmp_path / "grades.jsonl").exists()
+    out = capsys.readouterr().out
+    assert "on aml" in out and "NOT a real model" in out and "ref:honest" in out
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["rows"][0]["n"] == 3 and summary["real_model"] is False
+    assert len(list((tmp_path / "items").glob("*.json"))) == 3  # one record per seed
+    # resumable: a rerun plays nothing again and gives the same summary
+    assert main(argv) == 0
+    capsys.readouterr()
+    assert json.loads((tmp_path / "summary.json").read_text())["rows"] == summary["rows"]

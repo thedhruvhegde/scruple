@@ -1,0 +1,124 @@
+{
+ "item": {
+  "scenario_id": "aml-s7001",
+  "env": "aml",
+  "seed": 7001,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "http_error",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001066"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00030",
+      "T-00032",
+      "T-00033",
+      "T-00034",
+      "T-00035",
+      "T-00036",
+      "T-00038",
+      "T-00040",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case_notes",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": " A-001066"
+    },
+    "ok": false,
+    "error": "unknown account ' A-001066'"
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": " A-001066"
+    },
+    "ok": false,
+    "error": "unknown account ' A-001066'"
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": "A-001066"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-555553b4e114",
+  "trace_head": "d9d10bbadfc0c0a5bf39088f5d483a4626bc0d2bd91d2098eb0dedb636e164ca",
+  "turns": 5,
+  "input_tokens": 15897,
+  "output_tokens": 318,
+  "requests": 8,
+  "retries": 3,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 5,
+  "quota_waits_s": [],
+  "latency_s": 100.609,
+  "request_latency_s": [
+   1.807,
+   0.096,
+   0.6,
+   0.071,
+   0.511,
+   0.067,
+   0.51,
+   0.149,
+   0.072,
+   0.098,
+   0.082,
+   0.066,
+   0.068
+  ],
+  "detail": "HTTP 413: {\"error\":{\"message\":\"Request too large for model `qwen/qwen3.8-27b` in organization `org_REDACTED` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Requested 7280, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at h",
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.0,
+  "hard_failures": [],
+  "soft_failures": [
+   "AML-BASIS2",
+   "AML-DEC2"
+  ],
+  "submitted": false,
+  "tool_calls": 7,
+  "tool_errors": 2,
+  "trace_head": "d9d10bbadfc0c0a5bf39088f5d483a4626bc0d2bd91d2098eb0dedb636e164ca",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

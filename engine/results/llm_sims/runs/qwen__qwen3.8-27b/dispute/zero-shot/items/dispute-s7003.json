@@ -1,0 +1,157 @@
+{
+ "item": {
+  "scenario_id": "dispute-s7003",
+  "env": "dispute",
+  "seed": 7003,
+  "case_type": null,
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_evidence",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-08b1ef2fcb63374e"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-daff32cc229ded05"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-4b035c0c561a89a5"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-2c3140d98e19f46c"
+    },
+    "ok": true
+   },
+   {
+    "tool": "represent",
+    "args": {
+     "evidence_ids": [
+      "ev-4b035c0c561a89a5",
+      "ev-2c3140d98e19f46c",
+      "ev-08b1ef2fcb63374e",
+      "ev-daff32cc229ded05"
+     ],
+     "narrative": "Original Credit Transaction Not Accepted"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "actions": [
+       "get_case",
+       "list_evidence",
+       "get_evidence",
+       "get_ledger_view",
+       "represent",
+       "submit_decision"
+      ],
+      "cost_usd_minor": 0,
+      "deadlines_met": true,
+      "evidence_ids": [
+       "ev-4b035c0c561a89a5",
+       "ev-2c3140d98e19f46c",
+       "ev-08b1ef2fcb63374e",
+       "ev-daff32cc229ded05"
+      ],
+      "outcome": "won",
+      "refunded_minor": 0,
+      "win_rate": 1
+     },
+     "confidence": 0.9,
+     "explanation": "Original Credit Transaction Not Accepted"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-8d32e4f7a4f3",
+  "trace_head": "76cf44ddbb652395819ec70f50e2c56c632191af64403b788f0ba82930d23482",
+  "turns": 5,
+  "input_tokens": 18106,
+  "output_tokens": 704,
+  "requests": 7,
+  "retries": 2,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 92.089,
+  "request_latency_s": [
+   1.077,
+   1.12,
+   1.046,
+   0.065,
+   5.199,
+   0.062,
+   1.944
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.98276,
+  "hard_failures": [],
+  "soft_failures": [
+   "EVD-03",
+   "PROC-02"
+  ],
+  "submitted": true,
+  "tool_calls": 10,
+  "tool_errors": 0,
+  "trace_head": "76cf44ddbb652395819ec70f50e2c56c632191af64403b788f0ba82930d23482",
+  "metrics": {
+   "cost_usd": 0.0,
+   "resolution": "won",
+   "family": "buyers_remorse",
+   "fair_outcome": true,
+   "won": true
+  }
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

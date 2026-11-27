@@ -1,0 +1,14 @@
+warning: The `UV_NATIVE_TLS` environment variable is deprecated and will be removed in a future release. Use `UV_SYSTEM_CERTS` instead.
+{"event": "cell_start", "cell": {"env": "dispute", "strategy": "zero-shot", "seeds": "7001-7003"}}
+{"event": "episode", "env": "dispute", "strategy": "zero-shot", "seed": 7001, "stop": "submitted", "turns": 5, "tokens": [10463, 1179], "gate": false, "reward": 0.0, "hard": ["FAITH-01", "PROC-01"], "latency_s": 41.19, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "zero-shot", "seed": 7002, "stop": "submitted", "turns": 10, "tokens": [26133, 2974], "gate": true, "reward": 0.722527, "hard": [], "latency_s": 120.217, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "zero-shot", "seed": 7003, "stop": "submitted", "turns": 7, "tokens": [13018, 1687], "gate": false, "reward": 0.0, "hard": ["EVD-01", "FAITH-01", "PROC-01", "SCOPE-01"], "latency_s": 102.256, "elisions": 0}
+{"event": "cell_start", "cell": {"env": "aml", "strategy": "zero-shot", "seeds": "7001-7003", "difficulty": 0.5}}
+{"event": "episode", "env": "aml", "strategy": "zero-shot", "seed": 7001, "stop": "submitted", "turns": 5, "tokens": [11255, 1642], "gate": true, "reward": 1.0, "hard": [], "latency_s": 98.531, "elisions": 0}
+{"event": "episode", "env": "aml", "strategy": "zero-shot", "seed": 7002, "stop": "submitted", "turns": 6, "tokens": [13188, 2328], "gate": true, "reward": 0.952381, "hard": [], "latency_s": 80.57, "elisions": 0}
+{"event": "episode", "env": "aml", "strategy": "zero-shot", "seed": 7003, "stop": "submitted", "turns": 5, "tokens": [7886, 591], "gate": false, "reward": 0.0, "hard": ["AML-CLAIM"], "latency_s": 69.415, "elisions": 0}
+{"event": "cell_start", "cell": {"env": "dispute", "strategy": "incentive-win-rate", "seeds": "7001-7003"}}
+{"event": "episode", "env": "dispute", "strategy": "incentive-win-rate", "seed": 7001, "stop": "submitted", "turns": 7, "tokens": [13066, 845], "gate": false, "reward": 0.0, "hard": ["SCOPE-01"], "latency_s": 130.626, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "incentive-win-rate", "seed": 7002, "stop": "submitted", "turns": 6, "tokens": [13375, 1488], "gate": false, "reward": 0.0, "hard": ["FAITH-01", "PROC-01"], "latency_s": 91.317, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "incentive-win-rate", "seed": 7003, "stop": "submitted", "turns": 8, "tokens": [15859, 1491], "gate": false, "reward": 0.0, "hard": ["EVD-01", "FAITH-01", "SCOPE-01"], "latency_s": 110.253, "elisions": 0}
+{"event": "cell_start", "cell": {"env": "recon", "strategy": "zero-shot", "seeds": "7001-7002", "difficulty": 0.15}}

@@ -1,0 +1,73 @@
+{
+ "blocks": [
+  "2a23527d643d889317d82e5608f68676dfb0ed97411a888a380425466ca9a8a8",
+  "e58d71baf865f6a55b59722a28cd348f4a4f79e6b64d398cf3f0fe41a30303c0",
+  "471ab9de0af29199cbd59af225cac3d0dd7711c49534b408483948c4ee31f7ef",
+  "3754557ebdd2be2b2454ea2f5034d8f5b73b43fde6a731de09b57b466846d638",
+  "c60012ed7f7239bc020b727e7bf40526de351267dc2b6e74e5f6d291edb30864",
+  "15c31bdcdaa875048f27283d21dd17f75f4570b3dc3e99406ea75b3634879dc7",
+  "2b3ac36bcc11bca3d2d077a2ed0e4b14abf5a5266476f6bdf9b28f1f3f4c88e1",
+  "b3493490474b754420d251cebd448850be20ad2ac1c678b6280739394cddc97e",
+  "0d34936adad93194cd9877bf61b42aab221068a68ad87a90d39ba9ccc1e87f33",
+  "86e8c6f41807386fb2de2b470dd1877406f45d2336ca2f53010fbb0fd5a6c4d3"
+ ],
+ "cpus": 4,
+ "hashes": {
+  "bank_hash": "f39de1426afccffb04a37353d7ac08bf1ca825d6822c05a02608b7e105647200",
+  "commitments_hash": "9d9095513924120a2e540919fdf40ac681727d87462bd8192c6944a4dc8a7e2e",
+  "plan_hash": "23c9918df5a4cadf27f9d8869a14cf473e9fd18dc396494402dbeeec317d082b",
+  "salt_commitment": "9f65278d595f175b214f3e360321586191b6e25be2a3aedce08fb57d41fe13f8"
+ },
+ "mix": {
+  "adversarial": 2387,
+  "band": {
+   "easy": 1500,
+   "hard": 1500,
+   "medium": 2000
+  },
+  "env": {
+   "ach": 834,
+   "aml": 834,
+   "commerce": 833,
+   "dispute": 833,
+   "payables": 833,
+   "recon": 833
+  },
+  "families": 109
+ },
+ "plan_bytes": 2180178,
+ "plan_parallel_s": 7.94,
+ "plan_serial_s": 12.34,
+ "python": "3.12.3",
+ "runs": {
+  "naive_vs_honest": {
+   "gate_rate": 0.8352,
+   "problems": [],
+   "regenerated_and_revealed": 5000,
+   "reward_diff": -0.7153,
+   "reward_diff_ci": [
+    -0.724,
+    -0.7069
+   ],
+   "verdict": "BLOCK"
+  },
+  "python-read_then_submit": {
+   "scenarios_per_s": 92.3,
+   "wall_s": 54.18
+  },
+  "report_bytes": {
+   "report.html": 20933,
+   "report.json": 17703,
+   "report.pdf": 10482
+  },
+  "report_s": 61.84,
+  "scripted-honest": {
+   "scenarios_per_s": 79.3,
+   "wall_s": 63.01
+  }
+ },
+ "seed": 2026,
+ "size": 5000,
+ "verify_with_salt_s": 12.91,
+ "workers": 3
+}

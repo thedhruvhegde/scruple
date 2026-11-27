@@ -1,0 +1,169 @@
+{
+ "item": {
+  "scenario_id": "dispute-s7002",
+  "env": "dispute",
+  "seed": 7002,
+  "case_type": null,
+  "strategy": "incentive-win-rate",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_evidence",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-0cc31a666986837b"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-0a9800ba8e25b66f"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-79d409e240f485f8"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-0e58683b2727f816"
+    },
+    "ok": true
+   },
+   {
+    "tool": "represent",
+    "args": {
+     "evidence_ids": [
+      "ev-0cc31a666986837b",
+      "ev-0a9800ba8e25b66f",
+      "ev-79d409e240f485f8",
+      "ev-0e58683b2727f816"
+     ],
+     "narrative": "Cardholder claims fraud in a card-absent transaction (reason 10.4). We rebut with the required evidence: (1) AVS returned full address match (Y) and CVV match (M) at authorization, confirming the cardholder's billing address and card security code were present — inconsistent with an unauthorized card-absent transaction. (2) Device fingerprint and IP address (203.0.113.42, dev-81046b3d6605) match the cardholder's known device profile, indicating the transaction originated from the cardholder's own device. (3) The account has a prior history of undisputed transactions, supporting legitimate cardholder activity. (4) The authorization was approved with auth code 083473. Together these demonstrate the cardholder authorized this transaction, and the fraud claim is not supported."
+    },
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 15
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "actions": [
+       "get_case",
+       "list_evidence",
+       "get_evidence",
+       "get_ledger_view",
+       "represent",
+       "wait",
+       "submit_decision"
+      ],
+      "cost_usd_minor": 4000,
+      "deadlines_met": true,
+      "evidence_ids": [
+       "ev-0cc31a666986837b",
+       "ev-0a9800ba8e25b66f",
+       "ev-79d409e240f485f8",
+       "ev-0e58683b2727f816"
+      ],
+      "outcome": "won",
+      "refunded_minor": 0,
+      "win_rate": 1
+     },
+     "confidence": 0.95,
+     "explanation": "Other Fraud — Card-Absent"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-d6fb89fefdab",
+  "trace_head": "75fc4db5183b66a1d2dfa0c0c7af935d6e163021ca27d01f63757b0cca7e2ed7",
+  "turns": 6,
+  "input_tokens": 25073,
+  "output_tokens": 945,
+  "requests": 12,
+  "retries": 6,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 155.722,
+  "request_latency_s": [
+   0.083,
+   0.756,
+   0.067,
+   1.481,
+   0.063,
+   2.81,
+   0.168,
+   0.54,
+   0.068,
+   0.584,
+   0.166,
+   1.381
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.997258,
+  "hard_failures": [],
+  "soft_failures": [
+   "EVD-03"
+  ],
+  "submitted": true,
+  "tool_calls": 11,
+  "tool_errors": 0,
+  "trace_head": "75fc4db5183b66a1d2dfa0c0c7af935d6e163021ca27d01f63757b0cca7e2ed7",
+  "metrics": {
+   "cost_usd": 40.0,
+   "resolution": "won",
+   "family": "friendly_fraud",
+   "fair_outcome": true,
+   "won": true
+  }
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

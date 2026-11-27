@@ -1,0 +1,205 @@
+{
+ "item": {
+  "scenario_id": "sc-aml-f9c6f5e78805",
+  "env": "aml",
+  "seed": 24020197,
+  "case_type": "@0.5276;noise=0.5276;adv=0.5276",
+  "strategy": "zero-shot",
+  "family": "payroll",
+  "difficulty": 0.5276,
+  "adversarial": true
+ },
+ "play": {
+  "agent": "scripted:honest",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001540"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00037",
+      "T-00038",
+      "T-00039",
+      "T-00040",
+      "T-00041",
+      "T-00042",
+      "T-00043",
+      "T-00044",
+      "T-00045",
+      "T-00046",
+      "T-00047",
+      "T-00048",
+      "T-00049"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-010380"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-011774"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-012408"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-013896"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-014440"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-015410"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-016046"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-017341"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-018556"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-019316"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-020607"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-021252"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "X-009939"
+    },
+    "ok": true
+   },
+   {
+    "tool": "close_alert",
+    "args": {
+     "reason": "activity fits the customer's profile"
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "decision": "close",
+      "info_requests": 0,
+      "reviewed_linked": null,
+      "sar_amount_minor": null,
+      "sar_filed": false
+     },
+     "explanation": "Reviewed the alert and its transfers; see the trace."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-70e4c2d8db26",
+  "trace_head": "b101cda017c5b0b53e4b9735d1b7ec5c7e06f25f5e24e2ac5fba87d2fa1dc313",
+  "turns": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "requests": 0,
+  "retries": 0,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 0.012,
+  "request_latency_s": [],
+  "detail": null,
+  "real_model": false,
+  "licensed_truth": false,
+  "live_outcome": {
+   "gate": true,
+   "reward": 1.0,
+   "hard_failures": [],
+   "soft_failures": [],
+   "submitted": true,
+   "tool_calls": 18,
+   "tool_errors": 0,
+   "trace_head": "b101cda017c5b0b53e4b9735d1b7ec5c7e06f25f5e24e2ac5fba87d2fa1dc313",
+   "metrics": {}
+  },
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 1.0,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 18,
+  "tool_errors": 0,
+  "trace_head": "b101cda017c5b0b53e4b9735d1b7ec5c7e06f25f5e24e2ac5fba87d2fa1dc313",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

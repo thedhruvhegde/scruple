@@ -1,0 +1,116 @@
+{
+ "item": {
+  "scenario_id": "aml-s7001",
+  "env": "aml",
+  "seed": 7001,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:openai/gpt-oss-20b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001066"
+    },
+    "ok": true
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": "A-001066"
+    },
+    "ok": true
+   },
+   {
+    "tool": "file_sar",
+    "args": {
+     "amount_minor": 2049240,
+     "indicators": [
+      "fan_in",
+      "new_counterparties",
+      "profile_mismatch"
+     ],
+     "narrative": "The account A-001066, a gig worker with an expected monthly inflow of $1,824, received nine inbound transfers totaling $1,113,400 from five distinct counterparties between 2026-09-05 and 2026-09-18. The transfers are large, repeated, and from multiple sources, indicating a potential structuring or layering scheme. Additionally, the account made two large outbound wire transfers of $467,920 each to external accounts on 2026-09-14, further suggesting possible money movement. This pattern is inconsistent with the account’s profile and raises red flags for potential money laundering. The SAR is filed to report these suspicious activities.",
+     "txn_ids": [
+      "T-00030",
+      "T-00032",
+      "T-00033",
+      "T-00034",
+      "T-00035",
+      "T-00036",
+      "T-00038",
+      "T-00040",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "decision": "file_sar",
+      "info_requests": 0,
+      "reviewed_linked": true,
+      "sar_amount_minor": 2049240,
+      "sar_filed": true
+     },
+     "explanation": "I reviewed the alert, the subject’s profile, and the linked transfers. The account is a gig worker with low expected monthly inflow (~$1,824). Nine inbound transfers between 2026‑09‑05 and 2026‑09‑18 total $1,113,400, far exceeding the profile and involving multiple counterparties. The pattern shows a fan‑in structure, new counterparties, and a profile mismatch. Additionally, two large outbound wire transfers of $467,920 each were made on 2026‑09‑14, further indicating possible layering. These red flags warrant filing a SAR. No information requests were needed. I filed the SAR with the nine linked transactions and the total amount of $2,049,240 (in cents)."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-555553b4e114",
+  "trace_head": "d95ed5c292338c4f49b7c21c57c79f197ca5b88eebc94651ab977ebe661a2d50",
+  "turns": 5,
+  "input_tokens": 16651,
+  "output_tokens": 2093,
+  "requests": 8,
+  "retries": 3,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 131.628,
+  "request_latency_s": [
+   0.661,
+   0.28,
+   0.421,
+   0.171,
+   2.377,
+   0.072,
+   0.443,
+   0.962
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 1.0,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 5,
+  "tool_errors": 0,
+  "trace_head": "d95ed5c292338c4f49b7c21c57c79f197ca5b88eebc94651ab977ebe661a2d50",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

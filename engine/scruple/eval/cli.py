@@ -32,30 +32,51 @@ def _progress(rec: EvalRecord) -> None:
     )
 
 
-def _run_finops(args: argparse.Namespace) -> int:
-    """`eval run --env recon|aml|ach|payables`: the seeds as finops tasks at
-    `--difficulty` along the curriculum, played by `scruple.finops.rollout` and graded
-    by replay (the strategy's brief is dispute-specific and is not used)."""
-    from scruple.finops.difficulty import curriculum
-    from scruple.finops.rollout import run_models
-    from scruple.finops.tasks import build_task
+def _run_env(args: argparse.Namespace) -> int:
+    """`eval run --env recon|aml|ach|payables|commerce`: the seeds at `--difficulty`
+    (commerce: that many adversarial scenarios), played resumably with one record per
+    seed, graded by replay and compared with the env's scripted references
+    (scruple.eval.env_batch). The strategy applies through the env-neutral texts of
+    `scruple.suite.envs.STRATEGY_ADDENDA`."""
+    from scruple.eval.env_batch import run_env_eval
+    from scruple.suite.agents import ProviderAgent
 
-    ct = curriculum(args.env, args.difficulty)
-    specs = [
-        build_task(args.env, s, ct, "eval-run", measure=False) for s in parse_seeds(args.seeds)
-    ]
-    summary = run_models(
-        specs,
+    agent = ProviderAgent(
         args.provider,
         args.model,
-        Path(args.out),
-        transport=args.transport,
         base_url=args.base_url,
-        concurrency=args.concurrency,
+        settings=RunSettings(
+            timeout_s=args.timeout,
+            max_retries=args.max_retries,
+            seed_from_episode=not args.no_seed,
+        ),
         rpm=args.rpm,
-        settings=RunSettings(timeout_s=args.timeout, max_retries=args.max_retries),
+        paced=args.paced,
+        transport=args.transport,
     )
-    print(json.dumps({k: v for k, v in summary.items() if k != "runs"}, indent=2, sort_keys=True))
+
+    def progress(rec: Any) -> None:
+        if not args.quiet:
+            o = rec.outcome
+            print(
+                f"seed {rec.item.seed}: {rec.play.stop}, reward {o.reward:.3f}, "
+                f"gate {'pass' if o.gate else 'FAIL'}",
+                file=sys.stderr,
+            )
+
+    out = Path(args.out)
+    run_env_eval(
+        args.env,
+        agent,
+        args.strategy,
+        parse_seeds(args.seeds),
+        out,
+        difficulty=args.difficulty,
+        concurrency=args.concurrency,
+        progress=progress,
+        transcripts=args.transport == "http",
+    )
+    print((out / "SUMMARY.md").read_text(), end="")
     return 0
 
 
@@ -81,8 +102,8 @@ def cmd_eval(args: argparse.Namespace) -> int:
         case "run":
             if args.transport == "http":  # fail fast on a missing key, before any work
                 make_provider(args.provider, base_url=args.base_url)
-            if getattr(args, "env", "dispute") != "dispute":  # a finops environment
-                return _run_finops(args)
+            if getattr(args, "env", "dispute") != "dispute":  # finops or commerce
+                return _run_env(args)
             cfg = EvalConfig(
                 provider=args.provider,
                 model=args.model,
@@ -167,11 +188,16 @@ def add_eval_parser(sub: Any) -> None:
     r.add_argument("--quiet", action="store_true", help="no per-seed progress on stderr")
     r.add_argument(
         "--env",
-        choices=["dispute", "recon", "aml", "ach", "payables"],
+        choices=["dispute", "recon", "aml", "ach", "payables", "commerce"],
         default="dispute",
-        help="environment (default dispute); the others are the finops suite",
+        help="environment (default dispute); the others are the finops suite and commerce",
     )
-    r.add_argument("--difficulty", type=float, default=0.5, help="finops envs: nominal difficulty")
+    r.add_argument("--difficulty", type=float, default=0.5, help="non-dispute envs: difficulty")
+    r.add_argument(
+        "--paced",
+        action="store_true",
+        help="non-dispute envs: provider-limit rules (wait out per-day 429s, elide on 413)",
+    )
 
     im = es.add_parser("import-store", help="score a store a CLI player wrote (CLI-brief path)")
     im.add_argument("--store", required=True)

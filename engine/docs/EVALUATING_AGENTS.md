@@ -257,6 +257,89 @@ $ uv run scruple eval import-store --store /tmp/store-opus-checklist --model opu
 One episode per seed counts (the first one started); an episode never submitted is
 lapsed and scored.
 
+## Other environments: `eval run --env`
+
+`--env recon|aml|ach|payables|commerce` plays the same seeds in another environment
+(`--difficulty` sets the case type along the finops curriculum; for commerce it sets
+how many adversarial scenarios, 0 to 3, a case carries):
+
+```bash
+uv run scruple eval run --env aml --provider groq --model openai/gpt-oss-120b \
+    --strategy incentive-win-rate --seeds 7001-7003 --difficulty 0.5 \
+    --out runs/aml-120b-incentive --concurrency 1 --rpm 6 --max-retries 12 --timeout 180 --paced
+```
+
+- One record per seed (`items/<env>-s<seed>.json`) as soon as it finishes, so the run
+  is resumable; HTTP errors and timeouts are replayed up to 3 times (an HTTP 413, one
+  request alone over the provider's per-minute input limit, is not: it would fail the
+  same way).
+- Grading replays the calls through a fresh episode (`replay_match` checks the live
+  and replayed trace heads agree); the summary compares the model with the env's
+  scripted references (`honest`, `oracle`, `floor`, `hacker`, ...) on the same tasks
+  with a paired bootstrap.
+- Strategies: the dispute prompts name dispute tools, so other environments get an
+  environment-neutral text per strategy (`scruple.suite.envs.STRATEGY_ADDENDA`):
+  `zero-shot`, `checklist-first`, `incentive-win-rate`, `incentive-scorecard`.
+- `--paced` adds the provider-limit rules (`scruple.agents.providers.limits`): a
+  per-day 429 with a stated wait under an hour is waited out, and a 413 elides the
+  oldest tool output until the request fits. Request and response bodies go to
+  `transcripts/`, headers never.
+
+## The client test suite: `scruple suite`
+
+A productized run: a versioned scenario bank, an agent run through it, and a report a
+client can file.
+
+```bash
+# 1. plan: a bank across environments and difficulty bands, committed by hash
+uv run scruple suite plan --envs all --size 5000 --difficulty-mix easy:0.3,medium:0.4,hard:0.3 \
+    --seed 2026 --cap recon=0.3 --out plan.json          # also writes plan.salt (keep it private)
+uv run scruple suite verify plan.json --salt plan.salt   # regenerate every case, reveal every commitment
+
+# 2. run: any agent; resumable, graded by replay
+uv run scruple suite run --plan plan.json --agent groq:openai/gpt-oss-120b --per-env 20 --rpm 6 --out runs/cand
+uv run scruple suite run --plan plan.json --agent python:mypkg.agent:play --out runs/local --concurrency 8
+uv run scruple suite run --plan plan.json --agent https://agent.example/step --out runs/remote
+uv run scruple suite run --plan plan.json --agent scripted:honest --per-env 20 --out runs/base
+
+# 3. report: HTML, PDF and JSON, with a baseline and the plan salt
+uv run scruple suite report runs/cand --baseline runs/base --salt plan.salt --format html,pdf,json
+uv run scruple suite replay runs/cand SCENARIO_ID      # the graded trace of one scenario
+```
+
+- **Plan.** Each scenario names `(env, seed, case_type)`, a difficulty band, its family
+  and the adversarial artefacts it carries (injected instructions, forged evidence,
+  bank-change requests, ...). Its hidden ground truth, the scenario's "future", is not in
+  the plan: only `sha256(salt | truth)` is. `bank_hash` covers every public field and
+  depends only on the parameters (same `--seed`, same bank, any worker count);
+  `plan_hash` names the whole plan; one hash per 500-scenario block. The run order is a
+  seeded shuffle fixed before any outcome exists.
+- **Agents.** `provider:model` uses the API harness above (paced, transcripts);
+  `python:module:fn` gets a `Session` (`observation`, `tools`, `call(tool, args)`; see
+  `scruple.suite.example_agents`); an `http(s)://` endpoint gets
+  `{"session", "env", "system", "observation", "tools", "last_result"}` per step and
+  answers `{"tool", "args"}` or `{"stop": true}`; `scripted:<policy>` plays a
+  reference (`honest` maps to each env's honest reference). MCP agents can use
+  `scruple mcp sim` and the MCP path above; they are not driven by `suite run`.
+- **Report.** Executive summary with a RELEASE / HOLD / BLOCK recommendation; pass rate
+  and reward by environment, difficulty band, adversarial artefacts and family (95%
+  Wilson and bootstrap intervals); the failure taxonomy (`scruple.suite.taxonomy`:
+  fabrication, self-report lies, injection-following, process, deadline, scope, rules,
+  integrity, outcome) with an example trace and replay command per mode; regression
+  against a baseline run, paired by scenario; operations (tokens, latency, stops,
+  provider-limit events); integrity (replay determinism, regenerated cases, revealed
+  commitments); methodology, limitations, reproduction commands and hashes.
+- **Release test.** Betting e-processes (`scruple.stats.BettingEProcess`, the gate's
+  statistics) read in the plan's outcome-blind order: RELEASE needs the gate pass rate
+  certified above `1 - --max-fail` at `--alpha` (and, with a baseline, non-inferiority
+  within `--tolerance` reward); BLOCK on evidence of a pass rate below target or of a
+  reward regression (overall, or per environment through e-BH); otherwise HOLD. The
+  test is anytime-valid: run more scenarios from the same plan and read it again.
+
+A sample deliverable (a real Groq model against the scripted reference, synthetic
+data) is at docs/samples/suite_report_sample.html and .pdf; the 5,000-scenario scale
+check is results/suite_scale/SCALE.md.
+
 ## Leaderboard
 
 ```

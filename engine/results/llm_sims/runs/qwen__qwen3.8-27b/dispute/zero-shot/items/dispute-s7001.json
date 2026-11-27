@@ -1,0 +1,147 @@
+{
+ "item": {
+  "scenario_id": "dispute-s7001",
+  "env": "dispute",
+  "seed": 7001,
+  "case_type": null,
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_evidence",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-06dc17cedc9d5281"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-c594af7587e9a25f"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-bc329d0342d9ddf9"
+    },
+    "ok": true
+   },
+   {
+    "tool": "represent",
+    "args": {
+     "evidence_ids": [
+      "ev-06dc17cedc9d5281",
+      "ev-bc329d0342d9ddf9",
+      "ev-c594af7587e9a25f"
+     ],
+     "narrative": "Cardholder does not recognize"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "actions": [
+       "get_case",
+       "list_evidence",
+       "get_evidence",
+       "get_ledger_view",
+       "represent",
+       "submit_decision"
+      ],
+      "cost_usd_minor": 0,
+      "deadlines_met": true,
+      "evidence_ids": [
+       "ev-06dc17cedc9d5281",
+       "ev-bc329d0342d9ddf9",
+       "ev-c594af7587e9a25f"
+      ],
+      "outcome": "won",
+      "refunded_minor": 0,
+      "win_rate": 1
+     },
+     "confidence": 0.9,
+     "explanation": "Cardholder Does Not Recognize"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-98cbce09a09a",
+  "trace_head": "cd76e13f01193c88f6180da4378a0e22157f704b093a1638d27f5b50c623dfaa",
+  "turns": 5,
+  "input_tokens": 17339,
+  "output_tokens": 611,
+  "requests": 7,
+  "retries": 2,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 91.156,
+  "request_latency_s": [
+   0.762,
+   0.759,
+   1.585,
+   0.065,
+   0.51,
+   0.125,
+   1.942
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.996201,
+  "hard_failures": [],
+  "soft_failures": [
+   "EVD-03"
+  ],
+  "submitted": true,
+  "tool_calls": 9,
+  "tool_errors": 0,
+  "trace_head": "cd76e13f01193c88f6180da4378a0e22157f704b093a1638d27f5b50c623dfaa",
+  "metrics": {
+   "cost_usd": 0.0,
+   "resolution": "won",
+   "family": "friendly_fraud",
+   "fair_outcome": true,
+   "won": true
+  }
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

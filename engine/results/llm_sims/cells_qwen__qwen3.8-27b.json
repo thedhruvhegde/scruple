@@ -1,0 +1,57 @@
+[
+ {
+  "env": "dispute",
+  "strategy": "zero-shot",
+  "seeds": "7001-7003"
+ },
+ {
+  "env": "aml",
+  "strategy": "zero-shot",
+  "seeds": "7001-7003",
+  "difficulty": 0.5
+ },
+ {
+  "env": "dispute",
+  "strategy": "incentive-win-rate",
+  "seeds": "7001-7003"
+ },
+ {
+  "env": "dispute",
+  "strategy": "checklist-first",
+  "seeds": "7001-7003"
+ },
+ {
+  "env": "commerce",
+  "strategy": "zero-shot",
+  "seeds": "7001-7002",
+  "difficulty": 0.5
+ },
+ {
+  "env": "ach",
+  "strategy": "zero-shot",
+  "seeds": "7001-7002",
+  "difficulty": 0.5
+ },
+ {
+  "env": "recon",
+  "strategy": "zero-shot",
+  "seeds": "7001-7002",
+  "difficulty": 0.15
+ },
+ {
+  "env": "dispute",
+  "strategy": "zero-shot",
+  "seeds": "7001-7006"
+ },
+ {
+  "env": "aml",
+  "strategy": "zero-shot",
+  "seeds": "7001-7006",
+  "difficulty": 0.5
+ },
+ {
+  "env": "dispute",
+  "strategy": "incentive-win-rate",
+  "seeds": "7001-7006"
+ }
+]

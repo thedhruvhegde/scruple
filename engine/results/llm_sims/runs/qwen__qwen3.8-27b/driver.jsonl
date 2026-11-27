@@ -1,0 +1,18 @@
+{"cell": {"env": "dispute", "seeds": "7001-7003", "strategy": "zero-shot"}, "event": "cell_start", "t": 1795795289}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 91.156, "reward": 0.996201, "seed": 7001, "stop": "submitted", "strategy": "zero-shot", "t": 1795795380, "tokens": [17339, 611], "turns": 5}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 119.037, "reward": 0.997258, "seed": 7002, "stop": "submitted", "strategy": "zero-shot", "t": 1795795499, "tokens": [24963, 918], "turns": 6}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 92.089, "reward": 0.98276, "seed": 7003, "stop": "submitted", "strategy": "zero-shot", "t": 1795795591, "tokens": [18106, 704], "turns": 5}
+{"cell": {"difficulty": 0.5, "env": "aml", "seeds": "7001-7003", "strategy": "zero-shot"}, "event": "cell_start", "t": 1795795591}
+{"elisions": 5, "env": "aml", "event": "episode", "gate": true, "hard": [], "latency_s": 100.609, "reward": 0.0, "seed": 7001, "stop": "http_error", "strategy": "zero-shot", "t": 1795795692, "tokens": [15897, 318], "turns": 5}
+{"elisions": 3, "env": "aml", "event": "episode", "gate": true, "hard": [], "latency_s": 50.319, "reward": 0.0, "seed": 7002, "stop": "http_error", "strategy": "zero-shot", "t": 1795795742, "tokens": [8884, 237], "turns": 4}
+{"elisions": 6, "env": "aml", "event": "episode", "gate": true, "hard": [], "latency_s": 134.696, "reward": 0.0, "seed": 7003, "stop": "http_error", "strategy": "zero-shot", "t": 1795795877, "tokens": [19786, 336], "turns": 6}
+{"cell": {"env": "dispute", "seeds": "7001-7003", "strategy": "incentive-win-rate"}, "event": "cell_start", "t": 1795795877}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 106.773, "reward": 0.996201, "seed": 7001, "stop": "submitted", "strategy": "incentive-win-rate", "t": 1795795984, "tokens": [17845, 760], "turns": 5}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 155.722, "reward": 0.997258, "seed": 7002, "stop": "submitted", "strategy": "incentive-win-rate", "t": 1795796139, "tokens": [25073, 945], "turns": 6}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 78.126, "reward": 0.98276, "seed": 7003, "stop": "submitted", "strategy": "incentive-win-rate", "t": 1795796218, "tokens": [18302, 689], "turns": 5}
+{"cell": {"env": "dispute", "seeds": "7001-7003", "strategy": "checklist-first"}, "event": "cell_start", "t": 1795796218}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 127.295, "reward": 0.996201, "seed": 7001, "stop": "submitted", "strategy": "checklist-first", "t": 1795796345, "tokens": [20830, 937], "turns": 6}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 171.528, "reward": 0.997796, "seed": 7002, "stop": "submitted", "strategy": "checklist-first", "t": 1795796517, "tokens": [33730, 832], "turns": 8}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": true, "hard": [], "latency_s": 107.769, "reward": 0.985179, "seed": 7003, "stop": "submitted", "strategy": "checklist-first", "t": 1795796624, "tokens": [21462, 833], "turns": 6}
+{"cell": {"difficulty": 0.5, "env": "commerce", "seeds": "7001-7002", "strategy": "zero-shot"}, "event": "cell_start", "t": 1795796625}
+{"elisions": 0, "env": "commerce", "event": "episode", "gate": true, "hard": [], "latency_s": 935.807, "reward": 0.928571, "seed": 7001, "stop": "submitted", "strategy": "zero-shot", "t": 1795797560, "tokens": [33103, 2326], "turns": 7}
