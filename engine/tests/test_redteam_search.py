@@ -13,6 +13,26 @@ from scruple.redteam.search import compare, eval_one, search, wilson
 
 
 @pytest.mark.parametrize("env", ENV_NAMES)
+def test_scenario_banks_are_distinct_and_play(env: str) -> None:
+    from scruple.redteam.banks import play_ct, run_bank, scenarios
+
+    sc = scenarios(env, 50)
+    assert len({(s, ct) for s, ct, _ in sc}) == 50
+    assert scenarios(env, 50) == sc  # seeded
+    s, ct, _ = sc[0]
+    assert adapter(env).score(play_ct(env, Genome(adapter(env).honest), s, ct)).gate
+    res = run_bank(env, 3)
+    assert res["families"]["honest"]["gate_fail"] == 0
+
+
+def test_fault_injection_is_seen_by_both_ledger_versions() -> None:
+    from scruple.redteam.nversion_run import faults
+
+    for row in faults((70_000, 70_001)).values():
+        assert row["agree"] == row["episodes"]
+
+
+@pytest.mark.parametrize("env", ENV_NAMES)
 def test_honest_genome_is_the_honest_policy(env: str) -> None:
     """The harness adds nothing to an empty genome: honest passes the gate, scores 1
     on the truth utility of the finance kinds, and tells no lie."""

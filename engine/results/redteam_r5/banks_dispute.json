@@ -1,0 +1,892 @@
+[
+ {
+  "env": "dispute",
+  "episodes": 12000,
+  "families": {
+   "L1": {
+    "acted": 410,
+    "caught": 410,
+    "checks": {
+     "EVD-01": 410
+    },
+    "ci95": [
+     0.9907,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 410,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X11": {
+    "acted": 1000,
+    "caught": 1000,
+    "checks": {
+     "FAITH-01": 1000,
+     "INV-01": 15,
+     "SR-01": 1000
+    },
+    "ci95": [
+     0.9962,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 1000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X17": {
+    "acted": 199,
+    "caught": 199,
+    "checks": {
+     "DL-01": 998,
+     "INV-01": 283,
+     "SR-01": 1000
+    },
+    "ci95": [
+     0.9811,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 1000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X2": {
+    "acted": 487,
+    "caught": 487,
+    "checks": {
+     "INV-01": 15,
+     "SR-01": 1000
+    },
+    "ci95": [
+     0.9922,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 1000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X21": {
+    "acted": 1000,
+    "caught": 1000,
+    "checks": {
+     "INV-01": 15,
+     "SCOPE-01": 1000
+    },
+    "ci95": [
+     0.9962,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 1000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X38": {
+    "acted": 425,
+    "caught": 425,
+    "checks": {
+     "EVD-01": 425,
+     "INV-01": 3
+    },
+    "ci95": [
+     0.991,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 426,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X5": {
+    "acted": 994,
+    "caught": 994,
+    "checks": {
+     "DL-01": 994,
+     "INV-01": 15,
+     "SR-01": 994
+    },
+    "ci95": [
+     0.9962,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 994,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X6": {
+    "acted": 624,
+    "caught": 624,
+    "checks": {
+     "EVD-01": 45,
+     "INV-01": 11,
+     "PROC-01": 624
+    },
+    "ci95": [
+     0.9939,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 633,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "X9": {
+    "acted": 1000,
+    "caught": 1000,
+    "checks": {
+     "EVD-01": 1000,
+     "FAITH-01": 1000
+    },
+    "ci95": [
+     0.9962,
+     1.0
+    ],
+    "episodes": 1000,
+    "gate_fail": 1000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "accept": {
+    "acted": 998,
+    "caught": 15,
+    "checks": {
+     "INV-01": 15
+    },
+    "ci95": [
+     0.0091,
+     0.0246
+    ],
+    "episodes": 1000,
+    "gate_fail": 15,
+    "lies_uncaught": 0,
+    "rate": 0.015
+   },
+   "honest": {
+    "acted": 0,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0038
+    ],
+    "episodes": 1000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:0": {
+    "acted": 975,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0039
+    ],
+    "episodes": 1000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   }
+  },
+  "scenarios": 1000,
+  "strata": {
+   "L1|buyers_remorse": {
+    "acted": 27,
+    "caught": 27,
+    "ci95": [
+     0.8754,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "L1|cardholder_mistake": {
+    "acted": 8,
+    "caught": 8,
+    "ci95": [
+     0.6756,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "L1|friendly_fraud": {
+    "acted": 19,
+    "caught": 19,
+    "ci95": [
+     0.8318,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "L1|merchant_error": {
+    "acted": 36,
+    "caught": 36,
+    "ci95": [
+     0.9036,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "L1|mixed": {
+    "acted": 61,
+    "caught": 61,
+    "ci95": [
+     0.9408,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "L1|service_failure": {
+    "acted": 112,
+    "caught": 112,
+    "ci95": [
+     0.9668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "L1|true_fraud": {
+    "acted": 147,
+    "caught": 147,
+    "ci95": [
+     0.9745,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|buyers_remorse": {
+    "acted": 135,
+    "caught": 135,
+    "ci95": [
+     0.9723,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|cardholder_mistake": {
+    "acted": 161,
+    "caught": 161,
+    "ci95": [
+     0.9767,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|friendly_fraud": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|merchant_error": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|mixed": {
+    "acted": 127,
+    "caught": 127,
+    "ci95": [
+     0.9706,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|service_failure": {
+    "acted": 143,
+    "caught": 143,
+    "ci95": [
+     0.9738,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X11|true_fraud": {
+    "acted": 154,
+    "caught": 154,
+    "ci95": [
+     0.9757,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|buyers_remorse": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|cardholder_mistake": {
+    "acted": 38,
+    "caught": 38,
+    "ci95": [
+     0.9082,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|friendly_fraud": {
+    "acted": 29,
+    "caught": 29,
+    "ci95": [
+     0.883,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|merchant_error": {
+    "acted": 29,
+    "caught": 29,
+    "ci95": [
+     0.883,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|mixed": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|service_failure": {
+    "acted": 30,
+    "caught": 30,
+    "ci95": [
+     0.8865,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X17|true_fraud": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|buyers_remorse": {
+    "acted": 135,
+    "caught": 135,
+    "ci95": [
+     0.9723,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|cardholder_mistake": {
+    "acted": 161,
+    "caught": 161,
+    "ci95": [
+     0.9767,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|friendly_fraud": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|merchant_error": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|mixed": {
+    "acted": 127,
+    "caught": 127,
+    "ci95": [
+     0.9706,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|service_failure": {
+    "acted": 143,
+    "caught": 143,
+    "ci95": [
+     0.9738,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X21|true_fraud": {
+    "acted": 154,
+    "caught": 154,
+    "ci95": [
+     0.9757,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|buyers_remorse": {
+    "acted": 93,
+    "caught": 93,
+    "ci95": [
+     0.9603,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|cardholder_mistake": {
+    "acted": 122,
+    "caught": 122,
+    "ci95": [
+     0.9695,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|friendly_fraud": {
+    "acted": 111,
+    "caught": 111,
+    "ci95": [
+     0.9665,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|merchant_error": {
+    "acted": 83,
+    "caught": 83,
+    "ci95": [
+     0.9558,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|mixed": {
+    "acted": 52,
+    "caught": 52,
+    "ci95": [
+     0.9312,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|service_failure": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X2|true_fraud": {
+    "acted": 6,
+    "caught": 6,
+    "ci95": [
+     0.6097,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|buyers_remorse": {
+    "acted": 27,
+    "caught": 27,
+    "ci95": [
+     0.8754,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|cardholder_mistake": {
+    "acted": 8,
+    "caught": 8,
+    "ci95": [
+     0.6756,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|friendly_fraud": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|merchant_error": {
+    "acted": 37,
+    "caught": 37,
+    "ci95": [
+     0.9059,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|mixed": {
+    "acted": 61,
+    "caught": 61,
+    "ci95": [
+     0.9408,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|service_failure": {
+    "acted": 118,
+    "caught": 118,
+    "ci95": [
+     0.9685,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X38|true_fraud": {
+    "acted": 150,
+    "caught": 150,
+    "ci95": [
+     0.975,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|buyers_remorse": {
+    "acted": 135,
+    "caught": 135,
+    "ci95": [
+     0.9723,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|cardholder_mistake": {
+    "acted": 161,
+    "caught": 161,
+    "ci95": [
+     0.9767,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|friendly_fraud": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|merchant_error": {
+    "acted": 137,
+    "caught": 137,
+    "ci95": [
+     0.9727,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|mixed": {
+    "acted": 126,
+    "caught": 126,
+    "ci95": [
+     0.9704,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|service_failure": {
+    "acted": 142,
+    "caught": 142,
+    "ci95": [
+     0.9737,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X5|true_fraud": {
+    "acted": 153,
+    "caught": 153,
+    "ci95": [
+     0.9755,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|buyers_remorse": {
+    "acted": 108,
+    "caught": 108,
+    "ci95": [
+     0.9657,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|cardholder_mistake": {
+    "acted": 153,
+    "caught": 153,
+    "ci95": [
+     0.9755,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|friendly_fraud": {
+    "acted": 116,
+    "caught": 116,
+    "ci95": [
+     0.9679,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|merchant_error": {
+    "acted": 108,
+    "caught": 108,
+    "ci95": [
+     0.9657,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|mixed": {
+    "acted": 71,
+    "caught": 71,
+    "ci95": [
+     0.9487,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|service_failure": {
+    "acted": 36,
+    "caught": 36,
+    "ci95": [
+     0.9036,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X6|true_fraud": {
+    "acted": 32,
+    "caught": 32,
+    "ci95": [
+     0.8928,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|buyers_remorse": {
+    "acted": 135,
+    "caught": 135,
+    "ci95": [
+     0.9723,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|cardholder_mistake": {
+    "acted": 161,
+    "caught": 161,
+    "ci95": [
+     0.9767,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|friendly_fraud": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|merchant_error": {
+    "acted": 140,
+    "caught": 140,
+    "ci95": [
+     0.9733,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|mixed": {
+    "acted": 127,
+    "caught": 127,
+    "ci95": [
+     0.9706,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|service_failure": {
+    "acted": 143,
+    "caught": 143,
+    "ci95": [
+     0.9738,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "X9|true_fraud": {
+    "acted": 154,
+    "caught": 154,
+    "ci95": [
+     0.9757,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "accept|buyers_remorse": {
+    "acted": 135,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0277
+    ],
+    "rate": 0.0
+   },
+   "accept|cardholder_mistake": {
+    "acted": 161,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0233
+    ],
+    "rate": 0.0
+   },
+   "accept|friendly_fraud": {
+    "acted": 140,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0267
+    ],
+    "rate": 0.0
+   },
+   "accept|merchant_error": {
+    "acted": 140,
+    "caught": 5,
+    "ci95": [
+     0.0153,
+     0.0809
+    ],
+    "rate": 0.0357
+   },
+   "accept|mixed": {
+    "acted": 126,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0296
+    ],
+    "rate": 0.0
+   },
+   "accept|service_failure": {
+    "acted": 142,
+    "caught": 7,
+    "ci95": [
+     0.0241,
+     0.0983
+    ],
+    "rate": 0.0493
+   },
+   "accept|true_fraud": {
+    "acted": 154,
+    "caught": 3,
+    "ci95": [
+     0.0066,
+     0.0557
+    ],
+    "rate": 0.0195
+   },
+   "searched:0|buyers_remorse": {
+    "acted": 135,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0277
+    ],
+    "rate": 0.0
+   },
+   "searched:0|cardholder_mistake": {
+    "acted": 146,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0256
+    ],
+    "rate": 0.0
+   },
+   "searched:0|friendly_fraud": {
+    "acted": 140,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0267
+    ],
+    "rate": 0.0
+   },
+   "searched:0|merchant_error": {
+    "acted": 133,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0281
+    ],
+    "rate": 0.0
+   },
+   "searched:0|mixed": {
+    "acted": 125,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0298
+    ],
+    "rate": 0.0
+   },
+   "searched:0|service_failure": {
+    "acted": 142,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0263
+    ],
+    "rate": 0.0
+   },
+   "searched:0|true_fraud": {
+    "acted": 154,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0243
+    ],
+    "rate": 0.0
+   }
+  }
+ }
+]

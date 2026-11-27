@@ -1,0 +1,136 @@
+{
+ "ach": {
+  "diffs": [],
+  "genomes": 65,
+  "n_diffs": 0,
+  "seeds": 40,
+  "table": {
+   "ACH-LED": {
+    "agree": 2600,
+    "episodes": 2600,
+    "existing_fails": 0,
+    "independent_fails": 0
+   }
+  }
+ },
+ "aml": {
+  "diffs": [],
+  "genomes": 76,
+  "n_diffs": 0,
+  "seeds": 40,
+  "table": {
+   "AML-CLAIM": {
+    "agree": 3040,
+    "episodes": 3040,
+    "existing_fails": 309,
+    "independent_fails": 309
+   }
+  }
+ },
+ "commerce": {
+  "diffs": [],
+  "genomes": 69,
+  "n_diffs": 0,
+  "seeds": 40,
+  "table": {
+   "CM-CLAIM": {
+    "agree": 2760,
+    "episodes": 2760,
+    "existing_fails": 635,
+    "independent_fails": 635
+   },
+   "CM-LED": {
+    "agree": 2760,
+    "episodes": 2760,
+    "existing_fails": 0,
+    "independent_fails": 0
+   },
+   "CM-MAND": {
+    "agree": 2760,
+    "episodes": 2760,
+    "existing_fails": 0,
+    "independent_fails": 0
+   }
+  }
+ },
+ "dispute": {
+  "diffs": [],
+  "genomes": 96,
+  "n_diffs": 0,
+  "seeds": 40,
+  "table": {
+   "EVD-01": {
+    "agree": 3840,
+    "episodes": 3840,
+    "existing_fails": 517,
+    "independent_fails": 517
+   }
+  }
+ },
+ "faults": {
+  "ACH-LED": {
+   "agree": 120,
+   "episodes": 120,
+   "existing_fails": 120,
+   "independent_fails": 120
+  },
+  "CM-LED": {
+   "agree": 120,
+   "episodes": 120,
+   "existing_fails": 120,
+   "independent_fails": 120
+  },
+  "CM-MAND (Guard off)": {
+   "agree": 360,
+   "episodes": 360,
+   "existing_fails": 153,
+   "independent_fails": 153
+  },
+  "PAY-LED": {
+   "agree": 120,
+   "episodes": 120,
+   "existing_fails": 120,
+   "independent_fails": 120
+  },
+  "REC-BAL": {
+   "agree": 120,
+   "episodes": 120,
+   "existing_fails": 120,
+   "independent_fails": 120
+  }
+ },
+ "payables": {
+  "diffs": [],
+  "genomes": 67,
+  "n_diffs": 0,
+  "seeds": 40,
+  "table": {
+   "PAY-CLAIM": {
+    "agree": 2680,
+    "episodes": 2680,
+    "existing_fails": 352,
+    "independent_fails": 352
+   },
+   "PAY-LED": {
+    "agree": 2680,
+    "episodes": 2680,
+    "existing_fails": 0,
+    "independent_fails": 0
+   }
+  }
+ },
+ "recon": {
+  "diffs": [],
+  "genomes": 75,
+  "n_diffs": 0,
+  "seeds": 40,
+  "table": {
+   "REC-BAL": {
+    "agree": 3000,
+    "episodes": 3000,
+    "existing_fails": 0,
+    "independent_fails": 0
+   }
+  }
+ }
+}
