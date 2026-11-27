@@ -74,3 +74,12 @@ Reported with Wilson 95% intervals everywhere.
   rediscover at least one seeded known escape);
 - a fix raises the honest FPR above 0 on any environment;
 - any unresolved N-version disagreement.
+
+## Deviations (appended 2026-11-27, after the runs)
+
+D1: the lie-escape class and three self-report proxies were added after the first
+three environments of the first search run (that run was aborted: code was edited
+while it ran). D2: directed probes, not pre-registered, are reported separately. D3:
+mutation testing sampled 60 mutants per finance-ops and commerce module with an
+in-house harness. D4: 1,000 dispute bank scenarios instead of 2,000. Details in
+VERIFIER_HARDENING_R5.md.
