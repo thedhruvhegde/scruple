@@ -1,0 +1,123 @@
+{
+ "item": {
+  "scenario_id": "aml-s7003",
+  "env": "aml",
+  "seed": 7003,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:openai/gpt-oss-20b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001242"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00029",
+      "T-00031",
+      "T-00036",
+      "T-00040"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "file_sar",
+    "args": {
+     "amount_minor": 3512930,
+     "indicators": [
+      "profile_mismatch",
+      "near_threshold_cash"
+     ],
+     "narrative": "The account holder, a warehouse associate with an expected monthly inflow of $3,372, received four cash deposits totaling $35,129.30 within a 14‑day period. The deposits are far above the account’s typical activity and exceed typical cash‑deposit thresholds, indicating potential structuring or other illicit activity. The pattern is inconsistent with the holder’s declared occupation and income, raising a profile mismatch red flag.",
+     "txn_ids": [
+      "T-00029",
+      "T-00031",
+      "T-00036",
+      "T-00040"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {},
+    "ok": false,
+    "error": "invalid arguments for submit_decision: explanation: Field required"
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "decision": "file_sar",
+      "info_requests": 0,
+      "reviewed_linked": true,
+      "sar_amount_minor": 3512930,
+      "sar_filed": true
+     },
+     "explanation": "I reviewed the alert triggered by the rule cash_near_threshold for account A-001242. The account is a US individual, warehouse associate, with expected monthly inflow of $3,372.00. Four cash deposits were made in the alert window: $9,700.00, $8,700.00, $8,700.00, and $8,029.30, totaling $35,129.30. This amount is far above the account’s typical activity and exceeds typical cash‑deposit thresholds, indicating potential structuring. The pattern also mismatches the holder’s declared occupation and income, raising a profile mismatch red flag. Therefore I filed a SAR citing the indicators profile_mismatch and near_threshold_cash, referencing the four transactions and the total amount. No further info requests were needed."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-ff3742914efa",
+  "trace_head": "8e6200827cb699191c64f092fd58aa3e845ab1f73acfa05acab845a12e913242",
+  "turns": 6,
+  "input_tokens": 10210,
+  "output_tokens": 934,
+  "requests": 10,
+  "retries": 4,
+  "rejected_turns": 1,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 118.191,
+  "request_latency_s": [
+   0.058,
+   0.269,
+   0.188,
+   0.055,
+   0.227,
+   0.815,
+   0.377,
+   0.383,
+   0.056,
+   0.677
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 1.0,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 6,
+  "tool_errors": 1,
+  "trace_head": "8e6200827cb699191c64f092fd58aa3e845ab1f73acfa05acab845a12e913242",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

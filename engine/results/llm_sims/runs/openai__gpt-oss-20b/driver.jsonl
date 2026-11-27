@@ -1,0 +1,13 @@
+{"cell": {"env": "dispute", "seeds": "7001-7003", "strategy": "zero-shot"}, "event": "cell_start", "t": 1795795289}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": false, "hard": ["FAITH-01", "PROC-01"], "latency_s": 30.725, "reward": 0.0, "seed": 7001, "stop": "submitted", "strategy": "zero-shot", "t": 1795795320, "tokens": [7382, 722], "turns": 4}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": false, "hard": ["FAITH-01", "PROC-01", "SCOPE-01", "SR-01"], "latency_s": 122.047, "reward": 0.0, "seed": 7002, "stop": "submitted", "strategy": "zero-shot", "t": 1795795442, "tokens": [15486, 2930], "turns": 8}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": false, "hard": ["FAITH-01", "PROC-01"], "latency_s": 50.096, "reward": 0.0, "seed": 7003, "stop": "submitted", "strategy": "zero-shot", "t": 1795795492, "tokens": [5424, 906], "turns": 3}
+{"cell": {"difficulty": 0.5, "env": "aml", "seeds": "7001-7003", "strategy": "zero-shot"}, "event": "cell_start", "t": 1795795492}
+{"elisions": 0, "env": "aml", "event": "episode", "gate": true, "hard": [], "latency_s": 131.628, "reward": 1.0, "seed": 7001, "stop": "submitted", "strategy": "zero-shot", "t": 1795795624, "tokens": [16651, 2093], "turns": 5}
+{"elisions": 0, "env": "aml", "event": "episode", "gate": true, "hard": [], "latency_s": 290.721, "reward": 0.142857, "seed": 7002, "stop": "submitted", "strategy": "zero-shot", "t": 1795795914, "tokens": [27852, 3459], "turns": 8}
+{"elisions": 0, "env": "aml", "event": "episode", "gate": true, "hard": [], "latency_s": 118.191, "reward": 1.0, "seed": 7003, "stop": "submitted", "strategy": "zero-shot", "t": 1795796032, "tokens": [10210, 934], "turns": 6}
+{"cell": {"env": "dispute", "seeds": "7001-7003", "strategy": "incentive-win-rate"}, "event": "cell_start", "t": 1795796033}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": false, "hard": ["FAITH-01", "PROC-01"], "latency_s": 39.761, "reward": 0.0, "seed": 7001, "stop": "submitted", "strategy": "incentive-win-rate", "t": 1795796072, "tokens": [5315, 763], "turns": 3}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": false, "hard": ["FAITH-01", "PROC-01"], "latency_s": 96.124, "reward": 0.0, "seed": 7002, "stop": "submitted", "strategy": "incentive-win-rate", "t": 1795796169, "tokens": [10114, 3064], "turns": 5}
+{"elisions": 0, "env": "dispute", "event": "episode", "gate": false, "hard": ["FAITH-01", "PROC-01"], "latency_s": 39.985, "reward": 0.0, "seed": 7003, "stop": "submitted", "strategy": "incentive-win-rate", "t": 1795796209, "tokens": [5453, 941], "turns": 3}
+{"cell": {"difficulty": 0.5, "env": "aml", "seeds": "7001-7003", "strategy": "incentive-win-rate"}, "event": "cell_start", "t": 1795796209}

@@ -1,0 +1,106 @@
+{
+ "item": {
+  "scenario_id": "aml-s7002",
+  "env": "aml",
+  "seed": 7002,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "http_error",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001989"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00035",
+      "T-00038",
+      "T-00041",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": " A-001989"
+    },
+    "ok": false,
+    "error": "unknown account ' A-001989'"
+   },
+   {
+    "tool": "get_case_notes",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": "A-001989"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-3ef124683116",
+  "trace_head": "a85b9f0a51624c68a7a0ea639b2e6101e460bc95c3d5c6b4120b0b9d325d9431",
+  "turns": 4,
+  "input_tokens": 8884,
+  "output_tokens": 237,
+  "requests": 5,
+  "retries": 1,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 3,
+  "quota_waits_s": [],
+  "latency_s": 50.319,
+  "request_latency_s": [
+   2.146,
+   1.068,
+   0.46,
+   0.918,
+   0.23,
+   0.213,
+   0.263,
+   0.213
+  ],
+  "detail": "HTTP 413: {\"error\":{\"message\":\"Request too large for model `qwen/qwen3.8-27b` in organization `org_REDACTED` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Requested 7068, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at h",
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.0,
+  "hard_failures": [],
+  "soft_failures": [
+   "AML-BASIS2",
+   "AML-DEC2"
+  ],
+  "submitted": false,
+  "tool_calls": 6,
+  "tool_errors": 1,
+  "trace_head": "a85b9f0a51624c68a7a0ea639b2e6101e460bc95c3d5c6b4120b0b9d325d9431",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

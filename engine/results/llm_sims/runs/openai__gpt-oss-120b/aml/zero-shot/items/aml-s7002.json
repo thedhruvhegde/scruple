@@ -1,0 +1,130 @@
+{
+ "item": {
+  "scenario_id": "aml-s7002",
+  "env": "aml",
+  "seed": 7002,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:openai/gpt-oss-120b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001989"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00035",
+      "T-00038",
+      "T-00041",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00035",
+      "T-00038",
+      "T-00041",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "file_sar",
+    "args": {
+     "amount_minor": 18521176,
+     "indicators": [
+      "pass_through",
+      "near_threshold_cash",
+      "profile_mismatch"
+     ],
+     "narrative": "The subject A-001989 is a business account (import‑export consultant) with an expected monthly inflow of $9,486. In the alert window (2026‑03‑12 to 2026‑03‑25) the account received and sent four large wire transfers ranging from $30k to $64k. Each inbound transfer was quickly followed by an outbound transfer to a different external party, a classic pass‑through pattern. The transaction sizes far exceed the expected activity and are near typical reporting thresholds, indicating a profile mismatch and near‑threshold cash. This combination of rapid inbound‑outbound flows, large amounts, and deviation from the declared business profile raises suspicion of money‑laundering activity, warranting a SAR.",
+     "txn_ids": [
+      "T-00035",
+      "T-00038",
+      "T-00041",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "decision": "file_sar",
+      "info_requests": 0,
+      "reviewed_linked": true,
+      "sar_amount_minor": 18521176,
+      "sar_filed": true
+     },
+     "explanation": "Reviewed the alert AL-42378102 (rule: pass_through) for subject A-001989. The account is a US business with an expected monthly inflow of $9,486, yet in the alert window it received two large inbound wires ($33,691.87 and $64,388.69) and quickly sent out two outbound wires of similar size to unrelated external parties. This rapid inbound‑outbound flow constitutes a classic pass‑through pattern, the amounts far exceed the declared profile (profile_mismatch) and are near typical reporting thresholds (near_threshold_cash). No satisfactory explanation was available, so a SAR was filed citing the four transactions totaling $185,211.76."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-3ef124683116",
+  "trace_head": "4ceb171335772caaee64f7c29fe66f96c1f8f875b0760da56667e735e58a6674",
+  "turns": 6,
+  "input_tokens": 13188,
+  "output_tokens": 2328,
+  "requests": 8,
+  "retries": 2,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 80.57,
+  "request_latency_s": [
+   0.928,
+   0.383,
+   0.057,
+   0.36,
+   2.079,
+   0.215,
+   3.29,
+   1.913
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.952381,
+  "hard_failures": [],
+  "soft_failures": [
+   "AML-BASIS2"
+  ],
+  "submitted": true,
+  "tool_calls": 6,
+  "tool_errors": 0,
+  "trace_head": "4ceb171335772caaee64f7c29fe66f96c1f8f875b0760da56667e735e58a6674",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

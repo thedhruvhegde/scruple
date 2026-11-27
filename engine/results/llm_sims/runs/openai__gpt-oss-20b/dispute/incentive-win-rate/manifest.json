@@ -1,0 +1,13 @@
+{
+ "agent": "groq:openai/gpt-oss-20b",
+ "difficulty": null,
+ "env": "dispute",
+ "loop": null,
+ "seeds": [
+  7001,
+  7002,
+  7003
+ ],
+ "strategy": "incentive-win-rate",
+ "synthetic": true
+}

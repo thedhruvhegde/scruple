@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (markdown table rows)
 """Scale check for `scruple suite`: a 5,000-scenario bank, built twice (serial and with
 worker processes) to show the hashes do not depend on the worker count, verified with
 the salt, played end to end by two local agents, and reported.
@@ -37,7 +38,12 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=2026)
     args = ap.parse_args()
     salt = (HERE / "demo.salt").read_text().strip()
-    out: dict = {"size": args.size, "seed": args.seed, "cpus": os.cpu_count(), "python": platform.python_version()}
+    out: dict = {
+        "size": args.size,
+        "seed": args.seed,
+        "cpus": os.cpu_count(),
+        "python": platform.python_version(),
+    }
     t = time.perf_counter()
     p1, _ = build_plan(ENV_NAMES, args.size, seed=args.seed, salt=salt, workers=1)
     out["plan_serial_s"] = round(time.perf_counter() - t, 2)
@@ -46,7 +52,9 @@ def main() -> None:
     out["plan_parallel_s"] = round(time.perf_counter() - t, 2)
     out["workers"] = args.workers
     assert p1["plan_hash"] == p2["plan_hash"], "worker count changed the bank"
-    out["hashes"] = {k: p1[k] for k in ("plan_hash", "bank_hash", "commitments_hash", "salt_commitment")}
+    out["hashes"] = {
+        k: p1[k] for k in ("plan_hash", "bank_hash", "commitments_hash", "salt_commitment")
+    }
     out["blocks"] = p1["blocks"]
     sc = p1["scenarios"]
     out["mix"] = {
@@ -67,14 +75,22 @@ def main() -> None:
         runs = {}
         for name, agent in (
             ("scripted-honest", ScriptedAgent("honest")),
-            ("python-read_then_submit", PythonAgent("scruple.suite.example_agents:read_then_submit")),
+            (
+                "python-read_then_submit",
+                PythonAgent("scruple.suite.example_agents:read_then_submit"),
+            ),
         ):
             t = time.perf_counter()
             run_suite(plan, agent, d / name, concurrency=args.workers)
             dt = time.perf_counter() - t
             runs[name] = {"wall_s": round(dt, 2), "scenarios_per_s": round(args.size / dt, 1)}
         t = time.perf_counter()
-        rep = build_report(d / "python-read_then_submit", baseline=d / "scripted-honest", salt=salt, verify_limit=None)
+        rep = build_report(
+            d / "python-read_then_submit",
+            baseline=d / "scripted-honest",
+            salt=salt,
+            verify_limit=None,
+        )
         files = write_report(rep, d / "report", ["json", "html", "pdf"])
         runs["report_s"] = round(time.perf_counter() - t, 2)
         runs["report_bytes"] = {f.name: f.stat().st_size for f in files}

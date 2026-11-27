@@ -1,0 +1,134 @@
+{
+ "item": {
+  "scenario_id": "aml-s7003",
+  "env": "aml",
+  "seed": 7003,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "http_error",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001242"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00029",
+      "T-00031",
+      "T-00036",
+      "T-00040"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case_notes",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": " A-001242"
+    },
+    "ok": false,
+    "error": "unknown account ' A-001242'"
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": " A-001242"
+    },
+    "ok": false,
+    "error": "unknown account ' A-001242'"
+   },
+   {
+    "tool": "list_transactions",
+    "args": {
+     "account_id": "A-001242"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001242"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-ff3742914efa",
+  "trace_head": "48019cd512decea98638f01914ac7c88de22c1ffd14e7427f91d25aabdf7ec41",
+  "turns": 6,
+  "input_tokens": 19786,
+  "output_tokens": 336,
+  "requests": 10,
+  "retries": 4,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 6,
+  "quota_waits_s": [],
+  "latency_s": 134.696,
+  "request_latency_s": [
+   3.324,
+   0.304,
+   0.934,
+   0.396,
+   0.654,
+   0.072,
+   0.853,
+   0.07,
+   0.068,
+   0.068,
+   0.066,
+   0.822,
+   0.078,
+   0.069,
+   0.068,
+   0.07
+  ],
+  "detail": "HTTP 413: {\"error\":{\"message\":\"Request too large for model `qwen/qwen3.8-27b` in organization `org_REDACTED` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Requested 7151, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at h",
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.0,
+  "hard_failures": [],
+  "soft_failures": [
+   "AML-BASIS2",
+   "AML-DEC2"
+  ],
+  "submitted": false,
+  "tool_calls": 9,
+  "tool_errors": 2,
+  "trace_head": "48019cd512decea98638f01914ac7c88de22c1ffd14e7427f91d25aabdf7ec41",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

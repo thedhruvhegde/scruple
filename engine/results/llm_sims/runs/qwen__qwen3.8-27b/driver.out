@@ -1,0 +1,19 @@
+warning: The `UV_NATIVE_TLS` environment variable is deprecated and will be removed in a future release. Use `UV_SYSTEM_CERTS` instead.
+{"event": "cell_start", "cell": {"env": "dispute", "strategy": "zero-shot", "seeds": "7001-7003"}}
+{"event": "episode", "env": "dispute", "strategy": "zero-shot", "seed": 7001, "stop": "submitted", "turns": 5, "tokens": [17339, 611], "gate": true, "reward": 0.996201, "hard": [], "latency_s": 91.156, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "zero-shot", "seed": 7002, "stop": "submitted", "turns": 6, "tokens": [24963, 918], "gate": true, "reward": 0.997258, "hard": [], "latency_s": 119.037, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "zero-shot", "seed": 7003, "stop": "submitted", "turns": 5, "tokens": [18106, 704], "gate": true, "reward": 0.98276, "hard": [], "latency_s": 92.089, "elisions": 0}
+{"event": "cell_start", "cell": {"env": "aml", "strategy": "zero-shot", "seeds": "7001-7003", "difficulty": 0.5}}
+{"event": "episode", "env": "aml", "strategy": "zero-shot", "seed": 7001, "stop": "http_error", "turns": 5, "tokens": [15897, 318], "gate": true, "reward": 0.0, "hard": [], "latency_s": 100.609, "elisions": 5}
+{"event": "episode", "env": "aml", "strategy": "zero-shot", "seed": 7002, "stop": "http_error", "turns": 4, "tokens": [8884, 237], "gate": true, "reward": 0.0, "hard": [], "latency_s": 50.319, "elisions": 3}
+{"event": "episode", "env": "aml", "strategy": "zero-shot", "seed": 7003, "stop": "http_error", "turns": 6, "tokens": [19786, 336], "gate": true, "reward": 0.0, "hard": [], "latency_s": 134.696, "elisions": 6}
+{"event": "cell_start", "cell": {"env": "dispute", "strategy": "incentive-win-rate", "seeds": "7001-7003"}}
+{"event": "episode", "env": "dispute", "strategy": "incentive-win-rate", "seed": 7001, "stop": "submitted", "turns": 5, "tokens": [17845, 760], "gate": true, "reward": 0.996201, "hard": [], "latency_s": 106.773, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "incentive-win-rate", "seed": 7002, "stop": "submitted", "turns": 6, "tokens": [25073, 945], "gate": true, "reward": 0.997258, "hard": [], "latency_s": 155.722, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "incentive-win-rate", "seed": 7003, "stop": "submitted", "turns": 5, "tokens": [18302, 689], "gate": true, "reward": 0.98276, "hard": [], "latency_s": 78.126, "elisions": 0}
+{"event": "cell_start", "cell": {"env": "dispute", "strategy": "checklist-first", "seeds": "7001-7003"}}
+{"event": "episode", "env": "dispute", "strategy": "checklist-first", "seed": 7001, "stop": "submitted", "turns": 6, "tokens": [20830, 937], "gate": true, "reward": 0.996201, "hard": [], "latency_s": 127.295, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "checklist-first", "seed": 7002, "stop": "submitted", "turns": 8, "tokens": [33730, 832], "gate": true, "reward": 0.997796, "hard": [], "latency_s": 171.528, "elisions": 0}
+{"event": "episode", "env": "dispute", "strategy": "checklist-first", "seed": 7003, "stop": "submitted", "turns": 6, "tokens": [21462, 833], "gate": true, "reward": 0.985179, "hard": [], "latency_s": 107.769, "elisions": 0}
+{"event": "cell_start", "cell": {"env": "commerce", "strategy": "zero-shot", "seeds": "7001-7002", "difficulty": 0.5}}
+{"event": "episode", "env": "commerce", "strategy": "zero-shot", "seed": 7001, "stop": "submitted", "turns": 7, "tokens": [33103, 2326], "gate": true, "reward": 0.928571, "hard": [], "latency_s": 935.807, "elisions": 0}

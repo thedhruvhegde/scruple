@@ -1,0 +1,126 @@
+{
+ "item": {
+  "scenario_id": "aml-s7001",
+  "env": "aml",
+  "seed": 7001,
+  "case_type": "@0.5;noise=0.5;adv=0.5",
+  "strategy": "zero-shot",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:openai/gpt-oss-120b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_alert",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_account",
+    "args": {
+     "account_id": "A-001066"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_transactions",
+    "args": {
+     "txn_ids": [
+      "T-00030",
+      "T-00032",
+      "T-00033",
+      "T-00034",
+      "T-00035",
+      "T-00036",
+      "T-00038",
+      "T-00040",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "file_sar",
+    "args": {
+     "amount_minor": 2049240,
+     "indicators": [
+      "fan_in",
+      "profile_mismatch"
+     ],
+     "narrative": "The subject A-001066 is a gig‑worker with an expected monthly inflow of $1,824. Within the alert window (2026‑09‑05 to 2026‑09‑18) the account received $11,134 from at least six distinct counterparties (fan‑in) and then transferred $9,358 via two large wires to external X‑accounts. The inbound volume far exceeds the declared expected income, indicating a profile mismatch. The rapid movement of funds to external parties after receipt raises concerns of layering. These patterns meet the fan‑in and profile‑mismatch red‑flags and warrant a SAR.",
+     "txn_ids": [
+      "T-00030",
+      "T-00032",
+      "T-00033",
+      "T-00034",
+      "T-00035",
+      "T-00036",
+      "T-00038",
+      "T-00040",
+      "T-00042"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "decision": "file_sar",
+      "info_requests": 0,
+      "reviewed_linked": true,
+      "sar_amount_minor": 2049240,
+      "sar_filed": true
+     },
+     "explanation": "Reviewed the fan‑in alert for subject A-001066. The account, opened 2026‑06‑08, is a gig‑worker with an expected monthly inflow of $1,824. Within the alert window (2026‑09‑05 to 2026‑09‑18) the account received nine inbound P2P transfers from eight distinct counterparties totaling $11,134, far exceeding the expected income (profile mismatch) and satisfying the fan‑in rule. Subsequently, the account sent two large wire transfers of $4,679 each to external X‑accounts, indicating rapid movement of funds. These red flags (fan_in, profile_mismatch) justify filing a SAR, which was filed covering all linked transactions with a total amount of $20,492.40."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-555553b4e114",
+  "trace_head": "d195b0863fa134d85c8261a331e4b93b89f3db35b9c121142db56d607cb8239d",
+  "turns": 5,
+  "input_tokens": 11255,
+  "output_tokens": 1642,
+  "requests": 9,
+  "retries": 4,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 98.531,
+  "request_latency_s": [
+   0.274,
+   0.065,
+   0.433,
+   0.752,
+   0.061,
+   2.583,
+   0.081,
+   0.061,
+   1.304
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 1.0,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 5,
+  "tool_errors": 0,
+  "trace_head": "d195b0863fa134d85c8261a331e4b93b89f3db35b9c121142db56d607cb8239d",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

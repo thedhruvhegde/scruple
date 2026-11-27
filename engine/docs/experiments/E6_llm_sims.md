@@ -109,3 +109,9 @@ open". The scoring never changes.
 - Bootstrap: paired over seeds, 2,000 resamples, seed 0, 95% percentile CI.
 - No exclusions beyond these. All dispute and finops cases are synthetic; model
   behaviour is real; outcomes are simulated.
+
+## Results
+
+Run on 2026-11-27, after this file was committed; stopped at 17:07 UTC when every
+model had reached the 200,000 tokens/day cap. Results, verdicts on P1-P7 and the
+cells not run: docs/results/LLM_SIMS.md.

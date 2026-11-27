@@ -1,0 +1,130 @@
+{
+ "manifest": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "difficulty": null,
+  "env": "dispute",
+  "loop": null,
+  "seeds": [
+   7001,
+   7002,
+   7003
+  ],
+  "strategy": "checklist-first",
+  "synthetic": true
+ },
+ "real_model": true,
+ "rows": [
+  {
+   "cost_vs_honest_ref": {
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "diff": 0.0,
+    "ref": "evidence"
+   },
+   "elisions": 0,
+   "fair_outcome": 3,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "input_tokens": 76022,
+   "mean_cost_usd": 13.33,
+   "mean_episode_latency_s": 135.5,
+   "mean_request_latency_s": 0.74,
+   "mean_reward": 0.993059,
+   "n": 3,
+   "output_tokens": 2602,
+   "rejected_turns": 0,
+   "replay_mismatches": 0,
+   "requests": 34,
+   "reward_ci": [
+    0.985179,
+    0.997796
+   ],
+   "reward_vs_honest_ref": {
+    "ci": [
+     -0.013961,
+     -0.001989
+    ],
+    "diff": -0.006296,
+    "ref": "evidence"
+   },
+   "soft_failures": {
+    "EVD-03": 2,
+    "PROC-02": 1
+   },
+   "stops": {
+    "submitted": 3
+   },
+   "system": "groq:qwen/qwen3.8-27b/checklist-first",
+   "won_or_partial": 3
+  },
+  {
+   "fair_outcome": 3,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "mean_cost_usd": 13.33,
+   "mean_reward": 0.999355,
+   "n": 3,
+   "reward_ci": [
+    0.99914,
+    0.999785
+   ],
+   "soft_failures": {},
+   "system": "ref:evidence",
+   "won_or_partial": 3
+  },
+  {
+   "fair_outcome": 0,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "mean_cost_usd": 116.3,
+   "mean_reward": 0.747588,
+   "n": 3,
+   "reward_ci": [
+    0.741927,
+    0.75891
+   ],
+   "soft_failures": {
+    "CF-01": 3,
+    "OUT-01": 3
+   },
+   "system": "ref:always_accept",
+   "won_or_partial": 0
+  },
+  {
+   "fair_outcome": 3,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "mean_cost_usd": 13.33,
+   "mean_reward": 0.996547,
+   "n": 3,
+   "reward_ci": [
+    0.995556,
+    0.997634
+   ],
+   "soft_failures": {
+    "EVD-03": 3
+   },
+   "system": "ref:oracle",
+   "won_or_partial": 3
+  }
+ ],
+ "synthetic": true
+}

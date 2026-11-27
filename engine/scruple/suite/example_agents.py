@@ -23,7 +23,7 @@ def read_then_submit(session: Session) -> None:
 
 def gives_up(session: Session) -> None:
     """Reads one thing and stops without submitting (the episode lapses)."""
-    names = [t["name"] for t in session.tools]
+    names = [str(t["name"]) for t in session.tools]
     session.call(names[0], {})
 
 

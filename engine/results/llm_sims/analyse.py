@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (markdown table rows)
 """E6 analysis: leaderboards per environment, failure taxonomy, notable behaviours.
 
     uv run python results/llm_sims/analyse.py
@@ -33,7 +34,11 @@ NOTABLE = ("fabrication", "self_report", "injection", "scope")
 def load() -> dict[tuple[str, str, str], list[ItemRecord]]:
     cells: dict[tuple[str, str, str], list[ItemRecord]] = {}
     for d in sorted(RUNS.glob("*/*/*/items")):
-        model, env, strat = d.parent.parent.parent.name.replace("__", "/"), d.parent.parent.name, d.parent.name
+        model, env, strat = (
+            d.parent.parent.parent.name.replace("__", "/"),
+            d.parent.parent.name,
+            d.parent.name,
+        )
         recs = [ItemRecord.model_validate_json(p.read_text()) for p in sorted(d.glob("*.json"))]
         if recs:
             cells[(model, env, strat)] = sorted(recs, key=lambda r: r.item.seed)
@@ -52,7 +57,9 @@ def card_of(env: str, ep: Any) -> Any:
     return get_env(env).verifier().score(ep.record())
 
 
-def row(label: str, recs: list[ItemRecord], refs: dict[str, Any] | None, honest: str | None) -> dict[str, Any]:
+def row(
+    label: str, recs: list[ItemRecord], refs: dict[str, Any] | None, honest: str | None
+) -> dict[str, Any]:
     n = len(recs)
     k = sum(r.outcome.gate for r in recs)
     m, lo, hi = boot_mean([r.outcome.reward for r in recs])
@@ -64,7 +71,9 @@ def row(label: str, recs: list[ItemRecord], refs: dict[str, Any] | None, honest:
         "reward": round(m, 3),
         "reward_ci": [round(lo, 3), round(hi, 3)],
         "hard": dict(Counter(h for r in recs for h in r.outcome.hard_failures).most_common()),
-        "taxonomy": dict(Counter(category(h) for r in recs for h in set(r.outcome.hard_failures)).most_common()),
+        "taxonomy": dict(
+            Counter(category(h) for r in recs for h in set(r.outcome.hard_failures)).most_common()
+        ),
         "stops": dict(Counter(r.play.stop for r in recs)),
         "provider_limited": sum(limited(r) for r in recs),
         "tokens_in": sum(r.play.input_tokens for r in recs),
@@ -87,7 +96,9 @@ def row(label: str, recs: list[ItemRecord], refs: dict[str, Any] | None, honest:
         d = paired_diff([r.outcome.reward for r in recs], [h.reward for h in hr])
         out["vs_ref"] = [round(x, 3) for x in d]
         if "cost" in out:
-            c = paired_diff([r.outcome.metrics["cost_usd"] for r in recs], [h.metrics["cost_usd"] for h in hr])
+            c = paired_diff(
+                [r.outcome.metrics["cost_usd"] for r in recs], [h.metrics["cost_usd"] for h in hr]
+            )
             out["cost_vs_ref"] = [round(x, 2) for x in c]
     return out
 
@@ -109,17 +120,50 @@ def main() -> None:
         rows = [row(f"{m} / {s}", recs, refs, a.honest_ref) for m, s, recs in sorted(by_env[env])]
         for name in refs[seeds[0]]:
             fake = [
-                ItemRecord(item=r.item, play=r.play.model_copy(update={"input_tokens": 0, "output_tokens": 0, "latency_s": 0.0, "request_latency_s": ()}), outcome=refs[r.item.seed][name], replay_match=True)
-                for r in sorted({x.item.seed: x for _, _, recs in by_env[env] for x in recs}.values(), key=lambda x: x.item.seed)
+                ItemRecord(
+                    item=r.item,
+                    play=r.play.model_copy(
+                        update={
+                            "input_tokens": 0,
+                            "output_tokens": 0,
+                            "latency_s": 0.0,
+                            "request_latency_s": (),
+                        }
+                    ),
+                    outcome=refs[r.item.seed][name],
+                    replay_match=True,
+                )
+                for r in sorted(
+                    {x.item.seed: x for _, _, recs in by_env[env] for x in recs}.values(),
+                    key=lambda x: x.item.seed,
+                )
             ]
             rr = row(f"ref:{name}", fake, None, None)
-            for k in ("stops", "tokens_in", "tokens_out", "episode_s", "request_s", "rejected", "elisions", "provider_limited", "replay_mismatch"):
+            for k in (
+                "stops",
+                "tokens_in",
+                "tokens_out",
+                "episode_s",
+                "request_s",
+                "rejected",
+                "elisions",
+                "provider_limited",
+                "replay_mismatch",
+            ):
                 rr.pop(k, None)
             rows.append(rr)
         report["cells"][env] = rows
         md.append(f"## {env} ({a.title})\n")
-        md.append(f"Seeds {seeds[0]}-{seeds[-1]}" + ("" if env == "dispute" else f", case types {sorted(set(cts.values()))[:2]}") + ".\n")
-        head = "| system | n | gate pass (95% CI) | mean reward (95% CI) | reward vs " + a.honest_ref + " ref (95% CI) |"
+        md.append(
+            f"Seeds {seeds[0]}-{seeds[-1]}"
+            + ("" if env == "dispute" else f", case types {sorted(set(cts.values()))[:2]}")
+            + ".\n"
+        )
+        head = (
+            "| system | n | gate pass (95% CI) | mean reward (95% CI) | reward vs "
+            + a.honest_ref
+            + " ref (95% CI) |"
+        )
         sep = "|---|---|---|---|---|"
         if env == "dispute":
             head += " mean cost $ | cost vs evidence (95% CI) | won/partial | fair (OUT-01) |"
@@ -130,10 +174,18 @@ def main() -> None:
         for r in rows:
             g = f"{r['gate']}/{r['n']} [{r['gate_ci'][0]:.2f}, {r['gate_ci'][1]:.2f}]"
             rw = f"{r['reward']:.3f} [{r['reward_ci'][0]:.3f}, {r['reward_ci'][1]:.3f}]"
-            vs = f"{r['vs_ref'][0]:+.3f} [{r['vs_ref'][1]:+.3f}, {r['vs_ref'][2]:+.3f}]" if "vs_ref" in r else ""
+            vs = (
+                f"{r['vs_ref'][0]:+.3f} [{r['vs_ref'][1]:+.3f}, {r['vs_ref'][2]:+.3f}]"
+                if "vs_ref" in r
+                else ""
+            )
             line = f"| {r['system']} | {r['n']} | {g} | {rw} | {vs} |"
             if env == "dispute":
-                cv = f"{r['cost_vs_ref'][0]:+.2f} [{r['cost_vs_ref'][1]:+.2f}, {r['cost_vs_ref'][2]:+.2f}]" if "cost_vs_ref" in r else ""
+                cv = (
+                    f"{r['cost_vs_ref'][0]:+.2f} [{r['cost_vs_ref'][1]:+.2f}, {r['cost_vs_ref'][2]:+.2f}]"
+                    if "cost_vs_ref" in r
+                    else ""
+                )
                 line += f" {r.get('cost', '')} | {cv} | {r.get('won', '')}/{r['n']} | {r.get('fair', '')}/{r['n']} |"
             hf = ", ".join(f"{k} x{v}" for k, v in r["hard"].items()) or "none"
             if r.get("provider_limited"):
@@ -150,7 +202,15 @@ def main() -> None:
                 category(s) for s in r.outcome.soft_failures if category(s) == "injection"
             }
             if limited(r):
-                report["provider_limited"].append({"model": model, "env": env, "strategy": strat, "seed": r.item.seed, "detail": (r.play.detail or "")[:160]})
+                report["provider_limited"].append(
+                    {
+                        "model": model,
+                        "env": env,
+                        "strategy": strat,
+                        "seed": r.item.seed,
+                        "detail": (r.play.detail or "")[:160],
+                    }
+                )
             if not cats & set(NOTABLE):
                 continue
             ep = replay(a, r.item.seed, r.item.case_type, r.play.calls)
@@ -169,16 +229,28 @@ def main() -> None:
                     "episode_id": r.play.episode_id,
                     "categories": sorted(cats & set(NOTABLE)),
                     "checks": why,
-                    "uploads": [c["args"] for c in r.play.calls if c.get("tool") == "upload_evidence"][:2],
-                    "submit": next((c["args"] for c in r.play.calls if c.get("tool") == "submit_decision"), None),
+                    "uploads": [
+                        c["args"] for c in r.play.calls if c.get("tool") == "upload_evidence"
+                    ][:2],
+                    "submit": next(
+                        (c["args"] for c in r.play.calls if c.get("tool") == "submit_decision"),
+                        None,
+                    ),
                 }
             )
-    md.append("## Notable behaviours (hard failures in fabrication, self-report, injection, scope)\n")
+    md.append(
+        "## Notable behaviours (hard failures in fabrication, self-report, injection, scope)\n"
+    )
     for x in report["notable"]:
-        md.append(f"- {x['model']} / {x['strategy']} / {x['env']} seed {x['seed']} ({x['episode_id']}): " + "; ".join(f"{k}: {v}" for k, v in x["checks"].items()))
+        md.append(
+            f"- {x['model']} / {x['strategy']} / {x['env']} seed {x['seed']} ({x['episode_id']}): "
+            + "; ".join(f"{k}: {v}" for k, v in x["checks"].items())
+        )
     md.append("")
     md.append(f"Provider-limited lapses (HTTP 413): {len(report['provider_limited'])}")
-    (ROOT / "llm_sims.json").write_text(json.dumps(report, indent=1, sort_keys=True, default=str) + "\n")
+    (ROOT / "llm_sims.json").write_text(
+        json.dumps(report, indent=1, sort_keys=True, default=str) + "\n"
+    )
     (ROOT / "TABLES.md").write_text("\n".join(md) + "\n")
     print("\n".join(md))
 

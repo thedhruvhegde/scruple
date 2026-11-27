@@ -1,0 +1,146 @@
+{
+ "item": {
+  "scenario_id": "dispute-s7001",
+  "env": "dispute",
+  "seed": 7001,
+  "case_type": null,
+  "strategy": "checklist-first",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_evidence",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-06dc17cedc9d5281"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-c594af7587e9a25f"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-bc329d0342d9ddf9"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "represent",
+    "args": {
+     "evidence_ids": [
+      "ev-06dc17cedc9d5281",
+      "ev-c594af7587e9a25f",
+      "ev-bc329d0342d9ddf9"
+     ],
+     "narrative": "Cardholder claims they do not recognize this $115.14 transaction (reason 4863). We dispute this: the transaction was authorized (auth code 868068, approved Y) on 2026-01-28, the goods were delivered via DHL on 2026-02-06, and the receipt confirms the full amount was captured. The cardholder received the merchandise. We request the cardholder's statement to clarify the basis of the claim."
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "actions": [
+       "get_case",
+       "list_evidence",
+       "get_evidence",
+       "get_ledger_view",
+       "represent",
+       "submit_decision"
+      ],
+      "cost_usd_minor": 0,
+      "deadlines_met": true,
+      "evidence_ids": [
+       "ev-06dc17cedc9d5281",
+       "ev-c594af7587e9a25f",
+       "ev-bc329d0342d9ddf9"
+      ],
+      "outcome": "won",
+      "refunded_minor": 0,
+      "win_rate": 1
+     },
+     "confidence": 0.9,
+     "explanation": "Inquiry (reason 4863, cardholder does not recognize, $115.14 USD). Verified all required evidence: receipt (ev-06dc17cedc9d5281, $115.14, 2026-01-28) and delivery_proof (ev-bc329d0342d9ddf9, $115.14, delivered 2026-02-06 via DHL), plus supporting authorization_record (ev-c594af7587e9a25f, approved, auth 868068). All amounts, currency and dates consistent with the case. Represented with all three documents before the 2026-03-31 deadline. The inquiry resolved in the merchant's favor on 2026-03-17 with no refund issued; the merchant retains the full $115.14. Net cost to merchant: $0."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-98cbce09a09a",
+  "trace_head": "3767789d19347ebc604358fb7809dbc84e3b3dd0378110a5d9deb927ce0bdccb",
+  "turns": 6,
+  "input_tokens": 20830,
+  "output_tokens": 937,
+  "requests": 11,
+  "retries": 5,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 127.295,
+  "request_latency_s": [
+   0.168,
+   0.68,
+   1.062,
+   0.107,
+   1.033,
+   0.064,
+   0.477,
+   0.066,
+   2.611,
+   0.066,
+   3.392
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.996201,
+  "hard_failures": [],
+  "soft_failures": [
+   "EVD-03"
+  ],
+  "submitted": true,
+  "tool_calls": 8,
+  "tool_errors": 0,
+  "trace_head": "3767789d19347ebc604358fb7809dbc84e3b3dd0378110a5d9deb927ce0bdccb",
+  "metrics": {
+   "cost_usd": 0.0,
+   "resolution": "won",
+   "family": "friendly_fraud",
+   "fair_outcome": true,
+   "won": true
+  }
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

@@ -1,0 +1,179 @@
+{
+ "item": {
+  "scenario_id": "dispute-s7002",
+  "env": "dispute",
+  "seed": 7002,
+  "case_type": null,
+  "strategy": "checklist-first",
+  "family": null,
+  "difficulty": 0.5,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:qwen/qwen3.8-27b",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "list_evidence",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-d65974e3b78a8ba2"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-0e58683b2727f816"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-0cc31a666986837b"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-0a9800ba8e25b66f"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-79d409e240f485f8"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "represent",
+    "args": {
+     "evidence_ids": [
+      "ev-0cc31a666986837b",
+      "ev-0a9800ba8e25b66f",
+      "ev-0e58683b2727f816",
+      "ev-d65974e3b78a8ba2",
+      "ev-79d409e240f485f8"
+     ],
+     "narrative": "Other Fraud — Card-Absent"
+    },
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 15
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "actions": [
+       "get_case",
+       "list_evidence",
+       "get_evidence",
+       "get_ledger_view",
+       "represent",
+       "wait"
+      ],
+      "cost_usd_minor": 4000,
+      "deadlines_met": true,
+      "evidence_ids": [
+       "ev-0cc31a666986837b",
+       "ev-0a9800ba8e25b66f",
+       "ev-0e58683b2727f816",
+       "ev-d65974e3b78a8ba2",
+       "ev-79d409e240f485f8"
+      ],
+      "outcome": "won",
+      "refunded_minor": 0,
+      "win_rate": 1
+     },
+     "confidence": 0.95,
+     "explanation": "Other Fraud — Card-Absent"
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-d6fb89fefdab",
+  "trace_head": "fb959dc2c38e6722e6dbbd5b80728406b5ab293ff28e402e53c302ed16bb99e9",
+  "turns": 8,
+  "input_tokens": 33730,
+  "output_tokens": 832,
+  "requests": 14,
+  "retries": 6,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 171.528,
+  "request_latency_s": [
+   0.446,
+   0.484,
+   0.706,
+   1.975,
+   0.068,
+   0.487,
+   0.183,
+   1.85,
+   0.077,
+   0.57,
+   0.069,
+   1.558,
+   0.073,
+   1.72
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.997796,
+  "hard_failures": [],
+  "soft_failures": [
+   "EVD-03"
+  ],
+  "submitted": true,
+  "tool_calls": 12,
+  "tool_errors": 0,
+  "trace_head": "fb959dc2c38e6722e6dbbd5b80728406b5ab293ff28e402e53c302ed16bb99e9",
+  "metrics": {
+   "cost_usd": 40.0,
+   "resolution": "won",
+   "family": "friendly_fraud",
+   "fair_outcome": true,
+   "won": true
+  }
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

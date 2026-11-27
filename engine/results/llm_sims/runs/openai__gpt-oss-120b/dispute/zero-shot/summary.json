@@ -1,0 +1,138 @@
+{
+ "manifest": {
+  "agent": "groq:openai/gpt-oss-120b",
+  "difficulty": null,
+  "env": "dispute",
+  "loop": null,
+  "seeds": [
+   7001,
+   7002,
+   7003
+  ],
+  "strategy": "zero-shot",
+  "synthetic": true
+ },
+ "real_model": true,
+ "rows": [
+  {
+   "cost_vs_honest_ref": {
+    "ci": [
+     0.0,
+     189.94
+    ],
+    "diff": 63.313333,
+    "ref": "evidence"
+   },
+   "elisions": 0,
+   "fair_outcome": 2,
+   "gate_pass": 1,
+   "gate_rate_ci": [
+    0.0615,
+    0.7923
+   ],
+   "hard_failures": {
+    "EVD-01": 1,
+    "FAITH-01": 2,
+    "PROC-01": 2,
+    "SCOPE-01": 1
+   },
+   "input_tokens": 49614,
+   "mean_cost_usd": 76.65,
+   "mean_episode_latency_s": 87.9,
+   "mean_request_latency_s": 0.83,
+   "mean_reward": 0.240842,
+   "n": 3,
+   "output_tokens": 5840,
+   "rejected_turns": 1,
+   "replay_mismatches": 0,
+   "requests": 27,
+   "reward_ci": [
+    0.0,
+    0.722527
+   ],
+   "reward_vs_honest_ref": {
+    "ci": [
+     -0.99914,
+     -0.277258
+    ],
+    "diff": -0.758513,
+    "ref": "evidence"
+   },
+   "soft_failures": {
+    "CAL-02": 1,
+    "CF-01": 1,
+    "EVD-03": 1,
+    "OUT-01": 1,
+    "PROC-02": 1
+   },
+   "stops": {
+    "submitted": 3
+   },
+   "system": "groq:openai/gpt-oss-120b/zero-shot",
+   "won_or_partial": 2
+  },
+  {
+   "fair_outcome": 3,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "mean_cost_usd": 13.33,
+   "mean_reward": 0.999355,
+   "n": 3,
+   "reward_ci": [
+    0.99914,
+    0.999785
+   ],
+   "soft_failures": {},
+   "system": "ref:evidence",
+   "won_or_partial": 3
+  },
+  {
+   "fair_outcome": 0,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "mean_cost_usd": 116.3,
+   "mean_reward": 0.747588,
+   "n": 3,
+   "reward_ci": [
+    0.741927,
+    0.75891
+   ],
+   "soft_failures": {
+    "CF-01": 3,
+    "OUT-01": 3
+   },
+   "system": "ref:always_accept",
+   "won_or_partial": 0
+  },
+  {
+   "fair_outcome": 3,
+   "gate_pass": 3,
+   "gate_rate_ci": [
+    0.4385,
+    1.0
+   ],
+   "hard_failures": {},
+   "mean_cost_usd": 13.33,
+   "mean_reward": 0.996547,
+   "n": 3,
+   "reward_ci": [
+    0.995556,
+    0.997634
+   ],
+   "soft_failures": {
+    "EVD-03": 3
+   },
+   "system": "ref:oracle",
+   "won_or_partial": 3
+  }
+ ],
+ "synthetic": true
+}
