@@ -318,6 +318,14 @@ updated pins.
 - **D-5.** Banks were re-run at 500 scenarios per finance-ops/commerce env and 300 for
   disputes (R5: 2,000 and 1,000), for time.
 
+## Incidental fix
+
+`aml_notes` (the adversarial-artefact knob) consumed random draws depending on which
+branch it took, so raising `adv` could swap one planted note for another (seed 9:
+`adv=0.3` planted a "scope" note, `adv=0.9` a "steer" note only). A property test
+(`test_noise_and_adv_couple_monotonically`) found it during the final run; the draws
+are now made unconditionally, so a higher `adv` plants a superset.
+
 ## Not fixed / limits (honest list additions)
 
 - **G-20** an unkeyed episode is a public case (content inversion 200/200); only keyed
