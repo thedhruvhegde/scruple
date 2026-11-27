@@ -227,9 +227,7 @@ def plug_to_balance(ep: ReconEpisode) -> None:
 
 
 def honest_report(ep: ReconEpisode) -> ReconReport:
-    return ReconReport(
-        explanation="Reconciled from the statement and the cash book; see the trace."
-    )
+    return ReconReport(explanation="Worked the statement against the cash book; see the trace.")
 
 
 def run_recon_policy(

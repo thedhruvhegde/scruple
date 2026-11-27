@@ -93,7 +93,11 @@ def _report(hist: History) -> Calls:
     report = {
         "explanation": "read the case, the ledger and every document; "
         + (f"took {', '.join(acted)}" if acted else "took no action"),
-        "claims": {"actions": list(dict.fromkeys(ok))[:20]},
+        "claims": {
+            "actions": list(dict.fromkeys(ok))[:20],
+            # dispute@3 requires the structured outcome: an accept resolves the case
+            "outcome": "accepted" if "accept" in acted else "pending",
+        },
     }
     return [("submit_decision", report)]
 

@@ -24,7 +24,9 @@ Session = Callable[[Client], Awaitable[Any]]
 
 def session(fn: Session, server: Any = None) -> Any:
     async def main() -> Any:
-        async with Client(server or build_sim_server()) as c:
+        async with Client(
+            server or build_sim_server(EpisodeTable(keyed=False, full_scores=True))
+        ) as c:
             return await fn(c)
 
     return anyio.run(main)
@@ -188,7 +190,7 @@ def test_list_case_types() -> None:
 
 
 def test_episode_table_is_shared_with_caller() -> None:
-    table = EpisodeTable()
+    table = EpisodeTable(keyed=False, full_scores=True)
 
     async def fn(c: Client) -> str:
         return str(data(await c.call_tool("start_episode", {"seed": 5}))["episode_id"])

@@ -220,7 +220,7 @@ def test_bench_reports_throughput() -> None:
 
 def test_http_grader_and_remote_episode(exported: dict[str, Path]) -> None:
     specs = tk.load_tasks(exported["recon"])
-    client = TestClient(build_app(specs, max_episodes=2))
+    client = TestClient(build_app(specs, max_episodes=2, full_grades=True))
     assert client.get("/health").json()["tasks"] == 6
     envs = client.get("/v1/envs").json()["envs"]
     assert {e["env"] for e in envs} == set(ENVS)

@@ -52,6 +52,7 @@ from scruple.agents.dispute_tools import DISPUTE_TOOL_NAMES
 from scruple.agents.env import DisputeSession
 from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeError
+from scruple.agents.keys import stable_key
 from scruple.realdata.scenarios import RealScenario, find_real_scenario, load_real_scenarios
 from scruple.sim.deadlines import ManualClock
 from scruple.sim.disputes import DisputeEngine
@@ -142,6 +143,7 @@ class ScenarioEpisode(DisputeEpisode):
         self.family = family
         self.real = rs
         self.episode_id = make_episode_id(seed, f"{SCENARIO_KIND}:{family}", nonce)
+        self.stable_id = stable_key(seed, f"{SCENARIO_KIND}:{family}", nonce)
         self.session = ScenarioSession(rs)
         self.trace = Trace()
         self._transitions = 0

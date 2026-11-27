@@ -36,6 +36,10 @@ class AchClaims(BaseModel):
     rules_followed: bool | None = Field(
         default=None, description="Whether every action complied with the ACH rules."
     )
+    collected_in_full: bool | None = Field(
+        default=None,
+        description="Whether the whole debit was collected (required from ach@3).",
+    )
 
 
 class AchReport(BaseModel):

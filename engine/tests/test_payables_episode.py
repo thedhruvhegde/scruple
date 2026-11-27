@@ -17,7 +17,7 @@ from scruple.agents.payables_baselines import reference_policy, run_payables_pol
 from scruple.agents.payables_episode import TOKENS, PayablesEpisode
 from scruple.agents.payables_tools import PAYABLES_TOOL_NAMES
 from scruple.agents.store import KINDS, EpisodeStore
-from scruple.mcp.sim_server import build_sim_server
+from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 
 GOLDEN = Path(__file__).parent / "golden_workflows"  # not tests/golden: that set is closed
 GOLDEN_SEEDS = (1, 7, 2026)
@@ -105,7 +105,7 @@ def test_payables_reference_policy_replays_over_mcp(case_type: str | None) -> No
     want = local.call("submit_decision", {"explanation": "reference policy over mcp"})
 
     async def main() -> dict[str, Any]:
-        async with Client(build_sim_server()) as c:
+        async with Client(build_sim_server(EpisodeTable(keyed=False, full_scores=True))) as c:
             kinds = _data(await c.call_tool("list_workflow_case_types", {}))
             assert kinds["payables"]["tokens"] == list(TOKENS)
             args: dict[str, Any] = {"seed": 5}

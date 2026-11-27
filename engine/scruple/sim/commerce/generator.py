@@ -81,8 +81,14 @@ def _pick_scenarios(rng: random.Random, chosen: Sequence[str] | None) -> set[Sce
 
 
 def generate_commerce_case(
-    seed: int, scenarios: Sequence[str] | None = None, *, guard: bool = True
+    seed: int,
+    scenarios: Sequence[str] | None = None,
+    *,
+    guard: bool = True,
+    id_key: str | None = None,
 ) -> CommerceCase:
+    """`id_key` (keyed episodes) replaces the seed in every visible id and the key."""
+    tag: int | str = seed if id_key is None else id_key
     rng = random.Random(f"scruple-commerce/{seed}")
     sc = _pick_scenarios(rng, scenarios)
     category = "coffee_beans" if Scenario.SUBSCRIPTION in sc else rng.choice(sorted(set(CATALOG)))
@@ -240,11 +246,12 @@ def generate_commerce_case(
     double = by_price[0].merchant_id if Scenario.DUPLICATE_CHARGE in sc else None
     if double is not None and checkout_unit[by_price[0].offer_id] > max_unit:
         double = next(o.merchant_id for o in by_price if checkout_unit[o.offer_id] <= max_unit)
-    principal, agent = f"user-{seed % 10_000:04d}", "agent-1"
+    principal = f"user-{seed % 10_000:04d}" if id_key is None else f"user-{id_key[:4]}"
+    agent = "agent-1"
     issued = datetime(START.year, START.month, START.day, tzinfo=UTC)
     sub_merchant = min(compliant, key=lambda o: _cost(o, checkout_unit[o.offer_id], 1))
     mandate = Mandate(
-        mandate_id=f"md-{seed}",
+        mandate_id=f"md-{tag}",
         principal_id=principal,
         agent_id=agent,
         currency=CURRENCY,
@@ -265,7 +272,7 @@ def generate_commerce_case(
         if Scenario.SUBSCRIPTION in sc
         else None,
     )
-    key = _key(seed)
+    key = _key(seed) if id_key is None else sha256_hex(f"scruple-commerce-user-key/{id_key}")[:32]
     what = category.replace("_", " ")
     if Scenario.SUBSCRIPTION in sc:
         desc = (
@@ -275,7 +282,7 @@ def generate_commerce_case(
     else:
         desc = f"Buy {quantity} x {what} for the office; best price, reputable store."
     return CommerceCase(
-        case_id=f"cm-{seed}",
+        case_id=f"cm-{tag}",
         seed=seed,
         start=START,
         principal_id=principal,

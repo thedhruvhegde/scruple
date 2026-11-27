@@ -66,7 +66,9 @@ EXTRA_CASE_FIELDS = {
     "ce3_eligible",
     "merchant_tier",
 }
-EPISODE_API = {"call", "trace", "closed", "submit", "episode_id"}
+# round 6: `stable_id` replaced `episode_id` as the per-episode randomness key (the
+# visible id is now secret per process); it is the pre-round-6 id, no new information
+EPISODE_API = {"call", "trace", "closed", "submit", "episode_id", "stable_id"}
 
 
 def _names(tree: ast.AST) -> Iterator[str]:

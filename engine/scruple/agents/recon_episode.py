@@ -21,6 +21,7 @@ from pydantic import BaseModel, ConfigDict
 from scruple.agents.ach_episode import WorkflowEpisode, jsonable, parse_case_type
 from scruple.agents.dispute_tools import DisputeToolSpec
 from scruple.agents.errors import EpisodeError
+from scruple.agents.keys import Salt
 from scruple.agents.recon_tools import (
     RECON_TOOL_BY_NAME,
     RECON_TOOL_NAMES,
@@ -111,14 +112,20 @@ class ReconEpisode(WorkflowEpisode):
     report_type = ReconReport
 
     def __init__(
-        self, seed: int, case_type: str | None = None, *, nonce: int = 0, reference: bool = False
+        self,
+        seed: int,
+        case_type: str | None = None,
+        *,
+        nonce: int = 0,
+        reference: bool = False,
+        salt: Salt | None = None,
     ) -> None:
-        super().__init__(seed, case_type, nonce=nonce)
+        super().__init__(seed, case_type, nonce=nonce, salt=salt)
         kinds, fmt, difficulty = parse_recon_case_type(case_type)
         self.reference = reference
         k = self.knobs
         self.case = generate_recon_case(
-            seed,
+            self.case_seed,
             difficulty,
             fmt,
             kinds,

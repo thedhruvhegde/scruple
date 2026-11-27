@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Any
 
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
+from scruple.agents.keys import restoring_id
 from scruple.agents.store import (
     KINDS,
     AnyEpisode,
@@ -123,7 +124,8 @@ class DbEpisodeStore:
             (c["tool"], json.loads(c["args_json"]))
             for c in self._repo.calls(self.tenant_id, episode_id)
         ]
-        return replay_episode(r.kind, r.seed, r.case_type, calls, r.nonce), len(calls)
+        with restoring_id(episode_id):
+            return replay_episode(r.kind, r.seed, r.case_type, calls, r.nonce), len(calls)
 
     def _current(self, episode_id: str) -> tuple[AnyEpisode, int]:
         """The live episode, replayed only if other processes added calls."""
@@ -173,12 +175,19 @@ class DbEpisodeStore:
         ]
 
 
-def durable_table(store: DbEpisodeStore) -> EpisodeTable:
+def durable_table(store: DbEpisodeStore, *, full_scores: bool | None = None) -> EpisodeTable:
     """An MCP `EpisodeTable` whose episodes live in `store` (built lazily: mcp is an
-    optional import)."""
+    optional import). Scores are redacted for the agent as in the in-memory table;
+    episodes here are not keyed (the stored row has no salt column), so ids are
+    secret but a rehearsed (kind, seed) is the same case: see VERIFIER_HARDENING_R6."""
     from mcp.server.mcpserver.exceptions import ToolError
 
-    from scruple.mcp.sim_server import LEGACY_KINDS, EpisodeTable, wrong_kind_message
+    from scruple.mcp.sim_server import (
+        LEGACY_KINDS,
+        EpisodeTable,
+        agent_score,
+        wrong_kind_message,
+    )
 
     class DurableEpisodeTable(EpisodeTable):
         def start(self, seed: int, case_type: str | None) -> Episode:
@@ -215,7 +224,10 @@ def durable_table(store: DbEpisodeStore) -> EpisodeTable:
                 kind = "dispute" if kind == "scenario" else kind  # a dispute episode
                 if kind not in kinds:
                     raise ToolError(wrong_kind_message(episode_id, kind))
-                return store.call(episode_id, tool, args)
+                out = store.call(episode_id, tool, args)
+                if tool == "submit_decision" and not self.full_scores:
+                    return agent_score(store.load(episode_id), out)
+                return out
             except UnknownEpisodeError:
                 raise ToolError(
                     f"unknown episode {episode_id!r}; call start_episode first"
@@ -223,7 +235,7 @@ def durable_table(store: DbEpisodeStore) -> EpisodeTable:
             except EpisodeError as exc:
                 raise ToolError(str(exc)) from exc
 
-    return DurableEpisodeTable()
+    return DurableEpisodeTable(keyed=False, full_scores=full_scores)
 
 
 __all__ = ["DbEpisodeStore", "durable_table", "episodes_repo"]

@@ -412,7 +412,12 @@ class DisputeSession:
     """
 
     def __init__(
-        self, seed: int, family: str | None = None, *, id_prefix: str | None = None
+        self,
+        seed: int,
+        family: str | None = None,
+        *,
+        id_prefix: str | None = None,
+        issuer_seed: int | None = None,
     ) -> None:
         self.seed = seed
         self.family = family
@@ -425,7 +430,7 @@ class DisputeSession:
             [case],
             self.clock,
             merchants=(self.merchant,),
-            issuer=SeededIssuer(IssuerParams(seed=seed)),
+            issuer=SeededIssuer(IssuerParams(seed=seed if issuer_seed is None else issuer_seed)),
         )
         self.case_id = case.case_id
         self.original_documents = case.documents
@@ -517,7 +522,7 @@ class DisputeSession:
         records the day it was ingested."""
         doc = make_document(
             self.case_id, kind, issued_on, dict(fields), UPLOAD_INDEX + self._uploads
-        )
+        ).model_copy(update={"provenance": "agent_authored"})
         self._uploads += 1
         self.engine.vault.add(doc)
         return doc

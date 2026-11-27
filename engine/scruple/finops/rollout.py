@@ -112,8 +112,19 @@ def fake_policy(hist: History) -> list[tuple[str, dict[str, Any]]]:
                         },
                     )
                 )
-            return calls or [("submit_decision", {"explanation": "nothing to do"})]
-        return [("submit_decision", {"explanation": "Matched exact pairs; escalated the rest."})]
+            return calls or [("get_task", {})]
+        # round 6: the structured claims are required (recon@3); read the status again
+        last = hist[-1]
+        if last[0] != "get_task":
+            return [("get_task", {})]
+        diff = (last[1].get("status") or {}).get("difference_minor")
+        claims = {"balanced": diff == 0, "escalations": names.count("escalate")}
+        return [
+            (
+                "submit_decision",
+                {"explanation": "Matched exact pairs; escalated the rest.", "claims": claims},
+            )
+        ]
     alert = _seen(hist, "get_alert")
     if alert is not None:  # aml
         a = alert["alert"]
@@ -124,7 +135,15 @@ def fake_policy(hist: History) -> list[tuple[str, dict[str, Any]]]:
             ]
         if "escalate" not in names:
             return [("escalate", {"txn_ids": a["linked_txn_ids"], "reason": "needs a second look"})]
-        return [("submit_decision", {"explanation": "Escalated the alert for review."})]
+        return [
+            (
+                "submit_decision",
+                {
+                    "explanation": "Escalated the alert for review.",
+                    "claims": {"decision": "escalate", "sar_filed": False},
+                },
+            )
+        ]
     return [("submit_decision", {"explanation": "Read the case."})]
 
 
@@ -159,6 +178,8 @@ def run_models(
     out.mkdir(parents=True, exist_ok=True)
 
     def play(spec: TaskSpec) -> tuple[Trajectory, dict[str, Any]]:
+        if spec.keyed:  # round 6: a keyed case is rebuilt only by the grader, with the salt
+            raise ValueError(f"{spec.task_id} is keyed; serve it (`scruple tasks serve`)")
         e = get_env(spec.env)
         ep = e.new_episode(spec.seed, spec.case_type)
         runner = ProviderRunner(

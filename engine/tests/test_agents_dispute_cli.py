@@ -15,7 +15,7 @@ from scruple.agents.dispute_tools import DISPUTE_TOOL_NAMES
 from scruple.agents.errors import EpisodeError
 from scruple.agents.store import EpisodeStore
 from scruple.cli.main import main
-from scruple.mcp.sim_server import build_sim_server
+from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 
 
 def test_store_round_trips_a_dispute_episode(tmp_path: Path) -> None:
@@ -103,7 +103,7 @@ def test_mcp_plays_a_dispute_episode_like_in_process() -> None:
 
 
 async def _session(fn: Any) -> Any:
-    async with Client(build_sim_server()) as c:
+    async with Client(build_sim_server(EpisodeTable(keyed=False, full_scores=True))) as c:
         return await fn(c)
 
 

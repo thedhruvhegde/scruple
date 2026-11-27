@@ -149,6 +149,7 @@ def honest_report(ep: PayablesEpisode) -> PayablesReport:
             invoices_paid=counts["paid"],
             invoices_held=counts["held"],
             invoices_rejected=counts["rejected"],
+            losses_minor=o.lost_minor + o.overpaid_minor,
         ),
     )
 

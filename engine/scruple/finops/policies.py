@@ -67,11 +67,20 @@ class Policy:
 
 
 def run_policy(
-    episode_cls: Callable[..., AnyEpisode], policy: Policy, seed: int, case_type: str | None
+    episode_cls: Callable[..., AnyEpisode],
+    policy: Policy,
+    seed: int,
+    case_type: str | None,
+    *,
+    salt: str | bytes | None = None,
 ) -> AnyEpisode:
     """Play one episode to its close: act, then submit the report (unless the episode
-    already closed, e.g. the horizon lapsed it)."""
-    ep = episode_cls(seed, case_type, reference=policy.reference)
+    already closed, e.g. the horizon lapsed it). `salt` keys the case."""
+    ep = (
+        episode_cls(seed, case_type, reference=policy.reference)
+        if salt is None
+        else episode_cls(seed, case_type, reference=policy.reference, salt=salt)
+    )
     with contextlib.suppress(EpisodeError):  # a refused call ends the script
         policy.act(ep)
     if not ep.closed:
@@ -385,11 +394,13 @@ class ReconPolicy(Policy):
                 claims=ReconClaims(balanced=True, unreconciled_minor=0),
             )
         return ReconReport(
-            explanation="Reconciled from the statement and the cash book; see the trace.",
+            explanation="Worked the statement against the cash book; see the trace.",
             claims=ReconClaims(
                 balanced=o.difference_minor == 0,
+                fully_reconciled=o.difference_minor == 0,
                 unreconciled_minor=o.difference_minor,
                 adjustments=len(o.adjustments),
+                escalations=len(o.escalated_statement) + len(o.escalated_ledger),
             ),
         )
 

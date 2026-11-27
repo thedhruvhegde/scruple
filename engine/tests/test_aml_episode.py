@@ -17,7 +17,7 @@ from scruple.agents.aml_episode import AmlEpisode
 from scruple.agents.aml_tools import AML_TOOL_NAMES
 from scruple.agents.cli import cmd_episode
 from scruple.agents.store import KINDS, EpisodeStore
-from scruple.mcp.sim_server import build_sim_server
+from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 from scruple.sim.aml.models import AmlFamily
 
 GOLDEN = Path(__file__).parent / "golden_workflows"  # not tests/golden: that set is closed
@@ -121,7 +121,7 @@ def test_aml_reference_policy_replays_over_mcp(family: str) -> None:
     want = local.call("submit_decision", {"explanation": "reference policy over mcp"})
 
     async def main() -> dict[str, Any]:
-        async with Client(build_sim_server()) as c:
+        async with Client(build_sim_server(EpisodeTable(keyed=False, full_scores=True))) as c:
             tools = {t.name: t for t in (await c.list_tools()).tools}
             assert {"aml_" + n for n in AML_TOOL_NAMES} <= set(tools)
             sar = tools["aml_file_sar"].input_schema

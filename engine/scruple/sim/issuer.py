@@ -134,8 +134,14 @@ class SeededIssuer:
     ) -> float:
         """Chance the merchant prevails given evidence that was not caught."""
         p = self.params
-        # a document that itself shows a mismatch is evidence against the merchant
-        kinds = {d.kind for d in evidence if d.fields.get("matches_cardholder") != "N"}
+        # a document that itself shows a mismatch is evidence against the merchant; a
+        # merchant-authored upload is narrative, not evidence of its kind (round 6: a
+        # self-written "delivery proof" earned the supporting bonus)
+        kinds = {
+            d.kind
+            for d in evidence
+            if d.fields.get("matches_cardholder") != "N" and d.provenance != "agent_authored"
+        }
         req = case.spec.required_evidence
         coverage = sum(1 for k in req if k in kinds) / len(req)
         support = min(2, sum(1 for k in case.spec.supporting_evidence if k in kinds))

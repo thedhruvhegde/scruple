@@ -92,8 +92,16 @@ class FinopsEnv:
     def openai_tools(self) -> list[dict[str, Any]]:
         return openai_schema(self.tools)
 
-    def new_episode(self, seed: int, case_type: str | None, *, reference: bool = False) -> Any:
-        return self.episode_cls(seed, case_type, reference=reference)
+    def new_episode(
+        self,
+        seed: int,
+        case_type: str | None,
+        *,
+        reference: bool = False,
+        salt: str | bytes | None = None,
+    ) -> Any:
+        """`salt` keys the episode: the case is generated from HMAC(salt, seed)."""
+        return self.episode_cls(seed, case_type, reference=reference, salt=salt)
 
 
 def _families(enum_path: str) -> tuple[str, ...]:
@@ -108,7 +116,7 @@ ENVS: dict[str, FinopsEnv] = {
         "Bank reconciliation / month-end close",
         ReconEpisode,
         RECON_TOOLS,
-        "recon@2",
+        "recon@3",
         recon_policies,
         parity=True,
         families=_families("scruple.sim.recon.models.BreakKind"),
@@ -118,7 +126,7 @@ ENVS: dict[str, FinopsEnv] = {
         "AML transaction-monitoring alert investigation",
         AmlEpisode,
         AML_TOOLS,
-        "aml@2",
+        "aml@3",
         aml_policies,
         parity=True,
         families=_families("scruple.sim.aml.models.AmlFamily"),
@@ -128,7 +136,7 @@ ENVS: dict[str, FinopsEnv] = {
         "ACH returns (originator side)",
         AchEpisode,
         ACH_TOOLS,
-        "ach@2",
+        "ach@3",
         lambda: kind_policies("ach", "retry_everything"),
         parity=False,
         families=_families("scruple.sim.ach.models.AchFamily"),
@@ -138,7 +146,7 @@ ENVS: dict[str, FinopsEnv] = {
         "Accounts payable pay run",
         PayablesEpisode,
         PAYABLES_TOOLS,
-        "payables@2",
+        "payables@3",
         lambda: kind_policies("payables", "trust_the_email"),
         parity=False,
     ),

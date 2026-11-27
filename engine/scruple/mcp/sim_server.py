@@ -26,6 +26,7 @@ Run it with `scruple mcp sim` (or `uv run scruple mcp sim`).
 from __future__ import annotations
 
 import inspect
+import os
 import threading
 from collections.abc import Callable, Collection
 from typing import Annotated, Any
@@ -46,6 +47,7 @@ from scruple.agents.dispute_episode import DISPUTE_TASK, DisputeEpisode
 from scruple.agents.dispute_tools import DISPUTE_TOOL_BY_NAME, DisputeToolSpec
 from scruple.agents.env import FAMILIES, ActionKind, EvidenceKind, SimEnvironment
 from scruple.agents.episode import Episode, EpisodeError
+from scruple.agents.keys import new_salt
 from scruple.agents.models import TASK
 from scruple.agents.payables_episode import PAYABLES_TASK, TOKENS, PayablesEpisode
 from scruple.agents.payables_tools import PAYABLES_TOOLS
@@ -106,7 +108,12 @@ class EpisodeTable:
     episodes see their calls one at a time, in arrival order.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, keyed: bool = True, full_scores: bool | None = None) -> None:
+        # round 6: every workflow/dispute start draws a fresh salt (a rehearsed case is a
+        # different case) and the score an agent gets back names no hidden truth unless
+        # the operator asks for full scorecards (SCRUPLE_MCP_FULL_SCORES=1)
+        self.keyed = keyed
+        self.full_scores = full_scores_enabled() if full_scores is None else full_scores
         self.episodes: dict[str, AnyEpisode] = {}
         self._starts: dict[tuple[int, str | None], int] = {}
         self._dispute_starts: dict[tuple[int, str | None], int] = {}
@@ -137,7 +144,7 @@ class EpisodeTable:
             key = (seed, family)
             nonce = self._dispute_starts.get(key, 0)
             try:
-                ep = DisputeEpisode(seed, family, nonce=nonce)
+                ep = DisputeEpisode(seed, family, nonce=nonce, salt=self._salt())
             except ValueError as exc:
                 raise ToolError(str(exc)) from exc
             self._dispute_starts[key] = nonce + 1
@@ -153,12 +160,15 @@ class EpisodeTable:
             key = (kind, seed, case_type)
             nonce = self._kind_starts.get(key, 0)
             try:
-                ep = new_episode(kind, seed, case_type, nonce)
+                ep = new_episode(kind, seed, case_type, nonce, self._salt())
             except (ValueError, KeyError) as exc:
                 raise ToolError(str(exc).strip("'\"")) from exc
             self._kind_starts[key] = nonce + 1
             self.episodes[ep.episode_id] = ep
             return ep
+
+    def _salt(self) -> str | None:
+        return new_salt() if self.keyed else None
 
     def call(
         self,
@@ -170,7 +180,11 @@ class EpisodeTable:
         """Run `tool` on the episode. `kinds` are the episode kinds the calling MCP tool
         serves; another kind is refused, so `accept` never reaches an ach episode."""
         with self._lock:
-            return self._call(episode_id, tool, args, kinds)
+            out = self._call(episode_id, tool, args, kinds)
+            ep = self.episodes.get(episode_id)
+            if tool == "submit_decision" and not self.full_scores and ep is not None:
+                return agent_score(ep, out)
+            return out
 
     def _call(
         self, episode_id: str, tool: str, args: dict[str, Any], kinds: Collection[str]
@@ -185,6 +199,40 @@ class EpisodeTable:
             return ep.call(tool, args)
         except EpisodeError as exc:
             raise ToolError(str(exc)) from exc
+
+
+FULL_SCORES_ENV = "SCRUPLE_MCP_FULL_SCORES"
+
+
+def full_scores_enabled() -> bool:
+    return os.environ.get(FULL_SCORES_ENV, "").strip().lower() in {"1", "true", "yes"}
+
+
+def agent_score(ep: Any, full: dict[str, Any]) -> dict[str, Any]:
+    """What an agent is told at submission: reward, gate and pass/fail per check id.
+
+    No expected decision, family, break list, truth or check explanation: those let an
+    agent rehearse a case (submit a probe, read the answer, play it again). Operators
+    get the full scorecard with `SCRUPLE_MCP_FULL_SCORES=1`."""
+    score = getattr(ep, "score", None)
+    card = getattr(score, "scorecard", None) if score is not None else None
+    if card is None:  # the simple dispute episode: named verifiers, no scorecard
+        checks = [{"id": v.name, "passed": v.passed} for v in getattr(score, "verifiers", ()) or ()]
+        return {
+            "episode_id": full.get("episode_id", getattr(ep, "episode_id", None)),
+            "closed": True,
+            "passed": all(c["passed"] for c in checks),
+            "checks": checks,
+            "synthetic": True,
+        }
+    return {
+        "episode_id": full.get("episode_id", getattr(ep, "episode_id", None)),
+        "closed": True,
+        "reward": card.reward,
+        "gate": card.gate,
+        "checks": [{"id": c.id, "passed": c.passed} for c in card.checks],
+        "synthetic": True,
+    }
 
 
 def _desc(name: str) -> str:

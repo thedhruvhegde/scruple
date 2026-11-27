@@ -64,7 +64,13 @@ def _first(env: str, genome: Genome, pred: Any, seeds: range = range(20_000, 20_
 
 
 def _hard(env: str, r: Any, check: str, vid: str | None = None) -> bool:
-    card = score_commerce(r) if env == "commerce" else get_env(env).verifier(vid).score(r)
+    # the round-5 regressions pin the v2 claim checks (round 6 replaced their text
+    # reading with v3's structured claims and soft ensemble; tests/test_verifier_r6.py)
+    card = (
+        score_commerce(r)
+        if env == "commerce"
+        else get_env(env).verifier(vid or f"{env}@2").score(r)
+    )
     return next(c for c in card.checks if c.id == check).passed
 
 

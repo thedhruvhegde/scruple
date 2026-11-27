@@ -120,7 +120,9 @@ def test_mcp_episodes_survive_a_server_restart(tmp_path: Path) -> None:
     path = str(tmp_path / "gate.db")
 
     def server() -> Any:
-        return build_sim_server(durable_table(DbEpisodeStore.on(SQLiteStorage(path))))
+        return build_sim_server(
+            durable_table(DbEpisodeStore.on(SQLiteStorage(path)), full_scores=True)
+        )
 
     async def start(c: Client) -> str:
         r = await c.call_tool("start_episode", {"seed": 1, "case_type": "fraud"})
@@ -205,7 +207,9 @@ def test_mcp_workflow_episodes_survive_a_server_restart(
     path = str(tmp_path / "gate.db")
 
     def server() -> Any:
-        return build_sim_server(durable_table(DbEpisodeStore.on(SQLiteStorage(path))))
+        return build_sim_server(
+            durable_table(DbEpisodeStore.on(SQLiteStorage(path)), full_scores=True)
+        )
 
     async def main() -> Any:
         async with Client(server()) as c:
@@ -234,7 +238,9 @@ def test_mcp_scenario_episode_is_durable(tmp_path: Path) -> None:
     sid = load_real_scenarios()[0].id
 
     def server() -> Any:
-        return build_sim_server(durable_table(DbEpisodeStore.on(SQLiteStorage(path))))
+        return build_sim_server(
+            durable_table(DbEpisodeStore.on(SQLiteStorage(path)), full_scores=True)
+        )
 
     async def main() -> Any:
         async with Client(server()) as c:

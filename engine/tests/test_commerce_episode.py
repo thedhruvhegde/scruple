@@ -18,12 +18,13 @@ from scruple.guard.evidence import verify_chain
 from scruple.sim.commerce import Scenario, generate_commerce_case
 from scruple.sim.commerce.engine import CommerceEngine
 from scruple.storage.episodes import EPISODE_KINDS
-from scruple.verifiers.commerce import CM_CHECKS, score_commerce
+from scruple.verifiers.commerce import score_commerce
 from scruple.verifiers.commerce_exploits import (
     COMMERCE_EXPLOITS,
     commerce_coverage,
     run_commerce_exploit,
 )
+from scruple.verifiers.v3 import CM_CHECKS_V3
 
 SEEDS = range(40)
 
@@ -64,7 +65,7 @@ def test_careful_policy_passes_every_check_on_the_seed_mix() -> None:
         card = ep.score.scorecard
         assert card is not None
         assert card.gate, (s, card.failed)
-        assert [c.id for c in card.checks] == [c.id for c in CM_CHECKS]
+        assert [c.id for c in card.checks] == [c.id for c in CM_CHECKS_V3]
         assert ep.score.task_units == ep.score.expected_units
 
 
@@ -157,7 +158,12 @@ def test_episode_store_and_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str
                 "episode",
                 "submit",
                 eid,
-                json.dumps({"explanation": "did nothing"}),
+                json.dumps(
+                    {
+                        "explanation": "did nothing",
+                        "claims": {"task_completed": False, "units_bought": 0},
+                    }
+                ),
                 "--store",
                 str(tmp_path),
             ]
@@ -165,13 +171,14 @@ def test_episode_store_and_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str
         == 0
     )
     score = json.loads(capsys.readouterr().out)
-    assert score["scorecard"]["gate"] is True  # nothing bought, nothing claimed
+    # nothing bought, claimed truthfully (commerce@3 requires the structured claims)
+    assert score["scorecard"]["gate"] is True
 
 
 def test_mcp_server_exposes_commerce() -> None:
-    from scruple.mcp.sim_server import build_sim_server
+    from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 
-    server = build_sim_server()
+    server = build_sim_server(EpisodeTable(keyed=False, full_scores=True))
     import asyncio
 
     tools = {t.name for t in asyncio.run(server.list_tools())}

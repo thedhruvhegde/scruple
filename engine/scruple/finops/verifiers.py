@@ -49,11 +49,19 @@ from scruple.hashing import sha256_hex
 from scruple.sim.recon.generator import normalise_reference
 from scruple.verifiers import ach as ach_v
 from scruple.verifiers import aml as aml_v
+from scruple.verifiers import claimtext, v3
+from scruple.verifiers import commerce as cm_v
+from scruple.verifiers import dispute as dispute_v
+from scruple.verifiers import dispute_v3 as dispute_v3_mod
 from scruple.verifiers import payables as pay_v
 from scruple.verifiers import recon as recon_v
 from scruple.verifiers.ach import WorkflowCheck, run_workflow_checks
 from scruple.verifiers.aml_record import AmlRecord
 from scruple.verifiers.checks import EvidenceRef, Scorecard, Verdict, at
+from scruple.verifiers.claimtext import grammar as ct_grammar
+from scruple.verifiers.claimtext import negex as ct_negex
+from scruple.verifiers.claimtext import ngram as ct_ngram
+from scruple.verifiers.claimtext import textnorm as ct_norm
 from scruple.verifiers.recon_record import ReconRecord
 from scruple.verifiers.trace import EventKind
 
@@ -217,13 +225,20 @@ AML_V2: tuple[WorkflowCheck[AmlRecord], ...] = gated(
 ACH_V2 = gated(ach_v.ACH_CHECKS)
 PAY_V2 = gated(pay_v.PAY_CHECKS)
 
+# --- v3 (round 6): scruple.verifiers.v3 -----------------------------------------------
+RECON_V3 = v3.recon_v3(RECON_V2)
+AML_V3 = v3.aml_v3(AML_V2)
+ACH_V3 = v3.ach_v3(ACH_V2)
+PAY_V3 = v3.payables_v3(PAY_V2)
+CM_V3 = v3.CM_CHECKS_V3
+_TEXT_MODS = (v3, claimtext, ct_negex, ct_grammar, ct_ngram, ct_norm)
+
+V3_DESC = "required structured claims (hard), free-text ensemble (soft), value x harm"
 _THIS = inspect.getmodule(_apply)
 assert _THIS is not None
 
 
-def _v(
-    vid: str, version: str, desc: str, checks: Sequence[WorkflowCheck[Any]], *mods: ModuleType
-) -> Verifier:
+def _v(vid: str, version: str, desc: str, checks: Sequence[Any], *mods: ModuleType) -> Verifier:
     return Verifier(vid, vid.split("@")[0], version, desc, tuple(checks), tuple(mods))
 
 
@@ -245,6 +260,34 @@ VERIFIERS: dict[str, Verifier] = {
         _v("ach@2", "2.0.0", "ach@1, gate-normalised", ACH_V2, ach_v, _THIS),
         _v("payables@1", "1.0.0", "the payables kind's scorecard", pay_v.PAY_CHECKS, pay_v),
         _v("payables@2", "2.0.0", "payables@1, gate-normalised", PAY_V2, pay_v, _THIS),
+        _v(
+            "commerce@2",
+            "2.0.0",
+            "the commerce scorecard (R5, gate-normalised)",
+            cm_v.CM_CHECKS,
+            cm_v,
+        ),
+        _v(
+            "dispute@2",
+            "2.0.0",
+            "the dispute scorecard (R5)",
+            dispute_v.DISPUTE_CHECKS_V2,
+            dispute_v,
+        ),
+        _v(
+            "dispute@3",
+            "3.0.0",
+            V3_DESC + "; EVD-01 provenance, CAL-03",
+            dispute_v.DISPUTE_CHECKS_V3,
+            dispute_v,
+            dispute_v3_mod,
+            *_TEXT_MODS,
+        ),
+        _v("recon@3", "3.0.0", V3_DESC, RECON_V3, recon_v, _THIS, *_TEXT_MODS),
+        _v("aml@3", "3.0.0", V3_DESC + "; AML-DEC3 regret", AML_V3, aml_v, _THIS, *_TEXT_MODS),
+        _v("ach@3", "3.0.0", V3_DESC + "; ACH-VALUE3", ACH_V3, ach_v, _THIS, *_TEXT_MODS),
+        _v("payables@3", "3.0.0", V3_DESC + "; PAY-VALUE3", PAY_V3, pay_v, _THIS, *_TEXT_MODS),
+        _v("commerce@3", "3.0.0", V3_DESC + "; CM-VALUE3", CM_V3, cm_v, _THIS, *_TEXT_MODS),
     )
 }
 
@@ -260,9 +303,14 @@ def get_verifier(vid: str) -> Verifier:
 
 __all__ = [
     "ACH_V2",
+    "ACH_V3",
     "AML_V2",
+    "AML_V3",
+    "CM_V3",
     "PAY_V2",
+    "PAY_V3",
     "RECON_V2",
+    "RECON_V3",
     "VERIFIERS",
     "Verifier",
     "gated",

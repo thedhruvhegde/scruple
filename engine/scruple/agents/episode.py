@@ -20,6 +20,8 @@ from pydantic import BaseModel, ConfigDict
 
 from scruple.agents.env import ActionKind, CaseEnvironment, GroundTruth, SimEnvironment
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
+from scruple.agents.keys import Salt, stable_key
+from scruple.agents.keys import episode_id as keyed_episode_id
 from scruple.agents.models import Decision, EpisodeScore, Observation
 from scruple.agents.scoring import score_episode
 from scruple.agents.tools import (
@@ -31,7 +33,6 @@ from scruple.agents.tools import (
     Scope,
     ToolSpec,
 )
-from scruple.hashing import content_hash
 
 __all__ = [
     "CallRecord",
@@ -43,10 +44,13 @@ __all__ = [
 ]
 
 
-def make_episode_id(seed: int, case_type: str | None, nonce: int = 0) -> str:
-    """Opaque and deterministic. Does not reveal the case type."""
-    digest = content_hash({"seed": seed, "case_type": case_type, "nonce": nonce})
-    return f"ep-{digest[:12]}"
+def make_episode_id(
+    seed: int, case_type: str | None, nonce: int = 0, salt: Salt | None = None
+) -> str:
+    """Opaque; deterministic for a fixed secret. Reveals neither the case type nor the
+    seed: an HMAC under the salt or the run secret (`scruple.agents.keys`). Round 6:
+    it used to be an unsalted hash of the seed, which the public generator inverted."""
+    return keyed_episode_id(seed, case_type, nonce, salt)
 
 
 class CallRecord(BaseModel):
@@ -72,6 +76,7 @@ class Episode:
         self.nonce = nonce
         self.env: CaseEnvironment = env or SimEnvironment()
         self.episode_id = make_episode_id(seed, case_type, nonce)
+        self.stable_id = stable_key(seed, case_type, nonce)
         self._case = self.env.load(seed, case_type)
         self._action: ActionKind | None = None
         self._cited: tuple[str, ...] = ()

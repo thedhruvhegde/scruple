@@ -192,7 +192,7 @@ def test_mcp_serves_knobs_and_the_new_tools() -> None:
     import anyio
     from mcp import Client
 
-    from scruple.mcp.sim_server import build_sim_server
+    from scruple.mcp.sim_server import EpisodeTable, build_sim_server
 
     def data(result: Any) -> dict[str, Any]:
         assert not result.is_error, result.content[0].text
@@ -201,7 +201,7 @@ def test_mcp_serves_knobs_and_the_new_tools() -> None:
         return dict(json.loads(result.content[0].text))
 
     async def main() -> None:
-        async with Client(build_sim_server()) as c:
+        async with Client(build_sim_server(EpisodeTable(keyed=False, full_scores=True))) as c:
             kinds = data(await c.call_tool("list_workflow_case_types", {}))
             assert kinds["knobs"]["by_kind"]["recon"] == ["adv", "breaks", "h", "n", "noise"]
             ep = data(

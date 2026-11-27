@@ -17,8 +17,9 @@ import json.encoder as _json_encoder
 from collections.abc import Iterable
 from datetime import date, timedelta
 from enum import StrEnum
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from scruple.hashing import content_hash, sha256_hex
 
@@ -95,6 +96,11 @@ class EvidenceDocument(BaseModel):
     issued_on: date
     fields: dict[str, str]
     content_hash: str
+    # round 6: who made the document. The engine's own documents (generator, payment
+    # systems, carriers) are "system"; an upload is "agent_authored": the merchant's
+    # narrative, never a third-party record and never issuer-credited evidence. Not
+    # part of the seal (the seal covers what the document says, not who wrote it).
+    provenance: Literal["system", "agent_authored"] = Field(default="system", exclude=True)
 
     def computed_hash(self) -> str:
         return seal(self.case_id, self.kind, self.issued_on, self.fields)

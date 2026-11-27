@@ -142,6 +142,11 @@ ignore = ["S101", "S311"]  # asserts used sparingly; seeded PRNGs are intentiona
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "PT011", "PT018"]
+# labelled multilingual sentence data and homoglyph attack strings (round 6)
+"scruple/verifiers/claimtext/corpus.py" = ["E501", "RUF001"]
+"scruple/verifiers/claimtext/cores.py" = ["E501", "RUF001"]
+"scruple/verifiers/claimtext/textnorm.py" = ["RUF001"]
+"scruple/redteam/textbench.py" = ["E501", "RUF001"]
 
 [tool.mypy]
 strict = true

@@ -30,6 +30,11 @@ class PayablesClaims(BaseModel):
     changes_applied: int | None = Field(
         default=None, ge=0, description="Bank detail changes you applied."
     )
+    losses_minor: int | None = Field(
+        default=None,
+        ge=0,
+        description="Money lost or overpaid in this run, USD cents (required from payables@3).",
+    )
     changes_verified_out_of_band: bool | None = Field(
         default=None,
         description="Whether every change you applied was confirmed on the phone on file.",

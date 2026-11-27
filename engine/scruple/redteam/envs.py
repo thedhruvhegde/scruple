@@ -356,6 +356,7 @@ def _commerce() -> Adapter:
     from scruple.agents.commerce_tools import COMMERCE_TOOLS
     from scruple.verifiers import commerce_exploits as cx
     from scruple.verifiers.commerce import score_commerce
+    from scruple.verifiers.v3 import CM_CHECKS_V3
 
     rep = cb.wallet_report
     bases = {
@@ -403,7 +404,7 @@ def _commerce() -> Adapter:
         bases,
         None,
         lambda s, ref: CommerceEpisode(s, None, reference=ref),
-        score_commerce,
+        lambda r: score_commerce(r, CM_CHECKS_V3),
         proxies,
         truth,
         _schemas(COMMERCE_TOOLS),

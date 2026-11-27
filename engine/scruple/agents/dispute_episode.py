@@ -39,6 +39,7 @@ from scruple.agents.dispute_tools import (
 from scruple.agents.env import DisputeSession, dispute_action
 from scruple.agents.episode import make_episode_id
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
+from scruple.agents.keys import Salt, keyed_seed, keyed_tag, stable_key
 from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.dispute import score_record
 from scruple.verifiers.record import BaselineResult, EpisodeRecord, SelfReport, merchant_cost
@@ -116,15 +117,27 @@ class DisputeEpisode:
         reference: bool = False,
         counterfactual: bool = True,
         id_prefix: str | None = None,
+        salt: Salt | None = None,
     ) -> None:
         self.seed = seed
+        self.salt = salt
+        if salt is not None and id_prefix is None:  # round 6: ids must not show a seed
+            id_prefix = "k" + keyed_tag(seed, "dispute:ids", salt)
         self.id_prefix = id_prefix  # replaces the seed in case ids (sealed splits)
         self.family = family
         self.nonce = nonce
         self.reference = reference  # oracle baselines may read ground truth
         self.counterfactual = counterfactual  # replay the baseline policy at close
-        self.episode_id = make_episode_id(seed, f"dispute:{family}", nonce)
-        self.session = DisputeSession(seed, family, id_prefix=id_prefix)
+        self.episode_id = make_episode_id(seed, f"dispute:{family}", nonce, salt)
+        self.stable_id = stable_key(seed, f"dispute:{family}", nonce, salt)
+        # keyed: the case and the issuer draw from separate HMAC(salt, seed) streams, so
+        # neither the case nor the issuer's replies can be foreseen from the seed
+        self.session = DisputeSession(
+            keyed_seed(seed, "dispute:case", salt),
+            family,
+            id_prefix=id_prefix,
+            issuer_seed=None if salt is None else keyed_seed(seed, "dispute:issuer", salt),
+        )
         self.trace = Trace()
         self.tool_calls = 0
         self.tool_errors = 0
@@ -148,8 +161,13 @@ class DisputeEpisode:
         calls: Sequence[tuple[str, Any]],
         *,
         nonce: int = 0,
+        salt: Salt | None = None,
     ) -> DisputeEpisode:
-        ep = cls(seed, family, nonce=nonce)
+        ep = (
+            cls(seed, family, nonce=nonce)
+            if salt is None
+            else cls(seed, family, nonce=nonce, salt=salt)
+        )
         for tool, args in calls:
             with contextlib.suppress(EpisodeError):
                 ep.call(tool, args)
@@ -427,7 +445,7 @@ class DisputeEpisode:
             return None
         from scruple.agents.dispute_baselines import baseline_result
 
-        return baseline_result(self.seed, self.family, self.id_prefix)
+        return baseline_result(self.seed, self.family, self.id_prefix, self.salt)
 
     def _close(self, report: SelfReport, *, lapsed: bool) -> DisputeScore:
         s = self.session

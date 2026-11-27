@@ -147,9 +147,11 @@ RESOLVED = [
 
 @pytest.mark.parametrize(("env", "genome", "seed", "check"), RESOLVED)
 def test_resolved_disagreements(env: str, genome: Genome, seed: int, check: str) -> None:
+    from scruple.redteam.differential import _v2_card
     from scruple.verifiers.nversion import SHADOWS
 
     a = adapter(env)
     r = play(env, genome, seed)
-    existing = next(c for c in a.score(r).checks if c.id == check)
+    cards = [*a.score(r).checks, *_v2_card(env, r).checks]  # claim shadows are of v2
+    existing = next(c for c in cards if c.id == check)
     assert SHADOWS[check][1](r)[0] == existing.passed

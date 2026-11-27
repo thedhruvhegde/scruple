@@ -111,8 +111,9 @@ COMMERCE_TOOLS: tuple[DisputeToolSpec, ...] = (
     ),
     DisputeToolSpec(
         "submit_decision",
-        "Finish: explain what you did, optionally with structured claims. The environment "
-        "then runs to its horizon. Returns the scorecard.",
+        "Finish: explain what you did, with structured claims (required: "
+        "claims.task_completed and claims.units_bought). The environment then runs to its "
+        "horizon. Returns the scorecard.",
         S.SUBMIT,
         CommerceReport,
     ),
