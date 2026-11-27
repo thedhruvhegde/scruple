@@ -1,0 +1,179 @@
+{
+ "cfpb2015/dev": {
+  "n": 1511,
+  "SR-02 INJECTION": {
+   "flagged": 1,
+   "rate": 0.0007,
+   "ci95": [
+    0.00011683586474173615,
+    0.0037393160689673586
+   ]
+  },
+  "SR-02 CASE_FILE_INJECTION": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0025358817573455546
+   ]
+  },
+  "REC-CLAIM clean phrases": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0025358817573455546
+   ]
+  },
+  "AML-CLAIM SAR phrases": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0025358817573455546
+   ]
+  },
+  "SR-01 text_claims": {
+   "flagged": 12,
+   "rate": 0.0079,
+   "ci95": [
+    0.0045488257904039205,
+    0.013830298083304113
+   ]
+  },
+  "SR-02 INJECTION planted": {
+   "detected": 1511,
+   "rate": 1.0,
+   "ci95": [
+    0.9974641182426545,
+    1.0
+   ]
+  },
+  "SR-02 CASE_FILE_INJECTION planted": {
+   "detected": 1511,
+   "rate": 1.0,
+   "ci95": [
+    0.9974641182426545,
+    1.0
+   ]
+  }
+ },
+ "cfpb2025/dev": {
+  "n": 798,
+  "SR-02 INJECTION": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.004790795959021549
+   ]
+  },
+  "SR-02 CASE_FILE_INJECTION": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.004790795959021549
+   ]
+  },
+  "REC-CLAIM clean phrases": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.004790795959021549
+   ]
+  },
+  "AML-CLAIM SAR phrases": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.004790795959021549
+   ]
+  },
+  "SR-01 text_claims": {
+   "flagged": 8,
+   "rate": 0.01,
+   "ci95": [
+    0.005088430180681302,
+    0.0196564350322947
+   ]
+  },
+  "SR-02 INJECTION planted": {
+   "detected": 798,
+   "rate": 1.0,
+   "ci95": [
+    0.9952092040409782,
+    0.9999999999999999
+   ]
+  },
+  "SR-02 CASE_FILE_INJECTION planted": {
+   "detected": 798,
+   "rate": 1.0,
+   "ci95": [
+    0.9952092040409782,
+    0.9999999999999999
+   ]
+  }
+ },
+ "cfpb_cc2024/sample": {
+  "n": 3000,
+  "SR-02 INJECTION": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0012788487253259629
+   ]
+  },
+  "SR-02 CASE_FILE_INJECTION": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0012788487253259629
+   ]
+  },
+  "REC-CLAIM clean phrases": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0012788487253259629
+   ]
+  },
+  "AML-CLAIM SAR phrases": {
+   "flagged": 0,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0012788487253259629
+   ]
+  },
+  "SR-01 text_claims": {
+   "flagged": 78,
+   "rate": 0.026,
+   "ci95": [
+    0.02088314953637451,
+    0.0323291990552345
+   ]
+  },
+  "SR-02 INJECTION planted": {
+   "detected": 3000,
+   "rate": 1.0,
+   "ci95": [
+    0.9987211512746742,
+    1.0
+   ]
+  },
+  "SR-02 CASE_FILE_INJECTION planted": {
+   "detected": 3000,
+   "rate": 1.0,
+   "ci95": [
+    0.9987211512746742,
+    1.0
+   ]
+  }
+ }
+}
