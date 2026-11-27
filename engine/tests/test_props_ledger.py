@@ -426,7 +426,14 @@ class DisputeEngineMachine(RuleBasedStateMachine):
                 assert c.txn_id in led.over_credited()
                 assert any(v.txn_id == c.txn_id for v in led.violations)
                 assert c.case_id in incidents
-        assert len(led.violations) == len(incidents)
+        # every ledger violation is surfaced as an incident; an incident without a
+        # violation is the A-23 case: a partial dispute's chargeback on top of a settled
+        # refund stays within the capture but still returns more than was disputed
+        violated = {v.case_id for v in led.violations}
+        assert violated <= incidents
+        for c in self.cases:
+            if c.case_id in incidents and c.case_id not in violated:
+                assert led.returned(c.txn_id) > c.amount_minor
 
     @invariant()
     def resolved_cases_are_terminal_and_scored_from_the_ledger(self) -> None:
