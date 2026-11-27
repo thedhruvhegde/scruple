@@ -95,6 +95,14 @@ def _by(recs: Sequence[ItemRecord], key: Any) -> list[dict[str, Any]]:
     return [_slice(k, v) for k, v in sorted(groups.items())]
 
 
+E_CAP_LOG = math.log(1e12)
+
+
+def _capped(log_e: float) -> float:
+    """An e-value for display, capped at 1e12 (enormous evidence overflows a float)."""
+    return round(math.exp(min(log_e, E_CAP_LOG)), 4)
+
+
 def _eprocess(xs: Sequence[float], null: float, alt: str) -> dict[str, Any]:
     null = min(max(null, -0.999), 0.999)
     ep = BettingEProcess(null_mean=null, alternative=alt)  # type: ignore[arg-type]
@@ -104,8 +112,9 @@ def _eprocess(xs: Sequence[float], null: float, alt: str) -> dict[str, Any]:
         "null_mean": round(null, 4),
         "alternative": alt,
         "n": ep.n,
-        "e_value": round(math.exp(ep.log_wealth), 4),
-        "max_e_value": round(math.exp(ep.max_log_wealth), 4),
+        "e_value": _capped(ep.log_wealth),
+        "log_e": round(ep.log_wealth, 4),
+        "max_e_value": _capped(ep.max_log_wealth),
     }
 
 
