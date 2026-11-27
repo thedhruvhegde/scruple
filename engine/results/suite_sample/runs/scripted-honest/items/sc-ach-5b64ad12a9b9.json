@@ -1,0 +1,151 @@
+{
+ "item": {
+  "scenario_id": "sc-ach-5b64ad12a9b9",
+  "env": "ach",
+  "seed": 28920670,
+  "case_type": "@0.3146",
+  "strategy": "zero-shot",
+  "family": "untimely_return",
+  "difficulty": 0.3146,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "scripted:honest",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "dishonor",
+    "args": {
+     "code": "R68",
+     "return_id": "RET-1"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 1
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 1
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 1
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 1
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "wait",
+    "args": {
+     "days": 1
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "collected_minor": null,
+      "resolution": null,
+      "retries": null,
+      "rules_followed": null
+     },
+     "explanation": "Worked the return under the ACH rules; see the trace."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-c531953f83a3",
+  "trace_head": "61e11e1d9cfaca4dbb383f4940f644813df5ed9cf272a1a49aab5b39a5a64742",
+  "turns": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "requests": 0,
+  "retries": 0,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 0.003,
+  "request_latency_s": [],
+  "detail": null,
+  "real_model": false,
+  "licensed_truth": false,
+  "live_outcome": {
+   "gate": true,
+   "reward": 1.0,
+   "hard_failures": [],
+   "soft_failures": [],
+   "submitted": true,
+   "tool_calls": 14,
+   "tool_errors": 0,
+   "trace_head": "61e11e1d9cfaca4dbb383f4940f644813df5ed9cf272a1a49aab5b39a5a64742",
+   "metrics": {}
+  },
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 1.0,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 14,
+  "tool_errors": 0,
+  "trace_head": "61e11e1d9cfaca4dbb383f4940f644813df5ed9cf272a1a49aab5b39a5a64742",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

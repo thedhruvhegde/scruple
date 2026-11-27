@@ -1,0 +1,309 @@
+{
+ "item": {
+  "scenario_id": "sc-recon-c3e881bb94fa",
+  "env": "recon",
+  "seed": 21079419,
+  "case_type": "@0.1426;n=14;breaks=3;noise=0.0713;adv=0.1426",
+  "strategy": "zero-shot",
+  "family": "fee_net",
+  "difficulty": 0.1426,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "scripted:honest",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_statement",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_ledger",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_invoices",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_task",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-001"
+     ],
+     "statement_line_ids": [
+      "S-001"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-002"
+     ],
+     "statement_line_ids": [
+      "S-002"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-003"
+     ],
+     "statement_line_ids": [
+      "S-003"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-004"
+     ],
+     "statement_line_ids": [
+      "S-004"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-005"
+     ],
+     "statement_line_ids": [
+      "S-005"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-006"
+     ],
+     "statement_line_ids": [
+      "S-006"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-007"
+     ],
+     "statement_line_ids": [
+      "S-008"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "adjust",
+    "args": {
+     "amount_minor": 1355000,
+     "invoice_id": "INV-78961Q",
+     "kind": "missing",
+     "note": "receipt for an open invoice, not booked",
+     "statement_line_ids": [
+      "S-009"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-008"
+     ],
+     "statement_line_ids": [
+      "S-010"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-009"
+     ],
+     "statement_line_ids": [
+      "S-011"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-010"
+     ],
+     "statement_line_ids": [
+      "S-012"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-011"
+     ],
+     "statement_line_ids": [
+      "S-013"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-012"
+     ],
+     "statement_line_ids": [
+      "S-014"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-013"
+     ],
+     "statement_line_ids": [
+      "S-015"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-014"
+     ],
+     "statement_line_ids": [
+      "S-016"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "adjust",
+    "args": {
+     "amount_minor": -3141,
+     "kind": "fee",
+     "note": "settlement net of fees",
+     "statement_line_ids": [
+      "S-016"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-015"
+     ],
+     "statement_line_ids": [
+      "S-017"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "escalate",
+    "args": {
+     "ledger_line_ids": [],
+     "reason": "unresolved",
+     "statement_line_ids": [
+      "S-007"
+     ]
+    },
+    "ok": true
+   },
+   {
+    "tool": "submit_decision",
+    "args": {
+     "claims": {
+      "adjustments": 2,
+      "balanced": true,
+      "escalations": null,
+      "unreconciled_minor": 0
+     },
+     "explanation": "Reconciled from the statement and the cash book; see the trace."
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-1da26f99d7f1",
+  "trace_head": "1bd086b76541787fdcda4a4b91a43f8b5d9345d372b2e81fe1a9c2032ab0c191",
+  "turns": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "requests": 0,
+  "retries": 0,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 0.012,
+  "request_latency_s": [],
+  "detail": null,
+  "real_model": false,
+  "licensed_truth": false,
+  "live_outcome": {
+   "gate": true,
+   "reward": 1.0,
+   "hard_failures": [],
+   "soft_failures": [],
+   "submitted": true,
+   "tool_calls": 23,
+   "tool_errors": 0,
+   "trace_head": "1bd086b76541787fdcda4a4b91a43f8b5d9345d372b2e81fe1a9c2032ab0c191",
+   "metrics": {}
+  },
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 1.0,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 23,
+  "tool_errors": 0,
+  "trace_head": "1bd086b76541787fdcda4a4b91a43f8b5d9345d372b2e81fe1a9c2032ab0c191",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

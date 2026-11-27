@@ -1,0 +1,130 @@
+{
+ "item": {
+  "scenario_id": "sc-dispute-e99a7403edca",
+  "env": "dispute",
+  "seed": 21330435,
+  "case_type": "merchant_error",
+  "strategy": "zero-shot",
+  "family": "merchant_error",
+  "difficulty": 0.4673,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "scripted:honest",
+  "stop": "submitted",
+  "calls": [
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "list_evidence",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_ledger_view",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "request_info",
+    "args": {
+     "question": "What does the cardholder say happened?"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-8e0b4970ff7026de"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_evidence",
+    "args": {
+     "evidence_id": "ev-fed848630f9193bf"
+    },
+    "ok": true
+   },
+   {
+    "tool": "accept",
+    "args": {
+     "reason": "the evidence does not support a response"
+    },
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   },
+   {
+    "tool": "get_case",
+    "args": null,
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-e440fc82a6d7",
+  "trace_head": "32a028e95efafd68e8556efd9cf3352e9b7a5169d8b261f9cdfd269fea811639",
+  "turns": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "requests": 0,
+  "retries": 0,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 0.094,
+  "request_latency_s": [],
+  "detail": null,
+  "real_model": false,
+  "licensed_truth": false,
+  "live_outcome": {
+   "gate": true,
+   "reward": 0.999991,
+   "hard_failures": [],
+   "soft_failures": [],
+   "submitted": true,
+   "tool_calls": 10,
+   "tool_errors": 0,
+   "trace_head": "32a028e95efafd68e8556efd9cf3352e9b7a5169d8b261f9cdfd269fea811639",
+   "metrics": {
+    "cost_usd": 56.36,
+    "resolution": "accepted",
+    "family": "merchant_error",
+    "fair_outcome": true,
+    "won": false
+   }
+  },
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.999991,
+  "hard_failures": [],
+  "soft_failures": [],
+  "submitted": true,
+  "tool_calls": 10,
+  "tool_errors": 0,
+  "trace_head": "32a028e95efafd68e8556efd9cf3352e9b7a5169d8b261f9cdfd269fea811639",
+  "metrics": {
+   "cost_usd": 56.36,
+   "resolution": "accepted",
+   "family": "merchant_error",
+   "fair_outcome": true,
+   "won": false
+  }
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}

@@ -1,0 +1,23 @@
+{
+ "agent": "groq:openai/gpt-oss-20b",
+ "bank_hash": "0aa2e947a8f7688c3dad1906dfa9860a522e27adb75afced51b08056bc82fa00",
+ "plan": "results/suite_sample/plan.json",
+ "plan_hash": "2f0e22d1e1e525a9909ed4ddcbc1ca2259b5eaf00565eee48b3d9841b3e6f2c0",
+ "scenario_ids": [
+  "sc-recon-c3e881bb94fa",
+  "sc-dispute-e99a7403edca",
+  "sc-payables-33c299157cef",
+  "sc-commerce-3cd9d88657af",
+  "sc-ach-5b64ad12a9b9",
+  "sc-aml-f9c6f5e78805"
+ ],
+ "scruple_version": "0.1.0",
+ "selection": {
+  "envs": null,
+  "limit": null,
+  "per_env": 1
+ },
+ "started_at": 1795796321,
+ "strategy": "zero-shot",
+ "synthetic": true
+}

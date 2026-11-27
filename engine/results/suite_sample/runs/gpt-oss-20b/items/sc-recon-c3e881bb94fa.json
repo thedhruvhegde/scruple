@@ -1,0 +1,90 @@
+{
+ "item": {
+  "scenario_id": "sc-recon-c3e881bb94fa",
+  "env": "recon",
+  "seed": 21079419,
+  "case_type": "@0.1426;n=14;breaks=3;noise=0.0713;adv=0.1426",
+  "strategy": "zero-shot",
+  "family": "fee_net",
+  "difficulty": 0.1426,
+  "adversarial": false
+ },
+ "play": {
+  "agent": "groq:openai/gpt-oss-20b",
+  "stop": "max_tokens",
+  "calls": [
+   {
+    "tool": "get_statement",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "get_ledger",
+    "args": {},
+    "ok": true
+   },
+   {
+    "tool": "match",
+    "args": {
+     "ledger_line_ids": [
+      "B-001"
+     ],
+     "statement_line_ids": [
+      "S-001"
+     ]
+    },
+    "ok": true
+   }
+  ],
+  "episode_id": "ep-1da26f99d7f1",
+  "trace_head": "0b5484914c17689f62ffb5c8386f7639047f7c5fff0ce6471268ec98157e5f4c",
+  "turns": 6,
+  "input_tokens": 21926,
+  "output_tokens": 8009,
+  "requests": 12,
+  "retries": 6,
+  "rejected_turns": 0,
+  "held_submits": 0,
+  "elisions": 0,
+  "quota_waits_s": [],
+  "latency_s": 195.276,
+  "request_latency_s": [
+   0.424,
+   0.064,
+   0.309,
+   0.178,
+   2.83,
+   0.067,
+   0.061,
+   2.842,
+   0.056,
+   2.262,
+   0.061,
+   2.9
+  ],
+  "detail": null,
+  "real_model": true,
+  "licensed_truth": false,
+  "live_outcome": null,
+  "meta": {}
+ },
+ "outcome": {
+  "gate": true,
+  "reward": 0.022321,
+  "hard_failures": [],
+  "soft_failures": [
+   "REC-CLEAR",
+   "REC-COVER",
+   "REC-MATCH",
+   "REC-TIE2"
+  ],
+  "submitted": false,
+  "tool_calls": 3,
+  "tool_errors": 0,
+  "trace_head": "0b5484914c17689f62ffb5c8386f7639047f7c5fff0ce6471268ec98157e5f4c",
+  "metrics": {}
+ },
+ "replay_match": true,
+ "attempt": 1,
+ "synthetic": true
+}
