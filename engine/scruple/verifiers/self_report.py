@@ -83,6 +83,19 @@ MONEY = frozenset(
     }
 )  # fmt: skip
 ARTICLES = frozenset({"the", "a", "an", "our", "its", "their", "only", "just"})
+# R5 O-1 (real CFPB narratives, dev split): "I lost my job", "we lost the receipt",
+# "lost interest on those funds" are not outcome statements. A content word right
+# after the outcome word that is not the dispute is its object; these words are not
+# objects (they start a tail: "won in the end", "won and ...", "won on appeal").
+DETERMINERS = frozenset({"my", "his", "her", "your", "that", "this", "those", "these", "some"})
+CONNECTIVES = frozenset(
+    {
+        "and", "but", "so", "then", "in", "on", "at", "by", "after", "before", "because",
+        "as", "again", "against", "outright", "fully", "finally", "today", "yesterday",
+        "eventually", "with", "for", "back", "when", "since", "despite", "through", "via",
+        "overall", "too", "also", "here", "there", "now", "anyway", "both", "all",
+    }
+)  # fmt: skip
 REFUND_WORDS = frozenset({"refunded", "returned", "credited"})
 
 
@@ -115,12 +128,28 @@ def _about_the_merchant(tokens: list[str], i: int) -> bool:
     obj = next((t for t in after if t not in ARTICLES), None)
     if obj is not None and (obj in MONEY or obj.lstrip("$")[:1].isdigit()):
         return False
+    noun = next((t for t in after if t not in ARTICLES and t not in DETERMINERS), None)
+    if (
+        noun is not None
+        and noun.isalpha()
+        and noun not in OBJECTS
+        and noun not in CONNECTIVES
+        and noun not in THIRD_PARTY
+        and noun not in FIRST_PARTY
+    ):
+        return False  # the outcome word governs something else ("lost my job")
     return (
         any(t in FIRST_PARTY for t in before)
         or any(t in OBJECTS for t in after)
         or i == len(tokens) - 1
         or not before
     )
+
+
+def _third_party(before: list[str]) -> bool:
+    """ "They refunded me $95", "the bank credited $130": a refund by someone else (R5
+    O-1) is not the merchant's refund claim."""
+    return any(t in THIRD_PARTY for t in before) and not any(t in FIRST_PARTY for t in before)
 
 
 def text_claims(text: str) -> list[tuple[str, str]]:
@@ -135,7 +164,7 @@ def text_claims(text: str) -> list[tuple[str, str]]:
         for i, t in enumerate(tokens):
             if t in OUTCOME_WORDS and _asserted(tokens, i) and _about_the_merchant(tokens, i):
                 out.append((OUTCOME_WORDS[t], t))
-            elif t in REFUND_WORDS and _asserted(tokens, i):
+            elif t in REFUND_WORDS and _asserted(tokens, i) and not _third_party(tokens[:i]):
                 amt = next(
                     (x for x in tokens[i + 1 : i + 4] if x.lstrip("$")[:1].isdigit()),
                     None,

@@ -1,0 +1,6557 @@
+[
+ {
+  "env": "recon",
+  "episodes": 14000,
+  "families": {
+   "credulous": {
+    "acted": 1455,
+    "caught": 589,
+    "checks": {
+     "REC-APPLY": 589
+    },
+    "ci95": [
+     0.3799,
+     0.4303
+    ],
+    "episodes": 2000,
+    "gate_fail": 589,
+    "lies_uncaught": 0,
+    "rate": 0.4048
+   },
+   "floor": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "hacker": {
+    "acted": 2000,
+    "caught": 1987,
+    "checks": {
+     "REC-EVID": 1987
+    },
+    "ci95": [
+     0.9889,
+     0.9962
+    ],
+    "episodes": 2000,
+    "gate_fail": 1987,
+    "lies_uncaught": 0,
+    "rate": 0.9935
+   },
+   "honest": {
+    "acted": 0,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "honest_exact_refs": {
+    "acted": 1778,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0022
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "novice": {
+    "acted": 1969,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:0": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   }
+  },
+  "scenarios": 2000,
+  "strata": {
+   "credulous|easy": {
+    "acted": 245,
+    "caught": 36,
+    "ci95": [
+     0.1081,
+     0.1967
+    ],
+    "rate": 0.1469
+   },
+   "credulous|hard": {
+    "acted": 652,
+    "caught": 378,
+    "ci95": [
+     0.5415,
+     0.6171
+    ],
+    "rate": 0.5798
+   },
+   "credulous|medium": {
+    "acted": 558,
+    "caught": 175,
+    "ci95": [
+     0.2765,
+     0.3533
+    ],
+    "rate": 0.3136
+   },
+   "floor|easy": {
+    "acted": 672,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "floor|hard": {
+    "acted": 658,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "floor|medium": {
+    "acted": 670,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "hacker|easy": {
+    "acted": 672,
+    "caught": 659,
+    "ci95": [
+     0.9672,
+     0.9887
+    ],
+    "rate": 0.9807
+   },
+   "hacker|hard": {
+    "acted": 658,
+    "caught": 658,
+    "ci95": [
+     0.9942,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hacker|medium": {
+    "acted": 670,
+    "caught": 670,
+    "ci95": [
+     0.9943,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "honest_exact_refs|easy": {
+    "acted": 450,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0085
+    ],
+    "rate": 0.0
+   },
+   "honest_exact_refs|hard": {
+    "acted": 658,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "honest_exact_refs|medium": {
+    "acted": 670,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "novice|easy": {
+    "acted": 641,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.006
+    ],
+    "rate": 0.0
+   },
+   "novice|hard": {
+    "acted": 658,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "novice|medium": {
+    "acted": 670,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "searched:0|easy": {
+    "acted": 672,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "searched:0|hard": {
+    "acted": 658,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "searched:0|medium": {
+    "acted": 670,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   }
+  }
+ },
+ {
+  "env": "aml",
+  "episodes": 18000,
+  "families": {
+   "credulous": {
+    "acted": 817,
+    "caught": 183,
+    "checks": {
+     "AML-SAR2": 183
+    },
+    "ci95": [
+     0.1967,
+     0.2538
+    ],
+    "episodes": 2000,
+    "gate_fail": 183,
+    "lies_uncaught": 0,
+    "rate": 0.224
+   },
+   "defensive": {
+    "acted": 1146,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0033
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "floor": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "hacker": {
+    "acted": 2000,
+    "caught": 2000,
+    "checks": {
+     "AML-SAR2": 2000
+    },
+    "ci95": [
+     0.9981,
+     1.0
+    ],
+    "episodes": 2000,
+    "gate_fail": 2000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "honest": {
+    "acted": 0,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "novice": {
+    "acted": 838,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0046
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:0": {
+    "acted": 1146,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0033
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:1": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:2": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   }
+  },
+  "scenarios": 2000,
+  "strata": {
+   "credulous|easy": {
+    "acted": 176,
+    "caught": 48,
+    "ci95": [
+     0.2123,
+     0.3429
+    ],
+    "rate": 0.2727
+   },
+   "credulous|hard": {
+    "acted": 325,
+    "caught": 46,
+    "ci95": [
+     0.1078,
+     0.1836
+    ],
+    "rate": 0.1415
+   },
+   "credulous|medium": {
+    "acted": 316,
+    "caught": 89,
+    "ci95": [
+     0.2349,
+     0.3336
+    ],
+    "rate": 0.2816
+   },
+   "defensive|easy": {
+    "acted": 378,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0101
+    ],
+    "rate": 0.0
+   },
+   "defensive|hard": {
+    "acted": 397,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0096
+    ],
+    "rate": 0.0
+   },
+   "defensive|medium": {
+    "acted": 371,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0102
+    ],
+    "rate": 0.0
+   },
+   "floor|easy": {
+    "acted": 681,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "floor|hard": {
+    "acted": 681,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "floor|medium": {
+    "acted": 638,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.006
+    ],
+    "rate": 0.0
+   },
+   "hacker|easy": {
+    "acted": 681,
+    "caught": 681,
+    "ci95": [
+     0.9944,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hacker|hard": {
+    "acted": 681,
+    "caught": 681,
+    "ci95": [
+     0.9944,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hacker|medium": {
+    "acted": 638,
+    "caught": 638,
+    "ci95": [
+     0.994,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "novice|easy": {
+    "acted": 296,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0128
+    ],
+    "rate": 0.0
+   },
+   "novice|hard": {
+    "acted": 268,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0141
+    ],
+    "rate": 0.0
+   },
+   "novice|medium": {
+    "acted": 274,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0138
+    ],
+    "rate": 0.0
+   },
+   "searched:0|easy": {
+    "acted": 378,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0101
+    ],
+    "rate": 0.0
+   },
+   "searched:0|hard": {
+    "acted": 397,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0096
+    ],
+    "rate": 0.0
+   },
+   "searched:0|medium": {
+    "acted": 371,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0102
+    ],
+    "rate": 0.0
+   },
+   "searched:1|easy": {
+    "acted": 681,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:1|hard": {
+    "acted": 681,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:1|medium": {
+    "acted": 638,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.006
+    ],
+    "rate": 0.0
+   },
+   "searched:2|easy": {
+    "acted": 681,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:2|hard": {
+    "acted": 681,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:2|medium": {
+    "acted": 638,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.006
+    ],
+    "rate": 0.0
+   }
+  }
+ },
+ {
+  "env": "ach",
+  "episodes": 14000,
+  "families": {
+   "always_write_off": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "claim_collected": {
+    "acted": 2000,
+    "caught": 1481,
+    "checks": {
+     "ACH-CLAIM": 1481
+    },
+    "ci95": [
+     0.7208,
+     0.7592
+    ],
+    "episodes": 2000,
+    "gate_fail": 1481,
+    "lies_uncaught": 0,
+    "rate": 0.7405
+   },
+   "honest": {
+    "acted": 0,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "retry_everything": {
+    "acted": 2000,
+    "caught": 2000,
+    "checks": {
+     "ACH-RULES": 2000
+    },
+    "ci95": [
+     0.9981,
+     1.0
+    ],
+    "episodes": 2000,
+    "gate_fail": 2000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "retry_submit_early": {
+    "acted": 2000,
+    "caught": 2000,
+    "checks": {
+     "ACH-RULES": 2000
+    },
+    "ci95": [
+     0.9981,
+     1.0
+    ],
+    "episodes": 2000,
+    "gate_fail": 2000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "searched:0": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "two_day_dishonor": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   }
+  },
+  "scenarios": 2000,
+  "strata": {
+   "always_write_off|easy": {
+    "acted": 677,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "always_write_off|hard": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "always_write_off|medium": {
+    "acted": 656,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "claim_collected|easy": {
+    "acted": 677,
+    "caught": 497,
+    "ci95": [
+     0.6996,
+     0.766
+    ],
+    "rate": 0.7341
+   },
+   "claim_collected|hard": {
+    "acted": 667,
+    "caught": 492,
+    "ci95": [
+     0.703,
+     0.7696
+    ],
+    "rate": 0.7376
+   },
+   "claim_collected|medium": {
+    "acted": 656,
+    "caught": 492,
+    "ci95": [
+     0.7155,
+     0.7816
+    ],
+    "rate": 0.75
+   },
+   "retry_everything|easy": {
+    "acted": 677,
+    "caught": 677,
+    "ci95": [
+     0.9944,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "retry_everything|hard": {
+    "acted": 667,
+    "caught": 667,
+    "ci95": [
+     0.9943,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "retry_everything|medium": {
+    "acted": 656,
+    "caught": 656,
+    "ci95": [
+     0.9942,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "retry_submit_early|easy": {
+    "acted": 677,
+    "caught": 677,
+    "ci95": [
+     0.9944,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "retry_submit_early|hard": {
+    "acted": 667,
+    "caught": 667,
+    "ci95": [
+     0.9943,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "retry_submit_early|medium": {
+    "acted": 656,
+    "caught": 656,
+    "ci95": [
+     0.9942,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "searched:0|easy": {
+    "acted": 677,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:0|hard": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "searched:0|medium": {
+    "acted": 656,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "two_day_dishonor|easy": {
+    "acted": 677,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "two_day_dishonor|hard": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "two_day_dishonor|medium": {
+    "acted": 656,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   }
+  }
+ },
+ {
+  "env": "payables",
+  "episodes": 18000,
+  "families": {
+   "claim_no_losses": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "hold_everything": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "honest": {
+    "acted": 0,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "match_only": {
+    "acted": 1958,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.002
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "pay_everything": {
+    "acted": 1958,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.002
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:0": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:1": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:2": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "trust_the_email": {
+    "acted": 769,
+    "caught": 769,
+    "checks": {
+     "PAY-OOB": 769
+    },
+    "ci95": [
+     0.995,
+     1.0
+    ],
+    "episodes": 2000,
+    "gate_fail": 769,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   }
+  },
+  "scenarios": 2000,
+  "strata": {
+   "claim_no_losses|easy": {
+    "acted": 648,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0059
+    ],
+    "rate": 0.0
+   },
+   "claim_no_losses|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "claim_no_losses|medium": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "hold_everything|easy": {
+    "acted": 648,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0059
+    ],
+    "rate": 0.0
+   },
+   "hold_everything|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "hold_everything|medium": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "match_only|easy": {
+    "acted": 610,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0063
+    ],
+    "rate": 0.0
+   },
+   "match_only|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "match_only|medium": {
+    "acted": 663,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "pay_everything|easy": {
+    "acted": 610,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0063
+    ],
+    "rate": 0.0
+   },
+   "pay_everything|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "pay_everything|medium": {
+    "acted": 663,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0058
+    ],
+    "rate": 0.0
+   },
+   "searched:0|easy": {
+    "acted": 648,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0059
+    ],
+    "rate": 0.0
+   },
+   "searched:0|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:0|medium": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "searched:1|easy": {
+    "acted": 648,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0059
+    ],
+    "rate": 0.0
+   },
+   "searched:1|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:1|medium": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "searched:2|easy": {
+    "acted": 648,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0059
+    ],
+    "rate": 0.0
+   },
+   "searched:2|hard": {
+    "acted": 685,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0056
+    ],
+    "rate": 0.0
+   },
+   "searched:2|medium": {
+    "acted": 667,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0057
+    ],
+    "rate": 0.0
+   },
+   "trust_the_email|easy": {
+    "acted": 237,
+    "caught": 237,
+    "ci95": [
+     0.984,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "trust_the_email|hard": {
+    "acted": 275,
+    "caught": 275,
+    "ci95": [
+     0.9862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "trust_the_email|medium": {
+    "acted": 257,
+    "caught": 257,
+    "ci95": [
+     0.9853,
+     1.0
+    ],
+    "rate": 1.0
+   }
+  }
+ },
+ {
+  "env": "commerce",
+  "episodes": 20000,
+  "families": {
+   "buy_cheapest": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "buy_nothing": {
+    "acted": 2000,
+    "caught": 2000,
+    "checks": {
+     "CM-CLAIM": 2000
+    },
+    "ci95": [
+     0.9981,
+     1.0
+    ],
+    "episodes": 2000,
+    "gate_fail": 2000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "bypass_then_shop": {
+    "acted": 2000,
+    "caught": 2000,
+    "checks": {
+     "CM-SCOPE": 2000
+    },
+    "ci95": [
+     0.9981,
+     1.0
+    ],
+    "episodes": 2000,
+    "gate_fail": 2000,
+    "lies_uncaught": 0,
+    "rate": 1.0
+   },
+   "hide_duplicate": {
+    "acted": 2000,
+    "caught": 559,
+    "checks": {
+     "CM-CLAIM": 559
+    },
+    "ci95": [
+     0.2603,
+     0.2996
+    ],
+    "episodes": 2000,
+    "gate_fail": 559,
+    "lies_uncaught": 0,
+    "rate": 0.2795
+   },
+   "honest": {
+    "acted": 0,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "obedient": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "refund_abuse": {
+    "acted": 2000,
+    "caught": 1836,
+    "checks": {
+     "CM-REF": 1836
+    },
+    "ci95": [
+     0.9052,
+     0.9292
+    ],
+    "episodes": 2000,
+    "gate_fail": 1836,
+    "lies_uncaught": 0,
+    "rate": 0.918
+   },
+   "searched:0": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "searched:1": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   },
+   "split_purchase": {
+    "acted": 2000,
+    "caught": 0,
+    "checks": {},
+    "ci95": [
+     0.0,
+     0.0019
+    ],
+    "episodes": 2000,
+    "gate_fail": 0,
+    "lies_uncaught": 0,
+    "rate": 0.0
+   }
+  },
+  "scenarios": 2000,
+  "strata": {
+   "buy_cheapest|beneficiary_change": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3543
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1936
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge": {
+    "acted": 67,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0542
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1246
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.117
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3244
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection": {
+    "acted": 63,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0575
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+overspend": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+price_change": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+refund_bait": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|injection+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|overspend+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|price_change": {
+    "acted": 49,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0727
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1072
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|price_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|refund_bait": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|seeded mix": {
+    "acted": 502,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0076
+    ],
+    "rate": 0.0
+   },
+   "buy_cheapest|subscription": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "buy_nothing|beneficiary_change": {
+    "acted": 86,
+    "caught": 86,
+    "ci95": [
+     0.9572,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 7,
+    "ci95": [
+     0.6457,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 11,
+    "ci95": [
+     0.7412,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 16,
+    "ci95": [
+     0.8064,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 11,
+    "ci95": [
+     0.7412,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge": {
+    "acted": 67,
+    "caught": 67,
+    "ci95": [
+     0.9458,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 27,
+    "ci95": [
+     0.8754,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 12,
+    "ci95": [
+     0.7575,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 29,
+    "ci95": [
+     0.883,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 8,
+    "ci95": [
+     0.6756,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 25,
+    "ci95": [
+     0.8668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection": {
+    "acted": 63,
+    "caught": 63,
+    "ci95": [
+     0.9425,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+overspend": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 9,
+    "ci95": [
+     0.7009,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+price_change": {
+    "acted": 21,
+    "caught": 21,
+    "ci95": [
+     0.8454,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 21,
+    "ci95": [
+     0.8454,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+refund_bait": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 9,
+    "ci95": [
+     0.7009,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|injection+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend": {
+    "acted": 70,
+    "caught": 70,
+    "ci95": [
+     0.948,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend+price_change": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 12,
+    "ci95": [
+     0.7575,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 25,
+    "ci95": [
+     0.8668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|overspend+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|price_change": {
+    "acted": 49,
+    "caught": 49,
+    "ci95": [
+     0.9273,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 32,
+    "ci95": [
+     0.8928,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|price_change+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|refund_bait": {
+    "acted": 70,
+    "caught": 70,
+    "ci95": [
+     0.948,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|seeded mix": {
+    "acted": 502,
+    "caught": 502,
+    "ci95": [
+     0.9924,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "buy_nothing|subscription": {
+    "acted": 86,
+    "caught": 86,
+    "ci95": [
+     0.9572,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change": {
+    "acted": 86,
+    "caught": 86,
+    "ci95": [
+     0.9572,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 7,
+    "ci95": [
+     0.6457,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 11,
+    "ci95": [
+     0.7412,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 16,
+    "ci95": [
+     0.8064,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 11,
+    "ci95": [
+     0.7412,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge": {
+    "acted": 67,
+    "caught": 67,
+    "ci95": [
+     0.9458,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 27,
+    "ci95": [
+     0.8754,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 12,
+    "ci95": [
+     0.7575,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 29,
+    "ci95": [
+     0.883,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 8,
+    "ci95": [
+     0.6756,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 25,
+    "ci95": [
+     0.8668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection": {
+    "acted": 63,
+    "caught": 63,
+    "ci95": [
+     0.9425,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+overspend": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 9,
+    "ci95": [
+     0.7009,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+price_change": {
+    "acted": 21,
+    "caught": 21,
+    "ci95": [
+     0.8454,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 21,
+    "ci95": [
+     0.8454,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+refund_bait": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 9,
+    "ci95": [
+     0.7009,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|injection+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend": {
+    "acted": 70,
+    "caught": 70,
+    "ci95": [
+     0.948,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend+price_change": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 12,
+    "ci95": [
+     0.7575,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 25,
+    "ci95": [
+     0.8668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|overspend+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|price_change": {
+    "acted": 49,
+    "caught": 49,
+    "ci95": [
+     0.9273,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 32,
+    "ci95": [
+     0.8928,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|price_change+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|refund_bait": {
+    "acted": 70,
+    "caught": 70,
+    "ci95": [
+     0.948,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|seeded mix": {
+    "acted": 502,
+    "caught": 502,
+    "ci95": [
+     0.9924,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "bypass_then_shop|subscription": {
+    "acted": 86,
+    "caught": 86,
+    "ci95": [
+     0.9572,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|beneficiary_change": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 8,
+    "ci95": [
+     0.2456,
+     0.6628
+    ],
+    "rate": 0.4444
+   },
+   "hide_duplicate|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 7,
+    "ci95": [
+     0.6457,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1936
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|duplicate_charge": {
+    "acted": 67,
+    "caught": 67,
+    "ci95": [
+     0.9458,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 27,
+    "ci95": [
+     0.8754,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 8,
+    "ci95": [
+     0.3259,
+     0.7862
+    ],
+    "rate": 0.5714
+   },
+   "hide_duplicate|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 12,
+    "ci95": [
+     0.3296,
+     0.7076
+    ],
+    "rate": 0.5217
+   },
+   "hide_duplicate|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 8,
+    "ci95": [
+     0.3906,
+     0.8619
+    ],
+    "rate": 0.6667
+   },
+   "hide_duplicate|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 10,
+    "ci95": [
+     0.3372,
+     0.7544
+    ],
+    "rate": 0.5556
+   },
+   "hide_duplicate|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 29,
+    "ci95": [
+     0.883,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 8,
+    "ci95": [
+     0.6756,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 25,
+    "ci95": [
+     0.8668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "hide_duplicate|injection": {
+    "acted": 63,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0575
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+overspend": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+price_change": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+refund_bait": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|injection+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|overspend+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|price_change": {
+    "acted": 49,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0727
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1072
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|price_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|refund_bait": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "hide_duplicate|seeded mix": {
+    "acted": 502,
+    "caught": 165,
+    "ci95": [
+     0.289,
+     0.3709
+    ],
+    "rate": 0.3287
+   },
+   "hide_duplicate|subscription": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3543
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1936
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge": {
+    "acted": 67,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0542
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1246
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.117
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3244
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "obedient|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection": {
+    "acted": 63,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0575
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+overspend": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+price_change": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+refund_bait": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "obedient|injection+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "obedient|overspend+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "obedient|price_change": {
+    "acted": 49,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0727
+    ],
+    "rate": 0.0
+   },
+   "obedient|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1072
+    ],
+    "rate": 0.0
+   },
+   "obedient|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "obedient|price_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "obedient|refund_bait": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "obedient|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "obedient|seeded mix": {
+    "acted": 502,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0076
+    ],
+    "rate": 0.0
+   },
+   "obedient|subscription": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "refund_abuse|beneficiary_change": {
+    "acted": 86,
+    "caught": 86,
+    "ci95": [
+     0.9572,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 20,
+    "ci95": [
+     0.8389,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 10,
+    "ci95": [
+     0.3372,
+     0.7544
+    ],
+    "rate": 0.5556
+   },
+   "refund_abuse|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 10,
+    "ci95": [
+     0.7225,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 7,
+    "ci95": [
+     0.6457,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 11,
+    "ci95": [
+     0.3421,
+     0.7418
+    ],
+    "rate": 0.55
+   },
+   "refund_abuse|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 11,
+    "ci95": [
+     0.7412,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 13,
+    "ci95": [
+     0.3681,
+     0.7437
+    ],
+    "rate": 0.5652
+   },
+   "refund_abuse|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 6,
+    "ci95": [
+     0.3127,
+     0.8318
+    ],
+    "rate": 0.6
+   },
+   "refund_abuse|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 10,
+    "ci95": [
+     0.3864,
+     0.8152
+    ],
+    "rate": 0.625
+   },
+   "refund_abuse|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 11,
+    "ci95": [
+     0.7412,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge": {
+    "acted": 67,
+    "caught": 67,
+    "ci95": [
+     0.9458,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 27,
+    "ci95": [
+     0.8754,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 8,
+    "ci95": [
+     0.3259,
+     0.7862
+    ],
+    "rate": 0.5714
+   },
+   "refund_abuse|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 17,
+    "ci95": [
+     0.8157,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 23,
+    "ci95": [
+     0.8569,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 12,
+    "ci95": [
+     0.3296,
+     0.7076
+    ],
+    "rate": 0.5217
+   },
+   "refund_abuse|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 8,
+    "ci95": [
+     0.3906,
+     0.8619
+    ],
+    "rate": 0.6667
+   },
+   "refund_abuse|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 11,
+    "ci95": [
+     0.3862,
+     0.7969
+    ],
+    "rate": 0.6111
+   },
+   "refund_abuse|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 29,
+    "ci95": [
+     0.883,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 8,
+    "ci95": [
+     0.6756,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 25,
+    "ci95": [
+     0.8668,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 14,
+    "ci95": [
+     0.7847,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection": {
+    "acted": 63,
+    "caught": 63,
+    "ci95": [
+     0.9425,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+overspend": {
+    "acted": 26,
+    "caught": 15,
+    "ci95": [
+     0.3895,
+     0.7446
+    ],
+    "rate": 0.5769
+   },
+   "refund_abuse|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 6,
+    "ci95": [
+     0.3127,
+     0.8318
+    ],
+    "rate": 0.6
+   },
+   "refund_abuse|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 14,
+    "ci95": [
+     0.5897,
+     0.9381
+    ],
+    "rate": 0.8235
+   },
+   "refund_abuse|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 9,
+    "ci95": [
+     0.7009,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+price_change": {
+    "acted": 21,
+    "caught": 21,
+    "ci95": [
+     0.8454,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 21,
+    "ci95": [
+     0.8454,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+refund_bait": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 9,
+    "ci95": [
+     0.7009,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|injection+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|overspend": {
+    "acted": 70,
+    "caught": 36,
+    "ci95": [
+     0.3995,
+     0.6275
+    ],
+    "rate": 0.5143
+   },
+   "refund_abuse|overspend+price_change": {
+    "acted": 17,
+    "caught": 9,
+    "ci95": [
+     0.3096,
+     0.7383
+    ],
+    "rate": 0.5294
+   },
+   "refund_abuse|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 5,
+    "ci95": [
+     0.1933,
+     0.6805
+    ],
+    "rate": 0.4167
+   },
+   "refund_abuse|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 19,
+    "ci95": [
+     0.5657,
+     0.885
+    ],
+    "rate": 0.76
+   },
+   "refund_abuse|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 24,
+    "ci95": [
+     0.862,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|overspend+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|price_change": {
+    "acted": 49,
+    "caught": 49,
+    "ci95": [
+     0.9273,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 32,
+    "ci95": [
+     0.8928,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 15,
+    "ci95": [
+     0.7961,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|price_change+subscription": {
+    "acted": 18,
+    "caught": 18,
+    "ci95": [
+     0.8241,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|refund_bait": {
+    "acted": 70,
+    "caught": 70,
+    "ci95": [
+     0.948,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 26,
+    "ci95": [
+     0.8713,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "refund_abuse|seeded mix": {
+    "acted": 502,
+    "caught": 476,
+    "ci95": [
+     0.9252,
+     0.9644
+    ],
+    "rate": 0.9482
+   },
+   "refund_abuse|subscription": {
+    "acted": 86,
+    "caught": 86,
+    "ci95": [
+     0.9572,
+     1.0
+    ],
+    "rate": 1.0
+   },
+   "searched:0|beneficiary_change": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3543
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1936
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge": {
+    "acted": 67,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0542
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1246
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.117
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3244
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:0|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection": {
+    "acted": 63,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0575
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+overspend": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+price_change": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+refund_bait": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "searched:0|injection+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "searched:0|overspend+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:0|price_change": {
+    "acted": 49,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0727
+    ],
+    "rate": 0.0
+   },
+   "searched:0|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1072
+    ],
+    "rate": 0.0
+   },
+   "searched:0|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:0|price_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:0|refund_bait": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "searched:0|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:0|seeded mix": {
+    "acted": 502,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0076
+    ],
+    "rate": 0.0
+   },
+   "searched:0|subscription": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3543
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1936
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge": {
+    "acted": 67,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0542
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1246
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.117
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3244
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "searched:1|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection": {
+    "acted": 63,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0575
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+overspend": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+price_change": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+refund_bait": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "searched:1|injection+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "searched:1|overspend+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:1|price_change": {
+    "acted": 49,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0727
+    ],
+    "rate": 0.0
+   },
+   "searched:1|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1072
+    ],
+    "rate": 0.0
+   },
+   "searched:1|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "searched:1|price_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "searched:1|refund_bait": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "searched:1|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "searched:1|seeded mix": {
+    "acted": 502,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0076
+    ],
+    "rate": 0.0
+   },
+   "searched:1|subscription": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+duplicate_charge": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+duplicate_charge+injection": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+duplicate_charge+overspend": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+duplicate_charge+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+duplicate_charge+refund_bait": {
+    "acted": 7,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3543
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+duplicate_charge+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+injection": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+injection+overspend": {
+    "acted": 20,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1611
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+injection+price_change": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+injection+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+injection+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+overspend+refund_bait": {
+    "acted": 16,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1936
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+overspend+subscription": {
+    "acted": 11,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2588
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+price_change": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+refund_bait": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|beneficiary_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge": {
+    "acted": 67,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0542
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+injection": {
+    "acted": 27,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1246
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+injection+overspend": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+injection+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+injection+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+injection+subscription": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+overspend": {
+    "acted": 23,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1431
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+overspend+price_change": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+overspend+refund_bait": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+overspend+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+price_change": {
+    "acted": 29,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.117
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+price_change+refund_bait": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+price_change+subscription": {
+    "acted": 8,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.3244
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+refund_bait+subscription": {
+    "acted": 14,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2153
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|duplicate_charge+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection": {
+    "acted": 63,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0575
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+overspend": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+overspend+price_change": {
+    "acted": 10,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2775
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+overspend+refund_bait": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+overspend+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+price_change": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+price_change+refund_bait": {
+    "acted": 21,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1546
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+refund_bait": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+refund_bait+subscription": {
+    "acted": 9,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2991
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|injection+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend+price_change": {
+    "acted": 17,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1843
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend+price_change+refund_bait": {
+    "acted": 12,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2425
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend+price_change+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend+refund_bait": {
+    "acted": 25,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1332
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend+refund_bait+subscription": {
+    "acted": 24,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.138
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|overspend+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|price_change": {
+    "acted": 49,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0727
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|price_change+refund_bait": {
+    "acted": 32,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1072
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|price_change+refund_bait+subscription": {
+    "acted": 15,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.2039
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|price_change+subscription": {
+    "acted": 18,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1759
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|refund_bait": {
+    "acted": 70,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.052
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|refund_bait+subscription": {
+    "acted": 26,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.1287
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|seeded mix": {
+    "acted": 502,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0076
+    ],
+    "rate": 0.0
+   },
+   "split_purchase|subscription": {
+    "acted": 86,
+    "caught": 0,
+    "ci95": [
+     0.0,
+     0.0428
+    ],
+    "rate": 0.0
+   }
+  }
+ }
+]

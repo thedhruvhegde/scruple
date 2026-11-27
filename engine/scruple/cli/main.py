@@ -134,6 +134,8 @@ def cmd_assurance(args: argparse.Namespace) -> int:
 def cmd_redteam(args: argparse.Namespace) -> int:
     if getattr(args, "suite", "rules") == "exploits":
         return cmd_redteam_exploits(args)
+    if getattr(args, "suite", "rules") == "search":
+        return cmd_redteam_search(args)
     from scruple.cli.demo import print_redteam
 
     return 0 if print_redteam() else 1
@@ -162,6 +164,38 @@ def cmd_redteam_exploits(args: argparse.Namespace) -> int:
         )
     else:
         print(render(rows, seeds))
+    return 0
+
+
+def cmd_redteam_search(args: argparse.Namespace) -> int:
+    """Black-box blind-spot search against one environment's verifier."""
+    import json
+    from pathlib import Path
+
+    from scruple.finops.parallel import default_workers
+    from scruple.redteam.envs import ENV_NAMES
+    from scruple.redteam.search import HOLDOUT, TRAIN, render, search
+
+    envs = list(ENV_NAMES) if args.env == "all" else [args.env]
+    train = range(args.train_start, args.train_start + args.train)
+    holdout = range(args.holdout_start, args.holdout_start + args.holdout)
+    _ = TRAIN, HOLDOUT
+    workers = args.workers if args.workers is not None else default_workers()
+    out = []
+    for env in envs:
+        res = search(
+            env, args.budget, train=train, holdout=holdout, rng_seed=args.rng, workers=workers
+        )
+        out.append(res)
+        if not args.json:
+            print(render(res))
+            print()
+    if args.out:
+        Path(args.out).write_text(
+            json.dumps([r.model_dump(mode="json") for r in out], indent=1, sort_keys=True) + "\n"
+        )
+    if args.json:
+        print(json.dumps([r.model_dump(mode="json") for r in out], indent=1, sort_keys=True))
     return 0
 
 
@@ -229,9 +263,24 @@ def build_parser() -> argparse.ArgumentParser:
         "suite",
         nargs="?",
         default="rules",
-        choices=["rules", "exploits"],
-        help="rules: attacks on learned rules (default); exploits: dispute-episode exploits",
+        choices=["rules", "exploits", "search"],
+        help="rules: attacks on learned rules (default); exploits: dispute-episode exploits; "
+        "search: black-box blind-spot search (--env, --budget)",
     )
+    rt.add_argument(
+        "--env",
+        default="all",
+        choices=["all", "dispute", "recon", "aml", "ach", "payables", "commerce"],
+        help="search: environment (default all)",
+    )
+    rt.add_argument("--budget", type=int, default=300, help="search: genome evaluations")
+    rt.add_argument("--rng", type=int, default=0, help="search: RNG seed")
+    rt.add_argument("--train", type=int, default=200, help="search: training seeds")
+    rt.add_argument("--train-start", type=int, default=10_000, help="search: first training seed")
+    rt.add_argument("--holdout", type=int, default=500, help="search: held-out seeds")
+    rt.add_argument("--holdout-start", type=int, default=20_000, help="search: first held-out seed")
+    rt.add_argument("--workers", type=int, default=None, help="search: processes")
+    rt.add_argument("--out", default=None, help="search: write JSON results here")
     rt.add_argument("--seeds", type=int, default=300, help="exploits: number of seeds")
     rt.add_argument("--start", type=int, default=0, help="exploits: first seed")
     rt.add_argument("--json", action="store_true", help="exploits: print JSON")
