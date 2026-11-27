@@ -77,7 +77,7 @@ mean reward {{ sgn(r.regression.reward_diff) }} [{{ sgn(r.regression.reward_diff
 <td class="n">{{ f.scenarios }}</td><td class="n">{{ pct(f.share) }} ({{ pct(f.share_ci[0]) }}&ndash;{{ pct(f.share_ci[1]) }})</td>
 <td>{% for k, v in f.checks.items() %}<code>{{ k }}</code>&times;{{ v }} {% endfor %}</td>
 <td>{% for k, v in f.envs.items() %}{{ k }} {{ v }} {% endfor %}</td></tr>{% endfor %}</table></div>
-{% for f in r.failure_modes[:6] %}<details{% if loop.first %} open{% endif %}><summary>{{ f.title }}: example {{ f.example.scenario_id }} ({{ f.example.env }}, {{ f.example.family }})</summary>
+{% for f in r.failure_modes|rejectattr("example.repeat")|list|batch(6)|first|default([]) %}<details{% if loop.first %} open{% endif %}><summary>{{ f.title }}: example {{ f.example.scenario_id }} ({{ f.example.env }}, {{ f.example.family }})</summary>
 <p class="small">Failed checks: {% for c in f.example.failed_checks %}<code>{{ c }}</code> {% endfor %} &middot; stop: {{ f.example.stop }} &middot; episode {{ f.example.episode_id }}.
 Other examples: {{ f.examples|join(", ") }}.</p>
 <div class="tw"><table><tr><th>#</th><th>tool</th><th>arguments</th><th>result</th></tr>

@@ -237,10 +237,13 @@ def failure_modes(
         for c, ids in cats.items():
             by_cat[c].append((r, ids))
     out = []
+    shown: set[str] = set()  # prefer an example not already shown for another mode
     n = len(recs)
     for c, lst in sorted(by_cat.items(), key=lambda kv: (-len(kv[1]), kv[0])):
         checks = Counter(h for _, ids in lst for h in ids)
-        ex = lst[0][0]
+        ex = next((r for r, _ in lst if r.item.scenario_id not in shown), lst[0][0])
+        dup = ex.item.scenario_id in shown
+        shown.add(ex.item.scenario_id)
         out.append(
             {
                 "category": c,
@@ -261,6 +264,7 @@ def failure_modes(
                     "stop": ex.play.stop,
                     "trace": trace_excerpt(ex),
                     "replay": f"uv run scruple suite replay {run_dir} {ex.item.scenario_id}",
+                    "repeat": dup,
                 },
             }
         )
@@ -730,7 +734,7 @@ def render_pdf(rep: dict[str, Any]) -> bytes:
             ],
             [44, 11, 20, 30],
         )
-    for f in rep["failure_modes"][:3]:
+    for f in [x for x in rep["failure_modes"] if not x["example"].get("repeat")][:3]:
         e = f["example"]
         para(
             f"Example trace: {f['title']} - {e['scenario_id']} ({e['env']}, {e['family']}), failed "
@@ -832,11 +836,11 @@ def render_pdf(rep: dict[str, Any]) -> bytes:
     h2("Reproduce")
     d.set_font("Courier", "", 7.5)
     for c in rep["reproduce"]:
-        d.multi_cell(w, 4, _latin(c), new_x="LMARGIN", new_y="NEXT")
+        d.multi_cell(w, 4, _latin(c), align="L", new_x="LMARGIN", new_y="NEXT")
     h2("Hashes")
     d.set_font("Courier", "", 7.5)
     for k, v in rep["hashes"].items():
-        d.multi_cell(w, 4, _latin(f"{k}: {v}"), new_x="LMARGIN", new_y="NEXT")
+        d.multi_cell(w, 4, _latin(f"{k}: {v}"), align="L", new_x="LMARGIN", new_y="NEXT")
     return bytes(d.output())
 
 
