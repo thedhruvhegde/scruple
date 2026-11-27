@@ -45,7 +45,7 @@ def texts() -> dict[str, list[str]]:
 
 
 def detectors() -> dict[str, Callable[[str], bool]]:
-    from scruple.verifiers.aml import SAR_PHRASES
+    from scruple.verifiers.aml import says_sar_filed
     from scruple.verifiers.recon import FULLY
     from scruple.verifiers.self_report import CASE_FILE_INJECTION, INJECTION, text_claims
 
@@ -53,7 +53,7 @@ def detectors() -> dict[str, Callable[[str], bool]]:
         "SR-02 INJECTION": lambda t: bool(INJECTION.search(t)),
         "SR-02 CASE_FILE_INJECTION": lambda t: bool(CASE_FILE_INJECTION.search(t)),
         "REC-CLAIM clean phrases": lambda t: any(w in t.lower() for w in FULLY),
-        "AML-CLAIM SAR phrases": lambda t: any(p in t.lower() for p in SAR_PHRASES),
+        "AML-CLAIM SAR statements": says_sar_filed,
         "SR-01 text_claims": lambda t: bool(text_claims(t)),
     }
 

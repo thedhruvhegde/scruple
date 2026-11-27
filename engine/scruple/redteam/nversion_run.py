@@ -116,7 +116,12 @@ def faults(seeds: tuple[int, ...]) -> dict[str, Any]:
                 agree += int(ex == ok)
                 fail_x += int(not ex)
                 fail_i += int(not ok)
-        res[cid] = {"episodes": n, "agree": agree, "existing_fails": fail_x, "independent_fails": fail_i}
+        res[cid] = {
+            "episodes": n,
+            "agree": agree,
+            "existing_fails": fail_x,
+            "independent_fails": fail_i,
+        }
     a = adapter("commerce")
     fn = SHADOWS["CM-MAND"][1]
     agree = n = fail_x = fail_i = 0

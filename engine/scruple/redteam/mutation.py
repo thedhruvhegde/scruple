@@ -213,7 +213,7 @@ def build_corpus(out: Path, seeds: int = 6, n_random: int = 30) -> None:
         (out / f"{env}.jsonl").write_text("\n".join(lines) + "\n")
 
 
-def signatures(corpus_dir: Path, envs: str) -> tuple[str, str]:
+def signatures(corpus_dir: Path, envs: str, hard_only: bool = False) -> tuple[str, str]:
     """(hard signature, full signature) of the current code on the stored corpus."""
     from scruple.finops.envs import get_env
     from scruple.verifiers.ach_record import AchRecord
@@ -247,7 +247,10 @@ def signatures(corpus_dir: Path, envs: str) -> tuple[str, str]:
                     hard.update(f"crash:{type(exc).__name__}".encode())
                     full.update(f"crash:{type(exc).__name__}".encode())
                     continue
-                hv = [card.gate, *[(c.id, c.passed) for c in card.checks]]
+                hv = [
+                    card.gate,
+                    *[(c.id, c.passed) for c in card.checks if c.hard or not hard_only],
+                ]
                 hard.update(json.dumps(hv).encode())
                 full.update(
                     json.dumps(
@@ -293,8 +296,10 @@ def _python() -> str:
 
 
 def _run_one(m: Mutant, work: Path, corpus_dir: Path, base: dict[str, tuple[str, str]],
-             timeout: int, new_tests: bool = True) -> dict[str, Any]:  # fmt: skip
+             timeout: int, new_tests: bool = True,
+             extra: tuple[str, ...] = ()) -> dict[str, Any]:  # fmt: skip
     env, tests = TARGETS[m.module]
+    tests = (*tests, *extra)
     if not new_tests:  # the suite as it was before round 5
         tests = tuple(t for t in tests if "redteam" not in t)
     target = work / m.module
@@ -342,6 +347,52 @@ def _run_one(m: Mutant, work: Path, corpus_dir: Path, base: dict[str, tuple[str,
     return row
 
 
+def classify(out: Path, workers: int = 3, timeout: int = 240) -> list[dict[str, Any]]:
+    """Second pass over a finished run: which distinguishable mutants change a *hard*
+    verdict (the gate or a hard check's pass/fail; soft pass flags excluded)."""
+    rows: list[dict[str, Any]] = json.loads((out / "mutants.json").read_text())
+    corpus_dir = (out / "corpus").resolve()
+    base = {e: signatures(corpus_dir, e, hard_only=True)[0]
+            for e in ("recon", "aml", "ach", "payables", "commerce", "recon+aml")}  # fmt: skip
+    todo = [r for r in rows if r.get("status") in ("killed", "survived")]
+    works = []
+    for i in range(workers):
+        w = Path(tempfile.mkdtemp(prefix=f"cls{i}-", dir=out))
+        _copy_repo(w)
+        works.append(w)
+
+    def one(i: int) -> None:
+        for r in todo[i::workers]:
+            m = Mutant(r["module"], r["index"], r["op"], r["line"], r["before"], r["after"])
+            env = TARGETS[m.module][0]
+            target = works[i] / m.module
+            original = target.read_text()
+            try:
+                target.write_text(mutated_source(m))
+                sig = subprocess.run(  # noqa: S603
+                    [_python(), "-I", "-c",
+                     "import sys, json; sys.path.insert(0, '.');"
+                     "from pathlib import Path;"
+                     "from scruple.redteam.mutation import signatures;"
+                     f"print(signatures(Path({str(corpus_dir)!r}), {env!r}, True)[0])"],
+                    cwd=works[i], capture_output=True, text=True, timeout=timeout,
+                )  # fmt: skip
+                r["hard_verdict_changed"] = (
+                    sig.returncode != 0 or sig.stdout.strip().splitlines()[-1] != base[env]
+                )
+            except subprocess.TimeoutExpired:
+                r["hard_verdict_changed"] = True
+            finally:
+                target.write_text(original)
+
+    with ThreadPoolExecutor(workers) as ex:
+        list(ex.map(one, range(workers)))
+    (out / "mutants.json").write_text(json.dumps(rows, indent=1, sort_keys=True) + "\n")
+    for w in works:
+        shutil.rmtree(w, ignore_errors=True)
+    return rows
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="python -m scruple.redteam.mutation")
     p.add_argument("--out", required=True)
@@ -353,6 +404,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--only", default="", help="comma-separated mutant ids to (re)run")
     p.add_argument("--only-file", default="", help="file with mutant ids, one per line")
     p.add_argument("--no-new-tests", action="store_true", help="the pre-round-5 suite only")
+    p.add_argument("--extra-tests", default="", help="comma-separated test files added to all")
     a = p.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -385,7 +437,15 @@ def main(argv: list[str] | None = None) -> int:
         res = []
         for m in queues[i]:
             res.append(
-                _run_one(m, works[i], corpus_dir.resolve(), base, a.timeout, not a.no_new_tests)
+                _run_one(
+                    m,
+                    works[i],
+                    corpus_dir.resolve(),
+                    base,
+                    a.timeout,
+                    not a.no_new_tests,
+                    tuple(filter(None, a.extra_tests.split(","))),
+                )
             )
             with (out / "progress.jsonl").open("a") as fh:
                 fh.write(json.dumps(res[-1]) + "\n")
@@ -406,7 +466,7 @@ def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
     for mod in sorted({r["module"] for r in rows}):
         rs = [r for r in rows if r["module"] == mod]
         dist = [r for r in rs if r.get("status") in ("killed", "survived")]
-        hard = [r for r in dist if r.get("hard_changed")]
+        hard = [r for r in dist if r.get("hard_verdict_changed", r.get("hard_changed"))]
         out[mod] = {
             "mutants": len(rs),
             "equivalent_on_corpus": sum(r.get("status") == "equivalent" for r in rs),
