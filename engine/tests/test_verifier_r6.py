@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
@@ -12,12 +13,19 @@ from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import make_episode_id
 from scruple.agents.keys import keyed_seed
 from scruple.finops.envs import get_env
-from scruple.finops.verifiers import get_verifier
+from scruple.finops.verifiers import get_verifier, verifier_version
 from scruple.redteam.leaks import inversion_probe, legacy_episode_id, rehearsal_probe
 from scruple.verifiers.claimtext import Claim, judge
 from scruple.verifiers.record import Claims, SelfReport
 
 # --- 1. seed inversion -------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _v3_scorecards() -> Iterator[None]:
+    """Round-6 behaviour, pinned on `<env>@3` (round 7 made `@4` the default)."""
+    with verifier_version(3):
+        yield
 
 
 def test_episode_id_is_not_the_unsalted_hash_of_the_seed() -> None:

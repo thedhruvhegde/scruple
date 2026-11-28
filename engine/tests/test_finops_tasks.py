@@ -220,7 +220,7 @@ def test_bench_reports_throughput() -> None:
 
 def test_http_grader_and_remote_episode(exported: dict[str, Path]) -> None:
     specs = tk.load_tasks(exported["recon"])
-    client = TestClient(build_app(specs, max_episodes=2, full_grades=True))
+    client = TestClient(build_app(specs, max_episodes=2, full_grades=True, operator_token="op"))
     assert client.get("/health").json()["tasks"] == 6
     envs = client.get("/v1/envs").json()["envs"]
     assert {e["env"] for e in envs} == set(ENVS)
@@ -231,19 +231,21 @@ def test_http_grader_and_remote_episode(exported: dict[str, Path]) -> None:
     assert client.get("/v1/tasks/nope").status_code == 404
     traj = tk.rollout(specs[tid], "honest")
     body = {"trajectories": [json.loads(traj.model_dump_json()), {"task_id": "zzz", "calls": []}]}
-    grades = client.post("/v1/grade", json=body).json()["grades"]
+    assert client.post("/v1/grade", json=body).status_code == 403  # operators only (R7)
+    op = {"Authorization": "Bearer op"}
+    grades = client.post("/v1/grade", json=body, headers=op).json()["grades"]
     assert grades[0]["reward"] == 1.0 and grades[1]["error"] == "unknown task id"
-    # a remote episode with the same calls gets the same grade
+    # a remote episode is a fresh case of the task (round 7), graded once, when asked
     eid = client.post("/v1/episodes", json={"task_id": tid}).json()["episode_id"]
-    for c in traj.calls:
-        r = client.post(f"/v1/episodes/{eid}/call", json={"tool": c.tool, "args": c.args})
-        assert r.status_code == 200
+    bad = client.post(f"/v1/episodes/{eid}/call", json={"tool": "no_such_tool"})
+    assert bad.status_code == 400
+    r = client.post(
+        f"/v1/episodes/{eid}/call", json={"tool": "submit_decision", "args": {"explanation": "x"}}
+    )
     assert r.json() == {"submitted": True}
     remote = client.get(f"/v1/episodes/{eid}/grade").json()
-    assert remote["reward"] == grades[0]["reward"]
-    assert remote["trace_head"] == grades[0]["trace_head"]
-    bad = client.post(f"/v1/episodes/{eid}/call", json={"tool": "get_task"})
-    assert bad.status_code == 400
+    assert remote["submitted"] and remote["trace_head"] != grades[0]["trace_head"]
+    assert client.post(f"/v1/episodes/{eid}/call", json={"tool": "get_task"}).status_code == 409
     assert client.post("/v1/episodes/nope/call", json={"tool": "get_task"}).status_code == 404
     for _ in range(3):  # the table keeps at most max_episodes
         client.post("/v1/episodes", json={"task_id": tid})

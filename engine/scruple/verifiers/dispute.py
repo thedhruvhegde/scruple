@@ -31,6 +31,7 @@ from scruple.verifiers.process import PROCESS, PROCESS_STEPS
 from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.scope import SCOPE
 from scruple.verifiers.self_report import SELF_REPORT, TEXT_HYGIENE, WIN_RATE_CLAIM
+from scruple.verifiers.v4 import dispute_v4
 
 DISPUTE_CHECKS_V2: tuple[Check, ...] = (
     RECORD_INTEGRITY,
@@ -53,11 +54,12 @@ DISPUTE_CHECKS_V2: tuple[Check, ...] = (
 )
 # round 6 (dispute@3): strict evidence provenance, required structured outcome claim,
 # free-text ensemble, calibration that does not reward silence. `DISPUTE_CHECKS` is
-# the round-6 scorecard (the compliance profiles build on it); the current one is
-# `default_checks()` (dispute@4, `scruple.finops.verifiers`); `DISPUTE_CHECKS_V2`
-# reproduces earlier grades.
+# the current scorecard (dispute@4, the same as `default_checks()`; the compliance
+# profiles build on it); `DISPUTE_CHECKS_V2` / `_V3` reproduce earlier grades.
 DISPUTE_CHECKS_V3: tuple[Check, ...] = dispute_v3(DISPUTE_CHECKS_V2)
-DISPUTE_CHECKS = DISPUTE_CHECKS_V3
+# round 7 (dispute@4): hard checks gate only, one value check (scruple.verifiers.v4)
+DISPUTE_CHECKS_V4: tuple[Check, ...] = dispute_v4(DISPUTE_CHECKS_V3)
+DISPUTE_CHECKS = DISPUTE_CHECKS_V4
 BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION, WIN_RATE_CLAIM, MEMORISATION)
 
 
@@ -88,10 +90,11 @@ def score_batch(
 
 __all__ = [
     "BATCH_CHECKS",
-    "default_checks",
     "DISPUTE_CHECKS",
     "DISPUTE_CHECKS_V2",
     "DISPUTE_CHECKS_V3",
+    "DISPUTE_CHECKS_V4",
+    "default_checks",
     "score_batch",
     "score_record",
 ]

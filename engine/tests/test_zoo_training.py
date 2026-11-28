@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import cache
 from typing import Any
 
 import pytest
 
+from scruple.finops.verifiers import verifier_version
 from scruple.zoo.context import Act
 from scruple.zoo.protocol import IllegalActError, ZooPolicy
 from scruple.zoo.rollout import (
@@ -37,6 +39,15 @@ from tests.test_zoo_context import FULL, make_ctx
 
 CFG = ZooConfig(n_train=40, n_dev=30, rollouts=8)
 ONE = {k: v[:1] for k, v in GRIDS.items()}  # one setting each: fast
+
+
+@pytest.fixture(autouse=True)
+def _zoo_on_dispute_v3() -> Iterator[None]:
+    """The zoo study was run and written up on dispute@3; round 7 made dispute@4 the
+    default (there the logreg learner beats random by 0.03, not 0.05:
+    VERIFIER_HARDENING_R7.md), so these tests pin the version they document."""
+    with verifier_version(3):
+        yield
 
 
 @cache

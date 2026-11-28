@@ -30,7 +30,8 @@ def test_every_adapter_builds_scores_and_replays(env: str) -> None:
     refs = a.reference_outcomes(11, ct)
     assert a.honest_ref in refs
     honest = refs[a.honest_ref]
-    assert honest.gate and honest.reward > 0.8
+    # (> 0.7: under dispute@4 one honest episode can lose the fairness credit, OUT-01)
+    assert honest.gate and honest.reward > 0.7
     # an episode never submitted is lapsed and scored, never dropped
     ep = replay(a, 11, ct, [])
     assert ep.closed

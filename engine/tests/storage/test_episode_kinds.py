@@ -29,7 +29,8 @@ INSERT INTO episodes VALUES ('default', 'ep-000000000001', 'ach', 3, NULL, 0, '2
 def _insert(path: Path, kind: str, n: int) -> None:
     with sqlite3.connect(path) as c:
         c.execute(
-            "INSERT INTO episodes VALUES ('default', ?, ?, 1, NULL, 0, '2026-11-02')",
+            "INSERT INTO episodes (tenant_id, episode_id, kind, seed, case_type, nonce, "
+            "created_at) VALUES ('default', ?, ?, 1, NULL, 0, '2026-11-02')",
             (f"ep-{n:012d}", kind),
         )
 
@@ -56,7 +57,8 @@ def test_an_old_sqlite_file_is_rebuilt_with_the_new_kinds(tmp_path: Path) -> Non
             c.execute("UPDATE episodes SET seed = 9")
         with pytest.raises(sqlite3.IntegrityError):
             c.execute(
-                "INSERT INTO episodes VALUES ('default', ?, ?, 1, NULL, 0, 'x')",
+                "INSERT INTO episodes (tenant_id, episode_id, kind, seed, case_type, nonce, "
+                "created_at) VALUES ('default', ?, ?, 1, NULL, 0, 'x')",
                 ("ep-000000000009", "nope"),
             )
     SQLiteStorage(str(path)).close()  # a second open changes nothing

@@ -44,8 +44,8 @@ def test_rec_apply_is_what_turns_xr6_into_a_hard_failure() -> None:
 def test_coverage_filters_and_renders() -> None:
     rows = coverage(range(4), envs=["aml"], ids=["XM7", "XM8"], workers=2)
     assert {(r.id, r.verifier) for r in rows} == {
-        ("XM7", "aml@1"), ("XM7", "aml@2"), ("XM7", "aml@3"),
-        ("XM8", "aml@1"), ("XM8", "aml@2"), ("XM8", "aml@3"),
+        ("XM7", "aml@1"), ("XM7", "aml@2"), ("XM7", "aml@3"), ("XM7", "aml@4"),
+        ("XM8", "aml@1"), ("XM8", "aml@2"), ("XM8", "aml@3"), ("XM8", "aml@4"),
     }  # fmt: skip
     md = render(rows)
     assert md.count("\n") == len(rows) + 1 and "| XM7 | aml |" in md

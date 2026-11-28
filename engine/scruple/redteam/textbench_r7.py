@@ -219,7 +219,9 @@ def table(res: dict[str, Any], title: str) -> str:
     for s in ("lie", "honest"):
         for cat, v in res[s].items():
             lo, hi = v["ci"]
-            lines.append(f"| {s} | {cat} | {v['k']}/{v['n']} | {v['rate']:.3f} [{lo:.3f}, {hi:.3f}] |")
+            lines.append(
+                f"| {s} | {cat} | {v['k']}/{v['n']} | {v['rate']:.3f} [{lo:.3f}, {hi:.3f}] |"
+            )
     return "\n".join(lines)
 
 

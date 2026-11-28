@@ -50,8 +50,10 @@ def test_start_call_submit(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -
     assert score["tool_errors"] == 1
     assert score["synthetic"] is True
 
-    # Same seed and calls in one process give the same scorecard.
-    ep = Episode(1, "fraud")
+    # Same seed, salt and calls in one process give the same scorecard (round 7: the
+    # store keys every start with a salt it keeps in the episode file).
+    salt = json.loads((tmp_path / f"{eid}.json").read_text())["salt"]
+    ep = Episode(1, "fraud", salt=salt)
     ep.call("list_evidence")
     ep.call("represent", {"evidence_ids": ["ev-01"]})
     with contextlib.suppress(EpisodeError):
@@ -146,8 +148,8 @@ def test_unknown_case_type(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -
 
 
 def test_store_ids_are_unique_and_deterministic(tmp_path: Path) -> None:
-    a = EpisodeStore(tmp_path / "a")
-    b = EpisodeStore(tmp_path / "b")
+    a = EpisodeStore(tmp_path / "a", keyed=False)  # unkeyed: deterministic across stores
+    b = EpisodeStore(tmp_path / "b", keyed=False)
     ids_a = [a.start(1, "fraud").episode_id for _ in range(3)]
     ids_b = [b.start(1, "fraud").episode_id for _ in range(3)]
     assert len(set(ids_a)) == 3

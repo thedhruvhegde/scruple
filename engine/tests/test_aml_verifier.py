@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
@@ -22,11 +23,21 @@ from scruple.agents.aml_baselines import (
 from scruple.agents.aml_episode import AmlEpisode
 from scruple.agents.aml_tools import AML_TOOL_NAMES, aml_anthropic_tools
 from scruple.agents.errors import EpisodeClosedError, EpisodeError, ToolArgumentError
+from scruple.finops.verifiers import verifier_version
 from scruple.sim.aml.models import FAMILIES, TYPOLOGIES, AmlFamily
 from scruple.verifiers.aml import AML_CHECKS, score_aml
 from scruple.verifiers.aml_exploits import AML_EXPLOITS, closure_rate, recall, run_aml_exploit
 from scruple.verifiers.aml_record import AmlClaims, AmlRecord, AmlReport
 from scruple.verifiers.trace import EventKind, verify_events
+
+
+@pytest.fixture(autouse=True)
+def _kind_scorecard() -> Iterator[None]:
+    """These tests pin the kind's own scorecard (`<env>@1`); since round 7 an episode
+    scores itself with the default verifier (`<env>@4`), so they ask for @1."""
+    with verifier_version(1):
+        yield
+
 
 SEEDS = range(40)
 

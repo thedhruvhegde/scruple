@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -23,11 +24,21 @@ from scruple.agents.recon_baselines import (
 from scruple.agents.recon_episode import ReconEpisode, parse_recon_case_type
 from scruple.agents.recon_tools import RECON_TOOL_NAMES, recon_anthropic_tools
 from scruple.agents.store import KINDS, EpisodeStore
+from scruple.finops.verifiers import verifier_version
 from scruple.sim.recon.models import BREAK_KINDS, BreakKind
 from scruple.verifiers.recon import RECON_CHECKS, cleared, evidence_group, score_recon
 from scruple.verifiers.recon_exploits import RECON_EXPLOITS, run_recon_exploit
 from scruple.verifiers.recon_record import ReconClaims, ReconRecord, ReconReport
 from scruple.verifiers.trace import EventKind, verify_events
+
+
+@pytest.fixture(autouse=True)
+def _kind_scorecard() -> Iterator[None]:
+    """These tests pin the kind's own scorecard (`<env>@1`); since round 7 an episode
+    scores itself with the default verifier (`<env>@4`), so they ask for @1."""
+    with verifier_version(1):
+        yield
+
 
 GOLDEN = Path(__file__).parent / "golden_workflows"  # not tests/golden: that set is closed
 K = BreakKind

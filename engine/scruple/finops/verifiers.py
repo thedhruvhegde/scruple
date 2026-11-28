@@ -247,9 +247,19 @@ AML_V4 = v4.aml_v4(AML_V3)
 ACH_V4 = v4.ach_v4(ACH_V3)
 PAY_V4 = v4.payables_v4(PAY_V3)
 CM_V4 = v4.commerce_v4(CM_V3)
-DISPUTE_V4 = v4.dispute_v4(dispute_v.DISPUTE_CHECKS_V3)
+DISPUTE_V4 = dispute_v.DISPUTE_CHECKS_V4
 _TEXT4_MODS = (
-    v4, v3, ct4, ct4_deob, ct4_fast, ct4_lang, ct4_lex, ct4_negex, ct_negex, ct_grammar, ct_norm
+    v4,
+    v3,
+    ct4,
+    ct4_deob,
+    ct4_fast,
+    ct4_lang,
+    ct4_lex,
+    ct4_negex,
+    ct_negex,
+    ct_grammar,
+    ct_norm,
 )
 V4_DESC = "v4 text judge (all facts, languages, obfuscation; unverifiable = flagged)"
 

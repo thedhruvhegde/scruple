@@ -39,7 +39,10 @@ class _Slot:
             hit = int(
                 t in self.exact
                 or any(t.startswith(p) for p in self.prefixes)
-                or (len(t) >= 5 and any(abs(len(w) - len(t)) <= 1 and edit1(w, t) for w in self.long))
+                or (
+                    len(t) >= 5
+                    and any(abs(len(w) - len(t)) <= 1 and edit1(w, t) for w in self.long)
+                )
             )
             if len(self.cache) > 20_000:
                 self.cache.clear()

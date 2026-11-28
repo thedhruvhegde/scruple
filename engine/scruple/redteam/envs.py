@@ -354,8 +354,8 @@ def _commerce() -> Adapter:
     from scruple.agents import commerce_baselines as cb
     from scruple.agents.commerce_episode import CommerceEpisode
     from scruple.agents.commerce_tools import COMMERCE_TOOLS
-    from scruple.verifiers import commerce_exploits as cx
     from scruple.finops.verifiers import score_default
+    from scruple.verifiers import commerce_exploits as cx
 
     rep = cb.wallet_report
     bases = {

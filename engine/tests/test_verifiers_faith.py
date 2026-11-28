@@ -257,13 +257,16 @@ def test_unopened_document_described_is_flagged() -> None:
 
 
 def test_registered_as_a_pure_gate() -> None:
-    assert FAITHFULNESS in DISPUTE_CHECKS and FAITHFULNESS.hard and FAITHFULNESS.weight == 0
+    inner = [getattr(c, "inner", c) for c in DISPUTE_CHECKS]  # dispute@4 wraps hard checks
+    assert FAITHFULNESS in inner and FAITHFULNESS.hard and FAITHFULNESS.weight == 0
     r = pool()[3]
     card = score_record(r)
     assert card.get("FAITH-01").passed
     assert (
         card.quality
-        == score_record(r, [c for c in DISPUTE_CHECKS if c is not FAITHFULNESS]).quality
+        == score_record(
+            r, [c for c in DISPUTE_CHECKS if getattr(c, "inner", c) is not FAITHFULNESS]
+        ).quality
     )
 
 
@@ -276,9 +279,13 @@ def test_exploit_fools_the_naive_metric_and_is_caught(xid: str) -> None:
     # the only difference from the honest agent is the text: every other check agrees
     for rec, card, honest in zip(run.records, run.cards.episodes, run.honest, strict=True):
         other = score_record(honest)
-        assert [c.passed for c in card.checks if c.id != "FAITH-01"] == [
-            c.passed for c in other.checks if c.id != "FAITH-01"
+        # (dispute@4's text judge reads the same text: it may also flag it, never pass
+        # something the honest text failed)
+        skip = {"FAITH-01", "DSP-TEXT4", "DSP-VALUE4"}
+        assert [c.passed for c in card.checks if c.id not in skip] == [
+            c.passed for c in other.checks if c.id not in skip
         ]
+        assert card.get("DSP-VALUE4").score <= other.get("DSP-VALUE4").score + 1e-9
         assert grounded(rec)
 
 

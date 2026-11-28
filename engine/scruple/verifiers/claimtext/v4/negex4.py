@@ -848,12 +848,18 @@ def read_tokens(toks: list[str], claim: Claim4) -> Reading:
 
 
 SEEN = "seen"
+# document kinds and policies named after a claim word are not the claim ("no refund
+# record was on file" says nothing about a refund)
+_COMPOUND = re.compile(
+    r"\b(refund|sar|duplicate|loss|write off|settlement|presentment|authorization) "
+    r"(records?|polic(?:y|ies)|requests? form|templates?|forms?|documents?|kinds?)\b"
+)
 
 
 def read(text: str, claim: Claim4) -> Reading:
     """Reader A4 on one text (already de-obfuscated and, for a supported language,
     glossed): frames over the discourse streams, plus numbers and fields."""
-    norm = normalise(text)
+    norm = _COMPOUND.sub(lambda m: "doc" + m.group(1).replace(" ", ""), normalise(text))
     r = read_tokens(tokens(norm), claim)
     num = numeric(norm, claim)
     a = max([r.assert_conf, *(st for sense, st in num if sense > 0)])

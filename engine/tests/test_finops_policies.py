@@ -208,13 +208,13 @@ def test_verifier_registry() -> None:
     assert set(VERIFIERS) == {
         "recon@1", "recon@2", "aml@1", "aml@2", "ach@1", "ach@2", "payables@1", "payables@2",
         "recon@3", "aml@3", "ach@3", "payables@3", "commerce@2", "commerce@3", "dispute@2",
-        "dispute@3",
+        "dispute@3", "recon@4", "aml@4", "ach@4", "payables@4", "commerce@4", "dispute@4",
     }  # fmt: skip
     for v in VERIFIERS.values():
         assert len(v.fingerprint) == 16
         assert v.fingerprint == v.fingerprint  # cached
         assert v.table()
-        if v.id.endswith(("@2", "@3")) and v.env not in ("dispute",):
+        if v.id.endswith(("@2", "@3", "@4")) and (v.env != "dispute" or v.id.endswith("@4")):
             assert all(c.weight == 0 for c in v.checks if c.hard)
     with pytest.raises(ValueError):
         get_verifier("nope@1")
