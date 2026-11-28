@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="only light">
 <title>Scruple environments</title>
-<meta name="description" content="A card-dispute RL environment for agents that move money: seeded episodes, a 12-tool API and 19 verifiers that score from ledger postings, so reward hacking does not pay.">
+<meta name="description" content="A card-dispute RL environment for agents that move money: seeded episodes, a 12-tool API and 20 verifiers that score from ledger postings, so reward hacking does not pay.">
 <link rel="canonical" href="https://www.scrumple.org/environments/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Scruple">
 <meta property="og:title" content="Scruple environments">
-<meta property="og:description" content="Seeded card-dispute episodes, a 12-tool API and 19 ledger-graded verifiers.">
+<meta property="og:description" content="Seeded card-dispute episodes, a 12-tool API and 20 ledger-graded verifiers.">
 <meta property="og:url" content="https://www.scrumple.org/environments/">
 <meta property="og:image" content="https://www.scrumple.org/assets/banners/og-1200x630.png">
 <link rel="icon" type="image/svg+xml" href="../assets/logos/bone-on-night/mark.svg">
@@ -178,13 +178,13 @@ td.s { color: var(--muted); font-family: var(--f-mono); font-variation-settings:
     <div class="page row">
       <div class="lhs">
         <h1 class="big" id="top-h"><span class="n">ENVIRONMENTS</span>A card-dispute environment where reward hacking doesn't pay.</h1>
-        <p class="sum">Seeded episodes of the full card-dispute lifecycle on a double-entry ledger. Agents act through a 12-tool API. Nineteen verifiers score each episode from ledger postings and a hash-chained trace. The agent's own report is checked against the ledger, never taken on trust.</p>
+        <p class="sum">Seeded episodes of the full card-dispute lifecycle on a double-entry ledger. Agents act through a 12-tool API. Twenty verifiers score each episode from ledger postings and a hash-chained trace. The agent's own report is checked against the ledger, never taken on trust.</p>
         <p>For AI labs and data partners training or evaluating agents on financial work, and for teams choosing a model before it touches money.</p>
         <p class="acts"><a class="btn solid" href="mailto:dhegde@umich.edu?subject=Scruple%20environment%20sample">Request the sample</a><a class="btn" href="../paper/">Read the paper</a><a class="btn" href="../results/">See results</a></p>
         <p class="src">Synthetic data. The sample runs in about two minutes with no API keys: pip install, one script.</p>
       </div>
       <div>
-        <div class="screen" data-head="run_sample.py / 200 seeded disputes"><div class="term"><span class="c-s">$</span> <span class="c-f">pip install scruple_engine-0.1.0-py3-none-any.whl</span>
+        <div class="screen" data-head="run_sample.py / 200 seeded disputes / sample v0.1.0, verifier v2"><div class="term"><span class="c-s">$</span> <span class="c-f">pip install scruple_engine-0.1.0-py3-none-any.whl</span>
 <span class="c-s">$</span> <span class="c-f">python run_sample.py --episodes 200</span>
 
 <span class="c-f">policy                      win    cost/case  gate   reward</span>
@@ -256,6 +256,8 @@ oracle (reads truth)        41%    $85.29      99%   0.971
             <tr><td class="k">EVD-02/03</td><td class="s">soft</td><td>Evidence covers the reason code's required kinds</td></tr>
             <tr><td class="k">PROC-02, DL-02</td><td class="s">soft</td><td>Investigation order; share of deadline weight met</td></tr>
             <tr><td class="k">CAL-03, SR-02, ESC-01</td><td class="s">soft</td><td>Calibrated win probability (stating none scores worse); no grader-directed text; escalations backed by evidence</td></tr>
+            <tr><td class="k">DSP-TEXT4</td><td class="s">soft</td><td>Free text contradicts no fact of the record, read by an ensemble of parsers across languages; it can only lower the reward</td></tr>
+            <tr><td class="k">DSP-VALUE4</td><td class="s">quality</td><td>Reward is realised value against an honest baseline on the same seed, times harm factors from the soft checks above, so doing nothing earns close to nothing</td></tr>
           </tbody>
         </table>
       </div>

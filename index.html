@@ -274,7 +274,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       <div class="hero-txt">
         <p class="kick">RL environments · verifiers · release gate</p>
         <h1 id="dlg-h">RL environments and release gates for AI agents that move money.</h1>
-        <p class="hero-sub">A seeded card-dispute simulator, 19 verifiers that score from the ledger and check the agent's own report against it, and a CI gate that blocks a release if any case type gets worse.</p>
+        <p class="hero-sub">A seeded card-dispute simulator, 20 verifiers that score from the ledger and check the agent's own report against it, and a CI gate that blocks a release if any case type gets worse.</p>
         <p class="hero-acts"><a class="btn solid" href="environments/">Run the environment</a><a class="btn" href="pilot/">Book a pilot</a><a class="btn" href="paper/">Read the paper</a></p>
       </div>
       <div class="msgs" aria-hidden="true">
@@ -303,7 +303,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
         <p class="sum">A simulator and a set of verifiers for agents that move money. Every stage is reproducible from its seed and leaves a record.</p>
         <ul class="kv wide">
           <li><b>Simulate</b><span>Seeded disputes on a double-entry ledger: 6 hidden case types across Visa and Mastercard reason codes.</span></li>
-          <li><b>Verify</b><span>19 checks score cost from ledger postings, per case type, and check the agent's report against them.</span></li>
+          <li><b>Verify</b><span>20 checks score cost from ledger postings, per case type, and check the agent's report against them.</span></li>
           <li><b>Gate</b><span>Replay, canary, a named approver, rollback.</span></li>
         </ul>
         <p class="tri" aria-label="Train on it. Evaluate on it. Ship through it."><span>Train on it.</span><span>Evaluate on it.</span><span>Ship through it.</span></p>
@@ -374,7 +374,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
           <li><b>Builders</b><span>Test every release of a finance agent against the same cases.</span></li>
           <li><b>Banks</b><span>Approve agent changes with evidence a model-risk reviewer can read.</span></li>
         </ul>
-        <p class="src">Today: the dispute RL environment, 19 verifiers and the release gate. Next: more money workflows, and gating model and prompt changes end to end.</p>
+        <p class="src">Today: the dispute RL environment, 20 verifiers and the release gate. Next: more money workflows, and gating model and prompt changes end to end.</p>
       </div>
       <div>
         <div class="screen panel" data-screen="loop" data-head="one loop" role="img" aria-label="Animated diagram: train, evaluate and ship in one loop, episodes and scores flowing between them and the next policy flowing back. Below, an illustrative synthetic stream per buyer: AI labs see episodes and rewards from the ledger, builders see each release checked across 6 case types, banks see gate decisions and a named approver."></div>
@@ -738,7 +738,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
       const ct = CTYPES[Math.floor(h(1) * CTYPES.length)], rw = 0.2 + h(2) * 0.79, flag = h(3) > 0.82;
       // narrow screens keep the case name whole and drop the "ledger ok" column, so the line has air
       return [T(`ep-${hex(n, 11)}  `, 14), T(pad(w ? ct : ct === "not_as_described" ? "not as descr." : ct.replace(/_/g, " "), w ? 17 : 16)), T("reward ", 14), T(rw.toFixed(2), flag ? 4 : 2),
-        T(flag ? (w ? "  flag: claimed_cost_mismatch" : "  flag") : (w ? "  19/19 verifiers, ledger ok" : ""), flag ? 4 : 14)];
+        T(flag ? (w ? "  flag: claimed_cost_mismatch" : "  flag") : (w ? "  20/20 verifiers, ledger ok" : ""), flag ? 4 : 14)];
     }
     if (lane === 1) {
       const bad = h(4) > 0.78, worst = bad ? (1 + h(5) * 11).toFixed(2) : "0.00";
@@ -750,7 +750,7 @@ main > .band + .band::before { content: var(--ruler); content: var(--ruler) / ""
   function loop(s, t) {
     const C = s.C, R = s.R, w = C >= 72, g = sheet(C, R), tt = reduce ? 6 : t;
     const gap = w ? 8 : 3, bw = Math.floor((C - 3 - 2 * gap) / 3), xs = [1, 1 + bw + gap, 1 + 2 * (bw + gap)];
-    const NAMES = ["TRAIN", "EVALUATE", "SHIP"], SUB = w ? ["episodes, rewards", "19 verifiers", "gate, canary, approver"] : ["episodes", "19 checks", "the gate"];
+    const NAMES = ["TRAIN", "EVALUATE", "SHIP"], SUB = w ? ["episodes, rewards", "20 verifiers", "gate, canary, approver"] : ["episodes", "20 checks", "the gate"];
     const box = (x, r, name, sub, hot) => {
       g.put(x, r, "+" + "-".repeat(bw - 2) + "+", hot ? 3 : 1); g.put(x, r + 3, "+" + "-".repeat(bw - 2) + "+", hot ? 3 : 1);
       for (const rr of [r + 1, r + 2]) { g.put(x, rr, "|", hot ? 3 : 1); g.put(x + bw - 1, rr, "|", hot ? 3 : 1); }
