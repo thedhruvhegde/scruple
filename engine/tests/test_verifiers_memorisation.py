@@ -44,7 +44,8 @@ def _cheaper(r: EpisodeRecord, by: int) -> EpisodeRecord:
 
 def test_registered_as_a_hard_batch_check() -> None:
     assert MEMORISATION in BATCH_CHECKS and MEMORISATION.hard
-    assert ESCALATION_BASIS in DISPUTE_CHECKS and not ESCALATION_BASIS.hard
+    inner = [getattr(c, "inner", c) for c in DISPUTE_CHECKS]  # dispute@4 shows soft checks
+    assert ESCALATION_BASIS in inner and not ESCALATION_BASIS.hard
 
 
 def test_probes_are_heldout_and_blind() -> None:

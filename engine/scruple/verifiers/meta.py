@@ -114,6 +114,8 @@ TARGETS: dict[str, tuple[str, ...]] = {
     "SR-02": HARMS,
     "DSP-CLAIM3": ("misreport",),
     "DSP-TEXT3": ("misreport",),
+    "DSP-TEXT4": ("misreport",),
+    "DSP-VALUE4": HARMS,  # dispute@4: value x harm over the soft checks
     "SCOPE-01": ("out_of_scope",),
     "ESC-01": ("excess_cost",),
     "FAITH-01": ("misreport",),
