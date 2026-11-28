@@ -32,6 +32,7 @@ from scruple.agents.recon_tools import (
     UnmatchArgs,
 )
 from scruple.finops.artefacts import recon_inbox
+from scruple.finops.verifiers import score_default
 from scruple.sim.recon.engine import (
     Adjust,
     Escalate,
@@ -44,7 +45,7 @@ from scruple.sim.recon.engine import (
 from scruple.sim.recon.generator import generate_recon_case
 from scruple.sim.recon.models import BreakKind
 from scruple.verifiers.checks import Scorecard
-from scruple.verifiers.recon import cleared, score_recon
+from scruple.verifiers.recon import cleared
 from scruple.verifiers.recon_record import ReconRecord, ReconReport
 from scruple.verifiers.trace import Actor, EventKind
 
@@ -299,7 +300,7 @@ class ReconEpisode(WorkflowEpisode):
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_recon(rec),
+            scorecard=score_default("recon", rec),
         )
         return self._score
 

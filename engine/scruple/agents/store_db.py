@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any
 
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
-from scruple.agents.keys import restoring_id
+from scruple.agents.keys import new_salt, restoring_id
 from scruple.agents.store import (
     KINDS,
     AnyEpisode,
@@ -64,8 +64,10 @@ class DbEpisodeStore:
         tenant_id: str = DEFAULT_TENANT,
         clock: Clock | None = None,
         cache: int = CACHE,
+        keyed: bool = True,
     ) -> None:
         self._repo = repo
+        self.keyed = keyed
         self.tenant_id = tenant_id
         self._clock = clock or SystemClock()
         self._cache: OrderedDict[str, tuple[AnyEpisode, int]] = OrderedDict()
@@ -89,8 +91,10 @@ class DbEpisodeStore:
             for _ in range(1_000):
                 with self._repo.transaction():
                     nonce = self._repo.count_starts(self.tenant_id, kind, seed, case_type)
+                    # round 7 (G-23): a fresh salt per start, stored on the row
+                    salt = new_salt() if self.keyed else None
                     while True:
-                        ep = new_episode(kind, seed, case_type, nonce)
+                        ep = new_episode(kind, seed, case_type, nonce, salt)
                         if self._repo.get_episode(self.tenant_id, ep.episode_id) is None:
                             break
                         nonce += 1
@@ -104,6 +108,7 @@ class DbEpisodeStore:
                                 case_type=case_type,
                                 nonce=nonce,
                                 created_at=self._clock.now(),
+                                salt=salt,
                             )
                         )
                     except DuplicateKeyError:  # pragma: no cover - a concurrent start won
@@ -125,7 +130,10 @@ class DbEpisodeStore:
             for c in self._repo.calls(self.tenant_id, episode_id)
         ]
         with restoring_id(episode_id):
-            return replay_episode(r.kind, r.seed, r.case_type, calls, r.nonce), len(calls)
+            return (
+                replay_episode(r.kind, r.seed, r.case_type, calls, r.nonce, r.salt),
+                len(calls),
+            )
 
     def _current(self, episode_id: str) -> tuple[AnyEpisode, int]:
         """The live episode, replayed only if other processes added calls."""
@@ -177,9 +185,9 @@ class DbEpisodeStore:
 
 def durable_table(store: DbEpisodeStore, *, full_scores: bool | None = None) -> EpisodeTable:
     """An MCP `EpisodeTable` whose episodes live in `store` (built lazily: mcp is an
-    optional import). Scores are redacted for the agent as in the in-memory table;
-    episodes here are not keyed (the stored row has no salt column), so ids are
-    secret but a rehearsed (kind, seed) is the same case: see VERIFIER_HARDENING_R6."""
+    optional import). Scores are redacted for the agent as in the in-memory table, and
+    every start is keyed by the store with a fresh salt kept on the row (round 7, G-23:
+    a rehearsed (kind, seed) is a different case, as in memory)."""
     from mcp.server.mcpserver.exceptions import ToolError
 
     from scruple.mcp.sim_server import (
@@ -235,7 +243,7 @@ def durable_table(store: DbEpisodeStore, *, full_scores: bool | None = None) -> 
             except EpisodeError as exc:
                 raise ToolError(str(exc)) from exc
 
-    return DurableEpisodeTable(keyed=False, full_scores=full_scores)
+    return DurableEpisodeTable(keyed=store.keyed, full_scores=full_scores)
 
 
 __all__ = ["DbEpisodeStore", "durable_table", "episodes_repo"]

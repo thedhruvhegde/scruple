@@ -130,7 +130,7 @@ class EpisodeTable:
         key = (seed, case_type)
         nonce = self._starts.get(key, 0)
         try:
-            ep = Episode(seed, case_type, nonce=nonce)
+            ep = Episode(seed, case_type, nonce=nonce, salt=self._salt())
         except ValueError as exc:
             raise ToolError(str(exc)) from exc
         self._starts[key] = nonce + 1

@@ -31,6 +31,7 @@ from scruple.verifiers.process import PROCESS, PROCESS_STEPS
 from scruple.verifiers.record import EpisodeRecord
 from scruple.verifiers.scope import SCOPE
 from scruple.verifiers.self_report import SELF_REPORT, TEXT_HYGIENE, WIN_RATE_CLAIM
+from scruple.verifiers.v4 import dispute_v4
 
 DISPUTE_CHECKS_V2: tuple[Check, ...] = (
     RECORD_INTEGRITY,
@@ -53,23 +54,36 @@ DISPUTE_CHECKS_V2: tuple[Check, ...] = (
 )
 # round 6 (dispute@3): strict evidence provenance, required structured outcome claim,
 # free-text ensemble, calibration that does not reward silence. `DISPUTE_CHECKS` is
-# the current scorecard; `DISPUTE_CHECKS_V2` reproduces earlier grades.
+# the current scorecard (dispute@4, the same as `default_checks()`; the compliance
+# profiles build on it); `DISPUTE_CHECKS_V2` / `_V3` reproduce earlier grades.
 DISPUTE_CHECKS_V3: tuple[Check, ...] = dispute_v3(DISPUTE_CHECKS_V2)
-DISPUTE_CHECKS = DISPUTE_CHECKS_V3
+# round 7 (dispute@4): hard checks gate only, one value check (scruple.verifiers.v4)
+DISPUTE_CHECKS_V4: tuple[Check, ...] = dispute_v4(DISPUTE_CHECKS_V3)
+DISPUTE_CHECKS = DISPUTE_CHECKS_V4
 BATCH_CHECKS: tuple[BatchCheck, ...] = (CONSISTENCY, CALIBRATION, WIN_RATE_CLAIM, MEMORISATION)
 
 
-def score_record(record: EpisodeRecord, checks: Sequence[Check] = DISPUTE_CHECKS_V3) -> Scorecard:
-    return run_checks(record, checks)
+def default_checks() -> tuple[Check, ...]:
+    """The current dispute scorecard: `scruple.finops.verifiers.default_verifier`
+    (round 7: one source of truth; `dispute@4`)."""
+    from scruple.finops.verifiers import default_verifier
+
+    return default_verifier("dispute").checks
+
+
+def score_record(record: EpisodeRecord, checks: Sequence[Check] | None = None) -> Scorecard:
+    """`checks` given: those (reproducing a version); omitted: the default verifier."""
+    return run_checks(record, default_checks() if checks is None else checks)
 
 
 def score_batch(
     records: Sequence[EpisodeRecord],
-    checks: Sequence[Check] = DISPUTE_CHECKS_V3,
+    checks: Sequence[Check] | None = None,
     batch: Sequence[BatchCheck] = BATCH_CHECKS,
 ) -> BatchScorecard:
+    cs = default_checks() if checks is None else checks
     return BatchScorecard(
-        episodes=tuple(run_checks(r, checks) for r in records),
+        episodes=tuple(run_checks(r, cs) for r in records),
         checks=tuple(b.run_batch(records) for b in batch),
     )
 
@@ -79,6 +93,8 @@ __all__ = [
     "DISPUTE_CHECKS",
     "DISPUTE_CHECKS_V2",
     "DISPUTE_CHECKS_V3",
+    "DISPUTE_CHECKS_V4",
+    "default_checks",
     "score_batch",
     "score_record",
 ]

@@ -14,6 +14,7 @@ from scruple.agents.commerce_tools import COMMERCE_TOOL_NAMES
 from scruple.agents.errors import EpisodeError
 from scruple.agents.store import KINDS, EpisodeStore
 from scruple.cli.main import main
+from scruple.finops.verifiers import default_verifier
 from scruple.guard.evidence import verify_chain
 from scruple.sim.commerce import Scenario, generate_commerce_case
 from scruple.sim.commerce.engine import CommerceEngine
@@ -24,7 +25,6 @@ from scruple.verifiers.commerce_exploits import (
     commerce_coverage,
     run_commerce_exploit,
 )
-from scruple.verifiers.v3 import CM_CHECKS_V3
 
 SEEDS = range(40)
 
@@ -65,7 +65,7 @@ def test_careful_policy_passes_every_check_on_the_seed_mix() -> None:
         card = ep.score.scorecard
         assert card is not None
         assert card.gate, (s, card.failed)
-        assert [c.id for c in card.checks] == [c.id for c in CM_CHECKS_V3]
+        assert [c.id for c in card.checks] == [c.id for c in default_verifier("commerce").checks]
         assert ep.score.task_units == ep.score.expected_units
 
 

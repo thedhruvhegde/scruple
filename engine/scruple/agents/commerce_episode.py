@@ -35,6 +35,7 @@ from scruple.agents.commerce_tools import (
 from scruple.agents.dispute_tools import DisputeToolSpec
 from scruple.agents.errors import EpisodeError
 from scruple.agents.keys import Salt, keyed_tag
+from scruple.finops.verifiers import score_default
 from scruple.sim.commerce.engine import (
     Checkout,
     CommerceAction,
@@ -45,10 +46,8 @@ from scruple.sim.commerce.engine import (
 from scruple.sim.commerce.generator import generate_commerce_case
 from scruple.sim.commerce.models import Scenario
 from scruple.verifiers.checks import Scorecard
-from scruple.verifiers.commerce import score_commerce
 from scruple.verifiers.commerce_record import CommerceRecord, CommerceReport
 from scruple.verifiers.trace import Actor, EventKind
-from scruple.verifiers.v3 import CM_CHECKS_V3
 
 COMMERCE_TASK = (
     "You are a shopping agent with the user's wallet. All data is synthetic. Buy what "
@@ -291,7 +290,7 @@ class CommerceEpisode(WorkflowEpisode):
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_commerce(self._record, CM_CHECKS_V3),
+            scorecard=score_default("commerce", self._record),
         )
         return self._score
 

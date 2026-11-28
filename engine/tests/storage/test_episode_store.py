@@ -42,8 +42,8 @@ def _strip(results: list[Any]) -> list[Any]:
 
 
 def test_db_store_matches_the_file_store(store: RawStorage, tmp_path: Path) -> None:
-    db = DbEpisodeStore.on(store, clock=SteppingClock())
-    files = EpisodeStore(tmp_path / "eps")
+    db = DbEpisodeStore.on(store, clock=SteppingClock(), keyed=False)  # compared by id
+    files = EpisodeStore(tmp_path / "eps", keyed=False)
     a = db.start(1, "fraud")
     b = files.start(1, "fraud")
     assert a.episode_id == b.episode_id  # same seed, case type and nonce
@@ -178,8 +178,8 @@ def test_every_episode_kind_round_trips_like_the_file_store(
     store: RawStorage, tmp_path: Path, kind: str, case_type: str | None
 ) -> None:
     """Every kind the file store knows (`KINDS`) is stored and replayed the same way."""
-    db = DbEpisodeStore.on(store, clock=SteppingClock())
-    files = EpisodeStore(tmp_path / "eps")
+    db = DbEpisodeStore.on(store, clock=SteppingClock(), keyed=False)  # compared by id
+    files = EpisodeStore(tmp_path / "eps", keyed=False)
     a, b = db.start(3, case_type, kind), files.start(3, case_type, kind)
     assert type(a) is type(b) and a.episode_id == b.episode_id
     for target, eid in ((db, a.episode_id), (files, b.episode_id)):

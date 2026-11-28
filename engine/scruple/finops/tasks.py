@@ -341,9 +341,7 @@ def replay(spec: TaskSpec, calls: Iterable[Call], *, salt: str | None = None) ->
     return ep
 
 
-def grade(
-    spec: TaskSpec, traj: Trajectory, *, salt: str | None = None, verifier: str | None = None
-) -> Grade:
+def _verifier_for(spec: TaskSpec, verifier: str | None) -> Any:
     e = get_env(spec.env)
     ver = e.verifier(verifier or spec.verifier.id)
     if verifier is None and ver.fingerprint != spec.verifier.fingerprint:
@@ -352,7 +350,27 @@ def grade(
             f"the spec's {spec.verifier.fingerprint}; grade with the matching scruple version "
             "or pass a verifier explicitly"
         )
+    return ver
+
+
+def grade(
+    spec: TaskSpec, traj: Trajectory, *, salt: str | None = None, verifier: str | None = None
+) -> Grade:
+    ver = _verifier_for(spec, verifier)
     ep = replay(spec, traj.calls, salt=salt)
+    return _grade_closed(spec, ep, ver)
+
+
+def grade_episode(spec: TaskSpec, ep: Any, *, verifier: str | None = None) -> Grade:
+    """The grade of an in-process episode of `spec` (a live episode of the task server,
+    played on its own per-episode case): lapsed first if it was never submitted."""
+    ver = _verifier_for(spec, verifier)
+    if not ep.closed:
+        ep.lapse("not_submitted")
+    return _grade_closed(spec, ep, ver)
+
+
+def _grade_closed(spec: TaskSpec, ep: Any, ver: Any) -> Grade:
     rec = ep.record()
     card = ver.score(rec)
     return Grade(
@@ -456,6 +474,7 @@ __all__ = [
     "build_task",
     "export_tasks",
     "grade",
+    "grade_episode",
     "grade_safe",
     "load_tasks",
     "obs_hash",

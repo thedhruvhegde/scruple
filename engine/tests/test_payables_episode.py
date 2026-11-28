@@ -63,7 +63,7 @@ def test_cli_plays_a_payables_episode(tmp_path: Path, capsys: pytest.CaptureFixt
 
 
 def test_store_reloads_a_payables_episode(tmp_path: Path) -> None:
-    store = EpisodeStore(tmp_path)
+    store = EpisodeStore(tmp_path, keyed=False)  # compared with an unkeyed replay
     ep = store.start(8, "duplicate@0", "payables")
     assert isinstance(ep, PayablesEpisode)
     store.call(ep.episode_id, "pay", {"invoice_id": ep.case.invoices[0].invoice_id})

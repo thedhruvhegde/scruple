@@ -147,6 +147,13 @@ ignore = ["S101", "S311"]  # asserts used sparingly; seeded PRNGs are intentiona
 "scruple/verifiers/claimtext/cores.py" = ["E501", "RUF001"]
 "scruple/verifiers/claimtext/textnorm.py" = ["RUF001"]
 "scruple/redteam/textbench.py" = ["E501", "RUF001"]
+# round 7: hand-built it/nl/ru/tr/zh/ja lexicons and the deobfuscation symbol table
+"scruple/verifiers/claimtext/v4/lexicons.py" = ["E501", "RUF001", "RUF003"]
+"scruple/verifiers/claimtext/v4/deob.py" = ["RUF001", "RUF003"]
+"scruple/verifiers/claimtext/v4/lang.py" = ["E501", "RUF001", "RUF003"]
+"scruple/verifiers/claimtext/v4/negex4.py" = ["E501"]
+"scruple/redteam/textbench_r7.py" = ["E501", "RUF001"]
+"tests/test_verifier_r7*.py" = ["E501", "RUF001"]
 
 [tool.mypy]
 strict = true

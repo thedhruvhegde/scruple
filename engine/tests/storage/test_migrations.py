@@ -69,7 +69,7 @@ def _tables(url: str) -> set[str]:
 
 
 def test_single_linear_head() -> None:
-    assert m.head() == "0016"
+    assert m.head() == "0017"
 
 
 @pytest.mark.parametrize(

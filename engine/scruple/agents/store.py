@@ -10,6 +10,7 @@ assumed (a terminal session); concurrent writers to the same episode are not loc
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import re
@@ -21,7 +22,7 @@ from scruple.agents.aml_episode import AmlEpisode
 from scruple.agents.commerce_episode import CommerceEpisode
 from scruple.agents.dispute_episode import DisputeEpisode
 from scruple.agents.episode import Episode, EpisodeError
-from scruple.agents.keys import Salt, restoring_id
+from scruple.agents.keys import Salt, new_salt, restoring_id
 from scruple.agents.payables_episode import PayablesEpisode
 from scruple.agents.recon_episode import ReconEpisode
 
@@ -66,7 +67,8 @@ WORKFLOW_KINDS: dict[
 def new_episode(
     kind: str, seed: int, case_type: str | None, nonce: int, salt: Salt | None = None
 ) -> AnyEpisode:
-    """`salt` keys the case (`scruple.agents.keys`); workflow and dispute kinds only."""
+    """`salt` keys the case (`scruple.agents.keys`); every kind but `scenario` (a real
+    scenario is public by construction). Round 7: the `simple` kind is keyed too."""
     if kind in WORKFLOW_KINDS:
         return WORKFLOW_KINDS[kind](seed, case_type, nonce=nonce, salt=salt)
     if kind == "dispute":
@@ -75,28 +77,30 @@ def new_episode(
         from scruple.realdata.situations import ScenarioEpisode
 
         return ScenarioEpisode(seed, case_type, nonce=nonce)
-    return Episode(seed, case_type, nonce=nonce)
+    return Episode(seed, case_type, nonce=nonce, salt=salt)
 
 
 def replay_episode(
-    kind: str, seed: int, case_type: str | None, calls: list[tuple[str, Any]], nonce: int
+    kind: str,
+    seed: int,
+    case_type: str | None,
+    calls: list[tuple[str, Any]],
+    nonce: int,
+    salt: Salt | None = None,
 ) -> AnyEpisode:
     """Rebuild an episode of any kind from its call log (exact: episodes are
-    deterministic). Shared by the file store and the database store."""
-    if kind in WORKFLOW_KINDS:
-        return WORKFLOW_KINDS[kind].replay(seed, case_type, calls, nonce=nonce)
-    if kind == "dispute":
-        return DisputeEpisode.replay(seed, case_type, calls, nonce=nonce)
-    if kind == "scenario":
-        from scruple.realdata.situations import ScenarioEpisode
-
-        return ScenarioEpisode.replay(seed, case_type, calls, nonce=nonce)
-    return Episode.replay(seed, case_type, calls, nonce=nonce)
+    deterministic given the salt). Shared by the file store and the database store."""
+    ep = new_episode(kind, seed, case_type, nonce, salt)
+    for tool, args in calls:
+        with contextlib.suppress(EpisodeError):
+            ep.call(tool, args)
+    return ep
 
 
 class EpisodeStore:
-    def __init__(self, root: Path | str | None = None) -> None:
+    def __init__(self, root: Path | str | None = None, *, keyed: bool = True) -> None:
         self.root = Path(root) if root is not None else default_store()
+        self.keyed = keyed
 
     def _path(self, episode_id: str) -> Path:
         if not _ID.match(episode_id):
@@ -121,11 +125,15 @@ class EpisodeStore:
         if kind not in KINDS:
             raise ValueError(f"unknown episode kind {kind!r}; choose from {', '.join(KINDS)}")
         nonce = len(list(self.root.glob("ep-*.json"))) if self.root.exists() else 0
-        ep = new_episode(kind, seed, case_type, nonce)
+        # round 7 (G-23): every start is keyed with a fresh salt, stored with the episode
+        salt = new_salt() if self.keyed else None
+        ep = new_episode(kind, seed, case_type, nonce, salt)
         while self._path(ep.episode_id).exists():  # pragma: no cover - only on races
             nonce += 1
-            ep = new_episode(kind, seed, case_type, nonce)
+            ep = new_episode(kind, seed, case_type, nonce, salt)
         record: dict[str, Any] = {"seed": seed, "case_type": case_type, "nonce": nonce, "calls": []}
+        if salt is not None:
+            record["salt"] = salt
         if kind != "simple":
             record["kind"] = kind
         self._write(ep.episode_id, record)
@@ -136,7 +144,7 @@ class EpisodeStore:
         calls = [(c["tool"], c["args"]) for c in r["calls"]]
         with restoring_id(episode_id):
             return replay_episode(
-                r.get("kind", "simple"), r["seed"], r["case_type"], calls, r["nonce"]
+                r.get("kind", "simple"), r["seed"], r["case_type"], calls, r["nonce"], r.get("salt")
             )
 
     def call(self, episode_id: str, tool: str, args: Any) -> dict[str, Any]:

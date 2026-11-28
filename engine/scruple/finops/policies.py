@@ -397,12 +397,23 @@ class ReconPolicy(Policy):
             explanation="Worked the statement against the cash book; see the trace.",
             claims=ReconClaims(
                 balanced=o.difference_minor == 0,
-                fully_reconciled=o.difference_minor == 0,
+                # round 7: "fully reconciled" (recon@4) also means nothing escalated or left
+                # unhandled; the policy states it only when that holds, so the claim reads
+                # the same under recon@3 (difference 0) and recon@4
+                fully_reconciled=True if _fully(o) else None,
                 unreconciled_minor=o.difference_minor,
                 adjustments=len(o.adjustments),
                 escalations=len(o.escalated_statement) + len(o.escalated_ledger),
             ),
         )
+
+
+def _fully(o: Any) -> bool:
+    return bool(
+        o.difference_minor == 0
+        and not (o.escalated_statement or o.escalated_ledger)
+        and not (o.unhandled_statement or o.unhandled_ledger)
+    )
 
 
 @dataclass(frozen=True)

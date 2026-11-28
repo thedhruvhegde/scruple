@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
@@ -19,6 +20,7 @@ from scruple.agents.payables_baselines import (
 )
 from scruple.agents.payables_episode import PayablesEpisode, parse_payables_case_type
 from scruple.agents.payables_tools import PAYABLES_TOOL_NAMES, payables_anthropic_tools
+from scruple.finops.verifiers import verifier_version
 from scruple.sim.ledger import JournalEntry, Posting
 from scruple.sim.payables.models import INVOICE_KINDS, InvoiceKind
 from scruple.verifiers.payables import PAY_CHECKS, score_payables
@@ -30,6 +32,15 @@ from scruple.verifiers.payables_exploits import (
 )
 from scruple.verifiers.payables_record import PayablesClaims, PayablesRecord, PayablesReport
 from scruple.verifiers.trace import EventKind, verify_events
+
+
+@pytest.fixture(autouse=True)
+def _kind_scorecard() -> Iterator[None]:
+    """These tests pin the kind's own scorecard (`<env>@1`); since round 7 an episode
+    scores itself with the default verifier (`<env>@4`), so they ask for @1."""
+    with verifier_version(1):
+        yield
+
 
 SEEDS = range(40)
 K = InvoiceKind

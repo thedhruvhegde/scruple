@@ -37,6 +37,7 @@ from scruple.agents.payables_tools import (
     VendorIdArgs,
     VerifyChangeArgs,
 )
+from scruple.finops.verifiers import score_default
 from scruple.sim.payables.engine import (
     ApplyChange,
     DeclineChange,
@@ -51,7 +52,6 @@ from scruple.sim.payables.engine import (
 from scruple.sim.payables.generator import CHANGE_KINDS, generate_payables_case
 from scruple.sim.payables.models import InvoiceKind
 from scruple.verifiers.checks import Scorecard
-from scruple.verifiers.payables import score_payables
 from scruple.verifiers.payables_record import PayablesRecord, PayablesReport
 from scruple.verifiers.trace import Actor, EventKind
 
@@ -308,7 +308,7 @@ class PayablesEpisode(WorkflowEpisode):
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_payables(self._record),
+            scorecard=score_default("payables", self._record),
         )
         return self._score
 

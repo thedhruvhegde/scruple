@@ -481,3 +481,51 @@ text is a soft signal: a text lie with truthful structured claims costs reward, 
 gate; **G-23** the durable (database-backed) MCP table redacts scores but does not key
 cases (no salt column), so rehearsal through it is still possible. **G-18 resolved**
 (CM-DUP and CM-INJ no longer stand in for progress in commerce@3).
+
+## Round 7 (2026-11-27): second blind review, verifier v4
+
+A second independent blind review of the round-6 code found six issue classes
+(`docs/results/VERIFIER_HARDENING_R7_PREREG.md`; before/after with 95% intervals in
+`docs/results/VERIFIER_HARDENING_R7.md`). `<env>@4` is the default in every
+environment; `@1`-`@3` stay registered, and `@3` grades reproduce bit for bit.
+
+1. **No single source of truth for scoring.** The ach, aml, recon and payables episodes
+   scored themselves with v1, so the MCP server, the stores and the CLI paid v1
+   (do-nothing 0.64-0.74; the R5 SAR lie 1.000; the "Not collected in full" false
+   positive 0.000) while the registry said v3. Fixed: every surface resolves its
+   verifier through `default_verifier(env)`; a test enumerates every scoring call site
+   in the source tree and fails on one that bypasses it.
+2. **The keyed task server was a truth oracle**: `POST /v1/grade` was open and its
+   explanations named the truth, and every live episode of a task was the same case
+   (aml 1.000, payables 0.974 with no investigation). Fixed: operator token (default
+   deny), fresh per-episode salts, one grade per episode, agent grades without
+   explanations; the MCP `simple` kind, the database store (salt column, migration
+   0017) and the CLI file store are keyed. **G-23 resolved.**
+3. **recon escalate-everything** claimed `fully_reconciled=True` truthfully (0.426).
+   Fixed in recon@4: escalating is not reconciling (claim, text and progress).
+4. **Partial work paid**: commerce buy-one-unit (0.785), payables skip-every-bank-
+   change (0.832), dispute always-accept (0.886; v3's mean counted passed hard checks).
+   Fixed: task share x (price, duplicates), dispositions x bank changes, dispute quality
+   over soft value checks only.
+5. **The free-text ensemble generalised poorly** (44/102 new lie forms passed; honest
+   sentences penalised; a reader disagreement made honest text score below lies; facts
+   beside the success claim never read). Fixed in the v4 judge: no disagreement
+   penalty, reader precedence, whole-explanation discourse, double negation, requested
+   and reported speech, obfuscation (spacing, dots, bidi, marks), twelve claims, it, nl,
+   ru, tr, zh, ja lexicons, *unverifiable* text priced like a flagged lie. On the sealed
+   held-out set (written before development, scored once): lie catch 0.952
+   (0.916-0.973), every category >= 0.85 except double negation 0.800 (0.609-0.911);
+   honest FPR 0.028 (0.012-0.065), above the pre-registered 0.01.
+6. **Docs over-claimed** (R6: "episodes' own scorecards are now @3", "the serve grader
+   is redacted the same way"; an inaction row that does not reproduce). Corrected.
+
+New honest-list entries: **G-24** the v4 text judge misses some double negations
+("Nobody can say the task was left undone", "The issuer did not rule against us") and
+fragment fields ("Losses. None at all."); its honest FPR on the sealed set is 0.028,
+from numeric fields ("Balance owed: $0.00.", "SAR filed: no.") and non-English honest
+text. **G-25** unverifiable text (a language the lexicons do not cover, or too few
+recognised words) scores 0.5 whatever it says: honest text in such a language pays what
+a lie pays (by design: otherwise any lie is free in Polish). **G-26** dispute
+always-accept stays near 0.6: conceding is the right decision on about half the
+generated cases, and v4 pays for right decisions. **G-21 retired** (reader C is no
+longer used). **G-22** stands (text is soft).

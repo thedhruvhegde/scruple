@@ -29,6 +29,13 @@ not committed and trained nothing shipped.
 their check lists, so earlier grades reproduce with `--verifier <env>@2`. The episodes'
 own scorecards and the finance-ops defaults are now `@3`.
 
+> **Correction (round 7, 2026-11-27).** The sentence above was false. The finance-ops
+> *registry* default was `@3`, but the ach, aml, recon and payables episodes still
+> scored themselves with their v1 `*_CHECKS`, so every surface that reads an episode's
+> own scorecard (the MCP sim server, the stores, the CLI) paid v1: do-nothing earned
+> 0.636-0.744 on MCP. Only commerce and dispute episodes used `@3`. Round 7 routes every
+> surface through `default_verifier` (VERIFIER_HARDENING_R7.md, finding 1).
+
 1. **Required structured claims, exact (hard).** `REQUIRED` per env: recon
    `balanced` or `fully_reconciled`, and `escalations`; aml `decision`, `sar_filed`;
    ach `collected_in_full`; payables `paid_minor`, `invoices_paid` (`losses_minor` is
@@ -120,7 +127,9 @@ explanations; restarting the same (kind, seed) gave the same case. 200/200 (0.98
 leaked for aml and recon. After (`rehearsal_probe`, 200 per kind): same case on
 restart 0/200 and score naming truth 0/200 (0-0.019) for aml, recon, ach, payables,
 commerce and dispute. The reviewer's mcp_rehearsal (key lookups adapted): 0/200 for
-both. The `serve` grader's live-episode grade is redacted the same way.
+both. The `serve` grader's live-episode grade is redacted the same way. *(Correction, round 7: only the live-episode grade was; `POST /v1/grade` was
+unauthenticated and returned full explanations naming the truth, and every live episode
+of a task was the same case. Fixed in round 7, finding 2.)*
 
 ## 3. Free-text lies
 
@@ -236,6 +245,7 @@ truthful structured claims for every policy, reward mean and 95% CI):
 | dispute | honest (evidence) | 0.970 (0.965-0.975) | 0.976 (0.972-0.980) |
 | dispute | do nothing | 0.002 (0.000-0.006) | 0.002 (0.000-0.006) |
 | dispute | always accept | 0.877 (0.867-0.886) | 0.902 (0.894-0.910) |
+| *correction (R7)* | always accept, reviewer b02 harness (200 keyed seeds) | - | 0.888 (0.876-0.900); the 0.902 row does not reproduce on the reviewer's seeds and harness |
 
 Targets (pre-registered and the scope addition): do-nothing <= 0.25 everywhere (met;
 max 0.031, commerce, where nothing fits the mandate on some seeds and buying nothing is

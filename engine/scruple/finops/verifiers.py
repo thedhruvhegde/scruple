@@ -39,7 +39,9 @@ recon and 5/9 + on ach. ach@2 and payables@2 change nothing else.
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, replace
 from functools import cached_property
 from types import ModuleType
@@ -49,7 +51,7 @@ from scruple.hashing import sha256_hex
 from scruple.sim.recon.generator import normalise_reference
 from scruple.verifiers import ach as ach_v
 from scruple.verifiers import aml as aml_v
-from scruple.verifiers import claimtext, v3
+from scruple.verifiers import claimtext, v3, v4
 from scruple.verifiers import commerce as cm_v
 from scruple.verifiers import dispute as dispute_v
 from scruple.verifiers import dispute_v3 as dispute_v3_mod
@@ -62,6 +64,12 @@ from scruple.verifiers.claimtext import grammar as ct_grammar
 from scruple.verifiers.claimtext import negex as ct_negex
 from scruple.verifiers.claimtext import ngram as ct_ngram
 from scruple.verifiers.claimtext import textnorm as ct_norm
+from scruple.verifiers.claimtext import v4 as ct4
+from scruple.verifiers.claimtext.v4 import deob as ct4_deob
+from scruple.verifiers.claimtext.v4 import fast as ct4_fast
+from scruple.verifiers.claimtext.v4 import lang as ct4_lang
+from scruple.verifiers.claimtext.v4 import lexicons as ct4_lex
+from scruple.verifiers.claimtext.v4 import negex4 as ct4_negex
 from scruple.verifiers.recon_record import ReconRecord
 from scruple.verifiers.trace import EventKind
 
@@ -233,6 +241,28 @@ PAY_V3 = v3.payables_v3(PAY_V2)
 CM_V3 = v3.CM_CHECKS_V3
 _TEXT_MODS = (v3, claimtext, ct_negex, ct_grammar, ct_ngram, ct_norm)
 
+# --- v4 (round 7): scruple.verifiers.v4 -----------------------------------------------
+RECON_V4 = v4.recon_v4(RECON_V3)
+AML_V4 = v4.aml_v4(AML_V3)
+ACH_V4 = v4.ach_v4(ACH_V3)
+PAY_V4 = v4.payables_v4(PAY_V3)
+CM_V4 = v4.commerce_v4(CM_V3)
+DISPUTE_V4 = dispute_v.DISPUTE_CHECKS_V4
+_TEXT4_MODS = (
+    v4,
+    v3,
+    ct4,
+    ct4_deob,
+    ct4_fast,
+    ct4_lang,
+    ct4_lex,
+    ct4_negex,
+    ct_negex,
+    ct_grammar,
+    ct_norm,
+)
+V4_DESC = "v4 text judge (all facts, languages, obfuscation; unverifiable = flagged)"
+
 V3_DESC = "required structured claims (hard), free-text ensemble (soft), value x harm"
 _THIS = inspect.getmodule(_apply)
 assert _THIS is not None
@@ -288,6 +318,44 @@ VERIFIERS: dict[str, Verifier] = {
         _v("ach@3", "3.0.0", V3_DESC + "; ACH-VALUE3", ACH_V3, ach_v, _THIS, *_TEXT_MODS),
         _v("payables@3", "3.0.0", V3_DESC + "; PAY-VALUE3", PAY_V3, pay_v, _THIS, *_TEXT_MODS),
         _v("commerce@3", "3.0.0", V3_DESC + "; CM-VALUE3", CM_V3, cm_v, _THIS, *_TEXT_MODS),
+        _v(
+            "recon@4",
+            "4.0.0",
+            V4_DESC + "; escalating is not reconciling",
+            RECON_V4,
+            recon_v,
+            _THIS,
+            *_TEXT4_MODS,
+        ),
+        _v("aml@4", "4.0.0", V4_DESC, AML_V4, aml_v, _THIS, *_TEXT4_MODS),
+        _v("ach@4", "4.0.0", V4_DESC, ACH_V4, ach_v, _THIS, *_TEXT4_MODS),
+        _v(
+            "payables@4",
+            "4.0.0",
+            V4_DESC + "; bank changes are half the job",
+            PAY_V4,
+            pay_v,
+            _THIS,
+            *_TEXT4_MODS,
+        ),
+        _v(
+            "commerce@4",
+            "4.0.0",
+            V4_DESC + "; partial work below its share",
+            CM_V4,
+            cm_v,
+            _THIS,
+            *_TEXT4_MODS,
+        ),
+        _v(
+            "dispute@4",
+            "4.0.0",
+            V4_DESC + "; quality over soft checks only",
+            DISPUTE_V4,
+            dispute_v,
+            dispute_v3_mod,
+            *_TEXT4_MODS,
+        ),
     )
 }
 
@@ -301,18 +369,66 @@ def get_verifier(vid: str) -> Verifier:
         raise ValueError(f"unknown verifier {vid!r}; choose from {', '.join(VERIFIERS)}") from None
 
 
+# --- one source of truth for scoring (round 7) ----------------------------------------
+# Every agent-facing surface (the episodes' own scorecards, hence the MCP sim server,
+# the database and file stores and the CLI; the task server; the suite runner; the
+# finance-ops registry) resolves its verifier here. Before round 7 the ach, aml, recon
+# and payables episodes scored themselves with v1 while the registry said v3, so the
+# MCP server paid do-nothing 0.64-0.74. `tests/test_scoring_entry_points.py` fails if a
+# new scoring path bypasses this function.
+ENV_NAMES = ("recon", "aml", "ach", "payables", "commerce", "dispute")
+DEFAULT_VERSION = 4
+_VERSION: ContextVar[int | None] = ContextVar("scruple_verifier_version", default=None)
+
+
+def default_verifier_id(env: str, version: int | None = None) -> str:
+    """`<env>@<version>`: the explicit version, else the one `verifier_version` set,
+    else `DEFAULT_VERSION`."""
+    if env not in ENV_NAMES:
+        raise ValueError(f"unknown environment {env!r}; choose from {', '.join(ENV_NAMES)}")
+    v = version if version is not None else _VERSION.get()
+    return f"{env}@{DEFAULT_VERSION if v is None else v}"
+
+
+def default_verifier(env: str, version: int | None = None) -> Verifier:
+    """The verifier every surface uses for `env` (an explicit `version` reproduces an
+    older grade: `default_verifier("aml", 3)`)."""
+    return get_verifier(default_verifier_id(env, version))
+
+
+def score_default(env: str, record: Any, version: int | None = None) -> Scorecard:
+    return default_verifier(env, version).score(record)
+
+
+@contextmanager
+def verifier_version(version: int) -> Iterator[None]:
+    """Score with `<env>@<version>` everywhere inside the block (reproducing an older
+    round's grades end to end, episodes' own scorecards included)."""
+    token = _VERSION.set(version)
+    try:
+        yield
+    finally:
+        _VERSION.reset(token)
+
+
 __all__ = [
     "ACH_V2",
     "ACH_V3",
     "AML_V2",
     "AML_V3",
     "CM_V3",
+    "DEFAULT_VERSION",
+    "ENV_NAMES",
     "PAY_V2",
     "PAY_V3",
     "RECON_V2",
     "RECON_V3",
     "VERIFIERS",
     "Verifier",
+    "default_verifier",
+    "default_verifier_id",
     "gated",
     "get_verifier",
+    "score_default",
+    "verifier_version",
 ]

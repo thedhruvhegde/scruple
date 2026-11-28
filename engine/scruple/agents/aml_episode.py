@@ -33,10 +33,10 @@ from scruple.agents.dispute_tools import DisputeToolSpec, RequestInfoArgs
 from scruple.agents.errors import EpisodeError
 from scruple.agents.keys import Salt
 from scruple.finops.artefacts import aml_notes, aml_perturb
+from scruple.finops.verifiers import score_default
 from scruple.sim.aml.engine import AmlAction, AmlEngine, CloseAlert, Escalate, FileSar, RequestInfo
 from scruple.sim.aml.generator import generate_aml_case
 from scruple.sim.aml.models import AmlFamily
-from scruple.verifiers.aml import score_aml
 from scruple.verifiers.aml_record import AmlRecord, AmlReport
 from scruple.verifiers.checks import Scorecard
 from scruple.verifiers.trace import Actor, EventKind
@@ -260,7 +260,7 @@ class AmlEpisode(WorkflowEpisode):
             trace_head=self.trace.head,
             flags=tuple(sorted(set(flags))),
             explanation=report.explanation,
-            scorecard=score_aml(self._record),
+            scorecard=score_default("aml", self._record),
         )
         return self._score
 

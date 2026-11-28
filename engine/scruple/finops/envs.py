@@ -29,7 +29,7 @@ from scruple.finops.policies import (
     kind_policies,
     recon_policies,
 )
-from scruple.finops.verifiers import VERIFIERS, Verifier
+from scruple.finops.verifiers import VERIFIERS, Verifier, default_verifier_id
 
 SUITE_VERSION = "1.0.0"
 
@@ -61,10 +61,15 @@ class FinopsEnv:
     title: str
     episode_cls: Callable[..., Any]
     tools: tuple[DisputeToolSpec, ...]
-    default_verifier: str
     policy_factory: Callable[[], dict[str, Policy]]
     parity: bool  # brought to dispute parity (knobs, artefacts, hacker family, oracle)
     families: tuple[str, ...] = field(default=())
+
+    @property
+    def default_verifier(self) -> str:
+        """The verifier id every surface grades with (`scruple.finops.verifiers.
+        default_verifier`, round 7: one source of truth)."""
+        return default_verifier_id(self.name)
 
     @property
     def knobs(self) -> frozenset[str]:
@@ -116,7 +121,6 @@ ENVS: dict[str, FinopsEnv] = {
         "Bank reconciliation / month-end close",
         ReconEpisode,
         RECON_TOOLS,
-        "recon@3",
         recon_policies,
         parity=True,
         families=_families("scruple.sim.recon.models.BreakKind"),
@@ -126,7 +130,6 @@ ENVS: dict[str, FinopsEnv] = {
         "AML transaction-monitoring alert investigation",
         AmlEpisode,
         AML_TOOLS,
-        "aml@3",
         aml_policies,
         parity=True,
         families=_families("scruple.sim.aml.models.AmlFamily"),
@@ -136,7 +139,6 @@ ENVS: dict[str, FinopsEnv] = {
         "ACH returns (originator side)",
         AchEpisode,
         ACH_TOOLS,
-        "ach@3",
         lambda: kind_policies("ach", "retry_everything"),
         parity=False,
         families=_families("scruple.sim.ach.models.AchFamily"),
@@ -146,7 +148,6 @@ ENVS: dict[str, FinopsEnv] = {
         "Accounts payable pay run",
         PayablesEpisode,
         PAYABLES_TOOLS,
-        "payables@3",
         lambda: kind_policies("payables", "trust_the_email"),
         parity=False,
     ),

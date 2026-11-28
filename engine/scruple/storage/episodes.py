@@ -33,6 +33,7 @@ EPISODES_TABLE = f"""CREATE TABLE IF NOT EXISTS episodes (
     case_type TEXT,
     nonce INTEGER NOT NULL,
     created_at TEXT NOT NULL,
+    salt TEXT,
     PRIMARY KEY (tenant_id, episode_id)
 );
 """
@@ -61,6 +62,17 @@ BEGIN SELECT RAISE(ABORT, '{t} is append-only'); END;
 )
 
 
+def sqlite_needs_salt_upgrade(conn: Any) -> bool:
+    """A SQLite file whose `episodes` table predates the per-episode salt (round 7)."""
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(episodes)").fetchall()]
+    return bool(cols) and "salt" not in cols
+
+
+# round 7 (migration 0017): the case key of a keyed episode; NULL for rows written
+# before it, which replay unkeyed as they were played
+SQLITE_SALT_UPGRADE = "ALTER TABLE episodes ADD COLUMN salt TEXT;"
+
+
 def sqlite_needs_kinds_upgrade(conn: Any) -> bool:
     """A SQLite file whose `episodes` table predates the current kind list."""
     row = conn.execute(
@@ -87,7 +99,7 @@ def sqlite_kinds_upgrade_script() -> str:
     )
 
 
-# Keep in step with migrations 0005, 0010 and 0016 (a test compares the catalogs).
+# Keep in step with migrations 0005, 0010, 0016 and 0017 (a test compares the catalogs).
 POSTGRES_DDL = _DDL + "".join(
     f"""
 CREATE OR REPLACE TRIGGER {t}_no_update BEFORE UPDATE ON {t}
@@ -111,6 +123,7 @@ class EpisodeRow(BaseModel):
     case_type: str | None
     nonce: int
     created_at: datetime
+    salt: str | None = None
 
 
 class SQLEpisodes:
@@ -126,7 +139,7 @@ class SQLEpisodes:
         with self._c.transaction():
             self._c.execute(
                 "INSERT INTO episodes (tenant_id, episode_id, kind, seed, case_type, nonce, "
-                "created_at) VALUES (?,?,?,?,?,?,?)",
+                "created_at, salt) VALUES (?,?,?,?,?,?,?,?)",
                 (
                     row.tenant_id,
                     row.episode_id,
@@ -135,12 +148,13 @@ class SQLEpisodes:
                     row.case_type,
                     row.nonce,
                     row.created_at.isoformat(),
+                    row.salt,
                 ),
             )
 
     def get_episode(self, tenant_id: str, episode_id: str) -> EpisodeRow | None:
         rows = self._c.query(
-            "SELECT tenant_id, episode_id, kind, seed, case_type, nonce, created_at "
+            "SELECT tenant_id, episode_id, kind, seed, case_type, nonce, created_at, salt "
             "FROM episodes WHERE tenant_id=? AND episode_id=?",
             (tenant_id, episode_id),
         )

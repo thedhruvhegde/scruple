@@ -216,7 +216,7 @@ def test_cli_plays_an_ach_episode(tmp_path: Path, capsys: pytest.CaptureFixture[
 
 
 def test_store_reloads_an_ach_episode(tmp_path: Path) -> None:
-    store = EpisodeStore(tmp_path)
+    store = EpisodeStore(tmp_path, keyed=False)  # compared with an unkeyed replay
     ep = store.start(8, "nsf_recoverable@0", "ach")
     store.call(ep.episode_id, "wait", {"days": 30})
     again = store.load(ep.episode_id)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
@@ -16,6 +17,7 @@ from scruple.agents.payables_baselines import (
     verify_changes,
 )
 from scruple.agents.payables_episode import PayablesEpisode
+from scruple.finops.verifiers import verifier_version
 from scruple.sim.payables.engine import (
     CASH,
     MISDIRECTED,
@@ -31,6 +33,15 @@ from scruple.sim.payables.models import CHANGE_CHANNELS
 from scruple.verifiers.payables import score_payables
 from scruple.verifiers.payables_exploits import XP5, run_payables_exploit
 from scruple.verifiers.payables_record import PayablesClaims, PayablesReport
+
+
+@pytest.fixture(autouse=True)
+def _kind_scorecard() -> Iterator[None]:
+    """These tests pin the kind's own scorecard (`<env>@1`); since round 7 an episode
+    scores itself with the default verifier (`<env>@4`), so they ask for @1."""
+    with verifier_version(1):
+        yield
+
 
 FRAUD, GENUINE = CHANGE_KINDS
 

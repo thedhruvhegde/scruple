@@ -207,7 +207,7 @@ def test_a_leaking_strategy_aborts_before_any_request(
 
 
 def _cli_play(store: Path, seed: int, submit: bool = True) -> str:
-    st = EpisodeStore(store)
+    st = EpisodeStore(store, keyed=False)  # a fixed script on the public case of the seed
     eid = st.start(seed, None, "dispute").episode_id
     st.call(eid, "get_case", None)
     st.call(eid, "list_evidence", None)
