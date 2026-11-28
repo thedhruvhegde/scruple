@@ -69,3 +69,10 @@ author's knowledge of the categories.
 ## Deviations
 
 Any deviation from the above is appended here, dated, with the reason.
+
+2026-11-28, after the runs (details in `VERIFIER_HARDENING_R7.md`, "Deviations"): D-1
+reviewer-script adaptations (`repro_v4/`); D-2 the payables criterion reported per case
+with change requests and overall; D-3 dispute@4 is value x harm over the soft checks
+rather than their plain mean; D-4 the sealed-set honest FPR (0.028) and the
+double-negation category (0.800) miss their targets, reported as measured, not tuned
+afterwards; D-5 the zoo test and the v1/v3 unit tests pin their verifier version.
